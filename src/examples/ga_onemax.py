@@ -28,10 +28,10 @@ import eap.stats as stats
 random.seed(64)
 
 lCreator = creator.Creator()
-lCreator.define('crtFitness', base.Fitness, weights=(1.0,))
+lCreator.define('crtFitness', base.Fitness, weights=(1.0,-1.0))
 lCreator.define('crtListIndividual', base.ListIndividual, size=100,
                 fitness=lCreator.crtFitness, generator=base.booleanGenerator())
-lCreator.define('crtPopulation', base.ListPopulation, size=300,
+lCreator.define('crtPopulation', base.ListPopulation, size=3000,
                 generator=lCreator.crtListIndividual)
 
 def evalOneMax(individual):
@@ -42,18 +42,20 @@ lToolBox = toolbox.SimpleGAToolbox()
 lToolBox.register('mutate', operators.flipBitMut)
 
 lPop = lCreator.crtPopulation()
-lPop.suscribe('stats', stats.statistics())
-lPop.suscribe('best', stats.bestInd())
+<<<<<<< local
+#lPop.suscribe('stats', stats.statistics())
+#lPop.suscribe('best', stats.bestInd())
+=======
+>>>>>>> other
 
 map(evalOneMax, lPop)
-lPop.emit()
+<<<<<<< local
+#lPop.emit()
+=======
+>>>>>>> other
 
 CXPB = 0.5
 MUTPB = 0.2
-
-popFitStats = stats.Statistics(lPop, 'mFitness[0]')
-popFitStats.add('mean', stats.mean)
-popFitStats.add('variance', stats.variance)
 
 for g in range(40):
     print 'Generation', g
@@ -75,11 +77,11 @@ for g in range(40):
     for i in lMutateIndx:
         lPop[i] = lToolBox.mutate(lPop[i])
 
-
     map(evalOneMax, lPop)
 
     lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
-    lPop.emit()
+<<<<<<< local
+#    lPop.emit()
   
     popFitStats.compute()
     print '\tAverage :', popFitStats.get('mean')
@@ -87,6 +89,14 @@ for g in range(40):
 #    print '\tMinimum :', stats.getStats('stats')[0]
 #    print '\tMaximum :', stats.getStats('stats')[1]
 #    print '\tAverage :', stats.getStats('stats')[2]
+=======
+
+    obj = [ind.mFitness[0] for ind in lPop]
+
+    print '\tMinimum :', min(obj)
+    print '\tMaximum :', max(obj)
+    print '\tAverage :', sum(obj)/len(obj)
+>>>>>>> other
 #    print '\tBest individual found :', stats.getStats('best')[0]
 
 print 'End of evolution'
