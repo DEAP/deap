@@ -112,6 +112,65 @@ def bestInd():
             lBestIndividual = copy.copy(lBestOfGeneration)
         lBestOfGeneration = copy.copy(lBestOfGeneration)
 
+class Statistics:
+    def __init__(self, inList, evalStr=None):
+	if evalStr == None:
+	    self.evalString = 'item'
+	else:
+	    self.evalString = 'item.' + evalStr
+	self.operations = dict()
+	self.results = dict()
+	self.list = inList
+    def add(self, name, function):
+	self.operations[name] = list((function, None))
+	self.results[name] = None
+
+    def compute(self):
+	for item in self.operations.items():
+	    item[1][1] = item[1][0]()
+	    item[1][1].next()
+	for item in self.list:
+	    value = eval(self.evalString)
+	    for item in self.operations.items():
+		self.results[item[0]] = item[1][1].send(value)
+	for item in self.operations.items():
+	    item[1][1].close()
+    def get(self, name):
+	return self.results[name]
+
+def max():
+    max = None
+    value = None
+    while True:
+	if value > max:
+	     max = value
+	value = yield max
+	
+def min():
+    min = None
+    value = None
+    while True:
+	if value < min or min is None:
+	     min = value
+	value = yield min
+
+def mean():
+    i, sum, mean = 0, 0, 0
+    while True:
+	value = yield mean
+	sum += float(value)
+	i += 1
+	mean = sum / i
+
+def variance():
+    sum, sum_sq, i = 0, 0, 0
+    var = 0
+    while True:
+	value =	yield var
+	sum_sq += float(value)**2
+	sum += float(value)
+	i += 1
+	var = (1.0/i * sum_sq - (sum/i)**2)
 
 #def bestIndHistory():
 #    lBestList = []

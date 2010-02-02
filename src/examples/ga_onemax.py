@@ -51,6 +51,10 @@ lPop.emit()
 CXPB = 0.5
 MUTPB = 0.2
 
+popFitStats = stats.Statistics(lPop, 'mFitness[0]')
+popFitStats.add('mean', stats.mean)
+popFitStats.add('variance', stats.variance)
+
 for g in range(40):
     print 'Generation', g
 
@@ -76,10 +80,13 @@ for g in range(40):
 
     lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
     lPop.emit()
-
-    print '\tMinimum :', stats.getStats('stats')[0]
-    print '\tMaximum :', stats.getStats('stats')[1]
-    print '\tAverage :', stats.getStats('stats')[2]
-    print '\tBest individual found :', stats.getStats('best')[0]
+  
+    popFitStats.compute()
+    print '\tAverage :', popFitStats.get('mean')
+    print '\tStdev :', popFitStats.get('variance')**0.5
+#    print '\tMinimum :', stats.getStats('stats')[0]
+#    print '\tMaximum :', stats.getStats('stats')[1]
+#    print '\tAverage :', stats.getStats('stats')[2]
+#    print '\tBest individual found :', stats.getStats('best')[0]
 
 print 'End of evolution'
