@@ -36,17 +36,16 @@ those complex structures to the library.
 import array
 import copy
 import itertools as it
-import observable
 import operator as op
 import random
 import sys
 
-class Population(observable.Observable):
+class Population(object):
     '''A population is an empty :class:`~eap.observable.Observable` object. The
     population object is more of a base class than an intanciable class
     as it is not a container.'''
     def __init__(self):
-        observable.Observable.__init__(self)
+        pass
 
 
 class ListPopulation(Population, list):
@@ -147,7 +146,7 @@ class MatrixPopulation(Population, list):
         return self[row * self.mNumCols + column]
 
 
-class Individual(observable.Observable):
+class Individual(object):
     '''An individual is an :class:`~eap.observable.Observable` object
     associated with a fitness. As the :class:`Population`, the basic
     individual is not a container of any type. If a *fitness* is passed
@@ -342,7 +341,7 @@ class Fitness(array.array):
         lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
         lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
         # Compare the results
-        return lSelfValues > lOtherValues
+        return lSelfValues < lOtherValues
 
     def __le__(self, other):
         # Pad the weights with the last value
