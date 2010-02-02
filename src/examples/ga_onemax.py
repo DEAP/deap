@@ -24,13 +24,13 @@ import eap.creator as creator
 import eap.evolutiontoolbox as toolbox
 import eap.operators as operators
 
-random.seed(64)
+random.seed(100)
 
 lCreator = creator.Creator()
-lCreator.define('crtFitness', base.Fitness, weights=(1.0,-1.0))
+lCreator.define('crtFitness', base.Fitness, weights=(1.0,))
 lCreator.define('crtListIndividual', base.ListIndividual, size=100,
                 fitness=lCreator.crtFitness, generator=base.booleanGenerator())
-lCreator.define('crtPopulation', base.ListPopulation, size=3000,
+lCreator.define('crtPopulation', base.ListPopulation, size=300,
                 generator=lCreator.crtListIndividual)
 
 def evalOneMax(individual):
@@ -50,6 +50,8 @@ MUTPB = 0.2
 for g in range(40):
     print 'Generation', g
 
+    lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
+
     lMateIndx = []
     lMutateIndx = []
 
@@ -68,8 +70,6 @@ for g in range(40):
         lPop[i] = lToolBox.mutate(lPop[i])
 
     map(evalOneMax, lPop)
-
-    lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
 
     obj = [ind.mFitness[0] for ind in lPop]
 
