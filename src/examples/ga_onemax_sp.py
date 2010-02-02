@@ -31,22 +31,26 @@ random.seed(64)
 lCreator = creator.Creator()
 lCreator.define('crtFitness', base.Fitness, weights=(1.0,))
 lCreator.define('crtListIndividual', specialized.BooleanIndividual, size=100,
-                fitness=lCreator.crtFitness, generator=base.binaryGenerator())
-lCreator.define('crtPopulation', base.ListPopulation, size=300,
+                fitness=lCreator.crtFitness, generator=base.booleanGenerator())
+lCreator.define('crtPopulation', base.ListPopulation, size=3000,
                 generator=lCreator.crtListIndividual)
 
 def evalOneMax(individual):
     if not individual.mFitness.isValid():
         individual.mFitness.append(individual.count(True))
 
-lToolBox = toolbox.SimpleGAToolBox()
+lToolBox = toolbox.SimpleGAToolbox()
 lToolBox.register('mutate', operators.flipBitMut)
 
 lPop = lCreator.crtPopulation()
-lPop.suscribe('stats', stats.statistics)
+#lPop.suscribe('stats', stats.statistics)
 
 map(evalOneMax, lPop)
-lPop.emit()
+#lPop.emit()
+
+popFitStats = stats.Statistics(lPop, 'mFitness[0]')
+popFitStats.add('mean', stats.mean)
+popFitStats.add('variance', stats.variance)
 
 CXPB = 0.5
 MUTPB = 0.2
@@ -74,11 +78,14 @@ for g in range(40):
     map(evalOneMax, lPop)
 
     lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
-    lPop.emit()
+#    lPop.emit()
 
-    print '\tMinimum :', stats.getStats('stats')[0]
-    print '\tMaximum :', stats.getStats('stats')[1]
-    print '\tAverage :', stats.getStats('stats')[2]
+    popFitStats.compute()
+    print '\tAverage :', popFitStats.get('mean')
+    print '\tStdev :', popFitStats.get('variance')**0.5
+#    print '\tMinimum :', stats.getStats('stats')[0]
+#    print '\tMaximum :', stats.getStats('stats')[1]
+#    print '\tAverage :', stats.getStats('stats')[2]
 
 print 'End of evolution'
 #print lStats.getStats('bestIndividualHistory')
