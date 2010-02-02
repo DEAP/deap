@@ -23,7 +23,6 @@ import eap.base as base
 import eap.creator as creator
 import eap.evolutiontoolbox as toolbox
 import eap.operators as operators
-import eap.stats as stats
 
 random.seed(64)
 
@@ -42,17 +41,8 @@ lToolBox = toolbox.SimpleGAToolbox()
 lToolBox.register('mutate', operators.flipBitMut)
 
 lPop = lCreator.crtPopulation()
-<<<<<<< local
-#lPop.suscribe('stats', stats.statistics())
-#lPop.suscribe('best', stats.bestInd())
-=======
->>>>>>> other
 
 map(evalOneMax, lPop)
-<<<<<<< local
-#lPop.emit()
-=======
->>>>>>> other
 
 CXPB = 0.5
 MUTPB = 0.2
@@ -80,23 +70,11 @@ for g in range(40):
     map(evalOneMax, lPop)
 
     lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
-<<<<<<< local
-#    lPop.emit()
-  
-    popFitStats.compute()
-    print '\tAverage :', popFitStats.get('mean')
-    print '\tStdev :', popFitStats.get('variance')**0.5
-#    print '\tMinimum :', stats.getStats('stats')[0]
-#    print '\tMaximum :', stats.getStats('stats')[1]
-#    print '\tAverage :', stats.getStats('stats')[2]
-=======
 
     obj = [ind.mFitness[0] for ind in lPop]
 
     print '\tMinimum :', min(obj)
     print '\tMaximum :', max(obj)
     print '\tAverage :', sum(obj)/len(obj)
->>>>>>> other
-#    print '\tBest individual found :', stats.getStats('best')[0]
 
 print 'End of evolution'
