@@ -24,4 +24,3 @@ import base
 import creator
 import evolutiontoolbox
 import operators
-import stats
