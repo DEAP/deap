@@ -9,20 +9,14 @@ Population
 
 .. autoclass:: Population
    :members:
-   
-.. autoclass:: ListPopulation([size, generator])
-   :members:
 
-.. autoclass:: MatrixPopulation([rows, columns, generator])
+.. autoclass:: PopulationMatrix([rows, columns, generator])
    :members:
    
 Individual
 ==========
 
-.. autoclass:: Individual([fitness])
-   :members:
-
-.. autoclass:: ListIndividual([size, generator, fitness])
+.. autoclass:: Individual([size, fitness, generator])
    :members:
    
 Fitness

@@ -20,8 +20,8 @@ sys.path.append(os.path.abspath('..'))
 
 import eap.base as base
 import eap.creator as creator
-import eap.evolutiontoolbox as toolbox
-import eap.stats as stats
+import eap.toolbox as toolbox
+import eap.operators as operators
 import pickle
 import random
 
@@ -37,10 +37,10 @@ random.seed(1024)
 lCreator = creator.Creator()
 
 lCreator.define('crtFitness', base.Fitness)
-lCreator.define('crtIndicesIndividual', base.ListIndividual, size=lIndSize,
+lCreator.define('crtIndividual', base.Individual, size=lIndSize,
                 generator=base.indiceGenerator(lIndSize), fitness=lCreator.crtFitness)
-lCreator.define('crtPopulation', base.ListPopulation, size=400,
-                generator=lCreator.crtIndicesIndividual)
+lCreator.define('crtPopulation', base.Population, size=400,
+                generator=lCreator.crtIndividual)
 
 def evalTSP(individual):
     if not individual.mFitness.isValid():
@@ -49,19 +49,27 @@ def evalTSP(individual):
             lDistance += lDistanceMap[lGene1, lGene2]
         individual.mFitness.append(lDistance)
 
-lToolBox = toolbox.IndicesGAToolBox()
+# Instanciate a toolbox that will contain the operators
+lToolbox = toolbox.Toolbox()
+# Add a partialy matched crossover method to the toolbox
+lToolbox.register('crossover', operators.pmxCx)
+# Add a shuffle indice mutation method to the toolbox with each index having a
+# probability of 5% to be moved
+lToolbox.register('mutate', operators.shuffleIndxMut, shuffleIndxPb=0.05)
+# Add a tournament selection method to the toolbox with tournament size of 3
+lToolbox.register('select', operators.tournSel, tournSize=3)
 
 lPop = lCreator.crtPopulation()
-lPop.suscribe('stats', stats.statistics)
 
 map(evalTSP, lPop)
-lPop.emit()
 
 CXPB = 0.5
 MUTPB = 0.2
 
-for g in range(50):
+for g in range(100):
     print 'Generation', g
+
+    lPop[:] = lToolbox.select(lPop, n=len(lPop), tournSize=3)
 
     lMateIndx = []
     lMutateIndx = []
@@ -72,22 +80,20 @@ for g in range(50):
         if random.random() < MUTPB:
             lMutateIndx.append(lIndx)
 
-    random.shuffle(lMateIndx)
     # Apply crossover on the choosen indexes and replace parents
     for i, j in zip(lMateIndx[::2], lMateIndx[1::2]):
-        lPop[i], lPop[j] = lToolBox.mate(lPop[i], lPop[j])
+        lPop[i], lPop[j] = lToolbox.crossover(lPop[i], lPop[j])
     # Apply mutation on the choosen indexes and replace parents
     for i in lMutateIndx:
-        lPop[i] = lToolBox.mutate(lPop[i])
+        lPop[i] = lToolbox.mutate(lPop[i])
 
     map(evalTSP, lPop)
 
-    lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
-    lPop.emit()
-
-    print '\tMinimum :', stats.getStats('stats')[0]
-    print '\tMaximum :', stats.getStats('stats')[1]
-    print '\tAverage :', stats.getStats('stats')[2]
+    # Gather all the fitnesses in one list and print the stats
+    lFitnesses = [lInd.mFitness[0] for lInd in lPop]
+    print '\tMinimum :', min(lFitnesses)
+    print '\tMaximum :', max(lFitnesses)
+    print '\tAverage :', sum(lFitnesses)/len(lFitnesses)
 
 print 'End of evolution'
 #print lStats.getStats('bestIndividualHistory')

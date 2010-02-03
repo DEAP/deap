@@ -2,15 +2,9 @@
 Evolutionary Toolbox
 ====================
 
-.. automodule:: eap.evolutiontoolbox
+.. automodule:: eap.toolbox
 
-.. autoclass:: EvolutionToolbox
-   :members:
-   
-.. autoclass:: SimpleGAToolbox
-   :members:
-   
-.. autoclass:: IndicesGAToolbox
+.. autoclass:: Toolbox
    :members:
    
 Operators
@@ -30,11 +24,11 @@ Crossover
 Mutation
 --------
 
-.. autofunction:: eap.operators.gaussMut(individual, mu, sigma, mutIndxPb=0.3)
+.. autofunction:: eap.operators.gaussMut
 
-.. autofunction:: eap.operators.shuffleIndxMut(individual, shuffleIndxPb=0.3)
+.. autofunction:: eap.operators.shuffleIndxMut
 
-.. autofunction:: eap.operators.flipBitMut(individual, flipIndxPb=0.3)
+.. autofunction:: eap.operators.flipBitMut
 
 Selection
 ---------

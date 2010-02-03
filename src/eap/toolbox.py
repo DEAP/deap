@@ -22,10 +22,9 @@ is set, it can be reused with a simple keyword that conatins all its arguments.
 Plus, every keyword or argument can be overriden at all time.
 '''
 
-import operators
 from functools import partial
 
-class EvolutionToolbox(object):
+class Toolbox(object):
     '''A toolbox for evolution that contains the evolutionary operators.
     At first this toolbox is empty, you can populate it by using the method
     :meth:`register`.
@@ -40,34 +39,34 @@ class EvolutionToolbox(object):
         delattr(self, methodName)
 
 
-class SimpleGAToolbox(EvolutionToolbox):
-    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
-    initialized with :meth:`mate` that apply a two points crossover with method
-    :meth:`eap.operators.twoPointsCx`, :meth:`mutate` that apply a gaussian
-    mutation with method :meth:`eap.operators.gaussMut` and :meth:`select` that
-    select individuals using a tournament with method
-    :meth:`eap.operators.tournSel`.
-    '''
-
-    def __init__(self):
-        self.register('mate', operators.twoPointsCx)
-        self.register('mutate', operators.gaussMut)
-        self.register('select', operators.tournSel)
-
-
-class IndicesGAToolbox(EvolutionToolbox):
-    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
-    initialized with :meth:`mate` that apply a partialy matched crossover with
-    method :meth:`eap.operators.pmxCx`, :meth:`mutate` that apply a shuffle
-    indices mutation with method :meth:`eap.operators.shuffleIndxMut` and
-    :meth:`select` that select individuals using a tournament with method
-    :meth:`eap.operators.tournSel`.
-
-    .. versionadded:: 0.2.0a
-       The toolbox for indice representation has been added for convenience.
-    '''
-
-    def __init__(self):
-        self.register('mate', operators.pmxCx)
-        self.register('mutate', operators.shuffleIndxMut)
-        self.register('select', operators.tournSel)
+#class SimpleGAToolbox(EvolutionToolbox):
+#    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
+#    initialized with :meth:`mate` that apply a two points crossover with method
+#    :meth:`eap.operators.twoPointsCx`, :meth:`mutate` that apply a gaussian
+#    mutation with method :meth:`eap.operators.gaussMut` and :meth:`select` that
+#    select individuals using a tournament with method
+#    :meth:`eap.operators.tournSel`.
+#    '''
+#
+#    def __init__(self):
+#        self.register('mate', operators.twoPointsCx)
+#        self.register('mutate', operators.gaussMut)
+#        self.register('select', operators.tournSel)
+#
+#
+#class IndicesGAToolbox(EvolutionToolbox):
+#    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
+#    initialized with :meth:`mate` that apply a partialy matched crossover with
+#    method :meth:`eap.operators.pmxCx`, :meth:`mutate` that apply a shuffle
+#    indices mutation with method :meth:`eap.operators.shuffleIndxMut` and
+#    :meth:`select` that select individuals using a tournament with method
+#    :meth:`eap.operators.tournSel`.
+#
+#    .. versionadded:: 0.2.0a
+#       The toolbox for indice representation has been added for convenience.
+#    '''
+#
+#    def __init__(self):
+#        self.register('mate', operators.pmxCx)
+#        self.register('mutate', operators.shuffleIndxMut)
+#        self.register('select', operators.tournSel)

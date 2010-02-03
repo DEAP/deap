@@ -157,7 +157,7 @@ def pmxCx(indOne, indTwo):
 # Mutations                          #
 ######################################
 
-def gaussMut(individual, mu, sigma, mutIndxPb=0.3):
+def gaussMut(individual, mu, sigma, mutIndxPb):
     '''This function applies a gaussian mutation on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
@@ -166,7 +166,7 @@ def gaussMut(individual, mu, sigma, mutIndxPb=0.3):
 
     .. todo::
        Add a parameter acting as constraints for the real valued attribute so
-       a min max and interval may be used.
+       a min, max and interval may be used.
 
     This function use the :meth:`random` and :meth:`gauss` methods from the
     python base :mod:`random` module.
@@ -182,7 +182,7 @@ def gaussMut(individual, mu, sigma, mutIndxPb=0.3):
         lIndividual.mFitness.setInvalid()
     return lIndividual
 
-def shuffleIndxMut(individual, shuffleIndxPb=0.3):
+def shuffleIndxMut(individual, shuffleIndxPb):
     '''Shuffle the attributes of the input individual and return the mutant.
     The *individual* is left intact and the mutant is an independant copy. The
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
@@ -207,7 +207,7 @@ def shuffleIndxMut(individual, shuffleIndxPb=0.3):
     return lIndividual
 
 
-def flipBitMut(individual, flipIndxPb=0.3):
+def flipBitMut(individual, flipIndxPb):
     '''Flip the value of the attributes of the input individual and return the
     mutant. The *individual* is left intact and the mutant is an independant
     copy. The *individual* is expected to be iterable and the values of the
@@ -234,32 +234,32 @@ def flipBitMut(individual, flipIndxPb=0.3):
 # Selections                         #
 ######################################
 
-def rndSel(individuals, n=1, repeat=True):
+def rndSel(individuals, n, replacement):
     '''Select *n* individuals at random from the input *individuals*. The
     list returned contains shallow copies of the input *individuals*. That
     means if an individual is selected twice, modifying one of the two
     occurences will modify the other. It is possible to randomly select without
-    picking twice the same individual by setting *repeat* to :data:`False`.
+    picking twice the same individual by setting *replacement* to :data:`False`.
 
     This function use the :meth:`randint` and :meth:`sample` method from the
     python base :mod:`random` module.
     '''
     lOutIndividuals = []
 
-    if repeat is True:
+    if replacement is True:
         lLenght = len(individuals)
         lChoosenList = []
         
         for i in xrange(n):
             lChoosenList.append(individuals[random.randint(0, lLenght - 1)])
     
-    elif repeat is False:
+    elif replacement is False:
         lOutIndividuals = random.sample(individuals, n)
 
     return lOutIndividuals
 
 
-def bestSel(individuals, n=1):
+def bestSel(individuals, n):
     '''Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     '''
@@ -281,7 +281,7 @@ def bestSel(individuals, n=1):
     return lChoosenList
 
 
-def worstSel(individuals, n=1):
+def worstSel(individuals, n):
     '''Select the *n* worst individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     '''
@@ -303,7 +303,7 @@ def worstSel(individuals, n=1):
     return lChoosenList
 
 
-def tournSel(individuals, n=1, tournSize=2):
+def tournSel(individuals, n, tournSize):
     '''Select *n* individuals from the input *individuals* using *n*
     tournaments of *tournSize* individuals. The list returned contains shallow
     copies of the input *individuals*. That means if an individual is selected

@@ -35,23 +35,22 @@ those complex structures to the library.
 
 import array
 import copy
-import itertools as it
-import operator as op
+import itertools
+import operator
 import random
 import sys
 
-class Population(object):
-    '''A population is an empty :class:`~eap.observable.Observable` object. The
-    population object is more of a base class than an intanciable class
-    as it is not a container.'''
-    def __init__(self):
-        pass
+#class Population(object):
+#    '''A population is an empty :class:`~eap.observable.Observable` object. The
+#    population object is more of a base class than an intanciable class
+#    as it is not a container.'''
+#    def __init__(self):
+#        pass
 
 
-class ListPopulation(Population, list):
-    '''The list population inherits from :class:`Population` for its observable
-    properties and from the python's base type :class:`list` for its container
-    properties. There is two way of initialising a list population;
+class Population(list):
+    '''A population inherits from the python's base type :class:`list` for its
+    iterable properties. There is two way of initialising a list population;
     first by creating it without any arguments and appending the objects that it
     shall contains with the :meth:`append` method and second by setting its size
     to a positive integer and giving it a *generator* that when called
@@ -66,22 +65,21 @@ class ListPopulation(Population, list):
         >>> def generatorB():
         ...     return 'Ind-B'
         ...
-        >>> pop = ListPopulation(size=5, generator=[generatorA, generatorB])
+        >>> pop = Population(size=5, generator=[generatorA, generatorB])
 
-    will produce a :class:`ListPopulation` ::
+    will produce a :class:`Population` ::
 
         >>> print pop
         ['Ind-A', 'Ind-B', 'Ind-A', 'Ind-B', 'Ind-A']
 
-    A list population may be copied using the :meth:`copy.copy` method.
+    A population may be copied using the :meth:`copy.copy` method.
     The copy produced is a mix of deep copy and shallow copy. All the attributes
     of the population are shallow copied, even if an attribute has been added at
-    run time. The list of objects is copied by calling :meth:`copy.copy` on each
+    runtime. The list of objects is copied by calling :meth:`copy.copy` on each
     element. If you have for example a population of populations of integers,
     the integers will be deeply copied.
     '''
     def __init__(self, size=0, generator=None):
-        Population.__init__(self)
         try:
             for i in xrange(size):
                 self.append(generator())
@@ -96,8 +94,8 @@ class ListPopulation(Population, list):
         lCopy[:] = map(copy.copy, self)
 
 
-class MatrixPopulation(Population, list):
-    '''The matrix population is much similar to the :class:`ListPopulation`, it
+class PopulationMatrix(Population):
+    '''The matrix population is much similar to the :class:`Population`, it
     only defines some more specific access methods to retreive the informations.
     The only difference is that the matrix population is filled row by
     row in a way that giving a list of generators will produce the following
@@ -119,15 +117,7 @@ class MatrixPopulation(Population, list):
     Internaly the matrix population is simply a :class:`list`.
     '''
     def __init__(self, rows=0, columns=0, generator=None):
-        Population.__init__(self)
-        try:
-            for i in range(rows*columns):
-                self.append(generator())
-        except TypeError:
-            lLenght = len(generator)
-            for i in range(rows*columns):
-                self.append(generator[i % lLenght]())
-        return lPop
+        Population.__init__(self, rows * columns, generator)
 
     def row(self, row):
         '''Return a specific row of the matrix population.'''
@@ -146,41 +136,40 @@ class MatrixPopulation(Population, list):
         return self[row * self.mNumCols + column]
 
 
-class Individual(object):
-    '''An individual is an :class:`~eap.observable.Observable` object
-    associated with a fitness. As the :class:`Population`, the basic
-    individual is not a container of any type. If a *fitness* is passed
-    to a individual then it may be both; an object generator that when called
-    :meth:`fitness` returns an object or an already constructed object. In both
-    cases the object will be stored as is in the :attr:`mFitness` attribute of
-    the individual. This allows both following methods to be used. ::
+#class Individual(object):
+#    '''An individual is an :class:`~eap.observable.Observable` object
+#    associated with a fitness. As the :class:`Population`, the basic
+#    individual is not a container of any type. If a *fitness* is passed
+#    to a individual then it may be both; an object generator that when called
+#    :meth:`fitness` returns an object or an already constructed object. In both
+#    cases the object will be stored as is in the :attr:`mFitness` attribute of
+#    the individual. This allows both following methods to be used. ::
+#
+#        >>> def fitness():
+#        ...    return 'fit-A'
+#        ...
+#        >>> Individual(fitness=fitness)
+#        >>> Individual(fitness=fitness())
+#
+#    '''
+#    def __init__(self, fitness=None):
+#        if fitness is not None:
+#            try:        # For conveniance, the user may pass a fitness object
+#                self.mFitness = fitness()
+#            except TypeError:
+#                self.mFitness = fitness
 
-        >>> def fitness():
-        ...    return 'fit-A'
-        ...
-        >>> Individual(fitness=fitness)
-        >>> Individual(fitness=fitness())
 
-    '''
-    def __init__(self, fitness=None):
-        if fitness is not None:
-            try:        # For conveniance, the user may pass a fitness object
-                self.mFitness = fitness()
-            except TypeError:
-                self.mFitness = fitness
-
-
-class ListIndividual(Individual, list):
-    '''The list individual inherits from :class:`Individual` for its observable
-    properties and from the python's base type :class:`list` for its container
-    properties. There is two way of initialising a list individual;
+class Individual(list):
+    '''An individual inherits from  the python's base type :class:`list` for its
+    container properties. There is two way of initialising a list individual;
     first by creating it without any arguments and appending the objects that it
     shall contains with the :meth:`append` method and second by setting its size
     to a positive integer and giving it a *generator* that when called
     :meth:`generator.next` will return the object that will be appended. The
     fitness argument is passed to the :class:`Individual`.
     
-    Opposed to the :class:`ListPopulation` the list individual uses generator
+    Opposed to the :class:`Population` the individual uses generator
     functions to produce its attributes. This kind of function allows a greater
     flexibility when it comes to produce interrelated objects like vector of
     indices.
@@ -196,14 +185,14 @@ class ListIndividual(Individual, list):
         ...     while True:
         ...         yield 'Attr-B'
         ...
-        >>> ind = ListIndividual(size=5, generator=[generatorA, generatorB])
+        >>> ind = Individual(size=5, generator=[generatorA, generatorB])
 
-    will produce a :class:`ListIndividual` ::
+    will produce a :class:`Individual` ::
 
         >>> print ind
         ['Attr-A', 'Attr-B', 'Attr-A', 'Attr-B', 'Attr-A']
 
-    A list individual may be copied using the :meth:`copy.copy` method.
+    An individual may be copied using the :meth:`copy.copy` method.
     The copy produced is a mix of deep copy and shallow copy. All the attributes
     of the individual are shallow copied, even if an attribute has been added
     at run time. The list of objects is copied by calling :meth:`copy.copy` on
@@ -212,7 +201,12 @@ class ListIndividual(Individual, list):
     the objects will be deeply copied.
     '''
     def __init__(self, size=0, generator=None, fitness=None):
-        Individual.__init__(self, fitness)
+        if fitness is not None:
+            try:        # For conveniance, the user may pass a fitness object
+                self.mFitness = fitness()
+            except TypeError:
+                self.mFitness = fitness
+
         try:
             for i in xrange(size):
                 self.append(generator.next())
@@ -314,62 +308,86 @@ class Fitness(array.array):
 
     def __gt__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = it.chain(self.mWeights, it.repeat(self.mWeights[-1]))
-        lOtherWeights = it.chain(other.mWeights, it.repeat(other.mWeights[-1]))
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
-        lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
+        lSelfValues = array.array('d', itertools.imap(operator.mul,
+                                                      self, lSelfWeights))
+        lOtherValues = array.array('d', itertools.imap(operator.mul,
+                                                       other, lOtherWeights))
         # Compare the results
         return lSelfValues > lOtherValues
 
     def __ge__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = it.chain(self.mWeights, it.repeat(self.mWeights[-1]))
-        lOtherWeights = it.chain(other.mWeights, it.repeat(other.mWeights[-1]))
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
-        lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
+        lSelfValues = array.array('d', itertools.imap(operator.mul,
+                                                      self, lSelfWeights))
+        lOtherValues = array.array('d', itertools.imap(operator.mul,
+                                                       other, lOtherWeights))
         # Compare the results
         return lSelfValues >= lOtherValues
 
 
     def __lt__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = it.chain(self.mWeights, it.repeat(self.mWeights[-1]))
-        lOtherWeights = it.chain(other.mWeights, it.repeat(other.mWeights[-1]))
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
-        lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
+        lSelfValues = array.array('d', itertools.imap(operator.mul,
+                                                      self, lSelfWeights))
+        lOtherValues = array.array('d', itertools.imap(operator.mul,
+                                                       other, lOtherWeights))
         # Compare the results
         return lSelfValues < lOtherValues
 
     def __le__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = it.chain(self.mWeights, it.repeat(self.mWeights[-1]))
-        lOtherWeights = it.chain(other.mWeights, it.repeat(other.mWeights[-1]))
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
-        lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
+        lSelfValues = array.array('d', itertools.imap(operator.mul,
+                                                      self, lSelfWeights))
+        lOtherValues = array.array('d', itertools.imap(operator.mul,
+                                                       other, lOtherWeights))
         # Compare the results
         return lSelfValues <= lOtherValues
 
     def __eq__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = it.chain(self.mWeights, it.repeat(self.mWeights[-1]))
-        lOtherWeights = it.chain(other.mWeights, it.repeat(other.mWeights[-1]))
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
-        lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
+        lSelfValues = array.array('d', itertools.imap(operator.mul,
+                                                      self, lSelfWeights))
+        lOtherValues = array.array('d', itertools.imap(operator.mul,
+                                                       other, lOtherWeights))
         # Compare the results
         return lSelfValues == lOtherValues
 
     def __ne__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = it.chain(self.mWeights, it.repeat(self.mWeights[-1]))
-        lOtherWeights = it.chain(other.mWeights, it.repeat(other.mWeights[-1]))
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', it.imap(op.mul, self, lSelfWeights))
-        lOtherValues = array.array('d', it.imap(op.mul, other, lOtherWeights))
+        lSelfValues = array.array('d', itertools.imap(operator.mul,
+                                                      self, lSelfWeights))
+        lOtherValues = array.array('d', itertools.imap(operator.mul,
+                                                       other, lOtherWeights))
         # Compare the results
         return lSelfValues != lOtherValues
 
@@ -387,6 +405,7 @@ class Fitness(array.array):
         lCopy = self.__class__.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
         lCopy.extend(self)
+        lCopy.mWeights[:] = self.mWeights[:]
         return lCopy
 
 

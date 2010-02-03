@@ -16,83 +16,84 @@
 import random
 import os
 import sys
-import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath('..'))
 
 import eap.base as base
 import eap.creator as creator
-import eap.evolutiontoolbox as toolbox
+import eap.toolbox as toolbox
 import eap.operators as operators
 
 random.seed(100)
 
+# Instanciate the creator
 lCreator = creator.Creator()
+# Define a way to build a maximizing fitness
 lCreator.define('crtFitness', base.Fitness, weights=(1.0,))
-lCreator.define('crtListIndividual', base.ListIndividual, size=100,
+# Define a way to build an individual containing booleans and the previous fitness
+lCreator.define('crtIndividual', base.Individual, size=100,
                 fitness=lCreator.crtFitness, generator=base.booleanGenerator())
-lCreator.define('crtPopulation', base.ListPopulation, size=300,
-                generator=lCreator.crtListIndividual)
+# Define a way to build a population filled with the previous individuals
+lCreator.define('crtPopulation', base.Population, size=300,
+                generator=lCreator.crtIndividual)
 
+# The function that evauluates an individual and set its fitness
 def evalOneMax(individual):
     if not individual.mFitness.isValid():
         individual.mFitness.append(individual.count(True))
 
-lToolBox = toolbox.SimpleGAToolbox()
-lToolBox.register('mutate', operators.flipBitMut)
+# Instanciate a toolbox that will contain the operators
+lToolbox = toolbox.Toolbox()
+# Add a two points crossover method to the toolbox
+lToolbox.register('crossover', operators.twoPointsCx)
+# Add a flip bit mutation method to the toolbox with each index having a probability
+# of 5% to be flipped
+lToolbox.register('mutate', operators.flipBitMut, flipIndxPb=0.05)
+# Add a tournament selection method to the toolbox with tournament size of 3
+lToolbox.register('select', operators.tournSel, tournSize=3)
 
+# Instanciate the population
 lPop = lCreator.crtPopulation()
 
+# Evaluate the population
 map(evalOneMax, lPop)
 
+# Each individual has a probability of 50% to be mated (crossover)
 CXPB = 0.5
+# Each individuals has a probability of 20% to be mutated
 MUTPB = 0.2
 
-g_averages = []
-
+# Begin the evolution
 for g in range(40):
     print 'Generation', g
 
-    lPop[:] = lToolBox.select(lPop, n=len(lPop), tournSize=3)
+    # Select then next population
+    lPop[:] = lToolbox.select(lPop, n=len(lPop))
 
+    # Build a table of the individuals that should be mated and mutated
     lMateIndx = []
     lMutateIndx = []
-
     for lIndx in xrange(len(lPop)):
         if random.random() < CXPB:
             lMateIndx.append(lIndx)
         if random.random() < MUTPB:
             lMutateIndx.append(lIndx)
     
-    random.shuffle(lMateIndx)
     # Apply crossover on the choosen indexes and replace parents
     for i, j in zip(lMateIndx[::2], lMateIndx[1::2]):
-        lPop[i], lPop[j] = lToolBox.mate(lPop[i], lPop[j])
+        lPop[i], lPop[j] = lToolbox.crossover(lPop[i], lPop[j])
+
     # Apply mutation on the choosen indexes and replace parents
     for i in lMutateIndx:
-        lPop[i] = lToolBox.mutate(lPop[i])
+        lPop[i] = lToolbox.mutate(lPop[i])
 
+    # Evaluate the population
     map(evalOneMax, lPop)
 
-    obj = [ind.mFitness[0] for ind in lPop]
-
-    print '\tMinimum :', min(obj)
-    print '\tMaximum :', max(obj)
-    print '\tAverage :', sum(obj)/len(obj)
-
-    attrs = [ind for ind in lPop]
-    trans = map(None, *attrs)       # Transpose the attributes
-
-    sums = map(sum, trans)
-    averages = [float(item) / len(attrs) for item in sums]
-    print averages[0]
-    g_averages.append(averages)
+    # Gather all the fitnesses in one list and print the stats
+    lFitnesses = [lInd.mFitness[0] for lInd in lPop]
+    print '\tMinimum :', min(lFitnesses)
+    print '\tMaximum :', max(lFitnesses)
+    print '\tAverage :', sum(lFitnesses)/len(lFitnesses)
 
 print 'End of evolution'
-
-plt.figure()
-plt.imshow(g_averages)
-plt.colorbar()
-plt.xlabel('Attribute')
-plt.ylabel('Generation')
-plt.show()
