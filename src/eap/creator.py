@@ -24,7 +24,7 @@ from functools import partial
 
 class Creator(object):
     '''The creator is an abstract factory that produce objects by calling their
-    constructor with that arguments defined in the :meth:`define` method.
+    constructor with the arguments defined in the :meth:`define` method.
     '''
     def define(self, methodName, constructor, *args, **kargs):
         '''Register a method to be called with :meth:`methodName()`, *args* and

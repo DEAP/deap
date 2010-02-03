@@ -71,6 +71,8 @@ Now we have two different individuals and their respective children.
 Selection
 =========
 
+Selection is made among a population by the selection operators that are availables in the :mod:`eap.operators` module. 
+
 Evaluation
 ==========
 

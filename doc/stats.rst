@@ -12,7 +12,7 @@ Retreiving the information
 
 The statistic module has been removed since it is really easy and efficient in python to access all the data of the evolutionary algorithm and built a list with it. Every EA is different, with different configurations, different levels of population, different kind of individuals and so on. A module that computes the statistics would have been limited by or would have limit your imagination in the sens that it cannot be enough general to cover every single configuration that EAP make possible.
 
-Accessing the data is made really efficient in python by the generator expressions. Here are some simple examples of evolutionary algorithms and the generator expressions needed to retreive almost everything.
+Accessing the data is made really efficient in python by the generator expressions. Here are some simple examples of evolutionary algorithms and the generator expressions needed to retreive the fitness.
 
 Mono-objective, mono-demic population
 -------------------------------------
@@ -42,7 +42,7 @@ Multi-objective, mono-demic population
 In this example, we have a single population that contains the individuals, each individual has a many fitnesses. In order to retreive the minimum, maximum and average of each fitness of the population we may simply use ::
 
     fits = [ind.mFitness for ind in pop]
-    trans = map(None, *fits)        # Transpose the fitnesses
+    trans = zip(*fits)        # Transpose the fitnesses
     
     minimums = map(min, trans)
     maximums = map(max, trans)
@@ -55,12 +55,12 @@ Observing something else
 It may be usefull to have some statistics about someting else than the population's fitness. For example, one may need to observe the mean value of each attribute of the individuals. Just as before, it is possible using the generator expressions. ::
 
     attrs = [ind for ind in pop]
-    trans = map(None, *attrs)       # Transpose the attributes
+    trans = zip(*attrs)       # Transpose the attributes
     
     sums = map(sum, trans)
     averages = [item / len(attrs) for item in trans]
     
-Using matplotlib it is possible to plot the evolution of the attribute's value in function of the generation number. First, we need to create a list where every *averages* produced will be saved. ::
+`Matplotlib <http://matplotlib.sourceforge.net/>`_ makes it possible to plot the evolution of the attribute's value in function of the generation number. First, we need to create a list where every *averages* produced will be saved. ::
 
     g_averages.append(averages)
     
@@ -76,3 +76,4 @@ Then, at the end of the evolution (or during the evolution with some more comman
 The above will produce for the One Max example a very impressive look at the propagation of the *ones* in the population. Each row of the graphic is a generation and each column represent the evolution in time of the average value of a specific attriute of the individuals.
 
 .. image:: _images/one_averages.svg
+    

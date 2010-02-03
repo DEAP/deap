@@ -15,57 +15,23 @@
 
 import array
 import copy
-import eap.base
 
-class BooleanIndividual(eap.base.Individual, array.array):
-    def __new__(cls, *args, **kargs):
-        return super(BooleanIndividual, cls).__new__(cls, 'b')
+class IndividualArray(array.array):
+    def __new__(cls, typecode, *args, **kargs):
+        return super(IndividualArray, cls).__new__(cls, typecode)
 
-    def __init__(self, size, generator, fitness=None):
-        eap.base.Individual.__init__(self, fitness)
+    def __init__(self, typecode, size=0, generator=None, fitness=None):
+        if fitness is not None:
+            try:        # For conveniance, the user may pass a fitness object
+                self.mFitness = fitness()
+            except TypeError:
+                self.mFitness = fitness
+
         for i in xrange(size):
             self.append(generator.next())
 
     def __copy__(self):
-        lCopy = self.__class__.__new__(self.__class__)
-        lCopy[:] = self[:]
-        lCopy.mFitness = copy.copy(self.mFitness)
-        return lCopy
-
-    def __repr__(self):
-        return str(list(self)) + ': ' + str(self.mFitness)
-
-
-class IntegerIndividual(eap.base.Individual, array.array):
-    def __new__(cls, *args, **kargs):
-        return super(IntegerIndividual, cls).__new__(cls, 'l')
-
-    def __init__(self, size, generator, fitness=None):
-        eap.base.Individual.__init__(self, fitness)
-        for i in xrange(size):
-            self.append(generator.next())
-
-    def __copy__(self):
-        lCopy = self.__class__.__new__(self.__class__)
-        lCopy[:] = self[:]
-        lCopy.mFitness = copy.copy(self.mFitness)
-        return lCopy
-
-    def __repr__(self):
-        return str(list(self)) + ': ' + str(self.mFitness)
-
-
-class FloatIndividual(eap.base.Individual, array.array):
-    def __new__(cls, *args, **kargs):
-        return super(FloatIndividual, cls).__new__(cls, 'd')
-
-    def __init__(self, size, generator, fitness=None):
-        eap.base.Individual.__init__(self, fitness)
-        for i in xrange(size):
-            self.append(generator.next())
-
-    def __copy__(self):
-        lCopy = self.__class__.__new__(self.__class__)
+        lCopy = self.__class__.__new__(self.__class__, self.typecode)
         lCopy[:] = self[:]
         lCopy.mFitness = copy.copy(self.mFitness)
         return lCopy

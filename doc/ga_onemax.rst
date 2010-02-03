@@ -19,8 +19,11 @@ Then we need to create the :class:`~eap.creator.Creator` and add some builder me
 .. literalinclude:: ../src/examples/ga_onemax.py
    :lines: 30-36
 
-The last lines create a :class:`~eap.base.Fitness` that has to be maximized, a :class:`~eap.base.ListIndividual` that has for fitness the maximizing fitness and attribute generator a :func:`~eap.base.booleanGenerator` and a :class:`~eap.base.ListPopulation` that will be filled with the :class:`~eap.base.ListIndividual`\ s.
+The last lines create a :class:`~eap.base.Fitness` that has to be maximized, a :class:`~eap.base.ListIndividual` that has for fitness the maximizing fitness and attribute generator a :func:`~eap.base.booleanGenerator` and a :class:`~eap.base.ListPopulation` that will be filled with :class:`~eap.base.ListIndividual` instances.
 
-More to come soon...
+The evaluation function
+=======================
+
+
 
 The complete `ga_onemax <http://peace.kenai.com/ga_onemax.py>`_ code.
