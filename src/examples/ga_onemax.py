@@ -16,6 +16,7 @@
 import random
 import os
 import sys
+import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath('..'))
 
@@ -47,6 +48,8 @@ map(evalOneMax, lPop)
 CXPB = 0.5
 MUTPB = 0.2
 
+g_averages = []
+
 for g in range(40):
     print 'Generation', g
 
@@ -77,4 +80,19 @@ for g in range(40):
     print '\tMaximum :', max(obj)
     print '\tAverage :', sum(obj)/len(obj)
 
+    attrs = [ind for ind in lPop]
+    trans = map(None, *attrs)       # Transpose the attributes
+
+    sums = map(sum, trans)
+    averages = [float(item) / len(attrs) for item in sums]
+    print averages[0]
+    g_averages.append(averages)
+
 print 'End of evolution'
+
+plt.figure()
+plt.imshow(g_averages)
+plt.colorbar()
+plt.xlabel('Attribute')
+plt.ylabel('Generation')
+plt.show()

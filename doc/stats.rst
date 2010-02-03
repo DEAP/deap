@@ -2,27 +2,77 @@
 Statistics
 ==========
 
-Observable Objects
-==================
+.. versionchanged:: 0.2.1b
+   There is no more statistics module in EAP. It has been replaced by the use of python's generator expressions and stats functions.
 
-.. automodule:: eap.observable
+The statistics in EAP are relatively easy to implement in your code. In fact, there is no statistical module in EAP since specialized python projects exist. You are encouraged to use your favorit stats module or the built-in python functions.
 
-.. autoclass:: Observable
-   :members: suscribe, unsuscribe
-   
-   .. automethod:: emit(output)
+Retreiving the information
+==========================
 
-Statistics Generators
-=====================
+The statistic module has been removed since it is really easy and efficient in python to access all the data of the evolutionary algorithm and built a list with it. Every EA is different, with different configurations, different levels of population, different kind of individuals and so on. A module that computes the statistics would have been limited by or would have limit your imagination in the sens that it cannot be enough general to cover every single configuration that EAP make possible.
 
-.. automodule:: eap.stats
+Accessing the data is made really efficient in python by the generator expressions. Here are some simple examples of evolutionary algorithms and the generator expressions needed to retreive almost everything.
 
-.. function:: eap.stats.getStats(statsName)
+Mono-objective, mono-demic population
+-------------------------------------
 
-   Return the current statistics that are associated with *statsName*. Usually, *statsName* is the name of the :class:`~observable.Observable` suscribed generator function.
+In this example, we have a single population that contains the individuals, each individual has a fitness. In order to retreive the minimum, maximum and average fitness of the population we may simply use ::
 
-.. function:: eap.stats.pushStats(statsName, stats)
+    fits = [ind.mFitness[0] for ind in pop]
+    
+    minimum = min(fits)
+    maximum = max(fits)
+    average = sum(fits)/len(fits)
 
-   Write the *stats* in the *statsName* entry of the dictionary, every push with the same name will replace the current value.
+Mono-objective, multi-demic population
+--------------------------------------
 
-.. autoclass:: eap.stats.Stats
+In this example, we have a single population of multiple demes that contains the individuals, each individual has a fitness. In order to retreive the minimum, maximum and average fitness of the population we may simply use ::
+
+    fits = [ind.mFitness[0] for deme in pop for ind in deme]
+    
+    minimum = min(fits)
+    maximum = max(fits)
+    average = sum(fits)/len(fits)
+    
+Multi-objective, mono-demic population
+--------------------------------------
+
+In this example, we have a single population that contains the individuals, each individual has a many fitnesses. In order to retreive the minimum, maximum and average of each fitness of the population we may simply use ::
+
+    fits = [ind.mFitness for ind in pop]
+    trans = map(None, *fits)        # Transpose the fitnesses
+    
+    minimums = map(min, trans)
+    maximums = map(max, trans)
+    sums = map(sum, trans)
+    averages = [item / len(fits) for item in sums]
+
+Observing something else
+========================
+
+It may be usefull to have some statistics about someting else than the population's fitness. For example, one may need to observe the mean value of each attribute of the individuals. Just as before, it is possible using the generator expressions. ::
+
+    attrs = [ind for ind in pop]
+    trans = map(None, *attrs)       # Transpose the attributes
+    
+    sums = map(sum, trans)
+    averages = [item / len(attrs) for item in trans]
+    
+Using matplotlib it is possible to plot the evolution of the attribute's value in function of the generation number. First, we need to create a list where every *averages* produced will be saved. ::
+
+    g_averages.append(averages)
+    
+Then, at the end of the evolution (or during the evolution with some more commands), we can draw thoses *averages* with matplotlib's :func:`imshow` function. ::
+
+    plt.figure()
+    plt.imshow(g_averages)
+    plt.colorbar()
+    plt.xlabel('Attribute')
+    plt.ylabel('Generation')
+    plt.show()
+    
+The above will produce for the One Max example a very impressive look at the propagation of the *ones* in the population. Each row of the graphic is a generation and each column represent the evolution in time of the average value of a specific attriute of the individuals.
+
+.. image:: _images/one_averages.svg
