@@ -5,7 +5,7 @@ import unittest
 
 import random
 import eap.base as base
-import eap.operators as operators
+import eap.toolbox as toolbox
 
 
 class  TestCrossovers(unittest.TestCase):
@@ -20,7 +20,7 @@ class  TestCrossovers(unittest.TestCase):
     def testTwoPointsCrossover(self):
         expectedChild1 = [2, 0, 1, 1, 4]
         expectedChild2 = [3, 0, 4, 3, 2]
-        child1, child2 = operators.twoPointsCx(self.Ind1, self.Ind2)
+        child1, child2 = toolbox.twoPointsCx(self.Ind1, self.Ind2)
         self.assertEquals(child1, expectedChild1)
         self.assertEquals(child2, expectedChild2)
 
@@ -28,7 +28,7 @@ class  TestCrossovers(unittest.TestCase):
     def testOnePointCrossover(self):
         expectedChild1 = [2, 0, 4, 1, 2]
         expectedChild2 = [3, 0, 1, 3, 4]
-        child1, child2 = operators.onePointCx(self.Ind1, self.Ind2)
+        child1, child2 = toolbox.onePointCx(self.Ind1, self.Ind2)
         self.assertEquals(child1, expectedChild1)
         self.assertEquals(child2, expectedChild2)
 
@@ -36,7 +36,7 @@ class  TestCrossovers(unittest.TestCase):
     def testPMXCrossover(self):
         expectedChild1 = [2, 0, 4, 3, 1]
         expectedChild2 = [3, 0, 1, 4, 2]
-        child1, child2 = operators.pmxCx(self.Ind1, self.Ind2)
+        child1, child2 = toolbox.pmxCx(self.Ind1, self.Ind2)
         self.assertEquals(child1, expectedChild1)
         self.assertEquals(child2, expectedChild2)
 
@@ -52,20 +52,20 @@ class TestMutations(unittest.TestCase):
 
     def testFilpBitMutation(self):
         expectedMutant = [False, True, True, False, True]
-        mutant = operators.flipBitMut(self.BoolInd, flipIndxPb=0.5)
+        mutant = toolbox.flipBitMut(self.BoolInd, flipIndxPb=0.5)
         self.assertEquals(mutant, expectedMutant)
 
 
     def testShuffleIndexesMutation(self):
         expectedMutant = [False, True, True, False, False]
-        mutant = operators.shuffleIndxMut(self.BoolInd, shuffleIndxPb=0.5)
+        mutant = toolbox.shuffleIndxMut(self.BoolInd, shuffleIndxPb=0.5)
         self.assertEquals(mutant, expectedMutant)
 
 
     def testGaussianMutation(self):
         expectedMutant = [0.84442185152504812, 0.75795440294030247,
                           1.445875763057654, 0.56536772757640075, 0.51127472136860852]
-        mutant = operators.gaussMut(self.RealInd, mu=1, sigma=0.5, mutIndxPb=0.5)
+        mutant = toolbox.gaussMut(self.RealInd, mu=1, sigma=0.5, mutIndxPb=0.5)
         self.assertEquals(mutant, expectedMutant)
 
 
