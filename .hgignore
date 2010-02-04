@@ -3,3 +3,8 @@ syntax: glob
 nbproject
 *.pyc
 doc/_build
+\.orig\..*$
+\.orig$
+\.chg\..*$
+\.rej$
+\.conflict\~$
