@@ -19,14 +19,14 @@ be called as generator in populations' and individuals' *generator* argument.
 The creator is responsible of intanciating the objects needed by the algorithms.
 '''
 
-from ConfigParser import RawConfigParser
 from functools import partial
+import random
 
-class Creator(object):
+class Evolver(object):
     '''The creator is an abstract factory that produce objects by calling their
     constructor with the arguments defined in the :meth:`define` method.
     '''
-    def define(self, methodName, constructor, *args, **kargs):
+    def register(self, methodName, constructor, *args, **kargs):
         '''Register a method to be called with :meth:`methodName()`, *args* and
         *kargs* will be passed as argument to the method. Supplying new
         keyworded arguments to the calee will override the predifined *kargs*.
@@ -35,14 +35,13 @@ class Creator(object):
             >>> def foo(a, b=1):
             ...     print a, b
             ...
-            >>> creator = Creator()
-            >>> creator.define('bar', foo, a=1, b=2)
+            >>> evolver.define('bar', foo, a=1, b=2)
 
         the following are possible. ::
 
-            >>> creator.bar()
+            >>> evolver.bar()
             1 2
-            >>> creator.bar(a=2, b=4)
+            >>> evolver.bar(a=2, b=4)
             2 4
 
         But if no keyworded arguments are used, then is will be imposible to
@@ -65,53 +64,37 @@ class Creator(object):
         '''
         setattr(self, methodName, partial(constructor, *args, **kargs))
 
-    def undefine(self, methodName):
+    def unregister(self, methodName):
         '''Unregister the method named *methodName*.'''
         delattr(self, methodName)
 
-    def dump(self, fileName):
-        '''Dump the creator to a file named *fileName*.'''
-        lConfig = RawConfigParser()
-        for lAttr in self.__dict__:
-            lConfig.add_section(lAttr)
-            lClassAndPath = self.__dict__[lAttr].func.__module__ + \
-                            '.' + self.__dict__[lAttr].func.__name__
-            lConfig.set(lAttr, 'type', lClassAndPath)
 
-            for lOption in self.__dict__[lAttr].keywords:
-                lConfig.set(lAttr, lOption, \
-                            self.__dict__[lAttr].keywords[lOption])
+#_inst = Evolver()
+#register = _inst.register
+#unregister = _inst.unregister
 
-        lFile = open(fileName, 'w')
-        lConfig.write(lFile)
-        lFile.close()
+def simpleGA(evolver, population, cxPb, mutPb, nGen):
+    # Begin the evolution
+    for g in range(nGen):
+        print 'Generation', g
 
-    def load(self, fileName):
-        '''Configure the creator from a configuration file named *fileName*.
-        Methods registered with same name as the one in the configuration file
-        will be overriden.
-        '''
-        lConfig = RawConfigParser()
-        lConfig.read(fileName)
-        for lSection in lConfig.sections():
-            kargs = dict()
-            for lOption in lConfig.options(lSection):
-                lValue = None
-                try:
-                    lValue = eval(lConfig.get(lSection, lOption))
-                except NameError:
-                    lValue = lConfig.get(lSection, lOption)
-                kargs[lOption] = lValue
-            lImportString = kargs['type'].split('.')
-            lModule = __import__(lImportString[0])
-            kargs.pop('type')
-            self.register(lSection, getattr(lModule, lImportString[1]),
-                          *args, **kargs)
+        population[:] = evolver.select(population, n=len(population))
 
+        # Apply crossover and mutation
+        for i in xrange(1, len(population), 2):
+            if random.random() < cxPb:
+                population[i - 1], population[i] = evolver.crossover(population[i - 1], population[i])
+        for i in xrange(len(population)):
+            if random.random() < mutPb:
+                population[i] = evolver.mutate(population[i])
 
-#creator_instance = Creator_()
-#
-#
-#def Creator():
-#    '''Creator singleton accessor.'''
-#    return creator_instance
+        # Evaluate the population
+        map(evolver.evaluate, population)
+
+        # Gather all the fitnesses in one list and print the stats
+        lFitnesses = [lInd.mFitness[0] for lInd in population]
+        print '\tMin Fitness :', min(lFitnesses)
+        print '\tMax Fitness :', max(lFitnesses)
+        print '\tMean Fitness :', sum(lFitnesses)/len(lFitnesses)
+
+    print 'End of evolution'
