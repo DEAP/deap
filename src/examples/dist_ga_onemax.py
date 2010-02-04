@@ -11,7 +11,7 @@ def distributedGA(toolbox, population, cxPb, mutPb, nGen):
     for g in range(nGen):
         print 'Generation', g
     
-        lPop[:] = toolbox.select(lPop, n=len(population))
+        population[:] = toolbox.select(lPop, n=len(population))
     
         # Apply crossover and mutation
         for i in xrange(1, len(lPop), 2):
