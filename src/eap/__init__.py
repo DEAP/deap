@@ -21,6 +21,6 @@ __date__ = "$10 nov. 2009 15:36:11$"
 __version__ = "0.2.1a"
 
 import base
-import creator
-import evolutiontoolbox
-import operators
+import algorithms
+import specialized
+import toolbox
