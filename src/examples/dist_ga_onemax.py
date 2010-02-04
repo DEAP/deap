@@ -11,21 +11,21 @@ def distributedGA(toolbox, population, cxPb, mutPb, nGen):
     for g in range(nGen):
         print 'Generation', g
     
-        population[:] = toolbox.select(lPop, n=len(population))
+        population[:] = toolbox.select(population, n=len(population))
     
         # Apply crossover and mutation
-        for i in xrange(1, len(lPop), 2):
+        for i in xrange(1, len(population), 2):
             if random.random() < cxPb:
                 population[i - 1], population[i] = toolbox.crossover(population[i - 1], population[i])
         for i, ind in enumerate(population):
             if random.random() < mutPb:
-                lPop[i] = toolbox.mutate(ind)
+                population[i] = toolbox.mutate(ind)
 
         # Distribute the evaluation
         lChilds = [dtm.spawn(toolbox.evaluate, lInd) for lInd in population]
         lData = yield ('waitFor', lChilds)
         for i, lID in enumerate(lChilds):
-            lPop[i].mFitness.append(lData[lID])
+            population[i].mFitness.append(lData[lID])
     
         # Gather all the fitnesses in one list and print the stats
         lFitnesses = [lInd.mFitness[0] for lInd in population]
