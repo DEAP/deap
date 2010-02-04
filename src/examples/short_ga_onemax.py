@@ -1,28 +1,23 @@
 
 import eap.base as base
-import eap.evolver as evolver
-import eap.operators as operators
+import eap.algorithms as algorithms
+import eap.toolbox as toolbox
 
-lEvolver = evolver.Evolver()
-lEvolver.register('fitness', base.Fitness, weights=(1.0,))
-lEvolver.register('individual', base.Individual, size=100,
-                fitness=lEvolver.fitness, generator=base.booleanGenerator())
-lEvolver.register('population', base.Population, size=300,
-                generator=lEvolver.individual)
+lTools = toolbox.Toolbox()
+lTools.register('fitness', base.Fitness, weights=(1.0,))
+lTools.register('individual', base.Individual, size=100,
+                fitness=lTools.fitness, generator=base.booleanGenerator())
+lTools.register('population', base.Population, size=300,
+                generator=lTools.individual)
                 
 def evalOneMax(individual):
     if not individual.mFitness.isValid():
         individual.mFitness.append(individual.count(True))
 
-lEvolver.register('evaluate', evalOneMax)
-lEvolver.register('crossover', operators.twoPointsCx)
-lEvolver.register('mutate', operators.flipBitMut, flipIndxPb=0.05)
-lEvolver.register('select', operators.tournSel, tournSize=3)
-lEvolver.register('evolve', evolver.simpleGA)
+lTools.register('evaluate', evalOneMax)
+lTools.register('crossover', toolbox.twoPointsCx)
+lTools.register('mutate', toolbox.flipBitMut, flipIndxPb=0.05)
+lTools.register('select', toolbox.tournSel, tournSize=3)
 
-lPop = lEvolver.population()
-
-# Evaluate the population
-map(lEvolver.evaluate, lPop)
-
-lEvolver.evolve(lEvolver, lPop, 0.5, 0.2, 40)
+lPop = lTools.population()
+algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
