@@ -28,6 +28,7 @@ module.
 
 import copy
 from functools import partial
+from eap.base import Fitness
 import random
 
 class Toolbox(object):
@@ -260,19 +261,14 @@ def rndSel(individuals, n, replacement):
     This function use the :meth:`randint` and :meth:`sample` method from the
     python base :mod:`random` module.
     '''
-    lOutIndividuals = []
+    lChosenList = []
 
     if replacement is True:
-        lLenght = len(individuals)
-        lChoosenList = []
-
-        for i in xrange(n):
-            lChoosenList.append(individuals[random.randint(0, lLenght - 1)])
-
+        lChosenList.extend([random.choice(individuals) for i in xrange(n)])
     elif replacement is False:
-        lOutIndividuals = random.sample(individuals, n)
+        lChosenList = random.sample(individuals, n)
 
-    return lOutIndividuals
+    return lChosenList
 
 
 def bestSel(individuals, n):
@@ -298,18 +294,15 @@ def tournSel(individuals, n, tournSize):
     This function use the :meth:`randint` method from the python base
     :mod:`random` module.
     '''
-    lChoosenList = []
-    lLenght = len(individuals)
+    lChosenList = []
+    for i in xrange(n):
+        lChosenList.append(random.choice(individuals))
+        for j in xrange(tournSize - 1):
+            lAspirant = random.choice(individuals)
+            if lAspirant.mFitness > lChosenList[i].mFitness:
+                lChosenList[i] = lAspirant
 
-    for i in range(n):
-        lChoosenIndx = random.randint(0, lLenght - 1)
-        for j in range(tournSize - 1):
-            lTriedIndx = random.randint(0, lLenght - 1)
-            if individuals[lTriedIndx].mFitness > individuals[lChoosenIndx].mFitness:
-                lChoosenIndx = lTriedIndx
-        lChoosenList.append(individuals[lChoosenIndx])
-
-    return lChoosenList
+    return lChosenList
 
 
 ######################################
