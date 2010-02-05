@@ -81,12 +81,10 @@ class Population(list):
     '''
     def __init__(self, size=0, generator=None):
         try:
-            for i in xrange(size):
-                self.append(generator())
+            self.extend([generator() for i in xrange(size)])
         except TypeError:
-            lLenght = len(generator)
-            for i in xrange(size):
-                self.append(generator[i % lLenght]())
+            lLength = len(generator)
+            self.extend(generator[i % lLength]() for i in xrange(size))
 
     def __copy__(self):
         lCopy = self.__class__.__new__(self.__class__)
@@ -208,12 +206,10 @@ class Individual(list):
                 self.mFitness = fitness
 
         try:
-            for i in xrange(size):
-                self.append(generator.next())
+            self.extend([generator.next() for i in xrange(size)])
         except TypeError:
             lCycle = itertools.cycle(generator)
-            for i in xrange(size):
-                self.append(lCycle.next().next())
+            self.extend([lCycle.next().next() for i in xrange(size)])
 
     def __copy__(self):
         """This method makes a shallow copy of self and fitness and then a deep
@@ -229,9 +225,7 @@ class Individual(list):
         lCopy = self.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
         lCopy.mFitness = copy.copy(self.mFitness)
-#        lCopy[:] = map(copy.copy, self)
-        super(Individual, lCopy).__init__(itertools.imap(copy.copy, self))
-
+        lCopy[:] = map(copy.copy, self)
         return lCopy
 
     def __repr__(self):
