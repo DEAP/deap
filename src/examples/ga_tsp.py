@@ -22,6 +22,9 @@ import eap.base as base
 import eap.toolbox as toolbox
 import eap.algorithms as algorithms
 import pickle
+import random
+
+random.seed(1582)
 
 # gr*.pickle contains the numpy ndarray of the distance map
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
@@ -30,13 +33,11 @@ lDistanceMap = pickle.load(lDistanceFile)
 lDistanceFile.close()
 lIndSize = lDistanceMap.shape[0]
 
-print lDistanceMap
-
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness)
 lTools.register('individual', base.Individual, size=lIndSize,
                 generator=base.indiceGenerator(lIndSize), fitness=lTools.fitness)
-lTools.register('population', base.Population, size=400,
+lTools.register('population', base.Population, size=300,
                 generator=lTools.individual)
 
 def evalTSP(individual):
@@ -53,11 +54,4 @@ lTools.register('evaluate', evalTSP)
 
 lPop = lTools.population()
 
-algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 100)
-
-lBest = lPop[0]
-for lInd in lPop[1:]:
-    if lInd.mFitness > lBest.mFitness:
-        lBest = lInd
-
-print lInd
+algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 50)
