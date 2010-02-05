@@ -279,44 +279,14 @@ def bestSel(individuals, n):
     '''Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     '''
-    def comp(indOne, indTwo):
-        if indOne.mFitness > indTwo.mFitnes:
-            return 1
-        elif indOne.mFitness < indTwo.mFitness:
-            return -1
-        return 0
-
-    lChoosenList = []
-    for lInd in individuals:
-        if len(lChoosenList) < n:
-            lChoosenList.append(lInd)
-            lChoosenList.sort(cmp)
-        elif lInd.mFitness > lChoosenList[0].mFitness:
-            lChoosenList[0] = lInd
-            lChoosenList.sort(cmp)
-    return lChoosenList
+    return sorted(individuals, key=lambda ind : ind.mFitness, reverse=True)[:n]
 
 
 def worstSel(individuals, n):
     '''Select the *n* worst individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     '''
-    def comp(indOne, indTwo):   # Allow reversed sort
-        if indOne.mFitness < indTwo.mFitnes:
-            return 1
-        elif indOne.mFitness > indTwo.mFitness:
-            return -1
-        return 0
-
-    lChoosenList = []
-    for lInd in individuals:
-        if len(lChoosenList) < n:
-            lChoosenList.append(lInd)
-            lChoosenList.sort(cmp)
-        elif lInd.mFitness < lChoosenList[0].mFitness:
-            lChoosenList[0] = lInd
-            lChoosenList.sort(cmp)
-    return lChoosenList
+    return sorted(individuals, key=lambda ind : ind.mFitness)[:n]
 
 
 def tournSel(individuals, n, tournSize):
