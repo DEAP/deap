@@ -28,7 +28,6 @@ module.
 
 import copy
 from functools import partial
-from eap.base import Fitness
 import random
 
 class Toolbox(object):
