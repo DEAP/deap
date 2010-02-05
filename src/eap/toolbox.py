@@ -111,7 +111,7 @@ def onePointCx(indOne, indTwo):
     return lChild1, lChild2
 
 
-def pmxCx(indOne, indTwo):
+def pmCx(indOne, indTwo):
     '''Execute a partialy matched crossover on the input indviduals. The two
     childrens produced are returned as a tuple, the two parents are left intact.
     This crossover expect individuals of indices, the result for any other type
