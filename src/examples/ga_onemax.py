@@ -13,87 +13,50 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import random
-import os
-import sys
-
-sys.path.append(os.path.abspath('..'))
-
 import eap.base as base
-import eap.creator as creator
 import eap.toolbox as toolbox
-import eap.operators as operators
 
-random.seed(100)
+lTools = toolbox.Toolbox()
+lTools.register('fitness', base.Fitness, weights=(1.0,))
+lTools.register('individual', base.Individual, size=100,
+                fitness=lTools.fitness, generator=base.booleanGenerator())
+lTools.register('population', base.Population, size=300,
+                generator=lTools.individual)
 
-# Instanciate the creator
-lCreator = creator.Creator()
-# Define a way to build a maximizing fitness
-lCreator.define('crtFitness', base.Fitness, weights=(1.0,))
-# Define a way to build an individual containing booleans and the previous fitness
-lCreator.define('crtIndividual', base.Individual, size=100,
-                fitness=lCreator.crtFitness, generator=base.booleanGenerator())
-# Define a way to build a population filled with the previous individuals
-lCreator.define('crtPopulation', base.Population, size=300,
-                generator=lCreator.crtIndividual)
-
-# The function that evauluates an individual and set its fitness
 def evalOneMax(individual):
     if not individual.mFitness.isValid():
         individual.mFitness.append(individual.count(True))
 
-# Instanciate a toolbox that will contain the operators
-lToolbox = toolbox.Toolbox()
-# Add a two points crossover method to the toolbox
-lToolbox.register('crossover', operators.twoPointsCx)
-# Add a flip bit mutation method to the toolbox with each index having a probability
-# of 5% to be flipped
-lToolbox.register('mutate', operators.flipBitMut, flipIndxPb=0.05)
-# Add a tournament selection method to the toolbox with tournament size of 3
-lToolbox.register('select', operators.tournSel, tournSize=3)
+lTools.register('evaluate', evalOneMax)
+lTools.register('crossover', toolbox.twoPointsCx)
+lTools.register('mutate', toolbox.flipBitMut, flipIndxPb=0.05)
+lTools.register('select', toolbox.tournSel, tournSize=3)
 
-# Instanciate the population
-lPop = lCreator.crtPopulation()
+lPop = lTools.population()
 
-# Evaluate the population
-map(evalOneMax, lPop)
-
-# Each individual has a probability of 50% to be mated (crossover)
-CXPB = 0.5
-# Each individuals has a probability of 20% to be mutated
-MUTPB = 0.2
+CXPB, MUTPB, NGEN = (0.5, 0.2, 40)
 
 # Begin the evolution
-for g in range(40):
+for g in range(NGEN):
     print 'Generation', g
 
-    # Select then next population
-    lPop[:] = lToolbox.select(lPop, n=len(lPop))
+    lPop[:] = lTools.select(lPop, n=len(lPop))
 
-    # Build a table of the individuals that should be mated and mutated
-    lMateIndx = []
-    lMutateIndx = []
-    for lIndx in xrange(len(lPop)):
+    # Apply crossover and mutation
+    for i in xrange(1, len(lPop), 2):
         if random.random() < CXPB:
-            lMateIndx.append(lIndx)
+            lPop[i - 1], lPop[i] = lTools.crossover(lPop[i - 1], lPop[i])
+    for i in xrange(len(lPop)):
         if random.random() < MUTPB:
-            lMutateIndx.append(lIndx)
-    
-    # Apply crossover on the choosen indexes and replace parents
-    for i, j in zip(lMateIndx[::2], lMateIndx[1::2]):
-        lPop[i], lPop[j] = lToolbox.crossover(lPop[i], lPop[j])
-
-    # Apply mutation on the choosen indexes and replace parents
-    for i in lMutateIndx:
-        lPop[i] = lToolbox.mutate(lPop[i])
+            lPop[i] = lTools.mutate(lPop[i])
 
     # Evaluate the population
-    map(evalOneMax, lPop)
+    map(lTools.evaluate, lPop)
 
     # Gather all the fitnesses in one list and print the stats
     lFitnesses = [lInd.mFitness[0] for lInd in lPop]
-    print '\tMinimum :', min(lFitnesses)
-    print '\tMaximum :', max(lFitnesses)
-    print '\tAverage :', sum(lFitnesses)/len(lFitnesses)
+    print '\tMin Fitness :', min(lFitnesses)
+    print '\tMax Fitness :', max(lFitnesses)
+    print '\tMean Fitness :', sum(lFitnesses)/len(lFitnesses)
 
 print 'End of evolution'
