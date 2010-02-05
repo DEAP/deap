@@ -226,10 +226,11 @@ class Individual(list):
            copied the way that they should.
 
         """
-        lCopy = self.__class__.__new__(self.__class__)
+        lCopy = self.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
         lCopy.mFitness = copy.copy(self.mFitness)
-        lCopy[:] = map(copy.copy, self)
+#        lCopy[:] = map(copy.copy, self)
+        super(Individual, lCopy).__init__(itertools.imap(copy.copy, self))
 
         return lCopy
 
@@ -368,7 +369,7 @@ class Fitness(array.array):
         return str(list(self))
 
     def __copy__(self):
-        lCopy = self.__class__.__new__(self.__class__)
+        lCopy = self.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
         lCopy.extend(self)
         lCopy.mWeights[:] = self.mWeights[:]
