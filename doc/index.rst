@@ -16,7 +16,6 @@ Evolutionary Contents
    
    ea_bases
    evo_toolbox
-   creator
    stats
    
 Tutorials

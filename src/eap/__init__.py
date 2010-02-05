@@ -17,8 +17,7 @@
 '''
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
-__date__ = "$10 nov. 2009 15:36:11$"
-__version__ = "0.2.1a"
+__version__ = "0.2.2"
 
 import base
 import algorithms

@@ -13,11 +13,19 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''The :mod:`creator` module is an helper module in order to simplify the
-object creation. Its one and only purpose is to register some function that can
-be called as generator in populations' and individuals' *generator* argument.
-The creator is responsible of intanciating the objects needed by the algorithms.
+'''The :mod:`algorithms` module is intended to contain some specific algorithms
+in order to execute very common evolutionary algorithms. The method used here
+are more for convenience than reference as the implementation of every 
+evolutionary algorithm may vary infinitly. Most of the algorithms in this module
+use operators registered in the toolbox with the same keywords,
+:meth:`crossover` for crossover, :meth:`mutate` for mutation, :meth:`select`
+for selection and :meth:`evaluate` for evaluation.
+
+.. note::
+   You are encouraged to write your own algorithms in order to make them do what
+   you realy them to do.
 '''
+
 import random
 
 def simpleGA(toolbox, population, cxPb, mutPb, nGen):

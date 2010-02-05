@@ -73,7 +73,7 @@ Then, at the end of the evolution (or during the evolution with some more comman
     plt.ylabel('Generation')
     plt.show()
     
-The above will produce for the One Max example a very impressive look at the propagation of the *ones* in the population. Each row of the graphic is a generation and each column represent the evolution in time of the average value of a specific attriute of the individuals.
+The above will produce for the One Max example a very impressive look at the propagation of the *ones* in the population. Each row of the graphic is a generation and each column represent the evolution in time of the average value of a specific attribute of the individuals.
 
 .. image:: _images/one_averages.svg
     

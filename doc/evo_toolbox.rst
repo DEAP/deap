@@ -10,36 +10,39 @@ Evolutionary Toolbox
 Operators
 =========
 
-.. automodule:: eap.operators 
+This module contains the operators an evolutionary algorithm. They are used to modify, select and move the individuals in their environment. A good set of operators should allow to move from an initial population of good solutions, equivalent to random sampling, to excellent configurations optimizing the studied problem.
+
+.. note::
+   Operators that affects the individual's constitution (attributes) are responsible of invalidating the fitness and make sure that the new individual(s) is (are) independent of the original individual(s).
 
 Crossover
 ---------
 
-.. autofunction:: eap.operators.twoPointsCx
+.. autofunction:: twoPointsCx
 
-.. autofunction:: eap.operators.onePointCx
+.. autofunction:: onePointCx
 
-.. autofunction:: eap.operators.pmxCx
+.. autofunction:: pmxCx
 
 Mutation
 --------
 
-.. autofunction:: eap.operators.gaussMut
+.. autofunction:: gaussMut
 
-.. autofunction:: eap.operators.shuffleIndxMut
+.. autofunction:: shuffleIndxMut
 
-.. autofunction:: eap.operators.flipBitMut
+.. autofunction:: flipBitMut
 
 Selection
 ---------
 
-.. autofunction:: eap.operators.tournSel
+.. autofunction:: tournSel
 
-.. autofunction:: eap.operators.rndSel
+.. autofunction:: rndSel
 
-.. autofunction:: eap.operators.bestSel
+.. autofunction:: bestSel
 
-.. autofunction:: eap.operators.worstSel
+.. autofunction:: worstSel
 
 Migration
 ---------
