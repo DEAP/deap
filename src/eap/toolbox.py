@@ -13,16 +13,22 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''The evolution toolbox is intended to contain the operators that you need in
-your evolutionary algorithms. It is always possible to use directly the
-operators from the module :mod:`eap.operators` but the toolbox does also contain
-the default values of the different parameters for each method. More over, it
-makes your algorithms easier to understand and modify, since once an oprerator
-is set, it can be reused with a simple keyword that conatins all its arguments.
-Plus, every keyword or argument can be overriden at all time.
+'''The :mod:`toolbox` module is intended to contain the operators that you need
+in your evolutionary algorithms, from initialisation to evaluation. It is
+always possible to use directly the operators from this module but the toolbox
+does also contain the default values of the different parameters for each
+method. More over, it makes your algorithms easier to understand and modify,
+since once an oprerator is set, it can be reused with a simple keyword that
+conatins all its arguments. Plus, every keyword or argument can be overriden
+at all time.
+
+The toolbox is also used in predefined algorithms from the :mod:`algorithms`
+module.
 '''
 
+import copy
 from functools import partial
+import random
 
 class Toolbox(object):
     '''A toolbox for evolution that contains the evolutionary operators.
@@ -38,21 +44,6 @@ class Toolbox(object):
         '''Unregister an operator from the toolbox.'''
         delattr(self, methodName)
 
-
-'''The operators are the core of an evolutionary algorithm. They are used to
-modify, select and move the individuals in their environment. A good set of
-operators should allow to move from an initial population of good solutions,
-equivalent to random sampling, to excellent configurations optimizing the
-studied problem.
-
-.. note::
-   Operators that affects the individual's constitution (attributes) are
-   responsible of invalidating the fitness and make sure that the new
-   individual(s) is (are) independent of the original individual(s).
-'''
-
-import copy
-import random
 
 ######################################
 # Crossovers                         #
