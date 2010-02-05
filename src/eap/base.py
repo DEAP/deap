@@ -307,33 +307,10 @@ class Fitness(array.array):
         return lNotEqual
 
     def __gt__(self, other):
-        # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
-        # Apply the weights to the values
-        lSelfValues = array.array('d', itertools.imap(operator.mul,
-                                                      self, lSelfWeights))
-        lOtherValues = array.array('d', itertools.imap(operator.mul,
-                                                       other, lOtherWeights))
-        # Compare the results
-        return lSelfValues > lOtherValues
+        return not self.__le__(other)
 
     def __ge__(self, other):
-        # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
-        # Apply the weights to the values
-        lSelfValues = array.array('d', itertools.imap(operator.mul,
-                                                      self, lSelfWeights))
-        lOtherValues = array.array('d', itertools.imap(operator.mul,
-                                                       other, lOtherWeights))
-        # Compare the results
-        return lSelfValues >= lOtherValues
-
+        return not self.__lt__(other)
 
     def __lt__(self, other):
         # Pad the weights with the last value
@@ -378,18 +355,7 @@ class Fitness(array.array):
         return lSelfValues == lOtherValues
 
     def __ne__(self, other):
-        # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
-        # Apply the weights to the values
-        lSelfValues = array.array('d', itertools.imap(operator.mul,
-                                                      self, lSelfWeights))
-        lOtherValues = array.array('d', itertools.imap(operator.mul,
-                                                       other, lOtherWeights))
-        # Compare the results
-        return lSelfValues != lOtherValues
+        return not self.__eq__(other)
 
     def __cmp__(self, other):
         if self > other:
