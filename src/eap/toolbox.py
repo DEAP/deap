@@ -257,17 +257,13 @@ def rndSel(individuals, n, replacement):
     occurences will modify the other. It is possible to randomly select without
     picking twice the same individual by setting *replacement* to :data:`False`.
 
-    This function use the :meth:`randint` and :meth:`sample` method from the
+    This function use the :meth:`choice` and :meth:`sample` method from the
     python base :mod:`random` module.
     '''
-    lChosenList = []
-
     if replacement is True:
-        lChosenList.extend([random.choice(individuals) for i in xrange(n)])
-    elif replacement is False:
-        lChosenList = random.sample(individuals, n)
-
-    return lChosenList
+        return [random.choice(individuals) for i in xrange(n)]
+    else:
+        return random.sample(individuals, n)
 
 
 def bestSel(individuals, n):
@@ -290,7 +286,7 @@ def tournSel(individuals, n, tournSize):
     copies of the input *individuals*. That means if an individual is selected
     twice, modifying one of the two occurences will modify the other.
 
-    This function use the :meth:`randint` method from the python base
+    This function use the :meth:`choice` method from the python base
     :mod:`random` module.
     '''
     lChosenList = []
