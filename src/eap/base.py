@@ -434,5 +434,6 @@ def expressionGenerator(funcSet, termSet, maxDepth):
 	else:
 	    lFunc = random.choice(funcSet)
 	    lArgs = [expressionGenerator(funcSet, termSet, maxDepth-1).next() for i in xrange(arity(lFunc))]
-	    expr = [lFunc, lArgs]
+	    expr = [lFunc]
+	    expr.extend(lArgs)
 	yield expr
