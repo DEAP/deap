@@ -299,6 +299,16 @@ def tournSel(individuals, n, tournSize):
 
     return lChosenList
 
+######################################
+# Evaluation                         #
+######################################
+
+def evaluateExpr(expr):
+    try:
+        return expr[0](*expr[1])
+    except :
+        values = [evaluateExpr(value) for value in expr[1]]
+        return evaluateExpr([expr[0],values])
 
 ######################################
 # Migrations                         #
