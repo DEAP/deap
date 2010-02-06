@@ -305,10 +305,13 @@ def tournSel(individuals, n, tournSize):
 
 def evaluateExpr(expr):
     try:
-        return expr[0](*expr[1])
-    except :
-        values = [evaluateExpr(value) for value in expr[1]]
-        return evaluateExpr([expr[0],values])
+        func = expr[0]
+        try:
+            return func(*[evaluateExpr(value) for value in expr[1:]])
+        except:
+            return func(*expr[1:])
+    except:
+        return expr
 
 ######################################
 # Migrations                         #
