@@ -231,7 +231,6 @@ class Individual(list):
     def __repr__(self):
         return str(list(self)) + ' : ' + str(self.mFitness)
 
-
 #class IndicesIndividual(Individual, list):
 #    """
 #    """
@@ -426,3 +425,14 @@ def booleanGenerator():
     while 1:
         yield random.choice([False, True])
 
+def expressionGenerator(funcSet, termSet, maxDepth):
+    def arity(func):
+        return func.func_code.co_argcount
+    while True:
+	if maxDepth == 0 or random.random() < len(termSet)/(len(termSet)+len(funcSet)):
+	    expr = random.choice(termSet)
+	else:
+	    lFunc = random.choice(funcSet)
+	    lArgs = [expressionGenerator(funcSet, termSet, maxDepth-1).next() for i in xrange(arity(lFunc))]
+	    expr = [lFunc, lArgs]
+	yield expr
