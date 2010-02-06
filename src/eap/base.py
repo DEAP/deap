@@ -287,12 +287,19 @@ class Fitness(array.array):
 
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort
-        lexically the fitnesses, this method returns :data:`True` if this fitness
-        is dominated by the *other* fitness and false otherwise. Once again,
-        the weights are used in this function.
+        lexically the fitnesses, this method returns :data:`True` if this
+        fitness is dominated by the *other* fitness and :data:`False` otherwise.
+        The weights are used to compare minimizing and maximizing fitnesses. If
+        there is more fitness values than weights, the las weight get repeated
+        until the end of the comparaison.
         '''
-        lNotEqual = False;
-        for lSVal, lSWght, lOVal, lOWght in zip(self, self.mWeights, other, other.mWeights):
+        lNotEqual = False
+         # Pad the weights with the last value
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
+        for lSVal, lSWght, lOVal, lOWght in zip(self, lSelfWeights, other, lOtherWeights):
             lSelfFit = lSVal * lSWght
             lOtherFit = lOVal * lOWght
             if (lSelfFit) > (lOtherFit):
