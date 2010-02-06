@@ -18,6 +18,7 @@ import sympy
 import eap.base as base
 import eap.toolbox as toolbox
 
+# define primitives
 def add(left, right):
     return sympy.Add(left,right)
 def sub(left, right):
@@ -27,6 +28,7 @@ def mul(left, right):
 def div(left, right):
     return sympy.Mul(left, sympy.Pow(right, sympy.Rational(-1)))
 
+# add primitives and closures to their respective list
 lFuncs = [add, sub, mul]
 lTerms = [sympy.Symbol('x')]
 
@@ -41,9 +43,13 @@ lTools.register('population', base.Population, size=3,
 
 def evalSymbReg(individual, terms):
     if not individual.mFitness.isValid():
+	# Reduce the tree as one symbolic expression
 	lSymExpr = toolbox.evaluateExpr(individual[0])
+	# Transform the symbolic expression in a callable function
 	lFuncExpr = sympy.lambdify(terms,lSymExpr)
 	lDiff = 0
+	# Evaluate the sum of squared difference between the expression
+	# and the real function : x**2 + x + 1
 	for x in xrange(-1000,1000):
 	    x = x/1000.
 	    lDiff += (lFuncExpr(x)-(x**2+x+1))**2
