@@ -110,6 +110,27 @@ def onePointCx(indOne, indTwo):
     lChild2.mFitness.setInvalid()
     return lChild1, lChild2
 
+def onePointCxGP(indOne, indTwo):
+    def chooseSubTree(expr1, expr2):
+	try:
+	    index = random.randint(1,min([len(expr1), len(expr2)])-1)
+	    if random.random() < 0.5:
+		lRetIndex, lSub1, lSub2 = chooseSubTree(expr1[index], expr2[index])
+		if lRetIndex is not None:
+		    return lRetIndex, lSub1, lSub2
+	    return index, expr1, expr2
+	except:
+	    return None, None, None
+
+    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
+    treeIndex = random.randint(0, min(len(lChild1),len(lChild2))-1)
+    index, lSub1, lSub2 = chooseSubTree(lChild1[treeIndex], lChild2[treeIndex])
+    lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
+    lChild1.mFitness.setInvalid()
+    lChild2.mFitness.setInvalid()
+    return lChild1, lChild2
+    
+
 def pmCx(indOne, indTwo):
     '''Execute a partialy matched crossover on the input indviduals. The two
     childrens produced are returned as a tuple, the two parents are left intact.
@@ -244,6 +265,26 @@ def flipBitMut(individual, flipIndxPb):
 
     return lIndividual
 
+def subTreeMut(individual, treeGenerator, depthRange):
+    def chooseSubTree(expr):
+	try:
+	    index = random.randint(1,len(expr)-1)
+	    if random.random() < 0.5:
+		ret_val, sub_tree = chooseSubTree(expr[index])
+		if ret_val is not None:
+		    return ret_val, sub_tree
+	    return index, expr
+	except:
+	    return None, None
+
+    lIndividual = copy.copy(individual)
+    for tree in lIndividual:
+	index, sub = chooseSubTree(tree)
+	subExprGen = treeGenerator(maxDepth=random.randint(depthRange[0],depthRange[1]))
+	sub[index] = subExprGen.next()
+
+    lIndividual.mFitness.setInvalid()
+    return lIndividual
 
 ######################################
 # Selections                         #
@@ -302,18 +343,18 @@ def tournSel(individuals, n, tournSize):
 # Evaluation                         #
 ######################################
 
-def evaluateExpr(expr):
+def evaluateExpr(expr, funcDict):
     try:
-        func = expr[0]
+        func = funcDict[expr[0]]
         try:
-            return func(*[evaluateExpr(value) for value in expr[1:]])
+            return func(*[evaluateExpr(value, funcDict) for value in expr[1:]])
         except:
             return func(*expr[1:])
     except:
-	try:
-	    return expr()
-	except:
-	    return expr
+#	try:
+#	    return expr.__call__()
+#	except:
+        return expr
 
 ######################################
 # Migrations                         #
