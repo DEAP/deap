@@ -225,7 +225,7 @@ class Individual(list):
         lCopy = self.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
         lCopy.mFitness = copy.copy(self.mFitness)
-        lCopy[:] = map(copy.copy, self)
+        lCopy[:] = map(copy.deepcopy, self)
         return lCopy
 
     def __repr__(self):
