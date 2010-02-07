@@ -17,6 +17,7 @@ import sympy
 
 import eap.base as base
 import eap.toolbox as toolbox
+import eap.algorithms as algorithms
 
 # define primitives
 def add(left, right):
@@ -30,7 +31,9 @@ def div(left, right):
 
 # add primitives and closures to their respective list
 lFuncs = [add, sub, mul]
-lTerms = [sympy.Symbol('x')]
+lSymbols = [sympy.Symbol('x')]
+lTerms = [sympy.Rational(1)]
+lTerms.extend(lSymbols)
 
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(-1.0,))
@@ -38,7 +41,7 @@ lTools.register('expression', base.expressionGenerator, funcSet=lFuncs,
 		termSet=lTerms, maxDepth=2)
 lTools.register('individual', base.Individual, size=1,
                 fitness=lTools.fitness, generator=lTools.expression())
-lTools.register('population', base.Population, size=3,
+lTools.register('population', base.Population, size=100,
                 generator=lTools.individual)
 
 def evalSymbReg(individual, terms):
@@ -50,26 +53,19 @@ def evalSymbReg(individual, terms):
 	lDiff = 0
 	# Evaluate the sum of squared difference between the expression
 	# and the real function : x**2 + x + 1
-	for x in xrange(-1000,1000):
-	    x = x/1000.
-	    lDiff += (lFuncExpr(x)-(x**2+x+1))**2
+	for x in xrange(-100,100):
+	    x = x/100.
+	    lDiff += abs(lFuncExpr(x)-(x**2+x+1))
         individual.mFitness.append(lDiff)
 
-lTools.register('evaluate', evalSymbReg, terms=lTerms)
+lTools.register('evaluate', evalSymbReg, terms=lSymbols)
 lTools.register('select', toolbox.tournSel, tournSize=3)
-#lTools.register('crossover', toolbox.twoPointsCx)
-#lTools.register('mutate', toolbox.flipBitMut, flipIndxPb=0.05)
-
+lTools.register('crossover', toolbox.onePointCxGP)
+lTools.register('mutate', toolbox.subTreeMut, treeGenerator=lTools.expression, 
+		depthRange=(0,1))
 
 lPop = lTools.population()
-map(lTools.evaluate, lPop)
-
-lFitnesses = [lInd.mFitness[0] for lInd in lPop]
-print 'Fitness'
-print '\tMin Fitness :', min(lFitnesses)
-print '\tMax Fitness :', max(lFitnesses)
-print '\tMean Fitness :', sum(lFitnesses)/len(lFitnesses)
-print 'Population'
+algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
 for ind in lPop:
-    print '\t', toolbox.evaluateExpr(ind[0]), ' : ', ind.mFitness
-
+    if ind.mFitness[0] < 1.:
+	print toolbox.evaluateExpr(ind[0])
