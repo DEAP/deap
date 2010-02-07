@@ -110,7 +110,6 @@ def onePointCx(indOne, indTwo):
     lChild2.mFitness.setInvalid()
     return lChild1, lChild2
 
-
 def pmCx(indOne, indTwo):
     '''Execute a partialy matched crossover on the input indviduals. The two
     childrens produced are returned as a tuple, the two parents are left intact.
@@ -311,7 +310,10 @@ def evaluateExpr(expr):
         except:
             return func(*expr[1:])
     except:
-        return expr
+	try:
+	    return expr()
+	except:
+	    return expr
 
 ######################################
 # Migrations                         #
