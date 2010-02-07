@@ -123,9 +123,9 @@ def onePointCxGP(indOne, indTwo):
 	    return None, None, None
 
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-    treeIndex = random.randint(0, min(len(lChild1),len(lChild2))-1)
-    index, lSub1, lSub2 = chooseSubTree(lChild1[treeIndex], lChild2[treeIndex])
-    lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
+    for tree1, tree2 in zip(lChild1, lChild2):
+	index, lSub1, lSub2 = chooseSubTree(tree1, tree2)
+	lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
     lChild1.mFitness.setInvalid()
     lChild2.mFitness.setInvalid()
     return lChild1, lChild2
@@ -345,13 +345,16 @@ def tournSel(individuals, n, tournSize):
 
 def evaluateExpr(expr):
     try:
-        func = expr[0]
+	func = expr[0]
         try:
             return func(*[evaluateExpr(value) for value in expr[1:]])
         except:
             return func(*expr[1:])
-    except:
-	return expr
+    except :
+	try:
+	    return expr()
+	except:
+	    return expr
 
 ######################################
 # Migrations                         #
