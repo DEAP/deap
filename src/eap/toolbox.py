@@ -343,18 +343,15 @@ def tournSel(individuals, n, tournSize):
 # Evaluation                         #
 ######################################
 
-def evaluateExpr(expr, funcDict):
+def evaluateExpr(expr):
     try:
-        func = funcDict[expr[0]]
+        func = expr[0]
         try:
-            return func(*[evaluateExpr(value, funcDict) for value in expr[1:]])
+            return func(*[evaluateExpr(value) for value in expr[1:]])
         except:
             return func(*expr[1:])
     except:
-#	try:
-#	    return expr.__call__()
-#	except:
-        return expr
+	return expr
 
 ######################################
 # Migrations                         #
