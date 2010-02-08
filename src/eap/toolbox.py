@@ -304,75 +304,57 @@ def tournSel(individuals, n, tournSize):
 # Migrations                         #
 ######################################
 
-def ringMig(populations, n=1, selection=None, replacement=None, migArray=None,
-            selKArgs={}, replKArgs={}):
-    '''Perform a ring migration between the ``populations``.'''
-    # TODO: Check if the migration is compliant to the new selection sheme
-    if selection is None:
-        selection = self.__bestSel
-    if migArray is None:
-        migArray = []
-        for i in range(len(population)):
-            migArray.append((i + 1) % (len(population)))
-    print migArray
-    lImmigrantsIndx = [[] for i in range(len(migArray))]
-    lEmigrantsIndx = [[] for i in range(len(migArray))]
-    lMigBuf = []
-    for lFromDeme, lToDeme in enumerate(migArray):
-        lEmigrantsIndx[lFromDeme].extend(selection(population[lFromDeme], n=n,
-                                         **selKArgs))
+def ringMig(populations, n, selection, replacement=None, migrationArray=None,
+            selKArgs=None, replKArgs=None):
+    '''Perform a ring migration between the ``populations``. The migration first
+    select *n* emmigrants from each population using the specified *selection*
+    operator and then replace *n* individuals from the associated population in
+    the *migrationArray* by themmigrants. If no *replacement*
+    operator is specified, the immigrants will replace the emmigrants of the
+    population, otherwise, the immigrants will replace the individuals selected
+    by the *replacement* operator. The migration array if provided, shall
+    contain each population's index once and only once. If no migration array
+    is provided, it defaults to a serial ring migration (1-2-...-n-1). You may
+    pass keyworded arguments to the two selection operators by giving a
+    dictionary to *selKArgs* and *replKArds*.
+    '''
+    if migrationArray is None:
+        migrationArray = [(i + 1) % len(populations) for i in xrange(len(populations))]
+    else:
+        for i in xrange(len(migrationArray)):
+            try:
+                migrationArray.index(i)
+            except:
+                raise ValueError, 'The migration array shall contain each population once and only once.'
+
+    lImmigrants = [[] for i in xrange(len(migrationArray))]
+    lEmigrants = [[] for i in xrange(len(migrationArray))]
+    if selKArgs is None:
+        selKArgs = {}
+    if replKArgs is None:
+        replKArgs = {}
+
+    for lFromDeme in xrange(len(migrationArray)):
+        lEmigrants[lFromDeme].extend(selection(populations[lFromDeme], n=n,
+                                     **selKArgs))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
-            lImmigrantsIndx[lFromDeme] = lEmigrantsIndx[lFromDeme]
+            lImmigrants[lFromDeme] = lEmigrants[lFromDeme]
         else:
             # Else select those who will be replaced
-            lImmigrantsIndx[lFromDeme].extend(replacement(population[lFromDeme],
-                                              n=n, **replKArgs))
+            lImmigrants[lFromDeme].extend(replacement(populations[lFromDeme],
+                                          n=n, **replKArgs))
 
-    # Assing a temporary buffer to contain the emigrants of the first deme will
-    # be usefull if the same indexes are choosen as immigrant indexes
-    for lIndx in lEmigrantsIndx[0]:
-        lMigBuf.append(deepcopy(population[0][lIndx]))
+    lMigBuf = lEmigrants[0]
+    for lFromDeme, lToDeme in enumerate(migrationArray[1:]):
+        lFromDeme += 1  # Enumerate starts at 0
 
-    for lFromDeme in range(1, len(migArray)):
-        lToDeme = migArray[lFromDeme]
-        for i, lIndx in enumerate(lEmigrantsIndx[lFromDeme]):
-            population[lToDeme][lImmigrantsIndx[lToDeme][i]] = \
-                      population[lFromDeme][lIndx]
+        for i, lImmigrant in enumerate(lImmigrants[lToDeme]):
+            lIndex = populations[lToDeme].index(lImmigrant)
+            populations[lToDeme][lIndex] = lEmigrants[lFromDeme][i]
 
-    lToDeme = migArray[0]
-    for i in range(len(lEmigrantsIndx[0])):
-        population[lToDeme][lImmigrantsIndx[lToDeme][i]] = lMigBuf[i]
+    lToDeme = migrationArray[0]
+    for i, lImmigrant in enumerate(lImmigrants[lToDeme]):
+        lIndex = populations[lToDeme].index(lImmigrant)
+        populations[lToDeme][lIndex] = lMigBuf[i]
 
-
-#class SimpleGAToolbox(EvolutionToolbox):
-#    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
-#    initialized with :meth:`mate` that apply a two points crossover with method
-#    :meth:`eap.operators.twoPointsCx`, :meth:`mutate` that apply a gaussian
-#    mutation with method :meth:`eap.operators.gaussMut` and :meth:`select` that
-#    select individuals using a tournament with method
-#    :meth:`eap.operators.tournSel`.
-#    '''
-#
-#    def __init__(self):
-#        self.register('mate', operators.twoPointsCx)
-#        self.register('mutate', operators.gaussMut)
-#        self.register('select', operators.tournSel)
-#
-#
-#class IndicesGAToolbox(EvolutionToolbox):
-#    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
-#    initialized with :meth:`mate` that apply a partialy matched crossover with
-#    method :meth:`eap.operators.pmxCx`, :meth:`mutate` that apply a shuffle
-#    indices mutation with method :meth:`eap.operators.shuffleIndxMut` and
-#    :meth:`select` that select individuals using a tournament with method
-#    :meth:`eap.operators.tournSel`.
-#
-#    .. versionadded:: 0.2.0a
-#       The toolbox for indice representation has been added for convenience.
-#    '''
-#
-#    def __init__(self):
-#        self.register('mate', operators.pmxCx)
-#        self.register('mutate', operators.shuffleIndxMut)
-#        self.register('select', operators.tournSel)
