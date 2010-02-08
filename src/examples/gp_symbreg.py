@@ -53,10 +53,10 @@ lTools.register('population', base.Population, size=100,
 def evalSymbReg(individual, symbols):
     if not individual.mFitness.isValid():
 	for expr in individual:
-	    # Reduce the tree as one symbolic expression
-	    lSymExpr = sympy.sympify(toolbox.evaluateExpr(expr))
+	    # Simplify the expression by collecting the terms
+	    lSymExpr = sympy.collect(toolbox.evaluateExpr(expr), lSymbols)
 	    # Transform the symbolic expression in a callable function
-	    lFuncExpr = sympy.lambdify(symbols,lSymExpr)
+	    lFuncExpr = sympy.lambdify(lSymbols, lSymExpr)
 	    lDiff = 0
 	    # Evaluate the sum of squared difference between the expression
 	    # and the real function : x**4 + x**3 + x**2 + x + 1
@@ -73,3 +73,8 @@ lTools.register('mutate', toolbox.subTreeMut, treeGenerator=lTools.expression,
 
 lPop = lTools.population()
 algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
+
+# Select the best individual of the last generation and print its expression.
+lBest = toolbox.bestSel(lPop,1)[0]
+print 'Best individual : ', sympy.collect(toolbox.evaluateExpr(lBest[0]), lSymbols)
+
