@@ -40,13 +40,6 @@ import operator
 import random
 import sys
 
-#class Population(object):
-#    '''A population is an empty :class:`~eap.observable.Observable` object. The
-#    population object is more of a base class than an intanciable class
-#    as it is not a container.'''
-#    def __init__(self):
-#        pass
-
 
 class Population(list):
     '''A population inherits from the python's base type :class:`list` for its
@@ -134,30 +127,6 @@ class PopulationMatrix(Population):
         return self[row * self.mNumCols + column]
 
 
-#class Individual(object):
-#    '''An individual is an :class:`~eap.observable.Observable` object
-#    associated with a fitness. As the :class:`Population`, the basic
-#    individual is not a container of any type. If a *fitness* is passed
-#    to a individual then it may be both; an object generator that when called
-#    :meth:`fitness` returns an object or an already constructed object. In both
-#    cases the object will be stored as is in the :attr:`mFitness` attribute of
-#    the individual. This allows both following methods to be used. ::
-#
-#        >>> def fitness():
-#        ...    return 'fit-A'
-#        ...
-#        >>> Individual(fitness=fitness)
-#        >>> Individual(fitness=fitness())
-#
-#    '''
-#    def __init__(self, fitness=None):
-#        if fitness is not None:
-#            try:        # For conveniance, the user may pass a fitness object
-#                self.mFitness = fitness()
-#            except TypeError:
-#                self.mFitness = fitness
-
-
 class Individual(list):
     '''An individual inherits from  the python's base type :class:`list` for its
     container properties. There is two way of initialising a list individual;
@@ -232,16 +201,6 @@ class Individual(list):
         return str(list(self)) + ' : ' + str(self.mFitness)
 
 
-#class IndicesIndividual(Individual, list):
-#    """
-#    """
-#    def __init__(self, size, fitness):
-#        Individual.__init__(self, fitness)
-#        for i in xrange(size):
-#            self.append(i)
-#        random.shuffle(self)
-
-
 class Fitness(array.array):
     '''The fitness is a measure of quality of a solution. The fitness
     inheritates from a python :class:`array.array`, so the number of objectives
@@ -294,7 +253,7 @@ class Fitness(array.array):
         until the end of the comparaison.
         '''
         lNotEqual = False
-         # Pad the weights with the last value
+        # Pad the weights with the last value
         lSelfWeights = itertools.chain(self.mWeights,
                                        itertools.repeat(self.mWeights[-1]))
         lOtherWeights = itertools.chain(other.mWeights,
@@ -387,7 +346,7 @@ def realGenerator(min=0.0, max=1.0):
     This function use the :meth:`uniform` method from the python base
     :mod:`random` module.
     '''
-    while 1:
+    while True:
         yield random.uniform(min, max)
 
 
@@ -398,7 +357,7 @@ def integerGenerator(min=0, max=sys.maxint):
     This function use the :meth:`randint` method from the python base
     :mod:`random` module.
     '''
-    while 1:
+    while True:
         yield random.randint(min, max)
 
 
@@ -416,7 +375,7 @@ def indiceGenerator(max):
     '''
     lIndices = []
     lReset = False
-    while 1:
+    while True:
         if len(lIndices) == 0 or lReset is True:
             lReset = False
             lIndices = range(max)
@@ -430,6 +389,6 @@ def booleanGenerator():
     This function use the :meth:`choice` method from the python base
     :mod:`random` module.
     '''
-    while 1:
+    while True:
         yield random.choice([False, True])
 
