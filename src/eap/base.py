@@ -225,11 +225,95 @@ class Individual(list):
         lCopy = self.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
         lCopy.mFitness = copy.copy(self.mFitness)
-        lCopy[:] = map(copy.deepcopy, self)
+        lCopy[:] = map(copy.copy, self)
         return lCopy
 
     def __repr__(self):
         return str(list(self)) + ' : ' + str(self.mFitness)
+
+class IndividualTree(list):
+    
+    def __init__(self, generator=None, fitness=None):
+        if fitness is not None:
+            try:        # For convenience, the user may pass a fitness object
+                self.mFitness = fitness()
+            except TypeError:
+                self.mFitness = fitness
+            self[:] = generator.next()
+
+    @staticmethod
+    def count(tree):
+        value = 0
+        for node in tree:
+            try:
+                value += count(node)
+            except:
+                value += 1
+        return value
+
+    @staticmethod
+    def evaluateExpr(expr):
+        try:
+            func = expr[0]
+            try:
+                return func(*[IndividualTree.evaluateExpr(value) for value in expr[1:]])
+            except:
+                return func(*expr[1:])
+        except :
+            try:
+                return expr()
+            except:
+                return expr
+
+    def getSubTree(self, index):
+        def __getSubTree(tree, index):
+            total = 0
+            if index == 0:
+                return tree
+            for child in tree:
+                if total == index:
+                   return child
+                try:
+                    nbrChild = IndividualTree.count(child)
+                    if nbrChild + total > index:
+                        return __getNode(child, index-total)
+                    else:
+                        total += nbrChild
+                except:
+                    total += 1
+        return __getSubTree(self, index)
+
+    def setSubTree(self, index, subTree):
+        def __setSubTree(tree, index, subTree):
+            total = 0
+            for i, child in enumerate(tree):
+                if total == index:
+                    tree[i] = copy.copy(subTree)
+                try:
+                    nbrChild = IndividualTree.count(child)
+                    if nbrChild + total > index:
+                        __setSubTree(child, index-total, subTree)
+                    else:
+                        total += nbrChild
+                except:
+                    total += 1
+        __setSubTree(self, index, subTree)
+
+    def __len__(self):
+        return IndividualTree.count(self)
+
+    def __copy__(self):
+        lCopy = self.__new__(self.__class__)
+        lCopy.__dict__.update(self.__dict__)
+        lCopy.mFitness = copy.copy(self.mFitness)
+        lCopy[:] = map(copy.deepcopy, self)
+        return lCopy
+
+    def evaluate(self):
+        return IndividualTree.evaluateExpr(self)
+
+    def __repr__(self):
+        return str(self.evaluate()) + ' : ' + str(self.mFitness)
 
 #class IndicesIndividual(Individual, list):
 #    """
@@ -428,12 +512,19 @@ def booleanGenerator():
 def expressionGenerator(funcSet, termSet, maxDepth):
     def arity(func):
         return func.func_code.co_argcount
-    while True:
+    def __expressionGenerator(funcSet, termSet, maxDepth):
 	if maxDepth == 0 or random.random() < len(termSet)/(len(termSet)+len(funcSet)):
 	    expr = random.choice(termSet)
 	else:
 	    lFunc = random.choice(funcSet)
-	    lArgs = [expressionGenerator(funcSet, termSet, maxDepth-1).next() for i in xrange(arity(lFunc))]
+	    lArgs = [__expressionGenerator(funcSet, termSet, maxDepth-1) for i in xrange(arity(lFunc))]
 	    expr = [lFunc]
 	    expr.extend(lArgs)
-	yield expr
+	return expr
+    while True:
+        lMaxDepth = maxDepth
+        try:
+             lMaxDepth = random.randint(maxDepth[0], maxDepth[1])
+        except TypeError:
+            pass
+        yield __expressionGenerator(funcSet, termSet, lMaxDepth)
