@@ -22,7 +22,7 @@ Crossover
 
 .. autofunction:: onePointCx
 
-.. autofunction:: pmxCx
+.. autofunction:: pmCx
 
 Mutation
 --------
@@ -47,5 +47,5 @@ Selection
 Migration
 ---------
 
-Migration is not fully implemented yet.
+.. autofunction:: ringMig
 
