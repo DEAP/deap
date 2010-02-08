@@ -46,7 +46,7 @@ class Toolbox(object):
 
 
 ######################################
-# Crossovers                         #
+# GA Crossovers                      #
 ######################################
 
 def twoPointsCx(indOne, indTwo):
@@ -110,27 +110,6 @@ def onePointCx(indOne, indTwo):
     lChild2.mFitness.setInvalid()
     return lChild1, lChild2
 
-def onePointCxGP(indOne, indTwo):
-    def chooseSubTree(expr1, expr2):
-	try:
-	    index = random.randint(1,min([len(expr1), len(expr2)])-1)
-	    if random.random() < 0.5:
-		lRetIndex, lSub1, lSub2 = chooseSubTree(expr1[index], expr2[index])
-		if lRetIndex is not None:
-		    return lRetIndex, lSub1, lSub2
-	    return index, expr1, expr2
-	except:
-	    return None, None, None
-
-    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-    for tree1, tree2 in zip(lChild1, lChild2):
-	index, lSub1, lSub2 = chooseSubTree(tree1, tree2)
-	lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
-    return lChild1, lChild2
-    
-
 def pmCx(indOne, indTwo):
     '''Execute a partialy matched crossover on the input indviduals. The two
     childrens produced are returned as a tuple, the two parents are left intact.
@@ -190,7 +169,7 @@ def pmCx(indOne, indTwo):
 
 
 ######################################
-# Mutations                          #
+# GA Mutations                       #
 ######################################
 
 def gaussMut(individual, mu, sigma, mutIndxPb):
@@ -265,6 +244,46 @@ def flipBitMut(individual, flipIndxPb):
 
     return lIndividual
 
+######################################
+# GP Crossovers                      #
+######################################
+
+def onePtCxGP(indOne, indTwo):
+    def chooseSubTree(expr1, expr2):
+	try:
+	    index = random.randint(1,min([len(expr1), len(expr2)])-1)
+	    if random.random() < 0.5:
+		lRetIndex, lSub1, lSub2 = chooseSubTree(expr1[index], expr2[index])
+		if lRetIndex is not None:
+		    return lRetIndex, lSub1, lSub2
+	    return index, expr1, expr2
+	except:
+	    return None, None, None
+
+    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
+    index, lSub1, lSub2 = chooseSubTree(lChild1, lChild2)
+    lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
+    lChild1.mFitness.setInvalid()
+    lChild2.mFitness.setInvalid()
+    return lChild1, lChild2
+
+def uniformOnePtCxGP(indOne, indTwo):
+
+    index = random.randint(1,min([len(indOne), len(indTwo)])-1)
+
+    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
+
+    lChild1.setSubTree(indTwo.getSubTree(index),index)
+    lChild2.setSubTree(indOne.getSubTree(index),index)
+
+    lChild1.mFitness.setInvalid()
+    lChild2.mFitness.setInvalid()
+    return lChild1, lChild2
+
+######################################
+# GP Mutations                       #
+######################################
+
 def subTreeMut(individual, treeGenerator, depthRange):
     def chooseSubTree(expr):
 	try:
@@ -278,13 +297,22 @@ def subTreeMut(individual, treeGenerator, depthRange):
 	    return None, None
 
     lIndividual = copy.copy(individual)
-    for tree in lIndividual:
-	index, sub = chooseSubTree(tree)
-	subExprGen = treeGenerator(maxDepth=random.randint(depthRange[0],depthRange[1]))
-	sub[index] = subExprGen.next()
+    index, sub = chooseSubTree(lIndividual)
+    subExprGen = treeGenerator(maxDepth=depthRange)
+    sub[index] = subExprGen.next()
 
     lIndividual.mFitness.setInvalid()
     return lIndividual
+
+def uniformTreeMut(individual, treeGenerator, depthRange):
+
+    lIndividual = copy.copy(individual)
+    index = random.randint(1, len(lIndividual)-1)
+    subExprGen = treeGenerator(maxDepth=depthRange)
+    lIndividual.setSubTree(index, subExprGen.next())
+    lIndividual.mFitness.setInvalid()
+    return lIndividual
+
 
 ######################################
 # Selections                         #
@@ -338,23 +366,6 @@ def tournSel(individuals, n, tournSize):
                 lChosenList[i] = lAspirant
 
     return lChosenList
-
-######################################
-# Evaluation                         #
-######################################
-
-def evaluateExpr(expr):
-    try:
-	func = expr[0]
-        try:
-            return func(*[evaluateExpr(value) for value in expr[1:]])
-        except:
-            return func(*expr[1:])
-    except :
-	try:
-	    return expr()
-	except:
-	    return expr
 
 ######################################
 # Migrations                         #
