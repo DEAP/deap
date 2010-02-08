@@ -239,7 +239,7 @@ class IndividualTree(list):
                 self.mFitness = fitness()
             except TypeError:
                 self.mFitness = fitness
-            self[:] = generator.next()
+        self[:] = generator.next()
 
     @staticmethod
     def count(tree):
@@ -266,38 +266,34 @@ class IndividualTree(list):
                 return expr
 
     def getSubTree(self, index):
-        def __getSubTree(tree, index):
-            total = 0
-            if index == 0:
-                return tree
-            for child in tree:
-                if total == index:
-                   return child
-                try:
-                    nbrChild = IndividualTree.count(child)
-                    if nbrChild + total > index:
-                        return __getNode(child, index-total)
-                    else:
-                        total += nbrChild
-                except:
-                    total += 1
-        return __getSubTree(self, index)
+        total = 0
+        if index == 0:
+            return self
+        for child in self:
+            if total == index:
+               return child
+            try:
+                nbrChild = IndividualTree.count(child)
+                if nbrChild + total > index:
+                    return getSubTree(child, index-total)
+                else:
+                    total += nbrChild
+            except:
+                total += 1
 
     def setSubTree(self, index, subTree):
-        def __setSubTree(tree, index, subTree):
-            total = 0
-            for i, child in enumerate(tree):
-                if total == index:
-                    tree[i] = copy.copy(subTree)
-                try:
-                    nbrChild = IndividualTree.count(child)
-                    if nbrChild + total > index:
-                        __setSubTree(child, index-total, subTree)
-                    else:
-                        total += nbrChild
-                except:
-                    total += 1
-        __setSubTree(self, index, subTree)
+        total = 0
+        for i, child in enumerate(self):
+            if total == index:
+                self[i] = copy.copy(subTree)
+            try:
+                nbrChild = IndividualTree.count(child)
+                if nbrChild + total > index:
+                    setSubTree(child, index-total, subTree)
+                else:
+                    total += nbrChild
+            except:
+                total += 1
 
     def __len__(self):
         return IndividualTree.count(self)
