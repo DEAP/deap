@@ -49,34 +49,33 @@ lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(-1.0,))
 lTools.register('expression', base.expressionGenerator, funcSet=lFuncs,
 		termSet=lTerms, maxDepth=3)
-lTools.register('individual', base.Individual, size=1,
+lTools.register('individual', base.IndividualTree,
                 fitness=lTools.fitness, generator=lTools.expression())
 lTools.register('population', base.Population, size=100,
                 generator=lTools.individual)
 
 def evalSymbReg(individual, symbols):
     if not individual.mFitness.isValid():
-	for expr in individual:
-	    # Reduce the tree as one symbolic expression
-	    lSymExpr = sympy.sympify(toolbox.evaluateExpr(expr))
-	    # Transform the symbolic expression in a callable function
-	    lFuncExpr = sympy.lambdify(symbols,lSymExpr)
-	    lDiff = 0
-	    # Evaluate the sum of squared difference between the expression
-	    # and the real function : x**4 + x**3 + x**2 + x + 1
-	    for x in xrange(-100,100):
-		x = x/100.
-		lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x + 1))**2
-	    individual.mFitness.append(lDiff)
+        expr = individual.evaluate()
+        #lSimplExpr = sympy.collect(expr, symbols)
+        # Transform the symbolic expression in a callable function
+        lFuncExpr = sympy.lambdify(symbols,expr)
+        lDiff = 0
+        # Evaluate the sum of squared difference between the expression
+        # and the real function : x**4 + x**3 + x**2 + x + 1
+        for x in xrange(-100,100):
+            x = x/100.
+            lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x + 1))**2
+        individual.mFitness.append(lDiff)
 
 lTools.register('evaluate', evalSymbReg, symbols=lSymbols)
 lTools.register('select', toolbox.tournSel, tournSize=3)
-lTools.register('crossover', toolbox.onePointCxGP)
-lTools.register('mutate', toolbox.subTreeMut, treeGenerator=lTools.expression, 
-		depthRange=(0,1))
+lTools.register('crossover', toolbox.uniformOnePtCxGP)
+lTools.register('mutate', toolbox.uniformTreeMut, treeGenerator=lTools.expression,
+		depthRange=(0,2))
 
 lPop = lTools.population()
 algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
-print lPop[0]
-print toolbox.evaluateExpr(lPop[0][0])
-print sympy.collect(sympy.sympify(toolbox.evaluateExpr(lPop[0][0])), sympy.Symbol('x'))
+
+lBest = toolbox.bestSel(lPop,1)[0]
+print 'Best individual : ', sympy.sympify(lBest.evaluate()), lBest.mFitness
