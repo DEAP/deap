@@ -28,6 +28,7 @@ module.
 
 import copy
 from functools import partial
+import math
 import random
 
 class Toolbox(object):
@@ -169,6 +170,30 @@ def pmCx(indOne, indTwo):
     return lChild1, lChild2
 
 
+def blendESCx(indOne, indTwo, alpha):
+    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
+    lLenght = min(len(lChild1), len(lChild2))
+    for i in xrange(lLenght):
+        lU_xi = random.random()
+        lGamma_xi = ((1.0 + 2.0 * alpha) * lU_xi) - alpha
+        lU_si = random.random()
+        lGamma_si = ((1.0 + 2.0 * alpha) * lU_si) - alpha
+        lX1_i = lChild1[i][0]
+        lX2_i = lChild2[i][0]
+        lS1_i = lChild1[i][1]
+        lS2_i = lChild2[i][1]
+
+        lChild1[i][0] = (1.0 - lGamma_xi) * lX1_i + lGamma_xi * lX2_i
+        lChild2[i][0] = (1.0 - lGamma_xi) * lX2_i + lGamma_xi * lX1_i
+        # TODO : add some constraint checking !
+        lChild1[i][1] = (1.0 - lGamma_si) * lS1_i + lGamma_si * lS2_i
+        lChild2[i][1] = (1.0 - lGamma_si) * lS2_i + lGamma_si * lS1_i
+    
+    lChild1.mFitness.setInvalid()
+    lChild2.mFitness.setInvalid()
+    return lChild1, lChild2
+
+
 ######################################
 # Mutations                          #
 ######################################
@@ -191,12 +216,53 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
     lIndividual = copy.copy(individual)
     for i in xrange(len(lIndividual)):
         if random.random() < mutIndxPb:
-            lIndividual[i] = lIndividual[i] + random.gauss(mu, sigma)
+            lIndividual[i] += random.gauss(mu, sigma)
             # TODO : add some constraint checking !!
             lMutated = True
     if lMutated:
         lIndividual.mFitness.setInvalid()
     return lIndividual
+
+
+def gaussESMut(individual, mutIndxPb):
+    '''This function applies a gaussian mutation on the input evolution strategy
+    individual and
+    returns the mutant. The *individual* is left intact and the mutant is an
+    independant copy. This mutation expects an iterable individual composed of
+    paired [value, strategy] attributes. The *mutIndxPb* argument is the
+    probability of each attribute to be mutated.
+
+    .. todo::
+       Add a parameter acting as constraints for the real valued attribute so
+       a min, max and interval may be used.
+
+    This function use the :meth:`random` and :meth:`gauss` methods from the
+    python base :mod:`random` module.
+    '''
+    lMutated = False
+    lIndividual = copy.copy(individual)
+    lLenght = len(lIndividual)
+    lT = 1.0 / math.sqrt(2.0 * math.sqrt(lLenght))
+    lTPrime = 1.0 / math.sqrt(2.0 * lLenght)
+    lN = random.gauss(0.0, 1.0)
+    # TODO : add some constraint checking !!
+    lMinStrategy = 0.01
+    for i in xrange(len(lIndividual)):
+        if random.random() < mutIndxPb:
+            lNi = random.gauss(0.0, 1.0)
+
+            lIndividual[i][1] *= math.exp(lTPrime * lN + lT * lNi)
+            if lIndividual[i][1] < lMinStrategy:
+                lIndividual[i][1] = lMinStrategy
+
+
+            lIndividual[i][0] += lIndividual[i][1] * lNi
+            # TODO : add some constraint checking !!
+            lMutated = True
+    if lMutated:
+        lIndividual.mFitness.setInvalid()
+    return lIndividual
+
 
 def shuffleIndxMut(individual, shuffleIndxPb):
     '''Shuffle the attributes of the input individual and return the mutant.
