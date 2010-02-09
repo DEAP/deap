@@ -14,7 +14,12 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import sympy
+import sys
+import os
 import random
+import math
+
+sys.path.append(os.path.abspath('..'))
 
 import eap.base as base
 import eap.toolbox as toolbox
@@ -23,27 +28,43 @@ import eap.algorithms as algorithms
 # define primitives
 def add(left, right):
 #    return "({0}+{1})".format(left,right) # compatible with Python 2.6.1 and Up
-     return "(%s + %s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
+    return "(%s + %s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
 def sub(left, right):
-#    return "({0}-{1})".format(left,right) # compatible with Python 2.6.1 and Up
-     return "(%s - %s)" % (str(left), str(right))  # compatible with Python 2.3 to 2.5.2
+#   return "({0}-{1})".format(left,right) # compatible with Python 2.6.1 and Up
+    return "(%s - %s)" % (str(left), str(right))  # compatible with Python 2.3 to 2.5.2
 def mul(left, right):
 #    return "({0}*{1})".format(left,right) # compatible with Python 2.6.1 and Up
-     return "(%s * %s)" % (str(left), str(right))  # compatible with Python 2.3 to 2.5.2
+    return "(%s * %s)" % (str(left), str(right))  # compatible with Python 2.3 to 2.5.2
 def div(left, right):
 #    return "({0}/{1})".format(left,right) # compatible with Python 2.6.1 and Up
-     return "(%s / %s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
+    return "safeDiv(%s,%s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
+def sin(left):
+#    return "sin({0})".format(left,right) # compatible with Python 2.6.1 and Up
+    return "sin(%s)" % str(left) # compatible with Python 2.3 to 2.5.2
+def cos(left):
+#    return "cos({0})".format(left,right) # compatible with Python 2.6.1 and Up
+    return "cos(%s)" % str(left) # compatible with Python 2.3 to 2.5.2
+
+def safeDiv(left, right):
+    try:
+        return left / right
+    except ZeroDivisionError:
+        return 0
+
 def randomCte():
-     return repr(random.randint(-1,1))
+    return repr(random.randint(-1,1))
 
 # add primitives and closures to their respective list
-lFuncs = [add, sub, mul]
+lFuncs = [add, sub, mul, div, sin, cos]
 # defines symbols that will be used in the expression
 lSymbols = ['x']
 # define terminal set
-lTerms = ['1']
+lTerms = [1, randomCte]
 # add the symbols to the terminal set
 lTerms.extend(lSymbols)
+# Associate function name with function object. It is used by lambdify to call
+# that are not in the 
+lFuncDict = {'safeDiv' : safeDiv, 'sin' : math.sin, 'cos' : math.cos}
 
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(-1.0,))
@@ -54,21 +75,20 @@ lTools.register('individual', base.IndividualTree,
 lTools.register('population', base.Population, size=100,
                 generator=lTools.individual)
 
-def evalSymbReg(individual, symbols):
+def evalSymbReg(individual, symbols, funcDict):
     if not individual.mFitness.isValid():
         expr = individual.evaluate()
-        #lSimplExpr = sympy.collect(expr, symbols)
         # Transform the symbolic expression in a callable function
-        lFuncExpr = sympy.lambdify(symbols,expr)
+        lFuncExpr = sympy.lambdify(symbols, expr, funcDict)
         lDiff = 0
         # Evaluate the sum of squared difference between the expression
-        # and the real function : x**4 + x**3 + x**2 + x + 1
-        for x in xrange(-100,100):
-            x = x/100.
-            lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x + 1))**2
+        # and the real function : x**4 + x**3 + x**2 + x
+        for x in xrange(-10,10):
+            x = x/10.
+            lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x))**2
         individual.mFitness.append(lDiff)
 
-lTools.register('evaluate', evalSymbReg, symbols=lSymbols)
+lTools.register('evaluate', evalSymbReg, symbols=lSymbols, funcDict=lFuncDict)
 lTools.register('select', toolbox.tournSel, tournSize=3)
 lTools.register('crossover', toolbox.uniformOnePtCxGP)
 lTools.register('mutate', toolbox.uniformTreeMut, treeGenerator=lTools.expression,
