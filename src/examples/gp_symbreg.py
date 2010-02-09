@@ -15,6 +15,7 @@
 
 import sympy
 import random
+import math
 
 import eap.base as base
 import eap.toolbox as toolbox
@@ -22,13 +23,14 @@ import eap.algorithms as algorithms
 
 # define primitives
 def add(left, right):
-    return sympy.Add(left,right)
+    return left + right
 def sub(left, right):
-    return sympy.Add(left, sympy.Mul(right,sympy.Rational(-1)))
+    return left - right
 def mul(left, right):
-    return sympy.Mul(left, right)
-def div(left, right):
-    return sympy.Mul(left, sympy.Pow(right, sympy.Rational(-1)))
+    return left * right
+def rdiv(left, right):
+    return sympy.nsimplify(left/right)
+
 def randomCte():
     return random.randint(-1,1)
 
@@ -54,15 +56,18 @@ def evalSymbReg(individual, symbols):
     if not individual.mFitness.isValid():
         # Simplify the expression by collecting the terms
         expr = individual.evaluate()
-        lSymExpr = sympy.collect(expr, symbols)
         # Transform the symbolic expression in a callable function
-        lFuncExpr = sympy.lambdify(lSymbols, lSymExpr)
+        lFuncExpr = sympy.lambdify(symbols, expr)
         lDiff = 0
         # Evaluate the sum of squared difference between the expression
         # and the real function : x**4 + x**3 + x**2 + x + 1
         for x in xrange(-100,100):
             x = x/100.
-            lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x + 1))**2
+            try:
+                lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x + 1))**2
+            except ZeroDivisionError:
+                lDiff += ((x**4 + x**3 + x**2 + x + 1))**2
+
         individual.mFitness.append(lDiff)
 
 lTools.register('evaluate', evalSymbReg, symbols=lSymbols)
@@ -78,4 +83,6 @@ algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
 # Select the best individual of the last generation and print its expression.
 lBest = toolbox.bestSel(lPop,1)[0]
 print 'Best individual : ', lBest
+lFitnesses = [lInd.mFitness[0] for lInd in lPop]
+print lFitnesses
 
