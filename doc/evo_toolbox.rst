@@ -24,6 +24,10 @@ Crossover
 
 .. autofunction:: pmCx
 
+.. autofunction:: blendESCx
+
+   .. versionadded:: 0.3.1a
+
 Mutation
 --------
 
@@ -32,6 +36,10 @@ Mutation
 .. autofunction:: shuffleIndxMut
 
 .. autofunction:: flipBitMut
+
+.. autofunction:: gaussESMut
+
+   .. versionadded:: 0.3.1a
 
 Selection
 ---------
