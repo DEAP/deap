@@ -13,11 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''
+'''The modo of EAP is simplicity, and freedom. The design allows you to build
+your algorithms exactly how you need them to be by manipulating simple genetic 
+blocks.
 '''
 
-__author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
-__version__ = "0.2.2"
+__author__ = 'Francois-Michel De Rainville and Felix-Antoine Fortin'
+__version__ = '0.3'
+__revision__ = '0.3.1a'
 
 import base
 import algorithms
