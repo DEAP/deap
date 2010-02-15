@@ -487,7 +487,8 @@ def expressionGenerator(funcSet, termSet, maxDepth):
             expr = [lFunc]
             expr.extend(lArgs)
         return expr
- 	while True:
+
+    while True:
         lMaxDepth = maxDepth
         try:
              lMaxDepth = random.randint(maxDepth[0], maxDepth[1])
@@ -497,17 +498,6 @@ def expressionGenerator(funcSet, termSet, maxDepth):
 
 def esGenerator(min=0.0, max=1.0, strategy=1.0):
     '''A generator function to build paired [value, strategy] attributes.
-
-    This function use the :meth:`gauss` method from the python base
-    :mod:`random` module.
-    '''
-    while True:
-        lMidValue = (max - min) * 0.5
-        lValue = random.gauss(lMidValue, strategy)
-        if lValue < min:
-            lValue = min
-        elif lValue > max:
-  
 
     This function use the :meth:`gauss` method from the python base
     :mod:`random` module.
