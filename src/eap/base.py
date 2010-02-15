@@ -328,6 +328,9 @@ class Fitness(array.array):
     def __repr__(self):
         return str(list(self))
 
+    def __reduce__(self):
+        return (self.__class__, (self.mWeights,), self.__dict__, iter(self))
+
     def __copy__(self):
         lCopy = self.__new__(self.__class__)
         lCopy.__dict__.update(self.__dict__)
