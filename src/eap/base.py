@@ -260,10 +260,7 @@ class IndividualTree(list):
             except TypeError:
                 return func(*expr[1:])
         except TypeError:
-            try:
-                return expr()
-            except TypeError:
-                return expr
+            return expr
 
     def getSubTree(self, index):
         def __getSubTree(tree, index):
