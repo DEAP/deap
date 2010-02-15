@@ -15,7 +15,6 @@
 
 import sympy
 import random
-import math
 
 import eap.base as base
 import eap.toolbox as toolbox
@@ -80,9 +79,5 @@ lTools.register('mutate', toolbox.uniformTreeMut, treeGenerator=lTools.expressio
 lPop = lTools.population()
 algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
 
-# Select the best individual of the last generation and print its expression.
 lBest = toolbox.bestSel(lPop,1)[0]
-print 'Best individual : ', lBest
-lFitnesses = [lInd.mFitness[0] for lInd in lPop]
-print lFitnesses
-
+print 'Best individual : ', sympy.sympify(lBest.evaluate()), lBest.mFitness
