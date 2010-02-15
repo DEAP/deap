@@ -22,7 +22,7 @@ class IndividualArray(array.array):
 
     def __init__(self, typecode, size=0, generator=None, fitness=None):
         if fitness is not None:
-            try:        # For conveniance, the user may pass a fitness object
+            try:  # For convenience, the user may pass a fitness object
                 self.mFitness = fitness()
             except TypeError:
                 self.mFitness = fitness
@@ -38,3 +38,6 @@ class IndividualArray(array.array):
 
     def __repr__(self):
         return str(list(self)) + ': ' + str(self.mFitness)
+
+    def __reduce__(self):
+        return (self.__class__, (self.typecode,), self.__dict__, iter(self))
