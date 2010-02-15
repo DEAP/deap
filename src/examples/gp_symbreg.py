@@ -60,8 +60,8 @@ def evalSymbReg(individual, symbols):
         lDiff = 0
         # Evaluate the sum of squared difference between the expression
         # and the real function : x**4 + x**3 + x**2 + x + 1
-        for x in xrange(-100,100):
-            x = x/100.
+        for x in xrange(-10,10):
+            x = x/10.
             try:
                 lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x + 1))**2
             except ZeroDivisionError:
