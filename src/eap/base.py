@@ -40,13 +40,6 @@ import operator
 import random
 import sys
 
-#class Population(object):
-#    '''A population is an empty :class:`~eap.observable.Observable` object. The
-#    population object is more of a base class than an intanciable class
-#    as it is not a container.'''
-#    def __init__(self):
-#        pass
-
 
 class Population(list):
     '''A population inherits from the python's base type :class:`list` for its
@@ -132,30 +125,6 @@ class PopulationMatrix(Population):
     def get(self, row, column):
         '''Return a specific element by its position in the matrix population.'''
         return self[row * self.mNumCols + column]
-
-
-#class Individual(object):
-#    '''An individual is an :class:`~eap.observable.Observable` object
-#    associated with a fitness. As the :class:`Population`, the basic
-#    individual is not a container of any type. If a *fitness* is passed
-#    to a individual then it may be both; an object generator that when called
-#    :meth:`fitness` returns an object or an already constructed object. In both
-#    cases the object will be stored as is in the :attr:`mFitness` attribute of
-#    the individual. This allows both following methods to be used. ::
-#
-#        >>> def fitness():
-#        ...    return 'fit-A'
-#        ...
-#        >>> Individual(fitness=fitness)
-#        >>> Individual(fitness=fitness())
-#
-#    '''
-#    def __init__(self, fitness=None):
-#        if fitness is not None:
-#            try:        # For conveniance, the user may pass a fitness object
-#                self.mFitness = fitness()
-#            except TypeError:
-#                self.mFitness = fitness
 
 
 class Individual(list):
@@ -307,15 +276,6 @@ class IndividualTree(list):
     def __repr__(self):
         return str(self.evaluate()) + ' : ' + str(self.mFitness)
 
-#class IndicesIndividual(Individual, list):
-#    """
-#    """
-#    def __init__(self, size, fitness):
-#        Individual.__init__(self, fitness)
-#        for i in xrange(size):
-#            self.append(i)
-#        random.shuffle(self)
-
 
 class Fitness(array.array):
     '''The fitness is a measure of quality of a solution. The fitness
@@ -362,12 +322,19 @@ class Fitness(array.array):
 
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort
-        lexically the fitnesses, this method returns :data:`True` if this fitness
-        is dominated by the *other* fitness and false otherwise. Once again,
-        the weights are used in this function.
+        lexically the fitnesses, this method returns :data:`True` if this
+        fitness is dominated by the *other* fitness and :data:`False` otherwise.
+        The weights are used to compare minimizing and maximizing fitnesses. If
+        there is more fitness values than weights, the las weight get repeated
+        until the end of the comparaison.
         '''
-        lNotEqual = False;
-        for lSVal, lSWght, lOVal, lOWght in zip(self, self.mWeights, other, other.mWeights):
+        lNotEqual = False
+        # Pad the weights with the last value
+        lSelfWeights = itertools.chain(self.mWeights,
+                                       itertools.repeat(self.mWeights[-1]))
+        lOtherWeights = itertools.chain(other.mWeights,
+                                        itertools.repeat(other.mWeights[-1]))
+        for lSVal, lSWght, lOVal, lOWght in zip(self, lSelfWeights, other, lOtherWeights):
             lSelfFit = lSVal * lSWght
             lOtherFit = lOVal * lOWght
             if (lSelfFit) > (lOtherFit):
@@ -458,7 +425,7 @@ def realGenerator(min=0.0, max=1.0):
     This function use the :meth:`uniform` method from the python base
     :mod:`random` module.
     '''
-    while 1:
+    while True:
         yield random.uniform(min, max)
 
 
@@ -469,7 +436,7 @@ def integerGenerator(min=0, max=sys.maxint):
     This function use the :meth:`randint` method from the python base
     :mod:`random` module.
     '''
-    while 1:
+    while True:
         yield random.randint(min, max)
 
 
@@ -487,7 +454,7 @@ def indiceGenerator(max):
     '''
     lIndices = []
     lReset = False
-    while 1:
+    while True:
         if len(lIndices) == 0 or lReset is True:
             lReset = False
             lIndices = range(max)
@@ -501,7 +468,7 @@ def booleanGenerator():
     This function use the :meth:`choice` method from the python base
     :mod:`random` module.
     '''
-    while 1:
+    while True:
         yield random.choice([False, True])
 
 def expressionGenerator(funcSet, termSet, maxDepth):
@@ -520,10 +487,38 @@ def expressionGenerator(funcSet, termSet, maxDepth):
             expr = [lFunc]
             expr.extend(lArgs)
         return expr
-    while True:
+ 	while True:
         lMaxDepth = maxDepth
         try:
              lMaxDepth = random.randint(maxDepth[0], maxDepth[1])
         except TypeError:
             pass
         yield __expressionGenerator(funcSet, termSet, lMaxDepth)
+
+def esGenerator(min=0.0, max=1.0, strategy=1.0):
+    '''A generator function to build paired [value, strategy] attributes.
+
+    This function use the :meth:`gauss` method from the python base
+    :mod:`random` module.
+    '''
+    while True:
+        lMidValue = (max - min) * 0.5
+        lValue = random.gauss(lMidValue, strategy)
+        if lValue < min:
+            lValue = min
+        elif lValue > max:
+  
+
+    This function use the :meth:`gauss` method from the python base
+    :mod:`random` module.
+    '''
+    while True:
+        lMidValue = (max - min) * 0.5
+        lValue = random.gauss(lMidValue, strategy)
+        if lValue < min:
+            lValue = min
+        elif lValue > max:
+            lValue = max
+        yield [lValue, strategy]
+
+   

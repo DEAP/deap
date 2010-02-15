@@ -13,10 +13,17 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+import os
+
+sys.path.append(os.path.abspath('..'))
+
 import random
 
 import eap.base as base
 import eap.toolbox as toolbox
+
+random.seed(64)
 
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(1.0,))
