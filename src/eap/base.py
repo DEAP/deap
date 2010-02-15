@@ -509,14 +509,18 @@ def expressionGenerator(funcSet, termSet, maxDepth):
     def arity(func):
         return func.func_code.co_argcount
     def __expressionGenerator(funcSet, termSet, maxDepth):
-	if maxDepth == 0 or random.random() < len(termSet)/(len(termSet)+len(funcSet)):
-	    expr = random.choice(termSet)
-	else:
-	    lFunc = random.choice(funcSet)
-	    lArgs = [__expressionGenerator(funcSet, termSet, maxDepth-1) for i in xrange(arity(lFunc))]
-	    expr = [lFunc]
-	    expr.extend(lArgs)
-	return expr
+        if maxDepth == 0 or random.random() < len(termSet)/(len(termSet)+len(funcSet)):
+            expr = random.choice(termSet)
+            try:
+                expr = expr()
+            except:
+                pass
+        else:
+            lFunc = random.choice(funcSet)
+            lArgs = [__expressionGenerator(funcSet, termSet, maxDepth-1) for i in xrange(arity(lFunc))]
+            expr = [lFunc]
+            expr.extend(lArgs)
+        return expr
     while True:
         lMaxDepth = maxDepth
         try:
