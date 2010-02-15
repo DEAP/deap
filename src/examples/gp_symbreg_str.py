@@ -17,13 +17,25 @@ import sympy
 import sys
 import os
 import random
-import math
+from math import cos, sin
 
 sys.path.append(os.path.abspath('..'))
 
 import eap.base as base
 import eap.toolbox as toolbox
 import eap.algorithms as algorithms
+
+#random.seed(2)
+
+# Define new functions
+def safeDiv(left, right):
+    try:
+        return left / right
+    except ZeroDivisionError:
+        return 0
+
+def randomCte():
+    return repr(random.randint(-1,1))
 
 # define primitives
 def add(left, right):
@@ -38,33 +50,22 @@ def mul(left, right):
 def div(left, right):
 #    return "({0}/{1})".format(left,right) # compatible with Python 2.6.1 and Up
     return "safeDiv(%s,%s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
-def sin(left):
-#    return "sin({0})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "sin(%s)" % str(left) # compatible with Python 2.3 to 2.5.2
-def cos(left):
+def sinStr(right):
+#    return "sin({0})".format(right) # compatible with Python 2.6.1 and Up
+    return "sin(%s)" % str(right) # compatible with Python 2.3 to 2.5.2
+def cosStr(right):
 #    return "cos({0})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "cos(%s)" % str(left) # compatible with Python 2.3 to 2.5.2
-
-def safeDiv(left, right):
-    try:
-        return left / right
-    except ZeroDivisionError:
-        return 0
-
-def randomCte():
-    return repr(random.randint(-1,1))
+    return "cos(%s)" % str(right) # compatible with Python 2.3 to 2.5.2
 
 # add primitives and closures to their respective list
-lFuncs = [add, sub, mul, div, sin, cos]
+lFuncs = [add, sub, mul, div, sinStr, cosStr]
+#lFuncs = [add, sub, mul]
 # defines symbols that will be used in the expression
 lSymbols = ['x']
 # define terminal set
 lTerms = [1, randomCte]
 # add the symbols to the terminal set
 lTerms.extend(lSymbols)
-# Associate function name with function object. It is used by lambdify to call
-# that are not in the 
-lFuncDict = {'safeDiv' : safeDiv, 'sin' : math.sin, 'cos' : math.cos}
 
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(-1.0,))
@@ -75,11 +76,11 @@ lTools.register('individual', base.IndividualTree,
 lTools.register('population', base.Population, size=100,
                 generator=lTools.individual)
 
-def evalSymbReg(individual, symbols, funcDict):
+def evalSymbReg(individual, symbols, functDict):
     if not individual.mFitness.isValid():
         expr = individual.evaluate()
         # Transform the symbolic expression in a callable function
-        lFuncExpr = sympy.lambdify(symbols, expr, funcDict)
+        lFuncExpr = sympy.lambdify(symbols, expr, functDict)
         lDiff = 0
         # Evaluate the sum of squared difference between the expression
         # and the real function : x**4 + x**3 + x**2 + x
@@ -88,14 +89,16 @@ def evalSymbReg(individual, symbols, funcDict):
             lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x))**2
         individual.mFitness.append(lDiff)
 
-lTools.register('evaluate', evalSymbReg, symbols=lSymbols, funcDict=lFuncDict)
+lTools.register('evaluate', evalSymbReg, symbols=lSymbols, functDict=locals())
 lTools.register('select', toolbox.tournSel, tournSize=3)
 lTools.register('crossover', toolbox.uniformOnePtCxGP)
 lTools.register('mutate', toolbox.uniformTreeMut, treeGenerator=lTools.expression,
 		depthRange=(0,2))
 
 lPop = lTools.population()
-algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
+algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 100)
 
 lBest = toolbox.bestSel(lPop,1)[0]
+print lBest
+print len(lBest)
 print 'Best individual : ', sympy.sympify(lBest.evaluate()), lBest.mFitness
