@@ -10,9 +10,9 @@ The statistics in EAP are relatively easy to implement in your code. In fact, th
 Retreiving the information
 ==========================
 
-The statistic module has been removed since it is really easy and efficient in python to access all the data of the evolutionary algorithm and built a list with it. Every EA is different, with different configurations, different levels of population, different kind of individuals and so on. A module that computes the statistics would have been limited by or would have limit your imagination in the sens that it cannot be enough general to cover every single configuration that EAP make possible.
+The statistic module has been removed since it is really easy and efficient in python to access all the data of the evolutionary algorithm and built a list with it. Every EA is different, with different configurations, different levels of population, different kind of individuals and so on. A module that computes the statistics would have been limited by or would have limit your imagination in a way that it cannot be enough general to cover every single configuration that EAP makes possible.
 
-Accessing the data is made really efficient in python by the generator expressions. Here are some simple examples of evolutionary algorithms and the generator expressions needed to retreive the fitness.
+Accessing the data is made really efficient in python by the list comprehension. Here are some simple examples of evolutionary algorithms and the list comprehension needed to retreive the fitness.
 
 Mono-objective, mono-demic population
 -------------------------------------

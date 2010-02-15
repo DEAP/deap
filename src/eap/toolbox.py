@@ -28,6 +28,7 @@ module.
 
 import copy
 from functools import partial
+import math
 import random
 
 class Toolbox(object):
@@ -168,6 +169,30 @@ def pmCx(indOne, indTwo):
     return lChild1, lChild2
 
 
+def blendESCx(indOne, indTwo, alpha):
+    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
+    lLenght = min(len(lChild1), len(lChild2))
+    for i in xrange(lLenght):
+        lU_xi = random.random()
+        lGamma_xi = ((1.0 + 2.0 * alpha) * lU_xi) - alpha
+        lU_si = random.random()
+        lGamma_si = ((1.0 + 2.0 * alpha) * lU_si) - alpha
+        lX1_i = lChild1[i][0]
+        lX2_i = lChild2[i][0]
+        lS1_i = lChild1[i][1]
+        lS2_i = lChild2[i][1]
+
+        lChild1[i][0] = (1.0 - lGamma_xi) * lX1_i + lGamma_xi * lX2_i
+        lChild2[i][0] = (1.0 - lGamma_xi) * lX2_i + lGamma_xi * lX1_i
+        # TODO : add some constraint checking !
+        lChild1[i][1] = (1.0 - lGamma_si) * lS1_i + lGamma_si * lS2_i
+        lChild2[i][1] = (1.0 - lGamma_si) * lS2_i + lGamma_si * lS1_i
+    
+    lChild1.mFitness.setInvalid()
+    lChild2.mFitness.setInvalid()
+    return lChild1, lChild2
+
+
 ######################################
 # GA Mutations                       #
 ######################################
@@ -190,12 +215,53 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
     lIndividual = copy.copy(individual)
     for i in xrange(len(lIndividual)):
         if random.random() < mutIndxPb:
-            lIndividual[i] = lIndividual[i] + random.gauss(mu, sigma)
+            lIndividual[i] += random.gauss(mu, sigma)
             # TODO : add some constraint checking !!
             lMutated = True
     if lMutated:
         lIndividual.mFitness.setInvalid()
     return lIndividual
+
+
+def gaussESMut(individual, mutIndxPb):
+    '''This function applies a gaussian mutation on the input evolution strategy
+    individual and
+    returns the mutant. The *individual* is left intact and the mutant is an
+    independant copy. This mutation expects an iterable individual composed of
+    paired [value, strategy] attributes. The *mutIndxPb* argument is the
+    probability of each attribute to be mutated.
+
+    .. todo::
+       Add a parameter acting as constraints for the real valued attribute so
+       a min, max and interval may be used.
+
+    This function use the :meth:`random` and :meth:`gauss` methods from the
+    python base :mod:`random` module.
+    '''
+    lMutated = False
+    lIndividual = copy.copy(individual)
+    lLenght = len(lIndividual)
+    lT = 1.0 / math.sqrt(2.0 * math.sqrt(lLenght))
+    lTPrime = 1.0 / math.sqrt(2.0 * lLenght)
+    lN = random.gauss(0.0, 1.0)
+    # TODO : add some constraint checking !!
+    lMinStrategy = 0.01
+    for i in xrange(len(lIndividual)):
+        if random.random() < mutIndxPb:
+            lNi = random.gauss(0.0, 1.0)
+
+            lIndividual[i][1] *= math.exp(lTPrime * lN + lT * lNi)
+            if lIndividual[i][1] < lMinStrategy:
+                lIndividual[i][1] = lMinStrategy
+
+
+            lIndividual[i][0] += lIndividual[i][1] * lNi
+            # TODO : add some constraint checking !!
+            lMutated = True
+    if lMutated:
+        lIndividual.mFitness.setInvalid()
+    return lIndividual
+
 
 def shuffleIndxMut(individual, shuffleIndxPb):
     '''Shuffle the attributes of the input individual and return the mutant.
@@ -371,75 +437,57 @@ def tournSel(individuals, n, tournSize):
 # Migrations                         #
 ######################################
 
-def ringMig(populations, n=1, selection=None, replacement=None, migArray=None,
-            selKArgs={}, replKArgs={}):
-    '''Perform a ring migration between the ``populations``.'''
-    # TODO: Check if the migration is compliant to the new selection sheme
-    if selection is None:
-        selection = self.__bestSel
-    if migArray is None:
-        migArray = []
-        for i in range(len(population)):
-            migArray.append((i + 1) % (len(population)))
-    print migArray
-    lImmigrantsIndx = [[] for i in range(len(migArray))]
-    lEmigrantsIndx = [[] for i in range(len(migArray))]
-    lMigBuf = []
-    for lFromDeme, lToDeme in enumerate(migArray):
-        lEmigrantsIndx[lFromDeme].extend(selection(population[lFromDeme], n=n,
-                                         **selKArgs))
+def ringMig(populations, n, selection, replacement=None, migrationArray=None,
+            selKArgs=None, replKArgs=None):
+    '''Perform a ring migration between the ``populations``. The migration first
+    select *n* emmigrants from each population using the specified *selection*
+    operator and then replace *n* individuals from the associated population in
+    the *migrationArray* by themmigrants. If no *replacement*
+    operator is specified, the immigrants will replace the emmigrants of the
+    population, otherwise, the immigrants will replace the individuals selected
+    by the *replacement* operator. The migration array if provided, shall
+    contain each population's index once and only once. If no migration array
+    is provided, it defaults to a serial ring migration (1-2-...-n-1). You may
+    pass keyworded arguments to the two selection operators by giving a
+    dictionary to *selKArgs* and *replKArds*.
+    '''
+    if migrationArray is None:
+        migrationArray = [(i + 1) % len(populations) for i in xrange(len(populations))]
+    else:
+        for i in xrange(len(migrationArray)):
+            try:
+                migrationArray.index(i)
+            except:
+                raise ValueError, 'The migration array shall contain each population once and only once.'
+
+    lImmigrants = [[] for i in xrange(len(migrationArray))]
+    lEmigrants = [[] for i in xrange(len(migrationArray))]
+    if selKArgs is None:
+        selKArgs = {}
+    if replKArgs is None:
+        replKArgs = {}
+
+    for lFromDeme in xrange(len(migrationArray)):
+        lEmigrants[lFromDeme].extend(selection(populations[lFromDeme], n=n,
+                                     **selKArgs))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
-            lImmigrantsIndx[lFromDeme] = lEmigrantsIndx[lFromDeme]
+            lImmigrants[lFromDeme] = lEmigrants[lFromDeme]
         else:
             # Else select those who will be replaced
-            lImmigrantsIndx[lFromDeme].extend(replacement(population[lFromDeme],
-                                              n=n, **replKArgs))
+            lImmigrants[lFromDeme].extend(replacement(populations[lFromDeme],
+                                          n=n, **replKArgs))
 
-    # Assing a temporary buffer to contain the emigrants of the first deme will
-    # be usefull if the same indexes are choosen as immigrant indexes
-    for lIndx in lEmigrantsIndx[0]:
-        lMigBuf.append(deepcopy(population[0][lIndx]))
+    lMigBuf = lEmigrants[0]
+    for lFromDeme, lToDeme in enumerate(migrationArray[1:]):
+        lFromDeme += 1  # Enumerate starts at 0
 
-    for lFromDeme in range(1, len(migArray)):
-        lToDeme = migArray[lFromDeme]
-        for i, lIndx in enumerate(lEmigrantsIndx[lFromDeme]):
-            population[lToDeme][lImmigrantsIndx[lToDeme][i]] = \
-                      population[lFromDeme][lIndx]
+        for i, lImmigrant in enumerate(lImmigrants[lToDeme]):
+            lIndex = populations[lToDeme].index(lImmigrant)
+            populations[lToDeme][lIndex] = lEmigrants[lFromDeme][i]
 
-    lToDeme = migArray[0]
-    for i in range(len(lEmigrantsIndx[0])):
-        population[lToDeme][lImmigrantsIndx[lToDeme][i]] = lMigBuf[i]
+    lToDeme = migrationArray[0]
+    for i, lImmigrant in enumerate(lImmigrants[lToDeme]):
+        lIndex = populations[lToDeme].index(lImmigrant)
+        populations[lToDeme][lIndex] = lMigBuf[i]
 
-
-#class SimpleGAToolbox(EvolutionToolbox):
-#    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
-#    initialized with :meth:`mate` that apply a two points crossover with method
-#    :meth:`eap.operators.twoPointsCx`, :meth:`mutate` that apply a gaussian
-#    mutation with method :meth:`eap.operators.gaussMut` and :meth:`select` that
-#    select individuals using a tournament with method
-#    :meth:`eap.operators.tournSel`.
-#    '''
-#
-#    def __init__(self):
-#        self.register('mate', operators.twoPointsCx)
-#        self.register('mutate', operators.gaussMut)
-#        self.register('select', operators.tournSel)
-#
-#
-#class IndicesGAToolbox(EvolutionToolbox):
-#    '''An evolutionary toolbox intended for simple genetic algorithms. Is is
-#    initialized with :meth:`mate` that apply a partialy matched crossover with
-#    method :meth:`eap.operators.pmxCx`, :meth:`mutate` that apply a shuffle
-#    indices mutation with method :meth:`eap.operators.shuffleIndxMut` and
-#    :meth:`select` that select individuals using a tournament with method
-#    :meth:`eap.operators.tournSel`.
-#
-#    .. versionadded:: 0.2.0a
-#       The toolbox for indice representation has been added for convenience.
-#    '''
-#
-#    def __init__(self):
-#        self.register('mate', operators.pmxCx)
-#        self.register('mutate', operators.shuffleIndxMut)
-#        self.register('select', operators.tournSel)

@@ -22,7 +22,11 @@ Crossover
 
 .. autofunction:: onePointCx
 
-.. autofunction:: pmxCx
+.. autofunction:: pmCx
+
+.. autofunction:: blendESCx
+
+   .. versionadded:: 0.3.1a
 
 Mutation
 --------
@@ -32,6 +36,10 @@ Mutation
 .. autofunction:: shuffleIndxMut
 
 .. autofunction:: flipBitMut
+
+.. autofunction:: gaussESMut
+
+   .. versionadded:: 0.3.1a
 
 Selection
 ---------
@@ -47,5 +55,5 @@ Selection
 Migration
 ---------
 
-Migration is not fully implemented yet.
+.. autofunction:: ringMig
 
