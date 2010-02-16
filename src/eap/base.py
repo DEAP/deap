@@ -174,7 +174,7 @@ class Individual(list):
             except TypeError:
                 self.mFitness = fitness
         else:
-            self.mFitness = None # User may don't assing fitness
+            self.mFitness = None # User may not assign a fitness
 
         try:
             self.extend([generator.next() for i in xrange(size)])
@@ -211,7 +211,7 @@ class IndividualTree(list):
             except TypeError:
                 self.mFitness = fitness
         else:
-            self.mFitness = None # User may don't assing fitness
+            self.mFitness = None # User may not assign a fitness
             
         self[:] = generator.next()
 
@@ -477,6 +477,16 @@ def booleanGenerator():
         yield random.choice([False, True])
 
 def expressionGenerator(funcSet, termSet, maxDepth):
+    '''A generator function to build an expression tree. The depth of the tree
+    is based on *maxDepth*. *maxDepth* can either be a single value or a tuple.
+    If it is a single value, it corresponds to the depth of tree generated.
+    If *maxDepth* is a tuple, it corresponds to a range of value tree's depth
+    can be. In this case, the tree depth is generated randomly in this range.
+    
+
+    This function use the :meth:`gauss` method from the python base
+    :mod:`random` module.
+    '''
     def arity(func):
         return func.func_code.co_argcount
     def __expressionGenerator(funcSet, termSet, maxDepth):
