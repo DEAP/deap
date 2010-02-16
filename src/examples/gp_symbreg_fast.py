@@ -99,6 +99,4 @@ lPop = lTools.population()
 algorithms.simpleEA(lTools, lPop, 0.5, 0.2, 100)
 
 lBest = toolbox.bestSel(lPop,1)[0]
-print lBest
-print len(lBest)
 print 'Best individual : ', sympy.sympify(lBest.evaluate()), lBest.mFitness
