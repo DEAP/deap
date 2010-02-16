@@ -4,70 +4,70 @@
 import unittest
 
 import random
-import eap.base as base
 import eap.toolbox as toolbox
 
 
 class  TestCrossovers(unittest.TestCase):
     def setUp(self):
         random.seed(0)
-        self.Ind1 = base.ListIndividual(size=5, generator=base.indiceGenerator(5),
-                                        fitness=base.Fitness)
-        self.Ind2 = base.ListIndividual(size=5, generator=base.indiceGenerator(5),
-                                        fitness=base.Fitness)
-    
+        self.Ind1 = [2, 0, 1, 3, 4]
+        self.Ind2 = [3, 0, 4, 1, 2]
+        self.Ind1Ref = [2, 0, 1, 3, 4]
+        self.Ind2Ref = [3, 0, 4, 1, 2]
+
 
     def testTwoPointsCrossover(self):
-        expectedChild1 = [2, 0, 1, 1, 4]
-        expectedChild2 = [3, 0, 4, 3, 2]
+        expectedChild1 = [2, 0, 1, 3, 2]
+        expectedChild2 = [3, 0, 4, 1, 4]
         child1, child2 = toolbox.twoPointsCx(self.Ind1, self.Ind2)
         self.assertEquals(child1, expectedChild1)
         self.assertEquals(child2, expectedChild2)
-
+        self.assertEquals(self.Ind1, self.Ind1Ref)
+        self.assertEquals(self.Ind2, self.Ind2Ref)
 
     def testOnePointCrossover(self):
-        expectedChild1 = [2, 0, 4, 1, 2]
-        expectedChild2 = [3, 0, 1, 3, 4]
+        expectedChild1 = [2, 0, 1, 3, 2]
+        expectedChild2 = [3, 0, 4, 1, 4]
         child1, child2 = toolbox.onePointCx(self.Ind1, self.Ind2)
         self.assertEquals(child1, expectedChild1)
         self.assertEquals(child2, expectedChild2)
-
+        self.assertEquals(self.Ind1, self.Ind1Ref)
+        self.assertEquals(self.Ind2, self.Ind2Ref)
 
     def testPMXCrossover(self):
-        expectedChild1 = [2, 0, 4, 3, 1]
-        expectedChild2 = [3, 0, 1, 4, 2]
-        child1, child2 = toolbox.pmxCx(self.Ind1, self.Ind2)
+        expectedChild1 = [4, 0, 3, 1, 2]
+        expectedChild2 = [1, 0, 2, 3, 4]
+        child1, child2 = toolbox.pmCx(self.Ind1, self.Ind2)
         self.assertEquals(child1, expectedChild1)
         self.assertEquals(child2, expectedChild2)
-
+        self.assertEquals(self.Ind1, self.Ind1Ref)
+        self.assertEquals(self.Ind2, self.Ind2Ref)
 
 class TestMutations(unittest.TestCase):
     def setUp(self):
         random.seed(0)
-        self.RealInd = base.ListIndividual(size=5, generator=base.realGenerator(),
-                                        fitness=base.Fitness)
-        self.BoolInd = base.ListIndividual(size=5, generator=base.booleanGenerator(),
-                                        fitness=base.Fitness)
-
+        self.RealIndRef = [0, 0, 0, 0, 0]
+        self.BoolIndRef = [True, True, False, False, True]
+        self.RealInd = [0, 0, 0, 0, 0]
+        self.BoolInd = [True, True, False, False, True]
 
     def testFilpBitMutation(self):
-        expectedMutant = [False, True, True, False, True]
+        expectedMutant = [True, True, True, True, True]
         mutant = toolbox.flipBitMut(self.BoolInd, flipIndxPb=0.5)
         self.assertEquals(mutant, expectedMutant)
-
+        self.assertEquals(self.BoolInd, self.BoolIndRef)
 
     def testShuffleIndexesMutation(self):
-        expectedMutant = [False, True, True, False, False]
+        expectedMutant = [True, False, True, True, False]
         mutant = toolbox.shuffleIndxMut(self.BoolInd, shuffleIndxPb=0.5)
         self.assertEquals(mutant, expectedMutant)
-
+        self.assertEquals(self.BoolInd, self.BoolIndRef)
 
     def testGaussianMutation(self):
-        expectedMutant = [0.84442185152504812, 0.75795440294030247,
-                          1.445875763057654, 0.56536772757640075, 0.51127472136860852]
-        mutant = toolbox.gaussMut(self.RealInd, mu=1, sigma=0.5, mutIndxPb=0.5)
+        expectedMutant = [0, 0, -0.033503257864528985, 0.59737333937499937, 0]
+        mutant = toolbox.gaussMut(self.RealInd, mu=0, sigma=0.5, mutIndxPb=0.5, min=-1, max=1)
         self.assertEquals(mutant, expectedMutant)
-
+        self.assertEquals(self.RealInd, self.RealIndRef)
 
 class TestAlgorithms(unittest.TestCase):
     pass
