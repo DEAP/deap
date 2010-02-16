@@ -37,7 +37,7 @@ def evalOneMax(individual):
         individual.mFitness.append(individual.count(True))
 
 lTools.register('evaluate', evalOneMax)
-lTools.register('crossover', toolbox.twoPointsCx)
+lTools.register('mate', toolbox.twoPointsCx)
 lTools.register('mutate', toolbox.flipBitMut, flipIndxPb=0.05)
 lTools.register('select', toolbox.tournSel, tournSize=3)
 
@@ -47,14 +47,14 @@ CXPB, MUTPB, NGEN = (0.5, 0.2, 40)
 
 # Begin the evolution
 for g in range(NGEN):
-    print 'Generation', g
+    print '-- Generation %i --' % g
 
     lPop[:] = lTools.select(lPop, n=len(lPop))
 
     # Apply crossover and mutation
     for i in xrange(1, len(lPop), 2):
         if random.random() < CXPB:
-            lPop[i - 1], lPop[i] = lTools.crossover(lPop[i - 1], lPop[i])
+            lPop[i - 1], lPop[i] = lTools.mate(lPop[i - 1], lPop[i])
     for i in xrange(len(lPop)):
         if random.random() < MUTPB:
             lPop[i] = lTools.mutate(lPop[i])
@@ -64,8 +64,13 @@ for g in range(NGEN):
 
     # Gather all the fitnesses in one list and print the stats
     lFitnesses = [lInd.mFitness[0] for lInd in lPop]
-    print '\tMin Fitness :', min(lFitnesses)
-    print '\tMax Fitness :', max(lFitnesses)
-    print '\tMean Fitness :', sum(lFitnesses)/len(lFitnesses)
+    print '  Min %f' % min(lFitnesses)
+    print '  Max %f' % max(lFitnesses)
+    lSum = float(sum(lFitnesses))
+    lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+    lLenght = len(lFitnesses)
+    lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
+    print '  Mean %f' % (lSum/lLenght)
+    print '  Std. Dev. %f' % lStdDev
 
-print 'End of evolution'
+print '-- End of evolution --'

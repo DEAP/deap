@@ -71,13 +71,13 @@ def evalSymbReg(individual, symbols):
 
 lTools.register('evaluate', evalSymbReg, symbols=lSymbols)
 lTools.register('select', toolbox.tournSel, tournSize=3)
-lTools.register('crossover', toolbox.uniformOnePtCxGP)
+lTools.register('mate', toolbox.uniformOnePtCxGP)
 lTools.register('mutate', toolbox.uniformTreeMut, treeGenerator=lTools.expression,
 		depthRange=(0,2))
 
 
 lPop = lTools.population()
-algorithms.simpleGA(lTools, lPop, 0.5, 0.2, 40)
+algorithms.simpleEA(lTools, lPop, 0.5, 0.2, 40)
 
 lBest = toolbox.bestSel(lPop,1)[0]
 print 'Best individual : ', sympy.sympify(lBest.evaluate()), lBest.mFitness
