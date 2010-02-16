@@ -28,19 +28,20 @@ for selection and :meth:`evaluate` for evaluation.
 
 import random
 
-def simpleGA(toolbox, population, cxPb, mutPb, nGen):
+def simpleEA(toolbox, population, cxPb, mutPb, nGen):
+    print '-- Starting evolution --'
     # Evaluate the population
     map(toolbox.evaluate, population)
-    # Begin the evolution
+    # Begin the generational process
     for g in range(nGen):
-        print 'Generation', g
+        print '-- Generation %i --' % g
 
         population[:] = toolbox.select(population, n=len(population))
 
         # Apply crossover and mutation
         for i in xrange(1, len(population), 2):
             if random.random() < cxPb:
-                population[i - 1], population[i] = toolbox.crossover(population[i - 1], population[i])
+                population[i - 1], population[i] = toolbox.mate(population[i - 1], population[i])
         for i in xrange(len(population)):
             if random.random() < mutPb:
                 population[i] = toolbox.mutate(population[i])
@@ -50,8 +51,84 @@ def simpleGA(toolbox, population, cxPb, mutPb, nGen):
 
         # Gather all the fitnesses in one list and print the stats
         lFitnesses = [lInd.mFitness[0] for lInd in population]
-        print '\tMin Fitness :', min(lFitnesses)
-        print '\tMax Fitness :', max(lFitnesses)
-        print '\tMean Fitness :', sum(lFitnesses)/len(lFitnesses)
+        print '  Min %f' % min(lFitnesses)
+        print '  Max %f' % max(lFitnesses)
+        lSum = float(sum(lFitnesses))
+        lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+        lLenght = len(lFitnesses)
+        lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
+        print '  Mean %f' % (lSum/lLenght)
+        print '  Std. Dev. %f' % lStdDev
 
-    print 'End of evolution'
+    print '-- End of evolution --'
+
+
+def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
+    print '-- Starting evolution --'
+    # Evaluate the population
+    map(toolbox.evaluate, population)
+    lMuSize = len(population)
+    lLambdaSize = int((lambdaFactor) * len(population))
+    # Begin the generational process
+    for g in range(nGen):
+        print '-- Generation %i --' % g
+
+        lNewPopulation = []
+        for i in xrange(0, lLambdaSize, 3):
+            lParents = toolbox.select(population, n=3)
+            lNewPopulation.extend(toolbox.mate(lParents[0], lParents[1]))
+            lNewPopulation.append(toolbox.mutate(lParents[2]))
+
+        map(toolbox.evaluate, lNewPopulation)
+
+        population.extend(lNewPopulation)
+        population[:] = toolbox.select(population, n=lMuSize)
+
+        # Gather all the fitnesses in one list and print the stats
+        lFitnesses = [lInd.mFitness[0] for lInd in population]
+        print '  Min %f' % min(lFitnesses)
+        print '  Max %f' % max(lFitnesses)
+        lSum = float(sum(lFitnesses))
+        lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+        lLenght = len(lFitnesses)
+        lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
+        print '  Mean %f' % (lSum/lLenght)
+        print '  Std. Dev. %f' % lStdDev
+
+    print '-- End of evolution --'
+
+
+def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
+    print '-- Starting evolution --'
+    # Evaluate the population
+    map(toolbox.evaluate, population)
+    lMuSize = len(population)
+    if lambdaFactor < 1.0:
+        raise ValueError, 'Lambda factor must be greater than 1.'
+    lLambdaSize = int((lambdaFactor) * len(population))
+    # Begin the generational process
+    for g in range(nGen):
+        print '-- Generation %i --' % g
+
+        lNewPopulation = []
+        for i in xrange(0, lLambdaSize, 3):
+            lParents = toolbox.select(population, n=3)
+            lNewPopulation.extend(toolbox.mate(lParents[0], lParents[1]))
+            lNewPopulation.append(toolbox.mutate(lParents[2]))
+
+        map(toolbox.evaluate, lNewPopulation)
+
+        population[:] = toolbox.select(lNewPopulation, n=lMuSize)
+
+        # Gather all the fitnesses in one list and print the stats
+        lFitnesses = [lInd.mFitness[0] for lInd in population]
+        print '  Min %f' % min(lFitnesses)
+        print '  Max %f' % max(lFitnesses)
+        lSum = float(sum(lFitnesses))
+        lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+        lLenght = len(lFitnesses)
+        lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
+        print '  Mean %f' % (lSum/lLenght)
+        print '  Std. Dev. %f' % lStdDev
+
+    print '-- End of evolution --'
