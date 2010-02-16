@@ -22,15 +22,15 @@ optimisation problem. Each of those potential solutions are called
 is to the problem.
 
 Each structure of the :mod:`base` module may be built directly on its own
-or concatenated with other structure. For example a population may contains
+or concatenated with other structure. For example, a population may contain
 individuals or other populations. In the former, the population would behave
 as a monodemic evolutionnary algorithm and in the later, as a multidemic
 evolutionary algorithm.
 
 The derived structures in the :mod:`base` module are only intended to provide
-basic tools to build simple evolutionary algorithm and much more complex complex
-structures may be developed, in wich case we are strongly interested to add
-those complex structures to the library.
+basic tools to build simple evolutionary algorithm and much more complex
+structures may be developed, in wich case we are strongly interested to get
+feebacks about implementation.
 '''
 
 import array
@@ -60,13 +60,13 @@ class Population(list):
         ...
         >>> pop = Population(size=5, generator=[generatorA, generatorB])
 
-    will produce a :class:`Population` ::
+    will produce a :class:`Population` like follow::
 
         >>> print pop
         ['Ind-A', 'Ind-B', 'Ind-A', 'Ind-B', 'Ind-A']
 
     A population may be copied using the :meth:`copy.copy` method.
-    The copy produced is a mix of deep copy and shallow copy. All the attributes
+    The copy produced is a mix of deep and shallow copy. All the attributes
     of the population are shallow copied, even if an attribute has been added at
     runtime. The list of objects is copied by calling :meth:`copy.copy` on each
     element. If you have for example a population of populations of integers,
@@ -163,8 +163,8 @@ class Individual(list):
     The copy produced is a mix of deep copy and shallow copy. All the attributes
     of the individual are shallow copied, even if an attribute has been added
     at run time. The list of objects is copied by calling :meth:`copy.copy` on
-    each element. If you have for example a list individual of objects that
-    defines a method :meth:`__copy__` to copy the object's attributes, 
+    each element. If you have for example an individual of objects and those
+    objects define a method :meth:`__copy__` to copy the object's attributes,
     the objects will be deeply copied.
     '''
     def __init__(self, size=0, generator=None, fitness=None):
@@ -173,6 +173,8 @@ class Individual(list):
                 self.mFitness = fitness()
             except TypeError:
                 self.mFitness = fitness
+        else:
+            self.mFitness = None # User may don't assing fitness
 
         try:
             self.extend([generator.next() for i in xrange(size)])
@@ -208,6 +210,9 @@ class IndividualTree(list):
                 self.mFitness = fitness()
             except TypeError:
                 self.mFitness = fitness
+        else:
+            self.mFitness = None # User may don't assing fitness
+            
         self[:] = generator.next()
 
     @staticmethod
@@ -285,7 +290,7 @@ class Fitness(array.array):
     or maximized (positive value). The *weights* are also used in
     multi-objective optimization to normalize the fitness.
 
-    Opposed to :class:`ListPopulation` and :class:`ListIndividual`, the
+    Opposed to :class:`Population` and :class:`Individual`, the
     *weights* argument is **not** cycled if it is shorter than the number of
     fitness values. It is extended with its last value.
 
@@ -313,7 +318,7 @@ class Fitness(array.array):
         '''
         return len(self) != 0
 
-    def setInvalid(self):
+    def invalidate(self):
         '''Invalidate this fitness. As a matter of facts, it simply deletes
         all the fitness values. This method has to be used after an individual
         is modified.

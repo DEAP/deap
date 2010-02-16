@@ -65,7 +65,7 @@ def twoPointsCx(indOne, indTwo):
         >>> print child2
         [B(1), ..., A(n), ..., A(n+i-1), B(n+i), ..., B(k)]
 
-    This function use the :meth:`randint` method from the python base
+    This function use the :func:`randint` function from the python base
     :mod:`random` module.
     '''
     lSize = min(len(indOne), len(indTwo))
@@ -80,8 +80,11 @@ def twoPointsCx(indOne, indTwo):
 
     lChild1[lCxPoint1:lCxPoint2], lChild2[lCxPoint1:lCxPoint2] \
          = lChild2[lCxPoint1:lCxPoint2], lChild1[lCxPoint1:lCxPoint2]
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
+    try:
+        lChild1.mFitness.invalidate()
+        lChild2.mFitness.invalidate()
+    except AttributeError:
+        pass
     return lChild1, lChild2
 
 
@@ -100,15 +103,18 @@ def onePointCx(indOne, indTwo):
         >>> print child2
         [B(1), ..., A(n), ..., A(m)]
 
-    This function use the :meth:`randint` method from the python base
+    This function use the :func:`randint` function from the python base
     :mod:`random` module.
     '''
     lSize = min(len(indOne), len(indTwo))
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lCxPoint = random.randint(1, lSize - 1)
     lChild1[lCxPoint:], lChild2[lCxPoint:] = lChild2[lCxPoint:], lChild1[lCxPoint:]
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
+    try:
+        lChild1.mFitness.invalidate()
+        lChild2.mFitness.invalidate()
+    except AttributeError:
+        pass
     return lChild1, lChild2
 
 def pmCx(indOne, indTwo):
@@ -133,7 +139,7 @@ def pmCx(indOne, indTwo):
         >>> print child2
         [2, 3, 1, 4, 0]
 
-    This function use the :meth:`randint` method from the python base
+    This function use the :func:`randint` function from the python base
     :mod:`random` module.
     '''
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
@@ -164,8 +170,11 @@ def pmCx(indOne, indTwo):
         lPos2[lTemp1], lPos2[lTemp2] = lPos2[lTemp2], lPos2[lTemp1]
         #print lPos1
 
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
+    try:
+        lChild1.mFitness.invalidate()
+        lChild2.mFitness.invalidate()
+    except AttributeError:
+        pass
     return lChild1, lChild2
 
 
@@ -188,8 +197,11 @@ def blendESCx(indOne, indTwo, alpha):
         lChild1[i][1] = (1.0 - lGamma_si) * lS1_i + lGamma_si * lS2_i
         lChild2[i][1] = (1.0 - lGamma_si) * lS2_i + lGamma_si * lS1_i
     
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
+    try:
+        lChild1.mFitness.invalidate()
+        lChild2.mFitness.invalidate()
+    except AttributeError:
+        pass
     return lChild1, lChild2
 
 
@@ -197,7 +209,7 @@ def blendESCx(indOne, indTwo, alpha):
 # GA Mutations                       #
 ######################################
 
-def gaussMut(individual, mu, sigma, mutIndxPb):
+def gaussMut(individual, mu, sigma, mutIndxPb, min, max):
     '''This function applies a gaussian mutation on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
@@ -208,7 +220,7 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
        Add a parameter acting as constraints for the real valued attribute so
        a min, max and interval may be used.
 
-    This function use the :meth:`random` and :meth:`gauss` methods from the
+    This function uses the :func:`random` and :func:`gauss` functions from the
     python base :mod:`random` module.
     '''
     lMutated = False
@@ -216,10 +228,17 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
     for i in xrange(len(lIndividual)):
         if random.random() < mutIndxPb:
             lIndividual[i] += random.gauss(mu, sigma)
-            # TODO : add some constraint checking !!
+            # TODO : add some constraint checking with an object!!
+            if lIndividual[i] < min:
+                lIndividual[i] = min
+            elif lIndividual[i] > max:
+                lIndividual[i] = max
             lMutated = True
     if lMutated:
-        lIndividual.mFitness.setInvalid()
+        try:
+            lIndividual.mFitness.invalidate()
+        except AttributeError:
+            pass
     return lIndividual
 
 
@@ -235,7 +254,7 @@ def gaussESMut(individual, mutIndxPb):
        Add a parameter acting as constraints for the real valued attribute so
        a min, max and interval may be used.
 
-    This function use the :meth:`random` and :meth:`gauss` methods from the
+    This function uses the :func:`random` and :func:`gauss` functions from the
     python base :mod:`random` module.
     '''
     lMutated = False
@@ -259,7 +278,10 @@ def gaussESMut(individual, mutIndxPb):
             # TODO : add some constraint checking !!
             lMutated = True
     if lMutated:
-        lIndividual.mFitness.setInvalid()
+        try:
+            lIndividual.mFitness.invalidate()
+        except AttributeError:
+            pass
     return lIndividual
 
 
@@ -269,7 +291,7 @@ def shuffleIndxMut(individual, shuffleIndxPb):
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
     probability of each attribute to be moved.
 
-    This function use the :meth:`random` and :meth:`randint` methods from the
+    This function uses the :func:`random` and :func:`randint` functions from the
     python base :mod:`random` module.
     '''
     lMutated = False
@@ -284,7 +306,10 @@ def shuffleIndxMut(individual, shuffleIndxPb):
                 lIndividual[lSwapIndx], lIndividual[i]
             lMutated = True
     if lMutated is True:
-        lIndividual.mFitness.setInvalid()
+        try:
+            lIndividual.mFitness.invalidate()
+        except AttributeError:
+            pass
     return lIndividual
 
 
@@ -296,7 +321,7 @@ def flipBitMut(individual, flipIndxPb):
     The *flipIndxPb* argument is the probability of each attribute to be
     flipped.
 
-    This function use the :meth:`random` method from the python base
+    This function uses the :func:`random` function from the python base
     :mod:`random` module.
     '''
     lMutated = False
@@ -306,7 +331,10 @@ def flipBitMut(individual, flipIndxPb):
             lIndividual[lGeneIndx] = not lIndividual[lGeneIndx]
             lMutated = True
     if lMutated is True:
-        lIndividual.mFitness.setInvalid()
+        try:
+            lIndividual.mFitness.invalidate()
+        except AttributeError:
+            pass
 
     return lIndividual
 
@@ -329,8 +357,13 @@ def onePtCxGP(indOne, indTwo):
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     index, lSub1, lSub2 = chooseSubTree(lChild1, lChild2)
     lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
+
+    try:
+        lChild1.mFitness.invalidate()
+        lChild2.mFitness.invalidate()
+    except AttributeError:
+        pass
+
     return lChild1, lChild2
 
 def uniformOnePtCxGP(indOne, indTwo):
@@ -341,9 +374,11 @@ def uniformOnePtCxGP(indOne, indTwo):
 
     lChild1.setSubTree(indTwo.getSubTree(index),index)
     lChild2.setSubTree(indOne.getSubTree(index),index)
-
-    lChild1.mFitness.setInvalid()
-    lChild2.mFitness.setInvalid()
+    try:
+        lChild1.mFitness.invalidate()
+        lChild2.mFitness.invalidate()
+    except AttributeError:
+        pass
     return lChild1, lChild2
 
 ######################################
@@ -366,8 +401,10 @@ def subTreeMut(individual, treeGenerator, depthRange):
     index, sub = chooseSubTree(lIndividual)
     subExprGen = treeGenerator(maxDepth=depthRange)
     sub[index] = subExprGen.next()
-
-    lIndividual.mFitness.setInvalid()
+    try:
+        lIndividual.mFitness.invalidate()
+    except AtributeError:
+        pass
     return lIndividual
 
 def uniformTreeMut(individual, treeGenerator, depthRange):
@@ -376,7 +413,10 @@ def uniformTreeMut(individual, treeGenerator, depthRange):
     index = random.randint(1, len(lIndividual)-1)
     subExprGen = treeGenerator(maxDepth=depthRange)
     lIndividual.setSubTree(index, subExprGen.next())
-    lIndividual.mFitness.setInvalid()
+    try:
+        lIndividual.mFitness.invalidate()
+    except AtributeError:
+        pass
     return lIndividual
 
 
@@ -384,20 +424,20 @@ def uniformTreeMut(individual, treeGenerator, depthRange):
 # Selections                         #
 ######################################
 
-def rndSel(individuals, n, replacement):
+def rndSel(individuals, n):
     '''Select *n* individuals at random from the input *individuals*. The
     list returned contains shallow copies of the input *individuals*. That
     means if an individual is selected twice, modifying one of the two
-    occurences will modify the other. It is possible to randomly select without
-    picking twice the same individual by setting *replacement* to :data:`False`.
+    occurences will modify the other.
 
-    This function use the :meth:`choice` and :meth:`sample` method from the
+    .. versionchanged:: 0.3.1a
+       Removed random sample without replacement as this is simply a call to
+       python's :func:`random.sample` function
+
+    This function uses the :func:`choice` function from the
     python base :mod:`random` module.
     '''
-    if replacement is True:
-        return [random.choice(individuals) for i in xrange(n)]
-    else:
-        return random.sample(individuals, n)
+    return [random.choice(individuals) for i in xrange(n)]
 
 
 def bestSel(individuals, n):
@@ -420,7 +460,7 @@ def tournSel(individuals, n, tournSize):
     copies of the input *individuals*. That means if an individual is selected
     twice, modifying one of the two occurences will modify the other.
 
-    This function use the :meth:`choice` method from the python base
+    This function uses the :func:`choice` function from the python base
     :mod:`random` module.
     '''
     lChosenList = []
