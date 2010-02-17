@@ -23,6 +23,7 @@ sys.path.append(os.path.abspath('..'))
 
 import eap.base as base
 import eap.toolbox as toolbox
+import eap.gptoolbox as gptoolbox
 import eap.algorithms as algorithms
 
 #random.seed(2)
@@ -33,44 +34,25 @@ def safeDiv(left, right):
         return left / right
     except ZeroDivisionError:
         return 0
-
 def randomCte():
-    return repr(random.randint(-1,1))
+    return random.randint(-1,1)
 
-# define primitives
-def add(left, right):
-#    return "({0}+{1})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "(%s + %s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
-def sub(left, right):
-#   return "({0}-{1})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "(%s - %s)" % (str(left), str(right))  # compatible with Python 2.3 to 2.5.2
-def mul(left, right):
-#    return "({0}*{1})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "(%s * %s)" % (str(left), str(right))  # compatible with Python 2.3 to 2.5.2
-def div(left, right):
-#    return "({0}/{1})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "safeDiv(%s,%s)" % (str(left), str(right)) # compatible with Python 2.3 to 2.5.2
-def sinStr(right):
-#    return "sin({0})".format(right) # compatible with Python 2.6.1 and Up
-    return "sin(%s)" % str(right) # compatible with Python 2.3 to 2.5.2
-def cosStr(right):
-#    return "cos({0})".format(left,right) # compatible with Python 2.6.1 and Up
-    return "cos(%s)" % str(right) # compatible with Python 2.3 to 2.5.2
-
-# add primitives and closures to their respective list
-lFuncs = [add, sub, mul, div, sinStr, cosStr]
-#lFuncs = [add, sub, mul]
-# defines symbols that will be used in the expression
-lSymbols = ['x']
-# define terminal set
-lTerms = [1, randomCte]
-# add the symbols to the terminal set
-lTerms.extend(lSymbols)
+lToolsGP = gptoolbox.ToolboxGP()
+lToolsGP.addOperation('add', '+', 'binary')
+lToolsGP.addOperation('sub', '-', 'binary')
+lToolsGP.addOperation('mul', '*', 'binary')
+lToolsGP.addOperation('neg', '-', 'unary')
+lToolsGP.addFunction(safeDiv)
+lToolsGP.addFunction(cos,1)
+lToolsGP.addFunction(sin,1)
+lToolsGP.addTerminal(randomCte)
+lToolsGP.addTerminal(1)
+lToolsGP.addSymbol('x')
 
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(-1.0,))
-lTools.register('expression', base.expressionGenerator, funcSet=lFuncs,
-		termSet=lTerms, maxDepth=3)
+lTools.register('expression', base.expressionGenerator, funcSet=lToolsGP.mPrimitiveSet,
+		termSet=lToolsGP.mTerminalSet, maxDepth=3)
 lTools.register('individual', base.IndividualTree,
                 fitness=lTools.fitness, generator=lTools.expression())
 lTools.register('population', base.Population, size=100,
@@ -89,14 +71,14 @@ def evalSymbReg(individual, symbols, functDict):
             lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x))**2
         individual.mFitness.append(lDiff)
 
-lTools.register('evaluate', evalSymbReg, symbols=lSymbols, functDict=locals())
+lTools.register('evaluate', evalSymbReg, symbols=lToolsGP.mSymbolSet, functDict=lToolsGP.mFuncDict)
 lTools.register('select', toolbox.tournSel, tournSize=3)
 lTools.register('mate', toolbox.uniformOnePtCxGP)
 lTools.register('mutate', toolbox.uniformTreeMut, treeGenerator=lTools.expression,
 		depthRange=(0,2))
 
 lPop = lTools.population()
-algorithms.simpleEA(lTools, lPop, 0.5, 0.2, 100)
+algorithms.simpleEA(lTools, lPop, 0.5, 0.2, 50)
 
 lBest = toolbox.bestSel(lPop,1)[0]
 print 'Best individual : ', sympy.sympify(lBest.evaluate()), lBest.mFitness
