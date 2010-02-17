@@ -488,7 +488,10 @@ def expressionGenerator(funcSet, termSet, maxDepth):
     :mod:`random` module.
     '''
     def arity(func):
-        return func.func_code.co_argcount
+        try:
+            return func.func_code.co_argcount
+        except AttributeError:
+            return func.mArity
     def __expressionGenerator(funcSet, termSet, maxDepth):
         if maxDepth == 0 or random.random() < len(termSet)/(len(termSet)+len(funcSet)):
             expr = random.choice(termSet)
