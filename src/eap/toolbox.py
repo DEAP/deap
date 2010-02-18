@@ -346,13 +346,15 @@ def onePtCxGP(indOne, indTwo):
     def chooseSubTree(expr1, expr2):
 	try:
 	    index = random.randint(1,min([len(expr1), len(expr2)])-1)
-	    if random.random() < 0.5:
-		lRetIndex, lSub1, lSub2 = chooseSubTree(expr1[index], expr2[index])
-		if lRetIndex is not None:
-		    return lRetIndex, lSub1, lSub2
-	    return index, expr1, expr2
-	except:
+        except TypeError:
 	    return None, None, None
+        
+        if random.random() < 0.5:
+            lRetIndex, lSub1, lSub2 = chooseSubTree(expr1[index], expr2[index])
+            if lRetIndex is not None:
+                return lRetIndex, lSub1, lSub2
+        return index, expr1, expr2
+
 
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     index, lSub1, lSub2 = chooseSubTree(lChild1, lChild2)
@@ -389,13 +391,14 @@ def subTreeMut(individual, treeGenerator, depthRange):
     def chooseSubTree(expr):
 	try:
 	    index = random.randint(1,len(expr)-1)
-	    if random.random() < 0.5:
-		ret_val, sub_tree = chooseSubTree(expr[index])
-		if ret_val is not None:
-		    return ret_val, sub_tree
-	    return index, expr
-	except:
+	except TypeError:
 	    return None, None
+
+        if random.random() < 0.5:
+            ret_val, sub_tree = chooseSubTree(expr[index])
+            if ret_val is not None:
+                return ret_val, sub_tree
+        return index, expr
 
     lIndividual = copy.copy(individual)
     index, sub = chooseSubTree(lIndividual)
@@ -496,12 +499,12 @@ def ringMig(populations, n, selection, replacement=None, migrationArray=None,
     else:
         for i in xrange(len(migrationArray)):
             try:
-                migrationArray.index(i)
-            except:
+                migrationArray.index(i) 
+            except: # TODO : Replace the bare except by the appropriate exception catching.
                 raise ValueError, 'The migration array shall contain each population once and only once.'
 
-    lImmigrants = [[] for i in xrange(len(migrationArray))]
-    lEmigrants = [[] for i in xrange(len(migrationArray))]
+    lImmigrants = [[]] * len(migrationArray)
+    lEmigrants =  [[]] * len(migrationArray)
     if selKArgs is None:
         selKArgs = {}
     if replKArgs is None:
