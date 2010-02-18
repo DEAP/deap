@@ -497,7 +497,7 @@ def expressionGenerator(funcSet, termSet, maxDepth):
             expr = random.choice(termSet)
             try:
                 expr = expr()
-            except:
+            except TypeError:
                 pass
         else:
             lFunc = random.choice(funcSet)
