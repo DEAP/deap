@@ -14,7 +14,7 @@ class BinaryOperation():
           self.mSymbol = symbol
           self.mArity = 2
       def __call__(self,left,right):
-          return "(%s%s%s)" % (str(left), str(self.mSymbol), str(right)) # compatible with Python 2.3 to 2.5.2
+          return "(%s %s %s)" % (str(left), str(self.mSymbol), str(right)) # compatible with Python 2.3 to 2.5.2
       def __repr__(self):
           return self.mSymbol
           
