@@ -460,7 +460,7 @@ def indiceGenerator(max):
     lIndices = []
     lReset = False
     while True:
-        if len(lIndices) == 0 or lReset is True:
+        if not lIndices or lReset:
             lReset = False
             lIndices = range(max)
             random.shuffle(lIndices)
