@@ -60,6 +60,8 @@ class ToolboxGP(dict):
               setattr(self, name, BinaryOperation(opSymbol))
           elif type == 'unary':
               setattr(self, name, UnaryOperation(opSymbol))
+          else:
+              raise ValueError('Unknown type of operation %s' % (type, ))
           self.mPrimitiveSet.append(getattr(self, name))
      def addSymbol(self, symbol):
           self.mSymbolSet.append(symbol)
@@ -69,10 +71,11 @@ class ToolboxGP(dict):
               return repr(func())
           try:
               setattr(self, term.__name__, partial(reprFunction, term))
-              self.mFuncDict[term.__name__] = term
-              self.mTerminalSet.append(getattr(self, term.__name__))
           except AttributeError:
               self.mTerminalSet.append(term)
+          else:
+              self.mFuncDict[term.__name__] = term
+              self.mTerminalSet.append(getattr(self, term.__name__))
 
     
 if __name__ == '__main__':
