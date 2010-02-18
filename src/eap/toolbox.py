@@ -305,7 +305,7 @@ def shuffleIndxMut(individual, shuffleIndxPb):
             lIndividual[i], lIndividual[lSwapIndx] = \
                 lIndividual[lSwapIndx], lIndividual[i]
             lMutated = True
-    if lMutated is True:
+    if lMutated:
         try:
             lIndividual.mFitness.invalidate()
         except AttributeError:
@@ -330,7 +330,7 @@ def flipBitMut(individual, flipIndxPb):
         if random.random() < flipIndxPb:
             lIndividual[lGeneIndx] = not lIndividual[lGeneIndx]
             lMutated = True
-    if lMutated is True:
+    if lMutated:
         try:
             lIndividual.mFitness.invalidate()
         except AttributeError:
