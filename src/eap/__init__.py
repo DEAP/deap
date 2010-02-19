@@ -13,9 +13,27 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''The modo of EAP is simplicity, and freedom. The design allows you to build
-your algorithms exactly how you need them to be by manipulating simple genetic 
-blocks.
+'''
+EAP stands for Evolutionary Algorithm in Python, it is dedicated to people who
+wish to learn how to use evolutionary algorithms and to those who wish to
+rediscover evolutionary algorithms. The concepts of EAP may be extremely well
+resumed by some of statement of the `Zen of Python
+<http://www.python.org/dev/peps/pep-0020/>`_ by Tim Peters.
+
+- Beautiful is better than ugly.
+- Explicit is better than implicit.
+- Simple is better than complex.
+- Complex is better than complicated.
+- Readability counts.
+- Special cases aren't special enough to break the rules.
+- Although practicality beats purity.
+- In the face of ambiguity, refuse the temptation to guess.
+- There should be one-- and preferably only one --obvious way to do it.
+- Although that way may not be obvious at first unless you're Dutch.
+- If the implementation is hard to explain, it's a bad idea.
+- If the implementation is easy to explain, it may be a good idea.
+
+EAP is the proof that evolutionary algorithms do **not** need to be complicated.
 '''
 
 __author__ = 'Francois-Michel De Rainville and Felix-Antoine Fortin'
