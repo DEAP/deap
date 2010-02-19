@@ -55,11 +55,11 @@ def simpleEA(toolbox, population, cxPb, mutPb, nGen):
         lFitnesses = [lInd.mFitness[0] for lInd in population]
         print '  Min %f' % min(lFitnesses)
         print '  Max %f' % max(lFitnesses)
-        lSum = math.fsum(lFitnesses)
+	lLenght = len(population)
+        lMean = math.fsum(lFitnesses) / lLenght
         lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
-        lLenght = len(lFitnesses)
-        lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
-        print '  Mean %f' % (lSum/lLenght)
+        lStdDev = (lSum2 / lLenght - lMean**2)**0.5
+        print '  Mean %f' % lMean
         print '  Std. Dev. %f' % lStdDev
 
     print '-- End of evolution --'
@@ -90,11 +90,10 @@ def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
         lFitnesses = [lInd.mFitness[0] for lInd in population]
         print '  Min %f' % min(lFitnesses)
         print '  Max %f' % max(lFitnesses)
-        lSum = math.fsum(lFitnesses)
+        lMean = math.fsum(lFitnesses) / lLenght
         lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
-        lLenght = len(lFitnesses)
-        lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
-        print '  Mean %f' % (lSum/lLenght)
+        lStdDev = (lSum2 / lLenght - lMean**2)**0.5
+        print '  Mean %f' % lMean
         print '  Std. Dev. %f' % lStdDev
 
     print '-- End of evolution --'
@@ -126,11 +125,10 @@ def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
         lFitnesses = [lInd.mFitness[0] for lInd in population]
         print '  Min %f' % min(lFitnesses)
         print '  Max %f' % max(lFitnesses)
-        lSum = math.fsum(lFitnesses)
+        lMean = math.fsum(lFitnesses) / lLenght
         lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
-        lLenght = len(lFitnesses)
-        lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
-        print '  Mean %f' % (lSum/lLenght)
+        lStdDev = (lSum2 / lLenght - lMean**2)**0.55
+        print '  Mean %f' % lMean
         print '  Std. Dev. %f' % lStdDev
 
     print '-- End of evolution --'
