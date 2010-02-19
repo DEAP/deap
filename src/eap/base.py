@@ -218,10 +218,7 @@ class IndividualTree(list):
     @staticmethod
     def count(tree):
         if isinstance(tree, list):
-            value = 0
-            for node in tree:
-                value += IndividualTree.count(node)
-            return value
+            return sum(IndividualTree.count(node) for node in tree)
         else:
             return 1
 
@@ -497,7 +494,7 @@ def expressionGenerator(funcSet, termSet, maxDepth):
             expr = random.choice(termSet)
             try:
                 expr = expr()
-            except:
+            except TypeError:
                 pass
         else:
             lFunc = random.choice(funcSet)
