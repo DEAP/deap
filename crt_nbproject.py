@@ -5,11 +5,11 @@ and files. It selects the default python version as the interpreter.
 This can then be changed by modifying the project option in Netbeans.
 """
 
-from __future__ import with_statement
-import sys
+from __future__ import with_statement # just for < Python 2.6
+
 import os
+import sys
 from string import Template
-import commands
 
 prop_template = Template("""java.lib.path=
 platform.active=Python_$version
@@ -31,8 +31,8 @@ xml_template = Template("""<?xml version="1.0" encoding="UTF-8"?>
     </configuration>
 </project>""")
 
-project_name = commands.getoutput('basename `pwd`')
-project_src = commands.getoutput('pwd')+ '/src'
+project_name = os.getcwd().rpartition('/')[2]
+project_src = os.getcwd() + '/src'
 python_version = sys.version.partition(" ")[0]
 
 xml_string = xml_template.substitute(name=project_name)
