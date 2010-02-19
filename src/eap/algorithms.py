@@ -27,6 +27,8 @@ for selection and :meth:`evaluate` for evaluation.
 '''
 
 import random
+import math
+from itertools import imap
 
 def simpleEA(toolbox, population, cxPb, mutPb, nGen):
     print '-- Starting evolution --'
@@ -53,8 +55,8 @@ def simpleEA(toolbox, population, cxPb, mutPb, nGen):
         lFitnesses = [lInd.mFitness[0] for lInd in population]
         print '  Min %f' % min(lFitnesses)
         print '  Max %f' % max(lFitnesses)
-        lSum = float(sum(lFitnesses))
-        lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+        lSum = math.fsum(lFitnesses)
+        lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
         lLenght = len(lFitnesses)
         lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
         print '  Mean %f' % (lSum/lLenght)
@@ -88,8 +90,8 @@ def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
         lFitnesses = [lInd.mFitness[0] for lInd in population]
         print '  Min %f' % min(lFitnesses)
         print '  Max %f' % max(lFitnesses)
-        lSum = float(sum(lFitnesses))
-        lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+        lSum = math.fsum(lFitnesses)
+        lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
         lLenght = len(lFitnesses)
         lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
         print '  Mean %f' % (lSum/lLenght)
@@ -124,8 +126,8 @@ def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
         lFitnesses = [lInd.mFitness[0] for lInd in population]
         print '  Min %f' % min(lFitnesses)
         print '  Max %f' % max(lFitnesses)
-        lSum = float(sum(lFitnesses))
-        lSum2 = float(reduce(lambda x, y: x + y*y, lFitnesses, 0))
+        lSum = math.fsum(lFitnesses)
+        lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
         lLenght = len(lFitnesses)
         lStdDev = ((lSum2 - (lSum*lSum / lLenght)) / (lLenght - 1))**0.5
         print '  Mean %f' % (lSum/lLenght)
