@@ -500,11 +500,11 @@ def ringMig(populations, n, selection, replacement=None, migrationArray=None,
         for i in xrange(len(migrationArray)):
             try:
                 migrationArray.index(i) 
-            except: # TODO : Replace the bare except by the appropriate exception catching.
+            except ValueError:
                 raise ValueError, 'The migration array shall contain each population once and only once.'
 
-    lImmigrants = [[]] * len(migrationArray)
-    lEmigrants =  [[]] * len(migrationArray)
+    lImmigrants = [[] for i in xrange(len(migrationArray))]
+    lEmigrants = [[] for i in xrange(len(migrationArray))]
     if selKArgs is None:
         selKArgs = {}
     if replKArgs is None:
