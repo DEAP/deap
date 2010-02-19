@@ -503,8 +503,8 @@ def ringMig(populations, n, selection, replacement=None, migrationArray=None,
             except ValueError:
                 raise ValueError, 'The migration array shall contain each population once and only once.'
 
-    lImmigrants = [[] for i in xrange(len(migrationArray))]
-    lEmigrants = [[] for i in xrange(len(migrationArray))]
+    lImmigrants = [list()] * len(migrationArray)
+    lEmigrants = [list()] * len(migrationArray)
     if selKArgs is None:
         selKArgs = {}
     if replKArgs is None:
