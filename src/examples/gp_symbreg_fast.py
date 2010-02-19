@@ -17,6 +17,7 @@ import sympy
 import sys
 import os
 import random
+import math
 from math import cos, sin
 
 sys.path.append(os.path.abspath('..'))
@@ -25,8 +26,9 @@ import eap.base as base
 import eap.toolbox as toolbox
 import eap.gptoolbox as gptoolbox
 import eap.algorithms as algorithms
+from itertools import imap
 
-#random.seed(2)
+random.seed(2)
 
 # Define new functions
 def safeDiv(left, right):
@@ -60,15 +62,12 @@ lTools.register('population', base.Population, size=100,
 
 def evalSymbReg(individual, symbols, functDict):
     if not individual.mFitness.isValid():
-        expr = individual.evaluate()
         # Transform the symbolic expression in a callable function
-        lFuncExpr = sympy.lambdify(symbols, expr, functDict)
-        lDiff = 0
+        lFuncExpr = sympy.lambdify(symbols, individual.evaluate(), functDict)
         # Evaluate the sum of squared difference between the expression
         # and the real function : x**4 + x**3 + x**2 + x
-        for x in xrange(-10,10):
-            x = x/10.
-            lDiff += (lFuncExpr(x)-(x**4 + x**3 + x**2 + x))**2
+        lValues = (x/10. for x in xrange(-10,10))
+        lDiff = math.fsum(imap(lambda x: (lFuncExpr(x)-(x**4 + x**3 + x**2 + x))**2, lValues))
         individual.mFitness.append(lDiff)
 
 lTools.register('evaluate', evalSymbReg, symbols=lToolsGP.mSymbolSet, functDict=lToolsGP.mFuncDict)
