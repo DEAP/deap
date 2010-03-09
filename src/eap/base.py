@@ -131,10 +131,10 @@ class Individual(list):
     '''An individual inherits from  the python's base type :class:`list` for its
     container properties. There is two way of initialising a list individual;
     first by creating it without any arguments and appending the objects that it
-    shall contains with the :meth:`append` method and second by setting its size
+    shall contains with the :meth:`~list.append` method and second by setting its size
     to a positive integer and giving it a *generator* that when called
-    :meth:`generator.next` will return the object that will be appended. The
-    fitness argument is passed to the :class:`Individual`.
+    :data:`generator.`\ :meth:`~generator.next` will return the object that
+    will be appended. The fitness argument is passed to the :class:`Individual`.
     
     Opposed to the :class:`Population` the individual uses generator
     functions to produce its attributes. This kind of function allows a greater
@@ -424,7 +424,7 @@ def realGenerator(min=0.0, max=1.0):
     random number generator used, see python's :mod:`random` module for more
     details.
 
-    This function use the :meth:`uniform` method from the python base
+    This function use the :meth:`~random.uniform` method from the python base
     :mod:`random` module.
     '''
     while True:
@@ -435,7 +435,7 @@ def integerGenerator(min=0, max=sys.maxint):
     '''A generator function to build a integer valued attributes between *min*
     and *max*. The start and end points are always included.
 
-    This function use the :meth:`randint` method from the python base
+    This function use the :meth:`~random.randint` method from the python base
     :mod:`random` module.
     '''
     while True:
@@ -449,9 +449,9 @@ def indiceGenerator(max):
     the *max*\ th call.
 
     It is possible to force the reinitialization of the sequence by sending
-    :data:`True` to this generator via the :meth:`send` method.
+    :data:`True` to this generator via the :meth:`~generator.send` method.
 
-    This function use the :meth:`shuffle` method from the python base
+    This function use the :meth:`~random.shuffle` method from the python base
     :mod:`random` module.
     '''
     lIndices = []
@@ -467,11 +467,12 @@ def indiceGenerator(max):
 def booleanGenerator():
     '''A generator function to build a boolean valued attributes.
 
-    This function use the :meth:`choice` method from the python base
+    This function use the :meth:`~random.choice` method from the python base
     :mod:`random` module.
     '''
+    lChoices = (False, True)
     while True:
-        yield random.choice([False, True])
+        yield random.choice(lChoices)
 
 def expressionGenerator(funcSet, termSet, maxDepth):
     '''A generator function to build an expression tree. The depth of the tree
@@ -481,7 +482,7 @@ def expressionGenerator(funcSet, termSet, maxDepth):
     can be. In this case, the tree depth is generated randomly in this range.
     
 
-    This function use the :meth:`gauss` method from the python base
+    This function use the :meth:`~random.gauss` method from the python base
     :mod:`random` module.
     '''
     def arity(func):
@@ -510,20 +511,4 @@ def expressionGenerator(funcSet, termSet, maxDepth):
         except TypeError:
             pass
         yield __expressionGenerator(funcSet, termSet, lMaxDepth)
-
-def esGenerator(min=0.0, max=1.0, strategy=1.0):
-    '''A generator function to build paired [value, strategy] attributes.
-
-    This function use the :meth:`gauss` method from the python base
-    :mod:`random` module.
-    '''
-    while True:
-        lMidValue = (max - min) * 0.5
-        lValue = random.gauss(lMidValue, strategy)
-        if lValue < min:
-            lValue = min
-        elif lValue > max:
-            lValue = max
-        yield [lValue, strategy]
-
    
