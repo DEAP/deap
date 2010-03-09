@@ -26,17 +26,20 @@ for selection and :meth:`evaluate` for evaluation.
    you realy them to do.
 '''
 
-import random
-import math
 from itertools import imap
+import logging
+import math
+import random
+
+_logger = logging.getLogger('eap.algorithms')
 
 def simpleEA(toolbox, population, cxPb, mutPb, nGen):
-    print '-- Starting evolution --'
+    _logger.info('Start of evolution')
     # Evaluate the population
     map(toolbox.evaluate, population)
     # Begin the generational process
     for g in range(nGen):
-        print '-- Generation %i --' % g
+        _logger.info('Evolving generation %i', g)
 
         population[:] = toolbox.select(population, n=len(population))
 
@@ -53,27 +56,27 @@ def simpleEA(toolbox, population, cxPb, mutPb, nGen):
 
         # Gather all the fitnesses in one list and print the stats
         lFitnesses = [lInd.mFitness[0] for lInd in population]
-        print '  Min %f' % min(lFitnesses)
-        print '  Max %f' % max(lFitnesses)
+        _logger.debug('Min %f', min(lFitnesses))
+        _logger.debug('Max %f', max(lFitnesses))
 	lLenght = len(population)
-        lMean = math.fsum(lFitnesses) / lLenght
-        lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
+        lMean = sum(lFitnesses) / lLenght
+        lSum2 = sum(imap(lambda x: x**2, lFitnesses))
         lStdDev = (lSum2 / lLenght - lMean**2)**0.5
-        print '  Mean %f' % lMean
-        print '  Std. Dev. %f' % lStdDev
+        _logger.debug('Mean %f', lMean)
+        _logger.debug('Std. Dev. %f', lStdDev)
 
-    print '-- End of evolution --'
+    _logger.info('End of (successful) evolution')
 
 
 def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
-    print '-- Starting evolution --'
+    _logger.info('Start of evolution')
     # Evaluate the population
     map(toolbox.evaluate, population)
     lMuSize = len(population)
     lLambdaSize = int((lambdaFactor) * len(population))
     # Begin the generational process
     for g in range(nGen):
-        print '-- Generation %i --' % g
+        _logger.info('Evolving generation %i', g)
 
         lNewPopulation = []
         for i in xrange(0, lLambdaSize, 3):
@@ -88,19 +91,20 @@ def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
 
         # Gather all the fitnesses in one list and print the stats
         lFitnesses = [lInd.mFitness[0] for lInd in population]
-        print '  Min %f' % min(lFitnesses)
-        print '  Max %f' % max(lFitnesses)
+        _logger.debug('Min %f', min(lFitnesses))
+        _logger.debug('Max %f', max(lFitnesses))
+        lLenght = len(population)
         lMean = math.fsum(lFitnesses) / lLenght
         lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
         lStdDev = (lSum2 / lLenght - lMean**2)**0.5
-        print '  Mean %f' % lMean
-        print '  Std. Dev. %f' % lStdDev
+        _logger.debug('Mean %f', lMean)
+        _logger.debug('Std. Dev. %f', lStdDev)
 
-    print '-- End of evolution --'
+    _logger.info('End of (successful) evolution')
 
 
 def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
-    print '-- Starting evolution --'
+    _logger.info('Start of evolution')
     # Evaluate the population
     map(toolbox.evaluate, population)
     lMuSize = len(population)
@@ -109,7 +113,7 @@ def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
     lLambdaSize = int((lambdaFactor) * len(population))
     # Begin the generational process
     for g in range(nGen):
-        print '-- Generation %i --' % g
+        _logger.info('Evolving generation %i', g)
 
         lNewPopulation = []
         for i in xrange(0, lLambdaSize, 3):
@@ -123,12 +127,13 @@ def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
 
         # Gather all the fitnesses in one list and print the stats
         lFitnesses = [lInd.mFitness[0] for lInd in population]
-        print '  Min %f' % min(lFitnesses)
-        print '  Max %f' % max(lFitnesses)
+        _logger.debug('Min %f', min(lFitnesses))
+        _logger.debug('Max %f', max(lFitnesses))
+        lLenght = len(population)
         lMean = math.fsum(lFitnesses) / lLenght
         lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
         lStdDev = (lSum2 / lLenght - lMean**2)**0.55
-        print '  Mean %f' % lMean
-        print '  Std. Dev. %f' % lStdDev
+        _logger.debug('Mean %f', lMean)
+        _logger.debug('Std. Dev. %f', lStdDev)
 
-    print '-- End of evolution --'
+    _logger.info('End of (successful) evolution')
