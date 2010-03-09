@@ -68,8 +68,9 @@ class Toolbox(object):
 def twoPointsCx(indOne, indTwo):
     '''Execute a two points crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
-    This operation apply on a :class:`ListIndividual` without restriction.
-    Whatever the passed individuals are, they are gonna be mixed like follow ::
+    This operation apply on an :class:`~eap.base.Individual` composed of a list
+    of attributes and act as follow ::
+    
 
         >>> ind1 = [A(1), ..., A(n), ..., A(n+i), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(n+i), ..., B(k)]
@@ -80,7 +81,7 @@ def twoPointsCx(indOne, indTwo):
         >>> print child2
         [B(1), ..., A(n), ..., A(n+i-1), B(n+i), ..., B(k)]
 
-    This function use the :func:`randint` function from the python base
+    This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     '''
     lSize = min(len(indOne), len(indTwo))
@@ -108,8 +109,8 @@ def twoPointsCx(indOne, indTwo):
 def onePointCx(indOne, indTwo):
     '''Execute a one point crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
-    This operation apply on a :class:`ListIndividual` without restriction.
-    Whatever the passed individuals are, they are gonna be mixed like follow ::
+    This operation apply on an :class:`~eap.base.Individual` composed of a list
+    of attributes and act as follow ::
 
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
@@ -120,7 +121,7 @@ def onePointCx(indOne, indTwo):
         >>> print child2
         [B(1), ..., A(n), ..., A(m)]
 
-    This function use the :func:`randint` function from the python base
+    This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     '''
     lSize = min(len(indOne), len(indTwo))
@@ -160,7 +161,7 @@ def pmCx(indOne, indTwo):
         >>> print child2
         [2, 3, 1, 4, 0]
 
-    This function use the :func:`randint` function from the python base
+    This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     '''
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
@@ -251,8 +252,8 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
        value minus the maximum). Wich way is closer to the representation used
        is up to you.
 
-    This function uses the :func:`random` and :func:`gauss` functions from the
-    python base :mod:`random` module.
+    This function uses the :func:`~random.random` and :func:`~random.gauss`
+    functions from the python base :mod:`random` module.
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
@@ -287,8 +288,8 @@ def gaussESMut(individual, mutIndxPb):
        Add a parameter acting as constraints for the real valued attribute so
        a min, max and interval may be used.
 
-    This function uses the :func:`random` and :func:`gauss` functions from the
-    python base :mod:`random` module.
+    This function uses the :func:`~random.random` and :func:`~random.gauss`
+    functions from the python base :mod:`random` module.
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
@@ -324,8 +325,8 @@ def shuffleIndxMut(individual, shuffleIndxPb):
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
     probability of each attribute to be moved.
 
-    This function uses the :func:`random` and :func:`randint` functions from the
-    python base :mod:`random` module.
+    This function uses the :func:`~random.random` and :func:`~random.randint`
+    functions from the python base :mod:`random` module.
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
@@ -357,7 +358,7 @@ def flipBitMut(individual, flipIndxPb):
     The *flipIndxPb* argument is the probability of each attribute to be
     flipped.
 
-    This function uses the :func:`random` function from the python base
+    This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     '''
     lMutated = False
@@ -473,9 +474,9 @@ def rndSel(individuals, n):
 
     .. versionchanged:: 0.3.1a
        Removed random sample without replacement as this is simply a call to
-       python's :func:`random.sample` function
+       python's :func:`~random.sample` function
 
-    This function uses the :func:`choice` function from the
+    This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     '''
     return [random.choice(individuals) for i in xrange(n)]
@@ -501,7 +502,7 @@ def tournSel(individuals, n, tournSize):
     copies of the input *individuals*. That means if an individual is selected
     twice, modifying one of the two occurences will modify the other.
 
-    This function uses the :func:`choice` function from the python base
+    This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
     '''
     lChosenList = []
@@ -528,9 +529,9 @@ def ringMig(populations, n, selection, replacement=None, migrationArray=None,
     population, otherwise, the immigrants will replace the individuals selected
     by the *replacement* operator. The migration array if provided, shall
     contain each population's index once and only once. If no migration array
-    is provided, it defaults to a serial ring migration (1-2-...-n-1). You may
-    pass keyworded arguments to the two selection operators by giving a
-    dictionary to *selKArgs* and *replKArds*.
+    is provided, it defaults to a serial ring migration (1 -- 2 -- ... -- n -- 1).
+    You may pass keyworded arguments to the two selection operators by giving a
+    dictionary to *selKArgs* and *replKArgs*.
     '''
     if migrationArray is None:
         migrationArray = [(i + 1) % len(populations) for i in xrange(len(populations))]
