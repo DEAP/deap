@@ -28,8 +28,15 @@ module.
 
 import copy
 from functools import partial
+import logging
 import math
 import random
+
+_logger = logging.getLogger('eap.toolbox')
+VERBOSE = 7
+TRACE = 3
+logging.addLevelName(VERBOSE, 'VERBOSE')
+logging.addLevelName(TRACE, 'TRACE')
 
 class Toolbox(object):
     '''A toolbox for evolution that contains the evolutionary operators.
@@ -39,11 +46,19 @@ class Toolbox(object):
 
     def register(self, methodName, method, *args, **kargs):
         '''Register an operator in the toolbox.'''
+        _logger.debug('Registering %s operator as %s', method.__name__, methodName)
+        if hasattr(self, methodName):
+            _logger.warning('Overwriting %s operator from %s to %s', methodName,
+                            getattr(self, methodName).func.__name__, method.__name__)
         setattr(self, methodName, partial(method, *args, **kargs))
 
     def unregister(self, methodName):
         '''Unregister an operator from the toolbox.'''
-        delattr(self, methodName)
+        _logger.debug('Removing %s operator from toolbox', methodName)
+        try:
+            delattr(self, methodName)
+        except AttributeError:
+            _logger.warning('There is no %s operator in the toolbox', methodName)
 
 
 ######################################
@@ -72,12 +87,13 @@ def twoPointsCx(indOne, indTwo):
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lCxPoint1 = random.randint(1, lSize)
     lCxPoint2 = random.randint(1, lSize - 1)
-
     if lCxPoint2 >= lCxPoint1:
         lCxPoint2 += 1
     else:			# Swap the two cx points
         lCxPoint1, lCxPoint2 = lCxPoint2, lCxPoint1
-
+    _logger.log(VERBOSE, 'Applying two points crossover with mating points %d and %d',
+                lCxPoint1, lCxPoint2)
+    _logger.log(TRACE, 'Parents are :\n%s\n%s', indOne, indTwo)
     lChild1[lCxPoint1:lCxPoint2], lChild2[lCxPoint1:lCxPoint2] \
          = lChild2[lCxPoint1:lCxPoint2], lChild1[lCxPoint1:lCxPoint2]
     try:
@@ -85,6 +101,7 @@ def twoPointsCx(indOne, indTwo):
         lChild2.mFitness.invalidate()
     except AttributeError:
         pass
+    _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
     return lChild1, lChild2
 
 
@@ -109,12 +126,16 @@ def onePointCx(indOne, indTwo):
     lSize = min(len(indOne), len(indTwo))
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lCxPoint = random.randint(1, lSize - 1)
+    _logger.log(VERBOSE, 'Applying one point crossover with mating point %d',
+                lCxPoint)
+    _logger.log(TRACE, 'Parents are :\n%s\n%s', indOne, indTwo)
     lChild1[lCxPoint:], lChild2[lCxPoint:] = lChild2[lCxPoint:], lChild1[lCxPoint:]
     try:
         lChild1.mFitness.invalidate()
         lChild2.mFitness.invalidate()
     except AttributeError:
         pass
+    _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
     return lChild1, lChild2
 
 def pmCx(indOne, indTwo):
@@ -145,6 +166,9 @@ def pmCx(indOne, indTwo):
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lSize = min(len(indOne), len(indTwo))
     lPos1, lPos2 = [0]*lSize, [0]*lSize
+    _logger.log(VERBOSE, 'Applying partialy matched crossover')
+    _logger.log(TRACE, 'Parents are :\n%s\n%s', indOne, indTwo)
+
     # Initialize the position of each indices in the individuals
     for i in xrange(lSize):
         lPos1[lChild1[i]] = i
@@ -175,6 +199,7 @@ def pmCx(indOne, indTwo):
         lChild2.mFitness.invalidate()
     except AttributeError:
         pass
+    _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
     return lChild1, lChild2
 
 
@@ -209,29 +234,36 @@ def blendESCx(indOne, indTwo, alpha):
 # GA Mutations                       #
 ######################################
 
-def gaussMut(individual, mu, sigma, mutIndxPb, min, max):
+def gaussMut(individual, mu, sigma, mutIndxPb):
     '''This function applies a gaussian mutation on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
     real valued attributes. The *mutIndxPb* argument is the probability of each
     attribute to be mutated.
 
-    .. todo::
-       Add a parameter acting as constraints for the real valued attribute so
-       a min, max and interval may be used.
+    .. note::
+       The mutation is not responsible for constraints checking, the best way to
+       do this is in the evaluation function or by implementing your own gaussian
+       mutation. The reason for this is that there is too many possibilities for
+       resetting the values. For example, if a value exceed the maximum, it may
+       be set to the maximum, to the maximum minus (the value minus the maximum),
+       it may be cycled to the minimum or even cycled to the minimum plus (the
+       value minus the maximum). Wich way is closer to the representation used
+       is up to you.
 
     This function uses the :func:`random` and :func:`gauss` functions from the
     python base :mod:`random` module.
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
+    _logger.log(VERBOSE, 'Applying gaussian mutation')
+    _logger.log(TRACE, 'on individual :\n%s', individual)
     for i in xrange(len(lIndividual)):
         if random.random() < mutIndxPb:
             lIndividual[i] += random.gauss(mu, sigma)
-            # TODO : add some constraint checking with an object!!
             if lIndividual[i] < min:
                 lIndividual[i] = min
-            elif lIndividual[i] > max:
+            elif max and lIndividual[i] > max:
                 lIndividual[i] = max
             lMutated = True
     if lMutated:
@@ -239,6 +271,7 @@ def gaussMut(individual, mu, sigma, mutIndxPb, min, max):
             lIndividual.mFitness.invalidate()
         except AttributeError:
             pass
+    _logger.log(TRACE, 'Mutant individual is :\n%s', lIndividual)
     return lIndividual
 
 
@@ -296,6 +329,8 @@ def shuffleIndxMut(individual, shuffleIndxPb):
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
+    _logger.log(VERBOSE, 'Applying shuffle index mutation')
+    _logger.log(TRACE, 'on individual :\n%s', individual)
     lSize = len(lIndividual)
     for i in range(lSize):
         if random.random() < shuffleIndxPb:
@@ -310,6 +345,7 @@ def shuffleIndxMut(individual, shuffleIndxPb):
             lIndividual.mFitness.invalidate()
         except AttributeError:
             pass
+    _logger.log(TRACE, 'Mutant individual is :\n%s', lIndividual)
     return lIndividual
 
 
@@ -326,6 +362,8 @@ def flipBitMut(individual, flipIndxPb):
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
+    _logger.log(VERBOSE, 'Applying flip bit mutation')
+    _logger.log(TRACE, 'on individual :\n%s', individual)
     for lGeneIndx in xrange(len(lIndividual)):
         if random.random() < flipIndxPb:
             lIndividual[lGeneIndx] = not lIndividual[lGeneIndx]
@@ -335,7 +373,7 @@ def flipBitMut(individual, flipIndxPb):
             lIndividual.mFitness.invalidate()
         except AttributeError:
             pass
-
+    _logger.log(TRACE, 'Mutant individual is :\n%s', lIndividual)
     return lIndividual
 
 ######################################
