@@ -21,6 +21,9 @@ sys.path.append(os.path.abspath('..'))
 import eap.base as base
 import eap.algorithms as algorithms
 import eap.toolbox as toolbox
+import logging
+
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 lTools = toolbox.Toolbox()
 lTools.register('fitness', base.Fitness, weights=(1.0,))
