@@ -202,6 +202,22 @@ class Individual(list):
     def __repr__(self):
         return str(list(self)) + ' : ' + str(self.mFitness)
 
+class IndividualES(Individual):
+    def __init__(self, size=0, generator=None, fitness=None, esdegree=1, strategy=1):
+        Individual.__init__(self, size, generator, fitness)
+        if esdegree == 1:
+            self.strategy = array.array('d', [strategy]*size)
+        elif esdegree == 2:
+            self.strategy = [strategy]*(size*(size-1)/2)
+        else:
+            raise ValueError, 'Not supported evolution strategy degree, %d > 2' \
+                                                                    % esdegree
+
+    def __copy__(self):
+        lCopy = Individual.__copy__(self)
+        lCopy.strategy = array.array('d', self.strategy)
+        return lCopy
+
 class IndividualTree(list):
     
     def __init__(self, generator=None, fitness=None):
@@ -511,4 +527,3 @@ def expressionGenerator(funcSet, termSet, maxDepth):
         except TypeError:
             pass
         yield __expressionGenerator(funcSet, termSet, lMaxDepth)
-   

@@ -18,12 +18,11 @@ in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
 evolutionary algorithm may vary infinitly. Most of the algorithms in this module
 use operators registered in the toolbox with the same keywords,
-:meth:`crossover` for crossover, :meth:`mutate` for mutation, :meth:`select`
+:meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~eap.select`
 for selection and :meth:`evaluate` for evaluation.
 
-.. note::
-   You are encouraged to write your own algorithms in order to make them do what
-   you realy them to do.
+You are encouraged to write your own algorithms in order to make them do what
+you realy them to do.
 '''
 
 from itertools import imap
@@ -34,6 +33,8 @@ import random
 _logger = logging.getLogger('eap.algorithms')
 
 def simpleEA(toolbox, population, cxPb, mutPb, nGen):
+    '''The simpleEA algorithm ...
+    '''
     _logger.info('Start of evolution')
     # Evaluate the population
     map(toolbox.evaluate, population)
@@ -94,8 +95,8 @@ def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
         _logger.debug('Min %f', min(lFitnesses))
         _logger.debug('Max %f', max(lFitnesses))
         lLenght = len(population)
-        lMean = math.fsum(lFitnesses) / lLenght
-        lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
+        lMean = sum(lFitnesses) / lLenght
+        lSum2 = sum(imap(lambda x: x**2, lFitnesses))
         lStdDev = (lSum2 / lLenght - lMean**2)**0.5
         _logger.debug('Mean %f', lMean)
         _logger.debug('Std. Dev. %f', lStdDev)

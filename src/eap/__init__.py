@@ -17,7 +17,7 @@
 EAP stands for Evolutionary Algorithm in Python, it is dedicated to people who
 wish to learn how to use evolutionary algorithms and to those who wish to
 rediscover evolutionary algorithms. The concepts of EAP may be extremely well
-resumed by some of statement of the `Zen of Python
+resumed by some statements of the `Zen of Python
 <http://www.python.org/dev/peps/pep-0020/>`_ by Tim Peters.
 
 - Beautiful is better than ugly.

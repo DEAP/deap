@@ -18,7 +18,7 @@ First open a python console and import the :mod:`eap.base` module. ::
 From the :mod:`~eap.base` module you can now build your first individual of any kind defined in the :mod:`~eap.base` module. Lets build an :class:`~eap.base.Individual` composed of boolean attributes and a maximizing fitness. The :class:`~eap.base.Individual` requires 3 arguments, *size*, *generator* and *fitness*. First, the *size* argument is the number of attributes that you want in your individual. Second, the *generator* argument is a generator function (providing a :func:`next` function) that will generate each attribute of the individual. Finaly, the *fitness* argument is the constructor object of the fitness that you want to associate with your individual. All that said lets build the individual. ::
 
     >>> base.Individual(size=5, generator=base.booleanGenerator(),
-    				fitness=base.Fitness(weights=(1.0,))
+    ...				fitness=base.Fitness(weights=(1.0,))
     [False, False, True, False, True]: []
 
 The individual created is probably different from the one created here. This is due to the use of the python's :mod:`random` module in the :func:`~eap.base.booleanGenerator` function. In order to control the randomness, we usualy set the seed of the :mod:`random` so the results are repeatable. ::
@@ -26,7 +26,7 @@ The individual created is probably different from the one created here. This is 
     >>> import random
     >>> random.seed(1024)
     >>> base.Individual(size=5, generator=base.booleanGenerator(),
-    				fitness=base.Fitness(weights=(1.0,))
+    ...				fitness=base.Fitness(weights=(1.0,))
     [True, False, False, True, True]: []
 
 Now you should have the same individual as in the example (remember that the random module is os dependent).
