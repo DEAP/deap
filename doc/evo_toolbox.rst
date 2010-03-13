@@ -15,6 +15,7 @@ This module contains the operators an evolutionary algorithm. They are used to m
 .. note::
    Operators that affects the individual's constitution (attributes) are responsible of invalidating the fitness and make sure that the new individual(s) is (are) independent of the original individual(s).
 
+
 Crossover
 ---------
 
@@ -24,9 +25,9 @@ Crossover
 
 .. autofunction:: pmCx
 
-.. autofunction:: blendESCx
-
-   .. versionadded:: 0.3.1a
+.. .. autofunction:: blendESCx
+..
+..    .. versionadded:: 0.3.1a
 
 Mutation
 --------
@@ -37,9 +38,9 @@ Mutation
 
 .. autofunction:: flipBitMut
 
-.. autofunction:: gaussESMut
-
-   .. versionadded:: 0.3.1a
+.. .. autofunction:: gaussESMut
+.. 
+..    .. versionadded:: 0.3.1a
 
 Selection
 ---------
@@ -55,5 +56,5 @@ Selection
 Migration
 ---------
 
-.. autofunction:: ringMig
+.. autofunction:: ringMig(populations, n, selection[, replacement[, migrationArray[, selKArgs[, replKArgs]]]])
 

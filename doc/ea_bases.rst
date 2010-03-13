@@ -9,7 +9,7 @@ Evolutionary Algorithm Bases
 Population
 ==========
 
-.. autoclass:: Population
+.. autoclass:: Population([size, generator])
    :members:
 
 .. autoclass:: PopulationMatrix([rows, columns, generator])
@@ -19,6 +19,9 @@ Individual
 ==========
 
 .. autoclass:: Individual([size, fitness, generator])
+   :members:
+   
+.. autoclass:: IndividualTree
    :members:
    
 Fitness
@@ -46,3 +49,7 @@ Version 0.2.1a of EAP elliminated the :class:`Gene` class since any object may b
 .. autofunction:: esGenerator
 
    .. versionadded:: 0.3.1
+   
+.. autofunction:: expressionGenerator
+
+   .. version added:: 0.3.1

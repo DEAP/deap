@@ -8,6 +8,7 @@ Evolutionary Content
 
 .. toctree::
    :maxdepth: 2
+   :numbered:
    
    ea_bases
    evo_toolbox

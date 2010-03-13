@@ -203,7 +203,6 @@ def pmCx(indOne, indTwo):
     _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
     return lChild1, lChild2
 
-
 def blendESCx(indOne, indTwo, alpha):
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lLenght = min(len(lChild1), len(lChild2))
@@ -212,17 +211,16 @@ def blendESCx(indOne, indTwo, alpha):
         lGamma_xi = ((1.0 + 2.0 * alpha) * lU_xi) - alpha
         lU_si = random.random()
         lGamma_si = ((1.0 + 2.0 * alpha) * lU_si) - alpha
-        lX1_i = lChild1[i][0]
-        lX2_i = lChild2[i][0]
-        lS1_i = lChild1[i][1]
-        lS2_i = lChild2[i][1]
+        lX1_i = lChild1[i]
+        lX2_i = lChild2[i]
+        lS1_i = lChild1.strategy[i]
+        lS2_i = lChild2.strategy[i]
 
-        lChild1[i][0] = (1.0 - lGamma_xi) * lX1_i + lGamma_xi * lX2_i
-        lChild2[i][0] = (1.0 - lGamma_xi) * lX2_i + lGamma_xi * lX1_i
-        # TODO : add some constraint checking !
-        lChild1[i][1] = (1.0 - lGamma_si) * lS1_i + lGamma_si * lS2_i
-        lChild2[i][1] = (1.0 - lGamma_si) * lS2_i + lGamma_si * lS1_i
-    
+        lChild1[i] = (1.0 - lGamma_xi) * lX1_i + lGamma_xi * lX2_i
+        lChild2[i] = (1.0 - lGamma_xi) * lX2_i + lGamma_xi * lX1_i
+        lChild1.strategy[i] = (1.0 - lGamma_si) * lS1_i + lGamma_si * lS2_i
+        lChild2.strategy[i] = (1.0 - lGamma_si) * lS2_i + lGamma_si * lS1_i
+
     try:
         lChild1.mFitness.invalidate()
         lChild2.mFitness.invalidate()
@@ -284,9 +282,7 @@ def gaussESMut(individual, mutIndxPb):
     paired [value, strategy] attributes. The *mutIndxPb* argument is the
     probability of each attribute to be mutated.
 
-    .. todo::
-       Add a parameter acting as constraints for the real valued attribute so
-       a min, max and interval may be used.
+    
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
@@ -297,19 +293,16 @@ def gaussESMut(individual, mutIndxPb):
     lT = 1.0 / math.sqrt(2.0 * math.sqrt(lLenght))
     lTPrime = 1.0 / math.sqrt(2.0 * lLenght)
     lN = random.gauss(0.0, 1.0)
-    # TODO : add some constraint checking !!
     lMinStrategy = 0.01
     for i in xrange(len(lIndividual)):
         if random.random() < mutIndxPb:
             lNi = random.gauss(0.0, 1.0)
 
-            lIndividual[i][1] *= math.exp(lTPrime * lN + lT * lNi)
-            if lIndividual[i][1] < lMinStrategy:
-                lIndividual[i][1] = lMinStrategy
+            lIndividual.strategy[i] *= math.exp(lTPrime * lN + lT * lNi)
+            if lIndividual.strategy[i] < lMinStrategy:
+                lIndividual.strategy[i] = lMinStrategy
 
-
-            lIndividual[i][0] += lIndividual[i][1] * lNi
-            # TODO : add some constraint checking !!
+            lIndividual[i] += lIndividual.strategy[i] * lNi
             lMutated = True
     if lMutated:
         try:
@@ -514,6 +507,12 @@ def tournSel(individuals, n, tournSize):
                 lChosenList[i] = lAspirant
 
     return lChosenList
+
+######################################
+# Replacement Strategies (ES)        #
+######################################
+
+
 
 ######################################
 # Migrations                         #
