@@ -28,15 +28,9 @@ module.
 
 import copy
 from functools import partial
-import logging
 import math
 import random
 
-_logger = logging.getLogger('eap.toolbox')
-VERBOSE = 7
-TRACE = 3
-logging.addLevelName(VERBOSE, 'VERBOSE')
-logging.addLevelName(TRACE, 'TRACE')
 
 class Toolbox(object):
     '''A toolbox for evolution that contains the evolutionary operators.
@@ -46,26 +40,18 @@ class Toolbox(object):
 
     def register(self, methodName, method, *args, **kargs):
         '''Register an operator in the toolbox.'''
-        _logger.debug('Registering %s operator as %s', method.__name__, methodName)
-        if hasattr(self, methodName):
-            _logger.warning('Overwriting %s operator from %s to %s', methodName,
-                            getattr(self, methodName).func.__name__, method.__name__)
         setattr(self, methodName, partial(method, *args, **kargs))
 
     def unregister(self, methodName):
         '''Unregister an operator from the toolbox.'''
-        _logger.debug('Removing %s operator from toolbox', methodName)
-        try:
-            delattr(self, methodName)
-        except AttributeError:
-            _logger.warning('There is no %s operator in the toolbox', methodName)
+        delattr(self, methodName)
 
 
 ######################################
 # GA Crossovers                      #
 ######################################
 
-def twoPointsCx(indOne, indTwo):
+def twoPointsCx(ind1, ind2):
     '''Execute a two points crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
     This operation apply on an :class:`~eap.base.Individual` composed of a list
@@ -84,26 +70,24 @@ def twoPointsCx(indOne, indTwo):
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     '''
-    lSize = min(len(indOne), len(indTwo))
-    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-    lCxPoint1 = random.randint(1, lSize)
-    lCxPoint2 = random.randint(1, lSize - 1)
-    if lCxPoint2 >= lCxPoint1:
-        lCxPoint2 += 1
+    size = min(len(ind1), len(ind2))
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    cxpoint1 = random.randint(1, size)
+    cxpoint2 = random.randint(1, size - 1)
+    if cxpoint2 >= cxpoint1:
+        cxpoint2 += 1
     else:			# Swap the two cx points
-        lCxPoint1, lCxPoint2 = lCxPoint2, lCxPoint1
-    _logger.log(VERBOSE, 'Applying two points crossover with mating points %d and %d',
-                lCxPoint1, lCxPoint2)
-    _logger.log(TRACE, 'Parents are :\n%s\n%s', indOne, indTwo)
-    lChild1[lCxPoint1:lCxPoint2], lChild2[lCxPoint1:lCxPoint2] \
-         = lChild2[lCxPoint1:lCxPoint2], lChild1[lCxPoint1:lCxPoint2]
+        cxpoint1, cxpoint2 = cxpoint2, cxpoint1
+   
+    child1[cxpoint1:cxpoint2], child2[cxpoint1:cxpoint2] \
+         = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
     try:
-        lChild1.mFitness.invalidate()
-        lChild2.mFitness.invalidate()
+        child1.fitness.invalidate()
+        child2.fitness.invalidate()
     except AttributeError:
         pass
-    _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
-    return lChild1, lChild2
+    
+    return child1, child2
 
 
 def onePointCx(indOne, indTwo):
@@ -127,19 +111,17 @@ def onePointCx(indOne, indTwo):
     lSize = min(len(indOne), len(indTwo))
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lCxPoint = random.randint(1, lSize - 1)
-    _logger.log(VERBOSE, 'Applying one point crossover with mating point %d',
-                lCxPoint)
-    _logger.log(TRACE, 'Parents are :\n%s\n%s', indOne, indTwo)
+    
     lChild1[lCxPoint:], lChild2[lCxPoint:] = lChild2[lCxPoint:], lChild1[lCxPoint:]
     try:
         lChild1.mFitness.invalidate()
         lChild2.mFitness.invalidate()
     except AttributeError:
         pass
-    _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
+    
     return lChild1, lChild2
 
-def pmCx(indOne, indTwo):
+def pmCx(ind1, ind2):
     '''Execute a partialy matched crossover on the input indviduals. The two
     childrens produced are returned as a tuple, the two parents are left intact.
     This crossover expect individuals of indices, the result for any other type
@@ -164,44 +146,43 @@ def pmCx(indOne, indTwo):
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     '''
-    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-    lSize = min(len(indOne), len(indTwo))
-    lPos1, lPos2 = [0]*lSize, [0]*lSize
-    _logger.log(VERBOSE, 'Applying partialy matched crossover')
-    _logger.log(TRACE, 'Parents are :\n%s\n%s', indOne, indTwo)
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    p1, p2 = [0]*size, [0]*size
 
     # Initialize the position of each indices in the individuals
-    for i in xrange(lSize):
-        lPos1[lChild1[i]] = i
-        lPos2[lChild2[i]] = i
+    for i in xrange(size):
+        p1[child1[i]] = i
+        p2[child2[i]] = i
     # Choose crossover points
-    lCXPoint1 = random.randint(0, lSize)
-    lCXPoint2 = random.randint(0, lSize - 1)
-    if lCXPoint2 >= lCXPoint1:
-        lCXPoint2 += 1
+    cxpoint1 = random.randint(0, size)
+    cxpoint2 = random.randint(0, size - 1)
+    if cxpoint2 >= cxpoint1:
+        cxpoint2 += 1
     else:			# Swap the two cx points
-        lCXPoint1, lCXPoint2 = lCXPoint2, lCXPoint1
+        cxpoint1, cxpoint2 = cxpoint2, cxpoint1
+    
     # Apply crossover between cx points
-    for i in xrange(lCXPoint1, lCXPoint2):
+    for i in xrange(cxpoint1, cxpoint2):
         # Keep track of the selected values
-        lTemp1 = lChild1[i]
-        lTemp2 = lChild2[i]
+        temp1 = child1[i]
+        temp2 = child2[i]
         # Swap the matched value
-        lChild1[i], lChild1[lPos1[lTemp2]] = lTemp2, lTemp1
-        lChild2[i], lChild2[lPos2[lTemp1]] = lTemp1, lTemp2
+        child1[i], child1[p1[temp2]] = temp2, temp1
+        child2[i], child2[p2[temp1]] = temp1, temp2
         # Position bookkeeping
         #print lTemp1, lTemp2
-        lPos1[lTemp1], lPos1[lTemp2] = lPos1[lTemp2], lPos1[lTemp1]
-        lPos2[lTemp1], lPos2[lTemp2] = lPos2[lTemp2], lPos2[lTemp1]
+        p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
+        p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
         #print lPos1
 
     try:
-        lChild1.mFitness.invalidate()
-        lChild2.mFitness.invalidate()
+        child1.fitness.invalidate()
+        child2.fitness.invalidate()
     except AttributeError:
         pass
-    _logger.log(TRACE, 'Childrens are :\n%s\n%s', lChild1, lChild2)
-    return lChild1, lChild2
+    
+    return child1, child2
 
 def blendESCx(indOne, indTwo, alpha):
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
@@ -233,7 +214,7 @@ def blendESCx(indOne, indTwo, alpha):
 # GA Mutations                       #
 ######################################
 
-def gaussMut(individual, mu, sigma, mutIndxPb):
+def gaussMut(individual, mu, sigma, indpb):
     '''This function applies a gaussian mutation on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
@@ -241,24 +222,26 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
     attribute to be mutated.
 
     .. note::
-       The mutation is not responsible for constraints checking, the best way to
-       do this is in the evaluation function or by implementing your own gaussian
-       mutation. The reason for this is that there is too many possibilities for
+       The mutation is not responsible for constraints checking, the reason for
+       this is that there is too many possibilities for
        resetting the values. For example, if a value exceed the maximum, it may
        be set to the maximum, to the maximum minus (the value minus the maximum),
        it may be cycled to the minimum or even cycled to the minimum plus (the
        value minus the maximum). Wich way is closer to the representation used
        is up to you.
+       
+       One easy way to add cronstraint checking to an operator is to simply wrap
+       the operator in a second function. See the Evolution Strategies example
+       for an explicit example.
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
     '''
     lMutated = False
     lIndividual = copy.copy(individual)
-    _logger.log(VERBOSE, 'Applying gaussian mutation')
-    _logger.log(TRACE, 'on individual :\n%s', individual)
+    
     for i in xrange(len(lIndividual)):
-        if random.random() < mutIndxPb:
+        if random.random() < indpb:
             lIndividual[i] += random.gauss(mu, sigma)
             if lIndividual[i] < min:
                 lIndividual[i] = min
@@ -270,11 +253,11 @@ def gaussMut(individual, mu, sigma, mutIndxPb):
             lIndividual.mFitness.invalidate()
         except AttributeError:
             pass
-    _logger.log(TRACE, 'Mutant individual is :\n%s', lIndividual)
+    
     return lIndividual
 
 
-def gaussESMut(individual, mutIndxPb):
+def gaussESMut(individual, indpb):
     '''This function applies a gaussian mutation on the input evolution strategy
     individual and
     returns the mutant. The *individual* is left intact and the mutant is an
@@ -295,7 +278,7 @@ def gaussESMut(individual, mutIndxPb):
     lN = random.gauss(0.0, 1.0)
     lMinStrategy = 0.01
     for i in xrange(len(lIndividual)):
-        if random.random() < mutIndxPb:
+        if random.random() < indpb:
             lNi = random.gauss(0.0, 1.0)
 
             lIndividual.strategy[i] *= math.exp(lTPrime * lN + lT * lNi)
@@ -312,7 +295,7 @@ def gaussESMut(individual, mutIndxPb):
     return lIndividual
 
 
-def shuffleIndxMut(individual, shuffleIndxPb):
+def shuffleIndxMut(individual, indpb):
     '''Shuffle the attributes of the input individual and return the mutant.
     The *individual* is left intact and the mutant is an independant copy. The
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
@@ -321,29 +304,27 @@ def shuffleIndxMut(individual, shuffleIndxPb):
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     '''
-    lMutated = False
-    lIndividual = copy.copy(individual)
-    _logger.log(VERBOSE, 'Applying shuffle index mutation')
-    _logger.log(TRACE, 'on individual :\n%s', individual)
-    lSize = len(lIndividual)
-    for i in range(lSize):
-        if random.random() < shuffleIndxPb:
-            lSwapIndx = random.randint(0, lSize - 2)
-            if lSwapIndx >= i:
-                lSwapIndx += 1
-            lIndividual[i], lIndividual[lSwapIndx] = \
-                lIndividual[lSwapIndx], lIndividual[i]
-            lMutated = True
-    if lMutated:
+    mutated = False
+    mutant = copy.deepcopy(individual)
+    
+    size = len(mutant)
+    for i in range(size):
+        if random.random() < indpb:
+            swap_indx = random.randint(0, size - 2)
+            if swap_indx >= i:
+                swap_indx += 1
+            mutant[i], mutant[swap_indx] = mutant[swap_indx], mutant[i]
+            mutated = True
+    if mutated:
         try:
-            lIndividual.mFitness.invalidate()
+            mutant.fitness.invalidate()
         except AttributeError:
             pass
-    _logger.log(TRACE, 'Mutant individual is :\n%s', lIndividual)
-    return lIndividual
+    
+    return mutant
 
 
-def flipBitMut(individual, flipIndxPb):
+def flipBitMut(individual, indpb):
     '''Flip the value of the attributes of the input individual and return the
     mutant. The *individual* is left intact and the mutant is an independant
     copy. The *individual* is expected to be iterable and the values of the
@@ -354,21 +335,20 @@ def flipBitMut(individual, flipIndxPb):
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     '''
-    lMutated = False
-    lIndividual = copy.copy(individual)
-    _logger.log(VERBOSE, 'Applying flip bit mutation')
-    _logger.log(TRACE, 'on individual :\n%s', individual)
-    for lGeneIndx in xrange(len(lIndividual)):
-        if random.random() < flipIndxPb:
-            lIndividual[lGeneIndx] = not lIndividual[lGeneIndx]
-            lMutated = True
-    if lMutated:
+    mutated = False
+    mutant = copy.deepcopy(individual)
+    
+    for indx in xrange(len(mutant)):
+        if random.random() < indpb:
+            mutant[indx] = not mutant[indx]
+            mutated = True
+    if mutated:
         try:
-            lIndividual.mFitness.invalidate()
+            mutant.fitness.invalidate()
         except AttributeError:
             pass
-    _logger.log(TRACE, 'Mutant individual is :\n%s', lIndividual)
-    return lIndividual
+    
+    return mutant
 
 ######################################
 # GP Crossovers                      #
@@ -479,7 +459,7 @@ def bestSel(individuals, n):
     '''Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     '''
-    return sorted(individuals, key=lambda ind : ind.mFitness, reverse=True)[:n]
+    return sorted(individuals, key=lambda ind : ind.fitness, reverse=True)[:n]
 
 
 def worstSel(individuals, n):
@@ -489,7 +469,7 @@ def worstSel(individuals, n):
     return sorted(individuals, key=lambda ind : ind.mFitness)[:n]
 
 
-def tournSel(individuals, n, tournSize):
+def tournSel(individuals, n, tournsize):
     '''Select *n* individuals from the input *individuals* using *n*
     tournaments of *tournSize* individuals. The list returned contains shallow
     copies of the input *individuals*. That means if an individual is selected
@@ -498,15 +478,15 @@ def tournSel(individuals, n, tournSize):
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
     '''
-    lChosenList = []
+    chosen = []
     for i in xrange(n):
-        lChosenList.append(random.choice(individuals))
-        for j in xrange(tournSize - 1):
-            lAspirant = random.choice(individuals)
-            if lAspirant.mFitness > lChosenList[i].mFitness:
-                lChosenList[i] = lAspirant
+        chosen.append(random.choice(individuals))
+        for j in xrange(tournsize - 1):
+            aspirant = random.choice(individuals)
+            if aspirant.fitness > chosen[i].fitness:
+                chosen[i] = aspirant
 
-    return lChosenList
+    return chosen
 
 ######################################
 # Replacement Strategies (ES)        #

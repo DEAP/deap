@@ -32,109 +32,39 @@ import random
 
 _logger = logging.getLogger('eap.algorithms')
 
-def simpleEA(toolbox, population, cxPb, mutPb, nGen):
+def simpleEA(toolbox, population, cxpb, mutpb, ngen):
     '''The simpleEA algorithm ...
     '''
-    _logger.info('Start of evolution')
+    _logger.info("Start of evolution")
     # Evaluate the population
     map(toolbox.evaluate, population)
     # Begin the generational process
-    for g in range(nGen):
-        _logger.info('Evolving generation %i', g)
+    for g in range(ngen):
+        _logger.info("Evolving generation %i", g)
 
         population[:] = toolbox.select(population, n=len(population))
 
         # Apply crossover and mutation
         for i in xrange(1, len(population), 2):
-            if random.random() < cxPb:
+            if random.random() < cxpb:
                 population[i - 1], population[i] = toolbox.mate(population[i - 1], population[i])
         for i in xrange(len(population)):
-            if random.random() < mutPb:
+            if random.random() < mutpb:
                 population[i] = toolbox.mutate(population[i])
 
         # Evaluate the population
         map(toolbox.evaluate, population)
 
         # Gather all the fitnesses in one list and print the stats
-        lFitnesses = [lInd.mFitness[0] for lInd in population]
-        _logger.debug('Min %f', min(lFitnesses))
-        _logger.debug('Max %f', max(lFitnesses))
-	lLenght = len(population)
-        lMean = sum(lFitnesses) / lLenght
-        lSum2 = sum(imap(lambda x: x**2, lFitnesses))
-        lStdDev = (lSum2 / lLenght - lMean**2)**0.5
-        _logger.debug('Mean %f', lMean)
-        _logger.debug('Std. Dev. %f', lStdDev)
+        fits = [ind.fitness[0] for ind in population]
+        _logger.debug("Min %f", min(fits))
+        _logger.debug("Max %f", max(fits))
+        lenght = len(population)
+        mean = sum(fits) / lenght
+        sum2 = sum(imap(lambda x: x**2, fits))
+        std_dev = (sum2 / lenght - mean**2)**0.5
+        _logger.debug("Mean %f", mean)
+        _logger.debug("Std. Dev. %f", std_dev)
 
-    _logger.info('End of (successful) evolution')
+    _logger.info("End of (successful) evolution")
 
-
-def mupluslambdaEA(toolbox, population, lambdaFactor, nGen):
-    _logger.info('Start of evolution')
-    # Evaluate the population
-    map(toolbox.evaluate, population)
-    lMuSize = len(population)
-    lLambdaSize = int((lambdaFactor) * len(population))
-    # Begin the generational process
-    for g in range(nGen):
-        _logger.info('Evolving generation %i', g)
-
-        lNewPopulation = []
-        for i in xrange(0, lLambdaSize, 3):
-            lParents = toolbox.select(population, n=3)
-            lNewPopulation.extend(toolbox.mate(lParents[0], lParents[1]))
-            lNewPopulation.append(toolbox.mutate(lParents[2]))
-
-        map(toolbox.evaluate, lNewPopulation)
-
-        population.extend(lNewPopulation)
-        population[:] = toolbox.select(population, n=lMuSize)
-
-        # Gather all the fitnesses in one list and print the stats
-        lFitnesses = [lInd.mFitness[0] for lInd in population]
-        _logger.debug('Min %f', min(lFitnesses))
-        _logger.debug('Max %f', max(lFitnesses))
-        lLenght = len(population)
-        lMean = sum(lFitnesses) / lLenght
-        lSum2 = sum(imap(lambda x: x**2, lFitnesses))
-        lStdDev = (lSum2 / lLenght - lMean**2)**0.5
-        _logger.debug('Mean %f', lMean)
-        _logger.debug('Std. Dev. %f', lStdDev)
-
-    _logger.info('End of (successful) evolution')
-
-
-def mucommalambdaEA(toolbox, population, lambdaFactor, nGen):
-    _logger.info('Start of evolution')
-    # Evaluate the population
-    map(toolbox.evaluate, population)
-    lMuSize = len(population)
-    if lambdaFactor < 1.0:
-        raise ValueError, 'Lambda factor must be greater than 1.'
-    lLambdaSize = int((lambdaFactor) * len(population))
-    # Begin the generational process
-    for g in range(nGen):
-        _logger.info('Evolving generation %i', g)
-
-        lNewPopulation = []
-        for i in xrange(0, lLambdaSize, 3):
-            lParents = toolbox.select(population, n=3)
-            lNewPopulation.extend(toolbox.mate(lParents[0], lParents[1]))
-            lNewPopulation.append(toolbox.mutate(lParents[2]))
-
-        map(toolbox.evaluate, lNewPopulation)
-
-        population[:] = toolbox.select(lNewPopulation, n=lMuSize)
-
-        # Gather all the fitnesses in one list and print the stats
-        lFitnesses = [lInd.mFitness[0] for lInd in population]
-        _logger.debug('Min %f', min(lFitnesses))
-        _logger.debug('Max %f', max(lFitnesses))
-        lLenght = len(population)
-        lMean = math.fsum(lFitnesses) / lLenght
-        lSum2 = math.fsum(imap(lambda x: x**2, lFitnesses))
-        lStdDev = (lSum2 / lLenght - lMean**2)**0.55
-        _logger.debug('Mean %f', lMean)
-        _logger.debug('Std. Dev. %f', lStdDev)
-
-    _logger.info('End of (successful) evolution')
