@@ -15,14 +15,16 @@
 
 import sys
 import random
-from itertools import imap
+import logging
 
 sys.path.append('..')
 
+import eap.algorithms as algorithms
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 random.seed(64)
 
@@ -46,38 +48,5 @@ tools.register('mutate', toolbox.flipBitMut, indpb=0.05)
 tools.register('select', toolbox.tournSel, tournsize=3)
 
 pop = tools.population()
-CXPB, MUTPB, NGEN = (0.5, 0.2, 40)
+algorithms.simpleEA(tools, pop, 0.5, 0.2, 40)
 
-## Evaluate the population
-map(tools.evaluate, pop)
-
-# Begin the evolution
-for g in range(NGEN):
-    print '-- Generation %i --' % g
-
-    pop[:] = tools.select(pop, n=len(pop))
-
-    # Apply crossover and mutation
-    for i in xrange(1, len(pop), 2):
-        if random.random() < CXPB:
-            pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
-
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = tools.mutate(pop[i])
-
-    # Evaluate the population
-    map(tools.evaluate, pop)
-
-    # Gather all the fitnesses in one list and print the stats
-    fits = [ind.fitness[0] for ind in pop]
-    print '  Min %f' % min(fits)
-    print '  Max %f' % max(fits)
-    lenght = len(pop)
-    mean = sum(fits) / lenght
-    sum2 = sum(imap(lambda x: x**2, fits))
-    std_dev = (sum2 / lenght - mean**2)**0.5
-    print '  Mean %f' % (mean)
-    print '  Std. Dev. %f' % std_dev
-
-print '-- End of evolution --'

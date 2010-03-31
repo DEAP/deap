@@ -14,44 +14,49 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import os
+import logging
+import random
+import yaml
 
-sys.path.append(os.path.abspath('..'))
+sys.path.append("..")
 
 import eap.base as base
+import eap.creator as creator
 import eap.toolbox as toolbox
 import eap.algorithms as algorithms
-import pickle
-import random
+
+logging.basicConfig(level=logging.INFO)
 
 random.seed(121)
 
-# gr*.pickle contains the numpy ndarray of the distance map
+# gr*.yml contains the distance map in list of list style in YAML/JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
-lDistanceFile = open('gr17.pickle', 'r')
-lDistanceMap = pickle.load(lDistanceFile)
-lDistanceFile.close()
-lIndSize = lDistanceMap.shape[0]
+distance_map = yaml.load(open("gr17.yml", "r"))
+IND_SIZE = len(distance_map[0])
 
-lTools = toolbox.Toolbox()
-lTools.register('fitness', base.Fitness)
-lTools.register('individual', base.Individual, size=lIndSize,
-                generator=base.indiceGenerator(lIndSize), fitness=lTools.fitness)
-lTools.register('population', base.Population, size=300,
-                generator=lTools.individual)
+creator.create("Individual", (base.Indices,), {"fitness" : base.Fitness})
+creator.create("Population", (base.List,))
+
+tools = toolbox.Toolbox()
+tools.register("individual", creator.Individual, size=IND_SIZE)
+tools.register("population", creator.Population, size=300, content=tools.individual)
 
 def evalTSP(individual):
-    if not individual.mFitness.isValid():
-        lDistance = lDistanceMap[individual[-1], individual[0]]
-        for lGene1, lGene2 in zip(individual[0:-1], individual[1:]):
-            lDistance += lDistanceMap[lGene1, lGene2]
-        individual.mFitness.append(lDistance)
+    if not individual.fitness.isValid():
+        distance = distance_map[individual[-1]][individual[0]]
+        for gene1, gene2 in zip(individual[0:-1], individual[1:]):
+            distance += distance_map[gene1][gene2]
+        individual.fitness.append(distance)
 
-lTools.register('mate', toolbox.pmCx)
-lTools.register('mutate', toolbox.shuffleIndxMut, shuffleIndxPb=0.05)
-lTools.register('select', toolbox.tournSel, tournSize=3)
-lTools.register('evaluate', evalTSP)
+tools.register("mate", toolbox.pmCx)
+tools.register("mutate", toolbox.shuffleIndxMut, indpb=0.05)
+tools.register("select", toolbox.tournSel, tournsize=3)
+tools.register("evaluate", evalTSP)
 
-lPop = lTools.population()
+pop = tools.population()
 
-algorithms.simpleEA(lTools, lPop, 0.5, 0.2, 50)
+algorithms.simpleEA(tools, pop, 0.5, 0.2, 50)
+
+best_ind = toolbox.bestSel(pop, 1)[0]
+logging.info("Best individual is %s", str(best_ind))
+logging.info("Best individual has fitness of %s", str(best_ind.fitness))

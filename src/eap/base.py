@@ -1,3 +1,6 @@
+#
+#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
+#    
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -35,267 +38,48 @@ feebacks about implementation.
 
 import array
 import copy
-import itertools
 import operator
 import random
-import sys
 
+from collections import deque
+from itertools import izip, repeat, count, chain, imap
 
-class Population(list):
-    '''A population inherits from the python's base type :class:`list` for its
-    iterable properties. There is two way of initialising a list population;
-    first by creating it without any arguments and appending the objects that it
-    shall contains with the :meth:`append` method and second by setting its size
-    to a positive integer and giving it a *generator* that when called
-    :meth:`generator` will return the object that will be appended.
+class List(list):
+    def __init__(self, size=0, content=None):
+        if content is not None:
+            if callable(content):
+                self.extend(content() for i in xrange(size))
+            else:
+                self.extend(content)
 
-    The *generator* may also be a list of generators that will be cycled
-    throught until the population has reached its size. For example, ::
+class Array(array.array):
+    def __new__(cls, typecode, **kargs):
+        return super(Array, cls).__new__(cls, typecode)
 
-        >>> def generatorA():
-        ...     return 'Ind-A'
-        ...
-        >>> def generatorB():
-        ...     return 'Ind-B'
-        ...
-        >>> pop = Population(size=5, generator=[generatorA, generatorB])
+    def __init__(self, size=0, content=None):
+        if content is not None:
+            if callable(content):
+                self.extend(content() for i in xrange(size))
+            else:
+                self.extend(content)
 
-    will produce a :class:`Population` like follow::
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        copy_ = cls.__new__(cls, typecode=self.typecode)
+        memo[id(self)] = copy_
+        copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        copy_.extend(self)
+        return copy_
 
-        >>> print pop
-        ['Ind-A', 'Ind-B', 'Ind-A', 'Ind-B', 'Ind-A']
-
-    A population may be copied using the :meth:`copy.copy` method.
-    The copy produced is a mix of deep and shallow copy. All the attributes
-    of the population are shallow copied, even if an attribute has been added at
-    runtime. The list of objects is copied by calling :meth:`copy.copy` on each
-    element. If you have for example a population of populations of integers,
-    the integers will be deeply copied.
-    '''
-    def __init__(self, size=0, generator=None):
-        try:
-            self.extend([generator() for i in xrange(size)])
-        except TypeError:
-            lLength = len(generator)
-            self.extend(generator[i % lLength]() for i in xrange(size))
-
-    def __copy__(self):
-        lCopy = self.__class__.__new__(self.__class__)
-        lCopy.__dict__.update(self.__dict__)
-        lCopy[:] = map(copy.copy, self)
-
-
-class PopulationMatrix(Population):
-    '''The matrix population is much similar to the :class:`Population`, it
-    only defines some more specific access methods to retreive the informations.
-    The only difference is that the matrix population is filled row by
-    row in a way that giving a list of generators will produce the following
-    result. ::
-
-        >>> def generatorA():
-        ...     return 'Ind-A'
-        ...
-        >>> def generatorB():
-        ...     return 'Ind-B'
-        ...
-        >>> MatrixPopulation(rows=2, columns=3, generator=[generatorA, generatorB])
-        +---------+---------+---------+
-        | 'Ind-A' | 'Ind-B' | 'Ind-A' |
-        +---------+---------+---------+
-        | 'Ind-B' | 'Ind-A' | 'Ind-B' |
-        +---------+---------+---------+
-
-    Internaly the matrix population is simply a :class:`list`.
-    '''
-    def __init__(self, rows=0, columns=0, generator=None):
-        Population.__init__(self, rows * columns, generator)
-
-    def row(self, row):
-        '''Return a specific row of the matrix population.'''
-        return self[(row * self.mNumCols):(row * (self.mNumCols + 1))]
-
-    def col(self, column):
-        '''Return a specific column of the matrix population.'''
-        lCol = []
-        for i in range(self.mNumRows):
-            lCol.append(self[i * self.mNumCols + column])
-            print lCol
-        return lCol
-
-    def get(self, row, column):
-        '''Return a specific element by its position in the matrix population.'''
-        return self[row * self.mNumCols + column]
-
-
-class Individual(list):
-    '''An individual inherits from  the python's base type :class:`list` for its
-    container properties. There is two way of initialising a list individual;
-    first by creating it without any arguments and appending the objects that it
-    shall contains with the :meth:`~list.append` method and second by setting its size
-    to a positive integer and giving it a *generator* that when called
-    :data:`generator.`\ :meth:`~generator.next` will return the object that
-    will be appended. The fitness argument is passed to the :class:`Individual`.
+class Indices(Array):
+    def __new__(cls, **kargs):
+        return super(Array, cls).__new__(cls, "i")
     
-    Opposed to the :class:`Population` the individual uses generator
-    functions to produce its attributes. This kind of function allows a greater
-    flexibility when it comes to produce interrelated objects like vector of
-    indices.
+    def __init__(self, size=0):
+        self.extend(i for i in xrange(size))
+        random.shuffle(self)
 
-    The *generator* may also be a list of generator functions that will be
-    cycled throught until the individual has reached its size. For example, ::
-
-        >>> def generatorA():
-        ...     while True:
-        ...         yield 'Attr-A'
-        ...
-        >>> def generatorB():
-        ...     while True:
-        ...         yield 'Attr-B'
-        ...
-        >>> ind = Individual(size=5, generator=[generatorA, generatorB])
-
-    will produce a :class:`Individual` ::
-
-        >>> print ind
-        ['Attr-A', 'Attr-B', 'Attr-A', 'Attr-B', 'Attr-A']
-
-    An individual may be copied using the :meth:`copy.copy` method.
-    The copy produced is a mix of deep copy and shallow copy. All the attributes
-    of the individual are shallow copied, even if an attribute has been added
-    at run time. The list of objects is copied by calling :meth:`copy.copy` on
-    each element. If you have for example an individual of objects and those
-    objects define a method :meth:`__copy__` to copy the object's attributes,
-    the objects will be deeply copied.
-    '''
-    def __init__(self, size=0, generator=None, fitness=None):
-        if fitness is not None:
-            try:        # For conveniance, the user may pass a fitness object
-                self.mFitness = fitness()
-            except TypeError:
-                self.mFitness = fitness
-        else:
-            self.mFitness = None # User may not assign a fitness
-
-        try:
-            self.extend([generator.next() for i in xrange(size)])
-        except TypeError:
-            lCycle = itertools.cycle(generator)
-            self.extend([lCycle.next().next() for i in xrange(size)])
-
-    def __copy__(self):
-        """This method makes a shallow copy of self and fitness and then a deep
-        copy of the list of objects that it is made of using
-        :meth:`copy.copy` for the fitness and :meth:`clone` for the elements
-        that are in its list.
-
-        .. warning::
-           If you override this class be sure that all elements are
-           copied the way that they should.
-
-        """
-        lCopy = self.__new__(self.__class__)
-        lCopy.__dict__.update(self.__dict__)
-        lCopy.mFitness = copy.copy(self.mFitness)
-        lCopy[:] = map(copy.copy, self)
-        return lCopy
-
-    def __repr__(self):
-        return str(list(self)) + ' : ' + str(self.mFitness)
-
-class IndividualES(Individual):
-    def __init__(self, size=0, generator=None, fitness=None, esdegree=1, strategy=1):
-        Individual.__init__(self, size, generator, fitness)
-        if esdegree == 1:
-            self.strategy = array.array('d', [strategy]*size)
-        elif esdegree == 2:
-            self.strategy = [strategy]*(size*(size-1)/2)
-        else:
-            raise ValueError, 'Not supported evolution strategy degree, %d > 2' \
-                                                                    % esdegree
-
-    def __copy__(self):
-        lCopy = Individual.__copy__(self)
-        lCopy.strategy = array.array('d', self.strategy)
-        return lCopy
-
-class IndividualTree(list):
-    
-    def __init__(self, generator=None, fitness=None):
-        if fitness is not None:
-            try:        # For convenience, the user may pass a fitness object
-                self.mFitness = fitness()
-            except TypeError:
-                self.mFitness = fitness
-        else:
-            self.mFitness = None # User may not assign a fitness
-            
-        self[:] = generator.next()
-
-    @staticmethod
-    def count(tree):
-        if isinstance(tree, list):
-            return sum(IndividualTree.count(node) for node in tree)
-        else:
-            return 1
-
-    @staticmethod
-    def evaluateExpr(expr):
-        try:
-            func = expr[0]
-            try:
-                return func(*[IndividualTree.evaluateExpr(value) for value in expr[1:]])
-            except TypeError:
-                return func(*expr[1:])
-        except TypeError:
-            return expr
-
-    def getSubTree(self, index):
-        def __getSubTree(tree, index):
-            total = 0
-            if index == 0:
-                return tree
-            for child in tree:
-                if total == index:
-                   return child
-                nbrChild = IndividualTree.count(child)
-                if nbrChild + total > index:
-                    return __getSubTree(child, index-total)
-                else:
-                    total += nbrChild
-        return __getSubTree(self, index)
-
-    def setSubTree(self, index, subTree):
-        def __setSubTree(tree, index, subTree):
-            total = 0
-            for i, child in enumerate(tree):
-                if total == index:
-                    tree[i] = subTree
-                    return
-                if IndividualTree.count(child) + total > index:
-                    __setSubTree(child, index-total, subTree)
-                    return
-                else:
-                    total += IndividualTree.count(child)
-        __setSubTree(self, index, subTree)
-
-    def __len__(self):
-        return IndividualTree.count(self)
-
-    def __copy__(self):
-        lCopy = self.__new__(self.__class__)
-        lCopy.__dict__.update(self.__dict__)
-        lCopy.mFitness = copy.copy(self.mFitness)
-        lCopy[:] = map(copy.deepcopy, self)
-        return lCopy
-
-    def evaluate(self):
-        return IndividualTree.evaluateExpr(self)
-
-    def __repr__(self):
-        return str(self.evaluate()) + ' : ' + str(self.mFitness)
-
-
-class Fitness(array.array):
+class Fitness(Array):
     '''The fitness is a measure of quality of a solution. The fitness
     inheritates from a python :class:`array.array`, so the number of objectives
     depends on the lenght of the array. The *weights* (defaults to (-1.0,)) 
@@ -319,11 +103,13 @@ class Fitness(array.array):
        When comparing fitness values that are minimized, ``a > b`` will return
        :data:`True` if *a* is inferior to *b*.
     '''
-    def __new__(cls, *args, **kargs):
+    weights = (-1.0,)
+    def __new__(cls, **kargs):
         return super(Fitness, cls).__new__(cls, 'd')
 
-    def __init__(self, weights=(-1.0,)):
-        self.mWeights = array.array('d', weights)
+    def __init__(self, values=None):
+        if values is not None:
+            self.extend(values)
 
     def isValid(self):
         '''Wheter or not this fitness is valid. An invalid fitness is simply
@@ -336,7 +122,7 @@ class Fitness(array.array):
         all the fitness values. This method has to be used after an individual
         is modified.
         '''
-        self[:] = array.array('d')
+	self[:] = array.array('d')
 
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort
@@ -346,20 +132,17 @@ class Fitness(array.array):
         there is more fitness values than weights, the las weight get repeated
         until the end of the comparaison.
         '''
-        lNotEqual = False
+        not_equal = False
         # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
-        for lSVal, lSWght, lOVal, lOWght in zip(self, lSelfWeights, other, lOtherWeights):
-            lSelfFit = lSVal * lSWght
-            lOtherFit = lOVal * lOWght
-            if (lSelfFit) > (lOtherFit):
+        weights = chain(self.weights, repeat(self.weights[-1]))
+        for weight, self_value, other_value in zip(weights, self, other):
+            self_value = self_value * weight
+            other_value = other_value * weight
+            if (self_value) > (other_value):
                 return False
-            elif (lSelfFit) < (lOtherFit):
-                lNotEqual = True
-        return lNotEqual
+            elif (self_value) < (other_value):
+                not_equal = True
+        return not_equal
 
     def __gt__(self, other):
         return not self.__le__(other)
@@ -369,45 +152,29 @@ class Fitness(array.array):
 
     def __lt__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
+        weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', itertools.imap(operator.mul,
-                                                      self, lSelfWeights))
-        lOtherValues = array.array('d', itertools.imap(operator.mul,
-                                                       other, lOtherWeights))
+        self_values = array.array('d', imap(operator.mul, self, weights))
+        other_values = array.array('d', imap(operator.mul, other, weights))
         # Compare the results
-        return lSelfValues < lOtherValues
+        return self_values < other_values
 
     def __le__(self, other):
         # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
+        weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', itertools.imap(operator.mul,
-                                                      self, lSelfWeights))
-        lOtherValues = array.array('d', itertools.imap(operator.mul,
-                                                       other, lOtherWeights))
+        self_values = array.array('d', imap(operator.mul, self, weights))
+        other_values = array.array('d', imap(operator.mul, other, weights))
         # Compare the results
-        return lSelfValues <= lOtherValues
+        return self_values <= other_values
 
     def __eq__(self, other):
-        # Pad the weights with the last value
-        lSelfWeights = itertools.chain(self.mWeights,
-                                       itertools.repeat(self.mWeights[-1]))
-        lOtherWeights = itertools.chain(other.mWeights,
-                                        itertools.repeat(other.mWeights[-1]))
+        weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
-        lSelfValues = array.array('d', itertools.imap(operator.mul,
-                                                      self, lSelfWeights))
-        lOtherValues = array.array('d', itertools.imap(operator.mul,
-                                                       other, lOtherWeights))
+        self_values = array.array('d', imap(operator.mul, self, weights))
+        other_values = array.array('d', imap(operator.mul, other, weights))
         # Compare the results
-        return lSelfValues == lOtherValues
+        return self_values == other_values
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -418,112 +185,8 @@ class Fitness(array.array):
         elif other > self:
             return -1
         return 0
-
-    def __repr__(self):
-        return str(list(self))
-
-    def __reduce__(self):
-        return (self.__class__, (self.mWeights,), self.__dict__, iter(self))
-
-    def __copy__(self):
-        lCopy = self.__new__(self.__class__)
-        lCopy.__dict__.update(self.__dict__)
-        lCopy.extend(self)
-        lCopy.mWeights[:] = self.mWeights[:]
-        return lCopy
-
-
-def realGenerator(min=0.0, max=1.0):
-    '''A generator function to build a real valued attributes between *min*
-    (defaults to 0.0) and *max* (defaults to 1.0). The start point is always
-    included. The end point *max* may or may not be included depending on the
-    random number generator used, see python's :mod:`random` module for more
-    details.
-
-    This function use the :meth:`~random.uniform` method from the python base
-    :mod:`random` module.
-    '''
-    while True:
-        yield random.uniform(min, max)
-
-
-def integerGenerator(min=0, max=sys.maxint):
-    '''A generator function to build a integer valued attributes between *min*
-    and *max*. The start and end points are always included.
-
-    This function use the :meth:`~random.randint` method from the python base
-    :mod:`random` module.
-    '''
-    while True:
-        yield random.randint(min, max)
-
-
-def indiceGenerator(max):
-    '''A generator function to build indice valued sequences between 0 and
-    *max*. Series of *max* - 1 calls to this generator shall never return the
-    same integer twice. The sequence is reinitialized (in a different order) at
-    the *max*\ th call.
-
-    It is possible to force the reinitialization of the sequence by sending
-    :data:`True` to this generator via the :meth:`~generator.send` method.
-
-    This function use the :meth:`~random.shuffle` method from the python base
-    :mod:`random` module.
-    '''
-    lIndices = []
-    lReset = False
-    while True:
-        if not lIndices or lReset:
-            lReset = False
-            lIndices = range(max)
-            random.shuffle(lIndices)
-        lReset = yield lIndices.pop(0)
-
-
-def booleanGenerator():
-    '''A generator function to build a boolean valued attributes.
-
-    This function use the :meth:`~random.choice` method from the python base
-    :mod:`random` module.
-    '''
-    lChoices = (False, True)
-    while True:
-        yield random.choice(lChoices)
-
-def expressionGenerator(funcSet, termSet, maxDepth):
-    '''A generator function to build an expression tree. The depth of the tree
-    is based on *maxDepth*. *maxDepth* can either be a single value or a tuple.
-    If it is a single value, it corresponds to the depth of tree generated.
-    If *maxDepth* is a tuple, it corresponds to a range of value tree's depth
-    can be. In this case, the tree depth is generated randomly in this range.
     
-
-    This function use the :meth:`~random.gauss` method from the python base
-    :mod:`random` module.
-    '''
-    def arity(func):
-        try:
-            return func.func_code.co_argcount
-        except AttributeError:
-            return func.mArity
-    def __expressionGenerator(funcSet, termSet, maxDepth):
-        if maxDepth == 0 or random.random() < len(termSet)/(len(termSet)+len(funcSet)):
-            expr = random.choice(termSet)
-            try:
-                expr = expr()
-            except TypeError:
-                pass
-        else:
-            lFunc = random.choice(funcSet)
-            lArgs = [__expressionGenerator(funcSet, termSet, maxDepth-1) for i in xrange(arity(lFunc))]
-            expr = [lFunc]
-            expr.extend(lArgs)
-        return expr
-
-    while True:
-        lMaxDepth = maxDepth
-        try:
-             lMaxDepth = random.randint(maxDepth[0], maxDepth[1])
-        except TypeError:
-            pass
-        yield __expressionGenerator(funcSet, termSet, lMaxDepth)
+    def __reduce__(self):
+        return (self.__class__, (self.weights,), self.__dict__, iter(self))
+    
+    
