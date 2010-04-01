@@ -25,7 +25,6 @@ You are encouraged to write your own algorithms in order to make them do what
 you realy them to do.
 '''
 
-from itertools import imap
 import logging
 import math
 import random
@@ -61,7 +60,7 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
         _logger.debug("Max %f", max(fits))
         lenght = len(population)
         mean = sum(fits) / lenght
-        sum2 = sum(imap(lambda x: x**2, fits))
+        sum2 = sum(map(lambda x: x**2, fits))
         std_dev = (sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)

@@ -18,7 +18,6 @@ import os
 import random
 import operator
 import math
-import itertools
 
 sys.path.append(os.path.abspath('..'))
 
