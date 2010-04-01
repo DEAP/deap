@@ -18,6 +18,7 @@ import os
 import random
 import operator
 import math
+import logging
 
 sys.path.append(os.path.abspath('..'))
 
@@ -26,6 +27,8 @@ import eap.creator as creator
 import eap.toolbox as toolbox
 import eap.gp as gp
 import eap.algorithms as algorithms
+
+logging.basicConfig(level=logging.DEBUG)
 
 random.seed(2)
 
@@ -36,29 +39,30 @@ def safeDiv(left, right):
     except ZeroDivisionError:
         return 0
 
-prog_gen = gp.ProgramGenerator()
-prog_gen.addPrimitive(operator.add, 2)
-prog_gen.addPrimitive(operator.sub, 2)
-prog_gen.addPrimitive(operator.mul, 2)
-prog_gen.addPrimitive(safeDiv, 2)
-prog_gen.addPrimitive(operator.neg, 1)
-prog_gen.addPrimitive(math.cos, 1)
-prog_gen.addPrimitive(math.sin, 1)
-prog_gen.addEphemeralConstant(lambda: random.randint(-1,1))
-prog_gen.addTerminal('x')
+psets = gp.ProgrammingSets()
+psets.addPrimitive(operator.add, 2)
+psets.addPrimitive(operator.sub, 2)
+psets.addPrimitive(operator.mul, 2)
+psets.addPrimitive(safeDiv, 2)
+psets.addPrimitive(operator.neg, 1)
+psets.addPrimitive(math.cos, 1)
+psets.addPrimitive(math.sin, 1)
+psets.addEphemeralConstant(lambda: random.randint(-1,1))
+psets.addTerminal('x')
 
 creator.create("Individual", (base.Tree,), {'fitness':base.Fitness})
 creator.create("Population", (base.List,))
 
 tools = toolbox.Toolbox()
-tools.register('expr', prog_gen.generate, min=1, max=2)
-tools.register('individual', creator.Individual, content=tools.expr)
+tools.register('expr_init', gp.generate_ramped, psets=psets, min=1, max=2)
+tools.register('individual', creator.Individual, content=tools.expr_init)
 tools.register('population', creator.Population, size=100, content=tools.individual)
+tools.register('lambdify', gp.lambdify, psets=psets, args='x')
 
 def evalSymbReg(individual):
     if not individual.fitness.isValid():
         # Transform the tree expression in a callable function
-        func = prog_gen.lambdify(individual, 'x')
+        func = tools.lambdify(expr=individual)
         # Evaluate the sum of squared difference between the expression
         # and the real function : x**4 + x**3 + x**2 + x
         values = (x/10. for x in xrange(-10,10))
@@ -69,11 +73,11 @@ def evalSymbReg(individual):
 tools.register('evaluate', evalSymbReg)
 tools.register('select', toolbox.tournSel, tournsize=3)
 tools.register('mate', toolbox.uniformOnePtTreeCx)
-tools.register('mutate', toolbox.uniformTreeMut, expression=tools.expr,
-		        min=0, max=2)
+tools.register('expr_mut', gp.generate_full, psets=psets, min=0, max=2)
+tools.register('mutate', toolbox.uniformTreeMut, expr=tools.expr_mut)
 
 pop = tools.population()
-algorithms.simpleEA(tools, pop, 0.5, 0.2, 50)
+algorithms.simpleEA(tools, pop, 0.5, 0.2, 40)
 
 best = toolbox.bestSel(pop,1)[0]
 

@@ -317,11 +317,11 @@ def uniformOnePtTreeCx(ind1, ind2):
 # GP Mutations                       #
 ######################################
 
-def uniformTreeMut(ind, expression, min, max):
+def uniformTreeMut(ind, expr):
 
     mutant = copy.deepcopy(ind)
     index = random.randint(1, mutant.count_nodes()-1)
-    subtree = base.Tree(expression(min=min,max=max))
+    subtree = base.Tree(expr())
     mutant.set_subtree_dfs(index, subtree)
     try:
         mutant.fitness.invalidate()
