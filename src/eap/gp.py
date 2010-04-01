@@ -4,10 +4,7 @@ from itertools import repeat
 def evaluate(expr):
     try:
         func = expr[0]
-        try:
-            return func(*[evaluate(value) for value in expr[1:]])
-        except TypeError:
-            return func(*expr[1:])
+        return func(*[evaluate(value) for value in expr[1:]])
     except TypeError:
         return expr
 
@@ -26,15 +23,21 @@ class ProgramGenerator(object):
         self.func_dict = dict()
         
     def addPrimitive(self, primitive, arity):
-        if arity > 0:
-            self.primitive_set.append((Primitive(primitive,arity), arity))
-            self.func_dict[primitive.__name__] = primitive
+        if arity <= 0:
+            raise ValueError("arity should be >= 1")
+        self.primitive_set.append((Primitive(primitive,arity), arity))
+        self.func_dict[primitive.__name__] = primitive
 
     def addTerminal(self, terminal):    
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
-        self.terminal_set.append(terminal)
-            
+            self.terminal_set.append(Primitive(terminal,0))
+        else:
+            self.terminal_set.append(terminal)
+
+    def addEphemeralConstant(self, ephemeral):
+        self.terminal_set.append(ephemeral)
+         
     def generate(self, min, max):
         termset_ratio = len(self.terminal_set) / \
                         (len(self.terminal_set)+len(self.primitive_set))

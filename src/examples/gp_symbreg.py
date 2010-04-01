@@ -44,7 +44,7 @@ prog_gen.addPrimitive(safeDiv, 2)
 prog_gen.addPrimitive(operator.neg, 1)
 prog_gen.addPrimitive(math.cos, 1)
 prog_gen.addPrimitive(math.sin, 1)
-prog_gen.addTerminal(lambda: random.randint(-1,1))
+prog_gen.addEphemeralConstant(lambda: random.randint(-1,1))
 prog_gen.addTerminal('x')
 
 creator.create("Individual", (base.Tree,), {'fitness':base.Fitness})
