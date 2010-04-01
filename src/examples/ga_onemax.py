@@ -15,7 +15,6 @@
 
 import sys
 import random
-from itertools import imap
 
 sys.path.append('..')
 
@@ -75,7 +74,7 @@ for g in range(NGEN):
     print '  Max %f' % max(fits)
     lenght = len(pop)
     mean = sum(fits) / lenght
-    sum2 = sum(imap(lambda x: x**2, fits))
+    sum2 = sum(map(lambda x: x**2, fits))
     std_dev = (sum2 / lenght - mean**2)**0.5
     print '  Mean %f' % (mean)
     print '  Std. Dev. %f' % std_dev
