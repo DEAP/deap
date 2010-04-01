@@ -16,25 +16,9 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''The :mod:`base` module of EAP contains the basic structures to be used in an
-evolutionary algorithm. The :class:`Population` structure is intended to
-contain a set of abstract representations of candidate solutions to the
-optimisation problem. Each of those potential solutions are called
-:class:`Individual`. The individuals are usualy composed of a set of attributes
-(widely called genes) and a :class:`Fitness` that describes how good a solution
-is to the problem.
-
-Each structure of the :mod:`base` module may be built directly on its own
-or concatenated with other structure. For example, a population may contain
-individuals or other populations. In the former, the population would behave
-as a monodemic evolutionnary algorithm and in the later, as a multidemic
-evolutionary algorithm.
-
-The derived structures in the :mod:`base` module are only intended to provide
-basic tools to build simple evolutionary algorithm and much more complex
-structures may be developed, in wich case we are strongly interested to get
-feebacks about implementation.
-'''
+"""The :mod:`~eap.base` module provides basic structures to build evolutionary
+algorithms.
+"""
 
 import array
 import copy
@@ -45,6 +29,49 @@ from collections import deque
 from itertools import izip, repeat, count, chain, imap
 
 class List(list):
+    """A List is a basic container that inherits from the python :class:`list`
+    class. The only difference is that it may be initialized using three
+    methods, a callable object, an iterable object or a generator function (the
+    last two initialization methods are the same but both are mentionned
+    in order to emphasize their presence). The first method is to provide a
+    callable object that return the desired value, the method will be
+    called *size* times and the returned valued will be appended to the
+    list after each call. For example, lets build a simple :class:`MyTuple`
+    class that initialize a tuple of boolean and integer in its member values ::
+    
+        class MyTuple(object):
+            calls = 0
+            def __init__(self):
+                self.values = bool(self.calls), calls
+                self.__class__.calls += 1
+            def __repr__(self):
+                return repr(self.values)
+    
+    Initializing a list of 3 MyTuples is done by ::
+    
+        print List(size=3, content=MyTuple)
+        [(False, 0), (True, 1), (True, 2)]
+        
+    The same result may be obtain by providing an iterable to the List's
+    content, in that case, no size is needed since the size will be that same
+    as the iterable provided. ::
+    
+        print List(content=[MyTuple(), MyTuple(), MyTuple()])
+        [(False, 0), (True, 1), (True, 2)]
+        
+    The same thing may be achieved by the uses of a generator function. First 
+    the generator must be defined ::
+    
+        def myGenerator(size):
+            for i in xrange(size):
+                yield MyTuple()
+            raise StopIteration
+            
+    Then it must be initialized and passed to List's content ::
+    
+         print List(content=myGenerator(size=3))
+         [(False, 0), (True, 1), (True, 2)]
+    """
     def __init__(self, size=0, content=None):
         if content is not None:
             if callable(content):
@@ -53,6 +80,13 @@ class List(list):
                 self.extend(content)
 
 class Array(array.array):
+    """An Array is a basic container that inherits from the python
+    :class:`~array.array` class. The only difference is that it may be
+    initialized  by the exact three methods than the :class:`List`. When
+    initializing an Array, a *typecode* must be provided to build the right
+    type of array. The *typecode* must be one of the type codes listed in
+    the python :mod:`array` module.
+    """
     def __new__(cls, typecode, **kargs):
         return super(Array, cls).__new__(cls, typecode)
 
@@ -72,6 +106,17 @@ class Array(array.array):
         return copy_
 
 class Indices(Array):
+    """An Indices is a specialization of the :class:`Array` container, 
+    it contains only integers (type code ``'i'``) between 0 and *size* - 1 and
+    do not repeat the same integer twice. For example, ::
+    
+        print Indices(size=5)
+        array('i', [0, 4, 2, 3, 1])
+        
+    is the same than providing the *content* ``[0, 4, 2, 3, 1]`` and the
+    *type code* ``'i'`` to an :class:`Array`. The Indices class is provided
+    only for convenience.
+    """
     def __new__(cls, **kargs):
         return super(Array, cls).__new__(cls, "i")
     
@@ -80,30 +125,35 @@ class Indices(Array):
         random.shuffle(self)
 
 class Fitness(Array):
-    '''The fitness is a measure of quality of a solution. The fitness
-    inheritates from a python :class:`array.array`, so the number of objectives
-    depends on the lenght of the array. The *weights* (defaults to (-1.0,)) 
-    argument indicates if the fitness value shall be minimized (negative value)
-    or maximized (positive value). The *weights* are also used in
-    multi-objective optimization to normalize the fitness.
-
-    Opposed to :class:`Population` and :class:`Individual`, the
-    *weights* argument is **not** cycled if it is shorter than the number of
-    fitness values. It is extended with its last value.
+    """The fitness is a measure of quality of a solution. The fitness
+    inheritates from the :class:`Array` class, so the number of objectives
+    depends on the lenght of the array.
 
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
     ``!=`` and :meth:`cmp` operators. The comparison of those operators is made
     lexicographically. Maximization and minimization are taken
-    care off by a multiplication between the weights and the fitness values.
+    care off by a multiplication between the :attr:`weights` and the fitness values.
     The comparison can be made between fitnesses of different size, if the
     fitnesses are equal until the extra elements, the longer fitness will be
-    greater than the shorter.
+    superior to the shorter.
 
     .. note::
        When comparing fitness values that are minimized, ``a > b`` will return
        :data:`True` if *a* is inferior to *b*.
-    '''
+    """
+    
     weights = (-1.0,)
+    """The weights are used in the fitness comparison. They are shared among
+    all fitnesses of the same type.
+    This member is **not** meant to be manipulated since it may influence how
+    fitnesses are compared and may
+    result in undesirable effects. However if you wish to manipulate it, in 
+    order to make the change effective to all fitnesses of the same type, use
+    ``FitnessType.weights = new_weights`` or
+    ``self.__class__.weights = new_weights`` or from an individual
+    ``ind.fitness.__class__.weights = new_weights``.
+    """
+    
     def __new__(cls, **kargs):
         return super(Fitness, cls).__new__(cls, 'd')
 
@@ -185,8 +235,5 @@ class Fitness(Array):
         elif other > self:
             return -1
         return 0
-    
-    def __reduce__(self):
-        return (self.__class__, (self.weights,), self.__dict__, iter(self))
     
     

@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''The :mod:`toolbox` module is intended to contain the operators that you need
+"""The :mod:`toolbox` module is intended to contain the operators that you need
 in your evolutionary algorithms, from initialisation to evaluation. It is
 always possible to use directly the operators from this module but the toolbox
 does also contain the default values of the different parameters for each
@@ -22,9 +22,9 @@ since once an oprerator is set, it can be reused with a simple keyword that
 conatins all its arguments. Plus, every keyword or argument can be overriden
 at all time.
 
-The toolbox is also used in predefined algorithms from the :mod:`algorithms`
+The toolbox is also used in predefined algorithms from the :mod:`~eap.algorithms`
 module.
-'''
+"""
 
 import copy
 from functools import partial
@@ -33,17 +33,17 @@ import random
 
 
 class Toolbox(object):
-    '''A toolbox for evolution that contains the evolutionary operators.
+    """A toolbox for evolution that contains the evolutionary operators.
     At first this toolbox is empty, you can populate it by using the method
     :meth:`register`.
-    '''
+    """
 
     def register(self, methodName, method, *args, **kargs):
-        '''Register an operator in the toolbox.'''
+        """Register an operator in the toolbox."""
         setattr(self, methodName, partial(method, *args, **kargs))
 
     def unregister(self, methodName):
-        '''Unregister an operator from the toolbox.'''
+        """Unregister an operator from the toolbox."""
         delattr(self, methodName)
 
 
@@ -52,7 +52,7 @@ class Toolbox(object):
 ######################################
 
 def twoPointsCx(ind1, ind2):
-    '''Execute a two points crossover on the input individuals. The two children
+    """Execute a two points crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
     This operation apply on an :class:`~eap.base.Individual` composed of a list
     of attributes and act as follow ::
@@ -69,7 +69,7 @@ def twoPointsCx(ind1, ind2):
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
-    '''
+    """
     size = min(len(ind1), len(ind2))
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint1 = random.randint(1, size)
@@ -91,7 +91,7 @@ def twoPointsCx(ind1, ind2):
 
 
 def onePointCx(indOne, indTwo):
-    '''Execute a one point crossover on the input individuals. The two children
+    """Execute a one point crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
     This operation apply on an :class:`~eap.base.Individual` composed of a list
     of attributes and act as follow ::
@@ -107,7 +107,7 @@ def onePointCx(indOne, indTwo):
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
-    '''
+    """
     lSize = min(len(indOne), len(indTwo))
     lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
     lCxPoint = random.randint(1, lSize - 1)
@@ -122,7 +122,7 @@ def onePointCx(indOne, indTwo):
     return lChild1, lChild2
 
 def pmCx(ind1, ind2):
-    '''Execute a partialy matched crossover on the input indviduals. The two
+    """Execute a partialy matched crossover on the input indviduals. The two
     childrens produced are returned as a tuple, the two parents are left intact.
     This crossover expect individuals of indices, the result for any other type
     of individuals is unpredictable.
@@ -145,7 +145,7 @@ def pmCx(ind1, ind2):
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
-    '''
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
@@ -190,7 +190,7 @@ def pmCx(ind1, ind2):
 ######################################
 
 def gaussMut(individual, mu, sigma, indpb):
-    '''This function applies a gaussian mutation on the input individual and
+    """This function applies a gaussian mutation on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
     real valued attributes. The *mutIndxPb* argument is the probability of each
@@ -211,7 +211,7 @@ def gaussMut(individual, mu, sigma, indpb):
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
-    '''
+    """
     lMutated = False
     lIndividual = copy.copy(individual)
     
@@ -233,14 +233,14 @@ def gaussMut(individual, mu, sigma, indpb):
 
 
 def shuffleIndxMut(individual, indpb):
-    '''Shuffle the attributes of the input individual and return the mutant.
+    """Shuffle the attributes of the input individual and return the mutant.
     The *individual* is left intact and the mutant is an independant copy. The
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
     probability of each attribute to be moved.
 
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
-    '''
+    """
     mutated = False
     mutant = copy.deepcopy(individual)
     
@@ -262,7 +262,7 @@ def shuffleIndxMut(individual, indpb):
 
 
 def flipBitMut(individual, indpb):
-    '''Flip the value of the attributes of the input individual and return the
+    """Flip the value of the attributes of the input individual and return the
     mutant. The *individual* is left intact and the mutant is an independant
     copy. The *individual* is expected to be iterable and the values of the
     attributes shall stay valid after the ``not`` operator is called on them.
@@ -271,7 +271,7 @@ def flipBitMut(individual, indpb):
 
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
-    '''
+    """
     mutated = False
     mutant = copy.deepcopy(individual)
     
@@ -377,44 +377,41 @@ def uniformTreeMut(individual, treeGenerator, depthRange):
 ######################################
 
 def rndSel(individuals, n):
-    '''Select *n* individuals at random from the input *individuals*. The
-    list returned contains shallow copies of the input *individuals*. That
-    means if an individual is selected twice, modifying one of the two
-    occurences will modify the other.
+    """Select *n* individuals at random from the input *individuals*. The
+    list returned contains shallow copies of the input *individuals*.
 
     .. versionchanged:: 0.3.1a
        Removed random sample without replacement as this is simply a call to
-       python's :func:`~random.sample` function
+       python"s :func:`~random.sample` function
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
-    '''
+    """
     return [random.choice(individuals) for i in xrange(n)]
 
 
 def bestSel(individuals, n):
-    '''Select the *n* best individuals among the input *individuals*. The
+    """Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
-    '''
+    """
     return sorted(individuals, key=lambda ind : ind.fitness, reverse=True)[:n]
 
 
 def worstSel(individuals, n):
-    '''Select the *n* worst individuals among the input *individuals*. The
+    """Select the *n* worst individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
-    '''
+    """
     return sorted(individuals, key=lambda ind : ind.mFitness)[:n]
 
 
 def tournSel(individuals, n, tournsize):
-    '''Select *n* individuals from the input *individuals* using *n*
+    """Select *n* individuals from the input *individuals* using *n*
     tournaments of *tournSize* individuals. The list returned contains shallow
-    copies of the input *individuals*. That means if an individual is selected
-    twice, modifying one of the two occurences will modify the other.
+    copies of the input *individuals*.
 
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
-    '''
+    """
     chosen = []
     for i in xrange(n):
         chosen.append(random.choice(individuals))
@@ -435,57 +432,57 @@ def tournSel(individuals, n, tournsize):
 # Migrations                         #
 ######################################
 
-def ringMig(populations, n, selection, replacement=None, migrationArray=None,
-            selKArgs=None, replKArgs=None):
-    '''Perform a ring migration between the ``populations``. The migration first
-    select *n* emmigrants from each population using the specified *selection*
+def ringMig(populations, n, selection, replacement=None, migarray=None,
+            sel_kargs=None, repl_kargs=None):
+    """Perform a ring migration between the *populations*. The migration first
+    select *n* emigrants from each population using the specified *selection*
     operator and then replace *n* individuals from the associated population in
-    the *migrationArray* by themmigrants. If no *replacement*
-    operator is specified, the immigrants will replace the emmigrants of the
+    the *migarray* by the emigrants. If no *replacement*
+    operator is specified, the immigrants will replace the emigrants of the
     population, otherwise, the immigrants will replace the individuals selected
-    by the *replacement* operator. The migration array if provided, shall
+    by the *replacement* operator. The migration array, if provided, shall
     contain each population's index once and only once. If no migration array
     is provided, it defaults to a serial ring migration (1 -- 2 -- ... -- n -- 1).
     You may pass keyworded arguments to the two selection operators by giving a
-    dictionary to *selKArgs* and *replKArgs*.
-    '''
-    if migrationArray is None:
-        migrationArray = [(i + 1) % len(populations) for i in xrange(len(populations))]
+    dictionary to *sel_kargs* and *repl_kargs*.
+    """
+    if migarray is None:
+        migarray = [(i + 1) % len(populations) for i in xrange(len(populations))]
     else:
-        for i in xrange(len(migrationArray)):
+        for i in xrange(len(migarray)):
             try:
-                migrationArray.index(i) 
+                migarray.index(i) 
             except ValueError:
-                raise ValueError, 'The migration array shall contain each population once and only once.'
+                raise ValueError, "The migration array shall contain each population once and only once."
 
-    lImmigrants = [list()] * len(migrationArray)
-    lEmigrants = [list()] * len(migrationArray)
-    if selKArgs is None:
-        selKArgs = {}
-    if replKArgs is None:
-        replKArgs = {}
+    immigrants = [list()] * len(migarray)
+    emigrants = [list()] * len(migarray)
+    if sel_kargs is None:
+        sel_kargs = {}
+    if repl_kargs is None:
+        repl_kargs = {}
 
-    for lFromDeme in xrange(len(migrationArray)):
-        lEmigrants[lFromDeme].extend(selection(populations[lFromDeme], n=n,
-                                     **selKArgs))
+    for from_deme in xrange(len(migarray)):
+        emigrants[from_deme].extend(selection(populations[from_deme], n=n,
+                                     **sel_kargs))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
-            lImmigrants[lFromDeme] = lEmigrants[lFromDeme]
+            immigrants[from_deme] = emigrants[from_deme]
         else:
             # Else select those who will be replaced
-            lImmigrants[lFromDeme].extend(replacement(populations[lFromDeme],
-                                          n=n, **replKArgs))
+            immigrants[from_deme].extend(replacement(populations[from_deme],
+                                          n=n, **repl_kargs))
 
-    lMigBuf = lEmigrants[0]
-    for lFromDeme, lToDeme in enumerate(migrationArray[1:]):
-        lFromDeme += 1  # Enumerate starts at 0
+    mig_buf = emigrants[0]
+    for from_deme, to_deme in enumerate(migarray[1:]):
+        from_deme += 1  # Enumerate starts at 0
 
-        for i, lImmigrant in enumerate(lImmigrants[lToDeme]):
-            lIndex = populations[lToDeme].index(lImmigrant)
-            populations[lToDeme][lIndex] = lEmigrants[lFromDeme][i]
+        for i, immigrant in enumerate(immigrants[to_deme]):
+            indx = populations[to_deme].index(immigrant)
+            populations[to_deme][indx] = emigrants[from_deme][i]
 
-    lToDeme = migrationArray[0]
-    for i, lImmigrant in enumerate(lImmigrants[lToDeme]):
-        lIndex = populations[lToDeme].index(lImmigrant)
-        populations[lToDeme][lIndex] = lMigBuf[i]
+    to_deme = migarray[0]
+    for i, immigrant in enumerate(immigrants[to_deme]):
+        indx = populations[to_deme].index(immigrant)
+        populations[to_deme][indx] = mig_buf[i]
 

@@ -32,15 +32,18 @@ import random
 _logger = logging.getLogger('eap.algorithms')
 
 def simpleEA(toolbox, population, cxpb, mutpb, ngen):
-    '''The simpleEA algorithm ...
-    '''
+    """The simpleEA algorithm reproduce the simplest evolutionary algorithm. It
+    is intended to be used for
+    """
     _logger.info("Start of evolution")
     # Evaluate the population
     map(toolbox.evaluate, population)
+    
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
-
+        
+        # Select the next generation individuals
         population[:] = toolbox.select(population, n=len(population))
 
         # Apply crossover and mutation

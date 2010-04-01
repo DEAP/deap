@@ -6,23 +6,27 @@ Evolutionary Algorithm Bases
 
 .. automodule:: eap.base
 
+.. _containers:
+
+Container Types
+===============
+
+.. autoclass:: eap.base.List([size, content])
+
+.. autoclass:: eap.base.Array(typecode[, size, content])
+
+.. autoclass:: eap.base.Indices(size)
+
+.. autoclass:: eap.base.Tree
+
+The Creator
+===========
+
 Population
 ==========
-
-.. autoclass:: Population([size, generator])
-   :members:
-
-.. autoclass:: PopulationMatrix([rows, columns, generator])
-   :members:
    
 Individual
 ==========
-
-.. autoclass:: Individual([size, fitness, generator])
-   :members:
-   
-.. autoclass:: IndividualTree
-   :members:
    
 Fitness
 =======
@@ -33,23 +37,17 @@ Fitness
 Attribute
 =========
 
-.. versionchanged:: 0.2.1a
-   From now, a Gene will be called an attribute, in order to avoid any confusion with biology terminologie that can miss lead the real extent of the individual's attributes.
-
-Version 0.2.1a of EAP elliminated the :class:`Gene` class since any object may be inserted in an :class:`Individual` as an attribute. Instead generator function are used to produce those attributes. In fact, when initializing an individual, the generator's :func:`next` function is simply called repeatedly until the individual has all its attributes.
-
-.. autofunction:: realGenerator(min, max)
-
-.. autofunction:: integerGenerator(min, max)
-
-.. autofunction:: indiceGenerator
-
-.. autofunction:: booleanGenerator
-
-.. autofunction:: esGenerator
-
-   .. versionadded:: 0.3.1
+.. versionchanged:: 0.4.0
+   While in version 0.2.1a :class:`Genes` were removed in favor of attributes generator, version 0.4.0 does not use implicite attribute generator. Intead, :ref:`containers` may be initialized by more than one method including the use of generator functions, iterables and callables.
    
-.. autofunction:: expressionGenerator
+Here is an example of how to implement a generator function that produce a serie of boolean and integer that may be used to produce individuals. ::
 
-   .. version added:: 0.3.1
+    def myGenerator(size, min, max):
+        i = 0
+        while i < size:
+            if i % 2 == 0:
+                yield random.choice((True, False))
+            else:
+                yield random.randint(min, max)
+            i += 1
+        raise StopIteration

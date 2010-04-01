@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''
+"""
 EAP stands for Evolutionary Algorithm in Python, it is dedicated to people who
 wish to learn how to use evolutionary algorithms and to those who wish to
 rediscover evolutionary algorithms. The concepts of EAP may be extremely well
@@ -34,8 +34,8 @@ resumed by some statements of the `Zen of Python
 - If the implementation is easy to explain, it may be a good idea.
 
 EAP is the proof that evolutionary algorithms do **not** need to be complicated.
-'''
+"""
 
-__author__ = 'Francois-Michel De Rainville and Felix-Antoine Fortin'
-__version__ = '0.4'
-__revision__ = '0.4.0'
+__author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
+__version__ = "0.4"
+__revision__ = "0.4.0"
