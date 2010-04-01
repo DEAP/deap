@@ -25,9 +25,6 @@ Crossover
 
 .. autofunction:: pmCx
 
-.. .. autofunction:: blendESCx
-..
-..    .. versionadded:: 0.3.1a
 
 Mutation
 --------
@@ -38,9 +35,6 @@ Mutation
 
 .. autofunction:: flipBitMut
 
-.. .. autofunction:: gaussESMut
-.. 
-..    .. versionadded:: 0.3.1a
 
 Selection
 ---------
@@ -56,5 +50,5 @@ Selection
 Migration
 ---------
 
-.. autofunction:: ringMig(populations, n, selection[, replacement[, migrationArray[, selKArgs[, replKArgs]]]])
+.. autofunction:: ringMig(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
 

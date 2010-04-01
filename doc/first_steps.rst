@@ -2,14 +2,13 @@
 First Steps of Evolution
 ========================
 
+.. warning::
+   This documentation is out of date as of version 0.4. See the :ref:`ga-onemax` tutorial and :ref:`ea-bases` for details on version 0.4.x.
+
 Before starting with complex algorithms, we will see some basis of EAP. First, we will start by creating simple individuals and make them interact with each other. After, we will learn how to use different operators. And then, we will learn how to use the :class:`~eap.toolbox.Toolbox` in order to build the desired structures
 
 A First Individual
 ==================
-
-.. automodule: eap.base
-
-.. automodule: eap.operators
 
 First open a python console and import the :mod:`eap.base` module. ::
 
@@ -90,7 +89,7 @@ Selection is made among a population by the selection operators that are availab
     >>> toolbox.bestSel([child1, child2], n=1)
     [[True, True, False, True, True]: [4.0, 0.2]]
 
-.. warning:: Its is **very** important here to note that the selection operators does not duplicate any individual during the selection process. If an individual is selected twice and one of either object is modified, the other will also be modified. Only the reference on the individual is copied.
+.. warning:: It is **very** important here to note that the selection operators does not duplicate any individual during the selection process. If an individual is selected twice and one of either object is modified, the other will also be modified. Only the reference on the individual is copied.
 
 The Toolbox
 ===========
