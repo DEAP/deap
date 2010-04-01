@@ -78,6 +78,128 @@ class Indices(Array):
     def __init__(self, size=0):
         self.extend(i for i in xrange(size))
         random.shuffle(self)
+        
+        
+class Tree(list):
+    """ Basic N-ary tree class"""
+    @classmethod
+    def create_node(cls, obj):
+        try:
+            Node = type('Node', (obj.__class__,), {})
+        except TypeError:
+            if callable(obj):
+                Node = type('Node', (object,), {"__call__":staticmethod(obj)})
+
+        Node.count_nodes = staticmethod(lambda: 1)
+        Node.height = staticmethod(lambda: 0)
+
+        try:
+            new_node = Node(obj)
+        except TypeError:
+            new_node = Node.__new__(Node)
+            new_node.__dict__.update(obj.__dict__)
+            
+        return new_node
+
+    @classmethod
+    def rectify_subtree(cls, subtree):
+        if isinstance(subtree, Tree):
+            if len(subtree) > 1:
+                return subtree
+            else:
+                return subtree[0]
+        else:
+            return subtree
+
+    def __init__(self, content=None):
+        list.__init__(self)
+        if hasattr(content, "__call__"):
+            content = content()
+        for elem in content:
+            if isinstance(elem, list):
+                self.append(Tree(elem))
+            else:
+                self.append(Tree.create_node(elem))
+
+    def count_nodes(self):
+        """ This method returns the number of nodes in the tree."""
+        return sum(elem.count_nodes() for elem in self)
+
+    def height(self):
+        """ This method returns the height of the tree."""
+        return max(elem.height() for elem in self)+1
+
+    def search_subtree_dfs(self, index):
+        """ This method searches the subtree with the
+            corresponding index based on a depth first
+            search.
+        """
+        if index == 0:
+            return self
+        total = 0
+        for child in self:
+            if total == index:
+                return child
+            nbr_child = child.count_nodes()
+            if nbr_child + total > index:
+                return child.search_subtree_dfs(index-total)
+            total += nbr_child
+
+    def set_subtree_dfs(self, index, subtree):
+        """ This method replaced the tree with
+            the corresponding index by subtree based
+            on a depth-first search.
+        """
+        if index == 0:
+            self[:] = subtree
+            return
+        total = 0
+        for i, child in enumerate(self):
+            if total == index:
+                self[i] = Tree.rectify_subtree(subtree)
+                return
+            nbr_child = child.count_nodes()
+            if nbr_child + total > index:
+                child.set_subtree_dfs(index-total, subtree)
+                return
+            total += nbr_child
+
+    def search_subtree_bfs(self, index):
+        """ This method searches the subtree with the
+            corresponding index based on a breadth-first
+            search.
+        """
+        if index == 0:
+            return self
+        queue = deque(self[1:])
+        total = 0
+        while total != index:
+            total += 1
+            subtree = queue.popleft()
+            if isinstance(subtree, Tree):
+                queue.extend(subtree[1:])
+        return subtree
+
+    def set_subtree_bfs(self, index, subtree):
+        """ This method replaced the tree with
+            the corresponding index by subtree based
+            on a breadth-first search.
+        """
+        if index == 0:
+            self[:] = subtree
+            return
+        queue = deque(izip(repeat(self, len(self[1:])), count(1)))
+        total = 0
+        while total != index:
+            total += 1
+            elem = queue.popleft()
+            parent = elem[0]
+            child  = elem[1]
+            if isinstance(parent[child], Tree):
+                tree = parent[child]
+                queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
+        parent[child] = Tree.rectify_subtree(subtree)        
+        
 
 class Fitness(Array):
     '''The fitness is a measure of quality of a solution. The fitness
@@ -122,7 +244,7 @@ class Fitness(Array):
         all the fitness values. This method has to be used after an individual
         is modified.
         '''
-	self[:] = array.array('d')
+        self[:] = array.array('d')
 
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort
