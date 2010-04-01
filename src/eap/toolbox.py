@@ -27,10 +27,11 @@ module.
 """
 
 import copy
-from functools import partial
 import math
 import random
+from functools import partial
 
+import eap.base as base
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
@@ -291,86 +292,42 @@ def flipBitMut(individual, indpb):
 # GP Crossovers                      #
 ######################################
 
-def onePtCxGP(indOne, indTwo):
-    def chooseSubTree(expr1, expr2):
-	try:
-	    index = random.randint(1,min([len(expr1), len(expr2)])-1)
-        except TypeError:
-	    return None, None, None
-        
-        if random.random() < 0.5:
-            lRetIndex, lSub1, lSub2 = chooseSubTree(expr1[index], expr2[index])
-            if lRetIndex is not None:
-                return lRetIndex, lSub1, lSub2
-        return index, expr1, expr2
+def uniformOnePtTreeCx(ind1, ind2):
 
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    
+    try:
+        index = random.randint(1,min([ind1.count_nodes(), ind2.count_nodes()])-1)    
+    except ValueError:
+        return child1, child2
 
-    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-    index, lSub1, lSub2 = chooseSubTree(lChild1, lChild2)
-    lSub1[index], lSub2[index] = lSub2[index], lSub1[index]
+    sub1 = ind1.search_subtree_dfs(index)
+    sub2 = ind2.search_subtree_dfs(index)
+    child1.set_subtree_dfs(index, sub2)
+    child2.set_subtree_dfs(index, sub1)
 
     try:
-        lChild1.mFitness.invalidate()
-        lChild2.mFitness.invalidate()
+        child1.fitness.invalidate()
+        child2.fitness.invalidate()
     except AttributeError:
         pass
-
-    return lChild1, lChild2
-
-def uniformOnePtCxGP(indOne, indTwo):
-
-    index = random.randint(1,min([len(indOne), len(indTwo)])-1)
-
-    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-
-    lChild1.setSubTree(indTwo.getSubTree(index),index)
-    lChild2.setSubTree(indOne.getSubTree(index),index)
-    try:
-        lChild1.mFitness.invalidate()
-        lChild2.mFitness.invalidate()
-    except AttributeError:
-        pass
-    return lChild1, lChild2
+    return child1, child2
 
 ######################################
 # GP Mutations                       #
 ######################################
 
-def subTreeMut(individual, treeGenerator, depthRange):
-    def chooseSubTree(expr):
-	try:
-	    index = random.randint(1,len(expr)-1)
-	except TypeError:
-	    return None, None
+def uniformTreeMut(ind, expression, min, max):
 
-        if random.random() < 0.5:
-            ret_val, sub_tree = chooseSubTree(expr[index])
-            if ret_val is not None:
-                return ret_val, sub_tree
-        return index, expr
-
-    lIndividual = copy.copy(individual)
-    index, sub = chooseSubTree(lIndividual)
-    subExprGen = treeGenerator(maxDepth=depthRange)
-    sub[index] = subExprGen.next()
+    mutant = copy.deepcopy(ind)
+    index = random.randint(1, mutant.count_nodes()-1)
+    subtree = base.Tree(expression(min=min,max=max))
+    mutant.set_subtree_dfs(index, subtree)
     try:
-        lIndividual.mFitness.invalidate()
-    except AtributeError:
+        mutant.fitness.invalidate()
+    except AttributeError:
         pass
-    return lIndividual
-
-def uniformTreeMut(individual, treeGenerator, depthRange):
-
-    lIndividual = copy.copy(individual)
-    index = random.randint(1, len(lIndividual)-1)
-    subExprGen = treeGenerator(maxDepth=depthRange)
-    lIndividual.setSubTree(index, subExprGen.next())
-    try:
-        lIndividual.mFitness.invalidate()
-    except AtributeError:
-        pass
-    return lIndividual
-
+    return mutant
 
 ######################################
 # Selections                         #
