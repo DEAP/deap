@@ -131,8 +131,7 @@ class Tree(list):
     def create_node(cls, obj):
         try:
             Node = type('Node', (obj.__class__,), {})
-        except TypeError, s:
-            print s
+        except TypeError:
             if callable(obj):
                 Node = type('Node', (object,), {"__call__":staticmethod(obj)})
 
