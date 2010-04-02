@@ -17,7 +17,7 @@ Container Types
 
 .. autoclass:: eap.base.Indices(size)
 
-.. autoclass:: eap.base.Tree
+.. autoclass:: eap.base.Tree([content])
 
 The Creator
 ===========
@@ -31,7 +31,7 @@ Individual
 Fitness
 =======
 
-.. autoclass:: Fitness(weights)
+.. autoclass:: Fitness
    :members:
 
 Attribute
