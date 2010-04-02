@@ -14,6 +14,7 @@ Evolutionary Content
    evo_toolbox
    algorithms
    stats
+   cma
    
 Tutorials
 ---------

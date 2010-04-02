@@ -43,7 +43,7 @@ The first line creates a maximizing fitness by replacing in the base type :class
 Toolbox
 -------
 
-The :mod:`eap.toolbox` is an other convenience module that contains a :class:`~eap.toolbox.Toolbox` class intended store functions with their arguments. The :class:`~eap.toolbox.Toolbox` contains two simple methods, :meth:`~eap.toolbox.Toolbox.register` and :meth:`~eap.toolbox.Toolbox.unregister`.::
+The :mod:`eap.toolbox` is an other convenience module that contains a :class:`~eap.toolbox.Toolbox` class intended store functions with their arguments. The :class:`~eap.toolbox.Toolbox` contains two simple methods, :meth:`~eap.toolbox.Toolbox.register` and :meth:`~eap.toolbox.Toolbox.unregister`. ::
 
     tools = toolbox.Toolbox()
     tools.register("individual", creator.Individual, size=100, typecode="b",
