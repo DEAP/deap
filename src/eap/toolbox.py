@@ -30,6 +30,8 @@ import copy
 import math
 import random
 from functools import partial
+# Needed by Nondominated sorting
+from itertools import chain, izip, repeat
 
 import eap.base as base
 
@@ -124,7 +126,7 @@ def onePointCx(indOne, indTwo):
 
 def pmCx(ind1, ind2):
     """Execute a partialy matched crossover on the input indviduals. The two
-    childrens produced are returned as a tuple, the two parents are left intact.
+    children produced are returned as a tuple, the two parents are left intact.
     This crossover expect individuals of indices, the result for any other type
     of individuals is unpredictable.
 
@@ -133,7 +135,7 @@ def pmCx(ind1, ind2):
     of those indexes. For more details see Goldberg and Lingel, "Alleles,
     loci, and the traveling salesman problem", 1985.
 
-    For example, the following parents will produce the two following childrens
+    For example, the following parents will produce the two following children
     when mated with crossover points ``a = 2`` and ``b = 3``. ::
 
         >>> ind1 = [0, 1, 2, 3, 4]
@@ -285,7 +287,6 @@ def flipBitMut(individual, indpb):
             mutant.fitness.invalidate()
         except AttributeError:
             pass
-    
     return mutant
 
 ######################################
@@ -378,6 +379,100 @@ def tournSel(individuals, n, tournsize):
                 chosen[i] = aspirant
 
     return chosen
+    
+######################################
+# Non-Dominated Sorting   (NSGA-II)  #
+######################################
+
+def nsga2(individuals, n):
+    """Apply NSGA-2 selection operator on the *individuals*.
+    """
+    pareto_fronts = sortFastND(individuals, n)
+    
+#    import matplotlib.pyplot as plt
+#    from itertools import cycle
+#    plt.figure(2)
+#    colors = cycle("bgrcmky")
+#    for i, front in enumerate(pareto_fronts):
+#        fit1 = [ind.fitness[0] for ind in front]
+#        fit2 = [ind.fitness[1] for ind in front]
+#        plt.scatter(fit1, fit2, c=colors.next())
+#    plt.show()
+#    print len(pareto_fronts)
+    
+    chosen = list(chain(*pareto_fronts[:-1]))
+    n = n - len(chosen)
+    if n > 0:
+        chosen.extend(sortCrowdingDist(pareto_fronts[-1])[0:n])
+    return chosen
+    
+
+def sortFastND(individuals, n):
+    """Sort the first *n* *individuals* according the the fast non-dominated
+    sorting algorithm. 
+    """
+    N = len(individuals)
+    pareto_fronts = []
+    
+    if n == 0:
+        return pareto_fronts
+    
+    pareto_fronts.append([])
+    pareto_sorted = 0
+    dominating_inds = dict(izip(individuals, repeat(0)))
+    dominated_inds = dict(izip(individuals, (list() for i in xrange(N))))
+    
+    # Rank first Pareto front
+    for i, ind_i in enumerate(individuals):
+        for ind_j in individuals[i+1:]:
+            if ind_j.fitness.is_dominated(ind_i.fitness):
+                dominating_inds[ind_j] += 1
+                dominated_inds[ind_i].append(ind_j)
+            elif ind_i.fitness.is_dominated(ind_j.fitness):
+                dominating_inds[ind_i] += 1
+                dominated_inds[ind_j].append(ind_i)
+        if dominating_inds[ind_i] == 0:
+            pareto_fronts[-1].append(ind_i)
+            pareto_sorted += 1
+    
+    # Rank the next front until all individuals are sorted or the given
+    # number of individual are sorted
+    while pareto_sorted < N and pareto_sorted < n:
+        pareto_fronts.append([])
+        for ind_p in pareto_fronts[-2]:
+            for ind_d in dominated_inds[ind_p]:
+                dominating_inds[ind_d] -= 1
+                if dominating_inds[ind_d] == 0:
+                    pareto_fronts[-1].append(ind_d)
+                    pareto_sorted += 1
+    
+    return pareto_fronts
+
+
+def sortCrowdingDist(individuals):
+    """Sort the individuals according to the crowding distance.
+    """
+    if len(individuals) == 0:
+        return []
+    distances = dict(izip(individuals, repeat(None)))
+    crowding = []
+    
+    for ind in individuals:
+        distances[ind] = (0.0)
+        crowding.append(ind)
+        
+    number_objectives = len(individuals[0].fitness)
+    for i in xrange(number_objectives):
+        crowding.sort(key=lambda ind: ind.fitness[i])
+        distances[crowding[0]] = float("inf")
+        distances[crowding[-1]] = float("inf")
+        for j, ind in enumerate(crowding[1:-1]):
+            if distances[ind] < float("inf"):
+                distances[ind] += crowding[j + 1].fitness[i] - \
+                                  crowding[j - 1].fitness[i]
+    sorted_dist = sorted(distances.iteritems(), key=lambda item: item[1], reverse=True)
+    return [item[0] for item in sorted_dist]
+
 
 ######################################
 # Replacement Strategies (ES)        #
@@ -412,8 +507,8 @@ def ringMig(populations, n, selection, replacement=None, migarray=None,
             except ValueError:
                 raise ValueError, "The migration array shall contain each population once and only once."
 
-    immigrants = [list()] * len(migarray)
-    emigrants = [list()] * len(migarray)
+    immigrants = [[] for i in len(migarray)]
+    emigrants = [[] for i in len(migarray)]
     if sel_kargs is None:
         sel_kargs = {}
     if repl_kargs is None:

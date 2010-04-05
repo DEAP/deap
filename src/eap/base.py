@@ -27,6 +27,7 @@ import random
 
 from collections import deque
 from itertools import izip, repeat, count, chain, imap
+import itertools
 
 class List(list):
     """A List is a basic container that inherits from the python :class:`list`
@@ -36,8 +37,16 @@ class List(list):
     in order to emphasize their presence). The first method is to provide a
     callable object that return the desired value, the method will be
     called *size* times and the returned valued will be appended to the
-    list after each call. For example, lets build a simple :class:`MyTuple`
-    class that initialize a tuple of boolean and integer in its member values ::
+    list after each call. The most classic way to initialize a List is to
+    provide a :data:`lambda` function using a random method, for instance, ::
+    
+        print List(size=3, content=lambda: random.choice((True, False)))
+        [False, False, True]
+    
+    A similar way is to provide the *content* argument with a class. For 
+    example, lets build a simple
+    :class:`MyTuple` class that initialize a tuple of boolean and integer
+    in its member values ::
     
         class MyTuple(object):
             calls = 0
@@ -47,14 +56,14 @@ class List(list):
             def __repr__(self):
                 return repr(self.values)
     
-    Initializing a list of 3 MyTuples is done by ::
+    Initializing a list of 3 :class:`MyTuples` is done by ::
     
         print List(size=3, content=MyTuple)
         [(False, 0), (True, 1), (True, 2)]
         
-    The same result may be obtain by providing an iterable to the List's
-    content, in that case, no size is needed since the size will be that same
-    as the iterable provided. ::
+    The same result may be obtained by providing an iterable to the List's
+    *content*, in that case, no *size* is needed since the size will be that
+    same as the iterable provided. ::
     
         print List(content=[MyTuple(), MyTuple(), MyTuple()])
         [(False, 0), (True, 1), (True, 2)]
@@ -67,7 +76,7 @@ class List(list):
                 yield MyTuple()
             raise StopIteration
             
-    Then it must be initialized and passed to List's content ::
+    Then it must be initialized and passed to List's *content* ::
     
          print List(content=myGenerator(size=3))
          [(False, 0), (True, 1), (True, 2)]
@@ -81,7 +90,7 @@ class List(list):
 
 class Array(array.array):
     """An Array is a basic container that inherits from the python
-    :class:`~array.array` class. The only difference is that it may be
+    :class:`~array.array` class. The Array may be
     initialized  by the exact three methods than the :class:`List`. When
     initializing an Array, a *typecode* must be provided to build the right
     type of array. The *typecode* must be one of the type codes listed in
@@ -292,7 +301,7 @@ class Fitness(Array):
     def invalidate(self):
         '''Invalidate this fitness. As a matter of facts, it simply deletes
         all the fitness values. This method has to be used after an individual
-        is modified.
+        is modified, usualy it is done in the modification operator.
         '''
         self[:] = array.array('d')
 
@@ -306,13 +315,13 @@ class Fitness(Array):
         '''
         not_equal = False
         # Pad the weights with the last value
-        weights = chain(self.weights, repeat(self.weights[-1]))
-        for weight, self_value, other_value in zip(weights, self, other):
-            self_value = self_value * weight
-            other_value = other_value * weight
-            if (self_value) > (other_value):
+#        weights = itertools.chain(self.weights, repeat(self.weights[-1]))
+        for weight, self_value, other_value in izip(self.weights, self, other):
+            self_w_value = self_value * weight
+            other_w_value = other_value * weight
+            if (self_w_value) > (other_w_value):
                 return False
-            elif (self_value) < (other_value):
+            elif (self_w_value) < (other_w_value):
                 not_equal = True
         return not_equal
 
