@@ -48,7 +48,7 @@ Crossover
 
 The second kind of operator that we will present is the crossover operator. There is a variety of crossover operators in the :mod:`eap.toolbox` module. Each crossover has its own caracteristics and may be applied to different type of individuals. Be carefull to read the documentation of the selected operator in order to avoid undesirable behavior.
 
-The general rule for crossover operators is that they return childrens that are independent of their parents and do not touch to the parents configuration. The returned childrens have invalid fitness.
+The general rule for crossover operators is that they return children that are independent of their parents and do not touch to the parents configuration. The returned children have invalid fitness.
 
 Lets create a second individual using the same technique as before, and apply the crossover operation. ::
 
@@ -57,7 +57,7 @@ Lets create a second individual using the same technique as before, and apply th
     >>> toolbox.twoPointsCx(ind1, ind2)
     ([True, True, False, True, True]: [], [False, False, True, True, True]: [])
 
-Now we have two different individuals and their respective child. Both of the childrens have an invalid fitness.
+Now we have two different individuals and their respective child. Both of the children have an invalid fitness.
 
 Evaluation
 ==========

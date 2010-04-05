@@ -27,21 +27,22 @@ try:
 except:
     raise ImportError, "NumPy is required by the CMA-ES package, you can find NumPy at http://numpy.scipy.org/"
     
-def cmaes(tools, individual, sigma, **kargs):
-    """The CMA-Es algorithm as described in ..
+def cmaes(toolbox, individual, sigma, **kargs):
+    """The CMA-Es algorithm as described in ...
     
     Additional configuration may be passed throught the keyworded arguments,
+    
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
     +================+===========================+============================+
-    | ``lambda_``    | ``floor(4 + 3 * log(N))`` | Number of childrens to     |
+    | ``lambda_``    | ``floor(4 + 3 * log(N))`` | Number of children to      |
     |                |                           | produce at each generation,|
     |                |                           | ``N`` is the individual's  |
     |                |                           | size.                      |
     +----------------+---------------------------+----------------------------+
     | ``mu``         | ``floor(lambda_ / 2)``    | The number of parents to   | 
     |                |                           | keep from the              |
-    |                |                           | lambda childrens.          |
+    |                |                           | lambda children.           |
     +----------------+---------------------------+----------------------------+
     | ``weights``    | ``"superlinear"``         | Decrease speed, can be     |
     |                |                           | ``"superlinear"``,         |
@@ -65,9 +66,9 @@ def cmaes(tools, individual, sigma, **kargs):
     |                | mueff) / ((N + 2)^2 +     | update.                    |
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
+    
     """
     indsize = len(individual)
-    fitness_model = copy.deepcopy(individual.fitness)
     
     dict = kargs
     
@@ -81,7 +82,8 @@ def cmaes(tools, individual, sigma, **kargs):
     
     pc = numpy.zeros(indsize)
     ps = numpy.zeros(indsize)
-    chiN = math.sqrt(indsize) * (1 - 1. / (4. * indsize) + 1. / (21. * indsize**2))
+    chiN = math.sqrt(indsize) * (1 - 1. / (4. * indsize) + \
+                                     1. / (21. * indsize**2))
     
     B = numpy.identity(indsize)
     C = numpy.identity(indsize)
@@ -102,7 +104,8 @@ def cmaes(tools, individual, sigma, **kargs):
             mu = dict.get("mu", lambda_ / 2)
             rweights = dict.get("weights", "superlinear")
             if rweights == "superlinear":
-                weights = math.log(mu + 0.5) - numpy.log(numpy.arange(1, mu + 1))
+                weights = math.log(mu + 0.5) - \
+                          numpy.log(numpy.arange(1, mu + 1))
             elif rweights == "linear":
                 weights = mu + 0.5 - numpy.arange(1, mu + 1)
             elif rweights == "equal":
@@ -122,7 +125,9 @@ def cmaes(tools, individual, sigma, **kargs):
                                              ((indsize + 2.)**2 + mueff))
             ccovmu = min(1 - ccov1, ccovmu)
             
-            damps = dict.get("damps", 1. + 2. * max(0, math.sqrt((mueff - 1.) / (indsize + 1.)) - 1.) + cs)
+            damps = 1. + 2. * max(0, math.sqrt((mueff - 1.) / \
+                                               (indsize + 1.)) - 1.) + cs
+            damps = dict.get("damps", damps)
         
         itercount += 1
         
@@ -137,19 +142,25 @@ def cmaes(tools, individual, sigma, **kargs):
         # Evaluation ... Test with rastrigin
         fitnesses = numpy.empty((lambda_,))
         for i in xrange(lambda_):
-            fitnesses[i] = tools.evaluate(arx[i])
+            fitnesses[i] = toolbox.evaluate(arx[i])
         
         sorted_indx = numpy.argsort(fitnesses)
+        print fitnesses[sorted_indx[0]]
         
         xold = numpy.array(xmean)
         xmean = numpy.dot(weights, arx[sorted_indx[0:mu]])
         zmean = numpy.dot(weights, arz[sorted_indx[0:mu]])
         
-        ps = (1 - cs) * ps + math.sqrt(cs * (2 - cs) * mueff) * numpy.dot(B.T, zmean)
+        # Cumulation : update evolution path
+        ps = (1 - cs) * ps + \
+             math.sqrt(cs * (2 - cs) * mueff) * numpy.dot(B.T, zmean)
         
-        hsig = numpy.linalg.norm(ps) / math.sqrt(1 - (1 - cs)**(2 * itercount)) / chiN < 1.4 + 2/(indsize + 1)
+        hsig = numpy.linalg.norm(ps) / \
+               math.sqrt(1 - (1 - cs)**(2 * itercount)) / \
+               chiN < 1.4 + 2/(indsize + 1)
         
-        pc = (1 - cc) * pc + hsig * (math.sqrt(cc * (2 - cc) * mueff) / sigma) * (xmean - xold)
+        pc = (1 - cc) * pc + \
+             hsig * (math.sqrt(cc * (2 - cc) * mueff) / sigma) * (xmean - xold)
         
         
         #Z = numpy.zeros((indsize,indsize))
@@ -158,6 +169,7 @@ def cmaes(tools, individual, sigma, **kargs):
         #    Z += numpy.outer((ccovmu * weights[i] / sigma**2) * z, z)
         #C = (1 - ccov1 - ccovmu) * C + numpy.outer(ccov1 * pc, pc) + Z
         
+        # Covariance matrix update
         artmp = arx[sorted_indx[0:mu]] - xold
         C = (1 - ccov1 - ccovmu + (1 - hsig) * ccov1 * cc * (2 - cc)) * C \
             + numpy.outer(ccov1 * pc, pc) \
@@ -174,8 +186,6 @@ def cmaes(tools, individual, sigma, **kargs):
         B = B[:,indx]
         BD = B * diagD
         
-        
-        
         if fitnesses[sorted_indx[0]] < 10**-7:
             stop_flags.append(True)
             
@@ -183,29 +193,33 @@ def cmaes(tools, individual, sigma, **kargs):
         individual[i] = attr
     individual.fitness.append(fitnesses[sorted_indx[0]])
     return individual
-            
+
 
 def rand(x):
+    """Random test objective function."""
     return numpy.random.random()
     
 def plane(x):
+    """Plane test objective function."""
     return x[0]
 
 def rastrigin(x):
-    """Rastrigin test objective function"""
-    N = len(x)
-    return 10 * N + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
+    """Rastrigin test objective function. Consider using ``lambda_ = 20 * N`` 
+    for this test function.
+    """
+    return 10 * len(x) + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
     
 def sphere(x):
+    """Sphere test objective function."""
     return sum(x**2)
 
 def cigar(x, rot=0):
-    """Cigar test objective function"""
+    """Cigar test objective function."""
     #if rot:
     #    x = rotate(x)  
     return x[0]**2 + 1e6 * sum(x[1:]**2)
 
 def rosen(x):  
-    """Rosenbrock test objective function"""
+    """Rosenbrock test objective function."""
     return sum(100.*(x[:-1]**2-x[1:])**2 + (1.-x[:-1])**2)
     
