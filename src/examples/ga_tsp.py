@@ -26,8 +26,7 @@ import eap.toolbox as toolbox
 import eap.algorithms as algorithms
 
 logging.basicConfig(level=logging.INFO)
-
-random.seed(121)
+random.seed(1638)
 
 # gr*.yml contains the distance map in list of list style in YAML/JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
@@ -42,11 +41,10 @@ tools.register("individual", creator.Individual, size=IND_SIZE)
 tools.register("population", creator.Population, size=300, content=tools.individual)
 
 def evalTSP(individual):
-    if not individual.fitness.isValid():
-        distance = distance_map[individual[-1]][individual[0]]
-        for gene1, gene2 in zip(individual[0:-1], individual[1:]):
-            distance += distance_map[gene1][gene2]
-        individual.fitness.append(distance)
+    distance = distance_map[individual[-1]][individual[0]]
+    for gene1, gene2 in zip(individual[0:-1], individual[1:]):
+        distance += distance_map[gene1][gene2]
+    return [distance]
 
 tools.register("mate", toolbox.pmCx)
 tools.register("mutate", toolbox.shuffleIndxMut, indpb=0.05)

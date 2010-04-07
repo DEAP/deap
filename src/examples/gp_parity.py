@@ -76,10 +76,9 @@ tools.register('population', creator.Population, size=500, content=tools.individ
 tools.register('lambdify', gp.lambdify, psets=psets, args=['IN0', 'IN1', 'IN2', 'IN3', 'IN4', 'IN5'])
 
 def evalParity(individual):
-    if not individual.fitness.isValid():
-        func = tools.lambdify(expr=individual)
-        good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
-        individual.fitness.append(good)
+    func = tools.lambdify(expr=individual)
+    good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
+    return [good]
 
 tools.register('evaluate', evalParity)
 tools.register('select', toolbox.tournSel, tournsize=3)

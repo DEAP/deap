@@ -36,8 +36,11 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
     is intended to be used for
     """
     _logger.info("Start of evolution")
-    # Evaluate the population
-    map(toolbox.evaluate, population)
+    
+    # Evaluate the invalid individuals
+    for ind in population:
+        if not ind.fitness.valid:
+            ind.fitness.extend(toolbox.evaluate(ind))
     
     # Begin the generational process
     for g in range(ngen):
@@ -54,8 +57,10 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
             if random.random() < mutpb:
                 population[i] = toolbox.mutate(population[i])
 
-        # Evaluate the population
-        map(toolbox.evaluate, population)
+        # Evaluate the invalid individuals
+        for ind in population:
+            if not ind.fitness.valid:
+                ind.fitness.extend(toolbox.evaluate(ind))
 
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness[0] for ind in population]
@@ -73,40 +78,37 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
 def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm, ...
     """
-    if cxpb + mutpb != 1.0:
-        sum_ = cxpb + mutpb
-        cxpb /= sum_
-        mutpb /= sum_
-        del sum_
-        warn = "Sum of crossover and mutation probabilities is different "
-        warn += "than 1.0. Probabilities have been scaled to "
-        warn += "%f and %f respectivly." % (cxpb, mutpb)
-        _logger.warning(warn)
+    assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
     
     _logger.info("Start of evolution")
-    # Evaluate the population
-    map(toolbox.evaluate, population)
+    
+    # Evaluate the invalid individuals
+    for ind in population:
+        if not ind.fitness.valid:
+            ind.fitness.extend(toolbox.evaluate(ind))
     
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
         
         children = []
-        while len(children) < lambda_:
-            if random.random() < cxpb:
+        for i in xrange(lambda_):
+            op_choice = random.random()
+            if op_choice < cxpb:
                 p1, p2 = toolbox.select(population, 2)
-                children.extend(toolbox.mate(p1, p2))
-            else:
+                children.append(toolbox.mate(p1, p2)[0])
+            elif op_choice < cxpb + mutpb:
                 p = toolbox.select(population, 1)
                 children.append(toolbox.mutate(p[0]))
+            else:
+                children.append(toolbox.select(population, 1)[0])
         
-        while len(children) > lambda_:
-            children.pop()
+        # Evaluate the invalid individuals
+        for ind in children:
+            if not ind.fitness.valid:
+                ind.fitness.extend(toolbox.evaluate(ind))
         
-        map(toolbox.evaluate, children)
-        
-        population.extend(children)
-        population[:] = toolbox.select(population, mu)
+        population[:] = toolbox.select(population + children, mu)
         
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness[0] for ind in population]
@@ -125,38 +127,35 @@ def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm
     """
     assert lambda_ >= mu, "lambda must be greater or equal to mu." 
-    
-    if cxpb + mutpb != 1.0:
-        sum_ = cxpb + mutpb
-        cxpb /= sum_
-        mutpb /= sum_
-        del sum_
-        warn = "Sum of crossover and mutation probabilities is different "
-        warn += "than 1.0. Probabilities have been scaled to "
-        warn += "%f and %f respectivly." % (cxpb, mutpb)
-        _logger.warning(warn)
-    
+    assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
+        
     _logger.info("Start of evolution")
-    # Evaluate the population
-    map(toolbox.evaluate, population)
+    
+    # Evaluate the invalid individuals
+    for ind in population:
+        if not ind.fitness.valid:
+            ind.fitness.extend(toolbox.evaluate(ind))
     
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
         
         children = []
-        while len(children) < lambda_:
-            if random.random() < cxpb:
+        for i in xrange(lambda_):
+            op_choice = random.random()
+            if op_choice < cxpb:
                 p1, p2 = toolbox.select(population, 2)
-                children.extend(toolbox.mate(p1, p2))
-            else:
+                children.append(toolbox.mate(p1, p2)[0])
+            elif op_choice < cxpb + mutpb:
                 p = toolbox.select(population, 1)
                 children.append(toolbox.mutate(p[0]))
+            else:
+                children.append(toolbox.select(population, 1)[0])
         
-        while len(children) > lambda_:
-            children.pop()
-        
-        map(toolbox.evaluate, children)
+        # Evaluate the invalid individuals
+        for ind in children:
+            if not ind.fitness.valid:
+                ind.fitness.extend(toolbox.evaluate(ind))
         
         population[:] = toolbox.select(children, mu)
         
@@ -177,20 +176,36 @@ def steadyEA(toolbox, population, ngen):
     """The is the steady-state evolutionary algorithm
     """
     _logger.info("Start of evolution")
-    # Evaluate the population
-    map(toolbox.evaluate, population)
+    
+    # Evaluate the invalid individuals
+    for ind in population:
+        if not ind.fitness.valid:
+            ind.fitness.extend(toolbox.evaluate(ind))
     
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
         
-        children = []
-        if random.random() < cxpb:
-            p1, p2 = toolbox.select(population, 2)
-            children.extend(toolbox.mate(p1, p2))
-        else:
-            p = toolbox.select(population, 1)
-            children.append(toolbox.mutate(p[0]))
+        p1, p2 = toolbox.select(population, 2)
+        child = toolbox.mate(p1, p2)[0]
+        child = toolbox.mutate(child)
         
+        if not child.fitness.valid:
+            child.fitness.extend(toolbox.evaluate(child))
         
+        population.append(child)
+        population[:] = toolbox.select(population, len(population) - 1)
+        
+        # Gather all the fitnesses in one list and print the stats
+        fits = [ind.fitness[0] for ind in population]
+        _logger.debug("Min %f", min(fits))
+        _logger.debug("Max %f", max(fits))
+        lenght = len(population)
+        mean = sum(fits) / lenght
+        sum2 = sum(map(lambda x: x**2, fits))
+        std_dev = (sum2 / lenght - mean**2)**0.5
+        _logger.debug("Mean %f", mean)
+        _logger.debug("Std. Dev. %f", std_dev)
+
+    _logger.info("End of (successful) evolution")
 

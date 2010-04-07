@@ -30,7 +30,7 @@ import eap.algorithms as algorithms
 
 logging.basicConfig(level=logging.DEBUG)
 
-random.seed(2)
+random.seed(1626)
 
 # Define new functions
 def safeDiv(left, right):
@@ -60,15 +60,14 @@ tools.register('population', creator.Population, size=100, content=tools.individ
 tools.register('lambdify', gp.lambdify, psets=psets, args='x')
 
 def evalSymbReg(individual):
-    if not individual.fitness.isValid():
-        # Transform the tree expression in a callable function
-        func = tools.lambdify(expr=individual)
-        # Evaluate the sum of squared difference between the expression
-        # and the real function : x**4 + x**3 + x**2 + x
-        values = (x/10. for x in xrange(-10,10))
-        diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
-        diff = sum(map(diff_func, values))
-        individual.fitness.append(diff)
+    # Transform the tree expression in a callable function
+    func = tools.lambdify(expr=individual)
+    # Evaluate the sum of squared difference between the expression
+    # and the real function : x**4 + x**3 + x**2 + x
+    values = (x/10. for x in xrange(-10,10))
+    diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
+    diff = sum(map(diff_func, values))
+    return [diff]
 
 tools.register('evaluate', evalSymbReg)
 tools.register('select', toolbox.tournSel, tournsize=3)
