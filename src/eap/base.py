@@ -291,19 +291,29 @@ class Fitness(Array):
     def __init__(self, values=None):
         if values is not None:
             self.extend(values)
-
-    def isValid(self):
-        '''Wheter or not this fitness is valid. An invalid fitness is simply
-        an empty array.
-        '''
+        
+    def getvalid(self):
         return len(self) != 0
+    
+    def setvalid(self, value):
+        if not value:
+            self[:] = array.array('d')
 
-    def invalidate(self):
-        '''Invalidate this fitness. As a matter of facts, it simply deletes
-        all the fitness values. This method has to be used after an individual
-        is modified, usualy it is done in the modification operator.
-        '''
-        self[:] = array.array('d')
+    valid = property(getvalid, setvalid, None, 
+                     "Asses if a fitness is valid or not.")
+
+#    def isValid(self):
+#        '''Wheter or not this fitness is valid. An invalid fitness is simply
+#        an empty array.
+#        '''
+#        return len(self) != 0
+#
+#    def invalidate(self):
+#        '''Invalidate this fitness. As a matter of facts, it simply deletes
+#        all the fitness values. This method has to be used after an individual
+#        is modified, usualy it is done in the modification operator.
+#        '''
+#        self[:] = array.array('d')
 
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort

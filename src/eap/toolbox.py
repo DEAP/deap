@@ -85,15 +85,15 @@ def twoPointsCx(ind1, ind2):
     child1[cxpoint1:cxpoint2], child2[cxpoint1:cxpoint2] \
          = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
     try:
-        child1.fitness.invalidate()
-        child2.fitness.invalidate()
+        child1.fitness.valid = False
+        child2.fitness.valid = False
     except AttributeError:
         pass
     
     return child1, child2
 
 
-def onePointCx(indOne, indTwo):
+def onePointCx(ind1, ind2):
     """Execute a one point crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
     This operation apply on an :class:`~eap.base.Individual` composed of a list
@@ -111,18 +111,19 @@ def onePointCx(indOne, indTwo):
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     """
-    lSize = min(len(indOne), len(indTwo))
-    lChild1, lChild2 = copy.copy(indOne), copy.copy(indTwo)
-    lCxPoint = random.randint(1, lSize - 1)
+    size = min(len(ind1), len(ind2))
+    child1, child2 = copy.copy(ind1), copy.copy(ind2)
+    cxpoint = random.randint(1, size - 1)
     
-    lChild1[lCxPoint:], lChild2[lCxPoint:] = lChild2[lCxPoint:], lChild1[lCxPoint:]
+    child1[cxpoint:], child2[cxpoint:] = child2[cxpoint:], child1[cxpoint:]
+    
     try:
-        lChild1.mFitness.invalidate()
-        lChild2.mFitness.invalidate()
+        child1.fitness.valid = False
+        child2.fitness.valid = False
     except AttributeError:
         pass
     
-    return lChild1, lChild2
+    return child1, child2
 
 def pmCx(ind1, ind2):
     """Execute a partialy matched crossover on the input indviduals. The two
@@ -180,8 +181,8 @@ def pmCx(ind1, ind2):
         #print lPos1
 
     try:
-        child1.fitness.invalidate()
-        child2.fitness.invalidate()
+        child1.fitness.valid = False
+        child2.fitness.valid = False
     except AttributeError:
         pass
     
@@ -215,20 +216,16 @@ def gaussMut(individual, mu, sigma, indpb):
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
     """
-    lMutated = False
-    lIndividual = copy.copy(individual)
+    mutated = False
+    mutant = copy.copy(individual)
     
-    for i in xrange(len(lIndividual)):
+    for i in xrange(len(mutant)):
         if random.random() < indpb:
-            lIndividual[i] += random.gauss(mu, sigma)
-            if lIndividual[i] < min:
-                lIndividual[i] = min
-            elif max and lIndividual[i] > max:
-                lIndividual[i] = max
-            lMutated = True
-    if lMutated:
+            mutant[i] += random.gauss(mu, sigma)
+            mutated = True
+    if mutated:
         try:
-            lIndividual.mFitness.invalidate()
+            mutant.fitness.valid = False
         except AttributeError:
             pass
     
@@ -284,7 +281,7 @@ def flipBitMut(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.invalidate()
+            mutant.fitness.valid = False
         except AttributeError:
             pass
     return mutant
@@ -308,8 +305,8 @@ def uniformOnePtTreeCx(ind1, ind2):
     child2.set_subtree_dfs(index, sub1)
 
     try:
-        child1.fitness.invalidate()
-        child2.fitness.invalidate()
+        child1.fitness.valid = False
+        child2.fitness.valid = False
     except AttributeError:
         pass
     return child1, child2
@@ -325,7 +322,7 @@ def uniformTreeMut(ind, expr):
     subtree = base.Tree(expr())
     mutant.set_subtree_dfs(index, subtree)
     try:
-        mutant.fitness.invalidate()
+        mutant.fitness.valid = False
     except AttributeError:
         pass
     return mutant
@@ -403,7 +400,7 @@ def nsga2(individuals, n):
     chosen = list(chain(*pareto_fronts[:-1]))
     n = n - len(chosen)
     if n > 0:
-        chosen.extend(sortCrowdingDist(pareto_fronts[-1])[0:n])
+        chosen.extend(sortCrowdingDist(pareto_fronts[-1], n))
     return chosen
     
 
@@ -419,59 +416,57 @@ def sortFastND(individuals, n):
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = dict(izip(individuals, repeat(0)))
-    dominated_inds = dict(izip(individuals, (list() for i in xrange(N))))
+    dominating_inds = dict.fromkeys(map(id, individuals), 0.0)
+    dominated_inds = dict(izip(map(id, individuals), (list() for i in xrange(N))))
     
     # Rank first Pareto front
     for i, ind_i in enumerate(individuals):
         for ind_j in individuals[i+1:]:
-            if ind_j.fitness.is_dominated(ind_i.fitness):
-                dominating_inds[ind_j] += 1
-                dominated_inds[ind_i].append(ind_j)
-            elif ind_i.fitness.is_dominated(ind_j.fitness):
-                dominating_inds[ind_i] += 1
-                dominated_inds[ind_j].append(ind_i)
-        if dominating_inds[ind_i] == 0:
+            if ind_j.fitness.isDominated(ind_i.fitness):
+                dominating_inds[id(ind_j)] += 1
+                dominated_inds[id(ind_i)].append(ind_j)
+            elif ind_i.fitness.isDominated(ind_j.fitness):
+                dominating_inds[id(ind_i)] += 1
+                dominated_inds[id(ind_j)].append(ind_i)
+        if dominating_inds[id(ind_i)] == 0:
             pareto_fronts[-1].append(ind_i)
             pareto_sorted += 1
-    
+            
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
-    while pareto_sorted < N and pareto_sorted < n:
+    N = min(N, n)
+    while pareto_sorted < N:
         pareto_fronts.append([])
         for ind_p in pareto_fronts[-2]:
-            for ind_d in dominated_inds[ind_p]:
-                dominating_inds[ind_d] -= 1
-                if dominating_inds[ind_d] == 0:
+            for ind_d in dominated_inds[id(ind_p)]:
+                dominating_inds[id(ind_d)] -= 1
+                if dominating_inds[id(ind_d)] == 0:
                     pareto_fronts[-1].append(ind_d)
                     pareto_sorted += 1
     
     return pareto_fronts
 
 
-def sortCrowdingDist(individuals):
+def sortCrowdingDist(individuals, n):
     """Sort the individuals according to the crowding distance.
     """
     if len(individuals) == 0:
         return []
-    distances = dict(izip(individuals, repeat(None)))
-    crowding = []
     
-    for ind in individuals:
-        distances[ind] = (0.0)
-        crowding.append(ind)
+    distances = dict(izip(map(id, individuals), ([0.0, ind] for ind in individuals)))
+    crowding = list(individuals)
         
     number_objectives = len(individuals[0].fitness)
     for i in xrange(number_objectives):
         crowding.sort(key=lambda ind: ind.fitness[i])
-        distances[crowding[0]] = float("inf")
-        distances[crowding[-1]] = float("inf")
+        distances[id(crowding[0])][0] = float("inf")
+        distances[id(crowding[-1])][0] = float("inf")
         for j, ind in enumerate(crowding[1:-1]):
-            if distances[ind] < float("inf"):
-                distances[ind] += crowding[j + 1].fitness[i] - \
-                                  crowding[j - 1].fitness[i]
-    sorted_dist = sorted(distances.iteritems(), key=lambda item: item[1], reverse=True)
-    return [item[0] for item in sorted_dist]
+            if distances[id(ind)][0] < float("inf"):
+                distances[id(ind)][0] += crowding[j + 1].fitness[i] - \
+                                      crowding[j - 1].fitness[i]
+    sorted_dist = sorted(distances.itervalues(), key=lambda value: value[0], reverse=True)
+    return (value[1] for value in sorted_dist[:n])
 
 
 ######################################

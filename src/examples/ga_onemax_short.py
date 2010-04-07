@@ -17,19 +17,18 @@ import sys
 import random
 import logging
 
-sys.path.append('..')
+sys.path.append("..")
 
 import eap.algorithms as algorithms
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
+logging.basicConfig(level=logging.DEBUG)
 random.seed(64)
 
 creator.create("FitnessMax", (base.Fitness,), {"weights" : (1.0,)})
-creator.create("Individual", (base.Array,), {'fitness' : creator.FitnessMax})
+creator.create("Individual", (base.Array,), {"fitness" : creator.FitnessMax})
 creator.create("Population", (base.List,))
 
 tools = toolbox.Toolbox()
@@ -39,14 +38,13 @@ tools.register("population", creator.Population, size=300,
 		content=tools.individual)
 
 def evalOneMax(individual):
-    if not individual.fitness.isValid():
-        individual.fitness.append(sum(individual))
+    return [sum(individual)]
 
-tools.register('evaluate', evalOneMax)
-tools.register('mate', toolbox.twoPointsCx)
-tools.register('mutate', toolbox.flipBitMut, indpb=0.05)
-tools.register('select', toolbox.tournSel, tournsize=3)
+tools.register("evaluate", evalOneMax)
+tools.register("mate", toolbox.twoPointsCx)
+tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
+tools.register("select", toolbox.tournSel, tournsize=3)
 
 pop = tools.population()
-algorithms.simpleEA(tools, pop, 0.5, 0.2, 40)
+algorithms.plusEA(tools, pop, 100, 100, 0.5, 0.2, 40)
 

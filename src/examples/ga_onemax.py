@@ -16,7 +16,9 @@
 import sys
 import random
 
-sys.path.append('..')
+
+sys.path.append("..")
+
 
 import eap.base as base
 import eap.creator as creator
@@ -26,7 +28,7 @@ import eap.toolbox as toolbox
 random.seed(64)
 
 creator.create("FitnessMax", (base.Fitness,), {"weights" : (1.0,)})
-creator.create("Individual", (base.Array,), {'fitness' : creator.FitnessMax})
+creator.create("Individual", (base.Array,), {"fitness" : creator.FitnessMax})
 creator.create("Population", (base.List,))
 
 tools = toolbox.Toolbox()
@@ -36,23 +38,23 @@ tools.register("population", creator.Population, size=300,
 		content=tools.individual)
 
 def evalOneMax(individual):
-    if not individual.fitness.isValid():
-        individual.fitness.append(sum(individual))
+    return [sum(individual)]
 
-tools.register('evaluate', evalOneMax)
-tools.register('mate', toolbox.twoPointsCx)
-tools.register('mutate', toolbox.flipBitMut, indpb=0.05)
-tools.register('select', toolbox.tournSel, tournsize=3)
+tools.register("evaluate", evalOneMax)
+tools.register("mate", toolbox.twoPointsCx)
+tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
+tools.register("select", toolbox.tournSel, tournsize=3)
 
 pop = tools.population()
 CXPB, MUTPB, NGEN = (0.5, 0.2, 40)
 
-## Evaluate the population
-map(tools.evaluate, pop)
+# Evaluate the entire population
+for ind in pop:
+    ind.fitness.extend(tools.evaluate(ind))
 
 # Begin the evolution
 for g in range(NGEN):
-    print '-- Generation %i --' % g
+    print "-- Generation %i --" % g
 
     pop[:] = tools.select(pop, n=len(pop))
 
@@ -65,18 +67,20 @@ for g in range(NGEN):
         if random.random() < MUTPB:
             pop[i] = tools.mutate(pop[i])
 
-    # Evaluate the population
-    map(tools.evaluate, pop)
+    # Evaluate the invalid individuals
+    for ind in pop:
+        if not ind.fitness.valid:
+            ind.fitness.extend(tools.evaluate(ind))
 
     # Gather all the fitnesses in one list and print the stats
     fits = [ind.fitness[0] for ind in pop]
-    print '  Min %f' % min(fits)
-    print '  Max %f' % max(fits)
+    print "  Min %f" % min(fits)
+    print "  Max %f" % max(fits)
     lenght = len(pop)
     mean = sum(fits) / lenght
     sum2 = sum(map(lambda x: x**2, fits))
     std_dev = (sum2 / lenght - mean**2)**0.5
-    print '  Mean %f' % (mean)
-    print '  Std. Dev. %f' % std_dev
+    print "  Mean %f" % (mean)
+    print "  Std. Dev. %f" % std_dev
 
-print '-- End of evolution --'
+print "-- End of evolution --"
