@@ -39,25 +39,25 @@ def safeDiv(left, right):
     except ZeroDivisionError:
         return 0
 
-psets = gp.ProgrammingSets()
-psets.addPrimitive(operator.add, 2)
-psets.addPrimitive(operator.sub, 2)
-psets.addPrimitive(operator.mul, 2)
-psets.addPrimitive(safeDiv, 2)
-psets.addPrimitive(operator.neg, 1)
-psets.addPrimitive(math.cos, 1)
-psets.addPrimitive(math.sin, 1)
-psets.addEphemeralConstant(lambda: random.randint(-1,1))
-psets.addTerminal('x')
+pset = gp.PrimitiveSet()
+pset.addPrimitive(operator.add, 2)
+pset.addPrimitive(operator.sub, 2)
+pset.addPrimitive(operator.mul, 2)
+pset.addPrimitive(safeDiv, 2)
+pset.addPrimitive(operator.neg, 1)
+pset.addPrimitive(math.cos, 1)
+pset.addPrimitive(math.sin, 1)
+pset.addEphemeralConstant(lambda: random.randint(-1,1))
+pset.addTerminal('x')
 
 creator.create("Individual", (base.Tree,), {'fitness':base.Fitness})
 creator.create("Population", (base.List,))
 
 tools = toolbox.Toolbox()
-tools.register('expr_init', gp.generate_ramped, psets=psets, min=1, max=2)
+tools.register('expr_init', gp.generate_ramped, pset=pset, min=1, max=2)
 tools.register('individual', creator.Individual, content=tools.expr_init)
 tools.register('population', creator.Population, size=100, content=tools.individual)
-tools.register('lambdify', gp.lambdify, psets=psets, args='x')
+tools.register('lambdify', gp.lambdify, pset=pset, args='x')
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
@@ -72,7 +72,7 @@ def evalSymbReg(individual):
 tools.register('evaluate', evalSymbReg)
 tools.register('select', toolbox.tournSel, tournsize=3)
 tools.register('mate', toolbox.uniformOnePtTreeCx)
-tools.register('expr_mut', gp.generate_full, psets=psets, min=0, max=2)
+tools.register('expr_mut', gp.generate_full, pset=pset, min=0, max=2)
 tools.register('mutate', toolbox.uniformTreeMut, expr=tools.expr_mut)
 
 pop = tools.population()

@@ -51,29 +51,25 @@ for i in xrange(PARITY_SIZE_M):
             inputs[i][j] = 0
     outputs[i] = parity
 
-psets = gp.ProgrammingSets()
-psets.addPrimitive(operator.and_, 2)
-psets.addPrimitive(operator.or_, 2)
-psets.addPrimitive(operator.xor, 2)
-psets.addPrimitive(operator.not_, 1)
-psets.addTerminal(1)
-psets.addTerminal(0)
-psets.addTerminal('IN0')
-psets.addTerminal('IN1')
-psets.addTerminal('IN2')
-psets.addTerminal('IN3')
-psets.addTerminal('IN4')
-psets.addTerminal('IN5')
+pset = gp.PrimitiveSet()
+pset.addPrimitive(operator.and_, 2)
+pset.addPrimitive(operator.or_, 2)
+pset.addPrimitive(operator.xor, 2)
+pset.addPrimitive(operator.not_, 1)
+pset.addTerminal(1)
+pset.addTerminal(0)
+for i in xrange(PARITY_FANIN_M):
+    pset.addTerminal('IN%s'%i)
 
 creator.create("Fitness", (base.Fitness,), {'weights':(1.0,)})
 creator.create("Individual", (base.Tree,), {'fitness':creator.Fitness})
 creator.create("Population", (base.List,))
 
 tools = toolbox.Toolbox()
-tools.register('expr_init', gp.generate_grow, psets=psets, min=1, max=2)
+tools.register('expr_init', gp.generate_grow, pset=pset, min=1, max=2)
 tools.register('individual', creator.Individual, content=tools.expr_init)
 tools.register('population', creator.Population, size=500, content=tools.individual)
-tools.register('lambdify', gp.lambdify, psets=psets, args=['IN0', 'IN1', 'IN2', 'IN3', 'IN4', 'IN5'])
+tools.register('lambdify', gp.lambdify, pset=pset, args=["IN%s" %i for i in xrange(PARITY_FANIN_M)])
 
 def evalParity(individual):
     func = tools.lambdify(expr=individual)
@@ -83,7 +79,7 @@ def evalParity(individual):
 tools.register('evaluate', evalParity)
 tools.register('select', toolbox.tournSel, tournsize=3)
 tools.register('mate', toolbox.uniformOnePtTreeCx)
-tools.register('expr_mut', gp.generate_grow, psets=psets, min=0, max=2)
+tools.register('expr_mut', gp.generate_grow, pset=pset, min=0, max=2)
 tools.register('mutate', toolbox.uniformTreeMut, expr=tools.expr_mut)
 
 pop = tools.population()
