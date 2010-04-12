@@ -46,9 +46,15 @@ pset.addPrimitive(operator.or_, 'bool', ['bool', 'bool'])
 pset.addPrimitive(operator.not_, 'bool', ['bool'])
 
 # floating point operators
+# Define a safe division function
+def safeDiv(left, right):
+    try: return left / right
+    except ZeroDivisionError: return 0
+
 pset.addPrimitive(operator.add, 'float', ['float','float'])
 pset.addPrimitive(operator.sub, 'float', ['float','float'])
 pset.addPrimitive(operator.mul, 'float', ['float','float'])
+pset.addPrimitive(safeDiv, 'float', ['float','float'])
 
 # logic operators
 # Define a new if-then-else function
@@ -79,8 +85,10 @@ tools.register('lambdify', gp.lambdify, pset=pset, args=['IN%s'%i for i in xrang
 def evalSpambase(individual):
     # Transform the tree expression in a callable function
     func = tools.lambdify(expr=individual)
+    # Randomly sample 400 mails in the spam database
+    spam_samp = random.sample(spam, 400)
     # Evaluate the sum of correctly identified mail as spam
-    result = sum(bool(func(*mail[:57])) is bool(mail[57]) for mail in spam)
+    result = sum(bool(func(*mail[:57])) is bool(mail[57]) for mail in spam_samp)
     return [result]
     
 tools.register('evaluate', evalSpambase)
