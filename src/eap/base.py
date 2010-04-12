@@ -133,37 +133,24 @@ class Indices(Array):
         self.extend(i for i in xrange(size))
         random.shuffle(self)
         
-        
 class Tree(list):
     """ Basic N-ary tree class"""
     @classmethod
     def create_node(cls, obj):
-        try:
-            Node = type('Node', (obj.__class__,), {})
-        except TypeError:
-            if callable(obj):
-                Node = type('Node', (object,), {"__call__":staticmethod(obj)})
-
-        Node.count_nodes = staticmethod(lambda: 1)
-        Node.height = staticmethod(lambda: 0)
-
-        try:
-            new_node = Node(obj)
-        except TypeError:
-            new_node = Node.__new__(Node)
-            new_node.__dict__.update(obj.__dict__)
-            
+        Node = type('Node', (obj.__class__,), {})
+        Node.height = property(lambda self: 0)
+        Node.size = property(lambda self: 1)
+        Node.root = property(lambda self: self)
+        new_node = Node.__new__(Node)
+        new_node.__dict__.update(obj.__dict__)          
         return new_node
 
     @classmethod
     def rectify_subtree(cls, subtree):
-        if isinstance(subtree, Tree):
-            if len(subtree) > 1:
-                return subtree
-            else:
-                return subtree[0]
-        else:
+        if subtree.size > 1:
             return subtree
+        else:
+            return subtree.root
 
     def __init__(self, content=None):
         list.__init__(self)
@@ -174,14 +161,20 @@ class Tree(list):
                 self.append(Tree(elem))
             else:
                 self.append(Tree.create_node(elem))
+    
+    @property
+    def root(self):
+        return self[0]
 
-    def count_nodes(self):
+    @property
+    def size(self):
         """ This method returns the number of nodes in the tree."""
-        return sum(elem.count_nodes() for elem in self)
+        return sum(elem.size for elem in self)
 
+    @property
     def height(self):
         """ This method returns the height of the tree."""
-        return max(elem.height() for elem in self)+1
+        return max(elem.height for elem in self)+1
 
     def search_subtree_dfs(self, index):
         """ This method searches the subtree with the
@@ -194,7 +187,7 @@ class Tree(list):
         for child in self:
             if total == index:
                 return child
-            nbr_child = child.count_nodes()
+            nbr_child = child.size
             if nbr_child + total > index:
                 return child.search_subtree_dfs(index-total)
             total += nbr_child
@@ -212,7 +205,7 @@ class Tree(list):
             if total == index:
                 self[i] = Tree.rectify_subtree(subtree)
                 return
-            nbr_child = child.count_nodes()
+            nbr_child = child.size
             if nbr_child + total > index:
                 child.set_subtree_dfs(index-total, subtree)
                 return
@@ -252,8 +245,7 @@ class Tree(list):
             if isinstance(parent[child], Tree):
                 tree = parent[child]
                 queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
-        parent[child] = Tree.rectify_subtree(subtree)        
-        
+        parent[child] = Tree.rectify_subtree(subtree)
 
 class Fitness(Array):
     """The fitness is a measure of quality of a solution. The fitness
