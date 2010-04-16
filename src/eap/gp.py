@@ -18,12 +18,16 @@ from itertools import repeat
 
 ## GP Tree utility functions
 
-def evaluate(expr):
+def evaluate_to_string(expr):
     try:
         func = expr[0]
-        return func(*[evaluate(value) for value in expr[1:]])
+        return func(*[evaluate_to_string(value) for value in expr[1:]])
     except TypeError:
         return expr
+
+def evaluate(pset, expr):
+    return eval(evaluate_to_string(expr), pset.func_dict)
+
 
 def lambdify(pset, expr, args):
     """ 
@@ -34,7 +38,7 @@ def lambdify(pset, expr, args):
     function of sympy0.6.6.
     """
     if isinstance(expr, list):
-        expr = evaluate(expr)
+        expr = evaluate_to_string(expr)
     if isinstance(args, str):
         pass
     elif hasattr(args, "__iter__"):
@@ -59,7 +63,10 @@ class Primitive(object):
         
 class Terminal(object):
     def __init__(self, primitive):
-        self.name = str(primitive)
+        try:
+            self.name = primitive.__name__
+        except:
+            self.name = str(primitive)
     def __call__(self):
         return self        
     def __repr__(self):
@@ -89,9 +96,7 @@ class PrimitiveSet(object):
     def addTerminal(self, terminal):    
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
-            self.terminals.append(Primitive(terminal,0))
-        else:
-            self.terminals.append(Terminal(terminal))
+        self.terminals.append(Terminal(terminal))
 
     def addEphemeralConstant(self, ephemeral):
         self.terminals.append(Ephemeral(ephemeral))       
@@ -170,12 +175,9 @@ class TypedPrimitiveSet(object):
     def addTerminal(self, terminal, ret_type):
         if not self.terminals.has_key(ret_type):
            self.terminals[ret_type] = list()
-               
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
-            prim = PrimitiveTyped(terminal, ret_type, [])
-        else:
-           prim = TerminalTyped(terminal, ret_type)
+        prim = TerminalTyped(terminal, ret_type)
         self.terminals[ret_type].append(prim)
         
     def addEphemeralConstant(self, ephemeral, ret_type):
