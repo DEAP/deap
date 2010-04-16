@@ -96,17 +96,26 @@ class Array(array.array):
     type of array. The *typecode* must be one of the type codes listed in
     the python :mod:`array` module.
     """
-    def __new__(cls, typecode, **kargs):
-        return super(Array, cls).__new__(cls, typecode)
+    def __new__(cls, typecode, content=[], size=0):
+        gen_content = content
+        if callable(content):
+            gen_content = (content() for i in xrange(size))
+        return super(Array, cls).__new__(cls, typecode, gen_content)
+        
+    def __init__(self):
+        pass
 
-    def __init__(self, size=0, content=None):
-        if content is not None:
-            if callable(content):
-                self.extend(content() for i in xrange(size))
-            else:
-                self.extend(content)
+#    def __init__(self, size=0, content=None):
+#        if content is not None:
+#            if callable(content):
+#                self.extend(content() for i in xrange(size))
+#            else:
+#                self.extend(content)
 
     def __deepcopy__(self, memo):
+        """Overrides the deepcopy from array.array that does not copy the
+        object's attributes.
+        """
         cls = self.__class__
         copy_ = cls.__new__(cls, typecode=self.typecode)
         memo[id(self)] = copy_
@@ -116,18 +125,18 @@ class Array(array.array):
 
 class Indices(Array):
     """An Indices is a specialization of the :class:`Array` container, 
-    it contains only integers (type code ``'i'``) between 0 and *size* - 1 and
+    it contains only integers (type code ``"i"``) between 0 and *size* - 1 and
     do not repeat the same integer twice. For example, ::
     
         print Indices(size=5)
         array('i', [0, 4, 2, 3, 1])
         
     is the same than providing the *content* ``[0, 4, 2, 3, 1]`` and the
-    *type code* ``'i'`` to an :class:`Array`. The Indices class is provided
+    *type code* ``"i"`` to an :class:`Array`. The Indices class is provided
     only for convenience.
     """
-    def __new__(cls, **kargs):
-        return super(Array, cls).__new__(cls, "i")
+    def __new__(cls, typecode="i", content=[], size=0):
+        return super(Indices, cls).__new__(cls, "i", content, size)
     
     def __init__(self, size=0):
         self.extend(i for i in xrange(size))
@@ -137,7 +146,7 @@ class Tree(list):
     """ Basic N-ary tree class"""
     @classmethod
     def create_node(cls, obj):
-        Node = type('Node', (obj.__class__,), {})
+        Node = type("Node", (obj.__class__,), {})
         Node.height = property(lambda self: 0)
         Node.size = property(lambda self: 1)
         Node.root = property(lambda self: self)
@@ -277,8 +286,8 @@ class Fitness(Array):
     ``ind.fitness.__class__.weights = new_weights``.
     """
     
-    def __new__(cls, **kargs):
-        return super(Fitness, cls).__new__(cls, 'd')
+    def __new__(cls, typecode="d", values=None):
+        return super(Fitness, cls).__new__(cls, "d")
 
     def __init__(self, values=None):
         if values is not None:
@@ -289,7 +298,7 @@ class Fitness(Array):
     
     def setvalid(self, value):
         if not value:
-            self[:] = array.array('d')
+            self[:] = array.array("d")
 
     valid = property(getvalid, setvalid, None, 
                      "Asses if a fitness is valid or not.")
