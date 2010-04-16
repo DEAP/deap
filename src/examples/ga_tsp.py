@@ -30,8 +30,9 @@ random.seed(1638)
 
 # gr*.yml contains the distance map in list of list style in YAML/JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
-distance_map = yaml.load(open("gr17.yml", "r"))
-IND_SIZE = len(distance_map[0])
+tsp = yaml.load(open("gr17.yml", "r"))
+distance_map = tsp["DistanceMatrix"]
+IND_SIZE = tsp["TourSize"]
 
 creator.create("Individual", (base.Indices,), {"fitness" : base.Fitness})
 creator.create("Population", (base.List,))

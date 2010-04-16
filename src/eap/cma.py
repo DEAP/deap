@@ -19,18 +19,55 @@
 #    
 
 import copy
+import logging
 import math
 import random
+import numpy
+    
+_logger = logging.getLogger("eap.cma")
+    
+def cmaES(toolbox, population, sigma, ngen, **kargs):
+    """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
+    Evolution Strategy: A Comparing Rewiew.*
+    
+    The provided *population* should be a list of one or more individuals. The
+    other keyworded arguments are passed to the class :class:`CMAStrategy`.
+    """
+    _logger.info("Start of evolution")
+    strategy = CMAStrategy(population, sigma, kargs)  # Initialize the strategy
+    
+    for g in xrange(ngen):
+        _logger.info("Evolving generation %i", g)
+        
+        # Replace the whole population with the generated individuals from the
+        # cma strategy
+        population[:] = strategy.generate()
+        
+        # Evaluate the individuals
+        for ind in population:
+            ind.fitness.extend(toolbox.evaluate(ind))
+        
+        # Update the Strategy with the evaluated individuals
+        strategy.update(population)
+        
+        # Gather all the fitnesses in one list and print the stats
+        fits = [ind.fitness[0] for ind in population]
+        _logger.debug("Min %f", min(fits))
+        _logger.debug("Max %f", max(fits))
+        lenght = len(population)
+        mean = sum(fits) / lenght
+        sum2 = sum(map(lambda x: x**2, fits))
+        std_dev = (sum2 / lenght - mean**2)**0.5
+        _logger.debug("Mean %f", mean)
+        _logger.debug("Std. Dev. %f", std_dev)
+        
+    _logger.info("End of (successful) evolution")
+    
 
-try:
-    import numpy
-except:
-    raise ImportError, "NumPy is required by the CMA-ES package, you can find NumPy at http://numpy.scipy.org/"
-    
-def cmaes(toolbox, individual, sigma, **kargs):
-    """The CMA-Es algorithm as described in ...
-    
-    Additional configuration may be passed throught the keyworded arguments,
+class CMAStrategy(object):
+    """
+    Additional configuration may be passed throught the *params* argument as a 
+    dictionary,
     
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
@@ -66,160 +103,156 @@ def cmaes(toolbox, individual, sigma, **kargs):
     |                | mueff) / ((N + 2)^2 +     | update.                    |
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
-    
     """
-    indsize = len(individual)
-    
-    dict = kargs
-    
-    lambda_ = dict.get("lambda_", int(4 + 3 * math.log(indsize)))
-    lambda_last = lambda_
-    
-    xmean = individual[:]
-    ########### TEMP
-    #sigma = numpy.ones(indsize) * sigma
-    ########### TEMP
-    
-    pc = numpy.zeros(indsize)
-    ps = numpy.zeros(indsize)
-    chiN = math.sqrt(indsize) * (1 - 1. / (4. * indsize) + \
-                                     1. / (21. * indsize**2))
-    
-    B = numpy.identity(indsize)
-    C = numpy.identity(indsize)
-    diagD = numpy.ones(indsize)
-    BD = B * diagD
-    
-    itercount = 0
-    evalcount = 0
-    stop_flags = []
-    
-    S = []
-    
-    while True not in stop_flags:
-        # Initialization of the parameters at first iteration or when 
-        # the population size change
-        if itercount == 0 or lambda_ != lambda_last:
-            lambda_last = lambda_
-            mu = dict.get("mu", lambda_ / 2)
-            rweights = dict.get("weights", "superlinear")
-            if rweights == "superlinear":
-                weights = math.log(mu + 0.5) - \
-                          numpy.log(numpy.arange(1, mu + 1))
-            elif rweights == "linear":
-                weights = mu + 0.5 - numpy.arange(1, mu + 1)
-            elif rweights == "equal":
-                weights = numpy.ones(mu)
-            else:
-                pass    # Print some warning ?
-            
-            weights /= sum(weights)
-            mueff = 1. / sum(weights**2)
-            
-            cc = dict.get("ccum", 4. / (indsize + 4.))
-            cs = dict.get("cs", (mueff + 2.) / (indsize + mueff + 3.))
-            
-            
-            ccov1 = dict.get("ccov1", 2. / ((indsize + 1.3)**2 + mueff))
-            ccovmu = dict.get("ccovmu", 2. * (mueff - 2. + 1. / mueff) / \
-                                             ((indsize + 2.)**2 + mueff))
-            ccovmu = min(1 - ccov1, ccovmu)
-            
-            damps = 1. + 2. * max(0, math.sqrt((mueff - 1.) / \
-                                               (indsize + 1.)) - 1.) + cs
-            damps = dict.get("damps", damps)
+    def __init__(self, population, sigma, params):
+        self.centroid = copy.deepcopy(population[0])    # Create a centroid individual
+        self.centroid[:] = self.centroid[0:0]           # Clear its content
+        self.centroid.extend(numpy.mean(population, 0)) # The centroid is used in new individual creation
         
-        itercount += 1
+        self.dim = len(self.centroid)
+        #self.centroid = numpy.array(self.centroid)
+        self.sigma = sigma
+        self.pc = numpy.zeros(self.dim)
+        self.ps = numpy.zeros(self.dim)
+        self.chiN = math.sqrt(self.dim) * (1 - 1. / (4. * self.dim) + \
+                                      1. / (21. * self.dim**2))
         
-        # Handle boundaries ?
+        self.B = numpy.identity(self.dim)
+        self.C = numpy.identity(self.dim)
+        self.diagD = numpy.ones(self.dim)
+        self.BD = self.B * self.diagD
         
-        # Generate lambda offsprings
-        arz = numpy.random.randn(lambda_, indsize)
-        arx = numpy.empty((lambda_, indsize), dtype=arz.dtype)
-        for i in xrange(lambda_):
-            arx[i] = xmean + sigma * numpy.dot(BD, arz[i])
+        self.lambda_ = params.get("lambda_", int(4 + 3 * math.log(self.dim)))
         
-        # Evaluation ... Test with rastrigin
-        fitnesses = numpy.empty((lambda_,))
-        for i in xrange(lambda_):
-            fitnesses[i] = toolbox.evaluate(arx[i])
+        self.update_count = 0
         
-        sorted_indx = numpy.argsort(fitnesses)
-        print fitnesses[sorted_indx[0]]
+        self.params = params
+        self.compute_params(self.params)
         
-        xold = numpy.array(xmean)
-        xmean = numpy.dot(weights, arx[sorted_indx[0:mu]])
-        zmean = numpy.dot(weights, arz[sorted_indx[0:mu]])
+    def generate(self):
+        """Generate lambda offsprings from the current strategy using the 
+        centroid individual as parent.
+        """
+        arz = numpy.random.randn(self.lambda_, self.dim)
+        offsprings = list()
+        empty_ind = copy.deepcopy(self.centroid)    # Create an individual
+        empty_ind[:] = empty_ind[0:0]               # faster to copy
+        for i in xrange(self.lambda_):
+            ind = copy.deepcopy(empty_ind)
+            #ind = copy.deepcopy(self.centroid)
+            #ind[:] = ind[0:0]                       # Clear the new individual
+            ind.extend(self.centroid + self.sigma * numpy.dot(self.BD, arz[i]))
+            offsprings.append(ind)
+        
+        return offsprings
+        
+    def update(self, population):
+        """Update the current Covariance Matrix Evolution Strategy.
+        """
+        sorted_pop = sorted(population, key=lambda ind: ind.fitness,
+                            reverse=True)
+        
+        old_centroid = numpy.array(self.centroid)
+        centroid = numpy.dot(self.weights, sorted_pop[0:self.mu])
+        
+        self.centroid[:] = self.centroid[0:0]      # Clear the centroid individual
+        self.centroid.extend(centroid)
+        
+        c_diff = centroid - old_centroid
         
         # Cumulation : update evolution path
-        ps = (1 - cs) * ps + \
-             math.sqrt(cs * (2 - cs) * mueff) * numpy.dot(B.T, zmean)
+        self.ps = (1 - self.cs) * self.ps \
+             + math.sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
+             * numpy.dot(self.B, (1. / self.diagD) \
+                          * numpy.dot(self.B.T, c_diff))
         
-        hsig = numpy.linalg.norm(ps) / \
-               math.sqrt(1 - (1 - cs)**(2 * itercount)) / \
-               chiN < 1.4 + 2/(indsize + 1)
+        hsig = numpy.linalg.norm(self.ps) \
+               / math.sqrt(1 - (1 - self.cs)**(2 * self.update_count)) \
+               / self.chiN < 1.4 + 2 / (self.dim + 1)
+               
+        self.update_count += 1
+               
+        self.pc = (1 - self.cc) * self.pc \
+             + hsig * (math.sqrt(self.cc * (2 - self.cc) * self.mueff) / \
+                     self.sigma) * c_diff
         
-        pc = (1 - cc) * pc + \
-             hsig * (math.sqrt(cc * (2 - cc) * mueff) / sigma) * (xmean - xold)
+        # Update covariance matrix
+        artmp = sorted_pop[0:self.mu] - old_centroid
+        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) \
+                   * self.ccov1 * self.cc * (2 - self.cc)) * self.C \
+                 + numpy.outer(self.ccov1 * self.pc, self.pc) \
+                 + self.ccovmu \
+                   * numpy.dot(artmp.T , (self.weights * artmp.T).T) \
+                   / self.sigma**2
         
+        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) \
+                                * self.cs / self.damps)
         
-        #Z = numpy.zeros((indsize,indsize))
-        #for i in xrange(mu): 
-        #    z = arx[sorted_indx[i]] - xold 
-        #    Z += numpy.outer((ccovmu * weights[i] / sigma**2) * z, z)
-        #C = (1 - ccov1 - ccovmu) * C + numpy.outer(ccov1 * pc, pc) + Z
-        
-        # Covariance matrix update
-        artmp = arx[sorted_indx[0:mu]] - xold
-        C = (1 - ccov1 - ccovmu + (1 - hsig) * ccov1 * cc * (2 - cc)) * C \
-            + numpy.outer(ccov1 * pc, pc) \
-            + ccovmu * numpy.dot(artmp.T , (weights * artmp.T).T) / sigma**2
-        
-        #C = (1 - ccov1) * C + ccov1 * pc * pc
-        
-        sigma *= numpy.exp((numpy.linalg.norm(ps) / chiN - 1.) * cs / damps)
-        
-        diagD, B = numpy.linalg.eigh(C)
-        indx = numpy.argsort(diagD)
-        diagD = diagD[indx]
-        diagD **= 0.5
-        B = B[:,indx]
-        BD = B * diagD
-        
-        if fitnesses[sorted_indx[0]] < 10**-7:
-            stop_flags.append(True)
-            
-    for i, attr in enumerate(arx[sorted_indx[0]]):
-        individual[i] = attr
-    individual.fitness.append(fitnesses[sorted_indx[0]])
-    return individual
+        self.diagD, self.B = numpy.linalg.eigh(self.C)
+        indx = numpy.argsort(self.diagD)
+        self.diagD = self.diagD[indx]
+        self.diagD **= 0.5
+        self.B = self.B[:,indx]
+        self.BD = self.B * self.diagD
 
+    def compute_params(self, params):
+        """Those parameters depends on lambda and need to computed again if it 
+        changes during evolution.
+        """
+        self.mu = params.get("mu", self.lambda_ / 2)
+        rweights = params.get("weights", "superlinear")
+        if rweights == "superlinear":
+            self.weights = math.log(self.mu + 0.5) - \
+                        numpy.log(numpy.arange(1, self.mu + 1))
+        elif rweights == "linear":
+            self.weights = mu + 0.5 - numpy.arange(1, self.mu + 1)
+        elif rweights == "equal":
+            self.weights = numpy.ones(self.mu)
+        else:
+            pass    # Print some warning ?
+        
+        self.weights /= sum(self.weights)
+        self.mueff = 1. / sum(self.weights**2)
+        
+        self.cc = params.get("ccum", 4. / (self.dim + 4.))
+        self.cs = params.get("cs", (self.mueff + 2.) / 
+                                   (self.dim + self.mueff + 3.))
+        self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3)**2 + \
+                                         self.mueff))
+        self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2. +  \
+                                                 1. / self.mueff) / \
+                                           ((self.dim + 2.)**2 + self.mueff))
+        self.ccovmu = min(1 - self.ccov1, self.ccovmu)
+        self.damps = 1. + 2. * max(0, math.sqrt((self.mueff - 1.) / \
+                                            (self.dim + 1.)) - 1.) + self.cs
+        self.damps = params.get("damps", self.damps)
+        
 
 def rand(x):
     """Random test objective function."""
-    return numpy.random.random()
+    return [numpy.random.random()]
     
 def plane(x):
     """Plane test objective function."""
-    return x[0]
+    return [x[0]]
 
 def rastrigin(x):
     """Rastrigin test objective function. Consider using ``lambda_ = 20 * N`` 
     for this test function.
     """
-    return 10 * len(x) + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
+    return [10 * len(x) + sum(map(lambda a: a**2 - 10 * math.cos(2 * math.pi * a), x))]
+    #return 10 * len(x) + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
     
 def sphere(x):
     """Sphere test objective function."""
-    return sum(x**2)
+    return [sum(map(lambda x: x**2, individual))]
 
-def cigar(x, rot=0):
+def cigar(x):
     """Cigar test objective function."""
-    #if rot:
-    #    x = rotate(x)  
-    return x[0]**2 + 1e6 * sum(x[1:]**2)
+    return [x[0]**2 + 1e6 * sum(map(lambda a: a**2, x))]
 
 def rosen(x):  
     """Rosenbrock test objective function."""
-    return sum(100.*(x[:-1]**2-x[1:])**2 + (1.-x[:-1])**2)
+    return [sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
+                   x[:-1], x[1:]))]
     

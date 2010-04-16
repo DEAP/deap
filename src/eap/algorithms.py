@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-'''The :mod:`algorithms` module is intended to contain some specific algorithms
+"""The :mod:`algorithms` module is intended to contain some specific algorithms
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
 evolutionary algorithm may vary infinitly. Most of the algorithms in this module
@@ -23,21 +23,21 @@ for selection and :meth:`evaluate` for evaluation.
 
 You are encouraged to write your own algorithms in order to make them do what
 you realy them to do.
-'''
+"""
 
 import logging
 import math
 import random
 
-_logger = logging.getLogger('eap.algorithms')
+_logger = logging.getLogger("eap.algorithms")
 
 def simpleEA(toolbox, population, cxpb, mutpb, ngen):
-    """The simpleEA algorithm reproduce the simplest evolutionary algorithm. It
-    is intended to be used for
+    """The simpleEA algorithm reproduce the simplest evolutionary algorithm.
+       
     """
     _logger.info("Start of evolution")
     
-    # Evaluate the invalid individuals
+    # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
@@ -52,12 +52,13 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
         # Apply crossover and mutation
         for i in xrange(1, len(population), 2):
             if random.random() < cxpb:
-                population[i - 1], population[i] = toolbox.mate(population[i - 1], population[i])
+                population[i - 1], population[i] = \
+                    toolbox.mate(population[i - 1], population[i])
         for i in xrange(len(population)):
             if random.random() < mutpb:
                 population[i] = toolbox.mutate(population[i])
 
-        # Evaluate the invalid individuals
+        # Evaluate the individuals with invalid fitness
         for ind in population:
             if not ind.fitness.valid:
                 ind.fitness.extend(toolbox.evaluate(ind))
@@ -82,7 +83,7 @@ def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
     
     _logger.info("Start of evolution")
     
-    # Evaluate the invalid individuals
+    # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
@@ -94,16 +95,16 @@ def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
         children = []
         for i in xrange(lambda_):
             op_choice = random.random()
-            if op_choice < cxpb:
+            if op_choice < cxpb:            # Apply crossover
                 p1, p2 = toolbox.select(population, 2)
-                children.append(toolbox.mate(p1, p2)[0])
-            elif op_choice < cxpb + mutpb:
-                p = toolbox.select(population, 1)
-                children.append(toolbox.mutate(p[0]))
-            else:
+                children.append(toolbox.mate(p1, p2)[0])    # Only the first child is selected
+            elif op_choice < cxpb + mutpb:  # Apply mutation
+                p = toolbox.select(population, 1)[0]
+                children.append(toolbox.mutate(p))
+            else:                           # Apply reproduction
                 children.append(toolbox.select(population, 1)[0])
         
-        # Evaluate the invalid individuals
+        # Evaluate the individuals with an invalid fitness
         for ind in children:
             if not ind.fitness.valid:
                 ind.fitness.extend(toolbox.evaluate(ind))
@@ -131,7 +132,7 @@ def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
         
     _logger.info("Start of evolution")
     
-    # Evaluate the invalid individuals
+    # Evaluate the individuals with an invalid fitness
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
@@ -143,16 +144,16 @@ def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
         children = []
         for i in xrange(lambda_):
             op_choice = random.random()
-            if op_choice < cxpb:
+            if op_choice < cxpb:            # Apply crossover
                 p1, p2 = toolbox.select(population, 2)
-                children.append(toolbox.mate(p1, p2)[0])
-            elif op_choice < cxpb + mutpb:
+                children.append(toolbox.mate(p1, p2)[0])    # Only the first child is selected
+            elif op_choice < cxpb + mutpb:  # Apply mutation
                 p = toolbox.select(population, 1)
                 children.append(toolbox.mutate(p[0]))
-            else:
+            else:                           # Apply reproduction
                 children.append(toolbox.select(population, 1)[0])
         
-        # Evaluate the invalid individuals
+        # Evaluate the individuals with an invalid fitness
         for ind in children:
             if not ind.fitness.valid:
                 ind.fitness.extend(toolbox.evaluate(ind))
@@ -177,7 +178,7 @@ def steadyEA(toolbox, population, ngen):
     """
     _logger.info("Start of evolution")
     
-    # Evaluate the invalid individuals
+    # Evaluate the individuals with an invalid fitness
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
@@ -187,7 +188,7 @@ def steadyEA(toolbox, population, ngen):
         _logger.info("Evolving generation %i", g)
         
         p1, p2 = toolbox.select(population, 2)
-        child = toolbox.mate(p1, p2)[0]
+        child = toolbox.mate(p1, p2)[0]     # Only the first child is selected
         child = toolbox.mutate(child)
         
         if not child.fitness.valid:
