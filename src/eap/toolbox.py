@@ -295,7 +295,7 @@ def uniformOnePtTreeCx(ind1, ind2):
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     
     try:
-        index = random.randint(1,min([ind1.count_nodes(), ind2.count_nodes()])-1)    
+        index = random.randint(1,min([ind1.size, ind2.size])-1)    
     except ValueError:
         return child1, child2
 
@@ -310,6 +310,49 @@ def uniformOnePtTreeCx(ind1, ind2):
     except AttributeError:
         pass
     return child1, child2
+    
+## Strongly Typed GP crossovers
+    
+def onePtTreeTypedCx(ind1, ind2):
+    child1 = copy.deepcopy(ind1)
+    child2 = copy.deepcopy(ind2)
+    
+    # choose the crossover point in the 1st
+    # individual
+    index1 = random.randint(1, child1.size-1)
+    subtree1 = child1.search_subtree_dfs(index1)
+    type1 = subtree1.root.ret
+    
+    # choose the crossover point in the 2nd
+    # individual 
+    index2 = random.randint(1, child2.size-1)
+    subtree2 = child2.search_subtree_dfs(index2)
+    type2 = subtree2.root.ret
+    
+    # try to mate the trees
+    # if not crossover point is found after MAX_CX_TRY
+    # the children are returned without modifications.
+    tries = 0
+    MAX_CX_TRY = 5
+    while not (type1 is type2) and tries != MAX_CX_TRY:
+        index2 = random.randint(1, child2.size-1)
+        subtree2 = child2.search_subtree_dfs(index2)
+        type2 = subtree2.root.ret
+        tries += 1
+    
+    if type1 is type2:
+        sub1 = ind1.search_subtree_dfs(index1)
+        sub2 = ind2.search_subtree_dfs(index2)
+        child1.set_subtree_dfs(index1, sub2)
+        child2.set_subtree_dfs(index2, sub1)
+
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+
+    return child1, child2    
 
 ######################################
 # GP Mutations                       #
@@ -318,7 +361,7 @@ def uniformOnePtTreeCx(ind1, ind2):
 def uniformTreeMut(ind, expr):
 
     mutant = copy.deepcopy(ind)
-    index = random.randint(1, mutant.count_nodes()-1)
+    index = random.randint(1, mutant.size-1)
     subtree = base.Tree(expr())
     mutant.set_subtree_dfs(index, subtree)
     try:
@@ -326,6 +369,31 @@ def uniformTreeMut(ind, expr):
     except AttributeError:
         pass
     return mutant
+
+## Strongly Typed GP mutations
+
+def uniformTreetypedMut(ind, expr):
+    """ 
+    The mutation of strongly typed GP expression is
+    pretty easy. First, it finds a subtree. Second, it 
+    has to identify the return type of the root of 
+    this subtree. Third, it generates a new subtree
+    with a root's type corresponding to the original 
+    subtree root's type. Finally, the old subtree is
+    replaced by the new subtree, and the mutant is 
+    returned.
+    """
+    mutant = copy.deepcopy(ind)
+    index = random.randint(1, mutant.size-1)
+    subtree = mutant.search_subtree_dfs(index)
+    type = subtree.root.ret
+    subtree = base.Tree(expr(type=type))
+    mutant.set_subtree_dfs(index, subtree)
+    try:
+        mutant.fitness.valid = False
+    except AttributeError:
+        pass   
+    return mutant 
 
 ######################################
 # Selections                         #
