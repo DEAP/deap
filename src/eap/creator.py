@@ -27,7 +27,7 @@ def create(name, bases, dict={}):
         else:
             dict_cls[obj_name] = obj
 
-    def init_type(self, **kargs):
+    def init_type(self, *args, **kargs):
         for elem in dict_inst.items():
             obj_name, object = elem
             if inspect.isclass(object):

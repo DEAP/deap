@@ -15,7 +15,8 @@
 
 import sys
 import random
-
+import multiprocessing
+import cPickle
 
 sys.path.append("..")
 
@@ -40,7 +41,7 @@ tools.register("population", creator.Population, size=300,
 def evalOneMax(individual):
     return [sum(individual)]
 
-tools.register("evaluate", evalOneMax)
+
 tools.register("mate", toolbox.twoPointsCx)
 tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
 tools.register("select", toolbox.tournSel, tournsize=3)
@@ -48,9 +49,12 @@ tools.register("select", toolbox.tournSel, tournsize=3)
 pop = tools.population()
 CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
-# Evaluate the entire population
-for ind in pop:
-    ind.fitness.extend(tools.evaluate(ind))
+# Process Pool of 4 workers
+pool = multiprocessing.Pool(processes=4)
+
+fitnesses = pool.map(evalOneMax, pop)
+for ind, fit in zip(pop, fitnesses):
+    ind.fitness.extend(fit)
 
 # Begin the evolution
 for g in range(NGEN):
@@ -68,10 +72,11 @@ for g in range(NGEN):
             pop[i] = tools.mutate(pop[i])
 
     # Evaluate the individuals with an invalid fitness
-    for ind in pop:
-        if not ind.fitness.valid:
-            ind.fitness.extend(tools.evaluate(ind))
-
+    invalid_ind = filter(lambda ind: not ind.fitness.valid, pop)
+    fitnesses = pool.map(evalOneMax, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.extend(fit)
+        
     # Gather all the fitnesses in one list and print the stats
     fits = [ind.fitness[0] for ind in pop]
     print "  Min %f" % min(fits)
