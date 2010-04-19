@@ -18,15 +18,20 @@ from itertools import repeat
 
 ## GP Tree utility functions
 
-def evaluate_to_string(expr):
-    try:
-        func = expr[0]
-        return func(*[evaluate_to_string(value) for value in expr[1:]])
-    except TypeError:
-        return expr
-
-def evaluate(pset, expr):
-    return eval(evaluate_to_string(expr), pset.func_dict)
+def evaluate(expr, pset=None):
+    """Evaluate the expression expr into a string if pset is None
+    or into Python code is pset is not None.
+    """
+    def _stringify(expr):
+        try:
+            func = expr[0]
+            return func(*[_stringify(value) for value in expr[1:]])
+        except TypeError:
+            return expr
+    if not pset is None:
+        return eval(_stringify(expr), pset.func_dict)
+    else:
+        return _stringify(expr)
 
 
 def lambdify(pset, expr, args):
@@ -38,7 +43,7 @@ def lambdify(pset, expr, args):
     function of sympy0.6.6.
     """
     if isinstance(expr, list):
-        expr = evaluate_to_string(expr)
+        expr = evaluate(expr)
     if isinstance(args, str):
         pass
     elif hasattr(args, "__iter__"):

@@ -82,4 +82,3 @@ best = toolbox.bestSel(pop,1)[0]
 
 print 'Best individual : ', gp.evaluate(best), best.fitness
 
-

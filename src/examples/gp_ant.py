@@ -178,7 +178,7 @@ if __name__ == "__main__":
     
     def evalArtificialAnt(individual):
         # Transform the tree expression to functionnal Python code
-        routine = gp.evaluate(pset, individual)
+        routine = gp.evaluate(individual, pset)
         # Run the generated routine
         ant.run(routine)
         return [ant.eaten]
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     
     best = toolbox.bestSel(pop,1)[0]
     
-    print 'Best individual : ', gp.evaluate(pset, best), evalArtificialAnt(best)
+    print 'Best individual : ', gp.evaluate(best), best.fitness
     
         
     
