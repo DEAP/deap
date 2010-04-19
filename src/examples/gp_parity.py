@@ -84,7 +84,7 @@ tools.register('mutate', toolbox.uniformTreeMut, expr=tools.expr_mut)
 
 pop = tools.population()
 
-algorithms.simpleEA(tools, pop, 0.5, 0.2, 50)
+algorithms.simpleEA(tools, pop, 0.5, 0.2, 40)
 
 best = toolbox.bestSel(pop,1)[0]
 print 'Best individual : ', gp.evaluate(best), best.fitness
