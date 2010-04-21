@@ -22,6 +22,7 @@ sys.path.append("..")
 import eap.algorithms as algorithms
 import eap.base as base
 import eap.creator as creator
+import eap.halloffame as halloffame
 import eap.toolbox as toolbox
 
 logging.basicConfig(level=logging.DEBUG)
@@ -45,6 +46,10 @@ tools.register("mate", toolbox.twoPointsCx)
 tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
 tools.register("select", toolbox.tournSel, tournsize=3)
 
-pop = tools.population()
-algorithms.plusEA(tools, pop, 100, 100, 0.5, 0.2, 40)
+hof = halloffame.HallOfFame(1)
 
+pop = tools.population()
+algorithms.simpleEA(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+
+logging.info("Best individual: %s", hof[0])
+logging.info("Best individual's fitness: %s", hof[0].fitness)

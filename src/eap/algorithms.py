@@ -31,7 +31,7 @@ import random
 
 _logger = logging.getLogger("eap.algorithms")
 
-def simpleEA(toolbox, population, cxpb, mutpb, ngen):
+def simpleEA(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     """The simpleEA algorithm reproduce the simplest evolutionary algorithm.
        
     """
@@ -41,6 +41,11 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
+            
+    try:
+        halloffame.update(population)
+    except AttributeError:
+        pass
     
     # Begin the generational process
     for g in range(ngen):
@@ -62,6 +67,11 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
         for ind in population:
             if not ind.fitness.valid:
                 ind.fitness.extend(toolbox.evaluate(ind))
+                
+        try:
+            halloffame.update(population)
+        except AttributeError:
+            pass
 
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness[0] for ind in population]
@@ -76,7 +86,7 @@ def simpleEA(toolbox, population, cxpb, mutpb, ngen):
 
     _logger.info("End of (successful) evolution")
 
-def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
+def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffame=None):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm, ...
     """
     assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
@@ -87,6 +97,11 @@ def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
+            
+    try:
+        halloffame.update(population)
+    except AttributeError:
+        pass
     
     # Begin the generational process
     for g in range(ngen):
@@ -109,6 +124,11 @@ def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
             if not ind.fitness.valid:
                 ind.fitness.extend(toolbox.evaluate(ind))
         
+        try:
+            halloffame.update(children)
+        except AttributeError:
+            pass
+            
         population[:] = toolbox.select(population + children, mu)
         
         # Gather all the fitnesses in one list and print the stats
@@ -124,7 +144,7 @@ def plusEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
 
     _logger.info("End of (successful) evolution")
     
-def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
+def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffame=None):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm
     """
     assert lambda_ >= mu, "lambda must be greater or equal to mu." 
@@ -136,6 +156,11 @@ def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
+            
+    try:
+        halloffame.update(population)
+    except AttributeError:
+        pass
     
     # Begin the generational process
     for g in range(ngen):
@@ -158,6 +183,11 @@ def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
             if not ind.fitness.valid:
                 ind.fitness.extend(toolbox.evaluate(ind))
         
+        try:
+            halloffame.update(children)
+        except AttributeError:
+            pass
+        
         population[:] = toolbox.select(children, mu)
         
         # Gather all the fitnesses in one list and print the stats
@@ -173,7 +203,7 @@ def commaEA(toolbox, population, mu, lambda_, cxpb, mutpb, ngen):
 
     _logger.info("End of (successful) evolution")
     
-def steadyEA(toolbox, population, ngen):
+def steadyEA(toolbox, population, ngen, halloffame=None):
     """The is the steady-state evolutionary algorithm
     """
     _logger.info("Start of evolution")
@@ -182,6 +212,11 @@ def steadyEA(toolbox, population, ngen):
     for ind in population:
         if not ind.fitness.valid:
             ind.fitness.extend(toolbox.evaluate(ind))
+    
+    try:
+        halloffame.update(population)
+    except AttributeError:
+        pass
     
     # Begin the generational process
     for g in range(ngen):
@@ -194,7 +229,13 @@ def steadyEA(toolbox, population, ngen):
         if not child.fitness.valid:
             child.fitness.extend(toolbox.evaluate(child))
         
+        try:
+            halloffame.update([child])
+        except AttributeError:
+            pass
+        
         population.append(child)
+        
         population[:] = toolbox.select(population, len(population) - 1)
         
         # Gather all the fitnesses in one list and print the stats

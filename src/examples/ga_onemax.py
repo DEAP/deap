@@ -86,5 +86,5 @@ for g in range(NGEN):
 print "-- End of (successful) evolution --"
 
 best_ind = toolbox.bestSel(pop, 1)[0]
-print "Best individual is %s" % str(best_ind)
-print "Best individual has fitness of %s" % str(best_ind.fitness)
+print "Best individual: %s" % str(best_ind)
+print "Best individual's fitness: %s" % str(best_ind.fitness)
