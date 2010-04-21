@@ -38,4 +38,4 @@ EAP is the proof that evolutionary algorithms do **not** need to be complicated.
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
 __version__ = "0.4"
-__revision__ = "0.4.0"
+__revision__ = "0.4.1"
