@@ -49,8 +49,8 @@ pop = tools.population()                        # The CMA-ES algorithm takes a
                                                 # population of one individuals as argument
 
 # The CMA-ES algorithm converge with good probability with those settings
-cma.cmaES(tools, pop, sigma=5.0, ngen=250, lambda_=600)
+cma.esCMA(tools, pop, sigma=5.0, ngen=250, lambda_=600)
 
-best_ind = toolbox.bestSel(pop, 1)[0]
+best_ind = toolbox.selBest(pop, 1)[0]
 logging.info("Best individual is %s", str(best_ind))
 logging.info("Best individual has fitness of %s", str(best_ind.fitness))

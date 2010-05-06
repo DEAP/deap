@@ -1,6 +1,3 @@
-#
-#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
-#    
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -26,8 +23,17 @@ import operator
 import random
 
 from collections import deque
-from itertools import izip, repeat, count, chain, imap
+from itertools import izip, repeat, count, chain, imap, starmap
 import itertools
+
+def repeatfunc(func, times=None, starmap=starmap, *args):
+    """Repeat calls to func with specified arguments.
+
+    Example:  repeatfunc(random.random)
+    """
+    if times is None:
+        return starmap(func, repeat(args))
+    return starmap(func, repeat(args, times))
 
 class List(list):
     """A List is a basic container that inherits from the python :class:`list`
@@ -35,63 +41,29 @@ class List(list):
     methods, a callable object, an iterable object or a generator function (the
     last two initialization methods are the same but both are mentionned
     in order to emphasize their presence). The first method is to provide a
-    callable object that return the desired value, the method will be
+    callable object that return the desired value, this callable will be
     called *size* times and the returned valued will be appended to the
-    list after each call. The most classic way to initialize a List is to
-    provide a :data:`lambda` function using a random method, for instance, ::
-    
-        print List(size=3, content=lambda: random.choice((True, False)))
-        [False, False, True]
-    
-    A similar way is to provide the *content* argument with a class. For 
-    example, lets build a simple
-    :class:`MyTuple` class that initialize a tuple of boolean and integer
-    in its member values ::
-    
-        class MyTuple(object):
-            calls = 0
-            def __init__(self):
-                self.values = bool(self.calls), calls
-                self.__class__.calls += 1
-            def __repr__(self):
-                return repr(self.values)
-    
-    Initializing a list of 3 :class:`MyTuples` is done by ::
-    
-        print List(size=3, content=MyTuple)
-        [(False, 0), (True, 1), (True, 2)]
-        
-    The same result may be obtained by providing an iterable to the List's
-    *content*, in that case, no *size* is needed since the size will be that
-    same as the iterable provided. ::
-    
-        print List(content=[MyTuple(), MyTuple(), MyTuple()])
-        [(False, 0), (True, 1), (True, 2)]
-        
-    The same thing may be achieved by the uses of a generator function. First 
-    the generator must be defined ::
-    
-        def myGenerator(size):
-            for i in xrange(size):
-                yield MyTuple()
-            raise StopIteration
-            
-    Then it must be initialized and passed to List's *content* ::
-    
-         print List(content=myGenerator(size=3))
-         [(False, 0), (True, 1), (True, 2)]
+    list after each call. The two next methods doesn't require the *size*
+    argument since the initialization will iterate over the iterable object
+    *content* until a :class:`StopIteration` is called.
     """
     def __init__(self, size=0, content=None):
         if content is not None:
             if callable(content):
-                self.extend(content() for i in xrange(size))
+                self.extend(repeatfunc(content, size))
             else:
                 self.extend(content)
+                
+    def __repr__(self):
+        out = super(List, self).__repr__()
+        if self.__dict__:
+            out = " : ".join([out, repr(self.__dict__)])
+        return out
 
 class Array(array.array):
     """An Array is a basic container that inherits from the python
-    :class:`~array.array` class. The Array may be
-    initialized  by the exact three methods than the :class:`List`. When
+    :class:`~array.array` class. The Array may be initialized  by the 
+    exact same three methods than the :class:`~eap.base.List`. When
     initializing an Array, a *typecode* must be provided to build the right
     type of array. The *typecode* must be one of the type codes listed in
     the python :mod:`array` module.
@@ -99,18 +71,12 @@ class Array(array.array):
     def __new__(cls, typecode, content=[], size=0):
         gen_content = content
         if callable(content):
-            gen_content = (content() for i in xrange(size))
+            gen_content = repeatfunc(content, size)
         return super(Array, cls).__new__(cls, typecode, gen_content)
         
     def __init__(self):
+        # This function is required by the creator.
         pass
-
-#    def __init__(self, size=0, content=None):
-#        if content is not None:
-#            if callable(content):
-#                self.extend(content() for i in xrange(size))
-#            else:
-#                self.extend(content)
 
     def __deepcopy__(self, memo):
         """Overrides the deepcopy from array.array that does not copy the
@@ -122,11 +88,17 @@ class Array(array.array):
         copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
         copy_.extend(self)
         return copy_
+    
+    def __repr__(self):
+        out = super(Array, self).__repr__()
+        if self.__dict__:
+            out = " : ".join([out, repr(self.__dict__)])
+        return out
 
 class Indices(Array):
-    """An Indices is a specialization of the :class:`Array` container, 
-    it contains only integers (type code ``"i"``) between 0 and *size* - 1 and
-    do not repeat the same integer twice. For example, ::
+    """An Indices is a specialization of the :class:`~eap.base.Array`
+    container,  it contains only integers (type code ``"i"``) between 0 
+    and *size* - 1 and do not repeat the same integer twice. For example, ::
     
         print Indices(size=5)
         array('i', [0, 4, 2, 3, 1])
@@ -303,19 +275,6 @@ class Fitness(Array):
     valid = property(getvalid, setvalid, None, 
                      "Asses if a fitness is valid or not.")
 
-#    def isValid(self):
-#        '''Wheter or not this fitness is valid. An invalid fitness is simply
-#        an empty array.
-#        '''
-#        return len(self) != 0
-#
-#    def invalidate(self):
-#        '''Invalidate this fitness. As a matter of facts, it simply deletes
-#        all the fitness values. This method has to be used after an individual
-#        is modified, usualy it is done in the modification operator.
-#        '''
-#        self[:] = array.array('d')
-
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort
         lexically the fitnesses, this method returns :data:`True` if this
@@ -343,6 +302,8 @@ class Fitness(Array):
         return not self.__lt__(other)
 
     def __lt__(self, other):
+        if other is None:
+            return False
         # Pad the weights with the last value
         weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
@@ -352,6 +313,8 @@ class Fitness(Array):
         return self_values < other_values
 
     def __le__(self, other):
+        if other is None:
+            return False
         # Pad the weights with the last value
         weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
@@ -361,6 +324,8 @@ class Fitness(Array):
         return self_values <= other_values
 
     def __eq__(self, other):
+        if other is None:
+            return False
         weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
         self_values = array.array('d', imap(operator.mul, self, weights))
@@ -377,4 +342,4 @@ class Fitness(Array):
         elif other > self:
             return -1
         return 0
-        
+ 

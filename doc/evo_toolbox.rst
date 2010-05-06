@@ -1,10 +1,12 @@
+.. _evo-toolbox:
+
 ====================
 Evolutionary Toolbox
 ====================
 
 .. automodule:: eap.toolbox
 
-.. autoclass:: Toolbox
+.. autoclass:: eap.toolbox.Toolbox
    :members:
    
 Operators
@@ -19,36 +21,42 @@ This module contains the operators an evolutionary algorithm. They are used to m
 Crossover
 ---------
 
-.. autofunction:: twoPointsCx
+.. autofunction:: eap.toolbox.cxTwoPoints
 
-.. autofunction:: onePointCx
+.. autofunction:: eap.toolbox.cxOnePoint
 
-.. autofunction:: pmCx
+.. autofunction:: eap.toolbox.cxUniform
+
+.. autofunction:: eap.toolbox.cxPartialyMatched
+
+.. autofunction:: eap.toolbox.cxBlend
+
+.. autofunction:: eap.toolbox.cxSimulatedBinary
 
 
 Mutation
 --------
 
-.. autofunction:: gaussMut
+.. autofunction:: eap.toolbox.mutGaussian
 
-.. autofunction:: shuffleIndxMut
+.. autofunction:: eap.toolbox.mutShuffleIndexes
 
-.. autofunction:: flipBitMut
+.. autofunction:: eap.toolbox.mutFlipBit
 
 
 Selection
 ---------
 
-.. autofunction:: tournSel
+.. autofunction:: eap.toolbox.selTournament
 
-.. autofunction:: rndSel
+.. autofunction:: eap.toolbox.selRandom
 
-.. autofunction:: bestSel
+.. autofunction:: eap.toolbox.selBest
 
-.. autofunction:: worstSel
+.. autofunction:: eap.toolbox.selWorst
 
 Migration
 ---------
 
-.. autofunction:: ringMig(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
+.. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
 

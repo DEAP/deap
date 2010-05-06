@@ -41,20 +41,23 @@ class Toolbox(object):
     :meth:`register`.
     """
 
-    def register(self, methodName, method, *args, **kargs):
-        """Register an operator in the toolbox."""
-        setattr(self, methodName, partial(method, *args, **kargs))
+    def register(self, name, method, *args, **kargs):
+        """Register a new *method* in the toolbox using name *name*. The
+        arguments and keyworded arguments will be saved as default arguments
+        for the registered method.
+        """
+        setattr(self, name, partial(method, *args, **kargs))
 
-    def unregister(self, methodName):
-        """Unregister an operator from the toolbox."""
-        delattr(self, methodName)
+    def unregister(self, name):
+        """Unregister the registered method named *name* from the toolbox."""
+        delattr(self, name)
 
 
 ######################################
 # GA Crossovers                      #
 ######################################
 
-def twoPointsCx(ind1, ind2):
+def cxTwoPoints(ind1, ind2):
     """Execute a two points crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
     This operation apply on an :class:`~eap.base.Individual` composed of a list
@@ -93,7 +96,7 @@ def twoPointsCx(ind1, ind2):
     return child1, child2
 
 
-def onePointCx(ind1, ind2):
+def cxOnePoint(ind1, ind2):
     """Execute a one point crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
     This operation apply on an :class:`~eap.base.Individual` composed of a list
@@ -112,7 +115,7 @@ def onePointCx(ind1, ind2):
     :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
-    child1, child2 = copy.copy(ind1), copy.copy(ind2)
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint = random.randint(1, size - 1)
     
     child1[cxpoint:], child2[cxpoint:] = child2[cxpoint:], child1[cxpoint:]
@@ -125,7 +128,25 @@ def onePointCx(ind1, ind2):
     
     return child1, child2
 
-def pmCx(ind1, ind2):
+def cxUniform(ind1, ind2, indpb):
+    """Uniform crossover"""
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    
+    for i in xrange(size):
+        if random.random() < indpb:
+            child1[i], child2[i] = childe2[i], child1[i]
+    
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
+    
+
+def cxPartialyMatched(ind1, ind2):
     """Execute a partialy matched crossover on the input indviduals. The two
     children produced are returned as a tuple, the two parents are left intact.
     This crossover expect individuals of indices, the result for any other type
@@ -187,13 +208,137 @@ def pmCx(ind1, ind2):
         pass
     
     return child1, child2
+    
+def cxBlend(ind1, ind2, alpha):
+    """Blend crossover"""
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    
+    for i in xrange(size):
+        gamma = (1. + 2. * alpha) * random.random() - alpha
+        x1 = child1[i]
+        x2 = child2[i]
+        child1[i] = (1. - gamma) * x1 + gamma * x2
+        child2[i] = gamma * x1 + (1. - gamma) * x2
+    
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
 
+def cxSimulatedBinary(ind1, ind2, nu):
+    """Simulated binary crossover"""
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    
+    for i in xrange(size):
+        rand = random.random()
+        if rand <= 0.5:
+            beta = 2. * rand
+        else:
+            beta = 1. / (2. (1. - rand))
+        beta **= 1. / (nu + 1.)
+        x1 = child1[i]
+        x2 = child2[i]
+        child1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
+        child2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
+    
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
+    
+######################################
+# Messy Crossovers                   #
+######################################
+
+def cxMessyOnePoint(ind1, ind2):
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    cxpoint1 = random.randint(1, len(ind1))
+    cxpoint2 = random.randint(1, len(ind2))
+    
+    child1[cxpoint1:], child2[cxpoint2:] = child2[cxpoint2:], child1[cxpoint1:]
+    
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
+    
+######################################
+# ES Crossovers                      #
+######################################
+
+def cxESBlend(ind1, ind2, alpha, minstrategy=None):
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    
+    for indx in xrange(size):
+        # Blend the values
+        gamma = (1. + 2. * alpha) * random.random() - alpha
+        x1 = child1[indx]
+        x2 = child2[indx]
+        child1[indx] = (1. - gamma) * x1 + gamma * x2
+        child2[indx] = gamma * x1 + (1. - gamma) * x2
+        # Blend the strategies
+        gamma = (1. + 2. * alpha) * random.random() - alpha
+        s1 = child1.strategy[indx]
+        s2 = child2.strategy[indx]
+        child1.strategy[indx] = (1. - gamma) * s1 + gamma * s2
+        child2.strategy[indx] = gamma * s1 + (1. - gamma) * s2
+        if child1.strategy[indx] < minstrategy:     # 4 < None = False
+            child1.strategy[indx] = minstrategy
+        if child2.strategy[indx] < minstrategy:
+            child2.strategy[indx] = minstrategy
+    
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
+
+def cxESTwoPoints(ind1, ind2):
+    """Execute a classical two points crossover on both the individual and
+    its strategy. The crossover points for the individual and the strategy
+    are the same.
+    """
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(child1), len(child2))
+    
+    pt1 = random.randint(1, size)
+    pt2 = random.randint(1, size - 1)
+    if pt2 >= pt1:
+        pt2 += 1
+    else:			# Swap the two cx points
+        pt1, pt2 = pt2, pt1
+   
+    child1[pt1:pt2], child2[pt1:pt2] = child2[pt1:pt2], child1[pt1:pt2]     
+    child1.strategy[pt1:pt2], child2.strategy[pt1:pt2] = \
+        child2.strategy[pt1:pt2], child1.strategy[pt1:pt2]
+    
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
 
 ######################################
 # GA Mutations                       #
 ######################################
 
-def gaussMut(individual, mu, sigma, indpb):
+def mutGaussian(individual, sigma, indpb):
     """This function applies a gaussian mutation on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
@@ -217,11 +362,11 @@ def gaussMut(individual, mu, sigma, indpb):
     functions from the python base :mod:`random` module.
     """
     mutated = False
-    mutant = copy.copy(individual)
+    mutant = copy.deepcopy(individual)
     
     for i in xrange(len(mutant)):
         if random.random() < indpb:
-            mutant[i] += random.gauss(mu, sigma)
+            mutant[i] += random.gauss(0, sigma)
             mutated = True
     if mutated:
         try:
@@ -229,10 +374,10 @@ def gaussMut(individual, mu, sigma, indpb):
         except AttributeError:
             pass
     
-    return lIndividual
+    return mutant
 
 
-def shuffleIndxMut(individual, indpb):
+def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
     The *individual* is left intact and the mutant is an independant copy. The
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
@@ -261,7 +406,7 @@ def shuffleIndxMut(individual, indpb):
     return mutant
 
 
-def flipBitMut(individual, indpb):
+def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
     mutant. The *individual* is left intact and the mutant is an independant
     copy. The *individual* is expected to be iterable and the values of the
@@ -285,12 +430,42 @@ def flipBitMut(individual, indpb):
         except AttributeError:
             pass
     return mutant
+    
+######################################
+# ES Mutations                       #
+######################################
+
+def mutES(individual, indpb, minstrategy=None):
+    mutated = False
+    mutant = copy.deepcopy(individual)
+    
+    size = len(mutant)
+    t = 1. / math.sqrt(2. * math.sqrt(size))
+    t0 = 1. / math.sqrt(2. * size)
+    n = random.gauss(0, 1)
+    t0_n = t0 * n
+    
+    for indx in xrange(size):
+        if random.random() < indpb:
+            ni = random.gauss(0, 1)
+            mutant.strategy[indx] *= math.exp(t0_n + t * ni)
+            if mutant.strategy[indx] < minstrategy:     # 4 < None = False
+                mutant.strategy[indx] = minstrategy
+            mutant[indx] += mutant.strategy[indx] * ni
+            mutated = True
+            
+    if mutated:
+        try:
+            mutant.fitness.valid = False
+        except AttributeError:
+            pass
+    return mutant
 
 ######################################
 # GP Crossovers                      #
 ######################################
 
-def uniformOnePtTreeCx(ind1, ind2):
+def cxTreeUniformOnePoint(ind1, ind2):
 
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     
@@ -313,7 +488,7 @@ def uniformOnePtTreeCx(ind1, ind2):
     
 ## Strongly Typed GP crossovers
     
-def onePtTreeTypedCx(ind1, ind2):
+def cxTypedTreeOnePoint(ind1, ind2):
     child1 = copy.deepcopy(ind1)
     child2 = copy.deepcopy(ind2)
     
@@ -358,7 +533,7 @@ def onePtTreeTypedCx(ind1, ind2):
 # GP Mutations                       #
 ######################################
 
-def uniformTreeMut(ind, expr):
+def mutTreeUniform(ind, expr):
 
     mutant = copy.deepcopy(ind)
     index = random.randint(1, mutant.size-1)
@@ -372,7 +547,7 @@ def uniformTreeMut(ind, expr):
 
 ## Strongly Typed GP mutations
 
-def uniformTreetypedMut(ind, expr):
+def mutTypedTreeUniform(ind, expr):
     """ 
     The mutation of strongly typed GP expression is
     pretty easy. First, it finds a subtree. Second, it 
@@ -399,7 +574,7 @@ def uniformTreetypedMut(ind, expr):
 # Selections                         #
 ######################################
 
-def rndSel(individuals, n):
+def selRandom(individuals, n):
     """Select *n* individuals at random from the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
 
@@ -413,21 +588,21 @@ def rndSel(individuals, n):
     return [random.choice(individuals) for i in xrange(n)]
 
 
-def bestSel(individuals, n):
+def selBest(individuals, n):
     """Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     """
     return sorted(individuals, key=lambda ind : ind.fitness, reverse=True)[:n]
 
 
-def worstSel(individuals, n):
+def selWorst(individuals, n):
     """Select the *n* worst individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     """
     return sorted(individuals, key=lambda ind : ind.mFitness)[:n]
 
 
-def tournSel(individuals, n, tournsize):
+def selTournament(individuals, n, tournsize):
     """Select *n* individuals from the input *individuals* using *n*
     tournaments of *tournSize* individuals. The list returned contains shallow
     copies of the input *individuals*.
@@ -547,7 +722,7 @@ def sortCrowdingDist(individuals, n):
 # Migrations                         #
 ######################################
 
-def ringMig(populations, n, selection, replacement=None, migarray=None,
+def migRing(populations, n, selection, replacement=None, migarray=None,
             sel_kargs=None, repl_kargs=None):
     """Perform a ring migration between the *populations*. The migration first
     select *n* emigrants from each population using the specified *selection*
@@ -563,13 +738,7 @@ def ringMig(populations, n, selection, replacement=None, migarray=None,
     """
     if migarray is None:
         migarray = [(i + 1) % len(populations) for i in xrange(len(populations))]
-    else:
-        for i in xrange(len(migarray)):
-            try:
-                migarray.index(i) 
-            except ValueError:
-                raise ValueError, "The migration array shall contain each population once and only once."
-
+    
     immigrants = [[] for i in len(migarray)]
     emigrants = [[] for i in len(migarray)]
     if sel_kargs is None:

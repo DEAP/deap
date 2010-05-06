@@ -28,7 +28,7 @@ import eap.toolbox as toolbox
 random.seed(64)
 
 creator.create("FitnessMax", (base.Fitness,), {"weights" : (1.0,)})
-creator.create("Individual", (base.Array,), {"fitness" : creator.FitnessMax})
+creator.create("Individual", (base.List,), {"fitness" : creator.FitnessMax})
 creator.create("Population", (base.List,))
 
 tools = toolbox.Toolbox()
@@ -41,9 +41,9 @@ def evalOneMax(individual):
     return [sum(individual)]
 
 tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.twoPointsCx)
-tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
-tools.register("select", toolbox.tournSel, tournsize=3)
+tools.register("mate", toolbox.cxTwoPoints)
+tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
+tools.register("select", toolbox.selTournament, tournsize=3)
 
 pop = tools.population()
 CXPB, MUTPB, NGEN = 0.5, 0.2, 40
@@ -85,6 +85,6 @@ for g in range(NGEN):
 
 print "-- End of (successful) evolution --"
 
-best_ind = toolbox.bestSel(pop, 1)[0]
-print "Best individual: %s" % str(best_ind)
-print "Best individual's fitness: %s" % str(best_ind.fitness)
+best_ind = toolbox.selBest(pop, 1)[0]
+print "Best individual: %r" % best_ind
+#print "Best individual's fitness: %s" % repr(best_ind.fitness)
