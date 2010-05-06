@@ -17,8 +17,7 @@
 EAP stands for Evolutionary Algorithm in Python, it is dedicated to people who
 wish to learn how to use evolutionary algorithms and to those who wish to
 rediscover evolutionary algorithms. The concepts of EAP may be extremely well
-resumed by some statements of the `Zen of Python
-<http://www.python.org/dev/peps/pep-0020/>`_ by Tim Peters.
+resumed by some statements of the :pep:`20`, *the Zen of Python* by Tim Peters.
 
 - Beautiful is better than ugly.
 - Explicit is better than implicit.
@@ -33,7 +32,8 @@ resumed by some statements of the `Zen of Python
 - If the implementation is hard to explain, it's a bad idea.
 - If the implementation is easy to explain, it may be a good idea.
 
-EAP is the proof that evolutionary algorithms do **not** need to be complicated.
+EAP is the proof that evolutionary algorithms do **not** need to be neither
+complex or complicated.
 """
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"

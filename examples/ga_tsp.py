@@ -23,6 +23,7 @@ sys.path.append("..")
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
+import eap.halloffame as halloffame
 import eap.algorithms as algorithms
 
 logging.basicConfig(level=logging.INFO)
@@ -47,15 +48,14 @@ def evalTSP(individual):
         distance += distance_map[gene1][gene2]
     return [distance]
 
-tools.register("mate", toolbox.pmCx)
-tools.register("mutate", toolbox.shuffleIndxMut, indpb=0.05)
-tools.register("select", toolbox.tournSel, tournsize=3)
+tools.register("mate", toolbox.cxPartialyMatched)
+tools.register("mutate", toolbox.mutShuffleIndexes, indpb=0.05)
+tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("evaluate", evalTSP)
 
 pop = tools.population()
+hof = halloffame.HallOfFame(1)
 
-algorithms.simpleEA(tools, pop, 0.5, 0.2, 50)
+algorithms.eaSimple(tools, pop, 0.5, 0.2, 50, hof)
 
-best_ind = toolbox.bestSel(pop, 1)[0]
-logging.info("Best individual is %s", str(best_ind))
-logging.info("Best individual has fitness of %s", str(best_ind.fitness))
+logging.info("Best individual is %s", repr(hof[0]))
