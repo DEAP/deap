@@ -1,3 +1,6 @@
+#
+#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
+#    
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -23,96 +26,8 @@ import operator
 import random
 
 from collections import deque
-from itertools import izip, repeat, count, chain, imap, starmap
+from itertools import izip, repeat, count, chain, imap
 import itertools
-
-def repeatfunc(func, times=None, starmap=starmap, *args):
-    """Repeat calls to func with specified arguments.
-
-    Example:  repeatfunc(random.random)
-    """
-    if times is None:
-        return starmap(func, repeat(args))
-    return starmap(func, repeat(args, times))
-
-class List(list):
-    """A List is a basic container that inherits from the python :class:`list`
-    class. The only difference is that it may be initialized using three
-    methods, a callable object, an iterable object or a generator function (the
-    last two initialization methods are the same but both are mentionned
-    in order to emphasize their presence). The first method is to provide a
-    callable object that return the desired value, this callable will be
-    called *size* times and the returned valued will be appended to the
-    list after each call. The two next methods doesn't require the *size*
-    argument since the initialization will iterate over the iterable object
-    *content* until a :class:`StopIteration` is called.
-    """
-    def __init__(self, size=0, content=None):
-        if content is not None:
-            if callable(content):
-                self.extend(repeatfunc(content, size))
-            else:
-                self.extend(content)
-                
-    def __repr__(self):
-        out = super(List, self).__repr__()
-        if self.__dict__:
-            out = " : ".join([out, repr(self.__dict__)])
-        return out
-
-class Array(array.array):
-    """An Array is a basic container that inherits from the python
-    :class:`~array.array` class. The Array may be initialized  by the 
-    exact same three methods than the :class:`~eap.base.List`. When
-    initializing an Array, a *typecode* must be provided to build the right
-    type of array. The *typecode* must be one of the type codes listed in
-    the python :mod:`array` module.
-    """
-    def __new__(cls, typecode, content=[], size=0):
-        gen_content = content
-        if callable(content):
-            gen_content = repeatfunc(content, size)
-        return super(Array, cls).__new__(cls, typecode, gen_content)
-        
-    def __init__(self):
-        # This function is required by the creator.
-        pass
-
-    def __deepcopy__(self, memo):
-        """Overrides the deepcopy from array.array that does not copy the
-        object's attributes.
-        """
-        cls = self.__class__
-        copy_ = cls.__new__(cls, typecode=self.typecode)
-        memo[id(self)] = copy_
-        copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        copy_.extend(self)
-        return copy_
-    
-    def __repr__(self):
-        out = super(Array, self).__repr__()
-        if self.__dict__:
-            out = " : ".join([out, repr(self.__dict__)])
-        return out
-
-class Indices(Array):
-    """An Indices is a specialization of the :class:`~eap.base.Array`
-    container,  it contains only integers (type code ``"i"``) between 0 
-    and *size* - 1 and do not repeat the same integer twice. For example, ::
-    
-        print Indices(size=5)
-        array('i', [0, 4, 2, 3, 1])
-        
-    is the same than providing the *content* ``[0, 4, 2, 3, 1]`` and the
-    *type code* ``"i"`` to an :class:`Array`. The Indices class is provided
-    only for convenience.
-    """
-    def __new__(cls, typecode="i", content=[], size=0):
-        return super(Indices, cls).__new__(cls, "i", content, size)
-    
-    def __init__(self, size=0):
-        self.extend(i for i in xrange(size))
-        random.shuffle(self)
         
 class Tree(list):
     """ Basic N-ary tree class"""
@@ -228,7 +143,7 @@ class Tree(list):
                 queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
         parent[child] = Tree.rectify_subtree(subtree)
 
-class Fitness(Array):
+class Fitness(array.array):
     """The fitness is a measure of quality of a solution. The fitness
     inheritates from the :class:`Array` class, so the number of objectives
     depends on the lenght of the array.
@@ -246,7 +161,7 @@ class Fitness(Array):
        :data:`True` if *a* is inferior to *b*.
     """
     
-    weights = (-1.0,)
+    weights = ()
     """The weights are used in the fitness comparison. They are shared among
     all fitnesses of the same type.
     This member is **not** meant to be manipulated since it may influence how
@@ -258,12 +173,8 @@ class Fitness(Array):
     ``ind.fitness.__class__.weights = new_weights``.
     """
     
-    def __new__(cls, typecode="d", values=None):
-        return super(Fitness, cls).__new__(cls, "d")
-
-    def __init__(self, values=None):
-        if values is not None:
-            self.extend(values)
+    def __new__(cls, typecode=None, values=[]):
+        return super(Fitness, cls).__new__(cls, "d", values)
         
     def getvalid(self):
         return len(self) != 0
@@ -274,6 +185,19 @@ class Fitness(Array):
 
     valid = property(getvalid, setvalid, None, 
                      "Asses if a fitness is valid or not.")
+
+#    def isValid(self):
+#        '''Wheter or not this fitness is valid. An invalid fitness is simply
+#        an empty array.
+#        '''
+#        return len(self) != 0
+#
+#    def invalidate(self):
+#        '''Invalidate this fitness. As a matter of facts, it simply deletes
+#        all the fitness values. This method has to be used after an individual
+#        is modified, usualy it is done in the modification operator.
+#        '''
+#        self[:] = array.array('d')
 
     def isDominated(self, other):
         '''In addition to the comparaison operators that are used to sort
@@ -302,8 +226,6 @@ class Fitness(Array):
         return not self.__lt__(other)
 
     def __lt__(self, other):
-        if other is None:
-            return False
         # Pad the weights with the last value
         weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
@@ -313,8 +235,6 @@ class Fitness(Array):
         return self_values < other_values
 
     def __le__(self, other):
-        if other is None:
-            return False
         # Pad the weights with the last value
         weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
@@ -324,8 +244,6 @@ class Fitness(Array):
         return self_values <= other_values
 
     def __eq__(self, other):
-        if other is None:
-            return False
         weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
         self_values = array.array('d', imap(operator.mul, self, weights))
@@ -342,4 +260,4 @@ class Fitness(Array):
         elif other > self:
             return -1
         return 0
- 
+        

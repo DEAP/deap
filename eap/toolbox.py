@@ -31,9 +31,45 @@ import math
 import random
 from functools import partial
 # Needed by Nondominated sorting
-from itertools import chain, izip, repeat
+from itertools import chain, izip, repeat, cycle
 
 import eap.base as base
+
+
+class Repeat(object):
+    def __init__(self, func, times,):
+        self.func = func
+        self.count = cycle(xrange(times+1))
+        self.times = times
+        
+    def __iter__(self):
+        return self
+        
+    def next(self):
+        if self.count.next() == self.times:
+            raise StopIteration
+        return self.func()
+        
+class Iterate(object):
+    def __init__(self, func):
+        self.func = func
+        self.iter = iter(self.func())
+        
+    def __iter__(self):
+        return self
+        
+    def next(self):
+        try:
+            return self.iter.next()
+        except StopIteration:
+            self.iter = iter(self.func())
+            raise StopIteration
+
+class FuncCycle(list):
+    def __init__(self, seq_func):
+        self.cycle = cycle(func for func in seq_func)
+    def __call__(self):
+        return self.cycle.next()()
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
@@ -41,16 +77,25 @@ class Toolbox(object):
     :meth:`register`.
     """
 
-    def register(self, name, method, *args, **kargs):
-        """Register a new *method* in the toolbox using name *name*. The
-        arguments and keyworded arguments will be saved as default arguments
-        for the registered method.
-        """
-        setattr(self, name, partial(method, *args, **kargs))
+    def register(self, methodName, method, *args, **kargs):
+        """Register an operator in the toolbox."""
+        setattr(self, methodName, partial(method, *args, **kargs))
+        
+    def unregister(self, methodName):
+        """Unregister an operator from the toolbox."""
+        delattr(self, methodName)
 
-    def unregister(self, name):
-        """Unregister the registered method named *name* from the toolbox."""
-        delattr(self, name)
+    def regInit(self, methodName, method, content, size=None, args=(), kargs={}):
+        if hasattr(content,'__iter__'):
+            content = FuncCycle(content)
+        if size is None:
+            args = list(args)
+            args.append(Iterate(content))
+            self.register(methodName, method, *args, **kargs)
+        else:
+            args = list(args)
+            args.append(Repeat(content, size))
+            self.register(methodName, method, *args, **kargs)
 
 
 ######################################
