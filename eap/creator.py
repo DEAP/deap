@@ -1,3 +1,6 @@
+#
+#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
+#    
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -13,51 +16,51 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`creator` module allows to create and contain types (classes)
-built at runtime. Its only function :func:`~eap.creator.create` creates types
-and store them into the globals of this module. The main purpose of the creator
-is to allow the user to create its very own kind of structures from the base
-types defined in the :mod:`~eap.base` module. A secondary
-purpose is that when storing the new types with the same name they have been
-created with, pickling is made possible. 
-"""
-
+import array
+import copy
 import inspect
 
-def create(name, bases, dict={}):
-    """Instanciates new class and store it under :class:`eap.creator`\ .\ *name*\ . The
-    *base* argument is a tuple of base classes (see the :func:`type` built-in
-    function).
-    
-    The optional *dict* argument may contain callable or non-callable objects.
-    If the object is callable, then it will be automatically called when an
-    object of this type is initialized, adding the return value of the call to
-    an attribute named by the name assigned in the dictionary. If it is not
-    callable, it will be passed to the underlying :func:`type` function.
-    """
+def create(name, base, **kargs):
     dict_inst = {}
     dict_cls = {}
-    for obj_name, obj in dict.items():
-        #if inspect.isclass(obj):
+    for obj_name, obj in kargs.items():
         if callable(obj):
             dict_inst[obj_name] = obj
         else:
             dict_cls[obj_name] = obj
 
     def init_type(self, *args, **kargs):
-        for obj_name, obj in dict_inst.items():
-            setattr(self, obj_name, obj())
-
-        for base in bases:
-            base_args = {}
-            args_spec = inspect.getargspec(base.__init__)
-            for arg in args_spec[0][1:]:
-                if kargs.has_key(arg):
-                    base_args[arg] = kargs[arg]
-            base.__init__(self, **base_args)
-            
-
-    objtype = type(name, bases, dict_cls)
+        for elem in dict_inst.items():
+            obj_name, obj = elem
+            if inspect.isclass(obj):
+                obj = obj()
+            setattr(self, obj_name, obj)
+        base.__init__(self, *args)
+        
+    def repr_type(self):
+        out = super(self.__class__, self).__repr__()
+        if self.__dict__:
+            out = " : ".join([out, repr(self.__dict__)])
+        return out
+    
+    objtype = type(name, (base,), dict_cls)
+    
+    if issubclass(base, array.array):
+        def deepcopy_array(self, memo):
+            """Overrides the deepcopy from array.array that does not copy the
+            object's attributes.
+            """
+            cls = self.__class__
+            copy_ = cls.__new__(cls, self.typecode, self)
+            memo[id(self)] = copy_
+            copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
+            #copy_.extend(self)
+            return copy_
+        
+        setattr(objtype, "__deepcopy__", deepcopy_array)
+    
     setattr(objtype, "__init__", init_type)
+    #if not hasattr(objtype, "__repr__"):
+    setattr(objtype, "__repr__", repr_type)
     globals()[name] = objtype
 

@@ -13,38 +13,37 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+import array
 import sys
 import random
 import multiprocessing
 
-
 sys.path.append("..")
-
 
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
 
-
 random.seed(64)
 
-creator.create("FitnessMax", (base.Fitness,), {"weights" : (1.0,)})
-creator.create("Individual", (base.Array,), {"fitness" : creator.FitnessMax})
-creator.create("Population", (base.List,))
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", array.array, fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
-tools.register("individual", creator.Individual, size=100, typecode="b",
-		content=lambda: random.randint(0, 1))
-tools.register("population", creator.Population, size=300,
-		content=tools.individual)
+
+# Attribute generator
+tools.register("attr_bool", random.randint, 0, 1)
+
+# Structure initializers
+tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=100, args=("b",))
+tools.regInit("population", list, content=tools.individual, size=300)
 
 def evalOneMax(individual):
     return [sum(individual)]
 
-
-tools.register("mate", toolbox.twoPointsCx)
-tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
-tools.register("select", toolbox.tournSel, tournsize=3)
+tools.register("mate", toolbox.cxTwoPoints)
+tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
+tools.register("select", toolbox.selTournament, tournsize=3)
 
 pop = tools.population()
 CXPB, MUTPB, NGEN = 0.5, 0.2, 40
@@ -90,6 +89,5 @@ for g in range(NGEN):
 
 print "-- End of (successful) evolution --"
 
-best_ind = toolbox.bestSel(pop, 1)[0]
+best_ind = toolbox.selBest(pop, 1)[0]
 print "Best individual is %s" % str(best_ind)
-print "Best individual has fitness of %s" % str(best_ind.fitness)

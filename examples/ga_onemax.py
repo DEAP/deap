@@ -16,26 +16,26 @@
 import sys
 import random
 
-
 sys.path.append("..")
-
 
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
 
-
 random.seed(64)
 
-creator.create("FitnessMax", (base.Fitness,), {"weights" : (1.0,)})
-creator.create("Individual", (base.List,), {"fitness" : creator.FitnessMax})
-creator.create("Population", (base.List,))
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMax)
+creator.create("Population", list)
 
 tools = toolbox.Toolbox()
-tools.register("individual", creator.Individual, size=100, typecode="b",
-		content=lambda: random.randint(0, 1))
-tools.register("population", creator.Population, size=300,
-		content=tools.individual)
+
+# Attribute generator
+tools.register("attr_bool", random.randint, 0, 1)
+
+# Structure initializers
+tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=100)
+tools.regInit("population", creator.Population, content=tools.individual, size=300)
 
 def evalOneMax(individual):
     return [sum(individual)]
