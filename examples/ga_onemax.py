@@ -16,37 +16,37 @@
 import sys
 import random
 
-
 sys.path.append("..")
-
 
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
 
-
 random.seed(64)
 
-creator.create("FitnessMax", (base.Fitness,), {"weights" : (1.0,)})
-creator.create("Individual", (base.Array,), {"fitness" : creator.FitnessMax})
-creator.create("Population", (base.List,))
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMax)
+creator.create("Population", list)
 
 tools = toolbox.Toolbox()
-tools.register("individual", creator.Individual, size=100, typecode="b",
-		content=lambda: random.randint(0, 1))
-tools.register("population", creator.Population, size=300,
-		content=tools.individual)
+
+# Attribute generator
+tools.register("attr_bool", random.randint, 0, 1)
+
+# Structure initializers
+tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=100)
+tools.regInit("population", creator.Population, content=tools.individual, size=300)
 
 def evalOneMax(individual):
     return [sum(individual)]
 
 tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.twoPointsCx)
-tools.register("mutate", toolbox.flipBitMut, indpb=0.05)
-tools.register("select", toolbox.tournSel, tournsize=3)
+tools.register("mate", toolbox.cxTwoPoints)
+tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
+tools.register("select", toolbox.selTournament, tournsize=3)
 
 pop = tools.population()
-CXPB, MUTPB, NGEN = (0.5, 0.2, 40)
+CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
 # Evaluate the entire population
 for ind in pop:
@@ -67,7 +67,7 @@ for g in range(NGEN):
         if random.random() < MUTPB:
             pop[i] = tools.mutate(pop[i])
 
-    # Evaluate the invalid individuals
+    # Evaluate the individuals with an invalid fitness
     for ind in pop:
         if not ind.fitness.valid:
             ind.fitness.extend(tools.evaluate(ind))
@@ -83,4 +83,8 @@ for g in range(NGEN):
     print "  Mean %f" % (mean)
     print "  Std. Dev. %f" % std_dev
 
-print "-- End of evolution --"
+print "-- End of (successful) evolution --"
+
+best_ind = toolbox.selBest(pop, 1)[0]
+print "Best individual: %r" % best_ind
+#print "Best individual's fitness: %s" % repr(best_ind.fitness)

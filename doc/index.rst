@@ -21,6 +21,7 @@ Tutorials
 
 .. toctree::
    :maxdepth: 2
+   :numbered:
    
    first_steps
    ga_onemax
