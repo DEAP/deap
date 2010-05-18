@@ -90,12 +90,12 @@ Before evolving it, we need to instanciate a population. This step is done effor
 The Appeal of Evolution
 -----------------------
 
-The evolution of the population is the last thing to do before getting results. In this example we **do not** use the :mod:`eap.algorithm` module in order to show how to manipulate the different features of EAP. Let say that we want to evolve fo a fixed number of generation (:data:`MAXGEN`), the evolution will then begin with a simple for statement. ::
+The evolution of the population is the last thing to do before getting results. In this example we **do not** use the :mod:`eap.algorithms` module in order to show how to manipulate the different features of EAP. Let say that we want to evolve for a fixed number of generation :data:`MAXGEN`, the evolution will then begin with a simple for statement. ::
 
     for g in range(MAXGEN):
         evolve...
 
-Is that simple enough? Lets continue with more complicated things, mating and mutating the population. The crossover and mutation operators provided with eap usualy take respectivly 2 and 1 individual(s) on input and return 2 and 1 *new* individual(s). The simple GA algorithme states that the produced individuals shall replace their parents in the population, this is what is done by the following lines of code, where a crossover is applied with probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. ::
+Is that simple enough? Lets continue with more complicated things, mating and mutating the population. The crossover and mutation operators provided with eap usualy take respectivly 2 and 1 individual(s) on input and return 2 and 1 *new* individual(s). The simple GA algorithm states that the produced individuals shall replace their parents in the population, this is what is done by the following lines of code, where a crossover is applied with probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. ::
 
         for i in range(1, len(pop), 2):
             if random.random() < CXPB:
@@ -105,9 +105,11 @@ Is that simple enough? Lets continue with more complicated things, mating and mu
             if random.random() < MUTPB:
                 pop[i] = tools.mutate(pop[i])
 
-The population now needs to be evaluated, we use the map operator in order to apply the evaluation on every individual of the population. ::
+The population now needs to be evaluated, we then apply the evaluation on every individual in the population that has an invalid fitness. ::
 
-    map(tools.evaluate, pop)
+    for ind in pop:
+        if not ind.fitness.valid:
+            ind.fitness.extend(tools.evaluate(ind))
 
 And finaly, last but not least, the selection part occurs. We replace the whole population by individuals selected by tournament (as defined in the toolbox) in that same population. ::
 
@@ -127,4 +129,4 @@ Some statistics may be gathered on the population, the following lines print the
     print '  Mean %f' % (mean)
     print '  Std. Dev. %f' % std_dev
 
-The complete `One Max Genetic Algorithm <http://eap.deap.googlecode.com/hg/src/examples/ga_onemax.py>`_ code.
+The complete `One Max Genetic Algorithm <http://eap.deap.googlecode.com/hg/src/examples/ga_onemax.py>`_ code is the next this to look at. It may be a little different but it does the overall same thing.

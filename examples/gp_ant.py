@@ -47,7 +47,6 @@ fitness = [89]
 """
 
 import sys
-import os
 import random
 import operator
 import logging
@@ -56,13 +55,14 @@ import copy
 
 from functools import partial
 
-sys.path.append(os.path.abspath('..'))
+sys.path.append("..")
 
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
 import eap.gp as gp
 import eap.algorithms as algorithms
+import eap.halloffame as halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -167,14 +167,17 @@ if __name__ == "__main__":
     pset.addTerminal(ant.turn_left)
     pset.addTerminal(ant.turn_right)
 
-    creator.create("Fitness", (base.Fitness,), {'weights':(1.0,)})
-    creator.create("Individual", (base.Tree,), {'fitness':creator.Fitness})
-    creator.create("Population", (base.List,))
+    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
 
     tools = toolbox.Toolbox()
-    tools.register('expr_init', gp.generate_ramped, pset=pset, min=1, max=2)
-    tools.register('individual', creator.Individual, content=tools.expr_init)
-    tools.register('population', creator.Population, size=500, content=tools.individual)
+    
+    # Attribute generator
+    tools.register("expr_init", gp.generate_ramped, pset=pset, min=1, max=2)
+    
+    # Structure initializers
+    tools.regInit("individual", creator.Individual, content=tools.expr_init)
+    tools.regInit("population", list, content=tools.individual, size=300)
     
     def evalArtificialAnt(individual):
         # Transform the tree expression to functionnal Python code
@@ -183,18 +186,15 @@ if __name__ == "__main__":
         ant.run(routine)
         return [ant.eaten]
 
-    tools.register('evaluate', evalArtificialAnt)
-    tools.register('select', toolbox.tournSel, tournsize=7)
-    tools.register('mate', toolbox.uniformOnePtTreeCx)
-    tools.register('expr_mut', gp.generate_full, pset=pset, min=0, max=2)
-    tools.register('mutate', toolbox.uniformTreeMut, expr=tools.expr_mut)
+    tools.register("evaluate", evalArtificialAnt)
+    tools.register("select", toolbox.selTournament, tournsize=7)
+    tools.register("mate", toolbox.cxTreeUniformOnePoint)
+    tools.register("expr_mut", gp.generate_full, pset=pset, min=0, max=2)
+    tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
     pop = tools.population()
-    algorithms.simpleEA(tools, pop, 0.5, 0.2, 40)
+    hof = halloffame.HallOfFame(1)
     
-    best = toolbox.bestSel(pop,1)[0]
+    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
     
-    print 'Best individual : ', gp.evaluate(best), best.fitness
-    
-        
-    
+    print "Best individual is %r\nwith fitness of %r" % (gp.evaluate(hof[0]), hof[0].fitness)

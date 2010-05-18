@@ -28,119 +28,6 @@ import random
 from collections import deque
 from itertools import izip, repeat, count, chain, imap
 import itertools
-
-class List(list):
-    """A List is a basic container that inherits from the python :class:`list`
-    class. The only difference is that it may be initialized using three
-    methods, a callable object, an iterable object or a generator function (the
-    last two initialization methods are the same but both are mentionned
-    in order to emphasize their presence). The first method is to provide a
-    callable object that return the desired value, the method will be
-    called *size* times and the returned valued will be appended to the
-    list after each call. The most classic way to initialize a List is to
-    provide a :data:`lambda` function using a random method, for instance, ::
-    
-        print List(size=3, content=lambda: random.choice((True, False)))
-        [False, False, True]
-    
-    A similar way is to provide the *content* argument with a class. For 
-    example, lets build a simple
-    :class:`MyTuple` class that initialize a tuple of boolean and integer
-    in its member values ::
-    
-        class MyTuple(object):
-            calls = 0
-            def __init__(self):
-                self.values = bool(self.calls), calls
-                self.__class__.calls += 1
-            def __repr__(self):
-                return repr(self.values)
-    
-    Initializing a list of 3 :class:`MyTuples` is done by ::
-    
-        print List(size=3, content=MyTuple)
-        [(False, 0), (True, 1), (True, 2)]
-        
-    The same result may be obtained by providing an iterable to the List's
-    *content*, in that case, no *size* is needed since the size will be that
-    same as the iterable provided. ::
-    
-        print List(content=[MyTuple(), MyTuple(), MyTuple()])
-        [(False, 0), (True, 1), (True, 2)]
-        
-    The same thing may be achieved by the uses of a generator function. First 
-    the generator must be defined ::
-    
-        def myGenerator(size):
-            for i in xrange(size):
-                yield MyTuple()
-            raise StopIteration
-            
-    Then it must be initialized and passed to List's *content* ::
-    
-         print List(content=myGenerator(size=3))
-         [(False, 0), (True, 1), (True, 2)]
-    """
-    def __init__(self, size=0, content=None):
-        if content is not None:
-            if callable(content):
-                self.extend(content() for i in xrange(size))
-            else:
-                self.extend(content)
-
-class Array(array.array):
-    """An Array is a basic container that inherits from the python
-    :class:`~array.array` class. The Array may be
-    initialized  by the exact three methods than the :class:`List`. When
-    initializing an Array, a *typecode* must be provided to build the right
-    type of array. The *typecode* must be one of the type codes listed in
-    the python :mod:`array` module.
-    """
-    def __new__(cls, typecode, content=[], size=0):
-        gen_content = content
-        if callable(content):
-            gen_content = (content() for i in xrange(size))
-        return super(Array, cls).__new__(cls, typecode, gen_content)
-        
-    def __init__(self):
-        pass
-
-#    def __init__(self, size=0, content=None):
-#        if content is not None:
-#            if callable(content):
-#                self.extend(content() for i in xrange(size))
-#            else:
-#                self.extend(content)
-
-    def __deepcopy__(self, memo):
-        """Overrides the deepcopy from array.array that does not copy the
-        object's attributes.
-        """
-        cls = self.__class__
-        copy_ = cls.__new__(cls, typecode=self.typecode)
-        memo[id(self)] = copy_
-        copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        copy_.extend(self)
-        return copy_
-
-class Indices(Array):
-    """An Indices is a specialization of the :class:`Array` container, 
-    it contains only integers (type code ``"i"``) between 0 and *size* - 1 and
-    do not repeat the same integer twice. For example, ::
-    
-        print Indices(size=5)
-        array('i', [0, 4, 2, 3, 1])
-        
-    is the same than providing the *content* ``[0, 4, 2, 3, 1]`` and the
-    *type code* ``"i"`` to an :class:`Array`. The Indices class is provided
-    only for convenience.
-    """
-    def __new__(cls, typecode="i", content=[], size=0):
-        return super(Indices, cls).__new__(cls, "i", content, size)
-    
-    def __init__(self, size=0):
-        self.extend(i for i in xrange(size))
-        random.shuffle(self)
         
 class Tree(list):
     """ Basic N-ary tree class"""
@@ -256,7 +143,7 @@ class Tree(list):
                 queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
         parent[child] = Tree.rectify_subtree(subtree)
 
-class Fitness(Array):
+class Fitness(array.array):
     """The fitness is a measure of quality of a solution. The fitness
     inheritates from the :class:`Array` class, so the number of objectives
     depends on the lenght of the array.
@@ -274,7 +161,7 @@ class Fitness(Array):
        :data:`True` if *a* is inferior to *b*.
     """
     
-    weights = (-1.0,)
+    weights = ()
     """The weights are used in the fitness comparison. They are shared among
     all fitnesses of the same type.
     This member is **not** meant to be manipulated since it may influence how
@@ -286,12 +173,8 @@ class Fitness(Array):
     ``ind.fitness.__class__.weights = new_weights``.
     """
     
-    def __new__(cls, typecode="d", values=None):
-        return super(Fitness, cls).__new__(cls, "d")
-
-    def __init__(self, values=None):
-        if values is not None:
-            self.extend(values)
+    def __new__(cls, typecode=None, values=[]):
+        return super(Fitness, cls).__new__(cls, "d", values)
         
     def getvalid(self):
         return len(self) != 0
