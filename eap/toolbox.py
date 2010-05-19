@@ -750,9 +750,9 @@ def sortCrowdingDist(individuals, n):
         crowding.sort(key=lambda ind: ind.fitness[i])
         distances[id(crowding[0])][0] = float("inf")
         distances[id(crowding[-1])][0] = float("inf")
-        for j, ind in enumerate(crowding[1:-1]):
-            if distances[id(ind)][0] < float("inf"):
-                distances[id(ind)][0] += crowding[j + 1].fitness[i] - \
+        for j in xrange(1, len(crowding) - 1):
+            if distances[id(crowding[j])][0] < float("inf"):
+                distances[id(crowding[j])][0] += crowding[j + 1].fitness[i] - \
                                       crowding[j - 1].fitness[i]
     sorted_dist = sorted(distances.itervalues(), key=lambda value: value[0], reverse=True)
     return (value[1] for value in sorted_dist[:n])
