@@ -581,7 +581,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
 def mutTreeUniform(ind, expr):
 
     mutant = copy.deepcopy(ind)
-    index = random.randint(1, mutant.size-1)
+    index = random.randint(0, mutant.size-1)
     subtree = base.Tree(expr())
     mutant.set_subtree_dfs(index, subtree)
     try:
@@ -604,7 +604,7 @@ def mutTypedTreeUniform(ind, expr):
     returned.
     """
     mutant = copy.deepcopy(ind)
-    index = random.randint(1, mutant.size-1)
+    index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
     type = subtree.root.ret
     subtree = base.Tree(expr(type=type))
