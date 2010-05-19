@@ -118,8 +118,8 @@ def generate_full(pset, min, max):
     return _generate(pset, min, max, condition)
 
 def generate_grow(pset, min, max):
-    termset_ratio = len(pset.terminals) / \
-                    (len(pset.terminals)+len(pset.primitives))
+    termset_ratio = float(len(pset.terminals)) / \
+                    float(len(pset.terminals)+len(pset.primitives))
     def condition(max_depth):
         return max_depth == 0 or random.random() < termset_ratio
     return _generate(pset, min, max, condition)
