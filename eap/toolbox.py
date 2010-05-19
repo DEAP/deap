@@ -676,14 +676,15 @@ def nsga2(individuals, n):
     
 #    import matplotlib.pyplot as plt
 #    from itertools import cycle
-#    plt.figure(2)
+#    plt.figure()
 #    colors = cycle("bgrcmky")
-#    for i, front in enumerate(pareto_fronts):
+#    for front in pareto_fronts:
 #        fit1 = [ind.fitness[0] for ind in front]
 #        fit2 = [ind.fitness[1] for ind in front]
 #        plt.scatter(fit1, fit2, c=colors.next())
+#        print len(front)
 #    plt.show()
-#    print len(pareto_fronts)
+    #print len(pareto_fronts)
     
     chosen = list(chain(*pareto_fronts[:-1]))
     n = n - len(chosen)
@@ -704,35 +705,35 @@ def sortFastND(individuals, n):
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = dict.fromkeys(map(id, individuals), 0.0)
-    dominated_inds = dict(izip(map(id, individuals), (list() for i in xrange(N))))
+    dominating_inds = dict.fromkeys(xrange(N), 0.0)
+    dominated_inds = dict(izip(xrange(N), (list() for i in xrange(N))))
     
     # Rank first Pareto front
-    for i, ind_i in enumerate(individuals):
-        for ind_j in individuals[i+1:]:
-            if ind_j.fitness.isDominated(ind_i.fitness):
-                dominating_inds[id(ind_j)] += 1
-                dominated_inds[id(ind_i)].append(ind_j)
-            elif ind_i.fitness.isDominated(ind_j.fitness):
-                dominating_inds[id(ind_i)] += 1
-                dominated_inds[id(ind_j)].append(ind_i)
-        if dominating_inds[id(ind_i)] == 0:
-            pareto_fronts[-1].append(ind_i)
+    for i in xrange(N):
+        for j in xrange(i+1, N):
+            if individuals[j].fitness.isDominated(individuals[i].fitness):
+                dominating_inds[j] += 1
+                dominated_inds[i].append(j)
+            elif individuals[i].fitness.isDominated(individuals[j].fitness):
+                dominating_inds[i] += 1
+                dominated_inds[j].append(i)
+        if dominating_inds[i] == 0:
+            pareto_fronts[-1].append((individuals[i], i))
             pareto_sorted += 1
-            
+    
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
     N = min(N, n)
     while pareto_sorted < N:
         pareto_fronts.append([])
-        for ind_p in pareto_fronts[-2]:
-            for ind_d in dominated_inds[id(ind_p)]:
-                dominating_inds[id(ind_d)] -= 1
-                if dominating_inds[id(ind_d)] == 0:
-                    pareto_fronts[-1].append(ind_d)
+        for individual_p, indice_p in pareto_fronts[-2]:
+            for indice_d in dominated_inds[indice_p]:
+                dominating_inds[indice_d] -= 1
+                if dominating_inds[indice_d] == 0:
+                    pareto_fronts[-1].append((individuals[indice_d], indice_d))
                     pareto_sorted += 1
     
-    return pareto_fronts
+    return [[pair[0] for pair in front] for front in pareto_fronts]
 
 
 def sortCrowdingDist(individuals, n):
