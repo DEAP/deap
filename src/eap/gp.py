@@ -25,9 +25,9 @@ def evaluate(expr, pset=None):
     def _stringify(expr):
         try:
             func = expr[0]
-            return func(*[_stringify(value) for value in expr[1:]])
+            return str(func(*[_stringify(value) for value in expr[1:]]))
         except TypeError:
-            return expr
+            return str(expr)
     if not pset is None:
         return eval(_stringify(expr), pset.func_dict)
     else:
