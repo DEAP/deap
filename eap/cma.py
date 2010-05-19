@@ -1,4 +1,3 @@
-
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -14,9 +13,9 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 #
-#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
-#    Special thanks to Nikolaus Hansen for providing major part of this code.
-#    
+#    Special thanks to Nikolaus Hansen for providing major part of 
+#    this code. The CMA-ES algorithm is provided in many other languages
+#    at http://www.lri.fr/~hansen/cmaesintro.html.
 
 import copy
 import logging
@@ -26,12 +25,13 @@ import numpy
     
 _logger = logging.getLogger("eap.cma")
     
-def cmaES(toolbox, population, sigma, ngen, **kargs):
+def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
     The provided *population* should be a list of one or more individuals. The
-    other keyworded arguments are passed to the class :class:`CMAStrategy`.
+    other keyworded arguments are passed to the class
+    :class:`~eap.cma.CMAStrategy`.
     """
     _logger.info("Start of evolution")
     strategy = CMAStrategy(population, sigma, kargs)  # Initialize the strategy
@@ -46,6 +46,11 @@ def cmaES(toolbox, population, sigma, ngen, **kargs):
         # Evaluate the individuals
         for ind in population:
             ind.fitness.extend(toolbox.evaluate(ind))
+        
+        try:
+            halloffame.update(population)
+        except AttributeError:
+            pass
         
         # Update the Strategy with the evaluated individuals
         strategy.update(population)
@@ -104,7 +109,7 @@ class CMAStrategy(object):
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
     """
-    def __init__(self, population, sigma, params):
+    def __init__(self, population, sigma, params={}):
         self.centroid = copy.deepcopy(population[0])    # Create a centroid individual
         self.centroid[:] = self.centroid[0:0]           # Clear its content
         self.centroid.extend(numpy.mean(population, 0)) # The centroid is used in new individual creation
@@ -127,7 +132,7 @@ class CMAStrategy(object):
         self.update_count = 0
         
         self.params = params
-        self.compute_params(self.params)
+        self.computeParams(self.params)
         
     def generate(self):
         """Generate lambda offsprings from the current strategy using the 
@@ -136,18 +141,16 @@ class CMAStrategy(object):
         arz = numpy.random.randn(self.lambda_, self.dim)
         offsprings = list()
         empty_ind = copy.deepcopy(self.centroid)    # Create an individual
-        empty_ind[:] = empty_ind[0:0]               # faster to copy
+        del empty_ind[:]                            # faster to copy
         for i in xrange(self.lambda_):
             ind = copy.deepcopy(empty_ind)
-            #ind = copy.deepcopy(self.centroid)
-            #ind[:] = ind[0:0]                       # Clear the new individual
             ind.extend(self.centroid + self.sigma * numpy.dot(self.BD, arz[i]))
             offsprings.append(ind)
         
         return offsprings
         
     def update(self, population):
-        """Update the current Covariance Matrix Evolution Strategy.
+        """Update the current covariance matrix strategy.
         """
         sorted_pop = sorted(population, key=lambda ind: ind.fitness,
                             reverse=True)
@@ -155,7 +158,7 @@ class CMAStrategy(object):
         old_centroid = numpy.array(self.centroid)
         centroid = numpy.dot(self.weights, sorted_pop[0:self.mu])
         
-        self.centroid[:] = self.centroid[0:0]      # Clear the centroid individual
+        del self.centroid[:]                        # Clear the centroid individual
         self.centroid.extend(centroid)
         
         c_diff = centroid - old_centroid
@@ -195,7 +198,7 @@ class CMAStrategy(object):
         self.B = self.B[:,indx]
         self.BD = self.B * self.diagD
 
-    def compute_params(self, params):
+    def computeParams(self, params):
         """Those parameters depends on lambda and need to computed again if it 
         changes during evolution.
         """
