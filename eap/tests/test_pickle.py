@@ -47,8 +47,10 @@ class Pickling(unittest.TestCase):
         ind.fitness.extend([1.0])
         ind_s = pickle.dumps(ind)
         ind_l = pickle.loads(ind_s)
-        self.failUnlessEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
-        self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+        msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
+        self.failUnlessEqual(ind, ind_l, msg)
+        msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
+        self.failUnlessEqual(ind.fitness, ind_l.fitness, msg)
     
     def test_pickle_population(self):
         ind1 = creator.IndList([1.0,2.0,3.0])
