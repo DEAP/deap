@@ -1,0 +1,75 @@
+import sys
+import unittest
+import array
+import pickle
+import operator
+from test import test_support
+
+sys.path.append("..")
+
+import creator
+import base
+import gp
+
+class Pickling(unittest.TestCase):
+
+    def setUp(self):
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("IndList", list, fitness=creator.FitnessMax)
+        creator.create("IndArray", array.array, fitness=creator.FitnessMax)
+        creator.create("IndTree", base.Tree, fitness=creator.FitnessMax)
+    
+    def test_pickle_fitness(self):
+        fitness = creator.FitnessMax()
+        fitness.extend([1.0])
+        fitness_s = pickle.dumps(fitness)
+        fitness_l = pickle.loads(fitness_s)
+        self.failUnlessEqual(fitness, fitness_l, "Unpickled fitness != pickled fitness")
+
+    def test_pickle_ind_list(self):
+        ind = creator.IndList([1.0, 2.0, 3.0])
+        ind.fitness.extend([4.0])
+        ind_s = pickle.dumps(ind)
+        ind_l = pickle.loads(ind_s)
+        self.failUnlessEqual(ind, ind_l, "Unpickled individual list != pickled individual list")
+        self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+         
+    def test_pickle_ind_array(self):
+        ind = creator.IndArray('f',[1.0, 2.0, 3.0])
+        ind.fitness.extend([4.0])
+        ind_s = pickle.dumps(ind)
+        ind_l = pickle.loads(ind_s)
+        self.failUnlessEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
+        self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+    
+    def test_pickle_tree(self):
+        ind = creator.IndTree(["+", 1, 2])
+        ind.fitness.extend([1.0])
+        ind_s = pickle.dumps(ind)
+        ind_l = pickle.loads(ind_s)
+        self.failUnlessEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
+        self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+    
+    def test_pickle_population(self):
+        ind1 = creator.IndList([1.0,2.0,3.0])
+        ind1.fitness.extend([1.0])
+        ind2 = creator.IndList([4.0,5.0,6.0])
+        ind2.fitness.extend([2.0])
+        ind3 = creator.IndList([7.0,8.0,9.0])
+        ind3.fitness.extend([3.0])
+        
+        pop = [ind1, ind2, ind3]
+        
+        pop_s = pickle.dumps(pop)
+        pop_l = pickle.loads(pop_s)
+        
+        self.failUnlessEqual(pop[0], pop_l[0], "Unpickled individual list != pickled individual list")
+        self.failUnlessEqual(pop[0].fitness, pop_l[0].fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.failUnlessEqual(pop[1], pop_l[1], "Unpickled individual list != pickled individual list")
+        self.failUnlessEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.failUnlessEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
+        self.failUnlessEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
+        
+if __name__ == "__main__":
+    suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)
+    unittest.TextTestRunner(verbosity=2).run(suite)
