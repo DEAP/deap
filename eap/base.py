@@ -31,12 +31,24 @@ import itertools
         
 class Tree(list):
     """ Basic N-ary tree class"""
+    class Node(object):
+        height = 0
+        size = 1
+        @property
+        def root(self):
+            return self
+        def __getstate__(self):
+            try:
+                return self.base(self)
+            except TypeError:
+                base = self.base.__new__(self.base)
+                base.__dict__.update(self.__dict__)
+                return base
+
     @classmethod
     def create_node(cls, obj):
-        Node = type("Node", (type(obj),), {})
-        Node.height = property(lambda self: 0)
-        Node.size = property(lambda self: 1)
-        Node.root = property(lambda self: self)
+        Node = type("Node", (type(obj),cls.Node), {})
+        Node.base = type(obj)
         try:
             new_node = Node.__new__(Node)
             new_node.__dict__.update(obj.__dict__)
@@ -61,8 +73,22 @@ class Tree(list):
             else:
                 self.append(Tree.create_node(elem))
     
+    def __getstate__(self):
+        """ This methods returns the state of the Tree
+            as a list of arbitrary elements. It is mainly
+            used for pickling a Tree object.
+        """
+        return [elem.__getstate__() for elem in self]
+        
+    def __setstate__(self, state):
+        self.__init__(state)
+    
+    def __reduce__(self):
+        return (self.__class__, (self.__getstate__(),))
+    
     @property
     def root(self):
+        """Returns the root element of the tree."""
         return self[0]
 
     @property
@@ -127,7 +153,7 @@ class Tree(list):
         return subtree
 
     def set_subtree_bfs(self, index, subtree):
-        """ This method replaced the tree with
+        """ This method replaced the subtree with
             the corresponding index by subtree based
             on a breadth-first search.
         """
