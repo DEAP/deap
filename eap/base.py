@@ -33,12 +33,16 @@ class Tree(list):
     """ Basic N-ary tree class"""
     @classmethod
     def create_node(cls, obj):
-        Node = type("Node", (obj.__class__,), {})
+        Node = type("Node", (type(obj),), {})
         Node.height = property(lambda self: 0)
         Node.size = property(lambda self: 1)
         Node.root = property(lambda self: self)
-        new_node = Node.__new__(Node)
-        new_node.__dict__.update(obj.__dict__)          
+        try:
+            new_node = Node.__new__(Node)
+            new_node.__dict__.update(obj.__dict__)
+        except AttributeError:
+            new_node = Node(obj)
+            
         return new_node
 
     @classmethod
@@ -49,7 +53,6 @@ class Tree(list):
             return subtree.root
 
     def __init__(self, content=None):
-        list.__init__(self)
         if hasattr(content, "__call__"):
             content = content()
         for elem in content:
