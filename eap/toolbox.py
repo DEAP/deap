@@ -32,6 +32,7 @@ import random
 from functools import partial
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
+from operator import attrgetter
 
 import eap.base as base
 
@@ -444,7 +445,7 @@ def mutShuffleIndexes(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.invalidate()
+            mutant.fitness.valid = False
         except AttributeError:
             pass
     
@@ -637,14 +638,14 @@ def selBest(individuals, n):
     """Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     """
-    return sorted(individuals, key=lambda ind : ind.fitness, reverse=True)[:n]
+    return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
 
 
 def selWorst(individuals, n):
     """Select the *n* worst individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     """
-    return sorted(individuals, key=lambda ind : ind.mFitness)[:n]
+    return sorted(individuals, key=attrgetter("fitness"))[:n]
 
 
 def selTournament(individuals, n, tournsize):
