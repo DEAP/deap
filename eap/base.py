@@ -80,11 +80,11 @@ class Tree(list):
         """
         return [elem.__getstate__() for elem in self]
         
-    def __setstate__(self, state):
-        self.__init__(state)
+#    def __setstate__(self, state):
+#        self.__init__(state)
     
     def __reduce__(self):
-        return (self.__class__, (self.__getstate__(),))
+        return (self.__class__, (self.__getstate__(),), self.__dict__)
     
     @property
     def root(self):
@@ -285,8 +285,6 @@ class Fitness(object):
         # Pad the weights with the last value
         #weights = chain(self.weights, repeat(self.weights[-1]))
         # Apply the weights to the values
-        print other.values
-        print other.weights
         self_values = map(operator.mul, self.values, self.weights)
         other_values = map(operator.mul, other.values, other.weights)
         # Compare the results
