@@ -538,18 +538,19 @@ def cxTypedTreeOnePoint(ind1, ind2):
     child1 = copy.deepcopy(ind1)
     child2 = copy.deepcopy(ind2)
     
-    # choose the crossover point in the 1st
-    # individual
-    index1 = random.randint(1, child1.size-1)
+    # choose the crossover point in each individual
+    try:
+        index1 = random.randint(1, child1.size-1)
+        index2 = random.randint(1, child2.size-1)
+    except ValueError:
+        return child1, child2
+        
     subtree1 = child1.search_subtree_dfs(index1)
     type1 = subtree1.root.ret
-    
-    # choose the crossover point in the 2nd
-    # individual 
-    index2 = random.randint(1, child2.size-1)
     subtree2 = child2.search_subtree_dfs(index2)
     type2 = subtree2.root.ret
     
+
     # try to mate the trees
     # if not crossover point is found after MAX_CX_TRY
     # the children are returned without modifications.
