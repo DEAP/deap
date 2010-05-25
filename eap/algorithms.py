@@ -36,12 +36,16 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
        
     """
     _logger.info("Start of evolution")
+    evaluations = 0
     
     # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
-            
+            evaluations += 1
+            ind.fitness.values = toolbox.evaluate(ind)
+    
+    _logger.debug("Evaluated %i individuals", evaluations)
+    
     try:
         halloffame.update(population)
     except AttributeError:
@@ -50,6 +54,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
+        evaluations = 0
         
         # Select the next generation individuals
         population[:] = toolbox.select(population, n=len(population))
@@ -66,7 +71,10 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         # Evaluate the individuals with invalid fitness
         for ind in population:
             if not ind.fitness.valid:
-                ind.fitness.extend(toolbox.evaluate(ind))
+                evaluations += 1
+                ind.fitness.values = toolbox.evaluate(ind)
+        
+        _logger.debug("Evaluated %i individuals", evaluations)
                 
         try:
             halloffame.update(population)
@@ -74,13 +82,13 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
             pass
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
+        fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
         lenght = len(population)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
 
@@ -138,7 +146,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         lenght = len(population)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
 
@@ -197,7 +205,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         lenght = len(population)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
-        var = (sum2 / lenght - mean**2)
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Var. %f", var)
 
@@ -245,7 +253,7 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         lenght = len(population)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
 

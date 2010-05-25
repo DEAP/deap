@@ -28,7 +28,7 @@ resumed by some statements of the :pep:`20`, *the Zen of Python* by Tim Peters.
 - Although practicality beats purity.
 - In the face of ambiguity, refuse the temptation to guess.
 - There should be one-- and preferably only one --obvious way to do it.
-- Although that way may not be obvious at first unless you're Dutch.
+- Although that way may not be obvious at first unless you're *Canadian*.
 - If the implementation is hard to explain, it's a bad idea.
 - If the implementation is easy to explain, it may be a good idea.
 
@@ -37,5 +37,5 @@ complex or complicated.
 """
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
-__version__ = "0.4"
-__revision__ = "0.4.1"
+__version__ = "0.5"
+__revision__ = "0.5.0"

@@ -28,7 +28,7 @@ import eap.halloffame as halloffame
 import eap.algorithms as algorithms
 
 logging.basicConfig(level=logging.DEBUG)
-random.seed(1024)
+random.seed(1618)
 
 # gr*.yml contains the distance map in list of list style in YAML/JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
@@ -52,7 +52,7 @@ def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
     for gene1, gene2 in zip(individual[0:-1], individual[1:]):
         distance += distance_map[gene1][gene2]
-    return [distance]
+    return distance
 
 tools.register("mate", toolbox.cxPartialyMatched)
 tools.register("mutate", toolbox.mutShuffleIndexes, indpb=0.05)
@@ -62,6 +62,6 @@ tools.register("evaluate", evalTSP)
 pop = tools.population()
 hof = halloffame.HallOfFame(1)
 
-algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, hof)
+algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, hof)
 
 logging.info("Best individual is %s", repr(hof[0]))
