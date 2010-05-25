@@ -32,16 +32,16 @@ def create(name, base, **kargs):
     def init_type(self, *args, **kargs):
         for elem in dict_inst.items():
             obj_name, obj = elem
-            if inspect.isclass(obj):
+            if callable(obj):
                 obj = obj()
             setattr(self, obj_name, obj)
         base.__init__(self, *args)
         
-    def repr_type(self):
-        out = super(self.__class__, self).__repr__()
-        if self.__dict__:
-            out = " : ".join([out, repr(self.__dict__)])
-        return out
+    #def repr_type(self):
+    #    out = super(self.__class__, self).__repr__()
+    #    if self.__dict__:
+    #        out = " : ".join([out, repr(self.__dict__)])
+    #    return out
     
     objtype = type(name, (base,), dict_cls)
     
@@ -61,6 +61,6 @@ def create(name, base, **kargs):
     
     setattr(objtype, "__init__", init_type)
     #if not hasattr(objtype, "__repr__"):
-    setattr(objtype, "__repr__", repr_type)
+    #setattr(objtype, "__repr__", repr_type)
     globals()[name] = objtype
 
