@@ -20,6 +20,11 @@ import array
 import copy
 import inspect
 
+# Warning are turned into errors to catch the DeprecationWarning in the method
+# init_type of create.
+import warnings
+warnings.filterwarnings("error")
+
 def create(name, base, **kargs):
     dict_inst = {}
     dict_cls = {}
@@ -29,13 +34,23 @@ def create(name, base, **kargs):
         else:
             dict_cls[obj_name] = obj
 
-    def init_type(self, *args, **kargs):
+    def init_type(self, *args):
         for elem in dict_inst.items():
             obj_name, obj = elem
             if callable(obj):
                 obj = obj()
             setattr(self, obj_name, obj)
-        base.__init__(self, *args)
+            
+        # If an the __init__ method is called with *args and it doesn't take
+        # args, it can either raise a TypeError in which case the object
+        # __init__ can't take arguments, or a DeprecationWarning in which case
+        # the object might inherits from the class "object" which leave the
+        # option of passing arguments, but raise a warning stating that it will
+        # eventually stop permitting this option.
+        try:
+            base.__init__(self, *args)
+        except (TypeError, DeprecationWarning):
+            base.__init__(self)
         
     #def repr_type(self):
     #    out = super(self.__class__, self).__repr__()
