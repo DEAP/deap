@@ -73,7 +73,7 @@ tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s" %i for i in xran
 def evalParity(individual):
     func = tools.lambdify(expr=individual)
     good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
-    return [good]
+    return good,
 
 tools.register("evaluate", evalParity)
 tools.register("select", toolbox.selTournament, tournsize=3)

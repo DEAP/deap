@@ -89,7 +89,7 @@ def evalSpambase(individual):
     spam_samp = random.sample(spam, 400)
     # Evaluate the sum of correctly identified mail as spam
     result = sum(bool(func(*mail[:57])) is bool(mail[57]) for mail in spam_samp)
-    return [result]
+    return result,
     
 tools.register("evaluate", evalSpambase)
 tools.register("select", toolbox.selTournament, tournsize=3)

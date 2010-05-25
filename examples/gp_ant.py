@@ -184,7 +184,7 @@ if __name__ == "__main__":
         routine = gp.evaluate(individual, pset)
         # Run the generated routine
         ant.run(routine)
-        return [ant.eaten]
+        return ant.eaten,
 
     tools.register("evaluate", evalArtificialAnt)
     tools.register("select", toolbox.selTournament, tournsize=7)
