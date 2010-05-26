@@ -65,7 +65,7 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
-tools.register("expr", gp.generate_ramped, pset=pset, min=1, max=2)
+tools.register("expr", gp.generate_full, pset=pset, min=3, max=5)
 tools.regInit("individual", creator.Individual, tools.expr)
 tools.regInit("population", list, tools.individual, 300)
 tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s" %i for i in xrange(PARITY_FANIN_M)])
