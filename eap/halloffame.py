@@ -17,9 +17,7 @@ from toolbox import sortFastND
 from bisect import bisect_right
 from copy import deepcopy
 from itertools import chain
-from operator import attrgetter, __eq__
-
-#import time
+from operator import attrgetter, eq
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
@@ -61,6 +59,7 @@ class HallOfFame(object):
         inserting an new individual in a full hall of fame will not remove
         the worst individual to maintain a constant size.
         """
+        #print "insert"
         item = deepcopy(item)
         i = bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
@@ -68,6 +67,7 @@ class HallOfFame(object):
     
     def remove(self, index):
         """Remove the specified *index* from the hall of fame."""
+        #print "remove"
         del self.keys[len(self) - (index % len(self) + 1)]
         del self.items[index]
     
@@ -107,7 +107,7 @@ class ParetoFront(HallOfFame):
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
     it is sorted lexicographically at every moment.
     """
-    def __init__(self, similar=__eq__):
+    def __init__(self, similar=eq):
         self.similar = similar
         HallOfFame.__init__(self, None)
     
@@ -117,21 +117,21 @@ class ParetoFront(HallOfFame):
         of fame. If any individual in the hall of fame is dominated it is
         removed.
         """
-        #start = time.time()
-        pop_first_front = sortFastND(population, len(population), True)[0]
-        for ind in pop_first_front:
+        for ind in population:
             is_dominated = False
             has_twin = False
-            for i, hofer in enumerate(self):      # hofer = hall of famer
+            to_remove = []
+            for i, hofer in enumerate(self):    # hofer = hall of famer
                 if ind.fitness.isDominated(hofer.fitness):
                     is_dominated = True
                     break
                 elif hofer.fitness.isDominated(ind.fitness):
-                    self.remove(i)
+                    to_remove.append(i)
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
                     break
             
+            for i in reversed(to_remove):       # Remove the dominated hofer
+                self.remove(i)
             if not is_dominated and not has_twin:
                 self.insert(ind)
-        #print time.time() - start, "seconds"
