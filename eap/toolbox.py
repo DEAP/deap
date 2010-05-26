@@ -745,21 +745,41 @@ def sortCrowdingDist(individuals, n):
     if len(individuals) == 0:
         return []
     
-    distances = dict(izip(map(id, individuals), ([0.0, ind] for ind in individuals)))
-    crowding = list(individuals)
-        
+    distances = [0.0] * len(individuals)
+    crowding = [(ind, i) for i, ind in enumerate(individuals)]
+    
     number_objectives = len(individuals[0].fitness.values)
     for i in xrange(number_objectives):
-        crowding.sort(key=lambda ind: ind.fitness.values[i])
-        distances[id(crowding[0])][0] = float("inf")
-        distances[id(crowding[-1])][0] = float("inf")
+        crowding.sort(key=lambda element: element[0].fitness.values[i])
+        distances[crowding[0][1]] = float("inf")
+        distances[crowding[-1][1]] = float("inf")
         for j in xrange(1, len(crowding) - 1):
-            if distances[id(crowding[j])][0] < float("inf"):
-                distances[id(crowding[j])][0] += \
-                                      crowding[j + 1].fitness.values[i] - \
-                                      crowding[j - 1].fitness.values[i]
-    sorted_dist = sorted(distances.itervalues(), key=lambda value: value[0], reverse=True)
-    return (value[1] for value in sorted_dist[:n])
+            if distances[crowding[j][1]] < float("inf"):
+                distances[crowding[j][1]] += \
+                                      crowding[j + 1][0].fitness.values[i] - \
+                                      crowding[j - 1][0].fitness.values[i]
+    sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
+                         key=lambda value: value[0], reverse=True)
+    return (individuals[index] for dist, index in sorted_dist[:n])
+    
+    
+    
+#    distances = dict.fromkeys()
+#    #distances = dict(izip(map(id, individuals), ([0.0, ind] for ind in individuals)))
+#    crowding = list(individuals)
+#        
+#    number_objectives = len(individuals[0].fitness.values)
+#    for i in xrange(number_objectives):
+#        crowding.sort(key=lambda ind: ind.fitness.values[i])
+#        distances[id(crowding[0])][0] = float("inf")
+#        distances[id(crowding[-1])][0] = float("inf")
+#        for j in xrange(1, len(crowding) - 1):
+#            if distances[id(crowding[j])][0] < float("inf"):
+#                distances[id(crowding[j])][0] += \
+#                                      crowding[j + 1].fitness.values[i] - \
+#                                      crowding[j - 1].fitness.values[i]
+#    sorted_dist = sorted(distances.itervalues(), key=lambda value: value[0], reverse=True)
+#    return (value[1] for value in sorted_dist[:n])
 
 
 ######################################

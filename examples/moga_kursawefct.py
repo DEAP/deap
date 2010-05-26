@@ -22,7 +22,7 @@ from itertools import imap
 from operator import sub
 
 sys.path.append("..")
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 import eap.algorithms as algorithms
 import eap.base as base
@@ -73,13 +73,6 @@ def mutate(ind, *args, **kargs):
             mutant[i] = -5
     return mutant
 
-def similar(a, b):
-    diff = imap(sub, a, b)
-    for res in diff:
-        if abs(res) > 0.1:
-            return False
-    return True
-
 tools.register("evaluate", evalKursawe)
 tools.register("mate", mate, alpha=1.5)
 tools.register("mutate", mutate, sigma=3, indpb=0.3)
@@ -87,26 +80,16 @@ tools.register("select", toolbox.nsga2)
 
 pop = tools.population()
 hof = halloffame.ParetoFront()
-#hof = None
 
 algorithms.eaMuPlusLambda(tools, pop, 50, 100, cxpb=0.5, mutpb=0.2, ngen=50, halloffame=hof)
 
-#import matplotlib.pyplot as plt
-#from itertools import cycle
-#pareto_fronts = toolbox.sortFastND(pop, len(pop))
-#plt.figure(2)
-#colors = cycle("bgrcmky")
-#for front in pareto_fronts:
-#    fit1 = [ind.fitness.values[0] for ind in front]
-#    fit2 = [ind.fitness.values[1] for ind in front]
-#    plt.scatter(fit1, fit2, c=colors.next())
-#plt.show()
+logging.info("Best individual for measure 1 is %r, %r", hof[0], hof[0].fitness.values)
+logging.info("Best individual for measure 2 is %r, %r", hof[-1], hof[-1].fitness.values)
 
-#print len(hof)
-
+# You can plot the Hall of Fame if you have matplotlib installed
 #import matplotlib.pyplot as plt
 #plt.figure()
 #fit1 = [ind.fitness.values[0] for ind in hof]
 #fit2 = [ind.fitness.values[1] for ind in hof]
-#plt.scatter(fit1, fit2, c="blue")
+#plt.scatter(fit1, fit2)
 #plt.show()
