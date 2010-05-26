@@ -224,32 +224,17 @@ class Fitness(object):
     """
     
     def __init__(self, values=None):
-        self._values = values
+        self.values = values
     
-    def getvalid(self):
-        return self._values is not None
+    def getValid(self):
+        return self.values is not None
     
-    def setvalid(self, values):
+    def setValid(self, values):
         if not values:
-            self._values = None
+            self.values = None
         
-    valid = property(getvalid, setvalid, None, 
+    valid = property(getValid, setValid, None, 
                      "Asses if a fitness is valid or not.")
-    
-    def getvalues(self):
-        return self._values
-    
-    def setvalues(self, values):
-        if values is None:
-            self._values = None
-        else:
-            try:
-                self._values = tuple(values)
-            except TypeError:
-                self._values = tuple((values,))
-    
-    values = property(getvalues, setvalues, None,
-                      "Set the fitness to a single value or a tupe of values.")
 
     def isDominated(self, other):
         """In addition to the comparaison operators that are used to sort
@@ -260,6 +245,7 @@ class Fitness(object):
         until the end of the comparaison.
         """
         not_equal = False
+
         self_values = imap(operator.mul, self.values, self.weights)
         other_values = imap(operator.mul, other.values, other.weights)
         for self_value, other_value in izip(self_values, other_values):
@@ -276,6 +262,7 @@ class Fitness(object):
         self_values = map(operator.mul, self.values, self.weights)
         other_values = map(operator.mul, other.values, other.weights)
         return self_values <= other_values
+
 
     def __lt__(self, other):
         if other in (None, tuple()):    # Protection against yamling
@@ -296,12 +283,12 @@ class Fitness(object):
     def __deepcopy__(self, memo):
         """Replaces the basic deepcopy function with a faster one.
         
-           It assumes that the elements in the :attr:`values` tuple are 
-           immutable and the fitness does not contain any other object 
-           than :attr:`values` and :attr:`weights`.
+        It assumes that the elements in the :attr:`values` tuple are 
+        immutable and the fitness does not contain any other object 
+        than :attr:`values` and :attr:`weights`.
         """
         return self.__class__(self.values)
     
-    #def __repr__(self):
-    #    return repr(self.values)
+    def __repr__(self):
+        return repr(self.values)
         

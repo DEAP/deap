@@ -38,7 +38,7 @@ tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=10
 tools.regInit("population", creator.Population, content=tools.individual, size=300)
 
 def evalOneMax(individual):
-    return [sum(individual)]
+    return sum(individual),
 
 tools.register("evaluate", evalOneMax)
 tools.register("mate", toolbox.cxTwoPoints)
@@ -50,7 +50,7 @@ CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
 # Evaluate the entire population
 for ind in pop:
-    ind.fitness.extend(tools.evaluate(ind))
+    ind.fitness.values = tools.evaluate(ind)
 
 # Begin the evolution
 for g in range(NGEN):
@@ -70,21 +70,20 @@ for g in range(NGEN):
     # Evaluate the individuals with an invalid fitness
     for ind in pop:
         if not ind.fitness.valid:
-            ind.fitness.extend(tools.evaluate(ind))
+            ind.fitness.values = tools.evaluate(ind)
 
     # Gather all the fitnesses in one list and print the stats
-    fits = [ind.fitness[0] for ind in pop]
+    fits = [ind.fitness.values[0] for ind in pop]
     print "  Min %f" % min(fits)
     print "  Max %f" % max(fits)
     lenght = len(pop)
     mean = sum(fits) / lenght
     sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = (sum2 / lenght - mean**2)**0.5
+    std_dev = abs(sum2 / lenght - mean**2)**0.5
     print "  Mean %f" % (mean)
     print "  Std. Dev. %f" % std_dev
 
 print "-- End of (successful) evolution --"
 
 best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual: %r" % best_ind
-#print "Best individual's fitness: %s" % repr(best_ind.fitness)
+print "Best individual is %r, %r" % (best_ind, best_ind.fitness.values)

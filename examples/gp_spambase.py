@@ -102,4 +102,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
 
-print "Best individual is %r\nwith fitness of %r" % (gp.evaluate(hof[0]), hof[0].fitness)
+logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)

@@ -100,11 +100,15 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
     assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
     
     _logger.info("Start of evolution")
+    evaluations = 0
     
     # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            evaluations += 1
+            ind.fitness.values = toolbox.evaluate(ind)
+    
+    _logger.debug("Evaluated %i individuals", evaluations)
             
     try:
         halloffame.update(population)
@@ -114,6 +118,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
+        evaluations = 0
         
         children = []
         for i in xrange(lambda_):
@@ -127,10 +132,13 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
             else:                           # Apply reproduction
                 children.append(random.choice(population))
         
-        # Evaluate the individuals with an invalid fitness
+        # Evaluate the individuals with invalid fitness
         for ind in children:
             if not ind.fitness.valid:
-                ind.fitness.extend(toolbox.evaluate(ind))
+                evaluations += 1
+                ind.fitness.values = toolbox.evaluate(ind)
+        
+        _logger.debug("Evaluated %i individuals", evaluations)
         
         try:
             halloffame.update(children)
@@ -140,7 +148,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         population[:] = toolbox.select(population + children, mu)
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
+        fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
         lenght = len(population)
@@ -159,11 +167,15 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
     assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
         
     _logger.info("Start of evolution")
+    evaluations = 0
     
-    # Evaluate the individuals with an invalid fitness
+    # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            evaluations += 1
+            ind.fitness.values = toolbox.evaluate(ind)
+    
+    _logger.debug("Evaluated %i individuals", evaluations)
             
     try:
         halloffame.update(population)
@@ -173,6 +185,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
+        evaluations = 0
         
         children = []
         for i in xrange(lambda_):
@@ -186,10 +199,13 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
             else:                           # Apply reproduction
                 children.append(random.choice(population))
         
-        # Evaluate the individuals with an invalid fitness
+        # Evaluate the individuals with invalid fitness
         for ind in children:
             if not ind.fitness.valid:
-                ind.fitness.extend(toolbox.evaluate(ind))
+                evaluations += 1
+                ind.fitness.values = toolbox.evaluate(ind)
+        
+        _logger.debug("Evaluated %i individuals", evaluations)
         
         try:
             halloffame.update(children)
@@ -199,7 +215,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         population[:] = toolbox.select(children, mu)
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
+        fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
         lenght = len(population)
@@ -207,7 +223,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         sum2 = sum(map(lambda x: x**2, fits))
         std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
-        _logger.debug("Var. %f", var)
+        _logger.debug("Std. Dev. %f", std_dev)
 
     _logger.info("End of (successful) evolution")
     
@@ -247,7 +263,7 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         population[:] = toolbox.select(population, len(population) - 1)
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
+        fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
         lenght = len(population)

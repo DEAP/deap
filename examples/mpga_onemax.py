@@ -39,7 +39,7 @@ tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=10
 tools.regInit("population", list, content=tools.individual, size=300)
 
 def evalOneMax(individual):
-    return [sum(individual)]
+    return sum(individual),
 
 tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
@@ -53,7 +53,7 @@ pool = multiprocessing.Pool(processes=4)
 
 fitnesses = pool.map(evalOneMax, pop)
 for ind, fit in zip(pop, fitnesses):
-    ind.fitness.extend(fit)
+    ind.fitness.values = fit
 
 # Begin the evolution
 for g in range(NGEN):
@@ -74,20 +74,20 @@ for g in range(NGEN):
     invalid_ind = filter(lambda ind: not ind.fitness.valid, pop)
     fitnesses = pool.map(evalOneMax, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.extend(fit)
+        ind.fitness.values = fit
         
     # Gather all the fitnesses in one list and print the stats
-    fits = [ind.fitness[0] for ind in pop]
+    fits = [ind.fitness.values[0] for ind in pop]
     print "  Min %f" % min(fits)
     print "  Max %f" % max(fits)
     lenght = len(pop)
     mean = sum(fits) / lenght
     sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = (sum2 / lenght - mean**2)**0.5
+    std_dev = abs(sum2 / lenght - mean**2)**0.5
     print "  Mean %f" % (mean)
     print "  Std. Dev. %f" % std_dev
 
 print "-- End of (successful) evolution --"
 
 best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual is %s" % str(best_ind)
+print "Best individual is %r, %r" % (best_ind, best_ind.fitness.values)

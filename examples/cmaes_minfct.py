@@ -42,7 +42,10 @@ tools = toolbox.Toolbox()
 tools.regInit("individual", creator.Individual, content=lambda: 5.0, size=30, args=("d",))
 tools.regInit("population", list, content=tools.individual, size=1)
 
-tools.register("evaluate", cma.rastrigin)       # The rastrigin function is one
+def evalCMA(ind):
+    return cma.rastrigin(ind),
+
+tools.register("evaluate", evalCMA)             # The rastrigin function is one
                                                 # of the hardest function to optimize
 
 pop = tools.population()                        # The CMA-ES algorithm takes a 
@@ -53,4 +56,4 @@ hof = halloffame.HallOfFame(1)
 # The CMA-ES algorithm converge with good probability with those settings
 cma.esCMA(tools, pop, sigma=5.0, ngen=250, lambda_=600, halloffame=hof)
 
-logging.info("Best individual is %r", hof[0])
+logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)

@@ -695,7 +695,7 @@ def nsga2(individuals, n):
     return chosen
     
 
-def sortFastND(individuals, n):
+def sortFastND(individuals, n, first_front_only=False):
     """Sort the first *n* *individuals* according the the fast non-dominated
     sorting algorithm. 
     """
@@ -723,17 +723,18 @@ def sortFastND(individuals, n):
             pareto_fronts[-1].append((individuals[i], i))
             pareto_sorted += 1
     
+    if not first_front_only:
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
-    N = min(N, n)
-    while pareto_sorted < N:
-        pareto_fronts.append([])
-        for individual_p, indice_p in pareto_fronts[-2]:
-            for indice_d in dominated_inds[indice_p]:
-                dominating_inds[indice_d] -= 1
-                if dominating_inds[indice_d] == 0:
-                    pareto_fronts[-1].append((individuals[indice_d], indice_d))
-                    pareto_sorted += 1
+        N = min(N, n)
+        while pareto_sorted < N:
+            pareto_fronts.append([])
+            for individual_p, indice_p in pareto_fronts[-2]:
+                for indice_d in dominated_inds[indice_p]:
+                    dominating_inds[indice_d] -= 1
+                    if dominating_inds[indice_d] == 0:
+                        pareto_fronts[-1].append((individuals[indice_d], indice_d))
+                        pareto_sorted += 1
     
     return [[pair[0] for pair in front] for front in pareto_fronts]
 
@@ -747,15 +748,16 @@ def sortCrowdingDist(individuals, n):
     distances = dict(izip(map(id, individuals), ([0.0, ind] for ind in individuals)))
     crowding = list(individuals)
         
-    number_objectives = len(individuals[0].fitness)
+    number_objectives = len(individuals[0].fitness.values)
     for i in xrange(number_objectives):
-        crowding.sort(key=lambda ind: ind.fitness[i])
+        crowding.sort(key=lambda ind: ind.fitness.values[i])
         distances[id(crowding[0])][0] = float("inf")
         distances[id(crowding[-1])][0] = float("inf")
         for j in xrange(1, len(crowding) - 1):
             if distances[id(crowding[j])][0] < float("inf"):
-                distances[id(crowding[j])][0] += crowding[j + 1].fitness[i] - \
-                                      crowding[j - 1].fitness[i]
+                distances[id(crowding[j])][0] += \
+                                      crowding[j + 1].fitness.values[i] - \
+                                      crowding[j - 1].fitness.values[i]
     sorted_dist = sorted(distances.itervalues(), key=lambda value: value[0], reverse=True)
     return (value[1] for value in sorted_dist[:n])
 
