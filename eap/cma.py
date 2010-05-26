@@ -45,7 +45,7 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         
         # Evaluate the individuals
         for ind in population:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            ind.fitness.values = toolbox.evaluate(ind)
         
         try:
             halloffame.update(population)
@@ -56,13 +56,13 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         strategy.update(population)
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
+        fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
         lenght = len(population)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
         
@@ -233,29 +233,29 @@ class CMAStrategy(object):
 
 def rand(x):
     """Random test objective function."""
-    return [numpy.random.random()]
+    return numpy.random.random()
     
 def plane(x):
     """Plane test objective function."""
-    return [x[0]]
+    return x[0]
 
 def rastrigin(x):
     """Rastrigin test objective function. Consider using ``lambda_ = 20 * N`` 
     for this test function.
     """
-    return [10 * len(x) + sum(map(lambda a: a**2 - 10 * math.cos(2 * math.pi * a), x))]
+    return 10 * len(x) + sum(map(lambda a: a**2 - 10 * math.cos(2 * math.pi * a), x))
     #return 10 * len(x) + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
     
 def sphere(x):
     """Sphere test objective function."""
-    return [sum(map(lambda x: x**2, individual))]
+    return sum(map(lambda x: x**2, individual))
 
 def cigar(x):
     """Cigar test objective function."""
-    return [x[0]**2 + 1e6 * sum(map(lambda a: a**2, x))]
+    return x[0]**2 + 1e6 * sum(map(lambda a: a**2, x))
 
 def rosen(x):  
     """Rosenbrock test objective function."""
-    return [sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
-                   x[:-1], x[1:]))]
+    return sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
+                   x[:-1], x[1:]))
     

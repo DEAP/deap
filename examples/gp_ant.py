@@ -173,7 +173,7 @@ if __name__ == "__main__":
     tools = toolbox.Toolbox()
     
     # Attribute generator
-    tools.register("expr_init", gp.generate_ramped, pset=pset, min=1, max=2)
+    tools.register("expr_init", gp.generate_full, pset=pset, min=1, max=2)
     
     # Structure initializers
     tools.regInit("individual", creator.Individual, content=tools.expr_init)
@@ -197,4 +197,4 @@ if __name__ == "__main__":
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
     
-    print "Best individual is %r\nwith fitness of %r" % (gp.evaluate(hof[0]), hof[0].fitness)
+    logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)

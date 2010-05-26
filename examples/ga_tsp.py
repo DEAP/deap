@@ -52,7 +52,7 @@ def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
     for gene1, gene2 in zip(individual[0:-1], individual[1:]):
         distance += distance_map[gene1][gene2]
-    return distance
+    return distance,
 
 tools.register("mate", toolbox.cxPartialyMatched)
 tools.register("mutate", toolbox.mutShuffleIndexes, indpb=0.05)
@@ -64,4 +64,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, hof)
 
-logging.info("Best individual is %s", repr(hof[0]))
+logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)
