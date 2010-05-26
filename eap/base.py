@@ -27,7 +27,7 @@ import random
 import copy
 
 from collections import deque
-from itertools import izip, repeat, count, chain, imap
+from itertools import izip, repeat, count, imap
 import itertools
         
 class Tree(list):
@@ -35,11 +35,10 @@ class Tree(list):
     class Node(object):
         height = 0
         size = 1
-
         @property            
         def root(self):
             return self
-        def __getstate__(self):
+        def _getstate(self):
             try:
                 return self.base(self)
             except TypeError:
@@ -80,15 +79,13 @@ class Tree(list):
             else:
                 self.append(Tree.create_node(elem))
     
-    def __getstate__(self):
+    def _getstate(self):
         """ Returns the state of the Tree
             as a list of arbitrary elements. It is mainly
             used for pickling a Tree object.
         """
-        return [elem.__getstate__() for elem in self] 
+        return [elem._getstate() for elem in self] 
      
-#    def __setstate__(self, state):
-#        self.__init__(state)
     
     def __reduce__(self):
         """ Returns the class init, the object's state and the object
@@ -96,7 +93,7 @@ class Tree(list):
             
             The function is used to pickle Tree.
         """
-        return (self.__class__, (self.__getstate__(),), self.__dict__)
+        return (self.__class__, (self._getstate(),), self.__dict__)
     
     def __deepcopy__(self, memo):
         """ Deepcopy a Tree by first converting it back to a list of list.
