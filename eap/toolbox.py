@@ -34,8 +34,7 @@ from functools import partial
 from itertools import chain, izip, repeat, cycle
 from operator import attrgetter
 
-import eap.base as base
-
+import base
 
 class Repeat(object):
     def __init__(self, func, times,):
