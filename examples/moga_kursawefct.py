@@ -47,7 +47,7 @@ tools.regInit("population", creator.Population, content=tools.individual, size=5
 
 def evalKursawe(ind):
     f1 = sum(map(lambda x, y: -10 * math.exp(-0.2 * math.sqrt(x * x + y * y)), ind[:-1], ind[1:]))
-    f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[1:]))
+    f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[:]))
     return f1, f2
 
 def mate(ind1, ind2, *args, **kargs):
