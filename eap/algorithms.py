@@ -258,9 +258,7 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         except AttributeError:
             pass
         
-        population.append(child)
-        
-        population[:] = toolbox.select(population, len(population) - 1)
+        population[:] = toolbox.select(population + [child], len(population))
         
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in population]

@@ -707,7 +707,7 @@ def sortFastND(individuals, n, first_front_only=False):
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = dict.fromkeys(xrange(N), 0.0)
+    dominating_inds = dict.fromkeys(xrange(N), 0)
     dominated_inds = dict(izip(xrange(N), (list() for i in xrange(N))))
     
     # Rank first Pareto front
@@ -762,6 +762,146 @@ def sortCrowdingDist(individuals, n):
                          key=lambda value: value[0], reverse=True)
     return (individuals[index] for dist, index in sorted_dist[:n])
 
+
+######################################
+# Strength Pareto         (SPEA-II)  #
+######################################
+
+def spea2(individuals, n):
+    N = len(individuals)
+    L = len(individuals[0].fitness.values)
+    K = math.sqrt(N)
+    strength_fits = [0] * N
+    fits = [0] * N
+    dominating_inds = [list() for i in xrange(N)]
+    
+    for i in xrange(N):
+        for j in xrange(i + 1, N):
+            if individuals[i].fitness.isDominated(individuals[j].fitness):
+                strength_fits[j] += 1
+                dominating_inds[i].append(j)
+            elif individuals[j].fitness.isDominated(individuals[i].fitness):
+                strength_fits[i] += 1
+                dominating_inds[j].append(i)
+    
+    for i in xrange(N):
+        for j in dominating_inds[i]:
+            fits[i] += strength_fits[j]
+    
+    # Choose all non-dominated individuals
+    chosen_indices = [i for i in xrange(N) if fits[i] < 1]
+    
+    if len(chosen_indices) < n:     # The archive is too small
+        for i in xrange(N):
+            distances = [0.0] * N
+            for j in xrange(i + 1, N):
+                dist = 0.0
+                for k in xrange(L):
+                    val = individuals[i].fitness.values[k] - \
+                          individuals[j].fitness.values[k]
+                    dist += val * val
+                distances[j] = dist
+            kth_dist = _randomizedSelect(distances, 0, N - 1, K)
+            density = 1.0 / (kth_dist + 2.0)
+            fits[i] += density
+            
+        next_indices = [(fits[i], i) for i in xrange(N) if not i in chosen_indices]
+        next_indices.sort()
+        #print next_indices
+        chosen_indices += [i for fit, i in next_indices[:n - len(chosen_indices)]]
+                
+    elif len(chosen_indices) > n:   # The archive is too large
+        N = len(chosen_indices)
+        distances = [[0.0] * N for i in xrange(N)]
+        sorted_indices = [[0] * N for i in xrange(N)]
+        for i in xrange(N):
+            for j in xrange(i + 1, N):
+                dist = 0.0
+                for k in xrange(L):
+                    val = individuals[chosen_indices[i]].fitness.values[k] - \
+                          individuals[chosen_indices[j]].fitness.values[k]
+                    dist += val * val
+                distances[i][j] = dist
+                distances[j][i] = dist
+            distances[i][i] = -1
+        
+        # Insert sort is faster than quick sort for short arrays
+        for i in xrange(N):
+            for j in xrange(1, N):
+                k = j
+                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
+                    sorted_indices[i][k] = sorted_indices[i][k - 1]
+                    k -= 1
+                sorted_indices[i][k] = j
+        
+        size = N
+        to_remove = []
+        while size > n:
+            # Search for minimal distance
+            min_pos = 0
+            for i in xrange(1, N):
+                for j in xrange(1, size):
+                    dist_i_sorted_j = distances[i][sorted_indices[i][j]]
+                    dist_min_sorted_j = distances[min_pos][sorted_indices[min_pos][j]]
+                    
+                    if dist_i_sorted_j < dist_min_sorted_j:
+                        min_pos = i
+                        break
+                    elif dist_i_sorted_j > dist_min_sorted_j:
+                        break
+            
+            # Remove minimal distance from sorted_indices
+            for i in xrange(N):
+                distances[i][min_pos] = float("inf")
+                distances[min_pos][i] = float("inf")
+                
+                for j in xrange(1, size - 1):
+                    if sorted_indices[i][j] == min_pos:
+                        sorted_indices[i][j] = sorted_indices[i][j + 1]
+                        sorted_indices[i][j + 1] = min_pos
+            
+            # Remove corresponding individual from chosen_indices
+            to_remove.append(min_pos)
+            size -= 1
+        
+        for index in reversed(sorted(to_remove)):
+            del chosen_indices[index]
+    
+    return [individuals[i] for i in chosen_indices]
+    
+def _randomizedSelect(array, begin, end, i):
+    """Allows to select the ith smallest element from array without sorting it.
+    Runtime is expected to be O(n).
+    """
+    if begin == end:
+        return array[begin]
+    q = _randomizedPartition(array, begin, end)
+    k = q - begin + 1
+    if i < k:
+        return _randomizedSelect(array, begin, q, i)
+    else:
+        return _randomizedSelect(array, q + 1, end, i - k)
+
+def _randomizedPartition(array, begin, end):
+    i = random.randint(begin, end)
+    array[begin], array[i] = array[i], array[begin]
+    return _partition(array, begin, end)
+    
+def _partition(array, begin, end):
+    x = array[begin]
+    i = begin - 1
+    j = end + 1
+    while True:
+        j -= 1
+        while array[j] > x:
+            j -= 1
+        i += 1
+        while array[i] < x:
+            i += 1
+        if i < j:
+            array[i], array[j] = array[j], array[i]
+        else:
+            return j
 
 ######################################
 # Replacement Strategies (ES)        #
