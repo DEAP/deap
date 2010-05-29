@@ -109,7 +109,6 @@ def cxTwoPoints(ind1, ind2):
     This operation apply on an :class:`~eap.base.Individual` composed of a list
     of attributes and act as follow ::
     
-
         >>> ind1 = [A(1), ..., A(n), ..., A(n+i), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(n+i), ..., B(k)]
         >>> # Crossover with mating points n and n+i, n > 1 and n+i <= min(m, k)
@@ -193,10 +192,10 @@ def cxUniform(ind1, ind2, indpb):
     
 
 def cxPartialyMatched(ind1, ind2):
-    """Execute a partialy matched crossover on the input indviduals. The two
-    children produced are returned as a tuple, the two parents are left intact.
-    This crossover expect individuals of indices, the result for any other type
-    of individuals is unpredictable.
+    """Execute a partialy matched crossover (PMX) on the input indviduals.
+    The two children produced are returned as a tuple, the two parents are
+    left intact. This crossover expect iterable individuals of indices,
+    the result for any other type of individuals is unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values in a certain range of the two parents and swaping the values
@@ -242,11 +241,64 @@ def cxPartialyMatched(ind1, ind2):
         child1[i], child1[p1[temp2]] = temp2, temp1
         child2[i], child2[p2[temp1]] = temp1, temp2
         # Position bookkeeping
-        #print lTemp1, lTemp2
         p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-        #print lPos1
 
+    try:
+        child1.fitness.valid = False
+        child2.fitness.valid = False
+    except AttributeError:
+        pass
+    
+    return child1, child2
+
+def cxUniformPartialyMatched(ind1, ind2, indpb):
+    """Execute a uniform partialy matched crossover (UPMX) on the input
+    indviduals. The two children produced are returned as a tuple, the two
+    parents are left intact. This crossover expect iterable individuals of
+    indices, the result for any other type of individuals is unpredictable.
+
+    Moreover, this crossover consists of generating two children by matching
+    pairs of values chosen at random with a probability of *indpb* in the two
+    parents and swaping the values of those indexes. For more details see
+    Cicirello and Smith, "Modeling GA performance for control parameter
+    optimization", 2000.
+
+    For example, the following parents will produce the two following children
+    when mated with the chosen points ``[0, 1, 0, 0, 1]``. ::
+
+        >>> ind1 = [0, 1, 2, 3, 4]
+        >>> ind2 = [1, 2, 3, 4, 0]
+        >>> child1, child2 = pmxCx(ind1, ind2)
+        >>> print child1
+        [4, 2, 1, 3, 0]
+        >>> print child2
+        [2, 1, 3, 0, 4]
+
+    This function use the :func:`~random.random` and :func:`~random.randint`
+    functions from the python base :mod:`random` module.
+    """
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    p1, p2 = [0]*size, [0]*size
+
+    # Initialize the position of each indices in the individuals
+    for i in xrange(size):
+        p1[child1[i]] = i
+        p2[child2[i]] = i
+    
+    for i in xrange(size):
+        if random.random < indpb:
+            # Keep track of the selected values
+            temp1 = child1[i]
+            temp2 = child2[i]
+            # Swap the matched value
+            child1[i], child1[p1[temp2]] = temp2, temp1
+            child2[i], child2[p2[temp1]] = temp1, temp2
+            # Position bookkeeping
+            p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
+            p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
+    
     try:
         child1.fitness.valid = False
         child2.fitness.valid = False
@@ -707,8 +759,8 @@ def sortFastND(individuals, n, first_front_only=False):
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = dict.fromkeys(xrange(N), 0)
-    dominated_inds = dict(izip(xrange(N), (list() for i in xrange(N))))
+    dominating_inds = [0] * N
+    dominated_inds = [list() for i in xrange(N)]
     
     # Rank first Pareto front
     for i in xrange(N):
