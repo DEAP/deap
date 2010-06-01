@@ -1,6 +1,3 @@
-#
-#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
-#    
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
