@@ -772,7 +772,7 @@ def sortFastND(individuals, n, first_front_only=False):
                 dominating_inds[i] += 1
                 dominated_inds[j].append(i)
         if dominating_inds[i] == 0:
-            pareto_fronts[-1].append((individuals[i], i))
+            pareto_fronts[-1].append(i)
             pareto_sorted += 1
     
     if not first_front_only:
@@ -781,14 +781,14 @@ def sortFastND(individuals, n, first_front_only=False):
         N = min(N, n)
         while pareto_sorted < N:
             pareto_fronts.append([])
-            for individual_p, indice_p in pareto_fronts[-2]:
+            for indice_p in pareto_fronts[-2]:
                 for indice_d in dominated_inds[indice_p]:
                     dominating_inds[indice_d] -= 1
                     if dominating_inds[indice_d] == 0:
-                        pareto_fronts[-1].append((individuals[indice_d], indice_d))
+                        pareto_fronts[-1].append(indice_d)
                         pareto_sorted += 1
     
-    return [[pair[0] for pair in front] for front in pareto_fronts]
+    return [[individuals[index] for index in front] for front in pareto_fronts]
 
 
 def sortCrowdingDist(individuals, n):
