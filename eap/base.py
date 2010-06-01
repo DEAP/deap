@@ -20,15 +20,11 @@
 algorithms.
 """
 
-import array
 import copy
 import operator
-import random
-import copy
 
 from collections import deque
 from itertools import izip, repeat, count, imap
-import itertools
         
 class Tree(list):
     """ Basic N-ary tree class"""
