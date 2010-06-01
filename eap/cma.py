@@ -12,7 +12,7 @@
 #
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
-#
+
 #    Special thanks to Nikolaus Hansen for providing major part of 
 #    this code. The CMA-ES algorithm is provided in many other languages
 #    at http://www.lri.fr/~hansen/cmaesintro.html.
