@@ -40,10 +40,14 @@ class Tree(list):
             return self
         def _getstate(self):
             try:
-                return self.base(self)
+                base = self.base(self)
             except TypeError:
                 base = self.base.__new__(self.base)
-                base.__dict__.update(self.__dict__)
+            finally :
+                try:
+                    base.__dict__.update(self.__dict__)
+                except AttributeError:
+                    pass
                 return base
 
     @classmethod
@@ -102,7 +106,7 @@ class Tree(list):
             quick testing, up to 1.6 times faster, and at least 2 times less
             function calls.
         """
-        new = self.__class__(self.__getstate__())
+        new = self.__class__(self._getstate())
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
         return new
     
