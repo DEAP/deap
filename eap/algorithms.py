@@ -26,7 +26,6 @@ you realy them to do.
 """
 
 import logging
-import math
 import random
 
 _logger = logging.getLogger("eap.algorithms")
