@@ -69,23 +69,30 @@ class Primitive(object):
 class Terminal(object):
     def __init__(self, primitive):
         try:
-            self.name = primitive.__name__
-        except:
-            self.name = str(primitive)
+            self.value = primitive.__name__
+        except AttributeError:
+            self.value = str(primitive)
     def __call__(self):
-        return self        
+        return self
     def __repr__(self):
-        return self.name        
+        return self.value
 
-class Ephemeral(object):
+class Ephemeral(Terminal):
+    def __init__(self, func, value):
+       Terminal.__init__(self, value)
+       self.func = func
+    def regen(self):
+        self.value = self.func()
+
+class EphemeralGenerator(object):
     def __init__(self, ephemeral):
        self.name = str(ephemeral)
        self.func = ephemeral
     def __call__(self):
-       return Terminal(self.func())
+        return Ephemeral(self.func, self.func())
     def __repr__(self):
-        return self.name       
-       
+        return self.name
+
 class PrimitiveSet(object):
     def __init__(self):
         self.primitives = []
@@ -104,7 +111,7 @@ class PrimitiveSet(object):
         self.terminals.append(Terminal(terminal))
 
     def addEphemeralConstant(self, ephemeral):
-        self.terminals.append(Ephemeral(ephemeral))       
+        self.terminals.append(EphemeralGenerator(ephemeral))       
 
 ## Standard GP generation functions
 
@@ -154,15 +161,18 @@ class TerminalTyped(Terminal):
     def __init__(self, terminal, ret):
         self.ret = ret
         Terminal.__init__(self, terminal)
+        
+class EphemeralGeneratorTyped(EphemeralGenerator):
+    def __init__(self, func, ret):
+        self.ret = ret
+        EphemeralGenerator.__init__(self, func)
     def __call__(self):
-        return self
+        return EphemeralTyped(self.func, self.func(), self.ret)
 
 class EphemeralTyped(Ephemeral):
-    def __init__(self, ephemeral, ret):
+    def __init__(self, func, value, ret):
         self.ret = ret
-        Ephemeral.__init__(self, ephemeral)
-    def __call__(self):
-        return TerminalTyped(self.func(), self.ret)
+        Ephemeral.__init__(self, func, value)
 
 class TypedPrimitiveSet(object):
     def __init__(self):
@@ -188,7 +198,7 @@ class TypedPrimitiveSet(object):
     def addEphemeralConstant(self, ephemeral, ret_type):
         if not self.terminals.has_key(ret_type):
            self.terminals[ret_type] = list()
-        prim = EphemeralTyped(ephemeral, ret_type)
+        prim = EphemeralGeneratorTyped(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
 
 # Strongly Typed GP generation functions

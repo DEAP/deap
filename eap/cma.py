@@ -20,9 +20,9 @@
 import copy
 import logging
 import math
-import random
 import numpy
-    
+from itertools import imap, repeat
+
 _logger = logging.getLogger("eap.cma")
     
 def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
@@ -208,7 +208,7 @@ class CMAStrategy(object):
             self.weights = math.log(self.mu + 0.5) - \
                         numpy.log(numpy.arange(1, self.mu + 1))
         elif rweights == "linear":
-            self.weights = mu + 0.5 - numpy.arange(1, self.mu + 1)
+            self.weights = self.mu + 0.5 - numpy.arange(1, self.mu + 1)
         elif rweights == "equal":
             self.weights = numpy.ones(self.mu)
         else:
@@ -248,11 +248,11 @@ def rastrigin(x):
     
 def sphere(x):
     """Sphere test objective function."""
-    return sum(map(lambda x: x**2, individual))
+    return sum(imap(pow, x, repeat(2)))
 
 def cigar(x):
     """Cigar test objective function."""
-    return x[0]**2 + 1e6 * sum(map(lambda a: a**2, x))
+    return x[0]**2 + 1e6 * sum(imap(pow, x, repeat(2)))
 
 def rosen(x):  
     """Rosenbrock test objective function."""

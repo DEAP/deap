@@ -15,7 +15,6 @@
 
 import array
 import copy
-import inspect
 
 # Warning are turned into errors to catch the DeprecationWarning in the method
 # init_type of create.
@@ -69,9 +68,9 @@ def create(name, base, **kargs):
             #copy_.extend(self)
             return copy_
         
-        setattr(objtype, "__deepcopy__", deepcopy_array)
+        objtype.__deepcopy__ = deepcopy_array
     
-    setattr(objtype, "__init__", init_type)
+    objtype.__init__ = init_type
     #if not hasattr(objtype, "__repr__"):
     #setattr(objtype, "__repr__", repr_type)
     globals()[name] = objtype
