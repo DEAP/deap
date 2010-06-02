@@ -1,6 +1,3 @@
-#
-#    Copyright 2010, Francois-Michel De Rainville and Felix-Antoine Fortin.
-#    
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -253,7 +250,7 @@ class Fitness(object):
         return not_equal
         
     def __le__(self, other):
-        if other in (None, tuple()):    # Protection against yamling
+        if not other:                   # Protection against yamling
             return False
         # Apply the weights to the values
         self_values = map(operator.mul, self.values, self.weights)
@@ -262,7 +259,7 @@ class Fitness(object):
 
 
     def __lt__(self, other):
-        if other in (None, tuple()):    # Protection against yamling
+        if not other:                   # Protection against yamling
             return False
         # Apply the weights to the values
         self_values = map(operator.mul, self.values, self.weights)
@@ -270,7 +267,7 @@ class Fitness(object):
         return self_values < other_values
 
     def __eq__(self, other):
-        if other in (None, tuple()):    # Protection against yamling
+        if not other:                   # Protection against yamling
             return False
         # Apply the weights to the values
         self_values = map(operator.mul, self.values, self.weights)
