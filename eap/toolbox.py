@@ -29,12 +29,14 @@ module.
 import copy
 import math
 import random
+
+import base
+
 from functools import partial
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
 from operator import attrgetter
 
-import eap.base as base
 
 
 class Repeat(object):
@@ -180,7 +182,7 @@ def cxUniform(ind1, ind2, indpb):
     
     for i in xrange(size):
         if random.random() < indpb:
-            child1[i], child2[i] = childe2[i], child1[i]
+            child1[i], child2[i] = child2[i], child1[i]
     
     try:
         child1.fitness.valid = False
@@ -660,8 +662,8 @@ def mutTypedTreeUniform(ind, expr):
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
-    type = subtree.root.ret
-    subtree = base.Tree(expr(type=type))
+    type_ = subtree.root.ret
+    subtree = base.Tree(expr(type=type_))
     mutant.set_subtree_dfs(index, subtree)
     try:
         mutant.fitness.valid = False
