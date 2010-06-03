@@ -273,6 +273,14 @@ class Fitness(object):
         self_values = map(operator.mul, self.values, self.weights)
         other_values = map(operator.mul, other.values, other.weights)
         return self_values == other_values
+    
+    def __ne__(self, other):
+        if not other:                   # Protection against yamling
+            return False
+        # Apply the weights to the values
+        self_values = map(operator.mul, self.values, self.weights)
+        other_values = map(operator.mul, other.values, other.weights)
+        return self_values != other_values
 
     def __deepcopy__(self, memo):
         """Replaces the basic deepcopy function with a faster one.
