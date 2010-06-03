@@ -71,11 +71,11 @@ class Terminal(object):
         try:
             self.value = primitive.__name__
         except AttributeError:
-            self.value = str(primitive)
+            self.value = primitive
     def __call__(self):
         return self
     def __repr__(self):
-        return self.value
+        return str(self.value)
 
 class Ephemeral(Terminal):
     def __init__(self, func, value):
@@ -135,19 +135,18 @@ def _generate(pset, min, max, condition):
     def generate_expr(max_depth):
         if condition(max_depth):
             term = random.choice(pset.terminals)
-            expr = [term()]
+            expr = term()
         else:
             prim = random.choice(pset.primitives)
             expr = [prim]
-            for i in xrange(prim.arity):
-                arg = generate_expr(max_depth-1)
-                if len(arg) > 1:
-                    expr.append(arg)
-                else:
-                    expr.extend(arg)
+            args = (generate_expr(max_depth-1) for i in xrange(prim.arity))
+            expr.extend(args)
         return expr
     max_depth = random.randint(min, max)
-    return generate_expr(max_depth)
+    expr = generate_expr(max_depth)
+    if not isinstance(expr, list):
+        expr = [expr]
+    return expr
 
 ## Strongly Typed GP 
 
@@ -223,18 +222,17 @@ def _generate_typed(pset, type, min, max, condition):
     def generate_expr(max_depth, type):
         if condition(max_depth):
             term = random.choice(pset.terminals[type])
-            expr = [term()]                
+            expr = term()
         else:
             prim = random.choice(pset.primitives[type])
             expr = [prim]
-            for arg_type in prim.args:
-                arg = generate_expr(max_depth-1, arg_type)
-                if len(arg) > 1:
-                    expr.append(arg)
-                else:
-                    expr.extend(arg)
+            args = (generate_expr(max_depth-1, arg) for arg in prim.args)
+            expr.extend(args)
         return expr
     max_depth = random.randint(min, max)
-    return generate_expr(max_depth, type)
+    expr = generate_expr(max_depth, type)
+    if not isinstance(expr, list):
+        expr = [expr]
+    return expr
 
 
