@@ -78,18 +78,18 @@ class Terminal(object):
         return str(self.value)
 
 class Ephemeral(Terminal):
-    def __init__(self, func, value):
-       Terminal.__init__(self, value)
+    def __init__(self, func):
        self.func = func
+       Terminal.__init__(self, self.func())
     def regen(self):
         self.value = self.func()
 
 class EphemeralGenerator(object):
     def __init__(self, ephemeral):
-       self.name = str(ephemeral)
+       self.name = ephemeral.__name__
        self.func = ephemeral
     def __call__(self):
-        return Ephemeral(self.func, self.func())
+        return Ephemeral(self.func)
     def __repr__(self):
         return self.name
 
@@ -166,12 +166,12 @@ class EphemeralGeneratorTyped(EphemeralGenerator):
         self.ret = ret
         EphemeralGenerator.__init__(self, func)
     def __call__(self):
-        return EphemeralTyped(self.func, self.func(), self.ret)
+        return EphemeralTyped(self.func, self.ret)
 
 class EphemeralTyped(Ephemeral):
-    def __init__(self, func, value, ret):
+    def __init__(self, func, ret):
         self.ret = ret
-        Ephemeral.__init__(self, func, value)
+        Ephemeral.__init__(self, func)
 
 class TypedPrimitiveSet(object):
     def __init__(self):
@@ -180,25 +180,19 @@ class TypedPrimitiveSet(object):
         self.func_dict = dict()
     
     def addPrimitive(self, primitive, ret_type, in_types):
-        if not self.primitives.has_key(ret_type):
-           self.primitives[ret_type] = list()
         prim = PrimitiveTyped(primitive, ret_type, in_types)
-        self.primitives[ret_type].append(prim)
+        self.primitives.setdefault(ret_type, list()).append(prim)
         self.func_dict[primitive.__name__] = primitive
         
     def addTerminal(self, terminal, ret_type):
-        if not self.terminals.has_key(ret_type):
-           self.terminals[ret_type] = list()
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
         prim = TerminalTyped(terminal, ret_type)
-        self.terminals[ret_type].append(prim)
+        self.terminals.setdefault(ret_type, list()).append(prim)
         
     def addEphemeralConstant(self, ephemeral, ret_type):
-        if not self.terminals.has_key(ret_type):
-           self.terminals[ret_type] = list()
         prim = EphemeralGeneratorTyped(ephemeral, ret_type)
-        self.terminals[ret_type].append(prim)
+        self.terminals.setdefault(ret_type, list()).append(prim)
 
 # Strongly Typed GP generation functions
 
