@@ -15,13 +15,17 @@
 
 #    Special thanks to Nikolaus Hansen for providing major part of 
 #    this code. The CMA-ES algorithm is provided in many other languages
-#    at http://www.lri.fr/~hansen/cmaesintro.html.
+#    and advanced versions at http://www.lri.fr/~hansen/cmaesintro.html.
 
 import copy
 import logging
 import math
 import numpy
+import random   # Only used to seed numpy.random
+import sys      # Used to get maxint
 from itertools import imap, repeat
+
+numpy.random.seed(random.randint(0, sys.maxint))
 
 _logger = logging.getLogger("eap.cma")
     
@@ -115,7 +119,6 @@ class CMAStrategy(object):
         self.centroid.extend(numpy.mean(population, 0)) # The centroid is used in new individual creation
         
         self.dim = len(self.centroid)
-        #self.centroid = numpy.array(self.centroid)
         self.sigma = sigma
         self.pc = numpy.zeros(self.dim)
         self.ps = numpy.zeros(self.dim)
