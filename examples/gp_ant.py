@@ -197,4 +197,4 @@ if __name__ == "__main__":
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
     
-    logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)
+    logging.info("Best individual is %r, %r", gp.evaluate(hof[0]), hof[0].fitness)
