@@ -19,6 +19,10 @@ import random
 import logging
 
 sys.path.append("..")
+logging.basicConfig(level=logging.DEBUG)
+random.seed(64)     # Random must be seeded before importing cma because it is
+                    # used to seed numpy.random
+                    # This will be fixed in future release.
 
 import eap.algorithms as algorithms
 import eap.base as base
@@ -26,12 +30,6 @@ import eap.cma as cma
 import eap.creator as creator
 import eap.halloffame as halloffame
 import eap.toolbox as toolbox
-
-logging.basicConfig(level=logging.DEBUG)
-#random.seed(64)
-# Seed is not needed here since cma use numpy.random ... This will be fixed in some 
-# future release because it makes the results unreproductible from the main file
-# (you can still fix the seed in cma.py)
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)
