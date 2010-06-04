@@ -15,6 +15,7 @@
 
 import random
 from itertools import repeat
+from collections import defaultdict
 
 # Define the name of type for any types.
 __type__ = None
@@ -116,8 +117,8 @@ class EphemeralGenerator(object):
 
 class PrimitiveSetTyped(object):
     def __init__(self):
-        self.terminals = dict()
-        self.primitives = dict()
+        self.terminals = defaultdict(list)
+        self.primitives = defaultdict(list)
         self.func_dict = dict()
     
     def addPrimitive(self, primitive, in_types, ret_type):
@@ -125,18 +126,18 @@ class PrimitiveSetTyped(object):
             prim = Operator(primitive, in_types, ret_type)
         except (KeyError, ValueError):
             prim = Primitive(primitive, in_types, ret_type)
-        self.primitives.setdefault(ret_type, list()).append(prim)
+        self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
         
     def addTerminal(self, terminal, ret_type):
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
         prim = Terminal(terminal, ret_type)
-        self.terminals.setdefault(ret_type, list()).append(prim)
+        self.terminals[ret_type].append(prim)
         
     def addEphemeralConstant(self, ephemeral, ret_type):
         prim = EphemeralGenerator(ephemeral, ret_type)
-        self.terminals.setdefault(ret_type, list()).append(prim)
+        self.terminals[ret_type].append(prim)
 
 class PrimitiveSet(PrimitiveSetTyped):
     def addPrimitive(self, primitive, arity):
