@@ -39,8 +39,7 @@ def evaluate(expr, pset=None):
 
 
 def lambdify(pset, expr, args):
-    """ 
-    Returns a lambda function of the expression
+    """Return a lambda function of the expression.
 
     Remark:
     This function is a stripped version of the lambdify
@@ -60,6 +59,15 @@ def lambdify(pset, expr, args):
 ## Loosely + Strongly Typed GP 
 
 class Primitive(object):
+    """ Class that encapsulates a primitive and when called with arguments it
+        returns the Python code to call the primitive with the arguments.
+        
+        >>> import operator
+        >>> pr = Primitive(operator.mul, (int, int), int)
+        >>> pr("1", "2")
+        'mul(1, 2)'
+    """    
+        
     def __init__(self, primitive, args, ret = __type__):
         self.name = primitive.__name__
         self.arity = len(args)           
@@ -73,6 +81,20 @@ class Primitive(object):
         return self.name 
 
 class Operator(Primitive):
+    """ Class that encapsulates an operator and when called with arguments it
+        returns the Python code to call the operator with the arguments. It acts
+        as the Primitive class, but instead of returning a function and its 
+        arguments, it returns an operator and its operands.
+        
+        >>> import operator
+        >>> op = Operator(operator.mul, (int, int), int)
+        >>> op("1", "2")
+        '(1 * 2)'
+        >>> op2 = Operator(operator.neg, (int,), int)
+        >>> op2(1)
+        '-(1)'
+    """
+
     symbols = {"add" : "+", "sub" : "-", "mul" : "*", "div" : "/", "neg" : "-",
                "and_" : "and", "or_" : "or", "not_" : "not", 
                "lt" : "<", "eq" : "==", "gt" : ">", "geq" : ">=", "leq" : "<="}
@@ -86,6 +108,10 @@ class Operator(Primitive):
             raise ValueError("Operator arity can be either 1 or 2.")
 
 class Terminal(object):
+    """ Class that encapsulates terminal primitive in expression. Terminals can
+        be symbols, values, or 0-arity functions.
+    """
+   
     def __init__(self, terminal, ret = __type__):
         self.ret = ret
         try:
@@ -98,14 +124,18 @@ class Terminal(object):
         return str(self.value)
 
 class Ephemeral(Terminal):
+    """ Class that encapsulates a terminal which value is set at run-time. 
+        The value of the `Ephemeral` can be regenerated with the method `regen`.
+    """
     def __init__(self, func, ret = __type__):
-        self.ret = ret
         self.func = func
         Terminal.__init__(self, self.func(), self.ret)
     def regen(self):
         self.value = self.func()
         
 class EphemeralGenerator(object):
+    """ Class that generates `Ephemeral` to be added to an expression.
+    """
     def __init__(self, ephemeral, ret = __type__):
         self.ret = ret
         self.name = ephemeral.__name__
@@ -120,6 +150,8 @@ class PrimitiveSetTyped(object):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
         self.func_dict = dict()
+        self.termsCount = 0
+        self.primsCount = 0
     
     def addPrimitive(self, primitive, in_types, ret_type):
         try:
@@ -128,16 +160,26 @@ class PrimitiveSetTyped(object):
             prim = Primitive(primitive, in_types, ret_type)
         self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
+        self.primsCount += 1
         
     def addTerminal(self, terminal, ret_type):
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
         prim = Terminal(terminal, ret_type)
         self.terminals[ret_type].append(prim)
+        self.termsCount += 1
         
     def addEphemeralConstant(self, ephemeral, ret_type):
         prim = EphemeralGenerator(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
+        self.termsCount += 1
+    
+    @property
+    def terminalRatio(self):
+        """ Return the ratio of the number of terminals on the number of all
+            kinds of primitives.
+        """
+        return self.termsCount / float(self.termsCount + self.primsCount)
 
 class PrimitiveSet(PrimitiveSetTyped):
     def addPrimitive(self, primitive, arity):
@@ -163,10 +205,8 @@ def generate_full(pset, min, max, type=__type__):
     return _generate(pset, min, max, condition, type)
 
 def generate_grow(pset, min, max, type=__type__):
-    termset_ratio = len(pset.terminals) / \
-                    (len(pset.terminals)+len(pset.primitives))
     def condition(max_depth):
-        return max_depth == 0 or random.random() < termset_ratio
+        return max_depth == 0 or random.random() < pset.terminalRatio
     return _generate(pset, min, max, condition, type)
 
 def _generate(pset, min, max, condition, type=__type__):
@@ -185,4 +225,8 @@ def _generate(pset, min, max, condition, type=__type__):
     if not isinstance(expr, list):
         expr = [expr]
     return expr
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 
