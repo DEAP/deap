@@ -66,8 +66,6 @@ import eap.halloffame as halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
-#random.seed(2)
-
 def progn(*args):
     for arg in args:
         arg()
@@ -119,14 +117,14 @@ class AntSimulator(object):
             self.moves += 1
             self.row = (self.row + self.dir_row[self.dir]) % self.matrix_row
             self.col = (self.col + self.dir_col[self.dir]) % self.matrix_col
-            if self.matrix_exc[self.row][self.col] is "food":
+            if self.matrix_exc[self.row][self.col] == "food":
                 self.eaten += 1
             self.matrix_exc[self.row][self.col] = "passed"
 
     def sense_food(self):
         ahead_row = (self.row + self.dir_row[self.dir]) % self.matrix_row
         ahead_col = (self.col + self.dir_col[self.dir]) % self.matrix_col        
-        return self.matrix_exc[ahead_row][ahead_col] is "food"
+        return self.matrix_exc[ahead_row][ahead_col] == "food"
    
     def if_food_ahead(self, out1, out2):
         return partial(if_then_else, self.sense_food, out1, out2)
@@ -141,11 +139,11 @@ class AntSimulator(object):
         for i, line in enumerate(matrix):
             self.matrix.append(list())
             for j, col in enumerate(line):
-                if col is "#":
+                if col == "#":
                     self.matrix[-1].append("food")
-                elif col is ".":
+                elif col == ".":
                     self.matrix[-1].append("empty")
-                elif col is "S":
+                elif col == "S":
                     self.matrix[-1].append("empty")
                     self.row_start = self.row = i
                     self.col_start = self.col = j
