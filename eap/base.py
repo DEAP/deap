@@ -33,12 +33,12 @@ class Tree(list):
             Node.
         """
         @property
-        def height():
+        def height(self):
             """ The height of a Node is always 0."""
             return 0
         
         @property 
-        def size():
+        def size(self):
             """ The size of a Node is always 1."""
             return 1
             
@@ -73,31 +73,37 @@ class Tree(list):
         Node = type("Node", (type(obj), cls.Node), {"base": type(obj)})
         try:
             new_node = Node.__new__(Node)
+            new_node.__dict__.update(obj.__dict__)
         except AttributeError:
             new_node = Node(obj)
-        finally:
-            try:
-                new_node.__dict__.update(obj.__dict__)
-            except:
-                pass
         return new_node
-
-    @classmethod
-    def _rectify_subtree(cls, subtree):
-        """ Return the root if a Tree is just composed of one node, otherwise
-            return the tree.
-        """
-        if subtree.size > 1:
-            return subtree
+     
+    @classmethod        
+    def convert_node(cls, node):
+        """ Convert node into the proper object either a Tree or a Node."""
+        if isinstance(node, cls.Node):
+            return node
+        elif isinstance(node, Tree):
+            if len(node) == 1:
+                return node[0]
+            return node
+        elif isinstance(node, list):
+            if len(node) > 1:
+                return Tree(node)
+            else:
+                return cls.create_node(node[0])
         else:
-            return subtree.root
+            return cls.create_node(node)
 
     def __init__(self, content=None):
+        """ Initialize a tree with a list `content`.
+        
+            The first element of the list is the root of the tree, then the
+            following elements are the nodes. A node could be a list, then
+            representing a subtree.
+        """
         for elem in content:
-            if isinstance(elem, list):
-                self.append(Tree(elem))
-            else:
-                self.append(Tree.create_node(elem))
+            self.append(self.convert_node(elem))
     
     def _getstate(self):
         """ Return the state of the Tree
@@ -105,13 +111,10 @@ class Tree(list):
             used for pickling a Tree object.
         """
         return [elem._getstate() for elem in self] 
-     
     
     def __reduce__(self):
         """ Return the class init, the object's state and the object
-            dict in a tuple. 
-            
-            The function is used to pickle Tree.
+            dict in a tuple. The function is used to pickle Tree.
         """
         return (self.__class__, (self._getstate(),), self.__dict__)
     
@@ -126,6 +129,16 @@ class Tree(list):
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
         return new
         
+    def __setitem__(self, key, value):
+        """ Set the item at `key` with the corresponding `value`.
+        """
+        list.__setitem__(self, key, self.convert_node(value))
+        
+    def __setslice__(self, i, j, value):
+        """ Set the slice at `i` to `j` with the corresponding `value`.
+        """
+        list.__setslice__(self, i, j, self.convert_node(value))
+            
     def __str__(self):
         """ Return the tree in its original form, a list, as a string."""
         return list.__repr__(self)
@@ -171,12 +184,17 @@ class Tree(list):
             on a depth-first search.
         """
         if index == 0:
-            self[:] = subtree
+            try:
+                self[:] = subtree
+            except TypeError:
+                del self[1:]
+                self[0] = subtree
             return
+    
         total = 0
         for i, child in enumerate(self):
             if total == index:
-                self[i] = Tree._rectify_subtree(subtree)
+                self[i] = subtree
                 return
             nbr_child = child.size
             if nbr_child + total > index:
@@ -191,9 +209,7 @@ class Tree(list):
         if index == 0:
             return self
         queue = deque(self[1:])
-        total = 0
-        while total != index:
-            total += 1
+        for i in xrange(index):
             subtree = queue.popleft()
             if isinstance(subtree, Tree):
                 queue.extend(subtree[1:])
@@ -204,19 +220,22 @@ class Tree(list):
             on a breadth-first search.
         """
         if index == 0:
-            self[:] = subtree
+            try:
+                self[:] = subtree
+            except TypeError:
+                del self[1:]
+                self[0] = subtree
             return
+                
         queue = deque(izip(repeat(self, len(self[1:])), count(1)))
-        total = 0
-        while total != index:
-            total += 1
+        for i in xrange(index):
             elem = queue.popleft()
             parent = elem[0]
             child  = elem[1]
             if isinstance(parent[child], Tree):
                 tree = parent[child]
                 queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
-        parent[child] = Tree._rectify_subtree(subtree)
+        parent[child] = subtree
 
 class Fitness(object):
     """The fitness is a measure of quality of a solution.
