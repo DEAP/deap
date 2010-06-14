@@ -24,14 +24,33 @@ from collections import deque
 from itertools import izip, repeat, count, imap
         
 class Tree(list):
-    """ Basic N-ary tree class"""
+    """ Basic N-ary tree class."""
     class Node(object):
-        height = 0
-        size = 1
-        @property            
+        """ Class representing the node of a Tree.
+        
+            This class share the basic properties of the Tree, so the Tree's
+            methods can use them regardless if the treated object is a Tree or a 
+            Node.
+        """
+        @property
+        def height():
+            """ The height of a Node is always 0."""
+            return 0
+        
+        @property 
+        def size():
+            """ The size of a Node is always 1."""
+            return 1
+            
+        @property
         def root(self):
+            """ The root of a node is itself."""
             return self
+            
         def _getstate(self):
+            """ Convert the node back in its base class. This is specially
+                useful when pickling a Tree.
+            """
             try:
                 base = self.base(self)
             except TypeError:
@@ -45,24 +64,28 @@ class Tree(list):
 
     @classmethod
     def create_node(cls, obj):
-        """ Creates a node that will be added to the Tree.
+        """ Create a node that will be added to the Tree.
         
             A node is run-time defined class that inherits from the object
-            and the Node class. This inheritance add functionnality to the
-            that are defined in Node.
+            and the Node class. This inheritance add functionnalities and  
+            attributes that simplifies the task of Tree's methods.
         """
-        Node = type("Node", (type(obj),cls.Node), {"base": type(obj)})
+        Node = type("Node", (type(obj), cls.Node), {"base": type(obj)})
         try:
             new_node = Node.__new__(Node)
-            new_node.__dict__.update(obj.__dict__)
         except AttributeError:
             new_node = Node(obj)
+        finally:
+            try:
+                new_node.__dict__.update(obj.__dict__)
+            except:
+                pass
         return new_node
 
     @classmethod
-    def rectify_subtree(cls, subtree):
-        """ Returns the root if a Tree is just composed of one node, otherwise
-            returns the tree.
+    def _rectify_subtree(cls, subtree):
+        """ Return the root if a Tree is just composed of one node, otherwise
+            return the tree.
         """
         if subtree.size > 1:
             return subtree
@@ -77,7 +100,7 @@ class Tree(list):
                 self.append(Tree.create_node(elem))
     
     def _getstate(self):
-        """ Returns the state of the Tree
+        """ Return the state of the Tree
             as a list of arbitrary elements. It is mainly
             used for pickling a Tree object.
         """
@@ -85,7 +108,7 @@ class Tree(list):
      
     
     def __reduce__(self):
-        """ Returns the class init, the object's state and the object
+        """ Return the class init, the object's state and the object
             dict in a tuple. 
             
             The function is used to pickle Tree.
@@ -102,26 +125,35 @@ class Tree(list):
         new = self.__class__(self._getstate())
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
         return new
-    
+        
+    def __str__(self):
+        """ Return the tree in its original form, a list, as a string."""
+        return list.__repr__(self)
+        
+    def __repr__(self):
+        """ Return the Python code to build a copy of the object."""
+        module = self.__module__
+        name = self.__class__.__name__
+        return "%s.%s(%r)" % (module, name, self._getstate())
+   
     @property
     def root(self):
-        """Returns the root element of the tree."""
+        """Return the root element of the tree."""
         return self[0]
 
     @property
     def size(self):
-        """ Returns the number of nodes in the tree."""
+        """ Return the number of nodes in the tree."""
         return sum(elem.size for elem in self)
 
     @property
     def height(self):
-        """Returns the height of the tree."""
+        """Return the height of the tree."""
         return max(elem.height for elem in self)+1
 
     def search_subtree_dfs(self, index):
-        """ Searches the subtree with the
-            corresponding index based on a depth first
-            search.
+        """ Search the subtree with the corresponding index based on a depth 
+            first search.
         """
         if index == 0:
             return self
@@ -135,8 +167,7 @@ class Tree(list):
             total += nbr_child
 
     def set_subtree_dfs(self, index, subtree):
-        """ Replaces the tree with
-            the corresponding index by subtree based
+        """ Replace the tree with the corresponding index by subtree based
             on a depth-first search.
         """
         if index == 0:
@@ -145,7 +176,7 @@ class Tree(list):
         total = 0
         for i, child in enumerate(self):
             if total == index:
-                self[i] = Tree.rectify_subtree(subtree)
+                self[i] = Tree._rectify_subtree(subtree)
                 return
             nbr_child = child.size
             if nbr_child + total > index:
@@ -154,9 +185,8 @@ class Tree(list):
             total += nbr_child
 
     def search_subtree_bfs(self, index):
-        """ Searches the subtree with the
-            corresponding index based on a breadth-first
-            search.
+        """ Search the subtree with the corresponding index based on a 
+            breadth-first search.
         """
         if index == 0:
             return self
@@ -170,8 +200,7 @@ class Tree(list):
         return subtree
 
     def set_subtree_bfs(self, index, subtree):
-        """ Replaces the subtree with
-            the corresponding index by subtree based
+        """ Replace the subtree with the corresponding index by subtree based
             on a breadth-first search.
         """
         if index == 0:
@@ -187,7 +216,7 @@ class Tree(list):
             if isinstance(parent[child], Tree):
                 tree = parent[child]
                 queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
-        parent[child] = Tree.rectify_subtree(subtree)
+        parent[child] = Tree._rectify_subtree(subtree)
 
 class Fitness(object):
     """The fitness is a measure of quality of a solution.
@@ -249,12 +278,6 @@ class Fitness(object):
                 not_equal = True
         return not_equal
         
-    def __gt__(self, other):
-        return not self.__le__(other)
-        
-    def __ge__(self, other):
-        return not self.__lt__(other)
-        
     def __le__(self, other):
         if not other:                   # Protection against yamling
             return False
@@ -291,6 +314,13 @@ class Fitness(object):
         """
         return self.__class__(self.values)
     
+    def __str__(self):
+        """ Return the values of the Fitness object."""
+        return str(self.values)
+    
     def __repr__(self):
-        return repr(self.values)
+        """ Return the Python code to build a copy of the object."""
+        module = self.__module__
+        name = self.__class__.__name__
+        return "%s.%s(%r)" % (module, name, self.values)
         
