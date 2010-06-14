@@ -61,6 +61,7 @@ tools.register("lambdify", gp.lambdify, pset=pset, args='x')
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
+    
     func = tools.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
@@ -80,4 +81,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
 
-logging.info("Best individual is %r, %r", gp.evaluate(hof[0]), hof[0].fitness)
+logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
