@@ -249,6 +249,12 @@ class Fitness(object):
                 not_equal = True
         return not_equal
         
+    def __gt__(self, other):
+        return not self.__le__(other)
+        
+    def __ge__(self, other):
+        return not self.__lt__(other)
+        
     def __le__(self, other):
         if not other:                   # Protection against yamling
             return False
@@ -256,7 +262,6 @@ class Fitness(object):
         self_values = map(operator.mul, self.values, self.weights)
         other_values = map(operator.mul, other.values, other.weights)
         return self_values <= other_values
-
 
     def __lt__(self, other):
         if not other:                   # Protection against yamling
@@ -275,12 +280,7 @@ class Fitness(object):
         return self_values == other_values
     
     def __ne__(self, other):
-        if not other:                   # Protection against yamling
-            return False
-        # Apply the weights to the values
-        self_values = map(operator.mul, self.values, self.weights)
-        other_values = map(operator.mul, other.values, other.weights)
-        return self_values != other_values
+        return not self.__eq__(other)
 
     def __deepcopy__(self, memo):
         """Replaces the basic deepcopy function with a faster one.
