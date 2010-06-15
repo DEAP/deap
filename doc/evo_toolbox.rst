@@ -24,28 +24,23 @@ This module contains the operators an evolutionary algorithm. They are used to m
 Crossover
 ---------
 
-General
-+++++++
-
 .. autofunction:: eap.toolbox.cxTwoPoints
 
 .. autofunction:: eap.toolbox.cxOnePoint
 
 .. autofunction:: eap.toolbox.cxUniform
 
-Indices
-+++++++
-
 .. autofunction:: eap.toolbox.cxPartialyMatched
 
 .. autofunction:: eap.toolbox.cxUniformPartialyMatched
 
-Float
-+++++
-
 .. autofunction:: eap.toolbox.cxBlend
 
 .. autofunction:: eap.toolbox.cxSimulatedBinary
+
+.. autofunction:: eap.toolbox.cxTreeUniformOnePoint
+
+.. autofunction:: eap.toolbox.cxTypedTreeOnePoint
 
 
 Mutation
@@ -57,6 +52,9 @@ Mutation
 
 .. autofunction:: eap.toolbox.mutFlipBit
 
+.. autofunction:: eap.toolbox.mutTreeUniform
+
+.. autofunction:: eap.toolbox.mutTypedTreeUniform
 
 Selection
 ---------
