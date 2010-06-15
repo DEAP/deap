@@ -176,8 +176,8 @@ if __name__ == "__main__":
     tools.register("expr_init", gp.generate_full, pset=pset, min=1, max=2)
     
     # Structure initializers
-    tools.regInit("individual", creator.Individual, content=tools.expr_init)
-    tools.regInit("population", list, content=tools.individual, size=300)
+    tools.register("individual", creator.Individual, content_init=tools.expr_init)
+    tools.register("population", list, content_init=tools.individual, size_init=300)
     
     def evalArtificialAnt(individual):
         # Transform the tree expression to functionnal Python code
@@ -197,4 +197,4 @@ if __name__ == "__main__":
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
     
-    logging.info("Best individual is %r, %r", gp.evaluate(hof[0]), hof[0].fitness)
+    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
