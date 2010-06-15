@@ -73,7 +73,7 @@ def mutate(ind, *args, **kargs):
 
 tools.register("evaluate", evalKursawe)
 tools.register("mate", mate, alpha=1.5)
-tools.register("mutate", mutate, sigma=3, indpb=0.3)
+tools.register("mutate", mutate, mu=0, sigma=3, indpb=0.3)
 tools.register("select", toolbox.nsga2)
 
 pop = tools.population()

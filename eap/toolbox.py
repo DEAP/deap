@@ -463,8 +463,9 @@ def cxESTwoPoints(ind1, ind2):
 # GA Mutations                       #
 ######################################
 
-def mutGaussian(individual, sigma, indpb):
-    """This function applies a gaussian mutation on the input individual and
+def mutGaussian(individual, mu, sigma, indpb):
+    """This function applies a gaussian mutation of mean *mu* and standard
+    deviation *sigma*  on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
     real valued attributes. The *mutIndxPb* argument is the probability of each
@@ -491,7 +492,7 @@ def mutGaussian(individual, sigma, indpb):
     
     for i in xrange(len(mutant)):
         if random.random() < indpb:
-            mutant[i] += random.gauss(0, sigma)
+            mutant[i] += random.gauss(mu, sigma)
             mutated = True
     if mutated:
         try:
