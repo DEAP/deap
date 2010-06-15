@@ -68,8 +68,8 @@ def cxSet(ind1, ind2):
     child2 ^= ind1          # Symmetric Difference
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -88,7 +88,7 @@ def mutSet(individual):
         mutant.add(random.choice(items.keys()))
     
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass
     
