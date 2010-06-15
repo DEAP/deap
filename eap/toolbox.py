@@ -592,18 +592,21 @@ def mutES(individual, indpb, minstrategy=None):
 ######################################
 
 def cxTreeUniformOnePoint(ind1, ind2):
-
+    """ Randomly select in each individual and exchange
+        each subtree with the point as root between each individual.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     
     try:
-        index = random.randint(1,min([ind1.size, ind2.size])-1)    
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
     except ValueError:
         return child1, child2
 
-    sub1 = ind1.search_subtree_dfs(index)
-    sub2 = ind2.search_subtree_dfs(index)
-    child1.set_subtree_dfs(index, sub2)
-    child2.set_subtree_dfs(index, sub1)
+    sub1 = ind1.search_subtree_dfs(index1)
+    sub2 = ind2.search_subtree_dfs(index2)
+    child1.set_subtree_dfs(index1, sub2)
+    child2.set_subtree_dfs(index2, sub1)
 
     try:
         del child1.fitness.values
@@ -615,6 +618,14 @@ def cxTreeUniformOnePoint(ind1, ind2):
 ## Strongly Typed GP crossovers
     
 def cxTypedTreeOnePoint(ind1, ind2):
+    """ Randomly select in each individual and exchange
+        each subtree with the point as root between each individual.
+        Since the node are strongly typed, the operator then make sure the
+        the type of second node correspond to the type of the first node. It it
+        doesn't it randomly select another point in the second individual and
+        try again. It tries up to 5 times before returning the unmodified 
+        individuals.
+    """
     child1 = copy.deepcopy(ind1)
     child2 = copy.deepcopy(ind2)
     
@@ -661,7 +672,10 @@ def cxTypedTreeOnePoint(ind1, ind2):
 ######################################
 
 def mutTreeUniform(ind, expr):
-
+    """ Randomly select a point in the Tree, then replace the subtree with
+        the point as a root by a randomly generated expression. The expression
+        is generated using the method `expr`.
+    """
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
     mutant.set_subtree_dfs(index, expr())
