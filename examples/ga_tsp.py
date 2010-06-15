@@ -45,8 +45,8 @@ tools = toolbox.Toolbox()
 tools.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
 
 # Structure initializers
-tools.regInit("individual", creator.Individual, content=tools.indices, args=("i",))
-tools.regInit("population", list, content=tools.individual, size=300)
+tools.register("individual", creator.Individual, "i", content_init=tools.indices)
+tools.register("population", list, content_init=tools.individual, size_init=300)
 
 def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
@@ -64,4 +64,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, hof)
 
-logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)
+logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
