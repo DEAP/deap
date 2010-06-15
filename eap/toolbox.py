@@ -80,25 +80,46 @@ class Toolbox(object):
     :meth:`register`.
     """
 
-    def register(self, methodName, method, *args, **kargs):
-        """Register an operator in the toolbox."""
-        setattr(self, methodName, partial(method, *args, **kargs))
+    def register(self, methodname, method, *args, **kargs):
+        """Register a *method* in the toolbox under the name *method name*. You
+        may provide default arguments that will be passed automaticaly when
+        calling the registered method.
         
-    def unregister(self, methodName):
-        """Unregister an operator from the toolbox."""
-        delattr(self, methodName)
+        Keyworded arguments *content_init* and *size_init* may be used to
+        simulate iterable initializers. For example, when building objects
+        deriving from :class:`list`, the content argument will provide to
+        the built list its initial content.
+        """
+        if "content_init" in kargs:
+            if hasattr(kargs["content_init"], "__iter__"):
+                content = FuncCycle(kargs["content_init"])
+            if "size_init" in kargs:
+                args = list(args)
+                args.append(Repeat(kargs["content_init"], kargs["size_init"]))
+                del kargs["size_init"]
+            else:
+                args = list(args)
+                args.append(Iterate(kargs["content_init"]))
+                
+            del kargs["content_init"]
+            
+        setattr(self, methodname, partial(method, *args, **kargs))
+    
+    def unregister(self, methodname):
+        """Unregister *method name* from the toolbox."""
+        delattr(self, methodname)
 
-    def regInit(self, methodName, method, content, size=None, args=(), kargs={}):
-        if hasattr(content,'__iter__'):
-            content = FuncCycle(content)
-        if size is None:
-            args = list(args)
-            args.append(Iterate(content))
-            self.register(methodName, method, *args, **kargs)
-        else:
-            args = list(args)
-            args.append(Repeat(content, size))
-            self.register(methodName, method, *args, **kargs)
+#    def registerInitializer(self, methodName, method, content, size=None, args=(), kargs={}):
+#        if hasattr(content,'__iter__'):
+#            content = FuncCycle(content)
+#        if size is None:
+#            args = list(args)
+#            args.append(Iterate(content))
+#            self.register(methodName, method, *args, **kargs)
+#        else:
+#            args = list(args)
+#            args.append(Repeat(content, size))
+#            self.register(methodName, method, *args, **kargs)
 
 
 ######################################
@@ -111,14 +132,14 @@ def cxTwoPoints(ind1, ind2):
     This operation apply on an :class:`~eap.base.Individual` composed of a list
     of attributes and act as follow ::
     
-        >>> ind1 = [A(1), ..., A(n), ..., A(n+i), ..., A(m)]
-        >>> ind2 = [B(1), ..., B(n), ..., B(n+i), ..., B(k)]
-        >>> # Crossover with mating points n and n+i, n > 1 and n+i <= min(m, k)
+        >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)]
+        >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
+        >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
         >>> child1, child2 = twoPointsCx(ind1, ind2)
         >>> print child1
-        [A(1), ..., B(n), ..., B(n+i-1), A(n+i), ..., A(m)]
+        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)]
         >>> print child2
-        [B(1), ..., A(n), ..., A(n+i-1), B(n+i), ..., B(k)]
+        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)]
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -134,6 +155,7 @@ def cxTwoPoints(ind1, ind2):
    
     child1[cxpoint1:cxpoint2], child2[cxpoint1:cxpoint2] \
          = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
+    
     try:
         child1.fitness.valid = False
         child2.fitness.valid = False
@@ -151,12 +173,12 @@ def cxOnePoint(ind1, ind2):
 
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
-        >>> # Crossover with mating point n, 1 < n <= min(m, k)
+        >>> # Crossover with mating point i, 1 < i <= min(m, k)
         >>> child1, child2 = twoPointsCx(ind1, ind2)
         >>> print child1
-        [A(1), ..., B(n), ..., B(k)]
+        [A(1), ..., B(i), ..., B(k)]
         >>> print child2
-        [B(1), ..., A(n), ..., A(m)]
+        [B(1), ..., A(i), ..., A(m)]
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -455,8 +477,8 @@ def mutGaussian(individual, sigma, indpb):
        is up to you.
        
        One easy way to add cronstraint checking to an operator is to simply wrap
-       the operator in a second function. See the Evolution Strategies example
-       for an explicit example.
+       the operator in a second function. See the multi-objective example
+       (moga_kursawefct.py) for an explicit example.
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
