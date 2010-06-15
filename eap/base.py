@@ -217,18 +217,39 @@ class Fitness(object):
     ``ind.fitness.__class__.weights = new_weights``.
     """
     
-    def __init__(self, values=None):
+    wvalues = ()
+    """The wvalues correspond to the values of the fitness times the weights."""
+    
+    def __init__(self, values=()):
         self.values = values
-    
-    def getValid(self):
-        return self.values is not None
-    
-    def setValid(self, values):
-        if not values:
-            self.values = None
         
-    valid = property(getValid, setValid, None, 
-                     "Asses if a fitness is valid or not.")
+    def getValues(self):
+        """ Return the original values by dividing the weighted values by
+            the weights. If the fitness is invalid, the function returns an
+            empty tuple.
+        """
+        try :
+            return tuple(map(operator.div, self.wvalues, self.weights))
+        except (AttributeError, TypeError):
+            return ()
+            
+    def setValues(self, values):
+        """ Set wvalues as values times the weights."""
+        try :
+            self.wvalues = tuple(map(operator.mul, values, self.weights))
+        except (AttributeError, TypeError):
+            self.wvalues = ()
+            
+    def delValue(self):
+        """ Invalidate the fitness by setting the wvalues as an empty tuple."""
+        self.wvalues = ()
+
+    values = property(getValues, setValues, delValue, "Fitness values.")
+    
+    @property 
+    def valid(self):
+        """Asses if a fitness is valid or not."""
+        return len(self.wvalues) != 0
 
     def isDominated(self, other):
         """In addition to the comparaison operators that are used to sort
@@ -239,51 +260,40 @@ class Fitness(object):
         until the end of the comparaison.
         """
         not_equal = False
-
-        self_values = imap(operator.mul, self.values, self.weights)
-        other_values = imap(operator.mul, other.values, other.weights)
-        for self_value, other_value in izip(self_values, other_values):
-            if self_value > other_value:
+        for self_wvalue, other_wvalue in izip(self.wvalues, other.wvalues):
+            if self_wvalue > other_wvalue:
                 return False
-            elif self_value < other_value:
+            elif self_wvalue < other_wvalue:
                 not_equal = True
         return not_equal
         
+    def __gt__(self, other):
+        return not self.__le__(other)
+        
+    def __ge__(self, other):
+        return not self.__lt__(other)
+
     def __le__(self, other):
         if not other:                   # Protection against yamling
             return False
-        # Apply the weights to the values
-        self_values = map(operator.mul, self.values, self.weights)
-        other_values = map(operator.mul, other.values, other.weights)
-        return self_values <= other_values
-
+        return self.wvalues <= other.wvalues
 
     def __lt__(self, other):
         if not other:                   # Protection against yamling
             return False
-        # Apply the weights to the values
-        self_values = map(operator.mul, self.values, self.weights)
-        other_values = map(operator.mul, other.values, other.weights)
-        return self_values < other_values
+        return self.wvalues < other.wvalues
 
     def __eq__(self, other):
         if not other:                   # Protection against yamling
             return False
-        # Apply the weights to the values
-        self_values = map(operator.mul, self.values, self.weights)
-        other_values = map(operator.mul, other.values, other.weights)
-        return self_values == other_values
+        return self.wvalues == other.wvalues
     
     def __ne__(self, other):
-        if not other:                   # Protection against yamling
-            return False
-        # Apply the weights to the values
-        self_values = map(operator.mul, self.values, self.weights)
-        other_values = map(operator.mul, other.values, other.weights)
-        return self_values != other_values
+        return not self.__eq__(other)
+
 
     def __deepcopy__(self, memo):
-        """Replaces the basic deepcopy function with a faster one.
+        """Replace the basic deepcopy function with a faster one.
         
         It assumes that the elements in the :attr:`values` tuple are 
         immutable and the fitness does not contain any other object 
