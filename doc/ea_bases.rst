@@ -14,6 +14,7 @@ Container Types
 As of version 0.5.0, eap does not provide base types that wrap python base types, instead it is possible to create your own types that inherits from whatever type is more convenient or appropriate, for example, :class:`list`, :class:`array`, :class:`set`, :class:`dict`, etc. As most of those types are initialized using an iterable, the :mod:`~eap.creator` allows to create these objects using internal generators in order to produce objects with different content. See the :mod:`~eap.creator` module for more informations.
 
 .. autoclass:: eap.base.Tree([content])
+   :members:
 
 Fitness
 =======
