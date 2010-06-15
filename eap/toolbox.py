@@ -135,8 +135,8 @@ def cxTwoPoints(ind1, ind2):
     child1[cxpoint1:cxpoint2], child2[cxpoint1:cxpoint2] \
          = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -168,8 +168,8 @@ def cxOnePoint(ind1, ind2):
     child1[cxpoint:], child2[cxpoint:] = child2[cxpoint:], child1[cxpoint:]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -185,8 +185,8 @@ def cxUniform(ind1, ind2, indpb):
             child1[i], child2[i] = child2[i], child1[i]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -247,8 +247,8 @@ def cxPartialyMatched(ind1, ind2):
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -302,8 +302,8 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -322,8 +322,8 @@ def cxBlend(ind1, ind2, alpha):
         child2[i] = gamma * x1 + (1. - gamma) * x2
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -347,8 +347,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
         child2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -366,8 +366,8 @@ def cxMessyOnePoint(ind1, ind2):
     child1[cxpoint1:], child2[cxpoint2:] = child2[cxpoint2:], child1[cxpoint1:]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -400,8 +400,8 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
             child2.strategy[indx] = minstrategy
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -427,8 +427,8 @@ def cxESTwoPoints(ind1, ind2):
         child2.strategy[pt1:pt2], child1.strategy[pt1:pt2]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -470,7 +470,7 @@ def mutGaussian(individual, sigma, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     
@@ -499,7 +499,7 @@ def mutShuffleIndexes(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     
@@ -526,7 +526,7 @@ def mutFlipBit(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     return mutant
@@ -556,7 +556,7 @@ def mutES(individual, indpb, minstrategy=None):
             
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     return mutant
@@ -580,8 +580,8 @@ def cxTreeUniformOnePoint(ind1, ind2):
     child2.set_subtree_dfs(index, sub1)
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     return child1, child2
@@ -623,8 +623,8 @@ def cxTypedTreeOnePoint(ind1, ind2):
         child2.set_subtree_dfs(index2, sub1)
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
 
@@ -641,7 +641,7 @@ def mutTreeUniform(ind, expr):
     subtree = base.Tree(expr())
     mutant.set_subtree_dfs(index, subtree)
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass
     return mutant
@@ -666,7 +666,7 @@ def mutTypedTreeUniform(ind, expr):
     subtree = base.Tree(expr(type=type_))
     mutant.set_subtree_dfs(index, subtree)
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass   
     return mutant 
