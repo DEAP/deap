@@ -30,7 +30,7 @@ import eap.halloffame as halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
-random.seed(1626)
+random.seed(1348779701)
 
 # Define new functions
 def safeDiv(left, right):
