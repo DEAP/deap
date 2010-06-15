@@ -384,6 +384,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
 ######################################
 
 def cxMessyOnePoint(ind1, ind2):
+    """Execute a one point crossover will mostly change the individuals size.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint1 = random.randint(1, len(ind1))
     cxpoint2 = random.randint(1, len(ind2))
@@ -403,6 +405,8 @@ def cxMessyOnePoint(ind1, ind2):
 ######################################
 
 def cxESBlend(ind1, ind2, alpha, minstrategy=None):
+    """Execute a blend crossover on both, the individual and the strategy.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     
@@ -562,6 +566,10 @@ def mutFlipBit(individual, indpb):
 ######################################
 
 def mutES(individual, indpb, minstrategy=None):
+    """Mutate an evolution strategy according to its :attr:`strategy` attribute.
+    The strategy shall be teh same size as the individual. This is subject to
+    change.
+    """
     mutated = False
     mutant = copy.deepcopy(individual)
     
