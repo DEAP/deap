@@ -30,8 +30,6 @@ import copy
 import math
 import random
 
-import base
-
 from functools import partial
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
@@ -660,8 +658,7 @@ def mutTreeUniform(ind, expr):
 
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
-    subtree = base.Tree(expr())
-    mutant.set_subtree_dfs(index, subtree)
+    mutant.set_subtree_dfs(index, expr())
     try:
         mutant.fitness.valid = False
     except AttributeError:
@@ -684,9 +681,7 @@ def mutTypedTreeUniform(ind, expr):
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
-    type_ = subtree.root.ret
-    subtree = base.Tree(expr(type=type_))
-    mutant.set_subtree_dfs(index, subtree)
+    mutant.set_subtree_dfs(index, expr(type=subtree.root.ret))
     try:
         mutant.fitness.valid = False
     except AttributeError:
