@@ -42,9 +42,9 @@ spam = list(list(float(elem) for elem in row) for row in spamReader)
 pset = gp.PrimitiveSetTyped()
 
 # boolean operators
-pset.addPrimitive(operator.and_, [bool, bool], bool)
-pset.addPrimitive(operator.or_, [bool, bool], bool)
-pset.addPrimitive(operator.not_, [bool], bool)
+pset.addPrimitive(operator.and_, ["bool", "bool"], "bool")
+pset.addPrimitive(operator.or_, ["bool", "bool"], "bool")
+pset.addPrimitive(operator.not_, ["bool"], "bool")
 
 # floating point operators
 # Define a safe division function
@@ -52,10 +52,10 @@ def safeDiv(left, right):
     try: return left / right
     except ZeroDivisionError: return 0
 
-pset.addPrimitive(operator.add, [float,float], float)
-pset.addPrimitive(operator.sub, [float,float], float)
-pset.addPrimitive(operator.mul, [float,float], float)
-pset.addPrimitive(safeDiv, [float,float], float)
+pset.addPrimitive(operator.add, ["float","float"], "float")
+pset.addPrimitive(operator.sub, ["float","float"], "float")
+pset.addPrimitive(operator.mul, ["float","float"], "float")
+pset.addPrimitive(safeDiv, ["float","float"], "float")
 
 # logic operators
 # Define a new if-then-else function
@@ -63,23 +63,23 @@ def if_then_else(input, output1, output2):
     if input: return output1
     else: return output2
 
-pset.addPrimitive(operator.lt, [float, float], bool)
-pset.addPrimitive(operator.eq, [float, float], bool)
-pset.addPrimitive(if_then_else, [bool, float, float], float)
+pset.addPrimitive(operator.lt, ["float", "float"], "bool")
+pset.addPrimitive(operator.eq, ["float", "float"], "bool")
+pset.addPrimitive(if_then_else, ["bool", "float", "float"], "float")
 
 # terminals
-pset.addEphemeralConstant(lambda: random.random() * 100, float)
-pset.addTerminal(0, bool)
-pset.addTerminal(1, bool)
-for i in xrange(57): pset.addTerminal("IN%s"%i, float)
+pset.addEphemeralConstant(lambda: random.random() * 100, "float")
+pset.addTerminal(0, "bool")
+pset.addTerminal(1, "bool")
+for i in xrange(57): pset.addTerminal("IN%s"%i, "float")
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
-tools.register("expr", gp.generate_ramped, type=bool, pset=pset, min=1, max=2)
-tools.regInit("individual", creator.Individual, content=tools.expr)
-tools.regInit("population", list, content=tools.individual, size=100)
+tools.register("expr", gp.generate_ramped, type="bool", pset=pset, min=1, max=2)
+tools.register("individual", creator.Individual, content_init=tools.expr)
+tools.register("population", list, content_init=tools.individual, size_init=100)
 tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s"%i for i in xrange(57)])
 
 def evalSpambase(individual):
@@ -102,4 +102,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
 
-logging.info("Best individual is %r, %r", gp.evaluate(hof[0]), hof[0].fitness)
+logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)

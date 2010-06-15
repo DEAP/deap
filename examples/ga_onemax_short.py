@@ -38,8 +38,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=100, args=("b",))
-tools.regInit("population", list, content=tools.individual, size=300)
+tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
+tools.register("population", list, content_init=tools.individual, size_init=300)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -54,4 +54,4 @@ hof = halloffame.HallOfFame(1)
 pop = tools.population()
 algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
 
-logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)
+logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
