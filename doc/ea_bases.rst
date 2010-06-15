@@ -92,7 +92,7 @@ Individual Tree
 Population
 ++++++++++
 
-A population is usualy a list of individuals or sub-populations, it is no more complicated to create than an individual. ::
+A population is usualy a list of individuals or sub-populations, it is no more complicated to create than an individual. When using a :class:`~eap.toolbox.Toolbox`, it is often not necessary to create a class :class:`Population`, it is made here juste to show how it would be created. ::
 
     create("Population", list)
     

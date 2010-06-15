@@ -266,33 +266,37 @@ class Fitness(object):
     """
     
     wvalues = ()
-    """The wvalues correspond to the values of the fitness times the weights."""
+    """Contains the weighted values of the fitness, the multiplication with the
+    weights is made when the values are set via the property :attr:`values`.
+    Multiplication is made on setting of the values for efficiency.
+    
+    Generaly it is unnecessary to manipulate *wvalues* as it is an internal
+    attribute of the fitness used in the comparison operators.
+    """
     
     def __init__(self, values=()):
         self.values = values
         
     def getValues(self):
-        """ Return the original values by dividing the weighted values by
-            the weights. If the fitness is invalid, the function returns an
-            empty tuple.
-        """
         try :
             return tuple(map(operator.div, self.wvalues, self.weights))
         except (AttributeError, TypeError):
             return ()
             
     def setValues(self, values):
-        """ Set wvalues as values times the weights."""
         try :
             self.wvalues = tuple(map(operator.mul, values, self.weights))
         except (AttributeError, TypeError):
             self.wvalues = ()
             
     def delValue(self):
-        """ Invalidate the fitness by setting the wvalues as an empty tuple."""
         self.wvalues = ()
 
-    values = property(getValues, setValues, delValue, "Fitness values.")
+    values = property(getValues, setValues, delValue,
+        ("Fitness values. Use directly ``individual.fitness.values = some_value`` "
+         "in order to set the fitness and ``del individual.fitness.values`` "
+         "in order to clear (invalidate) the fitness. The (unweighted) fitness "
+         "can be directly accessed via ``individual.fitness.values``."))
     
     @property 
     def valid(self):

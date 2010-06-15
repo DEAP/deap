@@ -86,7 +86,12 @@ class Toolbox(object):
         Keyworded arguments *content_init* and *size_init* may be used to
         simulate iterable initializers. For example, when building objects
         deriving from :class:`list`, the content argument will provide to
-        the built list its initial content.
+        the built list its initial content. Depending on what is given to
+        *content_init* and *size* the initialization is different. If
+        *content_init* is an iterable, then the iterable is consumed enterily
+        to intialize each object, in that case *size_init* is not used.
+        Otherwise, *content_init* may be a simple function that will be repeated
+        *size_init* times in order to fill the object.
         """
         if "content_init" in kargs:
             if hasattr(kargs["content_init"], "__iter__"):
