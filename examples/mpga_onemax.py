@@ -78,14 +78,14 @@ for g in range(NGEN):
         
     # Gather all the fitnesses in one list and print the stats
     fits = [ind.fitness.values[0] for ind in pop]
-    print "  Min %f" % min(fits)
-    print "  Max %f" % max(fits)
+    print "  Min %s" % min(fits)
+    print "  Max %s" % max(fits)
     lenght = len(pop)
     mean = sum(fits) / lenght
     sum2 = sum(map(lambda x: x**2, fits))
     std_dev = abs(sum2 / lenght - mean**2)**0.5
-    print "  Mean %f" % (mean)
-    print "  Std. Dev. %f" % std_dev
+    print "  Avg %s" % (mean)
+    print "  Std %s" % std_dev
 
 print "-- End of (successful) evolution --"
 

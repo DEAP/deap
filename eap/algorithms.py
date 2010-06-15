@@ -94,8 +94,8 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
-        _logger.debug("Mean %s", ", ".join(map(str, means)))
-        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
 
@@ -166,10 +166,9 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
-        _logger.debug("Mean %s", ", ".join(map(str, means)))
-        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
         
-
     _logger.info("End of (successful) evolution")
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffame=None):
@@ -240,8 +239,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
-        _logger.debug("Mean %s", ", ".join(map(str, means)))
-        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
     
@@ -292,8 +291,8 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
-        _logger.debug("Mean %s", ", ".join(map(str, means)))
-        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
 
