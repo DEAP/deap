@@ -81,15 +81,21 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
             pass
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = abs(sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Mean %s", ", ".join(map(str, means)))
+        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
 
@@ -147,15 +153,22 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         population[:] = toolbox.select(population + children, mu)
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = abs(sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Mean %s", ", ".join(map(str, means)))
+        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
+        
 
     _logger.info("End of (successful) evolution")
     
@@ -214,15 +227,21 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         population[:] = toolbox.select(children, mu)
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = abs(sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Mean %s", ", ".join(map(str, means)))
+        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
     
@@ -260,15 +279,21 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         population[:] = toolbox.select(population + [child], len(population))
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = abs(sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Mean %s", ", ".join(map(str, means)))
+        _logger.debug("Std. Dev. %s",", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
 

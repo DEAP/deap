@@ -13,6 +13,11 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""The :mod:`~eap.creator` module is the heart and soul of EAP, it allows to
+create, at runtime, classes that will fulfill the needs of your evolutionary
+algorithms.
+"""
+
 import array
 import copy
 

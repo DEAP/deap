@@ -19,25 +19,13 @@ The creator is a class factory that can build at runtime new classes that inheri
 
 Let see an example of how to use the creator to setup an individual that contains an array of booleans and a miximizing fitness. We will first need to import the :mod:`eap.base` and :mod:`eap.creator` modules. The :mod:`eap.base` module contains the basic structure such as List, Array and Tree.
 
-The creator defines at first a single function called :func:`~eap.creator.create` that is used to create types. The :func:`~eap.creator.create` function takes at least 2 arguments plus one optional argument. The first argument *name* is the actual name of the type that we want to create, here it is :class:`Individual`. The second argument *bases* is a tuple of base classes that the new type created should inherit from. Finaly the optional argument *dict* is a dictionary of members to add to the new type (this subject is more detailed in the documentation, and out of the current scope). ::
+The creator defines at first a single function called :func:`~eap.creator.create` that is used to create types. The :func:`~eap.creator.create` function takes at least 2 arguments plus one optional argument. The first argument *name* is the actual name of the type that we want to create, here it is :class:`Individual`. The second argument *base* is the base classes that the new type created should inherit from. Finaly the optional argument *dict* is a dictionary of members to add to the new type (this subject is more detailed in the documentation, and out of the current scope). ::
 
-    creator.create("FitnessMax", (base.Fitness), {"weights" : (1,0)})
-    creator.create("Individual", (base.Array,), {"fitness" : creator.FitnessMax})
-    creator.create("Population", (base.List,))
+    creator.create("FitnessMax", base.Fitness, weights=(1,0))
+    creator.create("Individual", list, fitness=creator.FitnessMax)
+    creator.create("Population", list)
 
-The first line creates a maximizing fitness by replacing in the base type :class:`~eap.base.Fitness` the weights member with (1.0,) that means to maximize this fitness. The second line creates an :class:`Individual` class that inherits the properties of an :class:`~eap.base.Array` and has a :attr:`fitness` member of the type :class:`FitnessMax` that was just created. The third line creates a :class:`Population` class that is simply a :class:`~eap.base.List`. The three lines are exactly the same as the following bunch of code ::
-
-    class FitnessMax(base.Fitness):
-        weights = (1.0,)
-
-    class Individual(base.Array):
-        def __init__(self, typecode, size, content):
-            base.Array.__init__(self, typecode, size, content)
-            self.fitness = FitnessMax()
-    
-    class Population(base.List):
-        def __init__(self, size, content):
-            base.List.__init__(self, size, content)
+The first line creates a maximizing fitness by replacing in the base type :class:`~eap.base.Fitness` the weights member with (1.0,) that means to maximize this fitness. The second line creates an :class:`Individual` class that inherits the properties of :class:`list` and has a :attr:`fitness` member of the type :class:`FitnessMax` that was just created. The third line creates a :class:`Population` class that is simply a :class:`list`.
 
 -------
 Toolbox
@@ -46,22 +34,24 @@ Toolbox
 The :mod:`eap.toolbox` is an other convenience module that contains a :class:`~eap.toolbox.Toolbox` class intended store functions with their arguments. The :class:`~eap.toolbox.Toolbox` contains two simple methods, :meth:`~eap.toolbox.Toolbox.register` and :meth:`~eap.toolbox.Toolbox.unregister`. ::
 
     tools = toolbox.Toolbox()
-    tools.register("individual", creator.Individual, size=100, typecode="b",
-            content=lambda: random.randint(0, 1))
-    tools.register("population", creator.Population, size=300,
-            content=tools.individual)
+    
+    # Attribute generator
+    tools.register("attr_bool", random.randint, 0, 1)
+    
+    # Structure initializer
+    tools.register("individual", creator.Individual, content_init=tools.attr_bool, size_init=100)
+    tools.register("population", creator.Population, content_init=tools.individual, size_init=300)
 
 
-The two last lines of code create two functions within the toolbox, the first that instaciates individuals and the second that instanciate populations.
+The two last lines of code create two functions within the toolbox, the first instaciates individuals and the second instanciates populations.
 
 The Evaluation Function
 =======================
 
-The evaluation function is pretty simple in this case, we need to count the number of :data:`1` in the individual and append this value to the fitness. This is done by the following lines of code. ::
+The evaluation function is pretty simple in this case, we need to count the number of :data:`1` in the individual and this value. This is done by the following lines of code. ::
     
     def evalOneMax(individual):
-        if not individual.mFitness.isValid():
-            individual.mFitness.append(sum(individual))
+        return sum(individual),
    
 The Genetic Operators
 =====================
@@ -70,10 +60,10 @@ There is two way of using operators, the first one, is to simply call the functi
 
 Registering the operators and their default arguments in the toolbox is done as follow. ::
 
-    lTools.register('evaluate', evalOneMax)
-    lTools.register('mate', toolbox.twoPointsCx)
-    lTools.register('mutate', toolbox.flipBitMut, indpb=0.05)
-    lTools.register('select', toolbox.tournSel, tournsize=3)
+    tools.register("evaluate", evalOneMax)
+    tools.register("mate", toolbox.cxTwoPoints)
+    tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
+    tools.register("select", toolbox.selTournament, tournsize=3)
 
 Evolving the Population
 =======================
@@ -92,24 +82,24 @@ The Appeal of Evolution
 
 The evolution of the population is the last thing to do before getting results. In this example we **do not** use the :mod:`eap.algorithms` module in order to show how to manipulate the different features of EAP. Let say that we want to evolve for a fixed number of generation :data:`MAXGEN`, the evolution will then begin with a simple for statement. ::
 
-    for g in range(MAXGEN):
+    for g in range(10):
         evolve...
 
 Is that simple enough? Lets continue with more complicated things, mating and mutating the population. The crossover and mutation operators provided with eap usualy take respectivly 2 and 1 individual(s) on input and return 2 and 1 *new* individual(s). The simple GA algorithm states that the produced individuals shall replace their parents in the population, this is what is done by the following lines of code, where a crossover is applied with probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. ::
 
-        for i in range(1, len(pop), 2):
-            if random.random() < CXPB:
-                pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
-    
-        for i in range(len(pop)):
-            if random.random() < MUTPB:
-                pop[i] = tools.mutate(pop[i])
+    for i in range(1, len(pop), 2):
+        if random.random() < CXPB:
+            pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
+
+    for i in range(len(pop)):
+        if random.random() < MUTPB:
+            pop[i] = tools.mutate(pop[i])
 
 The population now needs to be evaluated, we then apply the evaluation on every individual in the population that has an invalid fitness. ::
 
     for ind in pop:
         if not ind.fitness.valid:
-            ind.fitness.extend(tools.evaluate(ind))
+            ind.fitness.values = tools.evaluate(ind)
 
 And finaly, last but not least, the selection part occurs. We replace the whole population by individuals selected by tournament (as defined in the toolbox) in that same population. ::
 
@@ -125,8 +115,8 @@ Some statistics may be gathered on the population, the following lines print the
     lenght = len(pop)
     mean = sum(fits) / lenght
     sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = (sum2 / lenght - mean**2)**0.5
+    std_dev = abs(sum2 / lenght - mean**2)**0.5
     print '  Mean %f' % (mean)
     print '  Std. Dev. %f' % std_dev
 
-The complete `One Max Genetic Algorithm <http://eap.deap.googlecode.com/hg/src/examples/ga_onemax.py>`_ code is the next this to look at. It may be a little different but it does the overall same thing.
+The complete `One Max Genetic Algorithm <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code is available. It may be a little different but it does the overall same thing.

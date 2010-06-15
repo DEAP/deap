@@ -34,8 +34,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=100)
-tools.regInit("population", creator.Population, content=tools.individual, size=300)
+tools.register("individual", creator.Individual, content_init=tools.attr_bool, size_init=100)
+tools.register("population", creator.Population, content_init=tools.individual, size_init=300)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -86,4 +86,4 @@ for g in range(NGEN):
 print "-- End of (successful) evolution --"
 
 best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual is %r, %r" % (best_ind, best_ind.fitness.values)
+print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)

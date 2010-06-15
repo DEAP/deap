@@ -19,41 +19,41 @@ Mono-objective, mono-demic population
 
 In this example, we have a single population that contains the individuals, each individual has a fitness. In order to retreive the minimum, maximum and average fitness of the population we may simply use ::
 
-    fits = [ind.mFitness[0] for ind in pop]
+    fits = [ind.fitness.values[0] for ind in pop]
     sum2 = sum(imap(lambda x: x**2, fits))
     
     minimum = min(fits)
     maximum = max(fits)
     mean = sum(fits) / len(fits)
-    sdev = (sum2 / len(fits) - mean**2)**0.5
+    std_dev = abs(sum2 / len(fits) - mean**2)**0.5
 
 Mono-objective, multi-demic population
 --------------------------------------
 
 In this example, we have a single population of multiple demes that contains the individuals, each individual has a fitness. In order to retreive the minimum, maximum and average fitness of the population we may simply use ::
 
-    fits = [ind.mFitness[0] for deme in pop for ind in deme]
+    fits = [ind.fitness.values[0] for deme in pop for ind in deme]
     sum2 = sum(imap(lambda x: x**2, fits))
     
     minimum = min(fits)
     maximum = max(fits)
     mean = sum(fits) / len(fits)
-    sdev = (sum2 / len(fits) - mean**2)**0.5
+    std_dev = abs(sum2 / len(fits) - mean**2)**0.5
     
 Multi-objective, mono-demic population
 --------------------------------------
 
 In this example, we have a single population that contains the individuals, each individual has a many fitnesses. In order to retreive the minimum, maximum and average of each fitness of the population we may simply use ::
 
-    fits = [ind.mFitness for ind in pop]
+    fits = [ind.fitness.values for ind in pop]
     fits_t = zip(*fits)        # Transpose the fitnesses
     
     minimums = map(min, fits_t)
     maximums = map(max, fits_t)
     sums = map(sum, fits_t)
-    sums2 = [sum(imap(lambda x: x**2, fit)) for fit in a_t]
+    sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
     means = [sum_ / len(sum_) for sum_ in sums]
-    sdevs = [(sum_2 / len(sum_2) - mean**2)**0.5 for sum_2, mean in zip(sums2, means)]
+    std_devs = [abs(sum_2 / len(sum_2) - mean**2)**0.5 for sum_2, mean in zip(sums2, means)]
 
 Observing something else
 ========================
