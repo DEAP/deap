@@ -20,6 +20,7 @@ import operator
 import math
 import logging
 import copy
+import inspect
 
 sys.path.append(os.path.abspath('..'))
 
@@ -48,8 +49,33 @@ adfset.addPrimitive(safeDiv, 2)
 adfset.addPrimitive(operator.neg, 1)
 adfset.addPrimitive(math.cos, 1)
 adfset.addPrimitive(math.sin, 1)
+adfset.addADF("ADF1", 2)
+adfset.addADF("ADF2", 2)
 adfset.addTerminal("ARG0")
 adfset.addTerminal("ARG1")
+
+adfset2 = gp.PrimitiveSet()
+adfset2.addPrimitive(operator.add, 2)
+adfset2.addPrimitive(operator.sub, 2)
+adfset2.addPrimitive(operator.mul, 2)
+adfset2.addPrimitive(safeDiv, 2)
+adfset2.addPrimitive(operator.neg, 1)
+adfset2.addPrimitive(math.cos, 1)
+adfset2.addPrimitive(math.sin, 1)
+adfset2.addADF("ADF2", 2)
+adfset2.addTerminal("ARG0")
+adfset2.addTerminal("ARG1")
+
+adfset3 = gp.PrimitiveSet()
+adfset3.addPrimitive(operator.add, 2)
+adfset3.addPrimitive(operator.sub, 2)
+adfset3.addPrimitive(operator.mul, 2)
+adfset3.addPrimitive(safeDiv, 2)
+adfset3.addPrimitive(operator.neg, 1)
+adfset3.addPrimitive(math.cos, 1)
+adfset3.addPrimitive(math.sin, 1)
+adfset3.addTerminal("ARG0")
+adfset3.addTerminal("ARG1")
 
 pset = gp.PrimitiveSet()
 pset.addPrimitive(operator.add, 2)
@@ -61,21 +87,28 @@ pset.addPrimitive(math.cos, 1)
 pset.addPrimitive(math.sin, 1)
 pset.addEphemeralConstant(lambda: random.randint(-1,1))
 pset.addADF("ADF0", 2)
+pset.addADF("ADF1", 2)
+pset.addADF("ADF2", 2)
 pset.addTerminal('x')
-
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
 tools.register('adf_expr', gp.generate_full, pset=adfset, min=1, max=2)
+tools.register('adf_expr2', gp.generate_full, pset=adfset2, min=1, max=2)
+tools.register('adf_expr3', gp.generate_full, pset=adfset3, min=1, max=2)
 tools.register('fun_expr', gp.generate_ramped, pset=pset, min=1, max=2)
 
-tools.register('ADF', base.Tree, content_init=tools.adf_expr)
+tools.register('ADF0', base.Tree, content_init=tools.adf_expr)
+tools.register('ADF1', base.Tree, content_init=tools.adf_expr2)
+tools.register('ADF2', base.Tree, content_init=tools.adf_expr3)
+
 tools.register('FUN', base.Tree, content_init=tools.fun_expr)
 
 tools.register('individual', creator.Individual, 
-                             content_init=[tools.FUN, tools.ADF], size_init=2)
+                             content_init=[tools.FUN, tools.ADF0, tools.ADF1, tools.ADF2], 
+                             size_init=4)
 tools.register('population', list, content_init=tools.individual, size_init=100)
 
 def evalSymbReg(individual):
@@ -86,7 +119,7 @@ def evalSymbReg(individual):
     values = (x/10. for x in xrange(-10,10))
     diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
     diff = sum(map(diff_func, values))
-    return [diff]
+    return diff,
 
 tools.register('evaluate', evalSymbReg)
 tools.register('select', toolbox.selTournament, tournsize=3)
@@ -95,7 +128,11 @@ tools.register('fun_mut', gp.generate_full, pset=pset, min=0, max=2)
 tools.register('mutate_fun', toolbox.mutTreeUniform, expr=tools.fun_mut)
 tools.register('adf_mut', gp.generate_full, pset=adfset, min=1, max=2)
 tools.register('mutate_adf', toolbox.mutTreeUniform, expr=tools.adf_mut)
-tools.register('lambdify', gp.lambdifyList, pset=pset, adfset=adfset, args='x')
+tools.register('adf_mut2', gp.generate_full, pset=adfset2, min=1, max=2)
+tools.register('mutate_adf2', toolbox.mutTreeUniform, expr=tools.adf_mut2)
+tools.register('adf_mut3', gp.generate_full, pset=adfset3, min=1, max=2)
+tools.register('mutate_adf3', toolbox.mutTreeUniform, expr=tools.adf_mut2)
+tools.register('lambdify', gp.lambdifyList, pset=[pset, adfset, adfset2, adfset3], args='x')
 
 pop = tools.population()
 
@@ -127,11 +164,22 @@ for g in range(NGEN):
             del pop[i].fitness.values
 
     for i in xrange(len(pop)):
-        pop[i] = copy.deepcopy(pop[i])
-        for j in xrange(1, len(pop[i])):
-            if random.random() < MUTPB:
-                pop[i][j] = tools.mutate_adf(pop[i][j])
-        del pop[i].fitness.values
+        if random.random() < MUTPB:
+            pop[i] = copy.deepcopy(pop[i])
+            pop[i][1] = tools.mutate_adf(pop[i][1])
+            del pop[i].fitness.values
+                
+    for i in xrange(len(pop)):
+        if random.random() < MUTPB:
+            pop[i] = copy.deepcopy(pop[i])
+            pop[i][2] = tools.mutate_adf2(pop[i][2])
+            del pop[i].fitness.values  
+            
+    for i in xrange(len(pop)):
+        if random.random() < MUTPB:
+            pop[i] = copy.deepcopy(pop[i])
+            pop[i][3] = tools.mutate_adf2(pop[i][3])
+            del pop[i].fitness.values               
                 
     # Evaluate the individuals with an invalid fitness
     for ind in pop:
