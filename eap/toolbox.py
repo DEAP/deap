@@ -91,17 +91,17 @@ class Toolbox(object):
         the built list its initial content.
         """
         if "content_init" in kargs:
-            if hasattr(kargs["content_init"], "__iter__"):
-                content = FuncCycle(kargs["content_init"])
+            content = kargs["content_init"]
+            del kargs["content_init"]
+            if hasattr(content, "__iter__"):
+                content = FuncCycle(content)
             if "size_init" in kargs:
                 args = list(args)
-                args.append(Repeat(kargs["content_init"], kargs["size_init"]))
+                args.append(Repeat(content, kargs["size_init"]))
                 del kargs["size_init"]
             else:
                 args = list(args)
-                args.append(Iterate(kargs["content_init"]))
-                
-            del kargs["content_init"]
+                args.append(Iterate(content))
             
         setattr(self, methodname, partial(method, *args, **kargs))
     
