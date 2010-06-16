@@ -43,9 +43,12 @@ def evaluateADF(seq, pset, adfset):
         lambda function.
     """
     adfdict = {}
-    for i, expr in enumerate(seq):
-        func = lambdify(adfset, expr, reduce(add, adfset.terminals.values()))
+    for i, expr in enumerate(reversed(seq)):
+        func = lambdify(adfset[i], expr, reduce(add, adfset[i].terminals.values()))
         adfdict.update({pset.adfs[i] : func})
+        for set in reversed(adfset[:i+1]):
+            set.func_dict.update(adfdict)
+            
     return adfdict
 
 def lambdify(pset, expr, args):
@@ -64,17 +67,17 @@ def lambdify(pset, expr, args):
     else:
         args = str(args)
     lstr = "lambda %s: (%s)" % (args, expr)
-    return eval(lstr, pset.func_dict)
+    return eval(lstr, dict(pset.func_dict))
 
-def lambdifyList(pset, adfset, expr, args):
+def lambdifyList(pset, expr, args):
     """ Return a lambda function created from a list of trees. The first 
         element of the list is the main tree, and the following elements are
         automatically defined functions (ADF) that can be called by the first
         tree.
     """
-    adfdict = evaluateADF(expr[1:], pset, adfset)
-    pset.func_dict.update(adfdict)
-    return lambdify(pset, expr[0], args)
+    adfdict = evaluateADF(expr[1:], pset[0], pset[1:])
+    pset[0].func_dict.update(adfdict)   
+    return lambdify(pset[0], expr[0], args)
 
 ## Loosely + Strongly Typed GP 
 
