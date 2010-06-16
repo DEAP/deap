@@ -12,17 +12,21 @@
 #
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
-#
+
 #    Special thanks to Nikolaus Hansen for providing major part of 
 #    this code. The CMA-ES algorithm is provided in many other languages
-#    at http://www.lri.fr/~hansen/cmaesintro.html.
+#    and advanced versions at http://www.lri.fr/~hansen/cmaesintro.html.
 
 import copy
 import logging
 import math
-import random
 import numpy
-    
+import random   # Only used to seed numpy.random
+import sys      # Used to get maxint
+from itertools import imap, repeat
+
+numpy.random.seed(random.randint(0, sys.maxint))
+
 _logger = logging.getLogger("eap.cma")
     
 def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
@@ -45,7 +49,7 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         
         # Evaluate the individuals
         for ind in population:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            ind.fitness.values = toolbox.evaluate(ind)
         
         try:
             halloffame.update(population)
@@ -56,13 +60,13 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         strategy.update(population)
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
+        fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
         lenght = len(population)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
         
@@ -115,7 +119,6 @@ class CMAStrategy(object):
         self.centroid.extend(numpy.mean(population, 0)) # The centroid is used in new individual creation
         
         self.dim = len(self.centroid)
-        #self.centroid = numpy.array(self.centroid)
         self.sigma = sigma
         self.pc = numpy.zeros(self.dim)
         self.ps = numpy.zeros(self.dim)
@@ -208,7 +211,7 @@ class CMAStrategy(object):
             self.weights = math.log(self.mu + 0.5) - \
                         numpy.log(numpy.arange(1, self.mu + 1))
         elif rweights == "linear":
-            self.weights = mu + 0.5 - numpy.arange(1, self.mu + 1)
+            self.weights = self.mu + 0.5 - numpy.arange(1, self.mu + 1)
         elif rweights == "equal":
             self.weights = numpy.ones(self.mu)
         else:
@@ -233,29 +236,29 @@ class CMAStrategy(object):
 
 def rand(x):
     """Random test objective function."""
-    return [numpy.random.random()]
+    return numpy.random.random()
     
 def plane(x):
     """Plane test objective function."""
-    return [x[0]]
+    return x[0]
 
 def rastrigin(x):
     """Rastrigin test objective function. Consider using ``lambda_ = 20 * N`` 
     for this test function.
     """
-    return [10 * len(x) + sum(map(lambda a: a**2 - 10 * math.cos(2 * math.pi * a), x))]
+    return 10 * len(x) + sum(map(lambda a: a**2 - 10 * math.cos(2 * math.pi * a), x))
     #return 10 * len(x) + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
     
 def sphere(x):
     """Sphere test objective function."""
-    return [sum(map(lambda x: x**2, individual))]
+    return sum(imap(pow, x, repeat(2)))
 
 def cigar(x):
     """Cigar test objective function."""
-    return [x[0]**2 + 1e6 * sum(map(lambda a: a**2, x))]
+    return x[0]**2 + 1e6 * sum(imap(pow, x, repeat(2)))
 
 def rosen(x):  
     """Rosenbrock test objective function."""
-    return [sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
-                   x[:-1], x[1:]))]
+    return sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
+                   x[:-1], x[1:]))
     

@@ -66,8 +66,6 @@ import eap.halloffame as halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
-#random.seed(2)
-
 def progn(*args):
     for arg in args:
         arg()
@@ -119,14 +117,14 @@ class AntSimulator(object):
             self.moves += 1
             self.row = (self.row + self.dir_row[self.dir]) % self.matrix_row
             self.col = (self.col + self.dir_col[self.dir]) % self.matrix_col
-            if self.matrix_exc[self.row][self.col] is "food":
+            if self.matrix_exc[self.row][self.col] == "food":
                 self.eaten += 1
             self.matrix_exc[self.row][self.col] = "passed"
 
     def sense_food(self):
         ahead_row = (self.row + self.dir_row[self.dir]) % self.matrix_row
         ahead_col = (self.col + self.dir_col[self.dir]) % self.matrix_col        
-        return self.matrix_exc[ahead_row][ahead_col] is "food"
+        return self.matrix_exc[ahead_row][ahead_col] == "food"
    
     def if_food_ahead(self, out1, out2):
         return partial(if_then_else, self.sense_food, out1, out2)
@@ -141,11 +139,11 @@ class AntSimulator(object):
         for i, line in enumerate(matrix):
             self.matrix.append(list())
             for j, col in enumerate(line):
-                if col is "#":
+                if col == "#":
                     self.matrix[-1].append("food")
-                elif col is ".":
+                elif col == ".":
                     self.matrix[-1].append("empty")
-                elif col is "S":
+                elif col == "S":
                     self.matrix[-1].append("empty")
                     self.row_start = self.row = i
                     self.col_start = self.col = j
@@ -173,18 +171,18 @@ if __name__ == "__main__":
     tools = toolbox.Toolbox()
     
     # Attribute generator
-    tools.register("expr_init", gp.generate_ramped, pset=pset, min=1, max=2)
+    tools.register("expr_init", gp.generate_full, pset=pset, min=1, max=2)
     
     # Structure initializers
-    tools.regInit("individual", creator.Individual, content=tools.expr_init)
-    tools.regInit("population", list, content=tools.individual, size=300)
+    tools.register("individual", creator.Individual, content_init=tools.expr_init)
+    tools.register("population", list, content_init=tools.individual, size_init=300)
     
     def evalArtificialAnt(individual):
         # Transform the tree expression to functionnal Python code
         routine = gp.evaluate(individual, pset)
         # Run the generated routine
         ant.run(routine)
-        return [ant.eaten]
+        return ant.eaten,
 
     tools.register("evaluate", evalArtificialAnt)
     tools.register("select", toolbox.selTournament, tournsize=7)
@@ -197,4 +195,4 @@ if __name__ == "__main__":
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
     
-    print "Best individual is %r\nwith fitness of %r" % (gp.evaluate(hof[0]), hof[0].fitness)
+    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)

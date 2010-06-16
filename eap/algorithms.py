@@ -26,7 +26,6 @@ you realy them to do.
 """
 
 import logging
-import math
 import random
 
 _logger = logging.getLogger("eap.algorithms")
@@ -36,12 +35,16 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
        
     """
     _logger.info("Start of evolution")
+    evaluations = 0
     
     # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
-            
+            evaluations += 1
+            ind.fitness.values = toolbox.evaluate(ind)
+    
+    _logger.debug("Evaluated %i individuals", evaluations)
+    
     try:
         halloffame.update(population)
     except AttributeError:
@@ -50,6 +53,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
+        evaluations = 0
         
         # Select the next generation individuals
         population[:] = toolbox.select(population, n=len(population))
@@ -66,7 +70,10 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         # Evaluate the individuals with invalid fitness
         for ind in population:
             if not ind.fitness.valid:
-                ind.fitness.extend(toolbox.evaluate(ind))
+                evaluations += 1
+                ind.fitness.values = toolbox.evaluate(ind)
+        
+        _logger.debug("Evaluated %i individuals", evaluations)
                 
         try:
             halloffame.update(population)
@@ -74,15 +81,21 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
             pass
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
 
@@ -92,11 +105,15 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
     assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
     
     _logger.info("Start of evolution")
+    evaluations = 0
     
     # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            evaluations += 1
+            ind.fitness.values = toolbox.evaluate(ind)
+    
+    _logger.debug("Evaluated %i individuals", evaluations)
             
     try:
         halloffame.update(population)
@@ -106,6 +123,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
+        evaluations = 0
         
         children = []
         for i in xrange(lambda_):
@@ -119,10 +137,13 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
             else:                           # Apply reproduction
                 children.append(random.choice(population))
         
-        # Evaluate the individuals with an invalid fitness
+        # Evaluate the individuals with invalid fitness
         for ind in children:
             if not ind.fitness.valid:
-                ind.fitness.extend(toolbox.evaluate(ind))
+                evaluations += 1
+                ind.fitness.values = toolbox.evaluate(ind)
+        
+        _logger.debug("Evaluated %i individuals", evaluations)
         
         try:
             halloffame.update(children)
@@ -132,16 +153,22 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         population[:] = toolbox.select(population + children, mu)
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
-
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
+        
     _logger.info("End of (successful) evolution")
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffame=None):
@@ -151,11 +178,15 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
     assert (cxpb + mutpb) <= 1.0, "The sum of the crossover and mutation probabilities must be smaller or equal to 1.0."
         
     _logger.info("Start of evolution")
+    evaluations = 0
     
-    # Evaluate the individuals with an invalid fitness
+    # Evaluate the individuals with invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            evaluations += 1
+            ind.fitness.values = toolbox.evaluate(ind)
+    
+    _logger.debug("Evaluated %i individuals", evaluations)
             
     try:
         halloffame.update(population)
@@ -165,6 +196,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
+        evaluations = 0
         
         children = []
         for i in xrange(lambda_):
@@ -178,10 +210,13 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
             else:                           # Apply reproduction
                 children.append(random.choice(population))
         
-        # Evaluate the individuals with an invalid fitness
+        # Evaluate the individuals with invalid fitness
         for ind in children:
             if not ind.fitness.valid:
-                ind.fitness.extend(toolbox.evaluate(ind))
+                evaluations += 1
+                ind.fitness.values = toolbox.evaluate(ind)
+        
+        _logger.debug("Evaluated %i individuals", evaluations)
         
         try:
             halloffame.update(children)
@@ -191,15 +226,21 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         population[:] = toolbox.select(children, mu)
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        var = (sum2 / lenght - mean**2)
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Var. %f", var)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
     
@@ -234,20 +275,24 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         except AttributeError:
             pass
         
-        population.append(child)
-        
-        population[:] = toolbox.select(population, len(population) - 1)
+        population[:] = toolbox.select(population + [child], len(population))
         
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        fits = [ind.fitness.values for ind in population]
+        fits_t = zip(*fits)             # Transpose fitnesses for analysis
+        
+        minimums = map(min, fits_t)
+        maximums = map(max, fits_t)
         lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)**0.5
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
+        sums = map(sum, fits_t)
+        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        means = [sum_ / lenght for sum_ in sums]
+        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        
+        _logger.debug("Min %s", ", ".join(map(str, minimums)))
+        _logger.debug("Max %s", ", ".join(map(str, maximums)))
+        _logger.debug("Avg %s", ", ".join(map(str, means)))
+        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
 
     _logger.info("End of (successful) evolution")
 

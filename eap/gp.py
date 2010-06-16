@@ -15,6 +15,10 @@
 
 import random
 from itertools import repeat
+from collections import defaultdict
+
+# Define the name of type for any types.
+__type__ = None
 
 ## GP Tree utility functions
 
@@ -25,9 +29,9 @@ def evaluate(expr, pset=None):
     def _stringify(expr):
         try:
             func = expr[0]
-            return func(*[_stringify(value) for value in expr[1:]])
+            return str(func(*[_stringify(value) for value in expr[1:]]))
         except TypeError:
-            return expr
+            return str(expr)
     if not pset is None:
         return eval(_stringify(expr), pset.func_dict)
     else:
@@ -35,8 +39,7 @@ def evaluate(expr, pset=None):
 
 
 def lambdify(pset, expr, args):
-    """ 
-    Returns a lambda function of the expression
+    """Return a lambda function of the expression.
 
     Remark:
     This function is a stripped version of the lambdify
@@ -53,178 +56,177 @@ def lambdify(pset, expr, args):
     lstr = "lambda %s: (%s)" % (args, expr)
     return eval(lstr, pset.func_dict)
 
-## Normal GP
+## Loosely + Strongly Typed GP 
 
 class Primitive(object):
-    def __init__(self, primitive, arity):
-        self.arity = arity
+    """ Class that encapsulates a primitive and when called with arguments it
+        returns the Python code to call the primitive with the arguments.
+        
+        >>> import operator
+        >>> pr = Primitive(operator.mul, (int, int), int)
+        >>> pr("1", "2")
+        'mul(1, 2)'
+    """    
+        
+    def __init__(self, primitive, args, ret = __type__):
         self.name = primitive.__name__
-        args = ", ".join(repeat("%s",arity))
-        self.seq = "%s(%s)" % (self.name, args)         
-    def __call__(self, *args):
-        return self.seq % args     
-    def __repr__(self):
-        return self.name        
-        
-class Terminal(object):
-    def __init__(self, primitive):
-        try:
-            self.name = primitive.__name__
-        except:
-            self.name = str(primitive)
-    def __call__(self):
-        return self        
-    def __repr__(self):
-        return self.name        
-
-class Ephemeral(object):
-    def __init__(self, ephemeral):
-       self.name = str(ephemeral)
-       self.func = ephemeral
-    def __call__(self):
-       return Terminal(self.func())
-    def __repr__(self):
-        return self.name       
-       
-class PrimitiveSet(object):
-    def __init__(self):
-        self.primitives = []
-        self.terminals = []
-        self.func_dict = dict()
-        
-    def addPrimitive(self, primitive, arity):
-        if arity <= 0:
-            raise ValueError("arity should be >= 1")
-        self.primitives.append(Primitive(primitive,arity))
-        self.func_dict[primitive.__name__] = primitive
-
-    def addTerminal(self, terminal):    
-        if callable(terminal):
-            self.func_dict[terminal.__name__] = terminal
-        self.terminals.append(Terminal(terminal))
-
-    def addEphemeralConstant(self, ephemeral):
-        self.terminals.append(Ephemeral(ephemeral))       
-
-## Standard GP generation functions
-
-def generate_ramped(pset, min, max):
-    method = random.choice([generate_grow, generate_full])
-    return method(pset, min, max)
-
-def generate_full(pset, min, max):
-    def condition(max_depth):
-        return max_depth == 0
-    return _generate(pset, min, max, condition)
-
-def generate_grow(pset, min, max):
-    termset_ratio = len(pset.terminals) / \
-                    (len(pset.terminals)+len(pset.primitives))
-    def condition(max_depth):
-        return max_depth == 0 or random.random() < termset_ratio
-    return _generate(pset, min, max, condition)
-
-def _generate(pset, min, max, condition):
-    def generate_expr(max_depth):
-        if condition(max_depth):
-            term = random.choice(pset.terminals)
-            expr = [term()]
-        else:
-            prim = random.choice(pset.primitives)
-            expr = [prim]
-            for i in xrange(prim.arity):
-                arg = generate_expr(max_depth-1)
-                if len(arg) > 1:
-                    expr.append(arg)
-                else:
-                    expr.extend(arg)
-        return expr
-    max_depth = random.randint(min, max)
-    return generate_expr(max_depth)
-
-## Strongly Typed GP 
-
-class PrimitiveTyped(Primitive):
-    def __init__(self, primitive, ret, args):
-        self.ret = ret
+        self.arity = len(args)           
         self.args = args
-        Primitive.__init__(self, primitive, len(args))
-        
-class TerminalTyped(Terminal):
-    def __init__(self, terminal, ret):
         self.ret = ret
-        Terminal.__init__(self, terminal)
+        args = ", ".join(repeat("%s", self.arity))
+        self.seq = "%s(%s)" % (self.name, args)  
+    def __call__(self, *args):
+        return self.seq % args  
+    def __repr__(self):
+        return self.name 
+
+class Operator(Primitive):
+    """ Class that encapsulates an operator and when called with arguments it
+        returns the Python code to call the operator with the arguments. It acts
+        as the Primitive class, but instead of returning a function and its 
+        arguments, it returns an operator and its operands.
+        
+        >>> import operator
+        >>> op = Operator(operator.mul, (int, int), int)
+        >>> op("1", "2")
+        '(1 * 2)'
+        >>> op2 = Operator(operator.neg, (int,), int)
+        >>> op2(1)
+        '-(1)'
+    """
+
+    symbols = {"add" : "+", "sub" : "-", "mul" : "*", "div" : "/", "neg" : "-",
+               "and_" : "and", "or_" : "or", "not_" : "not", 
+               "lt" : "<", "eq" : "==", "gt" : ">", "geq" : ">=", "leq" : "<="}
+    def __init__(self, operator, args, ret = __type__):
+        Primitive.__init__(self, operator, args, ret)
+        if len(args) == 1:
+            self.seq = "%s(%s)" % (self.symbols[self.name], "%s")
+        elif len(args) == 2:
+            self.seq = "(%s %s %s)" % ("%s", self.symbols[self.name], "%s")
+        else:
+            raise ValueError("Operator arity can be either 1 or 2.")
+
+class Terminal(object):
+    """ Class that encapsulates terminal primitive in expression. Terminals can
+        be symbols, values, or 0-arity functions.
+    """
+   
+    def __init__(self, terminal, ret = __type__):
+        self.ret = ret
+        try:
+            self.value = terminal.__name__
+        except AttributeError:
+            self.value = terminal
     def __call__(self):
         return self
+    def __repr__(self):
+        return str(self.value)
 
-class EphemeralTyped(Ephemeral):
-    def __init__(self, ephemeral, ret):
+class Ephemeral(Terminal):
+    """ Class that encapsulates a terminal which value is set at run-time. 
+        The value of the `Ephemeral` can be regenerated with the method `regen`.
+    """
+    def __init__(self, func, ret = __type__):
+        self.func = func
+        Terminal.__init__(self, self.func(), ret)
+    def regen(self):
+        self.value = self.func()
+        
+class EphemeralGenerator(object):
+    """ Class that generates `Ephemeral` to be added to an expression.
+    """
+    def __init__(self, ephemeral, ret = __type__):
         self.ret = ret
-        Ephemeral.__init__(self, ephemeral)
+        self.name = ephemeral.__name__
+        self.func = ephemeral
     def __call__(self):
-        return TerminalTyped(self.func(), self.ret)
+        return Ephemeral(self.func, self.ret)
+    def __repr__(self):
+        return self.name
 
-class TypedPrimitiveSet(object):
+class PrimitiveSetTyped(object):
     def __init__(self):
-        self.terminals = dict()
-        self.primitives = dict()
+        self.terminals = defaultdict(list)
+        self.primitives = defaultdict(list)
         self.func_dict = dict()
+        self.termsCount = 0
+        self.primsCount = 0
     
-    def addPrimitive(self, primitive, ret_type, in_types):
-        if not self.primitives.has_key(ret_type):
-           self.primitives[ret_type] = list()
-        prim = PrimitiveTyped(primitive, ret_type, in_types)
+    def addPrimitive(self, primitive, in_types, ret_type):
+        try:
+            prim = Operator(primitive, in_types, ret_type)
+        except (KeyError, ValueError):
+            prim = Primitive(primitive, in_types, ret_type)
         self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
+        self.primsCount += 1
         
     def addTerminal(self, terminal, ret_type):
-        if not self.terminals.has_key(ret_type):
-           self.terminals[ret_type] = list()
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
-        prim = TerminalTyped(terminal, ret_type)
+        prim = Terminal(terminal, ret_type)
         self.terminals[ret_type].append(prim)
+        self.termsCount += 1
         
     def addEphemeralConstant(self, ephemeral, ret_type):
-        if not self.terminals.has_key(ret_type):
-           self.terminals[ret_type] = list()
-        prim = EphemeralTyped(ephemeral, ret_type)
+        prim = EphemeralGenerator(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
+        self.termsCount += 1
+    
+    @property
+    def terminalRatio(self):
+        """ Return the ratio of the number of terminals on the number of all
+            kinds of primitives.
+        """
+        return self.termsCount / float(self.termsCount + self.primsCount)
 
-# Strongly Typed GP generation functions
+class PrimitiveSet(PrimitiveSetTyped):
+    def addPrimitive(self, primitive, arity):
+        assert arity > 0, "arity should be >= 1"
+        args = [__type__] * arity 
+        PrimitiveSetTyped.addPrimitive(self, primitive, args, __type__)
 
-def generate_ramped_typed(pset, type, min, max):
-    method = random.choice([generate_grow_typed, generate_full_typed])
-    return method(pset, type, min, max)
+    def addTerminal(self, terminal):    
+        PrimitiveSetTyped.addTerminal(self, terminal, __type__)
 
-def generate_full_typed(pset, type, min, max):
+    def addEphemeralConstant(self, ephemeral):
+        PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
+
+# Expression generation functions
+
+def generate_ramped(pset, min, max, type=__type__):
+    method = random.choice([generate_grow, generate_full])
+    return method(pset, min, max, type)
+
+def generate_full(pset, min, max, type=__type__):
     def condition(max_depth):
         return max_depth == 0
-    return _generate_typed(pset, type, min, max, condition)
+    return _generate(pset, min, max, condition, type)
 
-def generate_grow_typed(pset, type, min, max):
-    termset_ratio = len(pset.terminals) / \
-                    (len(pset.terminals)+len(pset.primitives))
+def generate_grow(pset, min, max, type=__type__):
     def condition(max_depth):
-        return max_depth == 0 or random.random() < termset_ratio
-    return _generate_typed(pset, type, min, max, condition)
+        return max_depth == 0 or random.random() < pset.terminalRatio
+    return _generate(pset, min, max, condition, type)
 
-def _generate_typed(pset, type, min, max, condition):
+def _generate(pset, min, max, condition, type=__type__):
     def generate_expr(max_depth, type):
         if condition(max_depth):
             term = random.choice(pset.terminals[type])
-            expr = [term()]                
+            expr = term()
         else:
             prim = random.choice(pset.primitives[type])
             expr = [prim]
-            for arg_type in prim.args:
-                arg = generate_expr(max_depth-1, arg_type)
-                if len(arg) > 1:
-                    expr.append(arg)
-                else:
-                    expr.extend(arg)
+            args = (generate_expr(max_depth-1, arg) for arg in prim.args)
+            expr.extend(args)
         return expr
     max_depth = random.randint(min, max)
-    return generate_expr(max_depth, type)
+    expr = generate_expr(max_depth, type)
+    if not isinstance(expr, list):
+        expr = [expr]
+    return expr
 
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 
