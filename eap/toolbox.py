@@ -30,8 +30,6 @@ import copy
 import math
 import random
 
-import base
-
 from functools import partial
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
@@ -88,7 +86,12 @@ class Toolbox(object):
         Keyworded arguments *content_init* and *size_init* may be used to
         simulate iterable initializers. For example, when building objects
         deriving from :class:`list`, the content argument will provide to
-        the built list its initial content.
+        the built list its initial content. Depending on what is given to
+        *content_init* and *size* the initialization is different. If
+        *content_init* is an iterable, then the iterable is consumed enterily
+        to intialize each object, in that case *size_init* is not used.
+        Otherwise, *content_init* may be a simple function that will be repeated
+        *size_init* times in order to fill the object.
         """
         if "content_init" in kargs:
             content = kargs["content_init"]
@@ -157,8 +160,8 @@ def cxTwoPoints(ind1, ind2):
          = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -190,8 +193,8 @@ def cxOnePoint(ind1, ind2):
     child1[cxpoint:], child2[cxpoint:] = child2[cxpoint:], child1[cxpoint:]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -207,8 +210,8 @@ def cxUniform(ind1, ind2, indpb):
             child1[i], child2[i] = child2[i], child1[i]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -269,8 +272,8 @@ def cxPartialyMatched(ind1, ind2):
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -324,8 +327,8 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -344,8 +347,8 @@ def cxBlend(ind1, ind2, alpha):
         child2[i] = gamma * x1 + (1. - gamma) * x2
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -369,8 +372,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
         child2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -381,6 +384,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
 ######################################
 
 def cxMessyOnePoint(ind1, ind2):
+    """Execute a one point crossover will mostly change the individuals size.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint1 = random.randint(1, len(ind1))
     cxpoint2 = random.randint(1, len(ind2))
@@ -388,8 +393,8 @@ def cxMessyOnePoint(ind1, ind2):
     child1[cxpoint1:], child2[cxpoint2:] = child2[cxpoint2:], child1[cxpoint1:]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -400,6 +405,8 @@ def cxMessyOnePoint(ind1, ind2):
 ######################################
 
 def cxESBlend(ind1, ind2, alpha, minstrategy=None):
+    """Execute a blend crossover on both, the individual and the strategy.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     
@@ -422,8 +429,8 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
             child2.strategy[indx] = minstrategy
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -449,8 +456,8 @@ def cxESTwoPoints(ind1, ind2):
         child2.strategy[pt1:pt2], child1.strategy[pt1:pt2]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -460,8 +467,9 @@ def cxESTwoPoints(ind1, ind2):
 # GA Mutations                       #
 ######################################
 
-def mutGaussian(individual, sigma, indpb):
-    """This function applies a gaussian mutation on the input individual and
+def mutGaussian(individual, mu, sigma, indpb):
+    """This function applies a gaussian mutation of mean *mu* and standard
+    deviation *sigma*  on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
     real valued attributes. The *mutIndxPb* argument is the probability of each
@@ -488,11 +496,11 @@ def mutGaussian(individual, sigma, indpb):
     
     for i in xrange(len(mutant)):
         if random.random() < indpb:
-            mutant[i] += random.gauss(0, sigma)
+            mutant[i] += random.gauss(mu, sigma)
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     
@@ -521,7 +529,7 @@ def mutShuffleIndexes(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     
@@ -548,7 +556,7 @@ def mutFlipBit(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     return mutant
@@ -558,6 +566,10 @@ def mutFlipBit(individual, indpb):
 ######################################
 
 def mutES(individual, indpb, minstrategy=None):
+    """Mutate an evolution strategy according to its :attr:`strategy` attribute.
+    The strategy shall be teh same size as the individual. This is subject to
+    change.
+    """
     mutated = False
     mutant = copy.deepcopy(individual)
     
@@ -578,7 +590,7 @@ def mutES(individual, indpb, minstrategy=None):
             
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     return mutant
@@ -588,22 +600,25 @@ def mutES(individual, indpb, minstrategy=None):
 ######################################
 
 def cxTreeUniformOnePoint(ind1, ind2):
-
+    """ Randomly select in each individual and exchange
+        each subtree with the point as root between each individual.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     
     try:
-        index = random.randint(1,min([ind1.size, ind2.size])-1)    
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
     except ValueError:
         return child1, child2
 
-    sub1 = ind1.search_subtree_dfs(index)
-    sub2 = ind2.search_subtree_dfs(index)
-    child1.set_subtree_dfs(index, sub2)
-    child2.set_subtree_dfs(index, sub1)
+    sub1 = ind1.search_subtree_dfs(index1)
+    sub2 = ind2.search_subtree_dfs(index2)
+    child1.set_subtree_dfs(index1, sub2)
+    child2.set_subtree_dfs(index2, sub1)
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     return child1, child2
@@ -611,6 +626,14 @@ def cxTreeUniformOnePoint(ind1, ind2):
 ## Strongly Typed GP crossovers
     
 def cxTypedTreeOnePoint(ind1, ind2):
+    """ Randomly select in each individual and exchange
+        each subtree with the point as root between each individual.
+        Since the node are strongly typed, the operator then make sure the
+        the type of second node correspond to the type of the first node. It it
+        doesn't it randomly select another point in the second individual and
+        try again. It tries up to 5 times before returning the unmodified 
+        individuals.
+    """
     child1 = copy.deepcopy(ind1)
     child2 = copy.deepcopy(ind2)
     
@@ -645,8 +668,8 @@ def cxTypedTreeOnePoint(ind1, ind2):
         child2.set_subtree_dfs(index2, sub1)
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
 
@@ -657,13 +680,15 @@ def cxTypedTreeOnePoint(ind1, ind2):
 ######################################
 
 def mutTreeUniform(ind, expr):
-
+    """ Randomly select a point in the Tree, then replace the subtree with
+        the point as a root by a randomly generated expression. The expression
+        is generated using the method `expr`.
+    """
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
-    subtree = base.Tree(expr())
-    mutant.set_subtree_dfs(index, subtree)
+    mutant.set_subtree_dfs(index, expr())
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass
     return mutant
@@ -684,11 +709,9 @@ def mutTypedTreeUniform(ind, expr):
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
-    type_ = subtree.root.ret
-    subtree = base.Tree(expr(type=type_))
-    mutant.set_subtree_dfs(index, subtree)
+    mutant.set_subtree_dfs(index, expr(type=subtree.root.ret))
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass   
     return mutant 

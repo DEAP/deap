@@ -129,7 +129,7 @@ class Ephemeral(Terminal):
     """
     def __init__(self, func, ret = __type__):
         self.func = func
-        Terminal.__init__(self, self.func(), self.ret)
+        Terminal.__init__(self, self.func(), ret)
     def regen(self):
         self.value = self.func()
         

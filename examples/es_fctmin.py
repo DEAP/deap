@@ -35,7 +35,7 @@ tools = toolbox.Toolbox()
 
 creator.create("Strategy", array.array)
 
-tools.regInit("strategy", creator.Strategy, content=lambda: 1., size=IND_SIZE, args=("d",)) 
+tools.register("strategy", creator.Strategy, "d", content_init=lambda: 1., size_init=IND_SIZE) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=tools.strategy)
@@ -44,8 +44,8 @@ creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=t
 tools.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.regInit("individual", creator.Individual, content=tools.attr_float, size=IND_SIZE, args=("d",))
-tools.regInit("population", list, content=tools.individual, size=50)
+tools.register("individual", creator.Individual, "d", content_init=tools.attr_float, size_init=IND_SIZE)
+tools.register("population", list, content_init=tools.individual, size_init=50)
 
 def evalSphere(individual):
     return sum(map(lambda x: x * x, individual)),
@@ -61,4 +61,4 @@ pop = tools.population()
 
 algorithms.eaMuCommaLambda(tools, pop, mu=3, lambda_=12, cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
 
-logging.info("Best individual is %r, %r", hof[0], hof[0].fitness.values)
+logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
