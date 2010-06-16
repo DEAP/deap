@@ -35,8 +35,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.regInit("individual", creator.Individual, content=tools.attr_bool, size=100, args=("b",))
-tools.regInit("population", list, content=tools.individual, size=300)
+tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
+tools.register("population", list, content_init=tools.individual, size_init=300)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -78,16 +78,16 @@ for g in range(NGEN):
         
     # Gather all the fitnesses in one list and print the stats
     fits = [ind.fitness.values[0] for ind in pop]
-    print "  Min %f" % min(fits)
-    print "  Max %f" % max(fits)
+    print "  Min %s" % min(fits)
+    print "  Max %s" % max(fits)
     lenght = len(pop)
     mean = sum(fits) / lenght
     sum2 = sum(map(lambda x: x**2, fits))
     std_dev = abs(sum2 / lenght - mean**2)**0.5
-    print "  Mean %f" % (mean)
-    print "  Std. Dev. %f" % std_dev
+    print "  Avg %s" % (mean)
+    print "  Std %s" % std_dev
 
 print "-- End of (successful) evolution --"
 
 best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual is %r, %r" % (best_ind, best_ind.fitness.values)
+print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)

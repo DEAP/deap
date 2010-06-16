@@ -66,8 +66,8 @@ creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_full, pset=pset, min=3, max=5)
-tools.regInit("individual", creator.Individual, tools.expr)
-tools.regInit("population", list, tools.individual, size=300)
+tools.register("individual", creator.Individual, content_init=tools.expr)
+tools.register("population", list, content_init=tools.individual, size_init=300)
 tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s" %i for i in xrange(PARITY_FANIN_M)])
 
 def evalParity(individual):
@@ -86,4 +86,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
 
-logging.info("Best individual is %r, %r", gp.evaluate(hof[0]), hof[0].fitness)
+logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
