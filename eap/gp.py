@@ -16,6 +16,7 @@
 import random
 from itertools import repeat
 from collections import defaultdict
+from operator import add
 
 # Define the name of type for any types.
 __type__ = None
@@ -37,6 +38,15 @@ def evaluate(expr, pset=None):
     else:
         return _stringify(expr)
 
+def evaluateADF(seq, pset, adfset):
+    """ Evaluate a list of ADF and return a dict mapping the ADF name with its
+        lambda function.
+    """
+    adfdict = {}
+    for i, expr in enumerate(seq):
+        func = lambdify(adfset, expr, reduce(add, adfset.terminals.values()))
+        adfdict.update({pset.adfs[i] : func})
+    return adfdict
 
 def lambdify(pset, expr, args):
     """Return a lambda function of the expression.
@@ -56,6 +66,16 @@ def lambdify(pset, expr, args):
     lstr = "lambda %s: (%s)" % (args, expr)
     return eval(lstr, pset.func_dict)
 
+def lambdifyList(pset, adfset, expr, args):
+    """ Return a lambda function created from a list of trees. The first 
+        element of the list is the main tree, and the following elements are
+        automatically defined functions (ADF) that can be called by the first
+        tree.
+    """
+    adfdict = evaluateADF(expr[1:], pset, adfset)
+    pset.func_dict.update(adfdict)
+    return lambdify(pset, expr[0], args)
+
 ## Loosely + Strongly Typed GP 
 
 class Primitive(object):
@@ -69,7 +89,7 @@ class Primitive(object):
     """    
         
     def __init__(self, primitive, args, ret = __type__):
-        self.name = primitive.__name__
+        self.name = primitive
         self.arity = len(args)           
         self.args = args
         self.ret = ret
@@ -149,15 +169,17 @@ class PrimitiveSetTyped(object):
     def __init__(self):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
+        self.adfs = []
         self.func_dict = dict()
         self.termsCount = 0
         self.primsCount = 0
+        self.adfsCount = 0
     
     def addPrimitive(self, primitive, in_types, ret_type):
         try:
-            prim = Operator(primitive, in_types, ret_type)
+            prim = Operator(primitive.__name__, in_types, ret_type)
         except (KeyError, ValueError):
-            prim = Primitive(primitive, in_types, ret_type)
+            prim = Primitive(primitive.__name__, in_types, ret_type)
         self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
         self.primsCount += 1
@@ -173,6 +195,11 @@ class PrimitiveSetTyped(object):
         prim = EphemeralGenerator(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
         self.termsCount += 1
+        
+    def addADF(self, name, in_types, ret_type):
+        prim = Primitive(name, in_types, ret_type)
+        self.adfs.append(name)
+        self.primitives[ret_type].append(prim)
     
     @property
     def terminalRatio(self):
@@ -192,6 +219,11 @@ class PrimitiveSet(PrimitiveSetTyped):
 
     def addEphemeralConstant(self, ephemeral):
         PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
+        
+    def addADF(self, name, arity):
+        assert arity > 0, "arity should be >= 1"
+        args = [__type__] * arity
+        PrimitiveSetTyped.addADF(self, name, args, __type__)        
 
 # Expression generation functions
 
