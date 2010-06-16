@@ -7,7 +7,10 @@ Evolutionary Toolbox
 .. automodule:: eap.toolbox
 
 .. autoclass:: eap.toolbox.Toolbox
-   :members:
+   
+   .. automethod:: register(methodname, method[, content_init[, size_init]], ...)
+   
+   .. automethod:: unregister(methodname)
    
 Operators
 =========
@@ -29,9 +32,22 @@ Crossover
 
 .. autofunction:: eap.toolbox.cxPartialyMatched
 
+.. autofunction:: eap.toolbox.cxUniformPartialyMatched
+
 .. autofunction:: eap.toolbox.cxBlend
 
+.. autofunction:: eap.toolbox.cxESBlend
+
+.. autofunction:: eap.toolbox.cxESTwoPoints
+
 .. autofunction:: eap.toolbox.cxSimulatedBinary
+
+.. autofunction:: eap.toolbox.cxMessyOnePoint
+
+.. autofunction:: eap.toolbox.cxTreeUniformOnePoint
+
+.. autofunction:: eap.toolbox.cxTypedTreeOnePoint
+
 
 
 Mutation
@@ -43,6 +59,11 @@ Mutation
 
 .. autofunction:: eap.toolbox.mutFlipBit
 
+.. autofunction:: eap.toolbox.mutES
+
+.. autofunction:: eap.toolbox.mutTreeUniform
+
+.. autofunction:: eap.toolbox.mutTypedTreeUniform
 
 Selection
 ---------

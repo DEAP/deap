@@ -30,7 +30,7 @@ import eap.halloffame as halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
-random.seed(1626)
+random.seed(1348779701)
 
 # Define new functions
 def safeDiv(left, right):
@@ -55,19 +55,20 @@ creator.create("Individual", base.Tree, fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, pset=pset, min=1, max=2)
-tools.regInit("individual", creator.Individual, content=tools.expr)
-tools.regInit("population", list, content=tools.individual, size=100)
+tools.register("individual", creator.Individual, content_init=tools.expr)
+tools.register("population", list, content_init=tools.individual, size_init=100)
 tools.register("lambdify", gp.lambdify, pset=pset, args='x')
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
+    
     func = tools.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
     values = (x/10. for x in xrange(-10,10))
     diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
     diff = sum(map(diff_func, values))
-    return [diff]
+    return diff,
 
 tools.register("evaluate", evalSymbReg)
 tools.register("select", toolbox.selTournament, tournsize=3)
@@ -80,4 +81,4 @@ hof = halloffame.HallOfFame(1)
 
 algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
 
-print "Best individual is %r\nwith fitness of %r" % (gp.evaluate(hof[0]), hof[0].fitness)
+logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
