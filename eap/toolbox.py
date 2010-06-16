@@ -65,7 +65,7 @@ class Iterate(object):
             self.iter = iter(self.func())
             raise StopIteration
 
-class FuncCycle(list):
+class FuncCycle(object):
     def __init__(self, seq_func):
         self.cycle = cycle(func for func in seq_func)
     def __call__(self):
