@@ -45,49 +45,51 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-pop = tools.population()
-CXPB, MUTPB, NGEN = 0.5, 0.2, 40
+if __name__ == "__main__":
 
-# Process Pool of 4 workers
-pool = multiprocessing.Pool(processes=4)
-
-fitnesses = pool.map(evalOneMax, pop)
-for ind, fit in zip(pop, fitnesses):
-    ind.fitness.values = fit
-
-# Begin the evolution
-for g in range(NGEN):
-    print "-- Generation %i --" % g
-
-    pop[:] = tools.select(pop, n=len(pop))
-
-    # Apply crossover and mutation
-    for i in xrange(1, len(pop), 2):
-        if random.random() < CXPB:
-            pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
-
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = tools.mutate(pop[i])
-
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = filter(lambda ind: not ind.fitness.valid, pop)
-    fitnesses = pool.map(evalOneMax, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
+    pop = tools.population()
+    CXPB, MUTPB, NGEN = 0.5, 0.2, 40
+    
+    # Process Pool of 4 workers
+    pool = multiprocessing.Pool(processes=4)
+    
+    fitnesses = pool.map(evalOneMax, pop)
+    for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
-        
-    # Gather all the fitnesses in one list and print the stats
-    fits = [ind.fitness.values[0] for ind in pop]
-    print "  Min %s" % min(fits)
-    print "  Max %s" % max(fits)
-    lenght = len(pop)
-    mean = sum(fits) / lenght
-    sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = abs(sum2 / lenght - mean**2)**0.5
-    print "  Avg %s" % (mean)
-    print "  Std %s" % std_dev
-
-print "-- End of (successful) evolution --"
-
-best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
+    
+    # Begin the evolution
+    for g in range(NGEN):
+        print "-- Generation %i --" % g
+    
+        pop[:] = tools.select(pop, n=len(pop))
+    
+        # Apply crossover and mutation
+        for i in xrange(1, len(pop), 2):
+            if random.random() < CXPB:
+                pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
+    
+        for i in xrange(len(pop)):
+            if random.random() < MUTPB:
+                pop[i] = tools.mutate(pop[i])
+    
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = filter(lambda ind: not ind.fitness.valid, pop)
+        fitnesses = pool.map(evalOneMax, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+            
+        # Gather all the fitnesses in one list and print the stats
+        fits = [ind.fitness.values[0] for ind in pop]
+        print "  Min %s" % min(fits)
+        print "  Max %s" % max(fits)
+        lenght = len(pop)
+        mean = sum(fits) / lenght
+        sum2 = sum(map(lambda x: x**2, fits))
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
+        print "  Avg %s" % (mean)
+        print "  Std %s" % std_dev
+    
+    print "-- End of (successful) evolution --"
+    
+    best_ind = toolbox.selBest(pop, 1)[0]
+    print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)

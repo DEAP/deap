@@ -94,18 +94,22 @@ def mutSet(individual):
     
     return mutant
 
-pop = tools.population()
-hof = halloffame.ParetoFront()
-
 tools.register("evaluate", evalKnapSack)
 tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
 tools.register("select", toolbox.spea2)
 
-algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, hof)
+if __name__ == "__main__":
 
-logging.info("Best individual for measure 1 is %r, %r", hof[0], hof[0].fitness.values)
-logging.info("Best individual for measure 2 is %r, %r", hof[-1], hof[-1].fitness.values)
+    pop = tools.population()
+    hof = halloffame.ParetoFront()
+    
+    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, hof)
+    
+    logging.info("Best individual for measure 1 is %s, %s", 
+                 hof[0], hof[0].fitness.values)
+    logging.info("Best individual for measure 2 is %s, %s", 
+                 hof[-1], hof[-1].fitness.values)
 
 # You can plot the Hall of Fame if you have matplotlib installed
 #import matplotlib.pyplot as plt

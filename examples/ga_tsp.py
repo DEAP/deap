@@ -59,9 +59,11 @@ tools.register("mutate", toolbox.mutShuffleIndexes, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("evaluate", evalTSP)
 
-pop = tools.population()
-hof = halloffame.HallOfFame(1)
+if __name__ == "__main__":
 
-algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, hof)
-
-logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, hof)
+    
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
