@@ -77,7 +77,7 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
-tools.register("expr", gp.generate_ramped, type="bool", pset=pset, min=1, max=2)
+tools.register("expr", gp.generate_ramped, pset=pset, type=pset.ret, min=1, max=2)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=100)
 tools.register("lambdify", gp.lambdify, pset=pset)
