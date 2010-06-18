@@ -27,31 +27,38 @@ import eap.halloffame as halloffame
 import eap.toolbox as toolbox
 
 logging.basicConfig(level=logging.DEBUG)
-random.seed(64)
+#random.seed(64)
 
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMax)
+IND_SIZE = 30
 
 tools = toolbox.Toolbox()
 
+creator.create("Strategy", array.array)
+
+tools.register("strategy", creator.Strategy, "d", content_init=lambda: 1., size_init=IND_SIZE) 
+
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=tools.strategy)
+
 # Attribute generator
-tools.register("attr_bool", random.randint, 0, 1)
+tools.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, "d", content_init=tools.attr_float, size_init=IND_SIZE)
+tools.register("population", list, content_init=tools.individual, size_init=50)
 
-def evalOneMax(individual):
-    return sum(individual),
-
-tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
+def evalSphere(individual):
+    return sum(map(lambda x: x * x, individual)),
+                   
+tools.register("evaluate", evalSphere)
+tools.register("mate", toolbox.cxESBlend, alpha=0.1, minstrategy=1e-10)
+tools.register("mutate", toolbox.mutES, indpb=0.1, minstrategy=1e-10)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
 hof = halloffame.HallOfFame(1)
 
 pop = tools.population()
-algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+
+algorithms.eaMuCommaLambda(tools, pop, mu=3, lambda_=12, cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
 
 logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

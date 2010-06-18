@@ -29,11 +29,12 @@ module.
 import copy
 import math
 import random
+
 from functools import partial
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
+from operator import attrgetter
 
-import eap.base as base
 
 
 class Repeat(object):
@@ -68,7 +69,7 @@ class Iterate(object):
             self.iter = iter(self.func())
             return self.iter.next()
 
-class FuncCycle(list):
+class FuncCycle(object):
     def __init__(self, seq_func):
         self.cycle = cycle(func for func in seq_func)
     def __call__(self):
@@ -80,25 +81,51 @@ class Toolbox(object):
     :meth:`register`.
     """
 
-    def register(self, methodName, method, *args, **kargs):
-        """Register an operator in the toolbox."""
-        setattr(self, methodName, partial(method, *args, **kargs))
+    def register(self, methodname, method, *args, **kargs):
+        """Register a *method* in the toolbox under the name *method name*. You
+        may provide default arguments that will be passed automaticaly when
+        calling the registered method.
         
-    def unregister(self, methodName):
-        """Unregister an operator from the toolbox."""
-        delattr(self, methodName)
+        Keyworded arguments *content_init* and *size_init* may be used to
+        simulate iterable initializers. For example, when building objects
+        deriving from :class:`list`, the content argument will provide to
+        the built list its initial content. Depending on what is given to
+        *content_init* and *size* the initialization is different. If
+        *content_init* is an iterable, then the iterable is consumed enterily
+        to intialize each object, in that case *size_init* is not used.
+        Otherwise, *content_init* may be a simple function that will be repeated
+        *size_init* times in order to fill the object.
+        """
+        if "content_init" in kargs:
+            content = kargs["content_init"]
+            del kargs["content_init"]
+            if hasattr(content, "__iter__"):
+                content = FuncCycle(content)
+            if "size_init" in kargs:
+                args = list(args)
+                args.append(Repeat(content, kargs["size_init"]))
+                del kargs["size_init"]
+            else:
+                args = list(args)
+                args.append(Iterate(content))
+            
+        setattr(self, methodname, partial(method, *args, **kargs))
+    
+    def unregister(self, methodname):
+        """Unregister *method name* from the toolbox."""
+        delattr(self, methodname)
 
-    def regInit(self, methodName, method, content, size=None, args=(), kargs={}):
-        if hasattr(content,'__iter__'):
-            content = FuncCycle(content)
-        if size is None:
-            args = list(args)
-            args.append(Iterate(content))
-            self.register(methodName, method, *args, **kargs)
-        else:
-            args = list(args)
-            args.append(Repeat(content, size))
-            self.register(methodName, method, *args, **kargs)
+#    def registerInitializer(self, methodName, method, content, size=None, args=(), kargs={}):
+#        if hasattr(content,'__iter__'):
+#            content = FuncCycle(content)
+#        if size is None:
+#            args = list(args)
+#            args.append(Iterate(content))
+#            self.register(methodName, method, *args, **kargs)
+#        else:
+#            args = list(args)
+#            args.append(Repeat(content, size))
+#            self.register(methodName, method, *args, **kargs)
 
 
 ######################################
@@ -111,15 +138,14 @@ def cxTwoPoints(ind1, ind2):
     This operation apply on an :class:`~eap.base.Individual` composed of a list
     of attributes and act as follow ::
     
-
-        >>> ind1 = [A(1), ..., A(n), ..., A(n+i), ..., A(m)]
-        >>> ind2 = [B(1), ..., B(n), ..., B(n+i), ..., B(k)]
-        >>> # Crossover with mating points n and n+i, n > 1 and n+i <= min(m, k)
+        >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)]
+        >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
+        >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
         >>> child1, child2 = twoPointsCx(ind1, ind2)
         >>> print child1
-        [A(1), ..., B(n), ..., B(n+i-1), A(n+i), ..., A(m)]
+        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)]
         >>> print child2
-        [B(1), ..., A(n), ..., A(n+i-1), B(n+i), ..., B(k)]
+        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)]
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -135,9 +161,10 @@ def cxTwoPoints(ind1, ind2):
    
     child1[cxpoint1:cxpoint2], child2[cxpoint1:cxpoint2] \
          = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
+    
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -152,12 +179,12 @@ def cxOnePoint(ind1, ind2):
 
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
-        >>> # Crossover with mating point n, 1 < n <= min(m, k)
+        >>> # Crossover with mating point i, 1 < i <= min(m, k)
         >>> child1, child2 = twoPointsCx(ind1, ind2)
         >>> print child1
-        [A(1), ..., B(n), ..., B(k)]
+        [A(1), ..., B(i), ..., B(k)]
         >>> print child2
-        [B(1), ..., A(n), ..., A(m)]
+        [B(1), ..., A(i), ..., A(m)]
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -169,8 +196,8 @@ def cxOnePoint(ind1, ind2):
     child1[cxpoint:], child2[cxpoint:] = child2[cxpoint:], child1[cxpoint:]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -183,11 +210,11 @@ def cxUniform(ind1, ind2, indpb):
     
     for i in xrange(size):
         if random.random() < indpb:
-            child1[i], child2[i] = childe2[i], child1[i]
+            child1[i], child2[i] = child2[i], child1[i]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -195,10 +222,10 @@ def cxUniform(ind1, ind2, indpb):
     
 
 def cxPartialyMatched(ind1, ind2):
-    """Execute a partialy matched crossover on the input indviduals. The two
-    children produced are returned as a tuple, the two parents are left intact.
-    This crossover expect individuals of indices, the result for any other type
-    of individuals is unpredictable.
+    """Execute a partialy matched crossover (PMX) on the input indviduals.
+    The two children produced are returned as a tuple, the two parents are
+    left intact. This crossover expect iterable individuals of indices,
+    the result for any other type of individuals is unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values in a certain range of the two parents and swaping the values
@@ -244,14 +271,67 @@ def cxPartialyMatched(ind1, ind2):
         child1[i], child1[p1[temp2]] = temp2, temp1
         child2[i], child2[p2[temp1]] = temp1, temp2
         # Position bookkeeping
-        #print lTemp1, lTemp2
         p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-        #print lPos1
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
+    except AttributeError:
+        pass
+    
+    return child1, child2
+
+def cxUniformPartialyMatched(ind1, ind2, indpb):
+    """Execute a uniform partialy matched crossover (UPMX) on the input
+    indviduals. The two children produced are returned as a tuple, the two
+    parents are left intact. This crossover expect iterable individuals of
+    indices, the result for any other type of individuals is unpredictable.
+
+    Moreover, this crossover consists of generating two children by matching
+    pairs of values chosen at random with a probability of *indpb* in the two
+    parents and swaping the values of those indexes. For more details see
+    Cicirello and Smith, "Modeling GA performance for control parameter
+    optimization", 2000.
+
+    For example, the following parents will produce the two following children
+    when mated with the chosen points ``[0, 1, 0, 0, 1]``. ::
+
+        >>> ind1 = [0, 1, 2, 3, 4]
+        >>> ind2 = [1, 2, 3, 4, 0]
+        >>> child1, child2 = pmxCx(ind1, ind2)
+        >>> print child1
+        [4, 2, 1, 3, 0]
+        >>> print child2
+        [2, 1, 3, 0, 4]
+
+    This function use the :func:`~random.random` and :func:`~random.randint`
+    functions from the python base :mod:`random` module.
+    """
+    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    size = min(len(ind1), len(ind2))
+    p1, p2 = [0]*size, [0]*size
+
+    # Initialize the position of each indices in the individuals
+    for i in xrange(size):
+        p1[child1[i]] = i
+        p2[child2[i]] = i
+    
+    for i in xrange(size):
+        if random.random < indpb:
+            # Keep track of the selected values
+            temp1 = child1[i]
+            temp2 = child2[i]
+            # Swap the matched value
+            child1[i], child1[p1[temp2]] = temp2, temp1
+            child2[i], child2[p2[temp1]] = temp1, temp2
+            # Position bookkeeping
+            p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
+            p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
+    
+    try:
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -270,8 +350,8 @@ def cxBlend(ind1, ind2, alpha):
         child2[i] = gamma * x1 + (1. - gamma) * x2
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -295,8 +375,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
         child2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -307,6 +387,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
 ######################################
 
 def cxMessyOnePoint(ind1, ind2):
+    """Execute a one point crossover will mostly change the individuals size.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint1 = random.randint(1, len(ind1))
     cxpoint2 = random.randint(1, len(ind2))
@@ -314,8 +396,8 @@ def cxMessyOnePoint(ind1, ind2):
     child1[cxpoint1:], child2[cxpoint2:] = child2[cxpoint2:], child1[cxpoint1:]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -326,6 +408,8 @@ def cxMessyOnePoint(ind1, ind2):
 ######################################
 
 def cxESBlend(ind1, ind2, alpha, minstrategy=None):
+    """Execute a blend crossover on both, the individual and the strategy.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     
@@ -348,8 +432,8 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
             child2.strategy[indx] = minstrategy
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -375,8 +459,8 @@ def cxESTwoPoints(ind1, ind2):
         child2.strategy[pt1:pt2], child1.strategy[pt1:pt2]
     
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     
@@ -386,8 +470,9 @@ def cxESTwoPoints(ind1, ind2):
 # GA Mutations                       #
 ######################################
 
-def mutGaussian(individual, sigma, indpb):
-    """This function applies a gaussian mutation on the input individual and
+def mutGaussian(individual, mu, sigma, indpb):
+    """This function applies a gaussian mutation of mean *mu* and standard
+    deviation *sigma*  on the input individual and
     returns the mutant. The *individual* is left intact and the mutant is an
     independant copy. This mutation expects an iterable individual composed of
     real valued attributes. The *mutIndxPb* argument is the probability of each
@@ -403,8 +488,8 @@ def mutGaussian(individual, sigma, indpb):
        is up to you.
        
        One easy way to add cronstraint checking to an operator is to simply wrap
-       the operator in a second function. See the Evolution Strategies example
-       for an explicit example.
+       the operator in a second function. See the multi-objective example
+       (moga_kursawefct.py) for an explicit example.
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
@@ -414,11 +499,11 @@ def mutGaussian(individual, sigma, indpb):
     
     for i in xrange(len(mutant)):
         if random.random() < indpb:
-            mutant[i] += random.gauss(0, sigma)
+            mutant[i] += random.gauss(mu, sigma)
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     
@@ -447,7 +532,7 @@ def mutShuffleIndexes(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.invalidate()
+            del mutant.fitness.values
         except AttributeError:
             pass
     
@@ -474,7 +559,7 @@ def mutFlipBit(individual, indpb):
             mutated = True
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     return mutant
@@ -484,6 +569,10 @@ def mutFlipBit(individual, indpb):
 ######################################
 
 def mutES(individual, indpb, minstrategy=None):
+    """Mutate an evolution strategy according to its :attr:`strategy` attribute.
+    The strategy shall be teh same size as the individual. This is subject to
+    change.
+    """
     mutated = False
     mutant = copy.deepcopy(individual)
     
@@ -504,7 +593,7 @@ def mutES(individual, indpb, minstrategy=None):
             
     if mutated:
         try:
-            mutant.fitness.valid = False
+            del mutant.fitness.values
         except AttributeError:
             pass
     return mutant
@@ -514,22 +603,25 @@ def mutES(individual, indpb, minstrategy=None):
 ######################################
 
 def cxTreeUniformOnePoint(ind1, ind2):
-
+    """ Randomly select in each individual and exchange
+        each subtree with the point as root between each individual.
+    """
     child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     
     try:
-        index = random.randint(1,min([ind1.size, ind2.size])-1)    
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
     except ValueError:
         return child1, child2
 
-    sub1 = ind1.search_subtree_dfs(index)
-    sub2 = ind2.search_subtree_dfs(index)
-    child1.set_subtree_dfs(index, sub2)
-    child2.set_subtree_dfs(index, sub1)
+    sub1 = ind1.search_subtree_dfs(index1)
+    sub2 = ind2.search_subtree_dfs(index2)
+    child1.set_subtree_dfs(index1, sub2)
+    child2.set_subtree_dfs(index2, sub1)
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
     return child1, child2
@@ -537,21 +629,30 @@ def cxTreeUniformOnePoint(ind1, ind2):
 ## Strongly Typed GP crossovers
     
 def cxTypedTreeOnePoint(ind1, ind2):
+    """ Randomly select in each individual and exchange
+        each subtree with the point as root between each individual.
+        Since the node are strongly typed, the operator then make sure the
+        the type of second node correspond to the type of the first node. It it
+        doesn't it randomly select another point in the second individual and
+        try again. It tries up to 5 times before returning the unmodified 
+        individuals.
+    """
     child1 = copy.deepcopy(ind1)
     child2 = copy.deepcopy(ind2)
     
-    # choose the crossover point in the 1st
-    # individual
-    index1 = random.randint(1, child1.size-1)
+    # choose the crossover point in each individual
+    try:
+        index1 = random.randint(1, child1.size-1)
+        index2 = random.randint(1, child2.size-1)
+    except ValueError:
+        return child1, child2
+        
     subtree1 = child1.search_subtree_dfs(index1)
     type1 = subtree1.root.ret
-    
-    # choose the crossover point in the 2nd
-    # individual 
-    index2 = random.randint(1, child2.size-1)
     subtree2 = child2.search_subtree_dfs(index2)
     type2 = subtree2.root.ret
     
+
     # try to mate the trees
     # if not crossover point is found after MAX_CX_TRY
     # the children are returned without modifications.
@@ -570,8 +671,8 @@ def cxTypedTreeOnePoint(ind1, ind2):
         child2.set_subtree_dfs(index2, sub1)
 
     try:
-        child1.fitness.valid = False
-        child2.fitness.valid = False
+        del child1.fitness.values
+        del child2.fitness.values
     except AttributeError:
         pass
 
@@ -582,13 +683,15 @@ def cxTypedTreeOnePoint(ind1, ind2):
 ######################################
 
 def mutTreeUniform(ind, expr):
-
+    """ Randomly select a point in the Tree, then replace the subtree with
+        the point as a root by a randomly generated expression. The expression
+        is generated using the method `expr`.
+    """
     mutant = copy.deepcopy(ind)
-    index = random.randint(1, mutant.size-1)
-    subtree = base.Tree(expr())
-    mutant.set_subtree_dfs(index, subtree)
+    index = random.randint(0, mutant.size-1)
+    mutant.set_subtree_dfs(index, expr())
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass
     return mutant
@@ -607,13 +710,11 @@ def mutTypedTreeUniform(ind, expr):
     returned.
     """
     mutant = copy.deepcopy(ind)
-    index = random.randint(1, mutant.size-1)
+    index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
-    type = subtree.root.ret
-    subtree = base.Tree(expr(type=type))
-    mutant.set_subtree_dfs(index, subtree)
+    mutant.set_subtree_dfs(index, expr(type=subtree.root.ret))
     try:
-        mutant.fitness.valid = False
+        del mutant.fitness.values
     except AttributeError:
         pass   
     return mutant 
@@ -640,14 +741,14 @@ def selBest(individuals, n):
     """Select the *n* best individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     """
-    return sorted(individuals, key=lambda ind : ind.fitness, reverse=True)[:n]
+    return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
 
 
 def selWorst(individuals, n):
     """Select the *n* worst individuals among the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
     """
-    return sorted(individuals, key=lambda ind : ind.mFitness)[:n]
+    return sorted(individuals, key=attrgetter("fitness"))[:n]
 
 
 def selTournament(individuals, n, tournsize):
@@ -679,14 +780,15 @@ def nsga2(individuals, n):
     
 #    import matplotlib.pyplot as plt
 #    from itertools import cycle
-#    plt.figure(2)
+#    plt.figure()
 #    colors = cycle("bgrcmky")
-#    for i, front in enumerate(pareto_fronts):
+#    for front in pareto_fronts:
 #        fit1 = [ind.fitness[0] for ind in front]
 #        fit2 = [ind.fitness[1] for ind in front]
 #        plt.scatter(fit1, fit2, c=colors.next())
+#        print len(front)
 #    plt.show()
-#    print len(pareto_fronts)
+    #print len(pareto_fronts)
     
     chosen = list(chain(*pareto_fronts[:-1]))
     n = n - len(chosen)
@@ -695,7 +797,7 @@ def nsga2(individuals, n):
     return chosen
     
 
-def sortFastND(individuals, n):
+def sortFastND(individuals, n, first_front_only=False):
     """Sort the first *n* *individuals* according the the fast non-dominated
     sorting algorithm. 
     """
@@ -707,35 +809,36 @@ def sortFastND(individuals, n):
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = dict.fromkeys(map(id, individuals), 0.0)
-    dominated_inds = dict(izip(map(id, individuals), (list() for i in xrange(N))))
+    dominating_inds = [0] * N
+    dominated_inds = [list() for i in xrange(N)]
     
     # Rank first Pareto front
-    for i, ind_i in enumerate(individuals):
-        for ind_j in individuals[i+1:]:
-            if ind_j.fitness.isDominated(ind_i.fitness):
-                dominating_inds[id(ind_j)] += 1
-                dominated_inds[id(ind_i)].append(ind_j)
-            elif ind_i.fitness.isDominated(ind_j.fitness):
-                dominating_inds[id(ind_i)] += 1
-                dominated_inds[id(ind_j)].append(ind_i)
-        if dominating_inds[id(ind_i)] == 0:
-            pareto_fronts[-1].append(ind_i)
+    for i in xrange(N):
+        for j in xrange(i+1, N):
+            if individuals[j].fitness.isDominated(individuals[i].fitness):
+                dominating_inds[j] += 1
+                dominated_inds[i].append(j)
+            elif individuals[i].fitness.isDominated(individuals[j].fitness):
+                dominating_inds[i] += 1
+                dominated_inds[j].append(i)
+        if dominating_inds[i] == 0:
+            pareto_fronts[-1].append(i)
             pareto_sorted += 1
-            
+    
+    if not first_front_only:
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
-    N = min(N, n)
-    while pareto_sorted < N:
-        pareto_fronts.append([])
-        for ind_p in pareto_fronts[-2]:
-            for ind_d in dominated_inds[id(ind_p)]:
-                dominating_inds[id(ind_d)] -= 1
-                if dominating_inds[id(ind_d)] == 0:
-                    pareto_fronts[-1].append(ind_d)
-                    pareto_sorted += 1
+        N = min(N, n)
+        while pareto_sorted < N:
+            pareto_fronts.append([])
+            for indice_p in pareto_fronts[-2]:
+                for indice_d in dominated_inds[indice_p]:
+                    dominating_inds[indice_d] -= 1
+                    if dominating_inds[indice_d] == 0:
+                        pareto_fronts[-1].append(indice_d)
+                        pareto_sorted += 1
     
-    return pareto_fronts
+    return [[individuals[index] for index in front] for front in pareto_fronts]
 
 
 def sortCrowdingDist(individuals, n):
@@ -744,21 +847,163 @@ def sortCrowdingDist(individuals, n):
     if len(individuals) == 0:
         return []
     
-    distances = dict(izip(map(id, individuals), ([0.0, ind] for ind in individuals)))
-    crowding = list(individuals)
-        
-    number_objectives = len(individuals[0].fitness)
+    distances = [0.0] * len(individuals)
+    crowding = [(ind, i) for i, ind in enumerate(individuals)]
+    
+    number_objectives = len(individuals[0].fitness.values)
     for i in xrange(number_objectives):
-        crowding.sort(key=lambda ind: ind.fitness[i])
-        distances[id(crowding[0])][0] = float("inf")
-        distances[id(crowding[-1])][0] = float("inf")
-        for j, ind in enumerate(crowding[1:-1]):
-            if distances[id(ind)][0] < float("inf"):
-                distances[id(ind)][0] += crowding[j + 1].fitness[i] - \
-                                      crowding[j - 1].fitness[i]
-    sorted_dist = sorted(distances.itervalues(), key=lambda value: value[0], reverse=True)
-    return (value[1] for value in sorted_dist[:n])
+        crowding.sort(key=lambda element: element[0].fitness.values[i])
+        distances[crowding[0][1]] = float("inf")
+        distances[crowding[-1][1]] = float("inf")
+        for j in xrange(1, len(crowding) - 1):
+            if distances[crowding[j][1]] < float("inf"):
+                distances[crowding[j][1]] += \
+                                      crowding[j + 1][0].fitness.values[i] - \
+                                      crowding[j - 1][0].fitness.values[i]
+    sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
+                         key=lambda value: value[0], reverse=True)
+    return (individuals[index] for dist, index in sorted_dist[:n])
 
+
+######################################
+# Strength Pareto         (SPEA-II)  #
+######################################
+
+def spea2(individuals, n):
+    N = len(individuals)
+    L = len(individuals[0].fitness.values)
+    K = math.sqrt(N)
+    strength_fits = [0] * N
+    fits = [0] * N
+    dominating_inds = [list() for i in xrange(N)]
+    
+    for i in xrange(N):
+        for j in xrange(i + 1, N):
+            if individuals[i].fitness.isDominated(individuals[j].fitness):
+                strength_fits[j] += 1
+                dominating_inds[i].append(j)
+            elif individuals[j].fitness.isDominated(individuals[i].fitness):
+                strength_fits[i] += 1
+                dominating_inds[j].append(i)
+    
+    for i in xrange(N):
+        for j in dominating_inds[i]:
+            fits[i] += strength_fits[j]
+    
+    # Choose all non-dominated individuals
+    chosen_indices = [i for i in xrange(N) if fits[i] < 1]
+    
+    if len(chosen_indices) < n:     # The archive is too small
+        for i in xrange(N):
+            distances = [0.0] * N
+            for j in xrange(i + 1, N):
+                dist = 0.0
+                for k in xrange(L):
+                    val = individuals[i].fitness.values[k] - \
+                          individuals[j].fitness.values[k]
+                    dist += val * val
+                distances[j] = dist
+            kth_dist = _randomizedSelect(distances, 0, N - 1, K)
+            density = 1.0 / (kth_dist + 2.0)
+            fits[i] += density
+            
+        next_indices = [(fits[i], i) for i in xrange(N) if not i in chosen_indices]
+        next_indices.sort()
+        #print next_indices
+        chosen_indices += [i for fit, i in next_indices[:n - len(chosen_indices)]]
+                
+    elif len(chosen_indices) > n:   # The archive is too large
+        N = len(chosen_indices)
+        distances = [[0.0] * N for i in xrange(N)]
+        sorted_indices = [[0] * N for i in xrange(N)]
+        for i in xrange(N):
+            for j in xrange(i + 1, N):
+                dist = 0.0
+                for k in xrange(L):
+                    val = individuals[chosen_indices[i]].fitness.values[k] - \
+                          individuals[chosen_indices[j]].fitness.values[k]
+                    dist += val * val
+                distances[i][j] = dist
+                distances[j][i] = dist
+            distances[i][i] = -1
+        
+        # Insert sort is faster than quick sort for short arrays
+        for i in xrange(N):
+            for j in xrange(1, N):
+                k = j
+                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
+                    sorted_indices[i][k] = sorted_indices[i][k - 1]
+                    k -= 1
+                sorted_indices[i][k] = j
+        
+        size = N
+        to_remove = []
+        while size > n:
+            # Search for minimal distance
+            min_pos = 0
+            for i in xrange(1, N):
+                for j in xrange(1, size):
+                    dist_i_sorted_j = distances[i][sorted_indices[i][j]]
+                    dist_min_sorted_j = distances[min_pos][sorted_indices[min_pos][j]]
+                    
+                    if dist_i_sorted_j < dist_min_sorted_j:
+                        min_pos = i
+                        break
+                    elif dist_i_sorted_j > dist_min_sorted_j:
+                        break
+            
+            # Remove minimal distance from sorted_indices
+            for i in xrange(N):
+                distances[i][min_pos] = float("inf")
+                distances[min_pos][i] = float("inf")
+                
+                for j in xrange(1, size - 1):
+                    if sorted_indices[i][j] == min_pos:
+                        sorted_indices[i][j] = sorted_indices[i][j + 1]
+                        sorted_indices[i][j + 1] = min_pos
+            
+            # Remove corresponding individual from chosen_indices
+            to_remove.append(min_pos)
+            size -= 1
+        
+        for index in reversed(sorted(to_remove)):
+            del chosen_indices[index]
+    
+    return [individuals[i] for i in chosen_indices]
+    
+def _randomizedSelect(array, begin, end, i):
+    """Allows to select the ith smallest element from array without sorting it.
+    Runtime is expected to be O(n).
+    """
+    if begin == end:
+        return array[begin]
+    q = _randomizedPartition(array, begin, end)
+    k = q - begin + 1
+    if i < k:
+        return _randomizedSelect(array, begin, q, i)
+    else:
+        return _randomizedSelect(array, q + 1, end, i - k)
+
+def _randomizedPartition(array, begin, end):
+    i = random.randint(begin, end)
+    array[begin], array[i] = array[i], array[begin]
+    return _partition(array, begin, end)
+    
+def _partition(array, begin, end):
+    x = array[begin]
+    i = begin - 1
+    j = end + 1
+    while True:
+        j -= 1
+        while array[j] > x:
+            j -= 1
+        i += 1
+        while array[i] < x:
+            i += 1
+        if i < j:
+            array[i], array[j] = array[j], array[i]
+        else:
+            return j
 
 ######################################
 # Replacement Strategies (ES)        #

@@ -14,6 +14,7 @@ Evolutionary Content
    evo_toolbox
    algorithms
    stats
+   milestone
    cma
    
 Tutorials
@@ -24,8 +25,9 @@ Tutorials
    :numbered:
    
    first_steps
-   ga_onemax
-   short_ga_onemax
+   onemax
+   short_onemax
+   knapsack
    
 Indices and tables
 ==================
