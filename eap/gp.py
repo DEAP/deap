@@ -44,14 +44,14 @@ def evaluateADF(seq):
     """
     adfdict = {}
     for i, expr in enumerate(reversed(seq[1:])):
-        func = lambdify(expr.pset, expr, reduce(add, expr.pset.terminals.values()))
+        func = lambdify(expr.pset, expr)
         adfdict.update({seq[0].pset.adfs[i] : func})
         for expr2 in reversed(seq[:i+1]):
             expr2.pset.func_dict.update(adfdict)
             
     return adfdict
 
-def lambdify(pset, expr, args):
+def lambdify(pset, expr):
     """Return a lambda function of the expression.
 
     Remark:
@@ -60,16 +60,11 @@ def lambdify(pset, expr, args):
     """
     if isinstance(expr, list):
         expr = evaluate(expr)
-    if isinstance(args, str):
-        pass
-    elif hasattr(args, "__iter__"):
-        args = ",".join(str(a) for a in args)
-    else:
-        args = str(args)
+    args = ",".join(a for a in pset.arguments)
     lstr = "lambda %s: (%s)" % (args, expr)
     return eval(lstr, dict(pset.func_dict))
 
-def lambdifyList(expr, args):
+def lambdifyList(expr):
     """ Return a lambda function created from a list of trees. The first 
         element of the list is the main tree, and the following elements are
         automatically defined functions (ADF) that can be called by the first
@@ -77,7 +72,7 @@ def lambdifyList(expr, args):
     """
     adfdict = evaluateADF(expr)
     expr[0].pset.func_dict.update(adfdict)   
-    return lambdify(expr[0].pset, expr[0], args)
+    return lambdify(expr[0].pset, expr[0])
 
 ## Loosely + Strongly Typed GP 
 
@@ -169,15 +164,33 @@ class EphemeralGenerator(object):
         return self.name
 
 class PrimitiveSetTyped(object):
-    def __init__(self):
+    def __init__(self, name, in_types, ret_type, prefix = "ARG"):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
+        self.arguments = []
         self.adfs = []
         self.func_dict = dict()
         self.termsCount = 0
         self.primsCount = 0
         self.adfsCount = 0
-    
+        
+        self.name = name 
+        self.ret = ret_type
+        self.ins = in_types
+        for i, type in enumerate(in_types):
+            self.arguments.append(prefix + ("%s" % i))
+            PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type)
+            
+    def renameArguments(self, new_args):
+        for i, argument in enumerate(self.arguments):
+            if new_args.has_key(argument):
+                self.arguments[i] = new_args[argument]
+        for terminals in self.terminals.values():
+            for terminal in terminals:
+                if ( isinstance(terminal, Terminal) and 
+                     new_args.has_key(terminal.value) ):
+                    terminal.value = new_args[terminal.value]
+
     def addPrimitive(self, primitive, in_types, ret_type):
         try:
             prim = Operator(primitive.__name__, in_types, ret_type)
@@ -199,10 +212,10 @@ class PrimitiveSetTyped(object):
         self.terminals[ret_type].append(prim)
         self.termsCount += 1
         
-    def addADF(self, name, in_types, ret_type):
-        prim = Primitive(name, in_types, ret_type)
-        self.adfs.append(name)
-        self.primitives[ret_type].append(prim)
+    def addADF(self, adfset):
+        prim = Primitive(adfset.name, adfset.ins, adfset.ret)
+        self.adfs.append(adfset.name)
+        self.primitives[adfset.ret].append(prim)
     
     @property
     def terminalRatio(self):
@@ -212,6 +225,10 @@ class PrimitiveSetTyped(object):
         return self.termsCount / float(self.termsCount + self.primsCount)
 
 class PrimitiveSet(PrimitiveSetTyped):
+    def __init__(self, name, arity, prefix="ARG"):
+        args = [__type__]*arity
+        PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
+
     def addPrimitive(self, primitive, arity):
         assert arity > 0, "arity should be >= 1"
         args = [__type__] * arity 
@@ -223,10 +240,8 @@ class PrimitiveSet(PrimitiveSetTyped):
     def addEphemeralConstant(self, ephemeral):
         PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
         
-    def addADF(self, name, arity):
-        assert arity > 0, "arity should be >= 1"
-        args = [__type__] * arity
-        PrimitiveSetTyped.addADF(self, name, args, __type__)        
+    def addADF(self, adfset):
+        PrimitiveSetTyped.addADF(self, adfset)        
 
 # Expression generation functions
 

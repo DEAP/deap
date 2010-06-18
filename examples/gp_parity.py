@@ -51,15 +51,13 @@ for i in xrange(PARITY_SIZE_M):
             inputs[i][j] = 0
     outputs[i] = parity
 
-pset = gp.PrimitiveSet()
+pset = gp.PrimitiveSet("MAIN", PARITY_FANIN_M, "IN")
 pset.addPrimitive(operator.and_, 2)
 pset.addPrimitive(operator.or_, 2)
 pset.addPrimitive(operator.xor, 2)
 pset.addPrimitive(operator.not_, 1)
 pset.addTerminal(1)
 pset.addTerminal(0)
-for i in xrange(PARITY_FANIN_M):
-    pset.addTerminal('IN%s'%i)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
@@ -68,7 +66,7 @@ tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_full, pset=pset, min=3, max=5)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=300)
-tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s" %i for i in xrange(PARITY_FANIN_M)])
+tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalParity(individual):
     func = tools.lambdify(expr=individual)

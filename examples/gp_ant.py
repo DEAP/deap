@@ -157,7 +157,7 @@ if __name__ == "__main__":
     file = open("santafe_trail.txt")
     ant.parse_matrix(file)
 
-    pset = gp.PrimitiveSet()
+    pset = gp.PrimitiveSet("MAIN", 0)
     pset.addPrimitive(ant.if_food_ahead, 2)
     pset.addPrimitive(prog2, 2)
     pset.addPrimitive(prog3, 3)
