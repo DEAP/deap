@@ -39,7 +39,7 @@ def safeDiv(left, right):
     except ZeroDivisionError:
         return 0
 
-pset = gp.PrimitiveSet()
+pset = gp.PrimitiveSet("MAIN", 1)
 pset.addPrimitive(operator.add, 2)
 pset.addPrimitive(operator.sub, 2)
 pset.addPrimitive(operator.mul, 2)
@@ -48,7 +48,7 @@ pset.addPrimitive(operator.neg, 1)
 pset.addPrimitive(math.cos, 1)
 pset.addPrimitive(math.sin, 1)
 pset.addEphemeralConstant(lambda: random.randint(-1,1))
-pset.addTerminal('x')
+pset.renameArguments({"ARG0" : "x"})
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", base.Tree, fitness=creator.FitnessMin, pset=pset)
@@ -57,7 +57,7 @@ tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, pset=pset, min=1, max=2)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=100)
-tools.register("lambdify", gp.lambdify, pset=pset, args='x')
+tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function

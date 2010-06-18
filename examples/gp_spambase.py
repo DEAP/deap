@@ -19,6 +19,7 @@ import random
 import operator
 import logging
 import csv
+import itertools
 
 sys.path.append(os.path.abspath(".."))
 
@@ -39,7 +40,7 @@ spamReader = csv.reader(open("spambase.csv"))
 spam = list(list(float(elem) for elem in row) for row in spamReader)
 
 # defined a new primitive set for strongly typed GP
-pset = gp.PrimitiveSetTyped()
+pset = gp.PrimitiveSetTyped("MAIN", itertools.repeat("float", 57), "bool", "IN")
 
 # boolean operators
 pset.addPrimitive(operator.and_, ["bool", "bool"], "bool")
@@ -71,7 +72,6 @@ pset.addPrimitive(if_then_else, ["bool", "float", "float"], "float")
 pset.addEphemeralConstant(lambda: random.random() * 100, "float")
 pset.addTerminal(0, "bool")
 pset.addTerminal(1, "bool")
-for i in xrange(57): pset.addTerminal("IN%s"%i, "float")
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
@@ -80,7 +80,7 @@ tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, type="bool", pset=pset, min=1, max=2)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=100)
-tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s"%i for i in xrange(57)])
+tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSpambase(individual):
     # Transform the tree expression in a callable function
