@@ -53,7 +53,7 @@ class Repeat(object):
 class Iterate(object):
     def __init__(self, func):
         self.func = func
-        self.iter = iter(self.func())
+        self.iter = None
         
     def __iter__(self):
         return self
@@ -64,6 +64,9 @@ class Iterate(object):
         except StopIteration:
             self.iter = iter(self.func())
             raise StopIteration
+        except AttributeError:
+            self.iter = iter(self.func())
+            return self.iter.next()
 
 class FuncCycle(list):
     def __init__(self, seq_func):
