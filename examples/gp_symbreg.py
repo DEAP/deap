@@ -14,13 +14,10 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import random
 import operator
 import math
 import logging
-
-random.seed(1348779701)
-
+import random
 
 sys.path.append("..")
 
@@ -55,6 +52,7 @@ creator.create("Individual", base.Tree, fitness=creator.FitnessMin, pset=pset)
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, pset=pset, min=1, max=2)
 tools.register("individual", creator.Individual, content_init=tools.expr)
+
 tools.register("population", list, content_init=tools.individual, size_init=100)
 tools.register("lambdify", gp.lambdify, pset=pset)
 
@@ -76,11 +74,12 @@ tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":
+    random.seed(1348779701)
+    
     logging.basicConfig(level=logging.DEBUG)
 
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
-    
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
