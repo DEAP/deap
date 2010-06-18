@@ -166,7 +166,7 @@ if __name__ == "__main__":
     pset.addTerminal(ant.turn_right)
 
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
+    creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
 
     tools = toolbox.Toolbox()
     
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     tools.register("evaluate", evalArtificialAnt)
     tools.register("select", toolbox.selTournament, tournsize=7)
     tools.register("mate", toolbox.cxTreeUniformOnePoint)
-    tools.register("expr_mut", gp.generate_full, pset=pset, min=0, max=2)
+    tools.register("expr_mut", gp.generate_full, min=0, max=2)
     tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
     pop = tools.population()

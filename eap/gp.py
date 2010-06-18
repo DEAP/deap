@@ -38,16 +38,16 @@ def evaluate(expr, pset=None):
     else:
         return _stringify(expr)
 
-def evaluateADF(seq, pset, adfset):
+def evaluateADF(seq):
     """ Evaluate a list of ADF and return a dict mapping the ADF name with its
         lambda function.
     """
     adfdict = {}
-    for i, expr in enumerate(reversed(seq)):
-        func = lambdify(adfset[i], expr, reduce(add, adfset[i].terminals.values()))
-        adfdict.update({pset.adfs[i] : func})
-        for set in reversed(adfset[:i+1]):
-            set.func_dict.update(adfdict)
+    for i, expr in enumerate(reversed(seq[1:])):
+        func = lambdify(expr.pset, expr, reduce(add, expr.pset.terminals.values()))
+        adfdict.update({seq[0].pset.adfs[i] : func})
+        for expr2 in reversed(seq[:i+1]):
+            expr2.pset.func_dict.update(adfdict)
             
     return adfdict
 
@@ -69,15 +69,15 @@ def lambdify(pset, expr, args):
     lstr = "lambda %s: (%s)" % (args, expr)
     return eval(lstr, dict(pset.func_dict))
 
-def lambdifyList(pset, expr, args):
+def lambdifyList(expr, args):
     """ Return a lambda function created from a list of trees. The first 
         element of the list is the main tree, and the following elements are
         automatically defined functions (ADF) that can be called by the first
         tree.
     """
-    adfdict = evaluateADF(expr[1:], pset[0], pset[1:])
-    pset[0].func_dict.update(adfdict)   
-    return lambdify(pset[0], expr[0], args)
+    adfdict = evaluateADF(expr)
+    expr[0].pset.func_dict.update(adfdict)   
+    return lambdify(expr[0].pset, expr[0], args)
 
 ## Loosely + Strongly Typed GP 
 
