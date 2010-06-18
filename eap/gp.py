@@ -168,9 +168,9 @@ class PrimitiveSetTyped(object):
         self.primitives = defaultdict(list)
         self.arguments = []
         self.func_dict = dict()
-        self.termsCount = 0
-        self.primsCount = 0
-        self.adfsCount = 0
+        self.terms_count = 0
+        self.prims_count = 0
+        self.adfs_count = 0
         
         self.name = name 
         self.ret = ret_type
@@ -196,19 +196,19 @@ class PrimitiveSetTyped(object):
             prim = Primitive(primitive.__name__, in_types, ret_type)
         self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
-        self.primsCount += 1
+        self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type):
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
         prim = Terminal(terminal, ret_type)
         self.terminals[ret_type].append(prim)
-        self.termsCount += 1
+        self.terms_count += 1
         
     def addEphemeralConstant(self, ephemeral, ret_type):
         prim = EphemeralGenerator(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
-        self.termsCount += 1
+        self.terms_count += 1
         
     def addADF(self, adfset):
         prim = Primitive(adfset.name, adfset.ins, adfset.ret)
@@ -219,7 +219,7 @@ class PrimitiveSetTyped(object):
         """ Return the ratio of the number of terminals on the number of all
             kinds of primitives.
         """
-        return self.termsCount / float(self.termsCount + self.primsCount)
+        return self.terms_count / float(self.terms_count + self.prims_count)
 
 class PrimitiveSet(PrimitiveSetTyped):
     def __init__(self, name, arity, prefix="ARG"):
