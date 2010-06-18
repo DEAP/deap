@@ -16,13 +16,13 @@
 import sys
 import random
 
+random.seed(64)
+
 sys.path.append("..")
 
 import eap.base as base
 import eap.creator as creator
 import eap.toolbox as toolbox
-
-random.seed(64)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -45,45 +45,46 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-pop = tools.population()
-CXPB, MUTPB, NGEN = 0.5, 0.2, 40
-
-# Evaluate the entire population
-for ind in pop:
-    ind.fitness.values = tools.evaluate(ind)
-
-# Begin the evolution
-for g in range(NGEN):
-    print "-- Generation %i --" % g
-
-    pop[:] = tools.select(pop, n=len(pop))
-
-    # Apply crossover and mutation
-    for i in xrange(1, len(pop), 2):
-        if random.random() < CXPB:
-            pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
-
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = tools.mutate(pop[i])
-
-    # Evaluate the individuals with an invalid fitness
+if __name__ == "__main__":
+    pop = tools.population()
+    CXPB, MUTPB, NGEN = 0.5, 0.2, 40
+    
+    # Evaluate the entire population
     for ind in pop:
-        if not ind.fitness.valid:
-            ind.fitness.values = tools.evaluate(ind)
-
-    # Gather all the fitnesses in one list and print the stats
-    fits = [ind.fitness.values[0] for ind in pop]
-    print "  Min %s" % min(fits)
-    print "  Max %s" % max(fits)
-    lenght = len(pop)
-    mean = sum(fits) / lenght
-    sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = abs(sum2 / lenght - mean**2)**0.5
-    print "  Avg %s" % mean
-    print "  Std %s" % std_dev
-
-print "-- End of (successful) evolution --"
-
-best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
+        ind.fitness.values = tools.evaluate(ind)
+    
+    # Begin the evolution
+    for g in range(NGEN):
+        print "-- Generation %i --" % g
+    
+        pop[:] = tools.select(pop, n=len(pop))
+    
+        # Apply crossover and mutation
+        for i in xrange(1, len(pop), 2):
+            if random.random() < CXPB:
+                pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
+    
+        for i in xrange(len(pop)):
+            if random.random() < MUTPB:
+                pop[i] = tools.mutate(pop[i])
+    
+        # Evaluate the individuals with an invalid fitness
+        for ind in pop:
+            if not ind.fitness.valid:
+                ind.fitness.values = tools.evaluate(ind)
+    
+        # Gather all the fitnesses in one list and print the stats
+        fits = [ind.fitness.values[0] for ind in pop]
+        print "  Min %s" % min(fits)
+        print "  Max %s" % max(fits)
+        lenght = len(pop)
+        mean = sum(fits) / lenght
+        sum2 = sum(map(lambda x: x**2, fits))
+        std_dev = abs(sum2 / lenght - mean**2)**0.5
+        print "  Avg %s" % mean
+        print "  Std %s" % std_dev
+    
+    print "-- End of (successful) evolution --"
+    
+    best_ind = toolbox.selBest(pop, 1)[0]
+    print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)

@@ -76,13 +76,18 @@ tools.register("mate", mate, alpha=1.5)
 tools.register("mutate", mutate, mu=0, sigma=3, indpb=0.3)
 tools.register("select", toolbox.nsga2)
 
-pop = tools.population()
-hof = halloffame.ParetoFront()
+if __name__ == "__main__":
 
-algorithms.eaMuPlusLambda(tools, pop, 50, 100, cxpb=0.5, mutpb=0.2, ngen=50, halloffame=hof)
-
-logging.info("Best individual for measure 1 is %s, %s", hof[0], hof[0].fitness.values)
-logging.info("Best individual for measure 2 is %s, %s", hof[-1], hof[-1].fitness.values)
+    pop = tools.population()
+    hof = halloffame.ParetoFront()
+    
+    algorithms.eaMuPlusLambda(tools, pop, mu=50, lambda_=100, 
+                              cxpb=0.5, mutpb=0.2, ngen=50, halloffame=hof)
+    
+    logging.info("Best individual for measure 1 is %s, %s", 
+                 hof[0], hof[0].fitness.values)
+    logging.info("Best individual for measure 2 is %s, %s", 
+                 hof[-1], hof[-1].fitness.values)
 
 # You can plot the Hall of Fame if you have matplotlib installed
 #import matplotlib.pyplot as plt

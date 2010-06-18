@@ -49,9 +49,9 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-hof = halloffame.HallOfFame(1)
+if __name__ == "__main__":
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
 
-pop = tools.population()
-algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
-
-logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

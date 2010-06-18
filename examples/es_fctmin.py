@@ -55,10 +55,11 @@ tools.register("mate", toolbox.cxESBlend, alpha=0.1, minstrategy=1e-10)
 tools.register("mutate", toolbox.mutES, indpb=0.1, minstrategy=1e-10)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-hof = halloffame.HallOfFame(1)
-
-pop = tools.population()
-
-algorithms.eaMuCommaLambda(tools, pop, mu=3, lambda_=12, cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
-
-logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+if __name__ == "__main__":
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaMuCommaLambda(tools, pop, mu=3, lambda_=12, 
+                               cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

@@ -19,6 +19,9 @@ import operator
 import math
 import logging
 
+random.seed(1348779701)
+
+
 sys.path.append("..")
 
 import eap.base as base
@@ -27,10 +30,6 @@ import eap.toolbox as toolbox
 import eap.gp as gp
 import eap.algorithms as algorithms
 import eap.halloffame as halloffame
-
-logging.basicConfig(level=logging.DEBUG)
-
-random.seed(1348779701)
 
 # Define new functions
 def safeDiv(left, right):
@@ -76,9 +75,12 @@ tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
 
-pop = tools.population()
-hof = halloffame.HallOfFame(1)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
 
-algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
-
-logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)

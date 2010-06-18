@@ -79,9 +79,11 @@ tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generate_grow, min=0, max=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
-pop = tools.population()
-hof = halloffame.HallOfFame(1)
+if __name__ == "__main__":
 
-algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
-
-logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
