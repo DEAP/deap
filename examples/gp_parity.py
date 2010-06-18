@@ -62,7 +62,7 @@ for i in xrange(PARITY_FANIN_M):
     pset.addTerminal('IN%s'%i)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
+creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_full, pset=pset, min=3, max=5)
@@ -78,7 +78,7 @@ def evalParity(individual):
 tools.register("evaluate", evalParity)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generate_grow, pset=pset, min=0, max=2)
+tools.register("expr_mut", gp.generate_grow, min=0, max=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 pop = tools.population()

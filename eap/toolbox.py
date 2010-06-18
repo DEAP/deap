@@ -686,7 +686,7 @@ def mutTreeUniform(ind, expr):
     """
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
-    mutant.set_subtree_dfs(index, expr())
+    mutant.set_subtree_dfs(index, expr(pset=mutant.pset))
     try:
         del mutant.fitness.values
     except AttributeError:
@@ -709,7 +709,7 @@ def mutTypedTreeUniform(ind, expr):
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
-    mutant.set_subtree_dfs(index, expr(type=subtree.root.ret))
+    mutant.set_subtree_dfs(index, expr(pset=mutant.pset, type=subtree.root.ret))
     try:
         del mutant.fitness.values
     except AttributeError:

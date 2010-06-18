@@ -40,19 +40,30 @@ def safeDiv(left, right):
     except ZeroDivisionError:
         return 0
 
+adfset0 = gp.PrimitiveSet()
+adfset0.addPrimitive(operator.add, 2)
+adfset0.addPrimitive(operator.sub, 2)
+adfset0.addPrimitive(operator.mul, 2)
+adfset0.addPrimitive(safeDiv, 2)
+adfset0.addPrimitive(operator.neg, 1)
+adfset0.addPrimitive(math.cos, 1)
+adfset0.addPrimitive(math.sin, 1)
+adfset0.addADF("ADF1", 2)
+adfset0.addADF("ADF2", 2)
+adfset0.addTerminal("ARG0")
+adfset0.addTerminal("ARG1")
 
-adfset = gp.PrimitiveSet()
-adfset.addPrimitive(operator.add, 2)
-adfset.addPrimitive(operator.sub, 2)
-adfset.addPrimitive(operator.mul, 2)
-adfset.addPrimitive(safeDiv, 2)
-adfset.addPrimitive(operator.neg, 1)
-adfset.addPrimitive(math.cos, 1)
-adfset.addPrimitive(math.sin, 1)
-adfset.addADF("ADF1", 2)
-adfset.addADF("ADF2", 2)
-adfset.addTerminal("ARG0")
-adfset.addTerminal("ARG1")
+adfset1 = gp.PrimitiveSet()
+adfset1.addPrimitive(operator.add, 2)
+adfset1.addPrimitive(operator.sub, 2)
+adfset1.addPrimitive(operator.mul, 2)
+adfset1.addPrimitive(safeDiv, 2)
+adfset1.addPrimitive(operator.neg, 1)
+adfset1.addPrimitive(math.cos, 1)
+adfset1.addPrimitive(math.sin, 1)
+adfset1.addADF("ADF2", 2)
+adfset1.addTerminal("ARG0")
+adfset1.addTerminal("ARG1")
 
 adfset2 = gp.PrimitiveSet()
 adfset2.addPrimitive(operator.add, 2)
@@ -62,20 +73,8 @@ adfset2.addPrimitive(safeDiv, 2)
 adfset2.addPrimitive(operator.neg, 1)
 adfset2.addPrimitive(math.cos, 1)
 adfset2.addPrimitive(math.sin, 1)
-adfset2.addADF("ADF2", 2)
 adfset2.addTerminal("ARG0")
 adfset2.addTerminal("ARG1")
-
-adfset3 = gp.PrimitiveSet()
-adfset3.addPrimitive(operator.add, 2)
-adfset3.addPrimitive(operator.sub, 2)
-adfset3.addPrimitive(operator.mul, 2)
-adfset3.addPrimitive(safeDiv, 2)
-adfset3.addPrimitive(operator.neg, 1)
-adfset3.addPrimitive(math.cos, 1)
-adfset3.addPrimitive(math.sin, 1)
-adfset3.addTerminal("ARG0")
-adfset3.addTerminal("ARG1")
 
 pset = gp.PrimitiveSet()
 pset.addPrimitive(operator.add, 2)
@@ -92,19 +91,23 @@ pset.addADF("ADF2", 2)
 pset.addTerminal('x')
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+creator.create("ADF0", base.Tree, pset=adfset0)
+creator.create("ADF1", base.Tree, pset=adfset1)
+creator.create("ADF2", base.Tree, pset=adfset2)
+creator.create("FUN", base.Tree, pset=pset)
+
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
-tools.register('adf_expr', gp.generate_full, pset=adfset, min=1, max=2)
+tools.register('adf_expr0', gp.generate_full, pset=adfset0, min=1, max=2)
+tools.register('adf_expr1', gp.generate_full, pset=adfset1, min=1, max=2)
 tools.register('adf_expr2', gp.generate_full, pset=adfset2, min=1, max=2)
-tools.register('adf_expr3', gp.generate_full, pset=adfset3, min=1, max=2)
 tools.register('fun_expr', gp.generate_ramped, pset=pset, min=1, max=2)
 
-tools.register('ADF0', base.Tree, content_init=tools.adf_expr)
-tools.register('ADF1', base.Tree, content_init=tools.adf_expr2)
-tools.register('ADF2', base.Tree, content_init=tools.adf_expr3)
-
-tools.register('FUN', base.Tree, content_init=tools.fun_expr)
+tools.register('ADF0', creator.ADF0, content_init=tools.adf_expr0)
+tools.register('ADF1', creator.ADF1, content_init=tools.adf_expr1)
+tools.register('ADF2', creator.ADF2, content_init=tools.adf_expr2)
+tools.register('FUN', creator.FUN, content_init=tools.fun_expr)
 
 tools.register('individual', creator.Individual, 
                              content_init=[tools.FUN, tools.ADF0, tools.ADF1, tools.ADF2], 
@@ -124,15 +127,9 @@ def evalSymbReg(individual):
 tools.register('evaluate', evalSymbReg)
 tools.register('select', toolbox.selTournament, tournsize=3)
 tools.register('mate', toolbox.cxTreeUniformOnePoint)
-tools.register('fun_mut', gp.generate_full, pset=pset, min=0, max=2)
-tools.register('mutate_fun', toolbox.mutTreeUniform, expr=tools.fun_mut)
-tools.register('adf_mut', gp.generate_full, pset=adfset, min=1, max=2)
-tools.register('mutate_adf', toolbox.mutTreeUniform, expr=tools.adf_mut)
-tools.register('adf_mut2', gp.generate_full, pset=adfset2, min=1, max=2)
-tools.register('mutate_adf2', toolbox.mutTreeUniform, expr=tools.adf_mut2)
-tools.register('adf_mut3', gp.generate_full, pset=adfset3, min=1, max=2)
-tools.register('mutate_adf3', toolbox.mutTreeUniform, expr=tools.adf_mut2)
-tools.register('lambdify', gp.lambdifyList, pset=[pset, adfset, adfset2, adfset3], args='x')
+tools.register('expr', gp.generate_full, min=1, max=2)
+tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr)
+tools.register('lambdify', gp.lambdifyList, args='x')
 
 pop = tools.population()
 
@@ -151,35 +148,18 @@ for g in range(NGEN):
     for i in xrange(1, len(pop), 2):
         pop[i] = copy.deepcopy(pop[i])
         pop[i-1] = copy.deepcopy(pop[i-1])
-        for j in xrange(0, len(pop[i])):
+        for j in xrange(len(pop[i])):
             if random.random() < CXPB:
                 pop[i - 1][j], pop[i][j] = tools.mate(pop[i - 1][j], pop[i][j])
         del pop[i].fitness.values
         del pop[i-1].fitness.values
 
     for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = copy.deepcopy(pop[i])
-            pop[i][0] = tools.mutate_fun(pop[i][0])
-            del pop[i].fitness.values
-
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = copy.deepcopy(pop[i])
-            pop[i][1] = tools.mutate_adf(pop[i][1])
-            del pop[i].fitness.values
-                
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = copy.deepcopy(pop[i])
-            pop[i][2] = tools.mutate_adf2(pop[i][2])
-            del pop[i].fitness.values  
-            
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = copy.deepcopy(pop[i])
-            pop[i][3] = tools.mutate_adf2(pop[i][3])
-            del pop[i].fitness.values               
+        pop[i] = copy.deepcopy(pop[i])
+        for j in xrange(len(pop[i])):
+            if random.random() < MUTPB:
+                pop[i][j] = tools.mutate(pop[i][j])
+        del pop[i].fitness.values
                 
     # Evaluate the individuals with an invalid fitness
     for ind in pop:

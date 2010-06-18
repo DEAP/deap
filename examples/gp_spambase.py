@@ -74,7 +74,7 @@ pset.addTerminal(1, "bool")
 for i in xrange(57): pset.addTerminal("IN%s"%i, "float")
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
+creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, type="bool", pset=pset, min=1, max=2)
@@ -94,7 +94,7 @@ def evalSpambase(individual):
 tools.register("evaluate", evalSpambase)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTypedTreeOnePoint)
-tools.register("expr_mut", gp.generate_full, pset=pset, min=0, max=2)
+tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register("mutate", toolbox.mutTypedTreeUniform, expr=tools.expr_mut)
 
 pop = tools.population()

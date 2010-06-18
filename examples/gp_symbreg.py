@@ -51,7 +51,7 @@ pset.addEphemeralConstant(lambda: random.randint(-1,1))
 pset.addTerminal('x')
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMin)
+creator.create("Individual", base.Tree, fitness=creator.FitnessMin, pset=pset)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, pset=pset, min=1, max=2)
@@ -73,7 +73,7 @@ def evalSymbReg(individual):
 tools.register("evaluate", evalSymbReg)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generate_full, pset=pset, min=0, max=2)
+tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 pop = tools.population()
