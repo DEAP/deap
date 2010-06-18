@@ -45,8 +45,8 @@ def evaluateADF(seq):
     adfdict = {}
     for i, expr in enumerate(reversed(seq[1:])):
         func = lambdify(expr.pset, expr)
-        adfdict.update({seq[0].pset.adfs[i] : func})
-        for expr2 in reversed(seq[:i+1]):
+        adfdict.update({expr.pset.name : func})
+        for expr2 in reversed(seq[1:i+1]):
             expr2.pset.func_dict.update(adfdict)
             
     return adfdict
@@ -58,8 +58,7 @@ def lambdify(pset, expr):
     This function is a stripped version of the lambdify
     function of sympy0.6.6.
     """
-    if isinstance(expr, list):
-        expr = evaluate(expr)
+    expr = evaluate(expr)
     args = ",".join(a for a in pset.arguments)
     lstr = "lambda %s: (%s)" % (args, expr)
     return eval(lstr, dict(pset.func_dict))
@@ -168,7 +167,6 @@ class PrimitiveSetTyped(object):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
         self.arguments = []
-        self.adfs = []
         self.func_dict = dict()
         self.termsCount = 0
         self.primsCount = 0
@@ -214,7 +212,6 @@ class PrimitiveSetTyped(object):
         
     def addADF(self, adfset):
         prim = Primitive(adfset.name, adfset.ins, adfset.ret)
-        self.adfs.append(adfset.name)
         self.primitives[adfset.ret].append(prim)
     
     @property
@@ -240,9 +237,6 @@ class PrimitiveSet(PrimitiveSetTyped):
     def addEphemeralConstant(self, ephemeral):
         PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
         
-    def addADF(self, adfset):
-        PrimitiveSetTyped.addADF(self, adfset)        
-
 # Expression generation functions
 
 def generate_ramped(pset, min, max, type=__type__):
