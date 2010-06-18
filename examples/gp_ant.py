@@ -43,14 +43,11 @@ prog3(prog3(move_forward,
                     turn_left), 
       if_food_ahead(move_forward, 
                     turn_right)) 
-fitness = [89]
+fitness = (89,)
 """
 
 import sys
-import random
-import operator
 import logging
-import csv
 import copy
 
 from functools import partial
@@ -154,8 +151,8 @@ class AntSimulator(object):
         
 if __name__ == "__main__":
     ant = AntSimulator(600)
-    file = open("santafe_trail.txt")
-    ant.parse_matrix(file)
+    trail_file = open("santafe_trail.txt")
+    ant.parse_matrix(trail_file)
 
     pset = gp.PrimitiveSet("MAIN", 0)
     pset.addPrimitive(ant.if_food_ahead, 2)
