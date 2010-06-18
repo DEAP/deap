@@ -16,7 +16,6 @@
 import random
 from itertools import repeat
 from collections import defaultdict
-from operator import add
 
 # Define the name of type for any types.
 __type__ = None
