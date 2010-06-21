@@ -126,7 +126,7 @@ class Toolbox(object):
 
 def deepcopyArgs(fn):
     def new(*args, **kargs):
-        args2 = copy.deepcopy(args)
+        args2 = (copy.deepcopy(arg) for arg in args)
         return fn(*args2, **kargs)
     return new
 
