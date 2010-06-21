@@ -597,7 +597,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
         try:
             type2 = subtree2.root.ret
         except AttributeError:
-            type2 = subtree2.ret   
+            type2 = subtree2.ret
         tries += 1
     
     if type1 is type2:
