@@ -648,9 +648,16 @@ def cxTypedTreeOnePoint(ind1, ind2):
         return child1, child2
         
     subtree1 = child1.search_subtree_dfs(index1)
-    type1 = subtree1.root.ret
     subtree2 = child2.search_subtree_dfs(index2)
-    type2 = subtree2.root.ret
+
+    try:
+        type1 = subtree1.root.ret
+    except AttributeError:
+        type1 = subtree1.ret
+    try:
+        type2 = subtree2.root.ret
+    except AttributeError:
+        type2 = subtree2.ret       
     
 
     # try to mate the trees
@@ -661,7 +668,10 @@ def cxTypedTreeOnePoint(ind1, ind2):
     while not (type1 is type2) and tries != MAX_CX_TRY:
         index2 = random.randint(1, child2.size-1)
         subtree2 = child2.search_subtree_dfs(index2)
-        type2 = subtree2.root.ret
+        try:
+            type2 = subtree2.root.ret
+        except AttributeError:
+            type2 = subtree2.ret   
         tries += 1
     
     if type1 is type2:
@@ -712,7 +722,11 @@ def mutTypedTreeUniform(ind, expr):
     mutant = copy.deepcopy(ind)
     index = random.randint(0, mutant.size-1)
     subtree = mutant.search_subtree_dfs(index)
-    mutant.set_subtree_dfs(index, expr(pset=mutant.pset, type=subtree.root.ret))
+    try:
+        type_ = subtree.root.ret
+    except AttributeError:
+        type_ = subtree.ret
+    mutant.set_subtree_dfs(index, expr(pset=mutant.pset, type=type_))
     try:
         del mutant.fitness.values
     except AttributeError:
