@@ -29,13 +29,13 @@ class Tree(list):
     @classmethod        
     def convert_node(cls, node):
         """ Convert node into the proper object either a Tree or a Node."""
-        if isinstance(node, Tree):
+        if isinstance(node, cls):
             if len(node) == 1:
                 return node[0]
             return node
         elif isinstance(node, list):
             if len(node) > 1:
-                return Tree(node)
+                return cls(node)
             else:
                 return node[0]
         else:
@@ -71,26 +71,6 @@ class Tree(list):
         name = self.__class__.__name__
         return "%s.%s(%r)" % (module, name, list.__repr__(self))
         
-    def _getstate(self):
-        state = []
-        for elem in self:
-            try:
-                state.append(elem._getstate())
-            except AttributeError:
-                state.append(elem)
-        return state
-
-    def __deepcopy__(self, memo):
-        """ Deepcopy a Tree by first converting it back to a list of list.
-        
-            This deepcopy is faster than the default implementation. From
-            quick testing, up to 1.6 times faster, and at least 2 times less
-            function calls.
-        """
-        new = self.__class__(self._getstate())
-        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        return new
-   
     @property
     def root(self):
         """Return the root element of the tree."""

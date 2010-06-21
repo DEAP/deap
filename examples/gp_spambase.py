@@ -74,7 +74,7 @@ pset.addTerminal(0, "bool")
 pset.addTerminal(1, "bool")
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, pset=pset, type=pset.ret, min=1, max=2)
