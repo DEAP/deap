@@ -477,7 +477,8 @@ def mutShuffleIndexes(individual, indpb):
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
-    for i in xrange(len(individual)):
+    size = len(individual)
+    for i in xrange(size):
         if random.random() < indpb:
             swap_indx = random.randint(0, size - 2)
             if swap_indx >= i:
