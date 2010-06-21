@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     pop = tools.population()
     
-    CXPB, MUTPB, NGEN = 0.5, 0.2, 10
+    CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     # Evaluate the entire population
     for ind in pop:
