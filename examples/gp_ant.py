@@ -49,6 +49,7 @@ fitness = (89,)
 import sys
 import logging
 import copy
+import random
 
 from functools import partial
 
@@ -185,6 +186,8 @@ tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":
+    random.seed(101)
+
     trail_file = open("santafe_trail.txt")
     ant.parse_matrix(trail_file)
     

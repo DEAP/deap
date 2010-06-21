@@ -21,69 +21,15 @@ import copy
 import operator
 
 from collections import deque
-from itertools import izip, repeat, count, imap
+from itertools import izip, repeat, count
         
 class Tree(list):
     """ Basic N-ary tree class."""
-    class Node(object):
-        """ Class representing the node of a Tree.
-        
-            This class share the basic properties of the Tree, so the Tree's
-            methods can use them regardless if the treated object is a Tree or a 
-            Node.
-        """
-        @property
-        def height(self):
-            """ The height of a Node is always 0."""
-            return 0
-        
-        @property 
-        def size(self):
-            """ The size of a Node is always 1."""
-            return 1
-            
-        @property
-        def root(self):
-            """ The root of a node is itself."""
-            return self
-            
-        def _getstate(self):
-            """ Convert the node back in its base class. This is specially
-                useful when pickling a Tree.
-            """
-            try:
-                base = self.base(self)
-            except TypeError:
-                base = self.base.__new__(self.base)
-            finally :
-                try:
-                    base.__dict__.update(self.__dict__)
-                except AttributeError:
-                    pass
-                return base
-
-    @classmethod
-    def create_node(cls, obj):
-        """ Create a node that will be added to the Tree.
-        
-            A node is run-time defined class that inherits from the object
-            and the Node class. This inheritance add functionnalities and  
-            attributes that simplifies the task of Tree's methods.
-        """
-        Node = type("Node", (type(obj), cls.Node), {"base": type(obj)})
-        try:
-            new_node = Node.__new__(Node)
-            new_node.__dict__.update(obj.__dict__)
-        except AttributeError:
-            new_node = Node(obj)
-        return new_node
      
     @classmethod        
     def convert_node(cls, node):
         """ Convert node into the proper object either a Tree or a Node."""
-        if isinstance(node, cls.Node):
-            return node
-        elif isinstance(node, Tree):
+        if isinstance(node, Tree):
             if len(node) == 1:
                 return node[0]
             return node
@@ -91,9 +37,9 @@ class Tree(list):
             if len(node) > 1:
                 return Tree(node)
             else:
-                return cls.create_node(node[0])
+                return node[0]
         else:
-            return cls.create_node(node)
+            return node
 
     def __init__(self, content=None):
         """ Initialize a tree with a list `content`.
@@ -104,30 +50,6 @@ class Tree(list):
         """
         for elem in content:
             self.append(self.convert_node(elem))
-    
-    def _getstate(self):
-        """ Return the state of the Tree
-            as a list of arbitrary elements. It is mainly
-            used for pickling a Tree object.
-        """
-        return [elem._getstate() for elem in self] 
-    
-    def __reduce__(self):
-        """ Return the class init, the object's state and the object
-            dict in a tuple. The function is used to pickle Tree.
-        """
-        return (self.__class__, (self._getstate(),), self.__dict__)
-    
-    def __deepcopy__(self, memo):
-        """ Deepcopy a Tree by first converting it back to a list of list.
-        
-            This deepcopy is faster than the default implementation. From
-            quick testing, up to 1.6 times faster, and at least 2 times less
-            function calls.
-        """
-        new = self.__class__(self._getstate())
-        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        return new
         
     def __setitem__(self, key, value):
         """ Set the item at `key` with the corresponding `value`.
@@ -141,13 +63,33 @@ class Tree(list):
             
     def __str__(self):
         """ Return the tree in its original form, a list, as a string."""
-        return list.__repr__(self)
+        return list.__str__(self)
         
     def __repr__(self):
         """ Return the Python code to build a copy of the object."""
         module = self.__module__
         name = self.__class__.__name__
-        return "%s.%s(%r)" % (module, name, self._getstate())
+        return "%s.%s(%r)" % (module, name, list.__repr__(self))
+        
+    def _getstate(self):
+        state = []
+        for elem in self:
+            try:
+                state.append(elem._getstate())
+            except AttributeError:
+                state.append(elem)
+        return state
+
+    def __deepcopy__(self, memo):
+        """ Deepcopy a Tree by first converting it back to a list of list.
+        
+            This deepcopy is faster than the default implementation. From
+            quick testing, up to 1.6 times faster, and at least 2 times less
+            function calls.
+        """
+        new = self.__class__(self._getstate())
+        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        return new
    
     @property
     def root(self):
@@ -157,12 +99,24 @@ class Tree(list):
     @property
     def size(self):
         """ Return the number of nodes in the tree."""
-        return sum(elem.size for elem in self)
+        sum_ = 0
+        for elem in self:
+            try:
+                sum_ += elem.size
+            except AttributeError:
+                sum_ += 1
+        return sum_
 
     @property
     def height(self):
         """Return the height of the tree."""
-        return max(elem.height for elem in self)+1
+        height = 0
+        for elem in self:
+            try:
+                height = max(elem.height, elem)
+            except AttributeError:
+                height = max(height, 1)
+        return height
 
     def search_subtree_dfs(self, index):
         """ Search the subtree with the corresponding index based on a depth 
@@ -174,10 +128,14 @@ class Tree(list):
         for child in self:
             if total == index:
                 return child
-            nbr_child = child.size
-            if nbr_child + total > index:
-                return child.search_subtree_dfs(index-total)
-            total += nbr_child
+            try:
+                nbr_child = child.size
+            except AttributeError:
+                total += 1
+            else:
+                if nbr_child + total > index:
+                    return child.search_subtree_dfs(index-total)
+                total += nbr_child
 
     def set_subtree_dfs(self, index, subtree):
         """ Replace the tree with the corresponding index by subtree based
@@ -196,11 +154,15 @@ class Tree(list):
             if total == index:
                 self[i] = subtree
                 return
-            nbr_child = child.size
-            if nbr_child + total > index:
-                child.set_subtree_dfs(index-total, subtree)
-                return
-            total += nbr_child
+            try:
+                nbr_child = child.size
+            except : 
+                total += 1
+            else:
+                if nbr_child + total > index:
+                    child.set_subtree_dfs(index-total, subtree)
+                    return
+                total += nbr_child
 
     def search_subtree_bfs(self, index):
         """ Search the subtree with the corresponding index based on a 

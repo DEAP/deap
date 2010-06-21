@@ -58,7 +58,6 @@ tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
-    
     func = tools.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
