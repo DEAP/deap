@@ -161,7 +161,7 @@ pset.addTerminal(ant.turn_left)
 pset.addTerminal(ant.turn_right)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMax, pset=pset)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
 

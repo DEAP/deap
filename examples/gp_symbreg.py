@@ -47,7 +47,7 @@ pset.addEphemeralConstant(lambda: random.randint(-1,1))
 pset.renameArguments({"ARG0" : "x"})
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMin, pset=pset)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_ramped, pset=pset, min=1, max=2)

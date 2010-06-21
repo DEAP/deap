@@ -13,7 +13,11 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+import copy
 import random
+
+import base
+
 from itertools import repeat
 from collections import defaultdict
 
@@ -235,7 +239,31 @@ class PrimitiveSet(PrimitiveSetTyped):
 
     def addEphemeralConstant(self, ephemeral):
         PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
+
+# Tree class faster than base Tree, optimized for Primitives
+class PrimitiveTree(base.Tree):
+    pset = None   
+    
+    def _getstate(self):
+        state = []
+        for elem in self:
+            try:
+                state.append(elem._getstate())
+            except AttributeError:
+                state.append(elem)
+        return state
+
+    def __deepcopy__(self, memo):
+        """ Deepcopy a Tree by first converting it back to a list of list.
         
+            This deepcopy is faster than the default implementation. From
+            quick testing, up to 1.6 times faster, and at least 2 times less
+            function calls.
+        """
+        new = self.__class__(self._getstate())
+        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        return new
+
 # Expression generation functions
 
 def generate_ramped(pset, min, max, type=__type__):
