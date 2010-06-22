@@ -26,12 +26,15 @@ from itertools import izip, repeat, count
 class Tree(list):
     """ Basic N-ary tree class."""
     class NodeProxy(object):
-        def __new__(cls, obj):
+        def __new__(cls, obj, *args, **kargs):
             if isinstance(obj, cls):
                 return obj
             inst = object.__new__(cls)
             inst.obj = obj
             return inst
+            
+        def getstate(self):
+            return self.obj
             
         @property
         def size(self):
@@ -44,7 +47,9 @@ class Tree(list):
         @property
         def root(self):
             return self
-            
+        
+        def __eq__(self, other):
+            return self.obj == other.obj        
         def __getattr__(self, attr):
             return getattr(self.obj, attr)
         def __call__(self, *args, **kargs):
@@ -78,6 +83,26 @@ class Tree(list):
         """
         for elem in content:
             self.append(self.convert_node(elem))
+        
+    def getstate(self):
+        """ Return the state of the Tree
+            as a list of arbitrary elements. It is mainly
+            used for pickling a Tree object.
+        """
+        return [elem.getstate() for elem in self] 
+    
+    def __reduce__(self):
+        """ Return the class init, the object's state and the object
+            dict in a tuple. The function is used to pickle Tree.
+        """
+        return (self.__class__, (self.getstate(),), self.__dict__)
+    
+    def __deepcopy__(self, memo):
+        """ Deepcopy a Tree by first converting it back to a list of list.
+        """
+        new = self.__class__(copy.deepcopy(self.getstate()))
+        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        return new        
         
     def __setitem__(self, key, value):
         """ Set the item at `key` with the corresponding `value`.
