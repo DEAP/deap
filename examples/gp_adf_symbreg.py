@@ -84,10 +84,10 @@ pset.addADF(adfset2)
 pset.renameArguments({"ARG0" : "x"})
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("ADF0", base.Tree, pset=adfset0)
-creator.create("ADF1", base.Tree, pset=adfset1)
-creator.create("ADF2", base.Tree, pset=adfset2)
-creator.create("MAIN", base.Tree, pset=pset)
+creator.create("ADF0", gp.PrimitiveTree, pset=adfset0)
+creator.create("ADF1", gp.PrimitiveTree, pset=adfset1)
+creator.create("ADF2", gp.PrimitiveTree, pset=adfset2)
+creator.create("MAIN", gp.PrimitiveTree, pset=pset)
 
 creator.create("Individual", list, fitness=creator.FitnessMin)
 

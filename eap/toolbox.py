@@ -577,30 +577,21 @@ def cxTypedTreeOnePoint(ind1, ind2):
     subtree1 = ind1.search_subtree_dfs(index1)
     subtree2 = ind2.search_subtree_dfs(index2)
 
-    try:
-        type1 = subtree1.root.ret
-    except AttributeError:
-        type1 = subtree1.ret
-    try:
-        type2 = subtree2.root.ret
-    except AttributeError:
-        type2 = subtree2.ret    
+    type1 = subtree1.root.ret
+    type2 = subtree2.root.ret 
 
     # try to mate the trees
     # if not crossover point is found after MAX_CX_TRY
     # the children are returned without modifications.
     tries = 0
     MAX_CX_TRY = 5
-    while not (type1 is type2) and tries != MAX_CX_TRY:
+    while not (type1 == type2) and tries != MAX_CX_TRY:
         index2 = random.randint(1, ind2.size-1)
         subtree2 = ind2.search_subtree_dfs(index2)
-        try:
-            type2 = subtree2.root.ret
-        except AttributeError:
-            type2 = subtree2.ret
+        type2 = subtree2.root.ret
         tries += 1
     
-    if type1 is type2:
+    if type1 == type2:
         sub1 = ind1.search_subtree_dfs(index1)
         sub2 = ind2.search_subtree_dfs(index2)
         ind1.set_subtree_dfs(index1, sub2)
@@ -637,12 +628,8 @@ def mutTypedTreeUniform(ind, expr):
     returned.
     """
     index = random.randint(0, ind.size-1)
-    subtree = ind.search_subtree_dfs(index)
-    try:
-        type_ = subtree.root.ret
-    except AttributeError:
-        type_ = subtree.ret    
-    ind.set_subtree_dfs(index, expr(pset=ind.pset, type=type_))
+    subtree = ind.search_subtree_dfs(index)  
+    ind.set_subtree_dfs(index, expr(pset=ind.pset, type= subtree.root.ret))
     return ind 
 
 ######################################

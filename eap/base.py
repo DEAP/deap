@@ -25,21 +25,49 @@ from itertools import izip, repeat, count
         
 class Tree(list):
     """ Basic N-ary tree class."""
-     
+    class NodeProxy(object):
+        def __new__(cls, obj):
+            if isinstance(obj, cls):
+                return obj
+            inst = object.__new__(cls)
+            inst.obj = obj
+            return inst
+            
+        @property
+        def size(self):
+            return 1
+            
+        @property
+        def height(self):
+            return 0
+            
+        @property
+        def root(self):
+            return self
+            
+        def __getattr__(self, attr):
+            return getattr(self.obj, attr)
+        def __call__(self, *args, **kargs):
+            return self.obj(*args, **kargs)
+        def __repr__(self):
+            return self.obj.__repr__()
+        def __str__(self):
+            return self.obj.__str__()
+                
     @classmethod        
     def convert_node(cls, node):
         """ Convert node into the proper object either a Tree or a Node."""
         if isinstance(node, cls):
             if len(node) == 1:
-                return node[0]
+                return cls.NodeProxy(node[0])
             return node
         elif isinstance(node, list):
             if len(node) > 1:
                 return cls(node)
             else:
-                return node[0]
+                return cls.NodeProxy(node[0])
         else:
-            return node
+            return cls.NodeProxy(node)
 
     def __init__(self, content=None):
         """ Initialize a tree with a list `content`.
@@ -79,24 +107,11 @@ class Tree(list):
     @property
     def size(self):
         """ Return the number of nodes in the tree."""
-        sum_ = 0
-        for elem in self:
-            try:
-                sum_ += elem.size
-            except AttributeError:
-                sum_ += 1
-        return sum_
-
+        return sum(elem.size for elem in self)
     @property
     def height(self):
         """Return the height of the tree."""
-        height = 0
-        for elem in self:
-            try:
-                height = max(elem.height, elem)
-            except AttributeError:
-                height = max(height, 1)
-        return height
+        return max(elem.height for elem in self)+1
 
     def search_subtree_dfs(self, index):
         """ Search the subtree with the corresponding index based on a depth 
@@ -108,14 +123,10 @@ class Tree(list):
         for child in self:
             if total == index:
                 return child
-            try:
-                nbr_child = child.size
-            except AttributeError:
-                total += 1
-            else:
-                if nbr_child + total > index:
-                    return child.search_subtree_dfs(index-total)
-                total += nbr_child
+            nbr_child = child.size
+            if nbr_child + total > index:
+                return child.search_subtree_dfs(index-total)
+            total += nbr_child
 
     def set_subtree_dfs(self, index, subtree):
         """ Replace the tree with the corresponding index by subtree based
@@ -134,15 +145,11 @@ class Tree(list):
             if total == index:
                 self[i] = subtree
                 return
-            try:
-                nbr_child = child.size
-            except : 
-                total += 1
-            else:
-                if nbr_child + total > index:
-                    child.set_subtree_dfs(index-total, subtree)
-                    return
-                total += nbr_child
+            nbr_child = child.size
+            if nbr_child + total > index:
+                child.set_subtree_dfs(index-total, subtree)
+                return
+            total += nbr_child
 
     def search_subtree_bfs(self, index):
         """ Search the subtree with the corresponding index based on a 
