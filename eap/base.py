@@ -126,17 +126,34 @@ class Tree(list):
         
     @property
     def root(self):
-        """Return the root element of the tree."""
+        """Return the root element of the tree.
+        
+        The root node of a tree is the node with no parents. There is at most 
+        one root node in a rooted tree.
+        """
         return self[0]
 
     @property
     def size(self):
-        """ Return the number of nodes in the tree."""
+        """ Return the number of nodes in the tree.
+        
+            The size of a node is the number of descendants it has including 
+            itself.
+        """
         return sum(elem.size for elem in self)
+
     @property
     def height(self):
-        """Return the height of the tree."""
-        return max(elem.height for elem in self)+1
+        """Return the height of the tree.
+        
+        The height of a tree is the length of the path from the root to the 
+        deepest node in the tree. A (rooted) tree with only one node (the root) 
+        has a height of zero.
+        """
+        try:
+            return max(elem.height for elem in self[1:])+1
+        except ValueError:
+            return 0
 
     def search_subtree_dfs(self, index):
         """ Search the subtree with the corresponding index based on a depth 
