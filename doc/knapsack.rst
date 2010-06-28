@@ -32,7 +32,7 @@ A population is now initialized with ::
     
 Voilà! The *last* thing to do is to define our evaluation function ::
 
-    def evalKnapSack(individual):
+    def evalKnapsack(individual):
         weight = 0.0
         value = 0.0
         for item in individual:
@@ -84,7 +84,7 @@ And a mutation operator could randomly add or remove an element from the set inp
 
 From here, everything else is just as usual, register the operators in the toolbox, and use or write an algorithm. Here we will use the Mu+Lambda algorithm and the SPEA-II selection sheme. ::
 
-    tools.register("evaluate", evalKnapSack)
+    tools.register("evaluate", evalKnapsack)
     tools.register("mate", cxSet)
     tools.register("mutate", mutSet)
     tools.register("select", toolbox.spea2)
