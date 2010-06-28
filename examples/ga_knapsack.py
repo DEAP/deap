@@ -19,15 +19,13 @@ import random
 import logging
 
 sys.path.append("..")
+logging.basicConfig(level=logging.DEBUG)
 
 from eap import algorithms
 from eap import base
 from eap import creator
 from eap import halloffame
 from eap import toolbox
-
-logging.basicConfig(level=logging.DEBUG)
-random.seed(64)
 
 MAX_ITEM = 50
 MAX_WEIGHT = 50
@@ -48,7 +46,7 @@ tools.register("attr_item", random.choice, items.keys())
 tools.register("individual", creator.Individual, content_init=tools.attr_item, size_init=30)
 tools.register("population", creator.Population, content_init=tools.individual, size_init=100)
 
-def evalKnapSack(individual):
+def evalKnapsack(individual):
     weight = 0.0
     value = 0.0
     for item in individual:
@@ -63,43 +61,33 @@ def cxSet(ind1, ind2):
     intersection of the two sets, the second child is the difference of the
     two sets.
     """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
-    child1 &= ind2          # Intersection
-    child2 ^= ind1          # Symmetric Difference
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return random.sample((child1, child2), 2)   # Algorithm always choose first child
+    temp = set(ind1)                # Used in order to keep type
+    ind1 &= ind2                    # Intersection
+    ind2 ^= temp                    # Symmetric Difference
+    return ind1, ind2
     
 def mutSet(individual):
     """Mutation that pops or add an element."""
-    mutant = copy.deepcopy(individual)
-    
     if random.random() < 0.5:
         try:
-            mutant.pop()
+            individual.pop()
         except KeyError:
             pass
     else:
-        mutant.add(random.choice(items.keys()))
+        individual.add(random.choice(items.keys()))
     
-    try:
-        del mutant.fitness.values
-    except AttributeError:
-        pass
-    
-    return mutant
+    return individual,
 
-tools.register("evaluate", evalKnapSack)
+tools.register("evaluate", evalKnapsack)
 tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
 tools.register("select", toolbox.spea2)
 
+tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
+tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
+
 if __name__ == "__main__":
+    random.seed(64)
 
     pop = tools.population()
     hof = halloffame.ParetoFront()
@@ -111,12 +99,12 @@ if __name__ == "__main__":
     logging.info("Best individual for measure 2 is %s, %s", 
                  hof[-1], hof[-1].fitness.values)
 
-# You can plot the Hall of Fame if you have matplotlib installed
-#import matplotlib.pyplot as plt
-#plt.figure()
-#weights = [ind.fitness.values[0] for ind in hof]
-#values = [ind.fitness.values[1] for ind in hof]
-#plt.scatter(weights, values)
-#plt.xlabel("Weight")
-#plt.ylabel("Value")
-#plt.show()
+    # You can plot the Hall of Fame if you have matplotlib installed
+    #import matplotlib.pyplot as plt
+    #plt.figure()
+    #weights = [ind.fitness.values[0] for ind in hof]
+    #values = [ind.fitness.values[1] for ind in hof]
+    #plt.scatter(weights, values)
+    #plt.xlabel("Weight")
+    #plt.ylabel("Value")
+    #plt.show()

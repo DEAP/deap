@@ -16,13 +16,11 @@
 import sys
 import random
 
-random.seed(64)
-
 sys.path.append("..")
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
+from eap import base
+from eap import creator
+from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -45,7 +43,12 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
+tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
+tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
+
 if __name__ == "__main__":
+    random.seed(64)
+    
     pop = tools.population()
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
@@ -66,7 +69,7 @@ if __name__ == "__main__":
     
         for i in xrange(len(pop)):
             if random.random() < MUTPB:
-                pop[i] = tools.mutate(pop[i])
+                pop[i] = tools.mutate(pop[i])[0]
     
         # Evaluate the individuals with an invalid fitness
         for ind in pop:

@@ -23,10 +23,10 @@ import copy
 
 sys.path.append(os.path.abspath('..'))
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-import eap.gp as gp
+from eap import base
+from eap import creator
+from eap import toolbox
+from eap import gp
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -125,7 +125,8 @@ tools.register('expr', gp.generate_full, min=1, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr)
 
 if __name__ == "__main__":
-
+    random.seed(1024)
+    
     pop = tools.population()
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
@@ -153,7 +154,7 @@ if __name__ == "__main__":
             pop[i] = copy.deepcopy(pop[i])
             for j in xrange(len(pop[i])):
                 if random.random() < MUTPB:
-                    pop[i][j] = tools.mutate(pop[i][j])
+                    pop[i][j] = tools.mutate(pop[i][j])[0]
             del pop[i].fitness.values
                     
         # Evaluate the individuals with an invalid fitness

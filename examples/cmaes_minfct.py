@@ -24,12 +24,12 @@ random.seed(64)     # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.
 
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.cma as cma
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
+from eap import algorithms
+from eap import base
+from eap import cma
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)

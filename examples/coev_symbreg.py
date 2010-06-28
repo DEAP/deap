@@ -4,10 +4,10 @@ import random
 
 sys.path.append(os.path.abspath('..'))
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-import eap.gp as gp
+from eap import base
+from eap import creator
+from eap import toolbox
+from eap import gp
 
 import gp_symbreg
 
@@ -35,7 +35,7 @@ tools_ga.register('population', list, content_init=tools_ga.individual, size_ini
 
 tools_ga.register("select", toolbox.selTournament, tournsize=3)
 tools_ga.register("mate", toolbox.cxTwoPoints)
-tools_ga.register("mutate", toolbox.mutGaussian,  mu=0, sigma=0.01, indpb=0.05)
+tools_ga.register("mutate", toolbox.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
 tools_gp = gp_symbreg.tools
 

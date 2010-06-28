@@ -29,8 +29,9 @@ module.
 import copy
 import math
 import random
-
-from functools import partial
+import inspect
+import functools
+import warnings
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
 from operator import attrgetter
@@ -108,55 +109,55 @@ class Toolbox(object):
                 args = list(args)
                 args.append(Iterate(content))
             
-        setattr(self, methodname, partial(method, *args, **kargs))
+        setattr(self, methodname, functools.partial(method, *args, **kargs))
     
     def unregister(self, methodname):
         """Unregister *method name* from the toolbox."""
         delattr(self, methodname)
         
     def decorate(self, methodname, *decorators):
-        method = getattr(self, methodname)
+        partial_func = getattr(self, methodname)
+        method = partial_func.func
+        args = partial_func.args
+        kargs = partial_func.keywords
         for decorator in decorators:
             method = decorator(method)
-        setattr(self, methodname, method)
+        setattr(self, methodname, functools.partial(method, *args, **kargs))
 
 ######################################
 # Decorators                         #
 ######################################
 
-def deepcopyArgs(fn):
-    def new(*args, **kargs):
-        args2 = (copy.deepcopy(arg) for arg in args)
-        return fn(*args2, **kargs)
-    return new
+def deepcopyArgs(*argsname):
+    def decDeepcopyArgs(func):
+        args_name = inspect.getargspec(func)[0]
+        args_pos = [args_name.index(name) for name in argsname]
+        @functools.wraps(func)
+        def wrapDeepcopyArgs(*args, **kargs):
+            args = list(args)
+            for pos in args_pos:
+                args[pos] = copy.deepcopy(args[pos])
+            return func(*args, **kargs)
+        return wrapDeepcopyArgs
+    return decDeepcopyArgs
 
-def delFitnesses(fn):
-    def new(*args, **kargs):
-        results = fn(*args, **kargs)
+def delFitness(func):
+    @functools.wraps(func)
+    def wrapDelFitness(*args, **kargs):
+        results = func(*args, **kargs)
         for result in results:
             try:
                 del result.fitness.values
             except AttributeError:
-                pass
+                warnings.warn(("Deleting the fitness of an object that "
+                              "has no fitness"), RuntimeWarning)
         return results
-    return new
-    
-def delFitness(fn):
-    def new(*args, **kargs):
-        result = fn(*args, **kargs)
-        try:
-            del result.fitness.values
-        except AttributeError:
-            pass
-        return result
-    return new
+    return wrapDelFitness
         
 ######################################
 # GA Crossovers                      #
 ######################################
 
-@deepcopyArgs
-@delFitnesses
 def cxTwoPoints(ind1, ind2):
     """Execute a two points crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
@@ -188,8 +189,6 @@ def cxTwoPoints(ind1, ind2):
     
     return ind1, ind2
 
-@deepcopyArgs
-@delFitnesses
 def cxOnePoint(ind1, ind2):
     """Execute a one point crossover on the input individuals. The two children
     produced are returned as a tuple, the two parents are left intact.
@@ -213,8 +212,6 @@ def cxOnePoint(ind1, ind2):
     ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
     return ind1, ind2
 
-@deepcopyArgs
-@delFitnesses
 def cxUniform(ind1, ind2, indpb):
     """Uniform crossover"""
     size = min(len(ind1), len(ind2))    
@@ -223,8 +220,6 @@ def cxUniform(ind1, ind2, indpb):
             ind1[i], ind2[i] = ind2[i], ind1[i]
     return ind1, ind2
     
-@deepcopyArgs
-@delFitnesses
 def cxPartialyMatched(ind1, ind2):
     """Execute a partialy matched crossover (PMX) on the input indviduals.
     The two children produced are returned as a tuple, the two parents are
@@ -279,8 +274,6 @@ def cxPartialyMatched(ind1, ind2):
 
     return ind1, ind2
 
-@deepcopyArgs
-@delFitnesses
 def cxUniformPartialyMatched(ind1, ind2, indpb):
     """Execute a uniform partialy matched crossover (UPMX) on the input
     indviduals. The two children produced are returned as a tuple, the two
@@ -329,8 +322,6 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
 
     return ind1, ind2
 
-@deepcopyArgs
-@delFitnesses
 def cxBlend(ind1, ind2, alpha):
     """Blend crossover"""
     size = min(len(ind1), len(ind2))
@@ -344,8 +335,6 @@ def cxBlend(ind1, ind2, alpha):
     
     return ind1, ind2
 
-@deepcopyArgs
-@delFitnesses
 def cxSimulatedBinary(ind1, ind2, nu):
     """Simulated binary crossover"""
     size = min(len(ind1), len(ind2))
@@ -368,8 +357,6 @@ def cxSimulatedBinary(ind1, ind2, nu):
 # Messy Crossovers                   #
 ######################################
 
-@deepcopyArgs
-@delFitnesses
 def cxMessyOnePoint(ind1, ind2):
     """Execute a one point crossover will mostly change the individuals size.
     """
@@ -382,8 +369,6 @@ def cxMessyOnePoint(ind1, ind2):
 # ES Crossovers                      #
 ######################################
 
-@deepcopyArgs
-@delFitnesses
 def cxESBlend(ind1, ind2, alpha, minstrategy=None):
     """Execute a blend crossover on both, the individual and the strategy.
     """
@@ -409,8 +394,6 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
 
     return ind1, ind2
 
-@deepcopyArgs
-@delFitnesses
 def cxESTwoPoints(ind1, ind2):
     """Execute a classical two points crossover on both the individual and
     its strategy. The crossover points for the individual and the strategy
@@ -435,8 +418,6 @@ def cxESTwoPoints(ind1, ind2):
 # GA Mutations                       #
 ######################################
 
-@deepcopyArgs
-@delFitness
 def mutGaussian(individual, mu, sigma, indpb):
     """This function applies a gaussian mutation of mean *mu* and standard
     deviation *sigma*  on the input individual and
@@ -464,10 +445,8 @@ def mutGaussian(individual, mu, sigma, indpb):
     for i in xrange(len(individual)):
         if random.random() < indpb:
             individual[i] += random.gauss(mu, sigma)
-    return individual
+    return individual,
 
-@deepcopyArgs
-@delFitness
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
     The *individual* is left intact and the mutant is an independant copy. The
@@ -486,10 +465,8 @@ def mutShuffleIndexes(individual, indpb):
             individual[i], individual[swap_indx] = \
                            individual[swap_indx], individual[i]
             mutated = True
-    return individual
+    return individual,
 
-@deepcopyArgs
-@delFitness
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
     mutant. The *individual* is left intact and the mutant is an independant
@@ -504,14 +481,12 @@ def mutFlipBit(individual, indpb):
     for indx in xrange(len(individual)):
         if random.random() < indpb:
             individual[indx] = not individual[indx]
-    return individual
+    return individual,
     
 ######################################
 # ES Mutations                       #
 ######################################
 
-@deepcopyArgs
-@delFitness
 def mutES(individual, indpb, minstrategy=None):
     """Mutate an evolution strategy according to its :attr:`strategy` attribute.
     The strategy shall be teh same size as the individual. This is subject to
@@ -531,14 +506,12 @@ def mutES(individual, indpb, minstrategy=None):
                 individual.strategy[indx] = minstrategy
             individual[indx] += individual.strategy[indx] * ni
             mutated = True
-    return individual
+    return individual,
 
 ######################################
 # GP Crossovers                      #
 ######################################
 
-@deepcopyArgs
-@delFitnesses
 def cxTreeUniformOnePoint(ind1, ind2):
     """ Randomly select in each individual and exchange
         each subtree with the point as root between each individual.
@@ -556,8 +529,6 @@ def cxTreeUniformOnePoint(ind1, ind2):
     return ind1, ind2
     
 ## Strongly Typed GP crossovers
-@deepcopyArgs
-@delFitnesses
 def cxTypedTreeOnePoint(ind1, ind2):
     """ Randomly select in each individual and exchange
         each subtree with the point as root between each individual.
@@ -602,23 +573,18 @@ def cxTypedTreeOnePoint(ind1, ind2):
 ######################################
 # GP Mutations                       #
 ######################################
-@deepcopyArgs
-@delFitness
-def mutTreeUniform(ind, expr):
+def mutTreeUniform(individual, expr):
     """ Randomly select a point in the Tree, then replace the subtree with
         the point as a root by a randomly generated expression. The expression
         is generated using the method `expr`.
     """
-    index = random.randint(0, ind.size-1)
-    ind.set_subtree_dfs(index, expr(pset=ind.pset))
-    return ind
+    index = random.randint(0, individual.size-1)
+    individual.set_subtree_dfs(index, expr(pset=individual.pset))
+    return individual,
 
 ## Strongly Typed GP mutations
-@deepcopyArgs
-@delFitness
-def mutTypedTreeUniform(ind, expr):
-    """ 
-    The mutation of strongly typed GP expression is
+def mutTypedTreeUniform(individual, expr):
+    """The mutation of strongly typed GP expression is
     pretty easy. First, it finds a subtree. Second, it 
     has to identify the return type of the root of 
     this subtree. Third, it generates a new subtree
@@ -627,10 +593,11 @@ def mutTypedTreeUniform(ind, expr):
     replaced by the new subtree, and the mutant is 
     returned.
     """
-    index = random.randint(0, ind.size-1)
+    index = random.randint(0, individual.size-1)
     subtree = ind.search_subtree_dfs(index)  
-    ind.set_subtree_dfs(index, expr(pset=ind.pset, type= subtree.root.ret))
-    return ind 
+    individual.set_subtree_dfs(index, expr(pset=individual.pset,
+                                           type= subtree.root.ret))
+    return individual,
 
 ######################################
 # Selections                         #
@@ -668,7 +635,7 @@ def selTournament(individuals, n, tournsize):
     """Select *n* individuals from the input *individuals* using *n*
     tournaments of *tournSize* individuals. The list returned contains shallow
     copies of the input *individuals*.
-
+    
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
     """
@@ -679,9 +646,33 @@ def selTournament(individuals, n, tournsize):
             aspirant = random.choice(individuals)
             if aspirant.fitness > chosen[i].fitness:
                 chosen[i] = aspirant
-
+                
     return chosen
+
+def selRoulette(individuals, n):
+    """Select *n* individuals from the input *individuals* using *n*
+    spins of a roulette. The selection is made by looking only at the first
+    objective of each individual. The list returned contains shallow
+    copies of the input *individuals*.
     
+    This function uses the :func:`~random.choice` function from the python base
+    :mod:`random` module.
+    """
+    s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
+    sum_fits = sum(map(lambda ind: ind.fitness.values[0], individuals))
+    
+    chosen = []
+    for i in xrange(n):
+        u = random.random() * sum_fits
+        sum_ = 0
+        for ind in s_inds:
+            sum_ += ind.fitness.values[0]
+            if sum_ > u:
+                chosen.append(ind)
+                break
+    
+    return chosen
+
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
@@ -690,19 +681,6 @@ def nsga2(individuals, n):
     """Apply NSGA-2 selection operator on the *individuals*.
     """
     pareto_fronts = sortFastND(individuals, n)
-    
-#    import matplotlib.pyplot as plt
-#    from itertools import cycle
-#    plt.figure()
-#    colors = cycle("bgrcmky")
-#    for front in pareto_fronts:
-#        fit1 = [ind.fitness[0] for ind in front]
-#        fit2 = [ind.fitness[1] for ind in front]
-#        plt.scatter(fit1, fit2, c=colors.next())
-#        print len(front)
-#    plt.show()
-    #print len(pareto_fronts)
-    
     chosen = list(chain(*pareto_fronts[:-1]))
     n = n - len(chosen)
     if n > 0:

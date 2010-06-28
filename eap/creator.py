@@ -24,7 +24,7 @@ import copy
 # Warning are turned into errors to catch the DeprecationWarning in the method
 # init_type of create.
 import warnings
-warnings.filterwarnings("error")
+warnings.filterwarnings("error", "", DeprecationWarning, "eap")
 
 def create(name, base, **kargs):
     dict_inst = {}
