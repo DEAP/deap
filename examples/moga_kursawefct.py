@@ -22,13 +22,11 @@ import random
 sys.path.append("..")
 logging.basicConfig(level=logging.DEBUG)
 
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
-
-random.seed(64)
+from eap import algorithms
+from eap import base
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", array.array, fitness=creator.FitnessMax)
@@ -48,35 +46,32 @@ def evalKursawe(ind):
     f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[:]))
     return f1, f2
 
-def mate(ind1, ind2, *args, **kargs):
-    child1, child2 = toolbox.cxBlend(ind1, ind2, *args, **kargs)
-    for i in xrange(len(child1)):
-        if child1[i] > 5:
-            child1[i] = 5
-        elif child1[i] < -5:
-            child1[i] = -5
-        if child2[i] > 5:
-            child2[i] = 5
-        elif child2[i] < -5:
-            child2[i] = -5
-    
-    return child1, child2
-
-def mutate(ind, *args, **kargs):
-    mutant = toolbox.mutGaussian(ind, *args, **kargs)
-    for i in xrange(len(mutant)):
-        if mutant[i] > 5:
-            mutant[i] = 5
-        elif mutant[i] < -5:
-            mutant[i] = -5
-    return mutant
+def checkBounds(min, max):
+    def decCheckBounds(func):
+        def wrapCheckBounds(*args, **kargs):
+            offsprings = func(*args, **kargs)
+            for child in offsprings:
+                for i in xrange(len(child)):
+                    if child[i] > max:
+                        child[i] = max
+                    elif child[i] < min:
+                        child[i] = min
+            return offsprings
+        return wrapCheckBounds
+    return decCheckBounds
 
 tools.register("evaluate", evalKursawe)
-tools.register("mate", mate, alpha=1.5)
-tools.register("mutate", mutate, mu=0, sigma=3, indpb=0.3)
+tools.register("mate", toolbox.cxBlend, alpha=1.5)
+tools.register("mutate", toolbox.mutGaussian, mu=0, sigma=3, indpb=0.3)
 tools.register("select", toolbox.nsga2)
 
+tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness,
+               checkBounds(min=-5, max=5))
+tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness,
+               checkBounds(min=-5, max=5))               
+
 if __name__ == "__main__":
+    random.seed(64)
 
     pop = tools.population()
     hof = halloffame.ParetoFront()
@@ -89,10 +84,10 @@ if __name__ == "__main__":
     logging.info("Best individual for measure 2 is %s, %s", 
                  hof[-1], hof[-1].fitness.values)
 
-# You can plot the Hall of Fame if you have matplotlib installed
-#import matplotlib.pyplot as plt
-#plt.figure()
-#fit1 = [ind.fitness.values[0] for ind in hof]
-#fit2 = [ind.fitness.values[1] for ind in hof]
-#plt.scatter(fit1, fit2)
-#plt.show()
+    ## You can plot the Hall of Fame if you have matplotlib installed
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # fit1 = [ind.fitness.values[0] for ind in hof]
+    # fit2 = [ind.fitness.values[1] for ind in hof]
+    # plt.scatter(fit1, fit2)
+    # plt.show()

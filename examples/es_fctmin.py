@@ -20,11 +20,11 @@ import logging
 
 sys.path.append("..")
 
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
+from eap import algorithms
+from eap import base
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 logging.basicConfig(level=logging.DEBUG)
 #random.seed(64)

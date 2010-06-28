@@ -19,15 +19,13 @@ import random
 import logging
 
 sys.path.append("..")
-
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
-
 logging.basicConfig(level=logging.DEBUG)
-random.seed(64)
+
+from eap import algorithms
+from eap import base
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMax)
@@ -49,7 +47,12 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
+tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
+tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
+
 if __name__ == "__main__":
+    random.seed(64)
+    
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
 

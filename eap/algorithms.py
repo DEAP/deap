@@ -65,7 +65,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
                     toolbox.mate(population[i - 1], population[i])
         for i in xrange(len(population)):
             if random.random() < mutpb:
-                population[i] = toolbox.mutate(population[i])
+                population[i] = toolbox.mutate(population[i])[0]
 
         # Evaluate the individuals with invalid fitness
         for ind in population:
@@ -126,16 +126,23 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         evaluations = 0
         
         children = []
-        for i in xrange(lambda_):
+        nb_children = 0
+        while nb_children < lambda_:
+        #for i in xrange(lambda_):
             op_choice = random.random()
             if op_choice < cxpb:            # Apply crossover
                 p1, p2 = random.sample(population, 2)
-                children.append(toolbox.mate(p1, p2)[0])    # Only the first child is selected
+                offsprings = toolbox.mate(p1, p2)
+                children.extend(offsprings)
+                nb_children += len(offsprings)
             elif op_choice < cxpb + mutpb:  # Apply mutation
                 p = random.choice(population)
-                children.append(toolbox.mutate(p))
+                mutants = toolbox.mutate(p)
+                children.extend(mutants)
+                nb_children += len(mutants)
             else:                           # Apply reproduction
                 children.append(random.choice(population))
+                nb_children += 1
         
         # Evaluate the individuals with invalid fitness
         for ind in children:
@@ -199,16 +206,23 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         evaluations = 0
         
         children = []
-        for i in xrange(lambda_):
+        nb_children = 0
+        while nb_children < lambda_:
+        #for i in xrange(lambda_):
             op_choice = random.random()
             if op_choice < cxpb:            # Apply crossover
                 p1, p2 = random.sample(population, 2)
-                children.append(toolbox.mate(p1, p2)[0])    # Only the first child is selected
+                offsprings = toolbox.mate(p1, p2)
+                children.extend(offsprings)
+                nb_children += len(offsprings)
             elif op_choice < cxpb + mutpb:  # Apply mutation
                 p = random.choice(population)
-                children.append(toolbox.mutate(p))
+                mutants = toolbox.mutate(p)
+                children.extend(mutants)
+                nb_children += len(mutants)
             else:                           # Apply reproduction
                 children.append(random.choice(population))
+                nb_children += 1
         
         # Evaluate the individuals with invalid fitness
         for ind in children:
@@ -265,7 +279,7 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         
         p1, p2 = toolbox.select(population, 2)
         child = toolbox.mate(p1, p2)[0]     # Only the first child is selected
-        child = toolbox.mutate(child)
+        child = toolbox.mutate(child)[0]
         
         if not child.fitness.valid:
             child.fitness.extend(toolbox.evaluate(child))

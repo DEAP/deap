@@ -55,12 +55,12 @@ from functools import partial
 
 sys.path.append("..")
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-import eap.gp as gp
-import eap.algorithms as algorithms
-import eap.halloffame as halloffame
+from eap import base
+from eap import creator
+from eap import toolbox
+from eap import gp
+from eap import algorithms
+from eap import halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -184,6 +184,9 @@ tools.register("select", toolbox.selTournament, tournsize=7)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
+
+tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
+tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
 
 if __name__ == "__main__":
     random.seed(101)
