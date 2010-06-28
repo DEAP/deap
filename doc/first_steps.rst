@@ -68,7 +68,7 @@ Lets create two individuals using the same technique as before, and apply the cr
 Evaluation
 ==========
 
-The evaluation is the most crucial part of an evolutionary algorithm, it is also the only part of the library that you must write your-self. An typical evaluation function takes one invidual as argument and return its fitness as a tuple. As shown in the in the :ref:`Evolutionary Algorithm Bases <ea-bases>` section, a fitness is a list of floating point values and has a property :attr:`valid` to know if this individual shall be re-evaluated. The fitness is set by setting the :attr:`~eap.base.Fitness.values` to the associated tuple. ::
+The evaluation is the most crucial part of an evolutionary algorithm, it is also the only part of the library that you must write your-self. An typical evaluation function takes one individual as argument and return its fitness as a tuple. As shown in the in the :ref:`Evolutionary Algorithm Bases <ea-bases>` section, a fitness is a list of floating point values and has a property :attr:`valid` to know if this individual shall be re-evaluated. The fitness is set by setting the :attr:`~eap.base.Fitness.values` to the associated tuple. ::
 
     >>> def eval(individual):
     ...     # Do some hard computing on the individual
@@ -89,7 +89,7 @@ The evaluation is the most crucial part of an evolutionary algorithm, it is also
 Selection
 =========
 
-Selection is made among a population by the selection operators that are availables in the :mod:`eap.toolbox` module. The selection operator usualy takes as first argument an iterable container of individuals and the number of individuals to select. It returns a list containing the references to the selected individuals. The selection is made as follow. ::
+Selection is made among a population by the selection operators that are available in the :mod:`eap.toolbox` module. The selection operator usually takes as first argument an iterable container of individuals and the number of individuals to select. It returns a list containing the references to the selected individuals. The selection is made as follow. ::
 
     >>> selected = toolbox.selBest([child1, child2], n=1)
     >>> selected[0] is child2
