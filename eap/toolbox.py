@@ -594,7 +594,7 @@ def mutTypedTreeUniform(individual, expr):
     returned.
     """
     index = random.randint(0, individual.size-1)
-    subtree = ind.search_subtree_dfs(index)  
+    subtree = individual.search_subtree_dfs(index)  
     individual.set_subtree_dfs(index, expr(pset=individual.pset,
                                            type= subtree.root.ret))
     return individual,
