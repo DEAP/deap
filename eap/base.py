@@ -122,7 +122,7 @@ class Tree(list):
         """ Return the Python code to build a copy of the object."""
         module = self.__module__
         name = self.__class__.__name__
-        return "%s.%s(%r)" % (module, name, list.__repr__(self))
+        return "%s.%s(%s)" % (module, name, list.__repr__(self))
         
     @property
     def root(self):
