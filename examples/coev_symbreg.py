@@ -73,11 +73,11 @@ if __name__ == "__main__":
     
         for i in xrange(len(pop_ga)):
             if random.random() < MUTPB:
-                pop_ga[i] = tools_ga.mutate(pop_ga[i])
+                pop_ga[i] = tools_ga.mutate(pop_ga[i])[0]
     
         for i in xrange(len(pop_gp)):
             if random.random() < MUTPB:
-                pop_gp[i] = tools_gp.mutate(pop_gp[i])
+                pop_gp[i] = tools_gp.mutate(pop_gp[i])[0]
     
         # Evaluate the individuals with an invalid fitness     
         for ind in pop_ga:
