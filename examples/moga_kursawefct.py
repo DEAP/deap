@@ -20,7 +20,7 @@ import sys
 import random
 
 sys.path.append("..")
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 from eap import algorithms
 from eap import base
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     logging.info("Best individual for measure 2 is %s, %s", 
                  hof[-1], hof[-1].fitness.values)
 
-    ## You can plot the Hall of Fame if you have matplotlib installed
+    # # You can plot the Hall of Fame if you have matplotlib installed
     # import matplotlib.pyplot as plt
     # plt.figure()
     # fit1 = [ind.fitness.values[0] for ind in hof]

@@ -64,8 +64,6 @@ if __name__ == "__main__":
     for g in range(NGEN):
         print "-- Generation %i --" % g
     
-        pop[:] = tools.select(pop, n=len(pop))
-    
         # Apply crossover and mutation
         for i in xrange(1, len(pop), 2):
             if random.random() < CXPB:
@@ -80,15 +78,19 @@ if __name__ == "__main__":
         fitnesses = pool.map(evalOneMax, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
+        
+        pop[:] = tools.select(pop, n=len(pop))
             
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in pop]
-        print "  Min %s" % min(fits)
-        print "  Max %s" % max(fits)
+        
         lenght = len(pop)
         mean = sum(fits) / lenght
         sum2 = sum(map(lambda x: x**2, fits))
         std_dev = abs(sum2 / lenght - mean**2)**0.5
+        
+        print "  Min %s" % min(fits)
+        print "  Max %s" % max(fits)
         print "  Avg %s" % (mean)
         print "  Std %s" % std_dev
     

@@ -37,6 +37,9 @@ tools_ga.register("select", toolbox.selTournament, tournsize=3)
 tools_ga.register("mate", toolbox.cxTwoPoints)
 tools_ga.register("mutate", toolbox.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
+tools_ga.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
+tools_ga.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
+
 tools_gp = gp_symbreg.tools
 
 if __name__ == "__main__":

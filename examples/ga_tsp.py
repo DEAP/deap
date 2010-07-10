@@ -20,7 +20,7 @@ import random
 import yaml
 
 sys.path.append("..")
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 from eap import base
 from eap import creator
@@ -61,7 +61,7 @@ tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
 tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
 
 if __name__ == "__main__":
-    random.seed(1618)
+    random.seed(58)
 
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
