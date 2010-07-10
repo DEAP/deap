@@ -125,7 +125,7 @@ tools.register('expr', gp.generate_full, min=1, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr)
 
 if __name__ == "__main__":
-    random.seed(1024)
+    random.seed(256)
     
     pop = tools.population()
     
@@ -137,8 +137,6 @@ if __name__ == "__main__":
     
     for g in range(NGEN):
         print "-- Generation %i --" % g
-    
-        pop = tools.select(pop, n=len(pop))
     
         # Apply crossover and mutation
         for i in xrange(1, len(pop), 2):
@@ -161,6 +159,8 @@ if __name__ == "__main__":
         for ind in pop:
             if not ind.fitness.valid:
                 ind.fitness.values = tools.evaluate(ind)
+        
+        pop = tools.select(pop, n=len(pop))
     
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in pop]

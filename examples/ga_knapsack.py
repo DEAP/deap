@@ -87,7 +87,7 @@ tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
 tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
 
 if __name__ == "__main__":
-    random.seed(64)
+    random.seed(64)         # Seed does not include item creation
 
     pop = tools.population()
     hof = halloffame.ParetoFront()
@@ -99,12 +99,12 @@ if __name__ == "__main__":
     logging.info("Best individual for measure 2 is %s, %s", 
                  hof[-1], hof[-1].fitness.values)
 
-    # You can plot the Hall of Fame if you have matplotlib installed
-    #import matplotlib.pyplot as plt
-    #plt.figure()
-    #weights = [ind.fitness.values[0] for ind in hof]
-    #values = [ind.fitness.values[1] for ind in hof]
-    #plt.scatter(weights, values)
-    #plt.xlabel("Weight")
-    #plt.ylabel("Value")
-    #plt.show()
+    # # You can plot the Hall of Fame if you have matplotlib installed
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # weights = [ind.fitness.values[0] for ind in hof]
+    # values = [ind.fitness.values[1] for ind in hof]
+    # plt.scatter(weights, values)
+    # plt.xlabel("Weight")
+    # plt.ylabel("Value")
+    # plt.show()

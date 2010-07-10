@@ -27,11 +27,10 @@ module.
 """
 
 import copy
+import functools
+import inspect
 import math
 import random
-import inspect
-import functools
-import warnings
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
 from operator import attrgetter
@@ -82,7 +81,7 @@ class Toolbox(object):
     """
 
     def register(self, methodname, method, *args, **kargs):
-        """Register a *method* in the toolbox under the name *method name*. You
+        """Register a *method* in the toolbox under the name *methodname*. You
         may provide default arguments that will be passed automaticaly when
         calling the registered method.
         
@@ -112,47 +111,20 @@ class Toolbox(object):
         setattr(self, methodname, functools.partial(method, *args, **kargs))
     
     def unregister(self, methodname):
-        """Unregister *method name* from the toolbox."""
+        """Unregister *methodname* from the toolbox."""
         delattr(self, methodname)
         
     def decorate(self, methodname, *decorators):
+        """Decorate *methodname* with the specified *decorators*, *methodname*
+        has to be a registered function in the current toolbox.
+        """
         partial_func = getattr(self, methodname)
         method = partial_func.func
         args = partial_func.args
         kargs = partial_func.keywords
         for decorator in decorators:
-            method = decorator(method)
+            method = decorate(decorator)(method)
         setattr(self, methodname, functools.partial(method, *args, **kargs))
-
-######################################
-# Decorators                         #
-######################################
-
-def deepcopyArgs(*argsname):
-    def decDeepcopyArgs(func):
-        args_name = inspect.getargspec(func)[0]
-        args_pos = [args_name.index(name) for name in argsname]
-        @functools.wraps(func)
-        def wrapDeepcopyArgs(*args, **kargs):
-            args = list(args)
-            for pos in args_pos:
-                args[pos] = copy.deepcopy(args[pos])
-            return func(*args, **kargs)
-        return wrapDeepcopyArgs
-    return decDeepcopyArgs
-
-def delFitness(func):
-    @functools.wraps(func)
-    def wrapDelFitness(*args, **kargs):
-        results = func(*args, **kargs)
-        for result in results:
-            try:
-                del result.fitness.values
-            except AttributeError:
-                warnings.warn(("Deleting the fitness of an object that "
-                              "has no fitness"), RuntimeWarning)
-        return results
-    return wrapDelFitness
         
 ######################################
 # GA Crossovers                      #
@@ -185,15 +157,15 @@ def cxTwoPoints(ind1, ind2):
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
    
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
-         = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
-    
+        = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
     return ind1, ind2
 
 def cxOnePoint(ind1, ind2):
-    """Execute a one point crossover on the input individuals. The two children
-    produced are returned as a tuple, the two parents are left intact.
-    This operation apply on an :class:`~eap.base.Individual` composed of a list
-    of attributes and act as follow ::
+    """Execute a one point crossover on the input individuals.
+    The two children produced are returned as a tuple, the two
+    parents are left intact. This operation apply on an
+    :class:`~eap.base.Individual` composed of a list of attributes
+    and act as follow ::
 
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
@@ -204,8 +176,8 @@ def cxOnePoint(ind1, ind2):
         >>> print ind2
         [B(1), ..., A(i), ..., A(m)]
 
-    This function use the :func:`~random.randint` function from the python base
-    :mod:`random` module.
+    This function use the :func:`~random.randint` function from the
+    python base :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
     cxpoint = random.randint(1, size - 1)
@@ -232,11 +204,11 @@ def cxPartialyMatched(ind1, ind2):
     loci, and the traveling salesman problem", 1985.
 
     For example, the following parents will produce the two following children
-    when mated with crossover points ``a = 2`` and ``b = 3``. ::
+    when mated with crossover points ``a = 2`` and ``b = 4``. ::
 
         >>> ind1 = [0, 1, 2, 3, 4]
         >>> ind2 = [1, 2, 3, 4, 0]
-        >>> ind1, ind2 = pmxCx(ind1, ind2)
+        >>> ind1, ind2 = cxPartialyMatched(ind1, ind2)
         >>> print ind1
         [0, 2, 3, 1, 4]
         >>> print ind2
@@ -271,7 +243,6 @@ def cxPartialyMatched(ind1, ind2):
         # Position bookkeeping
         p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-
     return ind1, ind2
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
@@ -291,7 +262,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
 
         >>> ind1 = [0, 1, 2, 3, 4]
         >>> ind2 = [1, 2, 3, 4, 0]
-        >>> ind1, ind2 = pmxCx(ind1, ind2)
+        >>> ind1, ind2 = cxUniformPartialyMatched(ind1, ind2)
         >>> print ind1
         [4, 2, 1, 3, 0]
         >>> print ind2
@@ -319,7 +290,6 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             # Position bookkeeping
             p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-
     return ind1, ind2
 
 def cxBlend(ind1, ind2, alpha):
@@ -332,7 +302,6 @@ def cxBlend(ind1, ind2, alpha):
         x2 = ind2[i]
         ind1[i] = (1. - gamma) * x1 + gamma * x2
         ind2[i] = gamma * x1 + (1. - gamma) * x2
-    
     return ind1, ind2
 
 def cxSimulatedBinary(ind1, ind2, nu):
@@ -350,7 +319,6 @@ def cxSimulatedBinary(ind1, ind2, nu):
         x2 = ind2[i]
         ind1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
         ind2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
-    
     return ind1, ind2
     
 ######################################
@@ -391,7 +359,6 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
             ind1.strategy[indx] = minstrategy
         if ind2.strategy[indx] < minstrategy:
             ind2.strategy[indx] = minstrategy
-
     return ind1, ind2
 
 def cxESTwoPoints(ind1, ind2):
@@ -411,7 +378,6 @@ def cxESTwoPoints(ind1, ind2):
     ind1[pt1:pt2], ind2[pt1:pt2] = ind2[pt1:pt2], ind1[pt1:pt2]     
     ind1.strategy[pt1:pt2], ind2.strategy[pt1:pt2] = \
         ind2.strategy[pt1:pt2], ind1.strategy[pt1:pt2]
-    
     return ind1, ind2
 
 ######################################
@@ -464,7 +430,6 @@ def mutShuffleIndexes(individual, indpb):
                 swap_indx += 1
             individual[i], individual[swap_indx] = \
                            individual[swap_indx], individual[i]
-            mutated = True
     return individual,
 
 def mutFlipBit(individual, indpb):
@@ -505,7 +470,6 @@ def mutES(individual, indpb, minstrategy=None):
             if individual.strategy[indx] < minstrategy:     # 4 < None = False
                 individual.strategy[indx] = minstrategy
             individual[indx] += individual.strategy[indx] * ni
-            mutated = True
     return individual,
 
 ######################################
@@ -567,8 +531,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
         sub2 = ind2.search_subtree_dfs(index2)
         ind1.set_subtree_dfs(index1, sub2)
         ind2.set_subtree_dfs(index2, sub1)
-
-    return ind1, ind2    
+    return ind1, ind2
 
 ######################################
 # GP Mutations                       #
@@ -742,15 +705,17 @@ def sortCrowdingDist(individuals, n):
     crowding = [(ind, i) for i, ind in enumerate(individuals)]
     
     number_objectives = len(individuals[0].fitness.values)
+    inf = float("inf")      # It is four times faster to compare with a local
+                            # variable than create the float("inf") each time
     for i in xrange(number_objectives):
         crowding.sort(key=lambda element: element[0].fitness.values[i])
         distances[crowding[0][1]] = float("inf")
         distances[crowding[-1][1]] = float("inf")
         for j in xrange(1, len(crowding) - 1):
-            if distances[crowding[j][1]] < float("inf"):
+            if distances[crowding[j][1]] < inf:
                 distances[crowding[j][1]] += \
-                                      crowding[j + 1][0].fitness.values[i] - \
-                                      crowding[j - 1][0].fitness.values[i]
+                    crowding[j + 1][0].fitness.values[i] - \
+                    crowding[j - 1][0].fitness.values[i]
     sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
                          key=lambda value: value[0], reverse=True)
     return (individuals[index] for dist, index in sorted_dist[:n])
@@ -953,3 +918,85 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     for i, immigrant in enumerate(immigrants[to_deme]):
         indx = populations[to_deme].index(immigrant)
         populations[to_deme][indx] = mig_buf[i]
+
+######################################
+# Decorators                         #
+######################################
+
+def deepcopyArgs(*argsname):
+    def decDeepcopyArgs(func):
+        args_name = inspect.getargspec(func)[0]
+        args_pos = [args_name.index(name) for name in argsname]
+        def wrapDeepcopyArgs(*args, **kargs):
+            args = list(args)
+            for pos in args_pos:
+                args[pos] = copy.deepcopy(args[pos])
+            return func(*args, **kargs)
+        return wrapDeepcopyArgs
+    return decDeepcopyArgs
+
+def delFitness(fn):
+    def decDelFitness(*args, **kargs):
+        results = fn(*args, **kargs)
+        for result in results:
+            try:
+                del result.fitness.values
+            except AttributeError:
+                warnings.warn(("Deleting the fitness of an object that "
+                              "has no fitness"), RuntimeWarning)
+        return results
+    return decDelFitness
+
+######################################
+# Decoration tool                    #
+######################################
+
+# This function is a simpler version of the decorator module (version 3.2.0)
+# from Michele Simionato available at http://pypi.python.org/pypi/decorator.
+# Copyright (c) 2005, Michele Simionato
+# All rights reserved.
+
+def decorate(decorator):
+    """Decorate a function preserving its signature."""
+    def wrapDecorate(func):
+        # From __init__
+        assert func.__name__
+        if inspect.isfunction(func):
+            argspec = inspect.getargspec(func)
+            args, varargs, keywords, defaults = argspec
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        if not signature:
+            raise TypeError('You are decorating a non function: %s' % func)
+    
+        # From create
+        src = ("def %(name)s(%(signature)s):\n"
+              "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
+                                                           signature=signature)
+    
+        # From make
+        evaldict = dict(_call_=decorator(func))
+        reserved_names = set([func.__name__] + \
+            [arg.strip(' *') for arg in signature.split(',')])
+        for n, v in evaldict.iteritems():
+            if n in reserved_names:
+                raise NameError('%s is overridden in\n%s' % (n, src))
+        try:
+            # This line does all the dirty work of reassigning the signature
+            code = compile(src, '<string>', 'single')
+            exec code in evaldict
+        except:
+            print >> sys.stderr, 'Error in generated code:'
+            print >> sys.stderr, src
+            raise
+        new_func = evaldict[func.__name__]
+    
+        # From update
+        new_func.__source__ = src
+        new_func.__name__ = func.__name__
+        new_func.__doc__ = func.__doc__
+        new_func.__dict__ = func.__dict__.copy()
+        new_func.func_defaults = defaults
+        new_func.__module__ = func.__module__
+        return new_func
+    return wrapDecorate
