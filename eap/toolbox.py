@@ -158,7 +158,6 @@ def cxTwoPoints(ind1, ind2):
    
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
         = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
-    return ind1, ind2
 
 def cxOnePoint(ind1, ind2):
     """Execute a one point crossover on the input individuals.
@@ -182,7 +181,6 @@ def cxOnePoint(ind1, ind2):
     size = min(len(ind1), len(ind2))
     cxpoint = random.randint(1, size - 1)
     ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
-    return ind1, ind2
 
 def cxUniform(ind1, ind2, indpb):
     """Uniform crossover"""
@@ -190,7 +188,6 @@ def cxUniform(ind1, ind2, indpb):
     for i in xrange(size):
         if random.random() < indpb:
             ind1[i], ind2[i] = ind2[i], ind1[i]
-    return ind1, ind2
     
 def cxPartialyMatched(ind1, ind2):
     """Execute a partialy matched crossover (PMX) on the input indviduals.
@@ -243,7 +240,6 @@ def cxPartialyMatched(ind1, ind2):
         # Position bookkeeping
         p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-    return ind1, ind2
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
     """Execute a uniform partialy matched crossover (UPMX) on the input
@@ -290,7 +286,6 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             # Position bookkeeping
             p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-    return ind1, ind2
 
 def cxBlend(ind1, ind2, alpha):
     """Blend crossover"""
@@ -302,7 +297,6 @@ def cxBlend(ind1, ind2, alpha):
         x2 = ind2[i]
         ind1[i] = (1. - gamma) * x1 + gamma * x2
         ind2[i] = gamma * x1 + (1. - gamma) * x2
-    return ind1, ind2
 
 def cxSimulatedBinary(ind1, ind2, nu):
     """Simulated binary crossover"""
@@ -319,7 +313,6 @@ def cxSimulatedBinary(ind1, ind2, nu):
         x2 = ind2[i]
         ind1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
         ind2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
-    return ind1, ind2
     
 ######################################
 # Messy Crossovers                   #
@@ -331,7 +324,6 @@ def cxMessyOnePoint(ind1, ind2):
     cxpoint1 = random.randint(1, len(ind1))
     cxpoint2 = random.randint(1, len(ind2))
     ind1[cxpoint1:], ind2[cxpoint2:] = ind2[cxpoint2:], ind1[cxpoint1:]
-    return ind1, ind2
     
 ######################################
 # ES Crossovers                      #
@@ -359,7 +351,6 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
             ind1.strategy[indx] = minstrategy
         if ind2.strategy[indx] < minstrategy:
             ind2.strategy[indx] = minstrategy
-    return ind1, ind2
 
 def cxESTwoPoints(ind1, ind2):
     """Execute a classical two points crossover on both the individual and
@@ -378,7 +369,6 @@ def cxESTwoPoints(ind1, ind2):
     ind1[pt1:pt2], ind2[pt1:pt2] = ind2[pt1:pt2], ind1[pt1:pt2]     
     ind1.strategy[pt1:pt2], ind2.strategy[pt1:pt2] = \
         ind2.strategy[pt1:pt2], ind1.strategy[pt1:pt2]
-    return ind1, ind2
 
 ######################################
 # GA Mutations                       #
@@ -411,7 +401,6 @@ def mutGaussian(individual, mu, sigma, indpb):
     for i in xrange(len(individual)):
         if random.random() < indpb:
             individual[i] += random.gauss(mu, sigma)
-    return individual,
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -430,7 +419,6 @@ def mutShuffleIndexes(individual, indpb):
                 swap_indx += 1
             individual[i], individual[swap_indx] = \
                            individual[swap_indx], individual[i]
-    return individual,
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
@@ -446,7 +434,6 @@ def mutFlipBit(individual, indpb):
     for indx in xrange(len(individual)):
         if random.random() < indpb:
             individual[indx] = not individual[indx]
-    return individual,
     
 ######################################
 # ES Mutations                       #
@@ -470,7 +457,6 @@ def mutES(individual, indpb, minstrategy=None):
             if individual.strategy[indx] < minstrategy:     # 4 < None = False
                 individual.strategy[indx] = minstrategy
             individual[indx] += individual.strategy[indx] * ni
-    return individual,
 
 ######################################
 # GP Crossovers                      #
@@ -490,7 +476,6 @@ def cxTreeUniformOnePoint(ind1, ind2):
     sub2 = ind2.search_subtree_dfs(index2)
     ind1.set_subtree_dfs(index1, sub2)
     ind2.set_subtree_dfs(index2, sub1)
-    return ind1, ind2
     
 ## Strongly Typed GP crossovers
 def cxTypedTreeOnePoint(ind1, ind2):
@@ -531,7 +516,6 @@ def cxTypedTreeOnePoint(ind1, ind2):
         sub2 = ind2.search_subtree_dfs(index2)
         ind1.set_subtree_dfs(index1, sub2)
         ind2.set_subtree_dfs(index2, sub1)
-    return ind1, ind2
 
 ######################################
 # GP Mutations                       #
@@ -543,7 +527,6 @@ def mutTreeUniform(individual, expr):
     """
     index = random.randint(0, individual.size-1)
     individual.set_subtree_dfs(index, expr(pset=individual.pset))
-    return individual,
 
 ## Strongly Typed GP mutations
 def mutTypedTreeUniform(individual, expr):
@@ -560,7 +543,6 @@ def mutTypedTreeUniform(individual, expr):
     subtree = individual.search_subtree_dfs(index)  
     individual.set_subtree_dfs(index, expr(pset=individual.pset,
                                            type= subtree.root.ret))
-    return individual,
 
 ######################################
 # Selections                         #
@@ -934,18 +916,6 @@ def deepcopyArgs(*argsname):
             return func(*args, **kargs)
         return wrapDeepcopyArgs
     return decDeepcopyArgs
-
-def delFitness(fn):
-    def decDelFitness(*args, **kargs):
-        results = fn(*args, **kargs)
-        for result in results:
-            try:
-                del result.fitness.values
-            except AttributeError:
-                warnings.warn(("Deleting the fitness of an object that "
-                              "has no fitness"), RuntimeWarning)
-        return results
-    return decDelFitness
 
 ######################################
 # Decoration tool                    #

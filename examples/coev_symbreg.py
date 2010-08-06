@@ -1,6 +1,7 @@
 import sys
 import os
 import random
+import copy
 
 sys.path.append(os.path.abspath('..'))
 
@@ -37,9 +38,6 @@ tools_ga.register("select", toolbox.selTournament, tournsize=3)
 tools_ga.register("mate", toolbox.cxTwoPoints)
 tools_ga.register("mutate", toolbox.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
-tools_ga.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
-tools_ga.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
-
 tools_gp = gp_symbreg.tools
 
 if __name__ == "__main__":
@@ -62,34 +60,48 @@ if __name__ == "__main__":
     for g in range(NGEN):
         print "-- Generation %i --" % g
     
-        pop_ga[:] = tools_ga.select(pop_ga, n=len(pop_ga))
-        pop_gp[:] = tools_gp.select(pop_gp, n=len(pop_gp))
+        # Select and clone the offsprings
+        off_ga = tools_ga.select(pop_ga, n=len(pop_ga))
+        off_gp = tools_gp.select(pop_gp, n=len(pop_gp))
+        off_ga = [copy.deepcopy(ind) for ind in off_ga]        
+        off_gp = [copy.deepcopy(ind) for ind in off_gp]
+    
     
         # Apply crossover and mutation
-        for i in xrange(1, len(pop_ga), 2):
+        for ind1, ind2 in zip(off_ga[::2], off_ga[1::2]):
             if random.random() < CXPB:
-                pop_ga[i - 1], pop_ga[i] = tools_ga.mate(pop_ga[i - 1], pop_ga[i])
+                tools_ga.mate(ind1, ind2)
+                del ind1.fitness.values
+                del ind2.fitness.values
     
-        for i in xrange(1, len(pop_gp), 2):
+        for ind1, ind2 in zip(off_gp[::2], off_gp[1::2]):
             if random.random() < CXPB:
-                pop_gp[i - 1], pop_gp[i] = tools_gp.mate(pop_gp[i - 1], pop_gp[i])
+                tools_gp.mate(ind1, ind2)
+                del ind1.fitness.values
+                del ind2.fitness.values
     
-        for i in xrange(len(pop_ga)):
+        for ind in off_ga:
             if random.random() < MUTPB:
-                pop_ga[i] = tools_ga.mutate(pop_ga[i])[0]
+                tools_ga.mutate(ind)
+                del ind.fitness.values
     
-        for i in xrange(len(pop_gp)):
+        for ind in off_gp:
             if random.random() < MUTPB:
-                pop_gp[i] = tools_gp.mutate(pop_gp[i])[0]
+                tools_gp.mutate(ind)
+                del ind.fitness.values
     
         # Evaluate the individuals with an invalid fitness     
-        for ind in pop_ga:
+        for ind in off_ga:
             if not ind.fitness.valid:
                ind.fitness.values = evalSymbReg(best_gp, ind)
         
-        for ind in pop_gp:
+        for ind in off_gp:
             if not ind.fitness.valid:
                 ind.fitness.values = evalSymbReg(ind, best_ga)
+                
+        # Replace the old population by the offsprings
+        pop_ga = off_ga
+        pop_gp = off_gp
                 
         best_ga = toolbox.selBest(pop_ga, 1)[0]
         best_gp = toolbox.selBest(pop_gp, 1)[0]    

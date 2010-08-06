@@ -66,18 +66,26 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
         evaluations = 0
+        
+        # Select the next generation individuals
+        offsprings = toolbox.select(population, n=len(population))
+        # Clone the selected individuals
+        offsprings = [copy.deepcopy(ind) for ind in offsprings]
 
-        # Apply crossover and mutation
-        for i in xrange(1, len(population), 2):
+        # Apply crossover and mutation on the offsprings
+        for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             if random.random() < cxpb:
-                population[i - 1], population[i] = \
-                    toolbox.mate(population[i - 1], population[i])
-        for i in xrange(len(population)):
-            if random.random() < mutpb:
-                population[i], = toolbox.mutate(population[i])
+                toolbox.mate(ind1, ind2)
+                del ind1.fitness.values
+                del ind2.fitness.values
 
-        # Evaluate the individuals with invalid fitness
-        for ind in population:
+        for ind in offsprings:
+            if random.random() < mutpb:
+                toolbox.mutate(ind)
+                del ind1.fitness.values
+
+        # Evaluate the offsprings with invalid fitness
+        for ind in offsprings:
             if not ind.fitness.valid:
                 evaluations += 1
                 ind.fitness.values = toolbox.evaluate(ind)
@@ -85,10 +93,10 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         _logger.debug("Evaluated %i individuals", evaluations)
 
         if halloffame is not None:
-            halloffame.update(population)
-        
-        # Select the next generation population
-        population[:] = toolbox.select(population, n=len(population))
+            halloffame.update(offsprings)
+            
+        # The population is entirely replaced by the offsprings
+        population[:] = offsprings
 
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values for ind in population]
@@ -96,11 +104,11 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
 
         minimums = map(min, fits_t)
         maximums = map(max, fits_t)
-        lenght = len(population)
+        length = len(population)
         sums = map(sum, fits_t)
         sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
-        means = [sum_ / lenght for sum_ in sums]
-        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        means = [sum_ / length for sum_ in sums]
+        std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
@@ -140,15 +148,22 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         #for i in xrange(lambda_):
             op_choice = random.random()
             if op_choice < cxpb:            # Apply crossover
-                p1, p2 = random.sample(population, 2)
-                children = toolbox.mate(p1, p2)
-                offsprings.extend(children)
-                nb_offsprings += len(children)
+                ind1, ind2 = random.sample(population, 2)
+                ind1 = copy.deepcopy(ind1)
+                ind2 = copy.deepcopy(ind2)
+                toolbox.mate(ind1, ind2)
+                del ind1.fitness.values
+                del ind2.fitness.values
+                offsprings.append(ind1)
+                offsprings.append(ind2)
+                nb_offsprings += 2
             elif op_choice < cxpb + mutpb:  # Apply mutation
-                p = random.choice(population)
-                mutants = toolbox.mutate(p)
-                offsprings.extend(mutants)
-                nb_offsprings += len(mutants)
+                ind = random.choice(population) # select
+                ind = copy.deepcopy(ind) # clone
+                toolbox.mutate(ind)
+                del ind.fitness.values
+                offsprings.append(ind)
+                nb_offsprings += 1
             else:                           # Apply reproduction
                 offsprings.append(random.choice(population))
                 nb_offsprings += 1
@@ -177,11 +192,11 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
 
         minimums = map(min, fits_t)
         maximums = map(max, fits_t)
-        lenght = len(population)
+        length = len(population)
         sums = map(sum, fits_t)
         sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
-        means = [sum_ / lenght for sum_ in sums]
-        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        means = [sum_ / length for sum_ in sums]
+        std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
@@ -222,15 +237,22 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         #for i in xrange(lambda_):
             op_choice = random.random()
             if op_choice < cxpb:            # Apply crossover
-                p1, p2 = random.sample(population, 2)
-                children = toolbox.mate(p1, p2)
-                offsprings.extend(children)
-                nb_offsprings += len(children)
+                ind1, ind2 = random.sample(population, 2)
+                ind1 = copy.deepcopy(ind1)
+                ind2 = copy.deepcopy(ind2)
+                toolbox.mate(ind1, ind2)
+                del ind1.fitness.values
+                del ind2.fitness.values
+                offsprings.append(ind1)
+                offsprings.append(ind2)
+                nb_offsprings += 2
             elif op_choice < cxpb + mutpb:  # Apply mutation
-                p = random.choice(population)
-                mutants = toolbox.mutate(p)
-                offsprings.extend(mutants)
-                nb_offsprings += len(mutants)
+                ind = random.choice(population) # select
+                ind = copy.deepcopy(ind) # clone
+                toolbox.mutate(ind)
+                del ind.fitness.values
+                offsprings.append(ind)
+                nb_offsprings += 1
             else:                           # Apply reproduction
                 offsprings.append(random.choice(population))
                 nb_offsprings += 1
@@ -259,11 +281,11 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
 
         minimums = map(min, fits_t)
         maximums = map(max, fits_t)
-        lenght = len(population)
+        length = len(population)
         sums = map(sum, fits_t)
         sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
-        means = [sum_ / lenght for sum_ in sums]
-        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        means = [sum_ / length for sum_ in sums]
+        std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))
@@ -280,7 +302,7 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
     # Evaluate the individuals with an invalid fitness
     for ind in population:
         if not ind.fitness.valid:
-            ind.fitness.extend(toolbox.evaluate(ind))
+            ind.fitness.values = toolbox.evaluate(ind)
     
     if halloffame is not None:
         halloffame.update(population)
@@ -290,11 +312,12 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         _logger.info("Evolving generation %i", g)
         
         p1, p2 = toolbox.select(population, 2)
+        p1 = copy.deepcopy(p1)
+        p2 = copy.deepcopy(p2)
         child = random.choice(toolbox.mate(p1, p2))
-        child = random.choice(toolbox.mutate(child))
+        child = toolbox.mutate(child)
         
-        if not child.fitness.valid:
-            child.fitness.extend(toolbox.evaluate(child))
+        child.fitness.values = toolbox.evaluate(child)
         
         if halloffame is not None:
             halloffame.update(child)
@@ -308,11 +331,11 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         
         minimums = map(min, fits_t)
         maximums = map(max, fits_t)
-        lenght = len(population)
+        length = len(population)
         sums = map(sum, fits_t)
         sums2 = [sum([x*x for x in fit]) for fit in fits_t]
-        means = [sum_ / lenght for sum_ in sums]
-        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
+        means = [sum_ / length for sum_ in sums]
+        std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
         
         _logger.debug("Min %s", ", ".join(map(str, minimums)))
         _logger.debug("Max %s", ", ".join(map(str, maximums)))

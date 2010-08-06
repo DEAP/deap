@@ -20,7 +20,7 @@ import random
 import yaml
 
 sys.path.append("..")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from eap import base
 from eap import creator
@@ -56,9 +56,6 @@ tools.register("mate", toolbox.cxPartialyMatched)
 tools.register("mutate", toolbox.mutShuffleIndexes, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("evaluate", evalTSP)
-
-tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
-tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
 
 if __name__ == "__main__":
     random.seed(58)

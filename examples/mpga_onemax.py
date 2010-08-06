@@ -15,6 +15,7 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
+import copy
 import sys
 import random
 import multiprocessing
@@ -44,9 +45,6 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
-tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
-
 if __name__ == "__main__":
     random.seed(64)
 
@@ -63,31 +61,39 @@ if __name__ == "__main__":
     # Begin the evolution
     for g in range(NGEN):
         print "-- Generation %i --" % g
+        
+        # Select the next generation individuals
+        offsprings = tools.select(pop, n=len(pop))
+        # Clone the selected individuals
+        offsprings = [copy.deepcopy(ind) for ind in offsprings]        
     
         # Apply crossover and mutation
-        for i in xrange(1, len(pop), 2):
+        for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             if random.random() < CXPB:
-                pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
+                tools.mate(ind1, ind2)
+                del ind1.fitness.values
+                del ind2.fitness.values
     
-        for i in xrange(len(pop)):
+        for ind in offsprings:
             if random.random() < MUTPB:
-                pop[i] = tools.mutate(pop[i])[0]
+                tools.mutate(ind)
+                del ind.fitness.values
     
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = filter(lambda ind: not ind.fitness.valid, pop)
+        invalid_ind = filter(lambda ind: not ind.fitness.valid, offsprings)
         fitnesses = pool.map(evalOneMax, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
-        pop[:] = tools.select(pop, n=len(pop))
+        pop[:] = offsprings
             
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in pop]
         
-        lenght = len(pop)
-        mean = sum(fits) / lenght
+        length = len(pop)
+        mean = sum(fits) / length
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = abs(sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / length - mean**2)**0.5
         
         print "  Min %s" % min(fits)
         print "  Max %s" % max(fits)

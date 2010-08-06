@@ -112,10 +112,10 @@ Some statistics may be gathered on the population, the following lines print the
     fits = [ind.fitness[0] for ind in pop]
     print '  Min %f' % min(fits)
     print '  Max %f' % max(fits)
-    lenght = len(pop)
-    mean = sum(fits) / lenght
+    length = len(pop)
+    mean = sum(fits) / length
     sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = abs(sum2 / lenght - mean**2)**0.5
+    std_dev = abs(sum2 / length - mean**2)**0.5
     print '  Mean %f' % (mean)
     print '  Std. Dev. %f' % std_dev
 

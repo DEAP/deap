@@ -72,9 +72,6 @@ tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
 
-tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
-tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
-
 if __name__ == "__main__":
     random.seed(1348779701)
     
