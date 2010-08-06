@@ -83,9 +83,6 @@ tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
 tools.register("select", toolbox.spea2)
 
-tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness)
-tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness)
-
 if __name__ == "__main__":
     random.seed(64)         # Seed does not include item creation
 
