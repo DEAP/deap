@@ -12,13 +12,16 @@ Evolutionary Toolbox
    
    .. automethod:: unregister(methodname)
    
+   .. automethod:: decorate(methodname, decorator[, ...])
+   
 Operators
 =========
 
 This module contains the operators an evolutionary algorithm. They are used to modify, select and move the individuals in their environment. A good set of operators should allow to move from an initial population of good solutions, equivalent to random sampling, to excellent configurations optimizing the studied problem.
 
 .. note::
-   Operators that affects the individual's constitution (attributes) are responsible of invalidating the fitness and make sure that the new individual(s) is (are) independent of the original individual(s).
+   The responsibility of making offspring(s) independent of their parent(s) and invalidating the fitness is left to the user and is generally fulfilled using respectively the :func:`~eap.toolbox.deepcopyArgs` and :func:`~eap.toolbox.delFitness` decorators. 
+
 
 
 Crossover
@@ -70,6 +73,12 @@ Selection
 
 .. autofunction:: eap.toolbox.selTournament
 
+.. autofunction:: eap.toolbox.selRoulette
+
+.. autofunction:: eap.toolbox.nsga2
+
+.. autofunction:: eap.toolbox.spea2
+
 .. autofunction:: eap.toolbox.selRandom
 
 .. autofunction:: eap.toolbox.selBest
@@ -81,3 +90,12 @@ Migration
 
 .. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
 
+Decorators
+----------
+The toolbox also contains some basic decorators to enhance operator's functionality.
+
+.. autofunction:: eap.toolbox.deepcopyArgs(argname[, ...])
+
+.. autofunction:: eap.toolbox.delFitness
+
+.. autofunction:: eap.toolbox.decorate

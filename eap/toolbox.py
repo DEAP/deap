@@ -31,6 +31,7 @@ import functools
 import inspect
 import math
 import random
+import warnings
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
 from operator import attrgetter
@@ -89,7 +90,7 @@ class Toolbox(object):
         simulate iterable initializers. For example, when building objects
         deriving from :class:`list`, the content argument will provide to
         the built list its initial content. Depending on what is given to
-        *content_init* and *size* the initialization is different. If
+        *content_init* and *size_init* the initialization is different. If
         *content_init* is an iterable, then the iterable is consumed enterily
         to intialize each object, in that case *size_init* is not used.
         Otherwise, *content_init* may be a simple function that will be repeated
@@ -116,7 +117,9 @@ class Toolbox(object):
         
     def decorate(self, methodname, *decorators):
         """Decorate *methodname* with the specified *decorators*, *methodname*
-        has to be a registered function in the current toolbox.
+        has to be a registered function in the current toolbox. Decorate uses
+        the signature preserving decoration function
+        :func:`~eap.toolbox.decorate`.
         """
         partial_func = getattr(self, methodname)
         method = partial_func.func
@@ -321,8 +324,8 @@ def cxSimulatedBinary(ind1, ind2, nu):
 def cxMessyOnePoint(ind1, ind2):
     """Execute a one point crossover will mostly change the individuals size.
     """
-    cxpoint1 = random.randint(1, len(ind1))
-    cxpoint2 = random.randint(1, len(ind2))
+    cxpoint1 = random.randint(0, len(ind1))
+    cxpoint2 = random.randint(0, len(ind2))
     ind1[cxpoint1:], ind2[cxpoint2:] = ind2[cxpoint2:], ind1[cxpoint1:]
     
 ######################################
@@ -383,17 +386,17 @@ def mutGaussian(individual, mu, sigma, indpb):
     attribute to be mutated.
 
     .. note::
-       The mutation is not responsible for constraints checking, the reason for
-       this is that there is too many possibilities for
+       The mutation is not responsible for constraints checking, because
+       there is too many possibilities for
        resetting the values. For example, if a value exceed the maximum, it may
        be set to the maximum, to the maximum minus (the value minus the maximum),
        it may be cycled to the minimum or even cycled to the minimum plus (the
        value minus the maximum). Wich way is closer to the representation used
        is up to you.
        
-       One easy way to add cronstraint checking to an operator is to simply wrap
-       the operator in a second function. See the multi-objective example
-       (moga_kursawefct.py) for an explicit example.
+       One easy way to add cronstraint checking to an operator is to 
+       use the function decoration in the toolbox. See the multi-objective
+       example (moga_kursawefct.py) for an explicit example.
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
@@ -554,7 +557,7 @@ def selRandom(individuals, n):
 
     .. versionchanged:: 0.3.1a
        Removed random sample without replacement as this is simply a call to
-       python"s :func:`~random.sample` function
+       python's :func:`~random.sample` function
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
@@ -600,7 +603,7 @@ def selRoulette(individuals, n):
     objective of each individual. The list returned contains shallow
     copies of the input *individuals*.
     
-    This function uses the :func:`~random.choice` function from the python base
+    This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
     s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
@@ -623,7 +626,15 @@ def selRoulette(individuals, n):
 ######################################
 
 def nsga2(individuals, n):
-    """Apply NSGA-2 selection operator on the *individuals*.
+    """Apply NSGA-II selection operator on the *individuals*. Usually,
+    the size of *individuals* will be larger than *n* because any individual
+    present in *individuals* will appear in the returned list at most once.
+    Having the size of *individuals* equals to *n* will have no effect other
+    than sorting the population according to a non-domination sheme.
+    
+    For more details on the NSGA-II operator see Deb, Pratab, Agarwal,
+    and Meyarivan, "A fast elitist non-dominated sorting genetic algorithm for
+    multi-objective optimization: NSGA-II", 2002.
     """
     pareto_fronts = sortFastND(individuals, n)
     chosen = list(chain(*pareto_fronts[:-1]))
@@ -678,8 +689,7 @@ def sortFastND(individuals, n, first_front_only=False):
 
 
 def sortCrowdingDist(individuals, n):
-    """Sort the individuals according to the crowding distance.
-    """
+    """Sort the individuals according to the crowding distance."""
     if len(individuals) == 0:
         return []
     
@@ -708,6 +718,15 @@ def sortCrowdingDist(individuals, n):
 ######################################
 
 def spea2(individuals, n):
+    """Apply SPEA-II selection operator on the *individuals*. Usually,
+    the size of *individuals* will be larger than *n* because any individual
+    present in *individuals* will appear in the returned list at most once.
+    Having the size of *individuals* equals to *n* will have no effect other
+    than sorting the population according to a strength pareto sheme.
+    
+    For more details on the SPEA-II operator see Zitzler, Laumanns and Thiele,
+    "SPEA 2: Improving the strength pareto evolutionary algorithm", 2001.
+    """
     N = len(individuals)
     L = len(individuals[0].fitness.values)
     K = math.sqrt(N)
@@ -906,6 +925,9 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
 ######################################
 
 def deepcopyArgs(*argsname):
+    """Pre-execution function that deepcopies argument specified by
+    *argname*
+    """
     def decDeepcopyArgs(func):
         args_name = inspect.getargspec(func)[0]
         args_pos = [args_name.index(name) for name in argsname]
@@ -927,12 +949,48 @@ def deepcopyArgs(*argsname):
 # All rights reserved.
 
 def decorate(decorator):
-    """Decorate a function preserving its signature."""
+    """Decorate a function preserving its signature. There is two way of
+    using this function, first as a decorator passing the decorator to
+    use as argument, for example ::
+    
+        @decorate(a_decorator)
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+    
+    Or as a decorator ::
+    
+        @decorate
+        def myDecorator(func):
+            def wrapFunc(*args, **kargs):
+                decoration_work()
+                return func(*args, **kargs)
+            return wrapFunc
+        
+        @myDecorator
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+    
+    Using the :mod:`inspect` module, we can retreive the signature of the
+    decorated function, what is not possible when not using this method. ::
+    
+        print inspect.getargspec(myFunc)
+        
+    It shall return something like ::
+    
+        (["arg1", "arg2", "arg3"], None, None, ("default",))
+    """
     def wrapDecorate(func):
         # From __init__
         assert func.__name__
         if inspect.isfunction(func):
             argspec = inspect.getargspec(func)
+            args, varargs, keywords, defaults = argspec
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        elif inspect.isclass(func):
+            argspec = inspect.getargspec(func.__init__)
             args, varargs, keywords, defaults = argspec
             signature = inspect.formatargspec(formatvalue=lambda val: "",
                                               *argspec)[1:-1]
