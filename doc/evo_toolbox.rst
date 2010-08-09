@@ -96,6 +96,4 @@ The toolbox also contains some basic decorators to enhance operator's functional
 
 .. autofunction:: eap.toolbox.deepcopyArgs(argname[, ...])
 
-.. autofunction:: eap.toolbox.delFitness
-
 .. autofunction:: eap.toolbox.decorate

@@ -49,15 +49,14 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     are completed.
     """
     _logger.info("Start of evolution")
-    evaluations = 0
 
-    # Evaluate the individuals with invalid fitness
-    for ind in population:
-        if not ind.fitness.valid:
-            evaluations += 1
-            ind.fitness.values = toolbox.evaluate(ind)
+    # Evaluate the individuals with an invalid fitness
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
 
-    _logger.debug("Evaluated %i individuals", evaluations)
+    _logger.debug("Evaluated %i individuals", len(invalid_ind))
 
     if halloffame is not None:
         halloffame.update(population)
@@ -65,12 +64,11 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
-        evaluations = 0
         
         # Select the next generation individuals
         offsprings = toolbox.select(population, n=len(population))
         # Clone the selected individuals
-        offsprings = [copy.deepcopy(ind) for ind in offsprings]
+        offsprings = map(toolbox.clone, offsprings)
 
         # Apply crossover and mutation on the offsprings
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
@@ -82,15 +80,15 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         for ind in offsprings:
             if random.random() < mutpb:
                 toolbox.mutate(ind)
-                del ind1.fitness.values
+                del ind.fitness.values
 
-        # Evaluate the offsprings with invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                evaluations += 1
-                ind.fitness.values = toolbox.evaluate(ind)
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
 
-        _logger.debug("Evaluated %i individuals", evaluations)
+        _logger.debug("Evaluated %i individuals", len(invalid_ind))
 
         if halloffame is not None:
             halloffame.update(offsprings)
@@ -99,7 +97,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         population[:] = offsprings
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values for ind in population]
+        fits = (ind.fitness.values for ind in population)
         fits_t = zip(*fits)             # Transpose fitnesses for analysis
 
         minimums = map(min, fits_t)

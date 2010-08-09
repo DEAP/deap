@@ -51,10 +51,8 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         for ind in population:
             ind.fitness.values = toolbox.evaluate(ind)
         
-        try:
+        if halloffame is not None:
             halloffame.update(population)
-        except AttributeError:
-            pass
         
         # Update the Strategy with the evaluated individuals
         strategy.update(population)

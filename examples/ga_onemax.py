@@ -16,6 +16,7 @@
 import sys
 import random
 import copy
+import time
 
 sys.path.append("..")
 
@@ -50,18 +51,23 @@ if __name__ == "__main__":
     pop = tools.pop()
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
-    # Evaluate the entire pop
-    for ind in pop:
-        ind.fitness.values = tools.evaluate(ind)
+    print "Start of evolution"
+    
+    # Evaluate the entire population
+    fitnesses = map(tools.evaluate, pop)
+    for ind, fit in zip(pop, fitnesses):
+        ind.fitness.values = fit
+    
+    print "  Evaluated %i individuals" % len(pop)
     
     # Begin the evolution
     for g in range(NGEN):
         print "-- Generation %i --" % g
-    
+        
         # Select the next generation individuals
         offsprings = tools.select(pop, n=len(pop))
         # Clone the selected individuals
-        offsprings = [copy.deepcopy(ind) for ind in offsprings]    
+        offsprings = map(tools.clone, offsprings)
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
@@ -76,12 +82,15 @@ if __name__ == "__main__":
                 del ind.fitness.values
     
         # Evaluate the individuals with an invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                ind.fitness.values = tools.evaluate(ind)
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = map(tools.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
         
-        # The pop is entirely replaced by the offsprings
-        pop = offsprings
+        print "  Evaluated %i individuals" % len(invalid_ind)
+        
+        # The population is entirely replaced by the offsprings
+        pop[:] = offsprings
         
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in pop]

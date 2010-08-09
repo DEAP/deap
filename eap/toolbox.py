@@ -77,9 +77,19 @@ class FuncCycle(object):
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
-    At first this toolbox is empty, you can populate it by using the method
-    :meth:`register`.
+    At first the toolbox contains two simple methods. The first method
+    :meth:`~eap.toolbox.clone` duplicates any element it is passed as
+    argument, this method defaults to the :func:`copy.deepcopy` function.
+    The second method :meth:`~eap.toolbox.map` applies the function given
+    as first argument to every items of the iterables given as next
+    arguments, this method defaults to the :func:`map` function. You may
+    populate the toolbox with any other function by using the
+    :meth:`~eap.toolbox.register` method.
     """
+    
+    def __init__(self):
+        self.register("clone", copy.deepcopy)
+        self.register("map", map)
 
     def register(self, methodname, method, *args, **kargs):
         """Register a *method* in the toolbox under the name *methodname*. You
@@ -947,6 +957,7 @@ def deepcopyArgs(*argsname):
 # from Michele Simionato available at http://pypi.python.org/pypi/decorator.
 # Copyright (c) 2005, Michele Simionato
 # All rights reserved.
+# Modified by Francois-Michel De Rainville, 2010
 
 def decorate(decorator):
     """Decorate a function preserving its signature. There is two way of
