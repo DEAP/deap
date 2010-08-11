@@ -899,8 +899,8 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     if migarray is None:
         migarray = [(i + 1) % len(populations) for i in xrange(len(populations))]
     
-    immigrants = [[] for i in len(migarray)]
-    emigrants = [[] for i in len(migarray)]
+    immigrants = [[] for i in xrange(len(migarray))]
+    emigrants = [[] for i in xrange(len(migarray))]
     if sel_kargs is None:
         sel_kargs = {}
     if repl_kargs is None:

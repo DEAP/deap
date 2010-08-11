@@ -14,6 +14,7 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
+import inspect
 import logging
 import math
 import sys
@@ -46,10 +47,13 @@ def evalKursawe(ind):
     f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[:]))
     return f1, f2
 
-def checkBounds(min, max):
+def checkBounds(min, max, *argsname):
     def decCheckBounds(func):
+        args_name = inspect.getargspec(func)[0]
+        args_pos = [args_name.index(name) for name in argsname]
         def wrapCheckBounds(*args, **kargs):
-            offsprings = func(*args, **kargs)
+            func(*args, **kargs)
+            offsprings = [args[index] for index in args_pos]
             for child in offsprings:
                 for i in xrange(len(child)):
                     if child[i] > max:
@@ -65,10 +69,8 @@ tools.register("mate", toolbox.cxBlend, alpha=1.5)
 tools.register("mutate", toolbox.mutGaussian, mu=0, sigma=3, indpb=0.3)
 tools.register("select", toolbox.nsga2)
 
-tools.decorate("mate", toolbox.deepcopyArgs("ind1", "ind2"), toolbox.delFitness,
-               checkBounds(min=-5, max=5))
-tools.decorate("mutate", toolbox.deepcopyArgs("individual"), toolbox.delFitness,
-               checkBounds(min=-5, max=5))               
+tools.decorate("mate", checkBounds(-5, 5, "ind1", "ind2"))
+tools.decorate("mutate", checkBounds(-5, 5, "individual"))               
 
 if __name__ == "__main__":
     random.seed(64)
