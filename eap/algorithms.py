@@ -122,15 +122,14 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         "probabilities must be smaller or equal to 1.0.")
     
     _logger.info("Start of evolution")
-    evaluations = 0
 
-    # Evaluate the individuals with invalid fitness
-    for ind in population:
-        if not ind.fitness.valid:
-            evaluations += 1
-            ind.fitness.values = toolbox.evaluate(ind)
+    # Evaluate the individuals with an invalid fitness
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
 
-    _logger.debug("Evaluated %i individuals", evaluations)
+    _logger.debug("Evaluated %i individuals", len(invalid_ind))
 
     if halloffame is not None:
         halloffame.update(population)
@@ -138,7 +137,6 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
     # Begin the generational process
     for g in range(ngen):
         _logger.info("Evolving generation %i", g)
-        evaluations = 0
 
         offsprings = []
         nb_offsprings = 0
@@ -147,8 +145,8 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
             op_choice = random.random()
             if op_choice < cxpb:            # Apply crossover
                 ind1, ind2 = random.sample(population, 2)
-                ind1 = copy.deepcopy(ind1)
-                ind2 = copy.deepcopy(ind2)
+                ind1 = toolbox.clone(ind1)
+                ind2 = toolbox.clone(ind2)
                 toolbox.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
@@ -157,7 +155,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
                 nb_offsprings += 2
             elif op_choice < cxpb + mutpb:  # Apply mutation
                 ind = random.choice(population) # select
-                ind = copy.deepcopy(ind) # clone
+                ind = toolbox.clone(ind) # clone
                 toolbox.mutate(ind)
                 del ind.fitness.values
                 offsprings.append(ind)
@@ -170,13 +168,13 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         if nb_offsprings > lambda_:
             del offsprings[lambda_:]
 
-        # Evaluate the individuals with invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                evaluations += 1
-                ind.fitness.values = toolbox.evaluate(ind)
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
 
-        _logger.debug("Evaluated %i individuals", evaluations)
+        _logger.debug("Evaluated %i individuals", len(invalid_ind))
 
         if halloffame is not None:
             halloffame.update(offsprings)
@@ -214,12 +212,12 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
     evaluations = 0
     
     # Evaluate the individuals with an invalid fitness
-    for ind in population:
-        if not ind.fitness.valid:
-            evaluations += 1
-            ind.fitness.values = toolbox.evaluate(ind)
-    
-    _logger.debug("Evaluated %i individuals", evaluations)
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
+
+    _logger.debug("Evaluated %i individuals", len(invalid_ind))
             
     if halloffame is not None:
         halloffame.update(population)
@@ -236,8 +234,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
             op_choice = random.random()
             if op_choice < cxpb:            # Apply crossover
                 ind1, ind2 = random.sample(population, 2)
-                ind1 = copy.deepcopy(ind1)
-                ind2 = copy.deepcopy(ind2)
+                ind1 = toolbox.clone(ind1)
+                ind2 = toolbox.clone(ind2)
                 toolbox.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
@@ -259,13 +257,13 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         if nb_offsprings > lambda_:
             del offsprings[lambda_:]
 
-        # Evaluate the individuals with invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                evaluations += 1
-                ind.fitness.values = toolbox.evaluate(ind)
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
 
-        _logger.debug("Evaluated %i individuals", evaluations)
+        _logger.debug("Evaluated %i individuals", len(invalid_ind))
 
         if halloffame is not None:
             halloffame.update(offsprings)
@@ -298,9 +296,10 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
     _logger.info("Start of evolution")
     
     # Evaluate the individuals with an invalid fitness
-    for ind in population:
-        if not ind.fitness.valid:
-            ind.fitness.values = toolbox.evaluate(ind)
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
     
     if halloffame is not None:
         halloffame.update(population)
@@ -310,10 +309,11 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         _logger.info("Evolving generation %i", g)
         
         p1, p2 = toolbox.select(population, 2)
-        p1 = copy.deepcopy(p1)
-        p2 = copy.deepcopy(p2)
-        child = random.choice(toolbox.mate(p1, p2))
-        child = toolbox.mutate(child)
+        p1 = toolbox.clone(p1)
+        p2 = toolbox.clone(p2)
+        toolbox.mate(p1, p2)
+        child = random.choice(p1, p2)
+        toolbox.mutate(child)
         
         child.fitness.values = toolbox.evaluate(child)
         
