@@ -13,6 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""The :mod:`~eap.history` module provides a way to generate the genealogy
+tree of the famillies of individuals in an evolution.
+
+.. note::
+   The genealogy tree might get very big if your population and/or the number
+   of generation is large.
+"""
+
 import copy
 import inspect
 
