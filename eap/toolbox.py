@@ -398,10 +398,7 @@ def mutGaussian(individual, mu, sigma, indpb):
     .. note::
        The mutation is not responsible for constraints checking, because
        there is too many possibilities for
-       resetting the values. For example, if a value exceed the maximum, it may
-       be set to the maximum, to the maximum minus (the value minus the maximum),
-       it may be cycled to the minimum or even cycled to the minimum plus (the
-       value minus the maximum). Wich way is closer to the representation used
+       resetting the values. Wich way is closer to the representation used
        is up to you.
        
        One easy way to add cronstraint checking to an operator is to 
@@ -564,10 +561,6 @@ def mutTypedTreeUniform(individual, expr):
 def selRandom(individuals, n):
     """Select *n* individuals at random from the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
-
-    .. versionchanged:: 0.3.1a
-       Removed random sample without replacement as this is simply a call to
-       python's :func:`~random.sample` function
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
