@@ -21,11 +21,16 @@ algorithms.
 import array
 import copy
 
+# Warning are turned into errors to catch the DeprecationWarning in the method
+# init_type of create.
+import warnings
+warnings.filterwarnings("error", "", DeprecationWarning, "creator")
+
 def create(name, base, **kargs):
     dict_inst = {}
     dict_cls = {}
     for obj_name, obj in kargs.items():
-        if callable(obj):
+        if hasattr(obj, "__call__"):
             dict_inst[obj_name] = obj
         else:
             dict_cls[obj_name] = obj
@@ -33,17 +38,18 @@ def create(name, base, **kargs):
     def init_type(self, *args, **kargs):
         for elem in dict_inst.items():
             obj_name, obj = elem
-            if callable(obj):
+            if hasattr(obj, "__call__"):
                 obj = obj()
             setattr(self, obj_name, obj)
             
         # A DeprecationWarning is raised when the object inherits from the 
         # class "object" which leave the option of passing arguments, but
         # raise a warning stating that it will eventually stop permitting
-        # this option.
+        # this option. Usually this appens when the base class does not
+        # override the __init__ method from object.
         try:
             base.__init__(self, *args, **kargs)
-        except (DeprecationWarning):
+        except DeprecationWarning:
             base.__init__(self)
     
     objtype = type(name, (base,), dict_cls)
