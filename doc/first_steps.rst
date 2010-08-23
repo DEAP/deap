@@ -39,36 +39,34 @@ Mutation
 
 The first kind of operator that we will present is the mutation operator. There is a variety of mutation operators in the :mod:`eap.toolbox` module. Each mutation has its own caracteristics and may be applied to different type of individual. Be carefull to read the documentation of the selected operator in order to avoid undesirable behavior.
 
-The general rule for mutation operators is that they make a copy of the individual before touching it and then apply the mutation on the copied individual. The mutated individual is finaly returned after its fitness has been invalidated, if possible.
+The general rule for mutation operators is that they **only** mutate, this means that an independant copy must be made prior to mutating the individual if the original individual has to be kept or is a reference to an other instance of individual (see the selection operator).
 
 In order to apply a mutation (here a gaussian mutation) on an individual, simply apply the desired function. ::
 
     >>> from eap import toolbox
     >>> ind = creator.Individual(content())
-    >>> mutant = toolbox.mutGaussian(ind, sigma=0.2, indpb=0.2)
-    >>> print type(mutant)
-    <class 'eap.creator.Individual'>
-
+    >>> toolbox.mutGaussian(ind, sigma=0.2, indpb=0.2)
+    >>> del ind.fitness.values
 
 Crossover
 =========
 
 The second kind of operator that we will present is the crossover operator. There is a variety of crossover operators in the :mod:`eap.toolbox` module. Each crossover has its own caracteristics and may be applied to different type of individuals. Be carefull to read the documentation of the selected operator in order to avoid undesirable behavior.
 
-The general rule for crossover operators is that they return children that are independent of their parents and do not touch to the parents configuration. The returned children have invalid fitness.
+The general rule for crossover operators is that they **only** mutate, this means that an independant copy must be made prior to mutating the individual if the original individual has to be kept or is a reference to an other instance of individual (see the selection operator).
 
 Lets create two individuals using the same technique as before, and apply the crossover operation to produce the two children. ::
 
     >>> ind1 = creator.Individual(content())
     >>> ind2 = creator.Individual(content())
-    >>> child1, child2 = toolbox.cxBlend(ind1, ind2, 0.5)
-    >>> print type(child1), type(child2)
-    <class 'eap.creator.Individual'> <class 'eap.creator.Individual'>
+    >>> toolbox.cxBlend(ind1, ind2, 0.5)
+    >>> del ind1.fitness.values
+    >>> del ind2.fitness.values
 
 Evaluation
 ==========
 
-The evaluation is the most crucial part of an evolutionary algorithm, it is also the only part of the library that you must write your-self. An typical evaluation function takes one individual as argument and return its fitness as a tuple. As shown in the in the :ref:`Evolutionary Algorithm Bases <ea-bases>` section, a fitness is a list of floating point values and has a property :attr:`valid` to know if this individual shall be re-evaluated. The fitness is set by setting the :attr:`~eap.base.Fitness.values` to the associated tuple. ::
+The evaluation is the most crucial part of an evolutionary algorithm, it is also the only part of the library that you must write your-self. An typical evaluation function takes one individual as argument and return its fitness as a :class:`tuple`. As shown in the in the :ref:`Evolutionary Algorithm Bases <ea-bases>` section, a fitness is a list of floating point values and has a property :attr:`valid` to know if this individual shall be re-evaluated. The fitness is set by setting the :attr:`~eap.base.Fitness.values` to the associated :class:`tuple`. ::
 
     >>> def eval(individual):
     ...     # Do some hard computing on the individual

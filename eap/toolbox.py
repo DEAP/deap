@@ -19,7 +19,7 @@ always possible to use directly the operators from this module but the toolbox
 does also contain the default values of the different parameters for each
 method. More over, it makes your algorithms easier to understand and modify,
 since once an oprerator is set, it can be reused with a simple keyword that
-conatins all its arguments. Plus, every keyword or argument can be overriden
+contains all its arguments. Plus, every keyword or argument can be overriden
 at all time.
 
 The toolbox is also used in predefined algorithms from the :mod:`~eap.algorithms`
@@ -144,19 +144,18 @@ class Toolbox(object):
 ######################################
 
 def cxTwoPoints(ind1, ind2):
-    """Execute a two points crossover on the input individuals. The two children
-    produced are returned as a tuple, the two parents are left intact.
-    This operation apply on an :class:`~eap.base.Individual` composed of a list
-    of attributes and act as follow ::
+    """Execute a two points crossover on the input individuals. The two 
+    individuals are modified in place. This operation apply on an individual
+    composed of a list of attributes and act as follow ::
     
         >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)]
         >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
         >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
-        >>> ind1, ind2 = twoPointsCx(ind1, ind2)
-        >>> print ind1
-        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)]
-        >>> print ind2
-        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)]
+        >>> twoPointsCx(ind1, ind2)
+        >>> print ind1, len(ind1)
+        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)], m
+        >>> print ind2, len(ind2)
+        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)], k
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -174,19 +173,18 @@ def cxTwoPoints(ind1, ind2):
 
 def cxOnePoint(ind1, ind2):
     """Execute a one point crossover on the input individuals.
-    The two children produced are returned as a tuple, the two
-    parents are left intact. This operation apply on an
-    :class:`~eap.base.Individual` composed of a list of attributes
+    The two individuals are modified in place. This operation apply on an
+    individual composed of a list of attributes
     and act as follow ::
 
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
         >>> # Crossover with mating point i, 1 < i <= min(m, k)
-        >>> ind1, ind2 = twoPointsCx(ind1, ind2)
-        >>> print ind1
-        [A(1), ..., B(i), ..., B(k)]
-        >>> print ind2
-        [B(1), ..., A(i), ..., A(m)]
+        >>> twoPointsCx(ind1, ind2)
+        >>> print ind1, len(ind1)
+        [A(1), ..., B(i), ..., B(k)], k
+        >>> print ind2, len(ind2)
+        [B(1), ..., A(i), ..., A(m)], m
 
     This function use the :func:`~random.randint` function from the
     python base :mod:`random` module.
@@ -196,7 +194,12 @@ def cxOnePoint(ind1, ind2):
     ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
 
 def cxUniform(ind1, ind2, indpb):
-    """Uniform crossover"""
+    """Execute a uniform crossover that modify in place the two individuals.
+    The genes are swapped according to the *indpb* probability.
+    
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
     size = min(len(ind1), len(ind2))    
     for i in xrange(size):
         if random.random() < indpb:
@@ -204,9 +207,9 @@ def cxUniform(ind1, ind2, indpb):
     
 def cxPartialyMatched(ind1, ind2):
     """Execute a partialy matched crossover (PMX) on the input indviduals.
-    The two children produced are returned as a tuple, the two parents are
-    left intact. This crossover expect iterable individuals of indices,
-    the result for any other type of individuals is unpredictable.
+    The two individuals are modified in place. This crossover expect iterable
+    individuals of indices, the result for any other type of individuals is
+    unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values in a certain range of the two parents and swaping the values
@@ -218,7 +221,7 @@ def cxPartialyMatched(ind1, ind2):
 
         >>> ind1 = [0, 1, 2, 3, 4]
         >>> ind2 = [1, 2, 3, 4, 0]
-        >>> ind1, ind2 = cxPartialyMatched(ind1, ind2)
+        >>> cxPartialyMatched(ind1, ind2)
         >>> print ind1
         [0, 2, 3, 1, 4]
         >>> print ind2
@@ -256,9 +259,9 @@ def cxPartialyMatched(ind1, ind2):
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
     """Execute a uniform partialy matched crossover (UPMX) on the input
-    indviduals. The two children produced are returned as a tuple, the two
-    parents are left intact. This crossover expect iterable individuals of
-    indices, the result for any other type of individuals is unpredictable.
+    indviduals. The two individuals are modified in place. This crossover
+    expect iterable individuals of indices, the result for any other type of
+    individuals is unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
@@ -271,7 +274,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
 
         >>> ind1 = [0, 1, 2, 3, 4]
         >>> ind2 = [1, 2, 3, 4, 0]
-        >>> ind1, ind2 = cxUniformPartialyMatched(ind1, ind2)
+        >>> cxUniformPartialyMatched(ind1, ind2)
         >>> print ind1
         [4, 2, 1, 3, 0]
         >>> print ind2
@@ -301,7 +304,13 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
 def cxBlend(ind1, ind2, alpha):
-    """Blend crossover"""
+    """Executes a blend crossover that modify inplace the input individuals.
+    The blend crossover expect individuals formed of a list of floating point
+    numbers.
+    
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
     size = min(len(ind1), len(ind2))
     
     for i in xrange(size):
@@ -312,7 +321,13 @@ def cxBlend(ind1, ind2, alpha):
         ind2[i] = gamma * x1 + (1. - gamma) * x2
 
 def cxSimulatedBinary(ind1, ind2, nu):
-    """Simulated binary crossover"""
+    """Executes a simulated binary crossover that modify inplace the input
+    individuals. The simulated binary crossover expect individuals formed of
+    a list of floating point numbers.
+    
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
     size = min(len(ind1), len(ind2))
     
     for i in xrange(size):
@@ -333,6 +348,20 @@ def cxSimulatedBinary(ind1, ind2, nu):
 
 def cxMessyOnePoint(ind1, ind2):
     """Execute a one point crossover will mostly change the individuals size.
+    This operation apply on an :class:`Individual` composed of a list of attributes
+    and act as follow ::
+
+        >>> ind1 = [A(1), ..., A(i), ..., A(m)]
+        >>> ind2 = [B(1), ..., B(j), ..., B(n)]
+        >>> # Crossover with mating points i, j, 1 <= i <= m, 1 <= j <= n
+        >>> cxMessyOnePoint(ind1, ind2)
+        >>> print ind1, len(ind1)
+        [A(1), ..., A(i - 1), B(j), B(n)], n + j - i
+        >>> print ind2, len(ind2)
+        [B(1), ..., B(j - 1), A(i), A(m)], m + i - j
+    
+    This function use the :func:`~random.randint` function from the python base
+    :mod:`random` module.        
     """
     cxpoint1 = random.randint(0, len(ind1))
     cxpoint2 = random.randint(0, len(ind2))

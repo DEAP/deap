@@ -62,21 +62,16 @@ def cxSet(ind1, ind2):
     two sets.
     """
     temp = set(ind1)                # Used in order to keep type
-    ind1 &= ind2                    # Intersection
-    ind2 ^= temp                    # Symmetric Difference
-    return ind1, ind2
+    ind1 &= ind2                    # Intersection (inplace)
+    ind2 ^= temp                    # Symmetric Difference (inplace)
     
 def mutSet(individual):
     """Mutation that pops or add an element."""
     if random.random() < 0.5:
-        try:
+        if len(individual) > 0:     # We cannot pop from an empty set
             individual.pop()
-        except KeyError:
-            pass
     else:
         individual.add(random.choice(items.keys()))
-    
-    return individual,
 
 tools.register("evaluate", evalKnapsack)
 tools.register("mate", cxSet)

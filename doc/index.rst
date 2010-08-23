@@ -14,7 +14,9 @@ Evolutionary Content
    evo_toolbox
    algorithms
    stats
+   halloffame
    milestone
+   history
    cma
    
 Tutorials
