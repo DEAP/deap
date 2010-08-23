@@ -58,7 +58,7 @@ tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("evaluate", evalTSP)
 
 if __name__ == "__main__":
-    random.seed(58)
+    random.seed(264)
 
     pop = tools.population()
     hof = halloffame.HallOfFame(1)

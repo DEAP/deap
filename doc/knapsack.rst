@@ -4,7 +4,7 @@ Individual Inheriting from Set
 
 Again for this example we will use a very simple problem, the 0-1 Knapsack. The purpose of this example is to show the simplicity of EAP and the ease to inherit from anyting else than a simple list or array.
 
-Many evolutionary algorithm textbooks mention that that best way to have an efficient algorithm is having a representation close the problem. Here, what can be closer to a bag than a set? Lets make our individuals inherit from the :class:`set` class then! ::
+Many evolutionary algorithm textbooks mention that the best way to have an efficient algorithm to have a representation close the problem. Here, what can be closer to a bag than a set? Lets make our individuals inherit from the :class:`set` class. ::
 
     creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
     creator.create("Individual", set, fitness=creator.Fitness)
@@ -49,38 +49,19 @@ Everything is ready for evolution. Ho no wait, since EAP's developpers are lazy,
         intersection of the two sets, the second child is the difference of the
         two sets.
         """
-        child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
-        child1 &= ind2                              # Intersection
-        child2 ^= ind1                              # Symmetric Difference
-        
-        try:
-            child1.fitness.valid = False            # It is important to 
-            child2.fitness.valid = False            # invalidate the fitnesses
-        except AttributeError:
-            pass
-        
-        return random.sample((child1, child2), 2)   # Algorithm always choose first child
+        temp = set(ind1)                # Used in order to keep type
+        ind1 &= ind2                    # Intersection (inplace)
+        ind2 ^= temp                    # Symmetric Difference (inplace)
 
 And a mutation operator could randomly add or remove an element from the set input individual. ::
 
     def mutSet(individual):
         """Mutation that pops or add an element."""
-        mutant = copy.deepcopy(individual)
-        
         if random.random() < 0.5:
-            try:
+            if len(individual) > 0:     # Cannont pop from an empty set
                 mutant.pop()
-            except KeyError:                        # The set is empty
-                pass
         else:
             mutant.add(random.choice(items.keys()))
-        
-        try:
-            mutant.fitness.valid = False
-        except AttributeError:
-            pass
-        
-        return mutant
 
 From here, everything else is just as usual, register the operators in the toolbox, and use or write an algorithm. Here we will use the Mu+Lambda algorithm and the SPEA-II selection sheme. ::
 
@@ -89,6 +70,9 @@ From here, everything else is just as usual, register the operators in the toolb
     tools.register("mutate", mutSet)
     tools.register("select", toolbox.spea2)
     
-    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50)
+    pop = tools.population()
+    hof = ParetoFront()
+    
+    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, hof)
 
 Finally, a :class:`~eap.halloffame.ParetoFront` may be used to retreive the best individuals of the evolution. The complete `Knapsack Genetic Algorithm <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code is available.
