@@ -34,7 +34,7 @@ except ImportError:                         # pickle but only present under
 
 class Milestone(object):
     """A milestone is a file containing the state of any object that has been
-    hooked-up. While initializing a milestone, add the objects that you want to
+    hooked. While initializing a milestone, add the objects that you want to
     be dumped by appending keyworded arguments to the initializer or using the 
     :meth:`add`. By default the milestone tries to use the YAML format wich
     is human readable, if PyYAML is not installed, it uses pickling wich is

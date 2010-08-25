@@ -20,12 +20,12 @@ import logging
 
 sys.path.append("..")
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-import eap.gp as gp
-import eap.algorithms as algorithms
-import eap.halloffame as halloffame
+from eap import base
+from eap import creator
+from eap import toolbox
+from eap import gp
+from eap import algorithms
+from eap import halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -51,24 +51,22 @@ for i in xrange(PARITY_SIZE_M):
             inputs[i][j] = 0
     outputs[i] = parity
 
-pset = gp.PrimitiveSet()
+pset = gp.PrimitiveSet("MAIN", PARITY_FANIN_M, "IN")
 pset.addPrimitive(operator.and_, 2)
 pset.addPrimitive(operator.or_, 2)
 pset.addPrimitive(operator.xor, 2)
 pset.addPrimitive(operator.not_, 1)
 pset.addTerminal(1)
 pset.addTerminal(0)
-for i in xrange(PARITY_FANIN_M):
-    pset.addTerminal('IN%s'%i)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generate_full, pset=pset, min=3, max=5)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=300)
-tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s" %i for i in xrange(PARITY_FANIN_M)])
+tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalParity(individual):
     func = tools.lambdify(expr=individual)
@@ -78,12 +76,14 @@ def evalParity(individual):
 tools.register("evaluate", evalParity)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generate_grow, pset=pset, min=0, max=2)
+tools.register("expr_mut", gp.generate_grow, min=0, max=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
-pop = tools.population()
-hof = halloffame.HallOfFame(1)
+if __name__ == "__main__":
 
-algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
-
-logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)

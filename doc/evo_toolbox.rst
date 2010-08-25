@@ -12,14 +12,18 @@ Evolutionary Toolbox
    
    .. automethod:: unregister(methodname)
    
+   .. automethod:: decorate(methodname, decorator[, ...])
+   
 Operators
 =========
 
 This module contains the operators an evolutionary algorithm. They are used to modify, select and move the individuals in their environment. A good set of operators should allow to move from an initial population of good solutions, equivalent to random sampling, to excellent configurations optimizing the studied problem.
 
 .. note::
-   Operators that affects the individual's constitution (attributes) are responsible of invalidating the fitness and make sure that the new individual(s) is (are) independent of the original individual(s).
+   The responsibility of making offspring(s) independent of their parent(s) and invalidating the fitness is left to the user and is generally fulfilled in the algorithm calling tools.clone on an individuals to duplicate it and del on the values attribute of the individual's fitness.
 
+.. versionchanged:: 0.6
+   In earlier versions, the resposability of cloning the individuals was left to the operator that wanted to modify an individuals. The new offsprings were returned via a tuple and the parents were left intact. In version 0.6, cloning is made prior to the operation on the individuals and the operators can now modify the individuals directly. At a user level, this may not affect your evolution if you were using the algorithms, but if you developped your own algorithms, you better take a look at the changes made in the algorithms source code.
 
 Crossover
 ---------
@@ -70,6 +74,12 @@ Selection
 
 .. autofunction:: eap.toolbox.selTournament
 
+.. autofunction:: eap.toolbox.selRoulette
+
+.. autofunction:: eap.toolbox.nsga2
+
+.. autofunction:: eap.toolbox.spea2
+
 .. autofunction:: eap.toolbox.selRandom
 
 .. autofunction:: eap.toolbox.selBest
@@ -81,3 +91,10 @@ Migration
 
 .. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
 
+Decorators
+----------
+The toolbox also contains some basic decorators to enhance operator's functionality.
+
+.. autofunction:: eap.toolbox.deepcopyArgs(argname[, ...])
+
+.. autofunction:: eap.toolbox.decorate

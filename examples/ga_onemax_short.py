@@ -19,15 +19,13 @@ import random
 import logging
 
 sys.path.append("..")
-
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
-
 logging.basicConfig(level=logging.DEBUG)
-random.seed(64)
+
+from eap import algorithms
+from eap import base
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMax)
@@ -49,9 +47,12 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-hof = halloffame.HallOfFame(1)
 
-pop = tools.population()
-algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+if __name__ == "__main__":
+    random.seed(64)
+    
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
 
-logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

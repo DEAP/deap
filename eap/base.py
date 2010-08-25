@@ -21,79 +21,58 @@ import copy
 import operator
 
 from collections import deque
-from itertools import izip, repeat, count, imap
+from itertools import izip, repeat, count
         
 class Tree(list):
     """ Basic N-ary tree class."""
-    class Node(object):
-        """ Class representing the node of a Tree.
-        
-            This class share the basic properties of the Tree, so the Tree's
-            methods can use them regardless if the treated object is a Tree or a 
-            Node.
-        """
+    class NodeProxy(object):
+        def __new__(cls, obj, *args, **kargs):
+            if isinstance(obj, cls):
+                return obj
+            inst = object.__new__(cls)
+            inst.obj = obj
+            return inst
+            
+        def getstate(self):
+            return self.obj
+            
         @property
-        def height(self):
-            """ The height of a Node is always 0."""
-            return 0
-        
-        @property 
         def size(self):
-            """ The size of a Node is always 1."""
             return 1
             
         @property
-        def root(self):
-            """ The root of a node is itself."""
-            return self
+        def height(self):
+            return 0
             
-        def _getstate(self):
-            """ Convert the node back in its base class. This is specially
-                useful when pickling a Tree.
-            """
-            try:
-                base = self.base(self)
-            except TypeError:
-                base = self.base.__new__(self.base)
-            finally :
-                try:
-                    base.__dict__.update(self.__dict__)
-                except AttributeError:
-                    pass
-                return base
-
-    @classmethod
-    def create_node(cls, obj):
-        """ Create a node that will be added to the Tree.
+        @property
+        def root(self):
+            return self
         
-            A node is run-time defined class that inherits from the object
-            and the Node class. This inheritance add functionnalities and  
-            attributes that simplifies the task of Tree's methods.
-        """
-        Node = type("Node", (type(obj), cls.Node), {"base": type(obj)})
-        try:
-            new_node = Node.__new__(Node)
-            new_node.__dict__.update(obj.__dict__)
-        except AttributeError:
-            new_node = Node(obj)
-        return new_node
-     
+        def __eq__(self, other):
+            return self.obj == other.obj        
+        def __getattr__(self, attr):
+            return getattr(self.obj, attr)
+        def __call__(self, *args, **kargs):
+            return self.obj(*args, **kargs)
+        def __repr__(self):
+            return self.obj.__repr__()
+        def __str__(self):
+            return self.obj.__str__()
+                
     @classmethod        
     def convert_node(cls, node):
         """ Convert node into the proper object either a Tree or a Node."""
-        if isinstance(node, cls.Node):
-            return node
-        elif isinstance(node, Tree):
+        if isinstance(node, cls):
             if len(node) == 1:
-                return node[0]
+                return cls.NodeProxy(node[0])
             return node
         elif isinstance(node, list):
             if len(node) > 1:
-                return Tree(node)
+                return cls(node)
             else:
-                return cls.create_node(node[0])
+                return cls.NodeProxy(node[0])
         else:
-            return cls.create_node(node)
+            return cls.NodeProxy(node)
 
     def __init__(self, content=None):
         """ Initialize a tree with a list `content`.
@@ -104,30 +83,26 @@ class Tree(list):
         """
         for elem in content:
             self.append(self.convert_node(elem))
-    
-    def _getstate(self):
+        
+    def getstate(self):
         """ Return the state of the Tree
             as a list of arbitrary elements. It is mainly
             used for pickling a Tree object.
         """
-        return [elem._getstate() for elem in self] 
+        return [elem.getstate() for elem in self] 
     
     def __reduce__(self):
         """ Return the class init, the object's state and the object
             dict in a tuple. The function is used to pickle Tree.
         """
-        return (self.__class__, (self._getstate(),), self.__dict__)
+        return (self.__class__, (self.getstate(),), self.__dict__)
     
     def __deepcopy__(self, memo):
         """ Deepcopy a Tree by first converting it back to a list of list.
-        
-            This deepcopy is faster than the default implementation. From
-            quick testing, up to 1.6 times faster, and at least 2 times less
-            function calls.
         """
-        new = self.__class__(self._getstate())
+        new = self.__class__(copy.deepcopy(self.getstate()))
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        return new
+        return new        
         
     def __setitem__(self, key, value):
         """ Set the item at `key` with the corresponding `value`.
@@ -141,28 +116,44 @@ class Tree(list):
             
     def __str__(self):
         """ Return the tree in its original form, a list, as a string."""
-        return list.__repr__(self)
+        return list.__str__(self)
         
     def __repr__(self):
         """ Return the Python code to build a copy of the object."""
         module = self.__module__
         name = self.__class__.__name__
-        return "%s.%s(%r)" % (module, name, self._getstate())
-   
+        return "%s.%s(%s)" % (module, name, list.__repr__(self))
+        
     @property
     def root(self):
-        """Return the root element of the tree."""
+        """Return the root element of the tree.
+        
+        The root node of a tree is the node with no parents. There is at most 
+        one root node in a rooted tree.
+        """
         return self[0]
 
     @property
     def size(self):
-        """ Return the number of nodes in the tree."""
+        """ Return the number of nodes in the tree.
+        
+            The size of a node is the number of descendants it has including 
+            itself.
+        """
         return sum(elem.size for elem in self)
 
     @property
     def height(self):
-        """Return the height of the tree."""
-        return max(elem.height for elem in self)+1
+        """Return the height of the tree.
+        
+        The height of a tree is the length of the path from the root to the 
+        deepest node in the tree. A (rooted) tree with only one node (the root) 
+        has a height of zero.
+        """
+        try:
+            return max(elem.height for elem in self[1:])+1
+        except ValueError:
+            return 0
 
     def search_subtree_dfs(self, index):
         """ Search the subtree with the corresponding index based on a depth 

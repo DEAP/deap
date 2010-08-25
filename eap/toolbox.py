@@ -19,7 +19,7 @@ always possible to use directly the operators from this module but the toolbox
 does also contain the default values of the different parameters for each
 method. More over, it makes your algorithms easier to understand and modify,
 since once an oprerator is set, it can be reused with a simple keyword that
-conatins all its arguments. Plus, every keyword or argument can be overriden
+contains all its arguments. Plus, every keyword or argument can be overriden
 at all time.
 
 The toolbox is also used in predefined algorithms from the :mod:`~eap.algorithms`
@@ -27,14 +27,14 @@ module.
 """
 
 import copy
+import functools
+import inspect
 import math
 import random
-
-from functools import partial
+import warnings
 # Needed by Nondominated sorting
 from itertools import chain, izip, repeat, cycle
 from operator import attrgetter
-
 
 
 class Repeat(object):
@@ -54,7 +54,7 @@ class Repeat(object):
 class Iterate(object):
     def __init__(self, func):
         self.func = func
-        self.iter = iter(self.func())
+        self.iter = None
         
     def __iter__(self):
         return self
@@ -65,6 +65,9 @@ class Iterate(object):
         except StopIteration:
             self.iter = iter(self.func())
             raise StopIteration
+        except AttributeError:
+            self.iter = iter(self.func())
+            return self.iter.next()
 
 class FuncCycle(object):
     def __init__(self, seq_func):
@@ -74,12 +77,22 @@ class FuncCycle(object):
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
-    At first this toolbox is empty, you can populate it by using the method
-    :meth:`register`.
+    At first the toolbox contains two simple methods. The first method
+    :meth:`~eap.toolbox.clone` duplicates any element it is passed as
+    argument, this method defaults to the :func:`copy.deepcopy` function.
+    The second method :meth:`~eap.toolbox.map` applies the function given
+    as first argument to every items of the iterables given as next
+    arguments, this method defaults to the :func:`map` function. You may
+    populate the toolbox with any other function by using the
+    :meth:`~eap.toolbox.register` method.
     """
+    
+    def __init__(self):
+        self.register("clone", copy.deepcopy)
+        self.register("map", map)
 
     def register(self, methodname, method, *args, **kargs):
-        """Register a *method* in the toolbox under the name *method name*. You
+        """Register a *method* in the toolbox under the name *methodname*. You
         may provide default arguments that will be passed automaticaly when
         calling the registered method.
         
@@ -87,7 +100,7 @@ class Toolbox(object):
         simulate iterable initializers. For example, when building objects
         deriving from :class:`list`, the content argument will provide to
         the built list its initial content. Depending on what is given to
-        *content_init* and *size* the initialization is different. If
+        *content_init* and *size_init* the initialization is different. If
         *content_init* is an iterable, then the iterable is consumed enterily
         to intialize each object, in that case *size_init* is not used.
         Otherwise, *content_init* may be a simple function that will be repeated
@@ -106,49 +119,48 @@ class Toolbox(object):
                 args = list(args)
                 args.append(Iterate(content))
             
-        setattr(self, methodname, partial(method, *args, **kargs))
+        setattr(self, methodname, functools.partial(method, *args, **kargs))
     
     def unregister(self, methodname):
-        """Unregister *method name* from the toolbox."""
+        """Unregister *methodname* from the toolbox."""
         delattr(self, methodname)
-
-#    def registerInitializer(self, methodName, method, content, size=None, args=(), kargs={}):
-#        if hasattr(content,'__iter__'):
-#            content = FuncCycle(content)
-#        if size is None:
-#            args = list(args)
-#            args.append(Iterate(content))
-#            self.register(methodName, method, *args, **kargs)
-#        else:
-#            args = list(args)
-#            args.append(Repeat(content, size))
-#            self.register(methodName, method, *args, **kargs)
-
-
+        
+    def decorate(self, methodname, *decorators):
+        """Decorate *methodname* with the specified *decorators*, *methodname*
+        has to be a registered function in the current toolbox. Decorate uses
+        the signature preserving decoration function
+        :func:`~eap.toolbox.decorate`.
+        """
+        partial_func = getattr(self, methodname)
+        method = partial_func.func
+        args = partial_func.args
+        kargs = partial_func.keywords
+        for decorator in decorators:
+            method = decorate(decorator)(method)
+        setattr(self, methodname, functools.partial(method, *args, **kargs))
+        
 ######################################
 # GA Crossovers                      #
 ######################################
 
 def cxTwoPoints(ind1, ind2):
-    """Execute a two points crossover on the input individuals. The two children
-    produced are returned as a tuple, the two parents are left intact.
-    This operation apply on an :class:`~eap.base.Individual` composed of a list
-    of attributes and act as follow ::
+    """Execute a two points crossover on the input individuals. The two 
+    individuals are modified in place. This operation apply on an individual
+    composed of a list of attributes and act as follow ::
     
         >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)]
         >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
         >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
-        >>> child1, child2 = twoPointsCx(ind1, ind2)
-        >>> print child1
-        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)]
-        >>> print child2
-        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)]
+        >>> twoPointsCx(ind1, ind2)
+        >>> print ind1, len(ind1)
+        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)], m
+        >>> print ind2, len(ind2)
+        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)], k
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint1 = random.randint(1, size)
     cxpoint2 = random.randint(1, size - 1)
     if cxpoint2 >= cxpoint1:
@@ -156,73 +168,48 @@ def cxTwoPoints(ind1, ind2):
     else:			# Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
    
-    child1[cxpoint1:cxpoint2], child2[cxpoint1:cxpoint2] \
-         = child2[cxpoint1:cxpoint2], child1[cxpoint1:cxpoint2]
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
-
+    ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
+        = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
 
 def cxOnePoint(ind1, ind2):
-    """Execute a one point crossover on the input individuals. The two children
-    produced are returned as a tuple, the two parents are left intact.
-    This operation apply on an :class:`~eap.base.Individual` composed of a list
-    of attributes and act as follow ::
+    """Execute a one point crossover on the input individuals.
+    The two individuals are modified in place. This operation apply on an
+    individual composed of a list of attributes
+    and act as follow ::
 
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
         >>> # Crossover with mating point i, 1 < i <= min(m, k)
-        >>> child1, child2 = twoPointsCx(ind1, ind2)
-        >>> print child1
-        [A(1), ..., B(i), ..., B(k)]
-        >>> print child2
-        [B(1), ..., A(i), ..., A(m)]
+        >>> twoPointsCx(ind1, ind2)
+        >>> print ind1, len(ind1)
+        [A(1), ..., B(i), ..., B(k)], k
+        >>> print ind2, len(ind2)
+        [B(1), ..., A(i), ..., A(m)], m
 
-    This function use the :func:`~random.randint` function from the python base
-    :mod:`random` module.
+    This function use the :func:`~random.randint` function from the
+    python base :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     cxpoint = random.randint(1, size - 1)
-    
-    child1[cxpoint:], child2[cxpoint:] = child2[cxpoint:], child1[cxpoint:]
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
+    ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
 
 def cxUniform(ind1, ind2, indpb):
-    """Uniform crossover"""
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
-    size = min(len(ind1), len(ind2))
+    """Execute a uniform crossover that modify in place the two individuals.
+    The genes are swapped according to the *indpb* probability.
     
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
+    size = min(len(ind1), len(ind2))    
     for i in xrange(size):
         if random.random() < indpb:
-            child1[i], child2[i] = child2[i], child1[i]
+            ind1[i], ind2[i] = ind2[i], ind1[i]
     
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
-    
-
 def cxPartialyMatched(ind1, ind2):
     """Execute a partialy matched crossover (PMX) on the input indviduals.
-    The two children produced are returned as a tuple, the two parents are
-    left intact. This crossover expect iterable individuals of indices,
-    the result for any other type of individuals is unpredictable.
+    The two individuals are modified in place. This crossover expect iterable
+    individuals of indices, the result for any other type of individuals is
+    unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values in a certain range of the two parents and swaping the values
@@ -230,27 +217,26 @@ def cxPartialyMatched(ind1, ind2):
     loci, and the traveling salesman problem", 1985.
 
     For example, the following parents will produce the two following children
-    when mated with crossover points ``a = 2`` and ``b = 3``. ::
+    when mated with crossover points ``a = 2`` and ``b = 4``. ::
 
         >>> ind1 = [0, 1, 2, 3, 4]
         >>> ind2 = [1, 2, 3, 4, 0]
-        >>> child1, child2 = pmxCx(ind1, ind2)
-        >>> print child1
+        >>> cxPartialyMatched(ind1, ind2)
+        >>> print ind1
         [0, 2, 3, 1, 4]
-        >>> print child2
+        >>> print ind2
         [2, 3, 1, 4, 0]
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
     """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
 
     # Initialize the position of each indices in the individuals
     for i in xrange(size):
-        p1[child1[i]] = i
-        p2[child2[i]] = i
+        p1[ind1[i]] = i
+        p2[ind2[i]] = i
     # Choose crossover points
     cxpoint1 = random.randint(0, size)
     cxpoint2 = random.randint(0, size - 1)
@@ -262,28 +248,20 @@ def cxPartialyMatched(ind1, ind2):
     # Apply crossover between cx points
     for i in xrange(cxpoint1, cxpoint2):
         # Keep track of the selected values
-        temp1 = child1[i]
-        temp2 = child2[i]
+        temp1 = ind1[i]
+        temp2 = ind2[i]
         # Swap the matched value
-        child1[i], child1[p1[temp2]] = temp2, temp1
-        child2[i], child2[p2[temp1]] = temp1, temp2
+        ind1[i], ind1[p1[temp2]] = temp2, temp1
+        ind2[i], ind2[p2[temp1]] = temp1, temp2
         # Position bookkeeping
         p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
-
 def cxUniformPartialyMatched(ind1, ind2, indpb):
     """Execute a uniform partialy matched crossover (UPMX) on the input
-    indviduals. The two children produced are returned as a tuple, the two
-    parents are left intact. This crossover expect iterable individuals of
-    indices, the result for any other type of individuals is unpredictable.
+    indviduals. The two individuals are modified in place. This crossover
+    expect iterable individuals of indices, the result for any other type of
+    individuals is unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
@@ -296,67 +274,60 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
 
         >>> ind1 = [0, 1, 2, 3, 4]
         >>> ind2 = [1, 2, 3, 4, 0]
-        >>> child1, child2 = pmxCx(ind1, ind2)
-        >>> print child1
+        >>> cxUniformPartialyMatched(ind1, ind2)
+        >>> print ind1
         [4, 2, 1, 3, 0]
-        >>> print child2
+        >>> print ind2
         [2, 1, 3, 0, 4]
 
     This function use the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
 
     # Initialize the position of each indices in the individuals
     for i in xrange(size):
-        p1[child1[i]] = i
-        p2[child2[i]] = i
+        p1[ind1[i]] = i
+        p2[ind2[i]] = i
     
     for i in xrange(size):
         if random.random < indpb:
             # Keep track of the selected values
-            temp1 = child1[i]
-            temp2 = child2[i]
+            temp1 = ind1[i]
+            temp2 = ind2[i]
             # Swap the matched value
-            child1[i], child1[p1[temp2]] = temp2, temp1
-            child2[i], child2[p2[temp1]] = temp1, temp2
+            ind1[i], ind1[p1[temp2]] = temp2, temp1
+            ind2[i], ind2[p2[temp1]] = temp1, temp2
             # Position bookkeeping
             p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
-    
+
 def cxBlend(ind1, ind2, alpha):
-    """Blend crossover"""
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    """Executes a blend crossover that modify inplace the input individuals.
+    The blend crossover expect individuals formed of a list of floating point
+    numbers.
+    
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
     size = min(len(ind1), len(ind2))
     
     for i in xrange(size):
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        x1 = child1[i]
-        x2 = child2[i]
-        child1[i] = (1. - gamma) * x1 + gamma * x2
-        child2[i] = gamma * x1 + (1. - gamma) * x2
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
+        x1 = ind1[i]
+        x2 = ind2[i]
+        ind1[i] = (1. - gamma) * x1 + gamma * x2
+        ind2[i] = gamma * x1 + (1. - gamma) * x2
 
 def cxSimulatedBinary(ind1, ind2, nu):
-    """Simulated binary crossover"""
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
+    """Executes a simulated binary crossover that modify inplace the input
+    individuals. The simulated binary crossover expect individuals formed of
+    a list of floating point numbers.
+    
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
     size = min(len(ind1), len(ind2))
     
     for i in xrange(size):
@@ -366,18 +337,10 @@ def cxSimulatedBinary(ind1, ind2, nu):
         else:
             beta = 1. / (2. (1. - rand))
         beta **= 1. / (nu + 1.)
-        x1 = child1[i]
-        x2 = child2[i]
-        child1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
-        child2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
+        x1 = ind1[i]
+        x2 = ind2[i]
+        ind1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
+        ind2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
 ######################################
 # Messy Crossovers                   #
@@ -385,20 +348,24 @@ def cxSimulatedBinary(ind1, ind2, nu):
 
 def cxMessyOnePoint(ind1, ind2):
     """Execute a one point crossover will mostly change the individuals size.
+    This operation apply on an :class:`Individual` composed of a list of attributes
+    and act as follow ::
+
+        >>> ind1 = [A(1), ..., A(i), ..., A(m)]
+        >>> ind2 = [B(1), ..., B(j), ..., B(n)]
+        >>> # Crossover with mating points i, j, 1 <= i <= m, 1 <= j <= n
+        >>> cxMessyOnePoint(ind1, ind2)
+        >>> print ind1, len(ind1)
+        [A(1), ..., A(i - 1), B(j), B(n)], n + j - i
+        >>> print ind2, len(ind2)
+        [B(1), ..., B(j - 1), A(i), A(m)], m + i - j
+    
+    This function use the :func:`~random.randint` function from the python base
+    :mod:`random` module.        
     """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
-    cxpoint1 = random.randint(1, len(ind1))
-    cxpoint2 = random.randint(1, len(ind2))
-    
-    child1[cxpoint1:], child2[cxpoint2:] = child2[cxpoint2:], child1[cxpoint1:]
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
+    cxpoint1 = random.randint(0, len(ind1))
+    cxpoint2 = random.randint(0, len(ind2))
+    ind1[cxpoint1:], ind2[cxpoint2:] = ind2[cxpoint2:], ind1[cxpoint1:]
     
 ######################################
 # ES Crossovers                      #
@@ -407,42 +374,32 @@ def cxMessyOnePoint(ind1, ind2):
 def cxESBlend(ind1, ind2, alpha, minstrategy=None):
     """Execute a blend crossover on both, the individual and the strategy.
     """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
     size = min(len(ind1), len(ind2))
     
     for indx in xrange(size):
         # Blend the values
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        x1 = child1[indx]
-        x2 = child2[indx]
-        child1[indx] = (1. - gamma) * x1 + gamma * x2
-        child2[indx] = gamma * x1 + (1. - gamma) * x2
+        x1 = ind1[indx]
+        x2 = ind2[indx]
+        ind1[indx] = (1. - gamma) * x1 + gamma * x2
+        ind2[indx] = gamma * x1 + (1. - gamma) * x2
         # Blend the strategies
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        s1 = child1.strategy[indx]
-        s2 = child2.strategy[indx]
-        child1.strategy[indx] = (1. - gamma) * s1 + gamma * s2
-        child2.strategy[indx] = gamma * s1 + (1. - gamma) * s2
-        if child1.strategy[indx] < minstrategy:     # 4 < None = False
-            child1.strategy[indx] = minstrategy
-        if child2.strategy[indx] < minstrategy:
-            child2.strategy[indx] = minstrategy
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
+        s1 = ind1.strategy[indx]
+        s2 = ind2.strategy[indx]
+        ind1.strategy[indx] = (1. - gamma) * s1 + gamma * s2
+        ind2.strategy[indx] = gamma * s1 + (1. - gamma) * s2
+        if ind1.strategy[indx] < minstrategy:     # 4 < None = False
+            ind1.strategy[indx] = minstrategy
+        if ind2.strategy[indx] < minstrategy:
+            ind2.strategy[indx] = minstrategy
 
 def cxESTwoPoints(ind1, ind2):
     """Execute a classical two points crossover on both the individual and
     its strategy. The crossover points for the individual and the strategy
     are the same.
     """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
-    size = min(len(child1), len(child2))
+    size = min(len(ind1), len(ind2))
     
     pt1 = random.randint(1, size)
     pt2 = random.randint(1, size - 1)
@@ -451,17 +408,9 @@ def cxESTwoPoints(ind1, ind2):
     else:			# Swap the two cx points
         pt1, pt2 = pt2, pt1
    
-    child1[pt1:pt2], child2[pt1:pt2] = child2[pt1:pt2], child1[pt1:pt2]     
-    child1.strategy[pt1:pt2], child2.strategy[pt1:pt2] = \
-        child2.strategy[pt1:pt2], child1.strategy[pt1:pt2]
-    
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    
-    return child1, child2
+    ind1[pt1:pt2], ind2[pt1:pt2] = ind2[pt1:pt2], ind1[pt1:pt2]     
+    ind1.strategy[pt1:pt2], ind2.strategy[pt1:pt2] = \
+        ind2.strategy[pt1:pt2], ind1.strategy[pt1:pt2]
 
 ######################################
 # GA Mutations                       #
@@ -476,36 +425,21 @@ def mutGaussian(individual, mu, sigma, indpb):
     attribute to be mutated.
 
     .. note::
-       The mutation is not responsible for constraints checking, the reason for
-       this is that there is too many possibilities for
-       resetting the values. For example, if a value exceed the maximum, it may
-       be set to the maximum, to the maximum minus (the value minus the maximum),
-       it may be cycled to the minimum or even cycled to the minimum plus (the
-       value minus the maximum). Wich way is closer to the representation used
+       The mutation is not responsible for constraints checking, because
+       there is too many possibilities for
+       resetting the values. Wich way is closer to the representation used
        is up to you.
        
-       One easy way to add cronstraint checking to an operator is to simply wrap
-       the operator in a second function. See the multi-objective example
-       (moga_kursawefct.py) for an explicit example.
+       One easy way to add cronstraint checking to an operator is to 
+       use the function decoration in the toolbox. See the multi-objective
+       example (moga_kursawefct.py) for an explicit example.
 
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
-    """
-    mutated = False
-    mutant = copy.deepcopy(individual)
-    
-    for i in xrange(len(mutant)):
+    """        
+    for i in xrange(len(individual)):
         if random.random() < indpb:
-            mutant[i] += random.gauss(mu, sigma)
-            mutated = True
-    if mutated:
-        try:
-            del mutant.fitness.values
-        except AttributeError:
-            pass
-    
-    return mutant
-
+            individual[i] += random.gauss(mu, sigma)
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -516,25 +450,14 @@ def mutShuffleIndexes(individual, indpb):
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
-    mutated = False
-    mutant = copy.deepcopy(individual)
-    
-    size = len(mutant)
-    for i in range(size):
+    size = len(individual)
+    for i in xrange(size):
         if random.random() < indpb:
             swap_indx = random.randint(0, size - 2)
             if swap_indx >= i:
                 swap_indx += 1
-            mutant[i], mutant[swap_indx] = mutant[swap_indx], mutant[i]
-            mutated = True
-    if mutated:
-        try:
-            del mutant.fitness.values
-        except AttributeError:
-            pass
-    
-    return mutant
-
+            individual[i], individual[swap_indx] = \
+                           individual[swap_indx], individual[i]
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
@@ -547,19 +470,9 @@ def mutFlipBit(individual, indpb):
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    mutated = False
-    mutant = copy.deepcopy(individual)
-    
-    for indx in xrange(len(mutant)):
+    for indx in xrange(len(individual)):
         if random.random() < indpb:
-            mutant[indx] = not mutant[indx]
-            mutated = True
-    if mutated:
-        try:
-            del mutant.fitness.values
-        except AttributeError:
-            pass
-    return mutant
+            individual[indx] = not individual[indx]
     
 ######################################
 # ES Mutations                       #
@@ -570,10 +483,7 @@ def mutES(individual, indpb, minstrategy=None):
     The strategy shall be teh same size as the individual. This is subject to
     change.
     """
-    mutated = False
-    mutant = copy.deepcopy(individual)
-    
-    size = len(mutant)
+    size = len(individual)
     t = 1. / math.sqrt(2. * math.sqrt(size))
     t0 = 1. / math.sqrt(2. * size)
     n = random.gauss(0, 1)
@@ -582,18 +492,10 @@ def mutES(individual, indpb, minstrategy=None):
     for indx in xrange(size):
         if random.random() < indpb:
             ni = random.gauss(0, 1)
-            mutant.strategy[indx] *= math.exp(t0_n + t * ni)
-            if mutant.strategy[indx] < minstrategy:     # 4 < None = False
-                mutant.strategy[indx] = minstrategy
-            mutant[indx] += mutant.strategy[indx] * ni
-            mutated = True
-            
-    if mutated:
-        try:
-            del mutant.fitness.values
-        except AttributeError:
-            pass
-    return mutant
+            individual.strategy[indx] *= math.exp(t0_n + t * ni)
+            if individual.strategy[indx] < minstrategy:     # 4 < None = False
+                individual.strategy[indx] = minstrategy
+            individual[indx] += individual.strategy[indx] * ni
 
 ######################################
 # GP Crossovers                      #
@@ -602,29 +504,19 @@ def mutES(individual, indpb, minstrategy=None):
 def cxTreeUniformOnePoint(ind1, ind2):
     """ Randomly select in each individual and exchange
         each subtree with the point as root between each individual.
-    """
-    child1, child2 = copy.deepcopy(ind1), copy.deepcopy(ind2)
-    
+    """    
     try:
         index1 = random.randint(1, ind1.size-1)
         index2 = random.randint(1, ind2.size-1)
     except ValueError:
-        return child1, child2
+        return ind1, ind2
 
     sub1 = ind1.search_subtree_dfs(index1)
     sub2 = ind2.search_subtree_dfs(index2)
-    child1.set_subtree_dfs(index1, sub2)
-    child2.set_subtree_dfs(index2, sub1)
-
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-    return child1, child2
+    ind1.set_subtree_dfs(index1, sub2)
+    ind2.set_subtree_dfs(index2, sub1)
     
 ## Strongly Typed GP crossovers
-    
 def cxTypedTreeOnePoint(ind1, ind2):
     """ Randomly select in each individual and exchange
         each subtree with the point as root between each individual.
@@ -634,70 +526,50 @@ def cxTypedTreeOnePoint(ind1, ind2):
         try again. It tries up to 5 times before returning the unmodified 
         individuals.
     """
-    child1 = copy.deepcopy(ind1)
-    child2 = copy.deepcopy(ind2)
-    
     # choose the crossover point in each individual
     try:
-        index1 = random.randint(1, child1.size-1)
-        index2 = random.randint(1, child2.size-1)
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
     except ValueError:
-        return child1, child2
+        return ind1, ind2
         
-    subtree1 = child1.search_subtree_dfs(index1)
+    subtree1 = ind1.search_subtree_dfs(index1)
+    subtree2 = ind2.search_subtree_dfs(index2)
+
     type1 = subtree1.root.ret
-    subtree2 = child2.search_subtree_dfs(index2)
-    type2 = subtree2.root.ret
-    
+    type2 = subtree2.root.ret 
 
     # try to mate the trees
     # if not crossover point is found after MAX_CX_TRY
     # the children are returned without modifications.
     tries = 0
     MAX_CX_TRY = 5
-    while not (type1 is type2) and tries != MAX_CX_TRY:
-        index2 = random.randint(1, child2.size-1)
-        subtree2 = child2.search_subtree_dfs(index2)
+    while not (type1 == type2) and tries != MAX_CX_TRY:
+        index2 = random.randint(1, ind2.size-1)
+        subtree2 = ind2.search_subtree_dfs(index2)
         type2 = subtree2.root.ret
         tries += 1
     
-    if type1 is type2:
+    if type1 == type2:
         sub1 = ind1.search_subtree_dfs(index1)
         sub2 = ind2.search_subtree_dfs(index2)
-        child1.set_subtree_dfs(index1, sub2)
-        child2.set_subtree_dfs(index2, sub1)
-
-    try:
-        del child1.fitness.values
-        del child2.fitness.values
-    except AttributeError:
-        pass
-
-    return child1, child2    
+        ind1.set_subtree_dfs(index1, sub2)
+        ind2.set_subtree_dfs(index2, sub1)
 
 ######################################
 # GP Mutations                       #
 ######################################
-
-def mutTreeUniform(ind, expr):
+def mutTreeUniform(individual, expr):
     """ Randomly select a point in the Tree, then replace the subtree with
         the point as a root by a randomly generated expression. The expression
         is generated using the method `expr`.
     """
-    mutant = copy.deepcopy(ind)
-    index = random.randint(0, mutant.size-1)
-    mutant.set_subtree_dfs(index, expr())
-    try:
-        del mutant.fitness.values
-    except AttributeError:
-        pass
-    return mutant
+    index = random.randint(0, individual.size-1)
+    individual.set_subtree_dfs(index, expr(pset=individual.pset))
 
 ## Strongly Typed GP mutations
-
-def mutTypedTreeUniform(ind, expr):
-    """ 
-    The mutation of strongly typed GP expression is
+def mutTypedTreeUniform(individual, expr):
+    """The mutation of strongly typed GP expression is
     pretty easy. First, it finds a subtree. Second, it 
     has to identify the return type of the root of 
     this subtree. Third, it generates a new subtree
@@ -706,15 +578,10 @@ def mutTypedTreeUniform(ind, expr):
     replaced by the new subtree, and the mutant is 
     returned.
     """
-    mutant = copy.deepcopy(ind)
-    index = random.randint(0, mutant.size-1)
-    subtree = mutant.search_subtree_dfs(index)
-    mutant.set_subtree_dfs(index, expr(type=subtree.root.ret))
-    try:
-        del mutant.fitness.values
-    except AttributeError:
-        pass   
-    return mutant 
+    index = random.randint(0, individual.size-1)
+    subtree = individual.search_subtree_dfs(index)  
+    individual.set_subtree_dfs(index, expr(pset=individual.pset,
+                                           type= subtree.root.ret))
 
 ######################################
 # Selections                         #
@@ -723,10 +590,6 @@ def mutTypedTreeUniform(ind, expr):
 def selRandom(individuals, n):
     """Select *n* individuals at random from the input *individuals*. The
     list returned contains shallow copies of the input *individuals*.
-
-    .. versionchanged:: 0.3.1a
-       Removed random sample without replacement as this is simply a call to
-       python"s :func:`~random.sample` function
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
@@ -752,7 +615,7 @@ def selTournament(individuals, n, tournsize):
     """Select *n* individuals from the input *individuals* using *n*
     tournaments of *tournSize* individuals. The list returned contains shallow
     copies of the input *individuals*.
-
+    
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
     """
@@ -763,30 +626,49 @@ def selTournament(individuals, n, tournsize):
             aspirant = random.choice(individuals)
             if aspirant.fitness > chosen[i].fitness:
                 chosen[i] = aspirant
-
+                
     return chosen
+
+def selRoulette(individuals, n):
+    """Select *n* individuals from the input *individuals* using *n*
+    spins of a roulette. The selection is made by looking only at the first
+    objective of each individual. The list returned contains shallow
+    copies of the input *individuals*.
     
+    This function uses the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
+    s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
+    sum_fits = sum(map(lambda ind: ind.fitness.values[0], individuals))
+    
+    chosen = []
+    for i in xrange(n):
+        u = random.random() * sum_fits
+        sum_ = 0
+        for ind in s_inds:
+            sum_ += ind.fitness.values[0]
+            if sum_ > u:
+                chosen.append(ind)
+                break
+    
+    return chosen
+
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
 def nsga2(individuals, n):
-    """Apply NSGA-2 selection operator on the *individuals*.
+    """Apply NSGA-II selection operator on the *individuals*. Usually,
+    the size of *individuals* will be larger than *n* because any individual
+    present in *individuals* will appear in the returned list at most once.
+    Having the size of *individuals* equals to *n* will have no effect other
+    than sorting the population according to a non-domination sheme.
+    
+    For more details on the NSGA-II operator see Deb, Pratab, Agarwal,
+    and Meyarivan, "A fast elitist non-dominated sorting genetic algorithm for
+    multi-objective optimization: NSGA-II", 2002.
     """
     pareto_fronts = sortFastND(individuals, n)
-    
-#    import matplotlib.pyplot as plt
-#    from itertools import cycle
-#    plt.figure()
-#    colors = cycle("bgrcmky")
-#    for front in pareto_fronts:
-#        fit1 = [ind.fitness[0] for ind in front]
-#        fit2 = [ind.fitness[1] for ind in front]
-#        plt.scatter(fit1, fit2, c=colors.next())
-#        print len(front)
-#    plt.show()
-    #print len(pareto_fronts)
-    
     chosen = list(chain(*pareto_fronts[:-1]))
     n = n - len(chosen)
     if n > 0:
@@ -839,8 +721,7 @@ def sortFastND(individuals, n, first_front_only=False):
 
 
 def sortCrowdingDist(individuals, n):
-    """Sort the individuals according to the crowding distance.
-    """
+    """Sort the individuals according to the crowding distance."""
     if len(individuals) == 0:
         return []
     
@@ -848,15 +729,17 @@ def sortCrowdingDist(individuals, n):
     crowding = [(ind, i) for i, ind in enumerate(individuals)]
     
     number_objectives = len(individuals[0].fitness.values)
+    inf = float("inf")      # It is four times faster to compare with a local
+                            # variable than create the float("inf") each time
     for i in xrange(number_objectives):
         crowding.sort(key=lambda element: element[0].fitness.values[i])
         distances[crowding[0][1]] = float("inf")
         distances[crowding[-1][1]] = float("inf")
         for j in xrange(1, len(crowding) - 1):
-            if distances[crowding[j][1]] < float("inf"):
+            if distances[crowding[j][1]] < inf:
                 distances[crowding[j][1]] += \
-                                      crowding[j + 1][0].fitness.values[i] - \
-                                      crowding[j - 1][0].fitness.values[i]
+                    crowding[j + 1][0].fitness.values[i] - \
+                    crowding[j - 1][0].fitness.values[i]
     sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
                          key=lambda value: value[0], reverse=True)
     return (individuals[index] for dist, index in sorted_dist[:n])
@@ -867,6 +750,15 @@ def sortCrowdingDist(individuals, n):
 ######################################
 
 def spea2(individuals, n):
+    """Apply SPEA-II selection operator on the *individuals*. Usually,
+    the size of *individuals* will be larger than *n* because any individual
+    present in *individuals* will appear in the returned list at most once.
+    Having the size of *individuals* equals to *n* will have no effect other
+    than sorting the population according to a strength pareto sheme.
+    
+    For more details on the SPEA-II operator see Zitzler, Laumanns and Thiele,
+    "SPEA 2: Improving the strength pareto evolutionary algorithm", 2001.
+    """
     N = len(individuals)
     L = len(individuals[0].fitness.values)
     K = math.sqrt(N)
@@ -1029,8 +921,8 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     if migarray is None:
         migarray = [(i + 1) % len(populations) for i in xrange(len(populations))]
     
-    immigrants = [[] for i in len(migarray)]
-    emigrants = [[] for i in len(migarray)]
+    immigrants = [[] for i in xrange(len(migarray))]
+    emigrants = [[] for i in xrange(len(migarray))]
     if sel_kargs is None:
         sel_kargs = {}
     if repl_kargs is None:
@@ -1060,3 +952,112 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
         indx = populations[to_deme].index(immigrant)
         populations[to_deme][indx] = mig_buf[i]
 
+######################################
+# Decorators                         #
+######################################
+
+def deepcopyArgs(*argsname):
+    """Pre-execution function that deepcopies argument specified by
+    *argname*
+    """
+    def decDeepcopyArgs(func):
+        args_name = inspect.getargspec(func)[0]
+        args_pos = [args_name.index(name) for name in argsname]
+        def wrapDeepcopyArgs(*args, **kargs):
+            args = list(args)
+            for pos in args_pos:
+                args[pos] = copy.deepcopy(args[pos])
+            return func(*args, **kargs)
+        return wrapDeepcopyArgs
+    return decDeepcopyArgs
+
+######################################
+# Decoration tool                    #
+######################################
+
+# This function is a simpler version of the decorator module (version 3.2.0)
+# from Michele Simionato available at http://pypi.python.org/pypi/decorator.
+# Copyright (c) 2005, Michele Simionato
+# All rights reserved.
+# Modified by Francois-Michel De Rainville, 2010
+
+def decorate(decorator):
+    """Decorate a function preserving its signature. There is two way of
+    using this function, first as a decorator passing the decorator to
+    use as argument, for example ::
+    
+        @decorate(a_decorator)
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+    
+    Or as a decorator ::
+    
+        @decorate
+        def myDecorator(func):
+            def wrapFunc(*args, **kargs):
+                decoration_work()
+                return func(*args, **kargs)
+            return wrapFunc
+        
+        @myDecorator
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+    
+    Using the :mod:`inspect` module, we can retreive the signature of the
+    decorated function, what is not possible when not using this method. ::
+    
+        print inspect.getargspec(myFunc)
+        
+    It shall return something like ::
+    
+        (["arg1", "arg2", "arg3"], None, None, ("default",))
+    """
+    def wrapDecorate(func):
+        # From __init__
+        assert func.__name__
+        if inspect.isfunction(func):
+            argspec = inspect.getargspec(func)
+            args, varargs, keywords, defaults = argspec
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        elif inspect.isclass(func):
+            argspec = inspect.getargspec(func.__init__)
+            args, varargs, keywords, defaults = argspec
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        if not signature:
+            raise TypeError('You are decorating a non function: %s' % func)
+    
+        # From create
+        src = ("def %(name)s(%(signature)s):\n"
+              "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
+                                                           signature=signature)
+    
+        # From make
+        evaldict = dict(_call_=decorator(func))
+        reserved_names = set([func.__name__] + \
+            [arg.strip(' *') for arg in signature.split(',')])
+        for n, v in evaldict.iteritems():
+            if n in reserved_names:
+                raise NameError('%s is overridden in\n%s' % (n, src))
+        try:
+            # This line does all the dirty work of reassigning the signature
+            code = compile(src, '<string>', 'single')
+            exec code in evaldict
+        except:
+            print >> sys.stderr, 'Error in generated code:'
+            print >> sys.stderr, src
+            raise
+        new_func = evaldict[func.__name__]
+    
+        # From update
+        new_func.__source__ = src
+        new_func.__name__ = func.__name__
+        new_func.__doc__ = func.__doc__
+        new_func.__dict__ = func.__dict__.copy()
+        new_func.func_defaults = defaults
+        new_func.__module__ = func.__module__
+        return new_func
+    return wrapDecorate

@@ -1,6 +1,7 @@
 syntax: glob
 main.py
 .DS_Store
+*.tmproj
 nbproject
 *.pyc
 doc/_build

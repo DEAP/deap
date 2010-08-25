@@ -24,12 +24,12 @@ random.seed(64)     # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.
 
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.cma as cma
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
+from eap import algorithms
+from eap import base
+from eap import cma
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)
@@ -43,15 +43,16 @@ tools.register("population", list, content_init=tools.individual, size_init=1)
 def evalCMA(ind):
     return cma.rastrigin(ind),
 
-tools.register("evaluate", evalCMA)             # The rastrigin function is one
-                                                # of the hardest function to optimize
+# The rastrigin function is one of the hardest function to optimize
+tools.register("evaluate", evalCMA)
 
-pop = tools.population()                        # The CMA-ES algorithm takes a 
-                                                # population of one individual as argument
-
-hof = halloffame.HallOfFame(1)
-
-# The CMA-ES algorithm converge with good probability with those settings
-cma.esCMA(tools, pop, sigma=5.0, ngen=250, lambda_=600, halloffame=hof)
-
-logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+if __name__ == "__main__":
+    # The CMA-ES algorithm takes a population of one individual as argument
+    pop = tools.population()
+    
+    hof = halloffame.HallOfFame(1)
+    
+    # The CMA-ES algorithm converge with good probability with those settings
+    cma.esCMA(tools, pop, sigma=5.0, ngen=250, lambda_=600, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
