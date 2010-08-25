@@ -89,7 +89,7 @@ class Primitive(object):
     """    
         
     def __init__(self, primitive, args, ret = __type__):
-        self.name = primitive
+        self.name = primitive.__name__
         self.arity = len(args)           
         self.args = args
         self.ret = ret
@@ -177,9 +177,9 @@ class PrimitiveSetTyped(object):
     
     def addPrimitive(self, primitive, in_types, ret_type):
         try:
-            prim = Operator(primitive.__name__, in_types, ret_type)
+            prim = Operator(primitive, in_types, ret_type)
         except (KeyError, ValueError):
-            prim = Primitive(primitive.__name__, in_types, ret_type)
+            prim = Primitive(primitive, in_types, ret_type)
         self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
         self.primsCount += 1
