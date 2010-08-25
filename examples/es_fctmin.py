@@ -20,14 +20,13 @@ import logging
 
 sys.path.append("..")
 
-import eap.algorithms as algorithms
-import eap.base as base
-import eap.creator as creator
-import eap.halloffame as halloffame
-import eap.toolbox as toolbox
+from eap import algorithms
+from eap import base
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 logging.basicConfig(level=logging.DEBUG)
-#random.seed(64)
 
 IND_SIZE = 30
 
@@ -55,10 +54,13 @@ tools.register("mate", toolbox.cxESBlend, alpha=0.1, minstrategy=1e-10)
 tools.register("mutate", toolbox.mutES, indpb=0.1, minstrategy=1e-10)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-hof = halloffame.HallOfFame(1)
-
-pop = tools.population()
-
-algorithms.eaMuCommaLambda(tools, pop, mu=3, lambda_=12, cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
-
-logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+if __name__ == "__main__":
+    random.seed(64)
+    
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaMuCommaLambda(tools, pop, mu=8, lambda_=32, 
+                               cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

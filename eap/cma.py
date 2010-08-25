@@ -51,10 +51,8 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         for ind in population:
             ind.fitness.values = toolbox.evaluate(ind)
         
-        try:
+        if halloffame is not None:
             halloffame.update(population)
-        except AttributeError:
-            pass
         
         # Update the Strategy with the evaluated individuals
         strategy.update(population)
@@ -63,10 +61,10 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         fits = [ind.fitness.values[0] for ind in population]
         _logger.debug("Min %f", min(fits))
         _logger.debug("Max %f", max(fits))
-        lenght = len(population)
-        mean = sum(fits) / lenght
+        length = len(population)
+        mean = sum(fits) / length
         sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = abs(sum2 / lenght - mean**2)**0.5
+        std_dev = abs(sum2 / length - mean**2)**0.5
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
         

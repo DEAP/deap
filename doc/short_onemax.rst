@@ -11,4 +11,11 @@ The short one max genetic algorithm example is very similar to one max example. 
     tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
     tools.register("select", toolbox.selTournament, tournsize=3)
 
-The toolbox is then passed to the algorithm and the algorithm uses the registered function.
+The toolbox is then passed to the algorithm and the algorithm uses the registered function. ::
+
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+
+    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+
+The short GA One max example makes use of a :class:`~eap.halloffame.HallOfFame` in order to keep track of the best individual to appear in the evolution (it keeps them even in the case they estinguish). All algorithms from the :mod:`eap.algorithms` module do take a *halloffame* argument that gets updated after every evaluation section of the basic algorithms.

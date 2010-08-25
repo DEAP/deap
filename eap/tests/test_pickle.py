@@ -1,3 +1,4 @@
+
 import sys
 import unittest
 import array
@@ -10,6 +11,10 @@ sys.path.append("..")
 import creator
 import base
 import gp
+import toolbox
+
+def func():
+    return "True"
 
 class Pickling(unittest.TestCase):
 
@@ -18,6 +23,9 @@ class Pickling(unittest.TestCase):
         creator.create("IndList", list, fitness=creator.FitnessMax)
         creator.create("IndArray", array.array, fitness=creator.FitnessMax)
         creator.create("IndTree", base.Tree, fitness=creator.FitnessMax)
+        self.toolbox = toolbox.Toolbox()
+        self.toolbox.register("func", func)
+        self.toolbox.register("lambda_func", lambda: "True")
     
     def test_pickle_fitness(self):
         fitness = creator.FitnessMax()
@@ -71,7 +79,19 @@ class Pickling(unittest.TestCase):
         self.failUnlessEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
         self.failUnlessEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.failUnlessEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
+    
+    def test_pickle_func(self):
+        func_s = pickle.dumps(self.toolbox.func)
+        func_l = pickle.loads(func_s)
+
+        self.failUnlessEqual(self.toolbox.func(), func_l())
+    
+    def test_pickle_lambda(self):
+        func_s = pickle.dumps(self.toolbox.lambda_func)
+        func_l = pickle.loads(func_s)
         
+        self.failUnlessEqual(self.toolbox.lambda_func(), func_l())
+    
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)
     unittest.TextTestRunner(verbosity=2).run(suite)

@@ -19,15 +19,16 @@ import random
 import operator
 import logging
 import csv
+import itertools
 
 sys.path.append(os.path.abspath(".."))
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-import eap.gp as gp
-import eap.algorithms as algorithms
-import eap.halloffame as halloffame
+from eap import base
+from eap import creator
+from eap import toolbox
+from eap import gp
+from eap import algorithms
+from eap import halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -39,7 +40,7 @@ spamReader = csv.reader(open("spambase.csv"))
 spam = list(list(float(elem) for elem in row) for row in spamReader)
 
 # defined a new primitive set for strongly typed GP
-pset = gp.PrimitiveSetTyped()
+pset = gp.PrimitiveSetTyped("MAIN", itertools.repeat("float", 57), "bool", "IN")
 
 # boolean operators
 pset.addPrimitive(operator.and_, ["bool", "bool"], "bool")
@@ -71,16 +72,15 @@ pset.addPrimitive(if_then_else, ["bool", "float", "float"], "float")
 pset.addEphemeralConstant(lambda: random.random() * 100, "float")
 pset.addTerminal(0, "bool")
 pset.addTerminal(1, "bool")
-for i in xrange(57): pset.addTerminal("IN%s"%i, "float")
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
-tools.register("expr", gp.generate_ramped, type="bool", pset=pset, min=1, max=2)
+tools.register("expr", gp.generate_ramped, pset=pset, type=pset.ret, min=1, max=2)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=100)
-tools.register("lambdify", gp.lambdify, pset=pset, args=["IN%s"%i for i in xrange(57)])
+tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSpambase(individual):
     # Transform the tree expression in a callable function
@@ -94,12 +94,13 @@ def evalSpambase(individual):
 tools.register("evaluate", evalSpambase)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTypedTreeOnePoint)
-tools.register("expr_mut", gp.generate_full, pset=pset, min=0, max=2)
+tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register("mutate", toolbox.mutTypedTreeUniform, expr=tools.expr_mut)
 
-pop = tools.population()
-hof = halloffame.HallOfFame(1)
-
-algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
-
-logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+if __name__ == "__main__":
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    
+    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)

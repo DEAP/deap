@@ -13,6 +13,11 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""The :mod:`halloffame` module  provides a way to keep track of the best
+individuals that ever lived in the evolutionary process. It is used by the
+algorithms provided in the :mod:`~eap.algorithms` module.
+"""
+
 from toolbox import sortFastND
 from bisect import bisect_right
 from copy import deepcopy
@@ -21,8 +26,14 @@ from operator import attrgetter, eq
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
-    population during the evolution. It is sorted so that the first element
-    of the hall of fame is the best individual ever seen at every moment.
+    population during the evolution. It is sorted at all time so that the
+    first element of the hall of fame is the individual that has the best
+    first fitness value ever seen, according to the weights provided to the
+    fitness at creation time.
+    
+    The class :class:`HallOfFame` provides an interface similar to a list
+    (without being one completly). It is possible to retreive the lenght,
+    to iterate forward and backward and to get an item or a slice.
     """
     def __init__(self, maxsize):
         self.maxsize = maxsize
@@ -32,7 +43,8 @@ class HallOfFame(object):
     def update(self, population):
         """Update the hall of fame with the *population* by replacing the worst
         individuals in the hall of fame by the best individuals in the
-        *population*. The size of the hall of fame is kept constant.
+        *population* (if they are better). The size of the hall of fame is kept
+        constant.
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
@@ -52,7 +64,7 @@ class HallOfFame(object):
     
     def insert(self, item):
         """Insert a new individual in the hall of fame using the
-        :func:`bisect_right` function. The inserted individual is inserted
+        :func:`~bisect.bisect_right` function. The inserted individual is inserted
         on the right side of an equal individual. Inserting a new individual
         in the hall of fame also preserve the hall of order's. This method
         **does not** check for the size of the hall of fame, in a way that
@@ -95,7 +107,7 @@ class HallOfFame(object):
 class ParetoFront(HallOfFame):
     """The Pareto front hall of fame contains all the non-dominated individuals
     that ever lived in the population. That means that the Pareto front hall of
-    fame can contain an infinity of individuals.
+    fame can contain an infinity of different individuals.
     
     The size of the front may become very large if it is used for example on
     a continuous function with a continuous domain. In order to limit the number

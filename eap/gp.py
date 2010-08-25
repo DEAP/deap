@@ -13,10 +13,13 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+import copy
 import random
+
+import base
+
 from itertools import repeat
 from collections import defaultdict
-from operator import add
 
 # Define the name of type for any types.
 __type__ = None
@@ -38,43 +41,40 @@ def evaluate(expr, pset=None):
     else:
         return _stringify(expr)
 
-def evaluateADF(seq, pset, adfset):
+def evaluateADF(seq):
     """ Evaluate a list of ADF and return a dict mapping the ADF name with its
         lambda function.
     """
     adfdict = {}
-    for i, expr in enumerate(seq):
-        func = lambdify(adfset, expr, reduce(add, adfset.terminals.values()))
-        adfdict.update({pset.adfs[i] : func})
+    for i, expr in enumerate(reversed(seq[1:])):
+        func = lambdify(expr.pset, expr)
+        adfdict.update({expr.pset.name : func})
+        for expr2 in reversed(seq[1:i+1]):
+            expr2.pset.func_dict.update(adfdict)
+            
     return adfdict
 
-def lambdify(pset, expr, args):
+def lambdify(pset, expr):
     """Return a lambda function of the expression.
 
     Remark:
     This function is a stripped version of the lambdify
     function of sympy0.6.6.
     """
-    if isinstance(expr, list):
-        expr = evaluate(expr)
-    if isinstance(args, str):
-        pass
-    elif hasattr(args, "__iter__"):
-        args = ",".join(str(a) for a in args)
-    else:
-        args = str(args)
+    expr = evaluate(expr)
+    args = ",".join(a for a in pset.arguments)
     lstr = "lambda %s: (%s)" % (args, expr)
-    return eval(lstr, pset.func_dict)
+    return eval(lstr, dict(pset.func_dict))
 
-def lambdifyList(pset, adfset, expr, args):
+def lambdifyList(expr):
     """ Return a lambda function created from a list of trees. The first 
         element of the list is the main tree, and the following elements are
         automatically defined functions (ADF) that can be called by the first
         tree.
     """
-    adfdict = evaluateADF(expr[1:], pset, adfset)
-    pset.func_dict.update(adfdict)
-    return lambdify(pset, expr[0], args)
+    adfdict = evaluateADF(expr)
+    expr[0].pset.func_dict.update(adfdict)   
+    return lambdify(expr[0].pset, expr[0])
 
 ## Loosely + Strongly Typed GP 
 
@@ -166,15 +166,32 @@ class EphemeralGenerator(object):
         return self.name
 
 class PrimitiveSetTyped(object):
-    def __init__(self):
+    def __init__(self, name, in_types, ret_type, prefix = "ARG"):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
-        self.adfs = []
+        self.arguments = []
         self.func_dict = dict()
-        self.termsCount = 0
-        self.primsCount = 0
-        self.adfsCount = 0
-    
+        self.terms_count = 0
+        self.prims_count = 0
+        self.adfs_count = 0
+        
+        self.name = name 
+        self.ret = ret_type
+        self.ins = in_types
+        for i, type in enumerate(in_types):
+            self.arguments.append(prefix + ("%s" % i))
+            PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type)
+            
+    def renameArguments(self, new_args):
+        for i, argument in enumerate(self.arguments):
+            if new_args.has_key(argument):
+                self.arguments[i] = new_args[argument]
+        for terminals in self.terminals.values():
+            for terminal in terminals:
+                if ( isinstance(terminal, Terminal) and 
+                     new_args.has_key(terminal.value) ):
+                    terminal.value = new_args[terminal.value]
+
     def addPrimitive(self, primitive, in_types, ret_type):
         try:
             prim = Operator(primitive, in_types, ret_type)
@@ -182,33 +199,36 @@ class PrimitiveSetTyped(object):
             prim = Primitive(primitive, in_types, ret_type)
         self.primitives[ret_type].append(prim)
         self.func_dict[primitive.__name__] = primitive
-        self.primsCount += 1
+        self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type):
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
         prim = Terminal(terminal, ret_type)
         self.terminals[ret_type].append(prim)
-        self.termsCount += 1
+        self.terms_count += 1
         
     def addEphemeralConstant(self, ephemeral, ret_type):
         prim = EphemeralGenerator(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
-        self.termsCount += 1
+        self.terms_count += 1
         
-    def addADF(self, name, in_types, ret_type):
-        prim = Primitive(name, in_types, ret_type)
-        self.adfs.append(name)
-        self.primitives[ret_type].append(prim)
+    def addADF(self, adfset):
+        prim = Primitive(adfset.name, adfset.ins, adfset.ret)
+        self.primitives[adfset.ret].append(prim)
     
     @property
     def terminalRatio(self):
         """ Return the ratio of the number of terminals on the number of all
             kinds of primitives.
         """
-        return self.termsCount / float(self.termsCount + self.primsCount)
+        return self.terms_count / float(self.terms_count + self.prims_count)
 
 class PrimitiveSet(PrimitiveSetTyped):
+    def __init__(self, name, arity, prefix="ARG"):
+        args = [__type__]*arity
+        PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
+
     def addPrimitive(self, primitive, arity):
         assert arity > 0, "arity should be >= 1"
         args = [__type__] * arity 
@@ -219,11 +239,30 @@ class PrimitiveSet(PrimitiveSetTyped):
 
     def addEphemeralConstant(self, ephemeral):
         PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
+
+# Tree class faster than base Tree, optimized for Primitives
+class PrimitiveTree(base.Tree):
+    pset = None   
+    
+    def _getstate(self):
+        state = []
+        for elem in self:
+            try:
+                state.append(elem._getstate())
+            except AttributeError:
+                state.append(elem)
+        return state
+
+    def __deepcopy__(self, memo):
+        """ Deepcopy a Tree by first converting it back to a list of list.
         
-    def addADF(self, name, arity):
-        assert arity > 0, "arity should be >= 1"
-        args = [__type__] * arity
-        PrimitiveSetTyped.addADF(self, name, args, __type__)        
+            This deepcopy is faster than the default implementation. From
+            quick testing, up to 1.6 times faster, and at least 2 times less
+            function calls.
+        """
+        new = self.__class__(self._getstate())
+        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        return new
 
 # Expression generation functions
 

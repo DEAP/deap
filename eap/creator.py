@@ -24,40 +24,33 @@ import copy
 # Warning are turned into errors to catch the DeprecationWarning in the method
 # init_type of create.
 import warnings
-warnings.filterwarnings("error")
+warnings.filterwarnings("error", "", DeprecationWarning, "creator")
 
 def create(name, base, **kargs):
     dict_inst = {}
     dict_cls = {}
     for obj_name, obj in kargs.items():
-        if callable(obj):
+        if hasattr(obj, "__call__"):
             dict_inst[obj_name] = obj
         else:
             dict_cls[obj_name] = obj
 
-    def init_type(self, *args):
+    def init_type(self, *args, **kargs):
         for elem in dict_inst.items():
             obj_name, obj = elem
-            if callable(obj):
+            if hasattr(obj, "__call__"):
                 obj = obj()
             setattr(self, obj_name, obj)
             
-        # If an the __init__ method is called with *args and it doesn't take
-        # args, it can either raise a TypeError in which case the object
-        # __init__ can't take arguments, or a DeprecationWarning in which case
-        # the object might inherits from the class "object" which leave the
-        # option of passing arguments, but raise a warning stating that it will
-        # eventually stop permitting this option.
+        # A DeprecationWarning is raised when the object inherits from the 
+        # class "object" which leave the option of passing arguments, but
+        # raise a warning stating that it will eventually stop permitting
+        # this option. Usually this appens when the base class does not
+        # override the __init__ method from object.
         try:
-            base.__init__(self, *args)
-        except (TypeError, DeprecationWarning):
+            base.__init__(self, *args, **kargs)
+        except DeprecationWarning:
             base.__init__(self)
-        
-    #def repr_type(self):
-    #    out = super(self.__class__, self).__repr__()
-    #    if self.__dict__:
-    #        out = " : ".join([out, repr(self.__dict__)])
-    #    return out
     
     objtype = type(name, (base,), dict_cls)
     
@@ -70,13 +63,10 @@ def create(name, base, **kargs):
             copy_ = cls.__new__(cls, self.typecode, self)
             memo[id(self)] = copy_
             copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
-            #copy_.extend(self)
             return copy_
         
         objtype.__deepcopy__ = deepcopy_array
     
     objtype.__init__ = init_type
-    #if not hasattr(objtype, "__repr__"):
-    #setattr(objtype, "__repr__", repr_type)
     globals()[name] = objtype
 

@@ -1,3 +1,4 @@
+#!python2.7
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -14,17 +15,19 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
-import random
+import logging
 import multiprocessing
+import random
+import sys
 
 sys.path.append("..")
+logging.basicConfig(level=logging.INFO)
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-
-random.seed(64)
+from eap import algorithms
+from eap import base
+from eap import creator
+from eap import halloffame
+from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMax)
@@ -41,53 +44,20 @@ tools.register("population", list, content_init=tools.individual, size_init=300)
 def evalOneMax(individual):
     return sum(individual),
 
+tools.register("evaluate", evalOneMax)
 tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-pop = tools.population()
-CXPB, MUTPB, NGEN = 0.5, 0.2, 40
-
 # Process Pool of 4 workers
 pool = multiprocessing.Pool(processes=4)
+tools.register("map", pool.map)
 
-fitnesses = pool.map(evalOneMax, pop)
-for ind, fit in zip(pop, fitnesses):
-    ind.fitness.values = fit
-
-# Begin the evolution
-for g in range(NGEN):
-    print "-- Generation %i --" % g
-
-    pop[:] = tools.select(pop, n=len(pop))
-
-    # Apply crossover and mutation
-    for i in xrange(1, len(pop), 2):
-        if random.random() < CXPB:
-            pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
-
-    for i in xrange(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = tools.mutate(pop[i])
-
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = filter(lambda ind: not ind.fitness.valid, pop)
-    fitnesses = pool.map(evalOneMax, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
-        
-    # Gather all the fitnesses in one list and print the stats
-    fits = [ind.fitness.values[0] for ind in pop]
-    print "  Min %s" % min(fits)
-    print "  Max %s" % max(fits)
-    lenght = len(pop)
-    mean = sum(fits) / lenght
-    sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = abs(sum2 / lenght - mean**2)**0.5
-    print "  Avg %s" % (mean)
-    print "  Std %s" % std_dev
-
-print "-- End of (successful) evolution --"
-
-best_ind = toolbox.selBest(pop, 1)[0]
-print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
+if __name__ == "__main__":
+    random.seed(64)
+    
+    pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    
+    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

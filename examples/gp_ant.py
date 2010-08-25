@@ -43,26 +43,24 @@ prog3(prog3(move_forward,
                     turn_left), 
       if_food_ahead(move_forward, 
                     turn_right)) 
-fitness = [89]
+fitness = (89,)
 """
 
 import sys
-import random
-import operator
 import logging
-import csv
 import copy
+import random
 
 from functools import partial
 
 sys.path.append("..")
 
-import eap.base as base
-import eap.creator as creator
-import eap.toolbox as toolbox
-import eap.gp as gp
-import eap.algorithms as algorithms
-import eap.halloffame as halloffame
+from eap import base
+from eap import creator
+from eap import toolbox
+from eap import gp
+from eap import algorithms
+from eap import halloffame
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -151,45 +149,48 @@ class AntSimulator(object):
         self.matrix_row = len(self.matrix)
         self.matrix_col = len(self.matrix[0])
         self.matrix_exc = copy.deepcopy(self.matrix)
-        
+
+ant = AntSimulator(600)
+
+pset = gp.PrimitiveSet("MAIN", 0)
+pset.addPrimitive(ant.if_food_ahead, 2)
+pset.addPrimitive(prog2, 2)
+pset.addPrimitive(prog3, 3)
+pset.addTerminal(ant.move_forward)
+pset.addTerminal(ant.turn_left)
+pset.addTerminal(ant.turn_right)
+
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
+
+tools = toolbox.Toolbox()
+
+# Attribute generator
+tools.register("expr_init", gp.generate_full, pset=pset, min=1, max=2)
+
+# Structure initializers
+tools.register("individual", creator.Individual, content_init=tools.expr_init)
+tools.register("population", list, content_init=tools.individual, size_init=300)
+
+def evalArtificialAnt(individual):
+    # Transform the tree expression to functionnal Python code
+    routine = gp.evaluate(individual, pset)
+    # Run the generated routine
+    ant.run(routine)
+    return ant.eaten,
+
+tools.register("evaluate", evalArtificialAnt)
+tools.register("select", toolbox.selTournament, tournsize=7)
+tools.register("mate", toolbox.cxTreeUniformOnePoint)
+tools.register("expr_mut", gp.generate_full, min=0, max=2)
+tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
+
 if __name__ == "__main__":
-    ant = AntSimulator(600)
-    file = open("santafe_trail.txt")
-    ant.parse_matrix(file)
+    random.seed(101)
 
-    pset = gp.PrimitiveSet()
-    pset.addPrimitive(ant.if_food_ahead, 2)
-    pset.addPrimitive(prog2, 2)
-    pset.addPrimitive(prog3, 3)
-    pset.addTerminal(ant.move_forward)
-    pset.addTerminal(ant.turn_left)
-    pset.addTerminal(ant.turn_right)
-
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", base.Tree, fitness=creator.FitnessMax)
-
-    tools = toolbox.Toolbox()
+    trail_file = open("santafe_trail.txt")
+    ant.parse_matrix(trail_file)
     
-    # Attribute generator
-    tools.register("expr_init", gp.generate_full, pset=pset, min=1, max=2)
-    
-    # Structure initializers
-    tools.register("individual", creator.Individual, content_init=tools.expr_init)
-    tools.register("population", list, content_init=tools.individual, size_init=300)
-    
-    def evalArtificialAnt(individual):
-        # Transform the tree expression to functionnal Python code
-        routine = gp.evaluate(individual, pset)
-        # Run the generated routine
-        ant.run(routine)
-        return ant.eaten,
-
-    tools.register("evaluate", evalArtificialAnt)
-    tools.register("select", toolbox.selTournament, tournsize=7)
-    tools.register("mate", toolbox.cxTreeUniformOnePoint)
-    tools.register("expr_mut", gp.generate_full, pset=pset, min=0, max=2)
-    tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
-
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
     
