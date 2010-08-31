@@ -118,8 +118,9 @@ class Toolbox(object):
             else:
                 args = list(args)
                 args.append(Iterate(content))
-            
-        setattr(self, methodname, functools.partial(method, *args, **kargs))
+        pfunc = functools.partial(method, *args, **kargs)
+        pfunc.__name__ = method
+        setattr(self, methodname, pfunc)
     
     def unregister(self, methodname):
         """Unregister *methodname* from the toolbox."""
