@@ -71,6 +71,7 @@ tools.register("lambdify", gp.lambdify, pset=pset)
 def evalParity(individual):
     func = tools.lambdify(expr=individual)
     good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
+    print("PRODUCE EVALUATION " + str(good))
     return good,
 
 tools.register("evaluate", evalParity)
