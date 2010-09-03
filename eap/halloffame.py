@@ -32,8 +32,8 @@ class HallOfFame(object):
     fitness at creation time.
     
     The class :class:`HallOfFame` provides an interface similar to a list
-    (without being one completly). It is possible to retreive the lenght,
-    to iterate forward and backward and to get an item or a slice.
+    (without being one completly). It is possible to retreive its lenght,
+    to iterate on it forward and backward and to get an item or a slice from it.
     """
     def __init__(self, maxsize):
         self.maxsize = maxsize

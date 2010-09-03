@@ -959,7 +959,7 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
 
 def deepcopyArgs(*argsname):
     """Pre-execution function that deepcopies argument specified by
-    *argname*
+    *argname*. We prefer the use of the :meth:`toolbox.clone()` method. 
     """
     def decDeepcopyArgs(func):
         args_name = inspect.getargspec(func)[0]
@@ -1029,11 +1029,11 @@ def decorate(decorator):
             signature = inspect.formatargspec(formatvalue=lambda val: "",
                                               *argspec)[1:-1]
         if not signature:
-            raise TypeError('You are decorating a non function: %s' % func)
+            raise TypeError("You are decorating a non function: %s" % func)
     
         # From create
         src = ("def %(name)s(%(signature)s):\n"
-              "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
+               "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
                                                            signature=signature)
     
         # From make
@@ -1042,13 +1042,13 @@ def decorate(decorator):
             [arg.strip(' *') for arg in signature.split(',')])
         for n, v in evaldict.iteritems():
             if n in reserved_names:
-                raise NameError('%s is overridden in\n%s' % (n, src))
+                raise NameError("%s is overridden in\n%s" % (n, src))
         try:
             # This line does all the dirty work of reassigning the signature
-            code = compile(src, '<string>', 'single')
+            code = compile(src, "<string>", "single")
             exec code in evaldict
         except:
-            print >> sys.stderr, 'Error in generated code:'
+            print >> sys.stderr, "Error in generated code:"
             print >> sys.stderr, src
             raise
         new_func = evaldict[func.__name__]

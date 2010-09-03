@@ -13,6 +13,7 @@ Evolutionary Content
    ea_bases
    evo_toolbox
    algorithms
+   gp
    stats
    halloffame
    milestone
@@ -30,6 +31,7 @@ Tutorials
    onemax
    short_onemax
    knapsack
+   mp
    
 Indices and tables
 ==================
