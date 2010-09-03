@@ -9,17 +9,17 @@ This is the first complete program built with EAP. It will help new users to ove
 Setting Things Up
 =================
 
-Here we use the one max problem to show how simple can be an evolutionary algorithm with EAP. The first thing to do is to ellaborate the structures of the algorithm. It is pretty obvious in this case that an individual that can contain a serie of `booleans` is the most interesting kind of structure available. EAP does not contain any explicit individual structure since it is simply a container of attributes associated with a fitness. Instead, it provides a convenient method for creating types called the creator.
+Here we use the one max problem to show how simple can be an evolutionary algorithm with EAP. The first thing to do is to elaborate the structures of the algorithm. It is pretty obvious in this case that an individual that can contain a series of `booleans` is the most interesting kind of structure available. EAP does not contain any explicit individual structure since it is simply a container of attributes associated with a fitness. Instead, it provides a convenient method for creating types called the creator.
 
 -------
 Creator
 -------
 
-The creator is a class factory that can build at runtime new classes that inherit from base classes. It is very useful since an individual can be any type of container from list to n-ary tree. The creator allows to bind those base classes together in order to build more complex new structures convenient for evolutionary computation.
+The creator is a class factory that can build at run-time new classes that inherit from base classes. It is very useful since an individual can be any type of container from list to n-ary tree. The creator allows to bind those base classes together in order to build more complex new structures convenient for evolutionary computation.
 
-Let see an example of how to use the creator to setup an individual that contains an array of booleans and a miximizing fitness. We will first need to import the :mod:`eap.base` and :mod:`eap.creator` modules. The :mod:`eap.base` module contains the basic structure such as List, Array and Tree.
+Let see an example of how to use the creator to setup an individual that contains an array of booleans and a maximizing fitness. We will first need to import the :mod:`eap.base` and :mod:`eap.creator` modules. The :mod:`eap.base` module contains the basic structure such as List, Array and Tree.
 
-The creator defines at first a single function called :func:`~eap.creator.create` that is used to create types. The :func:`~eap.creator.create` function takes at least 2 arguments plus one optional argument. The first argument *name* is the actual name of the type that we want to create, here it is :class:`Individual`. The second argument *base* is the base classes that the new type created should inherit from. Finaly the optional argument *dict* is a dictionary of members to add to the new type (this subject is more detailed in the documentation, and out of the current scope). ::
+The creator defines at first a single function called :func:`~eap.creator.create` that is used to create types. The :func:`~eap.creator.create` function takes at least 2 arguments plus one optional argument. The first argument *name* is the actual name of the type that we want to create, here it is :class:`Individual`. The second argument *base* is the base classes that the new type created should inherit from. Finally the optional argument *dict* is a dictionary of members to add to the new type (this subject is more detailed in the documentation, and out of the current scope). ::
 
     creator.create("FitnessMax", base.Fitness, weights=(1,0))
     creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -43,7 +43,7 @@ The :mod:`eap.toolbox` is an other convenience module that contains a :class:`~e
     tools.register("population", creator.Population, content_init=tools.individual, size_init=300)
 
 
-The two last lines of code create two functions within the toolbox, the first instaciates individuals and the second instanciates populations.
+The two last lines of code create two functions within the toolbox, the first function registered, when called, will instantiate individuals and the second will instantiate populations.
 
 The Evaluation Function
 =======================
@@ -72,7 +72,7 @@ Evolving the Population
 Creating the Population
 -----------------------
 
-Before evolving it, we need to instanciate a population. This step is done effortless using the method we registered in the :class:`~eap.toolbox.Toolbox`. ::
+Before evolving it, we need to instantiate a population. This step is done effortless using the method we registered in the :class:`~eap.toolbox.Toolbox`. ::
 
     pop = tools.population()
 
@@ -85,7 +85,7 @@ The evolution of the population is the last thing to do before getting results. 
     for g in range(10):
         evolve...
 
-Is that simple enough? Lets continue with more complicated things, mating and mutating the population. The crossover and mutation operators provided with eap usualy take respectivly 2 and 1 individual(s) on input and return 2 and 1 *new* individual(s). The simple GA algorithm states that the produced individuals shall replace their parents in the population, this is what is done by the following lines of code, where a crossover is applied with probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. ::
+Is that simple enough? Lets continue with more complicated things, mating and mutating the population. The crossover and mutation operators provided with eap usually take respectively 2 and 1 individual(s) on input and return 2 and 1 *new* individual(s). The simple GA algorithm states that the produced individuals shall replace their parents in the population, this is what is done by the following lines of code, where a crossover is applied with probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. ::
 
     for i in range(1, len(pop), 2):
         if random.random() < CXPB:
@@ -101,7 +101,7 @@ The population now needs to be evaluated, we then apply the evaluation on every 
         if not ind.fitness.valid:
             ind.fitness.values = tools.evaluate(ind)
 
-And finaly, last but not least, the selection part occurs. We replace the whole population by individuals selected by tournament (as defined in the toolbox) in that same population. ::
+And finally, last but not least, the selection part occurs. We replace the whole population by individuals selected by tournament (as defined in the toolbox) in that same population. ::
 
     pop[:] = tools.select(pop, n=len(pop))
 

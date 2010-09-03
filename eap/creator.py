@@ -27,6 +27,15 @@ import warnings
 warnings.filterwarnings("error", "", DeprecationWarning, "creator")
 
 def create(name, base, **kargs):
+    """The function :func:`create` does create a new class named *name*
+    inheriting from *base* in the :mod:`~eap.creator` module. The new
+    class can have attributes defined by the subsequent keyworded arguments
+    passed to the function create. If the argument is callable, it is
+    automatically called in the initialisation of an instance of this class
+    and the returned object is added as an attribute of the class' instance.
+    Otherwise, if the argument is not callable, (for example an :class:`int`),
+    it is added as a "static" attribute of the class.
+    """
     dict_inst = {}
     dict_cls = {}
     for obj_name, obj in kargs.items():

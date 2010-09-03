@@ -55,9 +55,9 @@ class History(object):
     
     def populate(self, individuals):
         """Populate the history with the initial *individuals*. An attribute
-        :attr:`history_index` is added to every individual that will help to 
-        track the parents and the childs through evolution. This index will be
-        modified by the :meth:`update` method when a child is produced.
+        :attr:`history_index` is added to every individual, this index will 
+        help to track the parents and the childs through evolution. This index
+        will be modified by the :meth:`update` method when a child is produced.
         Modifying the internal :attr:`genealogy_index` of the history or the
         :attr:`history_index` of an individual may lead to unpredictable
         results and corruption of the history.

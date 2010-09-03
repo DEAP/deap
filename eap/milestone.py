@@ -110,7 +110,7 @@ class Milestone(object):
     
     def load(self, filename):
         """Load a milestone file retreiving the dumped objects, it is not safe
-        to load a milestone file in a milestone object that containing
+        to load a milestone file in a milestone object that contians
         references as all conflicting names will be updated with the new
         values.
         """
