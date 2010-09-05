@@ -1,19 +1,18 @@
 import sys
 sys.path.append("..")
 
-from taskmanager import DtmControl
+from taskmanager import dtm
 
 import time
 import math
 
-dtm = DtmControl()
 
 def foo(arg):
-    time.sleep(0.51)
+    time.sleep(0.1)
     return arg*(math.sqrt(math.pow(arg,2)))
 
 def bar(a, b, c):
-    time.sleep(0.5)
+    time.sleep(0.1)
     return a+b+c
 
 
@@ -34,7 +33,7 @@ def main():
 
     asyncResult1 = dtm.apply_async(bar, [1,2,3], [4,5,6,7], c = [8,9])
     weirdPow = dtm.map_async(foo, listInit)
-    
+
     primes = dtm.filter(primaryTest, listInit)
     print("Voici les nombres premiers :")
     print(primes)

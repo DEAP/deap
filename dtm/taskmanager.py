@@ -1,9 +1,9 @@
 import threading
 import time
-import mpi
 import random
 import Queue
 import sys
+from commManager import DtmCommThread
 
 # Constantes
 DTM_TAG_EXIT = 1
@@ -12,6 +12,7 @@ DTM_TAG_QUERY_TASK = 3
 DTM_TAG_RETURN_RESULT = 4
 
 DTM_MPI_LATENCY = 0.1
+DTM_CONTROL_THREAD_LATENCY = 0.01
 DTM_ASK_FOR_TASK_DELAY = 0.5
 
 
@@ -24,7 +25,7 @@ def _printDtmMsg(msg, gravity=1):
 
 
 class DtmTaskIdGenerator(object):
-    def __init__(self, rank = mpi.rank, initId = 0):
+    def __init__(self, rank, initId = 0):
         self.r = rank
         self.wtid = 0
         self.generatorLock = threading.Lock()
@@ -38,54 +39,69 @@ class DtmTaskIdGenerator(object):
         return (self.r, newId)
 
 class DtmControl(object):
-    """
-    Cette classe est le coeur de DTM. Elle est speciale au sens ou elle possede des methodes
-    destinees aux threads d'execution, et d'autres destinees uniquement au thread principal
-    start(), _main() et _doCleanUp() sont les methodes du thread principal (_main etant la boucle principale)
-    Les autres methodes sont appelees (et executees dans) les threads d'EXECUTION
-    """
-    def __init__(self):
-        self.sTime = time.time()
-        self.curRank = mpi.rank
-        self.poolSize = mpi.size
-        
-        self.waitingThreads = {}
-        self.waitingThreadsLock = threading.Lock()
 
-        self.asyncWaitingList = {}
-        self.asyncWaitingListLock = threading.Lock()
-
-        self.resultsLock = threading.Lock()
-        self.results = {}
-
-        self.tasksStatsLock = threading.Lock()
-        self.tasksStats = {}
-        
-        self.idGenerator = DtmTaskIdGenerator()
-
-        if self.curRank == 0:
-            _printDtmMsg("DTM started with " + str(self.poolSize) + " workers")
-
-        self.execQueue = Queue.Queue()
-        
-        self.sendResultsQueue = Queue.Queue()
-
-        self.appStatusLock = threading.Lock()
-        self.appStatus = [1,0,0,0]
-        
-        
-        #self.updateReceiveThread.daemon = True
-        self.mpiThread = DtmMpiCommThread(self.execQueue, self.sendResultsQueue, self.appStatus, self.appStatusLock, self.waitingThreads, self.waitingThreadsLock, self.results, self.resultsLock)
-        #self.recvProcess.daemon = True
-
-
-        
-    def _doCleanUp(self):
+    class __DtmControl:
         """
-        Fonction charge de faire le clean up a la fin
+        Cette classe est le coeur de DTM. Elle est speciale au sens ou elle possede des methodes
+        destinees aux threads d'execution, et d'autres destinees uniquement au thread principal
+        start(), _main() et _doCleanUp() sont les methodes du thread principal (_main etant la boucle principale)
+        Les autres methodes sont appelees (et executees dans) les threads d'EXECUTION
         """
-        if mpi.rank == 0:
-            msgT = "Rank " + str(mpi.rank) + " ("+str(threading.currentThread().name)+" / " + str(threading.currentThread().ident) + ")\n"
+        def __init__(self):
+            self.sTime = time.time()
+
+            self.waitingThreads = {}
+            self.waitingThreadsLock = threading.Lock()
+
+            self.asyncWaitingList = {}
+            self.asyncWaitingListLock = threading.Lock()
+
+            self.resultsLock = threading.Lock()
+            self.results = {}
+
+            self.tasksStatsLock = threading.Lock()
+            self.tasksStats = {}
+
+
+
+            # Queues d'execution
+            self.waitingForRestartQueue = Queue.Queue()
+            self.execQueue = Queue.Queue()
+
+            # Queues partages
+            self.recvQueue = Queue.Queue()
+            self.sendQueue = Queue.Queue()
+
+
+            self.currentExecThread = None
+
+            self.exitStatus = threading.Event()
+            self.commReadyEvent = threading.Event()
+
+            self.exitState = (None, None)
+            
+
+            #self.updateReceiveThread.daemon = True
+            self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.exitStatus, self.commReadyEvent)
+
+            self.poolSize = self.commThread.poolSize
+            self.workerId = self.commThread.workerId
+
+            self.idGenerator = DtmTaskIdGenerator(self.workerId)
+            
+            self.nodesStatus = [[0,0,0,time.time(), time.time()] for i in xrange(self.poolSize)]
+            
+            if self.commThread.isRootWorker:
+                _printDtmMsg("DTM started with " + str(self.poolSize) + " workers")
+
+
+
+        def _doCleanUp(self):
+            """
+            Fonction charge de faire le clean up a la fin
+            """
+            #if self.commThread.isRootWorker:
+            msgT = "Rank " + str(self.workerId) + " ("+str(threading.currentThread().name)+" / " + str(threading.currentThread().ident) + ")\n"
             for target,times in self.tasksStats.items():
                 try:
                     msgT += "\t" + str(target.__name__) + " : Avg=" + str(sum(times)/float(len(times))) + ", Min=" + str(min(times)) + ", Max=" + str(max(times)) + ", Total : " + str(sum(times)) + " used by " + str(len(times)) + " calls\n"
@@ -94,215 +110,342 @@ class DtmControl(object):
             msgT += "\n"
             _printDtmMsg(msgT)
 
-        self.mpiThread.join()
+            if self.commThread.isRootWorker:
+                for n in xrange(self.poolSize):
+                    if n == self.workerId:
+                        continue
+                    self.sendQueue.put((n, ("Exit", self.workerId, 0, "Exit message")))
 
-        del self.execQueue
-        del self.sendResultsQueue
+            self.commThread.join()
 
-        countThreads = sum([1 for th in threading.enumerate() if not th.daemon])
-        if countThreads > 1:
-            print("Warning : there's more than 1 active thread at the exit (" + str(threading.activeCount()) + " total)\n" + str(threading.enumerate()))
+            del self.execQueue
+            del self.sendQueue
+            del self.recvQueue
 
-        #mpi.finalize()
+            countThreads = sum([1 for th in threading.enumerate() if not th.daemon])
+            if countThreads > 1:
+                print("Warning : there's more than 1 active thread at the exit (" + str(threading.activeCount()) + " total)\n" + str(threading.enumerate()))
 
-            
-    
-    def _main(self):
-        """
-        Dans cette fonction, get() et acquire() sont bloquants, on n'a pas besoin de sleep()
-        """
-        while self.appStatus[0] == 1:
-            # Si on est deja en train d'executer un thread, ca ne sert a rien d'en ajouter un
-            # Mieux vaut le laisser dans la execQueue, et peut-etre qu'un autre node libre
-            # pourra le demander et l'executer avant nous
-            #print(mpi.rank, "ENTREE DANS LA BOUCLE")
-            dtmGlobalExecutionLock.acquire()    # On verifie deja si on est en train de faire quelque chose
-            dtmGlobalExecutionLock.release()    # Tant que oui, on ne cree pas d'autre thread
-                                                # On ne va pas non plus rechercher si on a des resultats
-                                                # De toute facon, le thread en attente devrait attendre le global lock pour reprendre
+            #mpi.finalize()
 
-            newTask = self.execQueue.get()
-            if newTask is None or self.appStatus[0] != 1:
-                break
-            #try:
-                #newTask = self.execQueue.get(True, 0.1)      # Ok, on est libre, on demande une tache
-            #except (Queue.Empty,IOError):
-                #continue
 
-            # On verifie que on ne fait toujours rien
-            # (le delai du get() peut etre long et une tache en wait peut etre revenue)
-            # Si on s'est mis a faire quelque chose, on remet la tache dans la queue
-            # Bon on la remet a la fin et c'est pas optimal, mais c'est un debut...
-            if not dtmGlobalExecutionLock.acquire(False):
-                self.execQueue.put(newTask)
-                continue
+        def _returnResult(self, idToReturn, resultInfo):
+            if idToReturn == self.workerId:
+                self._dispatchResult(resultInfo)
             else:
-                dtmGlobalExecutionLock.release()
-
-            #print("CREATION DU THREAD")
-            # Ici il est trop tard pour reculer, on cree le thread et on l'initialise
-            # Si un autre thread a repris le lock, ce thread ci devra attendre
-            newThread = DtmThread(tid=newTask[0], returnInfo=(newTask[1],newTask[2],newTask[3]), target=newTask[6], args=newTask[7], kwargs=newTask[8], control=self)
-            newThread.start()
-            #time.sleep(0.01)     # On laisse le temps au thread de reprendre le verrou
-
-        if self.curRank == 0:
-            _printDtmMsg("DTM on rank " + str(self.curRank) + " receive an exit signal. Will quit NOW.")
-        self._doCleanUp()
-
-    
-    def start(self, initialTarget):       
-        # On demarre les processus de communication
+                self.sendQueue.put((idToReturn, ("Result", self.workerId, self.nodesStatus, resultInfo)))
         
-        self.mpiThread.start()
+        def _updateNodesDict(self, fromNodeNumber, newDict):
+            for i in xrange(len(newDict)):
+                if (i == fromNodeNumber or newDict[i][3] > self.nodesStatus[i][3]) and i != self.workerId:
+                    self.nodesStatus[i] = newDict[i]
+
+        def _askForTask(self):
+            curTime = time.time()
+            listNodesWorking = [i for i,n in enumerate(self.nodesStatus) if n[0] > 0 and i != self.workerId and curTime - n[4] > DTM_ASK_FOR_TASK_DELAY]
+            for nodeId in listNodesWorking:
+                self.sendQueue.put((nodeId, ("RequestTask", self.workerId, self.nodesStatus[:], time.time())))
+                self.nodesStatus[nodeId][4] = curTime
         
-        # Sur le rank 0, on met la premiere tache dans la queue d'execution
-        if self.curRank == 0:
-            initTask = (self.idGenerator.tid, None, None, None, [self.curRank], time.time(), initialTarget, (), {})
-            self.execQueue.put(initTask)
+        def _dispatchResult(self, result):
+            tidParent = result[1]
 
-        self._main()
-        
-
-    # Les fonctions suivantes ne SONT PAS APPELEES PAR LE THREAD PRINCIPAL
-    # Elles sont APPELEES PAR LES THREADS D'EXECUTION
-    # TOUS LES OBJETS NON-LOCAUX QU'ELLES MODIFIENT _DOIVENT_ ETRE THREAD-SAFE
-    # LES THREADS D'EXECUTION Y RESTENT BLOQUES TANT QUE LE RESULTAT N'ARRIVE PAS
-    # (sauf pour les asynchrones, mais eux-memes vont creer un thread qui restera bloque)
-    
-    def map(self, function, iterable):
-        listTid = []
-        currentId = threading.currentThread().tid
-        conditionObject = threading.currentThread().waitingCondition
-
-        # On cree tout de suite l'espace pour recevoir les resultats
-        self.resultsLock.acquire()
-        self.results[currentId] = [None for i in xrange(0, len(iterable))]
-        self.resultsLock.release()
-        
-        self.waitingThreadsLock.acquire()
-        for index,elem in enumerate(iterable):
-            task = (self.idGenerator.tid, mpi.rank, currentId, (True, index), [mpi.rank], time.time(), function, (elem,), {})
-            listTid.append(task[0])
-            self.execQueue.put(task)
-
-        self.waitingThreads[currentId] = (conditionObject, listTid, time.time())
-        self.waitingThreadsLock.release()
-        
-        time_wait = threading.currentThread().waitForCondition()        # On attend que les resultats soient disponibles
-
-        # A ce point-ci, les resultats sont arrives ET on a le lock global d'execution (voir DtmThread.waitForCondition())
-        self.resultsLock.acquire()
-        ret = self.results[currentId]
-        del self.results[currentId]
-        self.resultsLock.release()
-
-        # On revient au target du thread en retournant la liste des resultats
-        return ret
-
-    
-    def map_async(self, function, iterable, callback = None, chunksize = 1):
-        threadAsync = DtmAsyncWaitingThread(tid=self.idGenerator.tid, target=function, args=iterable, control=self)
-        asyncRequest = DtmAsyncResult(threadAsync, control=self)
-
-        # On revient tout de suite au thread (pas de mise en pause)
-        return asyncRequest
-
-    def _apply(self, function, args, kwargs):
-        currentId = threading.currentThread().tid
-        conditionObject = threading.currentThread().waitingCondition
-
-        # On cree tout de suite l'espace pour recevoir les resultats
-        self.resultsLock.acquire()
-        self.results[currentId] = [None]
-        self.resultsLock.release()
-
-        self.waitingThreadsLock.acquire()
-        task = (self.idGenerator.tid, mpi.rank, currentId, (True, 0), [mpi.rank], time.time(), function, args, kwargs)
-        listTid = [task[0]]
-        self.execQueue.put(task)
-        self.waitingThreads[currentId] = (conditionObject, listTid, time.time())
-        self.waitingThreadsLock.release()
-
-        time_wait = threading.currentThread().waitForCondition()        # On attend le resultat
-
-        # A ce point-ci, le resultat est arrive ET on a le lock global d'execution (voir DtmThread.waitForCondition())
-        self.resultsLock.acquire()
-        ret = self.results[currentId]
-        del self.results[currentId]
-        self.resultsLock.release()
-
-        # On revient au target du thread en retournant le resultat
-        return ret[0]
-    
-    def apply(self, function, *args, **kwargs):       
-        return self._apply(function, args, kwargs)
-
-    def apply_async(self, function, *args, **kwargs):
-        threadAsync = DtmAsyncWaitingThread(tid=self.idGenerator.tid, target=function, args=args, kwargs=kwargs, control=self, areArgsIterable = False)
-        asyncRequest = DtmAsyncResult(threadAsync, control=self)
-        return asyncRequest
-        
-    def imap(self, function, iterable, chunksize = 1):
-        return None
-
-    def imap_unordered(self, function, iterable, chunksize = 1):
-        return None
-
-    def filter(self, function, iterable):
-        results = self.map(function, iterable)
-        return [element for index,element in enumerate(iterable) if results[index]]
-
-    def repeat(self, function, *args, **kwargs):
-        return None
-
-    def close(self):
-        return None
-
-    def terminate(self):
-        return None
-
-
-    def waitForAll(self):
-        while True:
-            self.asyncWaitingListLock.acquire()
-            if len(self.asyncWaitingList.get(threading.currentThread().tid,[])) == 0:
-                self.asyncWaitingListLock.release()
-                break
+            self.resultsLock.acquire()
+            if result[2][0]:    # Le resultat est un iterable
+                self.results[tidParent][result[2][1]] = result[4]
             else:
-                self.waitingThreadsLock.acquire()
-                try:
-                    waitingForCondition = self.waitingThreads[self.asyncWaitingList[threading.currentThread().tid][0]][0]
-                except KeyError:        # On vient tout juste de recevoir le dernier resultat (et l'entree dans le dictionnaire a ete supprimee)
-                    self.waitingThreadsLock.release()
-                    self.asyncWaitingListLock.release()
+                self.results[tidParent] = result[4]
+            self.resultsLock.release()
+
+            self.waitingThreadsLock.acquire()
+
+            self.waitingThreads[tidParent][1].remove(result[0])
+            if len(self.waitingThreads[tidParent][1]) == 0:      # Tous les resultats sont arrives
+                conditionLock = self.waitingThreads[tidParent][0]
+                del self.waitingThreads[tidParent]              # On supprime la tache d'attente
+                self.waitingForRestartQueue.put(conditionLock)
+
+            self.waitingThreadsLock.release()
+
+        def _main(self):
+            while True:
+                # On update notre etat
+                self.nodesStatus[self.workerId] = [self.execQueue.qsize(), self.waitingForRestartQueue.qsize(), len(self.waitingThreads), time.time(), time.time()]
+                #if mpi.rank == 0:
+                    #print("Status updated")
+                # On verifie les messages recus
+                while True:
+                    try:
+                        recvMsg = self.recvQueue.get_nowait()
+                        #if mpi.rank == 0:
+                            #print("Receive from " + str(recvMsg[1]))
+                        if recvMsg[0] == "Exit":
+                            self.exitStatus.set()
+                            self.exitState = (recvMsg[2], recvMsg[3])
+                            break
+                        elif recvMsg[0] == "Task":
+                            self._updateNodesDict(recvMsg[1], recvMsg[2])
+                            for taskData in recvMsg[4]:
+                                taskData[4].append(self.workerId)
+                                self.execQueue.put(taskData)
+                        elif recvMsg[0] == "RequestTask":
+                            self._updateNodesDict(recvMsg[1], recvMsg[2])
+                        elif recvMsg[0] == "Result":
+                            self._updateNodesDict(recvMsg[1], recvMsg[2])
+                            self._dispatchResult(recvMsg[3])
+                        else:
+                            print("DTM warning : unknown message type ("+str(recvMsg[0])+") received will be ignored.")
+                    except Queue.Empty:
+                        break
+                    
+                if self.exitStatus.is_set():
                     break
                     
-                self.asyncWaitingListLock.release()
-                #print(type(waitingFor), type(waitingFor[0]))
-                waitingForCondition.acquire()
-                self.waitingThreadsLock.release()
-                self.appStatus[3] = 0
-                dtmGlobalExecutionLock.release()
+                # On determine si on doit envoyer des taches
+                availableNodes = [i for i,n in enumerate(self.nodesStatus) if n[0] <= 5 and n[0] < self.nodesStatus[self.workerId][0] and i != self.workerId]
 
-                waitingForCondition.wait()
-                waitingForCondition.release()
-                dtmGlobalExecutionLock.acquire()
-                self.appStatus[3] = 1
+                if self.nodesStatus[self.workerId][0] > 1 and len(availableNodes) > 0:
+                    # Cool il y a un slot de libre
+                    chosenSlot = random.choice(availableNodes)
+
+                    # On essaie de dispatcher equitablement les taches
+                    nbrTask = self.execQueue.qsize() / self.poolSize
+                    if nbrTask == 0:
+                        nbrTask = 1
+
+                    try:
+                        taskList = []
+                        try:
+                            for t in xrange(nbrTask):
+                                taskList.append(self.execQueue.get_nowait())
+                        except Queue.Empty:
+                            if len(taskList) == 0:
+                                raise Queue.Empty       # Si on a aucune tache a envoyer, on va au prochain catch
+                            else:
+                                pass                    # Sinon, on envoie ce qu'on peut
+
+                        # On lui envoie la tache
+                        nbrTask = len(taskList)
+                        self.sendQueue.put((chosenSlot, ("Task", self.workerId, self.nodesStatus[:], nbrTask, taskList)))
+
+                        #On peut supposer que le noeud aura maintenant 'nbrTask' taches de plus dans son execQ
+                        self.nodesStatus[chosenSlot][0] += nbrTask
+                    except Queue.Empty: # On a rien a lui donner
+                        pass
                 
-        return None
+                # Si on est deja en train d'executer un thread, ca ne sert a rien d'en ajouter un
+                # Mieux vaut le laisser dans la execQueue, et peut-etre qu'un autre node libre
+                # pourra le demander et l'executer avant nous
+                if dtmGlobalExecutionLock.acquire(False):    # On verifie deja si on est en train de faire quelque chose
+                    dtmGlobalExecutionLock.release()
 
-    def testAllAsync(self):
-        self.asyncWaitingListLock.acquire()
-        retValue = (len(self.asyncWaitingList.get(threading.currentThread().tid,[])) == 0)
-        self.asyncWaitingListLock.release()
-        return retValue
+                    try:
+                        # On redemarre en priorite les taches en attente (qui ont recu leurs resultats)
+                        wTaskLock = self.waitingForRestartQueue.get_nowait()
+                        wTaskLock.acquire()
+                        wTaskLock.notifyAll()
+                        wTaskLock.release()
+
+                        # On laisse au thread le temps de reprendre le lock global d'execution
+                        #time.sleep(0.001)
+                        continue
+                    except Queue.Empty:
+                        pass
+
+                    try:
+                        newTask = self.execQueue.get_nowait()
+
+                        newThread = DtmThread(tid=newTask[0], returnInfo=(newTask[1],newTask[2],newTask[3]), target=newTask[6], args=newTask[7], kwargs=newTask[8], control=self)
+                        newThread.start()
+
+                        # On laisse au thread le temps de prendre le lock global d'execution
+                        #time.sleep(0.001)
+                        continue
+                    except Queue.Empty:
+                        pass
+
+                    # Si on ne fait toujours rien
+                    # on demande une nouvelle tache
+                    self._askForTask()
+                    
+                time.sleep(DTM_CONTROL_THREAD_LATENCY)
+
+            if self.commThread.isRootWorker:
+                _printDtmMsg("DTM on rank " + str(self.workerId) + " receive an exit signal. Will quit NOW.")
+            self._doCleanUp()
 
 
-    def getWorkerId(self):
-        # With MPI, return the slot number
-        return self.curRank
+        def setOptions(self, *args, **kwargs):
+            return
+        
+        def start(self, initialTarget):
+            # On demarre le thread de communication
 
+            self.commThread.start()
+
+            self.commReadyEvent.wait()      # On attend que le thread de communication indique qu'il est pret
+            
+            # Sur le node principal (rank 0 dans le cas de MPI), on met la premiere tache dans la queue d'execution
+            if self.commThread.isRootWorker:
+                initTask = (self.idGenerator.tid, None, None, None, [self.workerId], time.time(), initialTarget, (), {})
+                self.execQueue.put(initTask)
+
+            self._main()
+
+
+        # Les fonctions suivantes ne SONT PAS APPELEES PAR LE THREAD PRINCIPAL
+        # Elles sont APPELEES PAR LES THREADS D'EXECUTION
+        # TOUS LES OBJETS NON-LOCAUX QU'ELLES MODIFIENT _DOIVENT_ ETRE THREAD-SAFE
+        # LES THREADS D'EXECUTION Y RESTENT BLOQUES TANT QUE LE RESULTAT N'ARRIVE PAS
+        # (sauf pour les asynchrones, mais eux-memes vont creer un thread qui restera bloque)
+
+        def map(self, function, iterable):
+            listTid = []
+            currentId = threading.currentThread().tid
+            conditionObject = threading.currentThread().waitingCondition
+
+            # On cree tout de suite l'espace pour recevoir les resultats
+            self.resultsLock.acquire()
+            self.results[currentId] = [None for i in xrange(0, len(iterable))]
+            self.resultsLock.release()
+
+            self.waitingThreadsLock.acquire()
+            for index,elem in enumerate(iterable):
+                task = (self.idGenerator.tid, self.workerId, currentId, (True, index), [self.workerId], time.time(), function, (elem,), {})
+                listTid.append(task[0])
+                self.execQueue.put(task)
+
+            self.waitingThreads[currentId] = (conditionObject, listTid, time.time())
+            self.waitingThreadsLock.release()
+
+            time_wait = threading.currentThread().waitForCondition()        # On attend que les resultats soient disponibles
+
+            # A ce point-ci, les resultats sont arrives ET on a le lock global d'execution (voir DtmThread.waitForCondition())
+            self.resultsLock.acquire()
+            ret = self.results[currentId]
+            del self.results[currentId]
+            self.resultsLock.release()
+
+            # On revient au target du thread en retournant la liste des resultats
+            return ret
+
+
+        def map_async(self, function, iterable, callback = None):
+            threadAsync = DtmAsyncWaitingThread(tid=self.idGenerator.tid, target=function, args=iterable, control=self)
+            asyncRequest = DtmAsyncResult(threadAsync, control=self)
+
+            # On revient tout de suite au thread (pas de mise en pause)
+            return asyncRequest
+
+        def _apply(self, function, args, kwargs):
+            currentId = threading.currentThread().tid
+            conditionObject = threading.currentThread().waitingCondition
+
+            # On cree tout de suite l'espace pour recevoir les resultats
+            self.resultsLock.acquire()
+            self.results[currentId] = [None]
+            self.resultsLock.release()
+
+            self.waitingThreadsLock.acquire()
+            task = (self.idGenerator.tid, self.workerId, currentId, (True, 0), [self.workerId], time.time(), function, args, kwargs)
+            listTid = [task[0]]
+            self.execQueue.put(task)
+            self.waitingThreads[currentId] = (conditionObject, listTid, time.time())
+            self.waitingThreadsLock.release()
+
+            time_wait = threading.currentThread().waitForCondition()        # On attend le resultat
+
+            # A ce point-ci, le resultat est arrive ET on a le lock global d'execution (voir DtmThread.waitForCondition())
+            self.resultsLock.acquire()
+            ret = self.results[currentId]
+            del self.results[currentId]
+            self.resultsLock.release()
+
+            # On revient au target du thread en retournant le resultat
+            return ret[0]
+
+        def apply(self, function, *args, **kwargs):
+            return self._apply(function, args, kwargs)
+
+        def apply_async(self, function, *args, **kwargs):
+            threadAsync = DtmAsyncWaitingThread(tid=self.idGenerator.tid, target=function, args=args, kwargs=kwargs, control=self, areArgsIterable = False)
+            asyncRequest = DtmAsyncResult(threadAsync, control=self)
+            return asyncRequest
+
+        def imap(self, function, iterable, chunksize = 1):
+            return None
+
+        def imap_unordered(self, function, iterable, chunksize = 1):
+            return None
+
+        def filter(self, function, iterable):
+            results = self.map(function, iterable)
+            return [element for index,element in enumerate(iterable) if results[index]]
+
+        def repeat(self, function, *args, **kwargs):
+            return None
+
+        def close(self):
+            return None
+
+        def terminate(self):
+            return None
+
+
+        def waitForAll(self):
+            while True:
+                self.asyncWaitingListLock.acquire()
+                if len(self.asyncWaitingList.get(threading.currentThread().tid,[])) == 0:
+                    self.asyncWaitingListLock.release()
+                    break
+                else:
+                    self.waitingThreadsLock.acquire()
+                    try:
+                        waitingForCondition = self.waitingThreads[self.asyncWaitingList[threading.currentThread().tid][0]][0]
+                    except KeyError:        # On vient tout juste de recevoir le dernier resultat (et l'entree dans le dictionnaire a ete supprimee)
+                        self.waitingThreadsLock.release()
+                        self.asyncWaitingListLock.release()
+                        break
+
+                    self.asyncWaitingListLock.release()
+                    waitingForCondition.acquire()
+                    self.waitingThreadsLock.release()
+                    dtmGlobalExecutionLock.release()
+
+                    waitingForCondition.wait()
+                    waitingForCondition.release()
+                    dtmGlobalExecutionLock.acquire()
+
+            return None
+
+        def testAllAsync(self):
+            self.asyncWaitingListLock.acquire()
+            retValue = (len(self.asyncWaitingList.get(threading.currentThread().tid,[])) == 0)
+            self.asyncWaitingListLock.release()
+            return retValue
+
+
+        def getWorkerId(self):
+            # With MPI, return the slot number
+            return self.workerId
+
+
+    # Methodes gerant le singleton
+    # Inspire de http://all4dev.libre-entreprise.org/index.php/Le_singleton_en_python
+    singletonInstance = None
+    
+    def __new__(c):
+      if not DtmControl.singletonInstance:
+          DtmControl.singletonInstance = DtmControl.__DtmControl()
+      return DtmControl.singletonInstance
+
+    def __getattr__(self, a):
+      return getattr(self.singletonInstance, a)
+
+    def __setattr__(self, a, value):
+      return setattr(self.singletonInstance, a, value)
+
+      
     
 
 class DtmThread(threading.Thread):
@@ -326,31 +469,27 @@ class DtmThread(threading.Thread):
 
     def run(self):
         dtmGlobalExecutionLock.acquire()
-        self.control.appStatus[3] = 1
         
         self.timeBegin = time.time()
         returnedR = self.t(*self.argsL, **self.kwargsL)
         self.timeExec += time.time() - self.timeBegin
-        
         if self.isRootTask:
             # Si la tache racine est terminee alors on quitte
-            self.control.appStatus[0] = 0
-            self.control.execQueue.put(None)
+            self.control.exitStatus.set()
         else:
-            self.control.sendResultsQueue.put([self.returnInfo[0], self.tid, self.returnInfo[1], self.returnInfo[2], 0, returnedR])
-        #if mpi.rank != 0:
-            #print(mpi.rank, "Thread will end up (or it should...)", returnedR)
-        self.control.appStatus[3] = 0
-        dtmGlobalExecutionLock.release()
+            resultTuple = (self.tid, self.returnInfo[1], self.returnInfo[2], self.timeExec, returnedR)
+            self.control._returnResult(self.returnInfo[0], resultTuple)
 
         self.control.tasksStatsLock.acquire()
         self.control.tasksStats.setdefault(self.t,[]).append(self.timeExec)
         self.control.tasksStatsLock.release()
         
+        dtmGlobalExecutionLock.release()
+
 
     def waitForCondition(self):
         self.waitingCondition.acquire()
-        self.control.appStatus[3] = 0
+        
         beginTimeWait = time.time()
         self.timeExec += beginTimeWait - self.timeBegin
         dtmGlobalExecutionLock.release()
@@ -360,7 +499,6 @@ class DtmThread(threading.Thread):
         
         dtmGlobalExecutionLock.acquire()
         self.timeBegin = time.time()
-        self.control.appStatus[3] = 1
         return time.time() - beginTimeWait
 
 
@@ -426,11 +564,9 @@ class DtmAsyncResult(object):
         if self.ready():
             return self.resultVal
 
-        threading.currentThread().control.appStatus[3] = 0
         dtmGlobalExecutionLock.release()
         self.rThread.join(timeout)
         dtmGlobalExecutionLock.acquire()
-        threading.currentThread().control.appStatus[3] = 1
         
         if self.rThread.isAlive():
             raise multiprocessing.TimeoutError("No result within the timeout for get()")
@@ -440,11 +576,9 @@ class DtmAsyncResult(object):
         if self.ready():
             return
 
-        threading.currentThread().control.appStatus[3] = 0
         dtmGlobalExecutionLock.release()
         self.rThread.join(timeout)
         dtmGlobalExecutionLock.acquire()
-        threading.currentThread().control.appStatus[3] = 1
         
         if self.rThread.isAlive():
             raise multiprocessing.TimeoutError("join() returned before async thread had terminated")
@@ -458,211 +592,4 @@ class DtmAsyncResult(object):
         return True
 
 
-
-class DtmMpiCommThread(threading.Thread):
-
-    def __init__(self, execQ, sendQ, appStatus, appStatusLock, waitingT, waitingTLock, resultsDict, resultsDictLock):
-        threading.Thread.__init__(self)
-        self.execQ = execQ
-        self.sendQ = sendQ
-        self.nodesStatus = [[1,0,time.time(), time.time()] if i == 0 else [0,0,time.time(), time.time()] for i in xrange(mpi.size)]
-        self.appStatus = appStatus
-        self.appStatusLock = appStatusLock
-        self.waitingT = waitingT
-        self.resultsDict = resultsDict
-        self.waitingTLock = waitingTLock
-        self.resultsDictLock = resultsDictLock
-        self.rankMpi = mpi.rank
-
-    def _updateNodesDict(self, fromNodeNumber, newDict):
-        #print("BEFORE UPDATE", self.nodesStatus[:])
-        #print("RECEIVE DICT ", newDict)
-        rankMpi = self.rankMpi
-        for i in xrange(len(newDict)):
-            if (i == fromNodeNumber or newDict[i][2] > self.nodesStatus[i][2]) and i != rankMpi:
-                self.nodesStatus[i] = newDict[i]
-
-        #print("AFTER UPDATE", self.nodesStatus[:])
-
-    def _dispatchResult(self, result):
-        tidParent = result[1]
-
-        self.resultsDictLock.acquire()
-        if result[2][0]:    # Le resultat est un iterable
-            self.resultsDict[tidParent][result[2][1]] = result[4]
-        else:
-            self.resultsDict[tidParent] = result[4]
-        self.resultsDictLock.release()
-
-        self.waitingTLock.acquire()
-        self.waitingT[tidParent][1].remove(result[0])
-        if len(self.waitingT[tidParent][1]) == 0:      # Tous les resultats sont arrives
-            conditionLock = self.waitingT[tidParent][0]
-            del self.waitingT[tidParent]              # On supprime la tache d'attente
-            conditionLock.acquire()     # On avertit le thread qu'il peut reprendre
-            conditionLock.notifyAll()
-            conditionLock.release()
-
-        self.waitingTLock.release()
-
-    
-    def run(self):
-        rankMpi = self.rankMpi
-        #print("Im the send/receive process ", multiprocessing.current_process().pid)
-        #print("\tOn rank " + str(rankMpi))
-        recvExit = mpi.irecv(tag=DTM_TAG_EXIT)
-        recvResult = mpi.irecv(tag=DTM_TAG_RETURN_RESULT)
-        recvTask = mpi.irecv(tag=DTM_TAG_RETURN_TASK)
-        recvAskForTasks = mpi.irecv(tag=DTM_TAG_QUERY_TASK)
-        
-
-        while True:
-            receiveSomething = False
-            self.appStatusLock.acquire()
-            if self.appStatus[3] == 0:
-                self.appStatus[1] = 0
-            else:
-                self.appStatus[1] = self.execQ.qsize()        # ATTENTION A MAC OS X (NotImplementedError) -- a verifier
-
-
-            self.waitingTLock.acquire()
-            if len(self.waitingT) == 0:
-                self.waitingTLock.release()
-                self.appStatus[2] = 0
-            else:
-                self.appStatus[2] = len(self.waitingT)
-                self.waitingTLock.release()
-
-            
-            if self.appStatus[0] != 1:
-                self.appStatusLock.release()
-                if rankMpi == 0:
-                    # Si on quitte, on doit l'annoncer a tout le monde
-                    # C'est le rank 0 qui va propager le message
-                    #print("******* ON QUITTE")
-                    for i in xrange(mpi.size):
-                        if i == rankMpi:
-                            continue
-                        #print("******* ENVOI DU MESSAGE DE QUIT A " + str(i))
-                        mpi.isend([0, self.appStatus[0], "Terminus!"], i, tag=DTM_TAG_EXIT)
-                        #print("************ FIN DE L'ENVOI")
-                del recvResult
-                del recvExit
-                del recvTask
-                del recvAskForTasks
-                break
-                
-            if recvExit:
-                # On quitte
-                #print(mpi.rank, "RECEIVE EXIT")
-                exitInfo = recvExit.message
-                self.appStatus[0] = exitInfo[1]
-
-                #Hack temporaire
-                self.execQ.put(None)
-                self.appStatusLock.release()
-                break
-                
-            self.appStatusLock.release()
-
-            if recvResult:
-                receiveSomething = True
-                resultData = recvResult.message
-                self._updateNodesDict(resultData[0], resultData[1])
-                self._dispatchResult(resultData[2])
-                recvResult = mpi.irecv(tag=DTM_TAG_RETURN_RESULT)
-
-            if recvAskForTasks:
-                receiveSomething = True
-                rankInfo = recvAskForTasks.message
-                self._updateNodesDict(rankInfo[0], rankInfo[1])
-                #time.sleep(0.1)
-                recvAskForTasks = mpi.irecv(tag=DTM_TAG_QUERY_TASK)
-
-            if recvTask:
-                receiveSomething = True
-                taskDataList = recvTask.message
-                for taskData in taskDataList[3]:
-                    self.execQ.put(taskData)
-                self._updateNodesDict(taskDataList[0], taskDataList[1])
-                #time.sleep(0.1)
-                recvTask = mpi.irecv(tag=DTM_TAG_RETURN_TASK)
-
-
-            # On met a jour NOTRE load
-            # Avant de commencer d'eventuelles operations d'envoi
-            self.appStatusLock.acquire()
-            self.nodesStatus[rankMpi] = [self.appStatus[1], self.appStatus[2], time.time(), time.time()]
-            currentExecStatus = self.appStatus[3]
-            self.appStatusLock.release()
-
-            didSomething = False
-            if not self.sendQ.empty():
-                # On a des donnees a envoyer
-                while True:
-                    try:
-                        data = self.sendQ.get_nowait()
-                        if data[0] == rankMpi:     # On ne s'envoie pas de message a nous-memes
-                            self._dispatchResult(data[1:])
-                            continue
-                        mpi.isend([rankMpi, self.nodesStatus[:], data[1:]], data[0], tag=DTM_TAG_RETURN_RESULT)
-                        didSomething = True
-                    except Queue.Empty:
-                        break
-            
-            if not currentExecStatus:
-                # Si on a rien a faire, on envoie notre status aux autres
-
-                # On choisit un node au hasard
-                # Toutefois, on s'assure qu'on ne l'a pas contacte depuis un certain delai
-                # (pour eviter de l'occuper a juste repondre a des demandes de taches)
-                curTime = time.time()
-                nodeWorking = [i for i,n in enumerate(self.nodesStatus) if n[0] > 0 and i != rankMpi and curTime - n[3] > DTM_ASK_FOR_TASK_DELAY]
-                if len(nodeWorking) > 0:
-                    chosenNode = random.choice(nodeWorking)
-                    mpi.isend([rankMpi, self.nodesStatus[:], time.time()], chosenNode, tag=DTM_TAG_QUERY_TASK)
-                    #didSomething = True
-                # Il est possible qu'on n'envoie rien si tous les nodes occupes ont ete contactes depuis moins de DTM_ASK_FOR_TASK_DELAY
-
-            else:
-                # On cherche si on pourrait envoyer la tache quelque part
-                currentSelfLoad = self.nodesStatus[rankMpi]
-                availableNodes = [i for i,n in enumerate(self.nodesStatus) if n[0] < currentSelfLoad[0] and i != rankMpi]
-                #print("BOUM", rankMpi, availableNodes)
-                if len(availableNodes) > 0:
-                    # Cool il y a un slot de libre
-                    chosenSlot = random.choice(availableNodes)
-                    
-                    # On essaie de dispatcher equitablement les taches
-                    nbrTask = self.execQ.qsize() / mpi.size
-                    if nbrTask == 0:
-                        nbrTask = 1
-                        
-                    try:
-                        taskList = []
-                        try:
-                            for t in xrange(nbrTask):
-                                taskList.append(self.execQ.get_nowait())
-                        except Queue.Empty:
-                            if len(taskList) == 0:
-                                raise Queue.Empty       # Si on a aucune tache a envoyer, on va au prochain catch
-                            else:
-                                pass                    # Sinon, on envoie ce qu'on peut
-                            
-                        # On lui envoie la tache
-                        nbrTask = len(taskList)
-                        mpi.isend([rankMpi, self.nodesStatus[:], nbrTask, taskList], chosenSlot, tag=DTM_TAG_RETURN_TASK)
-
-                        #On peut supposer que le noeud aura maintenant 'nbrTask' taches de plus dans son execQ
-                        self.nodesStatus[chosenSlot][0] += nbrTask
-                        didSomething = True
-                    except Queue.Empty: # On a rien a lui donner
-                        pass
-            
-            if not receiveSomething and not didSomething:
-                # Si on a recu quelque8 chose, on veut retester tout de suite
-                # donc pas de pause dans ce cas la
-                time.sleep(DTM_MPI_LATENCY)
-        #print("FIN DU PROCESS DE COMMUNICATION")
-        time.sleep(0.1)
-
+dtm = DtmControl()

@@ -1,12 +1,11 @@
 import sys
 sys.path.append("..")
 
-from taskmanager import DtmControl
+from taskmanager import dtm
 
 import time
 import math
 
-dtm = DtmControl()
 
 def reboum(c):
     return c-100+22-math.sqrt(12)
