@@ -14,7 +14,7 @@ class DtmCommThread(threading.Thread):
         self.pSize = mpi.size
         self.currentId = mpi.rank
         self.exitStatus = exitEvent
-        commReadyEvent.set()         # On doit notifier le thread principal qu'on est prets
+        commReadyEvent.set()         # On doit notifier le thread principal qu'on est pret
         
     @property
     def poolSize(self):
@@ -37,6 +37,8 @@ class DtmCommThread(threading.Thread):
             sendSomething = False
 
             if self.exitStatus.is_set():    # On quitte
+                # Note importante : le thread de communication DOIT vider la sendQ
+                # AVANT de quitter (les ordres de quit doivent etre envoyes)
                 working = False
 
             if recvAsync:
