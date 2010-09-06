@@ -47,6 +47,7 @@ def main():
 
     w = dtm.apply_async(applyTest, 15, b = 30, c = 45)
     print("Async return!")
+    w.wait()
     
     r = dtm.apply_async(applyTest, [1,2,3], [4,5,6], c = [7,8,9])
     print("APPLY RESULT ", r)
@@ -58,6 +59,7 @@ def main():
     dtm.waitForAll()
     print("AFTER WAIT FOR ALL ", time.time()-fTime)
     print("Is async done?", dtm.testAllAsync())
+   
     print(r.get())
     print(w.get())
 
