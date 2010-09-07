@@ -85,10 +85,6 @@ class DtmControl(object):
             self.asyncWaitingList = {}
             self.asyncWaitingListLock = threading.Lock()
 
-            # Contient les resultats d'une tache (lieu de stockage temporaire en attendant que tout soit recu)
-            # La cle du dictionnaire est le task Id de la tache a qui vont aller ces resultats
-            self.resultsLock = threading.Lock()
-            self.results = {}
 
             # Contient les statistiques sur les taches (la cle du dictionnaire est le __name__ d'une fonction)
             self.tasksStatsLock = threading.Lock()
@@ -116,6 +112,7 @@ class DtmControl(object):
             self.commReadyEvent = threading.Event()
 
             self.exitState = (None, None)
+            self.exitSetHere = False
 
             # Thread de communication; lance dans DtmControl.start()
             self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.commExitNotification, self.commReadyEvent)
@@ -145,7 +142,7 @@ class DtmControl(object):
             msgT += "\n"
             _printDtmMsg(msgT)
 
-            if self.commThread.isRootWorker:
+            if self.exitSetHere:
                 for n in xrange(self.poolSize):
                     if n == self.workerId:
                         continue
@@ -188,18 +185,18 @@ class DtmControl(object):
         def _dispatchResult(self, result):
             tidParent = result[1]
 
-            self.resultsLock.acquire()
-            self.results[tidParent][result[2]] = result[4]
-            self.resultsLock.release()
 
             self.waitingThreadsLock.acquire()
+
+            # On ajoute les resultats recus
+            self.waitingThreads[tidParent][3][result[2]] = result[4]
 
             self.waitingThreads[tidParent][1].remove(result[0])
             if len(self.waitingThreads[tidParent][1]) == 0:      # Tous les resultats sont arrives
                 conditionLock = self.waitingThreads[tidParent][0]
-                del self.waitingThreads[tidParent]              # On supprime la tache d'attente
                 
                 for listAsync in self.asyncWaitingList.values():
+                    # Clairement pas optimal de devoir tout parcourir pour savoir si le thread est asynchrone ou non, mais bon...
                     if tidParent in listAsync:
                         # Les threads asynchrones sont relances tout de suite puisqu'ils n'ont pas besoin du lock d'execution
                         conditionLock.acquire()
@@ -217,9 +214,7 @@ class DtmControl(object):
             # Cette fonction est la boucle principale du thread de controle
             
             while True:
-                # On update notre etat
-                self.nodesStatus[self.workerId] = [self.execQueue.qsize(), self.waitingForRestartQueue.qsize(), len(self.waitingThreads), time.time(), time.time()]
-
+                
                 # On verifie les messages recus
                 while True:
                     try:
@@ -245,7 +240,11 @@ class DtmControl(object):
                     
                 if self.exitStatus.is_set():
                     break
-                    
+
+                # On update notre etat
+                self.nodesStatus[self.workerId] = [self.execQueue.qsize(), self.waitingForRestartQueue.qsize(), len(self.waitingThreads), time.time(), time.time()]
+
+                
                 # On determine si on doit envoyer des taches
                 availableNodes = [i for i,n in enumerate(self.nodesStatus) if n[0] <= 5 and n[0] < self.nodesStatus[self.workerId][0] and i != self.workerId]
 
@@ -356,9 +355,7 @@ class DtmControl(object):
             conditionObject = threading.currentThread().waitingCondition
 
             # On cree tout de suite l'espace pour recevoir les resultats
-            self.resultsLock.acquire()
-            self.results[currentId] = [None for i in xrange(0, len(iterable))]
-            self.resultsLock.release()
+            listResults = [None for i in xrange(0, len(iterable))]
 
             # On cree toutes les taches et on les ajoute a la queue d'execution
             self.waitingThreadsLock.acquire()
@@ -367,16 +364,16 @@ class DtmControl(object):
                 listTid.append(task[0])
                 self.execQueue.put(task)
 
-            self.waitingThreads[currentId] = (conditionObject, listTid, time.time())
+            self.waitingThreads[currentId] = (conditionObject, listTid, time.time(), listResults)
             self.waitingThreadsLock.release()
 
             time_wait = threading.currentThread().waitForCondition()        # On attend que les resultats soient disponibles
 
             # A ce point-ci, les resultats sont arrives ET on a le lock global d'execution (voir DtmThread.waitForCondition())
-            self.resultsLock.acquire()
-            ret = self.results[currentId]
-            del self.results[currentId]
-            self.resultsLock.release()
+            self.waitingThreadsLock.acquire()
+            ret = self.waitingThreads[currentId][3]
+            del self.waitingThreads[currentId]
+            self.waitingThreadsLock.release()
 
             # On revient au target du thread en retournant la liste des resultats
             return ret
@@ -399,26 +396,22 @@ class DtmControl(object):
             currentId = threading.currentThread().tid
             conditionObject = threading.currentThread().waitingCondition
 
-            # On cree tout de suite l'espace pour recevoir les resultats
-            self.resultsLock.acquire()
-            self.results[currentId] = [None]
-            self.resultsLock.release()
 
             # On cree la tache et on la met sur la queue d'execution
             self.waitingThreadsLock.acquire()
             task = (self.idGenerator.tid, self.workerId, currentId, 0, [self.workerId], time.time(), function, args, kwargs)
             listTid = [task[0]]
             self.execQueue.put(task)
-            self.waitingThreads[currentId] = (conditionObject, listTid, time.time())
+            self.waitingThreads[currentId] = (conditionObject, listTid, time.time(), [None])
             self.waitingThreadsLock.release()
 
             time_wait = threading.currentThread().waitForCondition()        # On attend le resultat
 
             # A ce point-ci, le resultat est arrive ET on a le lock global d'execution (voir DtmThread.waitForCondition())
-            self.resultsLock.acquire()
-            ret = self.results[currentId]
-            del self.results[currentId]
-            self.resultsLock.release()
+            self.waitingThreadsLock.acquire()
+            ret = self.waitingThreads[currentId][3]
+            del self.waitingThreads[currentId]
+            self.waitingThreadsLock.release()
 
             # On revient au target du thread en retournant le resultat
             return ret[0]
@@ -454,6 +447,7 @@ class DtmControl(object):
         def terminate(self):
             # Termine l'execution
             # Comportement plus ou moins defini avec MPI si appele sur autre chose que le rank 0
+            self.exitSetHere = True
             self.exitStatus.set()
             return None
 
@@ -539,6 +533,7 @@ class DtmThread(threading.Thread):
         self.timeExec += time.time() - self.timeBegin
         if self.isRootTask:
             # Si la tache racine est terminee alors on quitte
+            self.control.exitSetHere = True
             self.control.exitStatus.set()
         else:
             # Sinon on retourne le resultat
