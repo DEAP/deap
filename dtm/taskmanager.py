@@ -3,6 +3,7 @@ import time
 import random
 import Queue
 from commManager import DtmCommThread
+#from commManagerMpi4py import DtmCommThread
 
 # Constantes
 DTM_MPI_LATENCY = 0.1
