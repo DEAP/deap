@@ -35,7 +35,7 @@ class DtmTaskIdGenerator(object):
     Mais rien n'empeche que le workerId soit autre chose, sous la restriction qu'il soit immutable
     (car il doit pouvoir servir de cle de dictionnaire)
     """
-    def __init__(self, rank, initId = 0):
+    def __init__(self, rank, initId=0):
         self.r = rank
         self.wtid = 0
         self.generatorLock = threading.Lock()
@@ -356,7 +356,7 @@ class DtmControl(object):
             conditionObject = threading.currentThread().waitingCondition
 
             # On cree tout de suite l'espace pour recevoir les resultats
-            listResults = [None for i in xrange(0, len(iterable))]
+            listResults = [None] * len(iterable)
 
             # On cree toutes les taches et on les ajoute a la queue d'execution
             self.waitingThreadsLock.acquire()
@@ -380,7 +380,7 @@ class DtmControl(object):
             return ret
 
 
-        def map_async(self, function, iterable, callback = None):
+        def map_async(self, function, iterable, callback=None):
             # Callback n'est pas encore implemente
 
             # On cree un thread special, qui "attendra pour nous"
@@ -426,23 +426,23 @@ class DtmControl(object):
             asyncRequest = DtmAsyncResult(threadAsync, control=self)
             return asyncRequest
 
-        def imap(self, function, iterable, chunksize = 1):
+        def imap(self, function, iterable, chunksize=1):
             # Not implemented
             raise NotImplementedError
 
-        def imap_unordered(self, function, iterable, chunksize = 1):
+        def imap_unordered(self, function, iterable, chunksize=1):
             # Not implemented (vraiment utile par rapport a imap?)
             raise NotImplementedError
 
         def filter(self, function, iterable):
             # Le filtrage s'effectue dans ce thread, mais le calcul est distribue
             results = self.map(function, iterable)
-            return [element for index,element in enumerate(iterable) if results[index]]
+            return [item for result, item in zip(results, iterable) if result]
 
         def repeat(self, function, howManyTimes, *args, **kwargs):
             # Repete une fonction avec les memes arguments et renvoie une liste contenant les resultats
             # Pas encore implemente
-            results = [None for i in xrange(howManyTimes)]
+            results = [None] * howManyTimes
             return results
 
         def terminate(self):
