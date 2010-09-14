@@ -28,6 +28,9 @@ class DtmCommThread(threading.Thread):
     def isRootWorker(self):
         return self.currentId == 0
 
+    def iterOverIDs(self):
+        return xrange(self.pSize)
+
     def run(self):
         recvAsync = mpi.irecv()
         working = True

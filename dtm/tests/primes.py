@@ -48,7 +48,8 @@ def main():
 
     print("Resultat de foo() calcule en meme temps :")
     print(weirdPow.get())
-
+    
+dtm.setOptions(communicationManager="pympi")
 dtm.start(main)
 
     

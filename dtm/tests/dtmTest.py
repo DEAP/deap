@@ -67,11 +67,13 @@ def main():
     listW = dtm.map_async(boumtest, listT)
     listK = dtm.map_async(boumtest3, [i for i in xrange(14)])
     #print("BOUM!")
-    listZ = dtm.map(boumtest2, [i for i in xrange(10)])
+    listZ = dtm.imap(boumtest2, [i for i in xrange(10)], 4)
+    
     print("YEAH")
     listW.wait()
     print(listW.get())
-    print(listZ)
+    for z in listZ:
+        print(z)
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 

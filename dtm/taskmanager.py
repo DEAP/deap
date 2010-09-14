@@ -2,9 +2,7 @@ import threading
 import time
 import random
 import Queue
-from commManager import DtmCommThread
-#from commManagerMpi4py import DtmCommThread
-#from commManagerTCP import DtmCommThread
+
 
 # Constantes
 DTM_MPI_LATENCY = 0.1
@@ -30,11 +28,11 @@ def _printDtmMsg(msg, gravity=1):
 
 class DtmTaskIdGenerator(object):
     """
-    Genere les IDs des taches (thread-safe)
-    Un ID est un tuple de la forme (workerId, numero unique)
-    Avec MPI, workerId est un entier (le rank), et les numeros uniques commencent a 0
-    Mais rien n'empeche que le workerId soit autre chose, sous la restriction qu'il soit immutable
-    (car il doit pouvoir servir de cle de dictionnaire)
+    A thread-safe ID generator.
+    A DTM task ID is a tuple looking like (workerId, uniqId)
+    With MPI, workerId is an integer (rank) and the uniqIds start from 0,
+    but workerId can be virtually any immutable object (as it is used as
+    a dictionnary key)
     """
     def __init__(self, rank, initId=0):
         self.r = rank
@@ -51,87 +49,52 @@ class DtmTaskIdGenerator(object):
 
 class DtmControl(object):
     """
-    Cette classe est le coeur de DTM.
-    Elle est speciale au sens ou elle possede des methodes destinees aux threads d'execution,
-    et d'autres destinees uniquement au thread principal (thread de controle)
+    DtmControl is the main DTM class. The dtm object you receive when you use ``from dtm.taskmanager import dtm``
+    is an instance of this class.
 
-    Les methodes start() et setOptions() sont appelees par l'utilisateur DANS LE THREAD PRINCIPAL.
+    Most of its methods are used by your program, in the execution tasks; however, two of thems (start() and setOptions()) MUST be called
+    in the MainThread (i.e. the thread started by the Python interpreter).
 
-    Les methodes map(), apply(), map_async(), filter(), terminate(), etc...
-    sont appelees par l'utilisateur DANS LES THREADS D'EXECUTION
-
-    Les methodes cachees (prefixees de _) sont reservees a l'usage interne de DTM.
-    L'utilisateur ne devrait jamais avoir a les appeler.
-    Toutes ces methodes cachees, sauf _apply() et _returnResult,
-    sont appelees uniquement par le thread de controle
-
-    Cette classe n'est pas dependante du backend de communication utilise, en autant que ce backend
-    fournisse une API definie
+    As this class is instancied directly in the module, initializer takes no arguments.
     """
     def __init__(self):
         self.sTime = time.time()
 
-        # Contient les threads qui sont en attente synchrone de resultats
-        # La cle du dictionnaire est le task Id de la tache en attente
         self.waitingThreads = {}
         self.waitingThreadsLock = threading.Lock()
 
-        # Contient la liste des taches asynchrones lancees par un thread
-        # La cle du dictionnaire est le task Id de la tache qui a lance les taches asynchrones
         self.asyncWaitingList = {}
         self.asyncWaitingListLock = threading.Lock()
 
-
-        # Contient les statistiques sur les taches (la cle du dictionnaire est le __name__ d'une fonction)
         self.tasksStatsLock = threading.Lock()
         self.tasksStats = {}
 
-
-        # Queues d'execution
-        # waitingForRestartQueue contient les locks conditionnels des threads qui etaient en attente
-        # de resultats qui ont tous ete recus. Cette queue est prioritaire sur
-        # execQueue, qui contient des taches non encore demarrees (qui peuvent donc migrer)
         self.waitingForRestartQueue = Queue.Queue()
         self.execQueue = Queue.Queue()
 
-        # Queues partages (communication)
         self.recvQueue = Queue.Queue()
         self.sendQueue = Queue.Queue()
 
-        # Declenche par la tache root lorsque termine
         self.exitStatus = threading.Event()
 
-        # Permet d'indiquer au thread de communication la fin du programme
         self.commExitNotification = threading.Event()
 
-        # Permet au thread de communication d'indiquer qu'il est pret
         self.commReadyEvent = threading.Event()
 
         self.exitState = (None, None)
         self.exitSetHere = False
 
-        # Thread de communication; lance dans DtmControl.start()
-        self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.commExitNotification, self.commReadyEvent)
-
-        self.poolSize = self.commThread.poolSize
-        self.workerId = self.commThread.workerId
-
-        # On initialise le generateur de task Id
-        self.idGenerator = DtmTaskIdGenerator(self.workerId)
-
-        # Cette liste contient les loads des differents workers
-        self.nodesStatus = [[0,0,0,time.time(), time.time()] for i in xrange(self.poolSize)]
-
-        if self.commThread.isRootWorker:
-            _printDtmMsg("DTM started with " + str(self.poolSize) + " workers")
+        self.commManagerType = "pympi"
+        self.isStarted = False
 
 
 
     def _doCleanUp(self):
         """
-        Fonction charge de faire le clean up a la fin
+        Clean up function, called at this end of the execution.
+        Should NOT be called by the user.
         """
-        #if self.commThread.isRootWorker:
+
         msgT = "Rank " + str(self.workerId) + " ("+str(threading.currentThread().name)+" / " + str(threading.currentThread().ident) + ")\n"
         for target,times in self.tasksStats.items():
             msgT += "\t" + str(target) + " : Avg=" + str(sum(times)/float(len(times))) + ", Min=" + str(min(times)) + ", Max=" + str(max(times)) + ", Total : " + str(sum(times)) + " used by " + str(len(times)) + " calls\n"
@@ -161,57 +124,71 @@ class DtmControl(object):
 
 
     def _returnResult(self, idToReturn, resultInfo):
+        """
+        Called by the execution threads when they have to return a result
+        Should NOT be called explicitly by the user
+        """
         if idToReturn == self.workerId:
             self._dispatchResult(resultInfo)
         else:
             self.sendQueue.put((idToReturn, ("Result", self.workerId, self.nodesStatus, resultInfo)))
 
     def _updateNodesDict(self, fromNodeNumber, newDict):
+        """
+        Called by the control thread to update its dictionnary
+        Should NOT be called explicitly by the user
+        """
         for i in xrange(len(newDict)):
             if (i == fromNodeNumber or newDict[i][3] > self.nodesStatus[i][3]) and i != self.workerId:
                 self.nodesStatus[i] = newDict[i]
 
     def _askForTask(self):
+        """
+        Called by the control thread, to ask the other workers for tasks
+        Should NOT be called explicitly by the user
+        """
         curTime = time.time()
-        listNodesWorking = [i for i,n in enumerate(self.nodesStatus) if n[0] > 0 and i != self.workerId and curTime - n[4] > DTM_ASK_FOR_TASK_DELAY]
+        listNodesWorking = [i for i,n in self.nodesStatus.items() if n[0] > 0 and i != self.workerId and curTime - n[4] > DTM_ASK_FOR_TASK_DELAY]
         for nodeId in listNodesWorking:
-            self.sendQueue.put((nodeId, ("RequestTask", self.workerId, self.nodesStatus[:], time.time())))
+            self.sendQueue.put((nodeId, ("RequestTask", self.workerId, self.nodesStatus, time.time())))
             self.nodesStatus[nodeId][4] = curTime
 
     def _dispatchResult(self, result):
+        """
+        Called by the control thread when a message is received;
+        Dispatch it to the task waiting for it.
+        Should NOT be called explicitly by the user
+        """
         tidParent = result[1]
-
 
         self.waitingThreadsLock.acquire()
 
-        # On ajoute les resultats recus
         self.waitingThreads[tidParent][3][result[2]] = result[4]
 
         self.waitingThreads[tidParent][1].remove(result[0])
-        if len(self.waitingThreads[tidParent][1]) == 0:      # Tous les resultats sont arrives
+        if len(self.waitingThreads[tidParent][1]) == 0:
             conditionLock = self.waitingThreads[tidParent][0]
 
             for listAsync in self.asyncWaitingList.values():
-                # Clairement pas optimal de devoir tout parcourir pour savoir si le thread est asynchrone ou non, mais bon...
                 if tidParent in listAsync:
-                    # Les threads asynchrones sont relances tout de suite puisqu'ils n'ont pas besoin du lock d'execution
                     conditionLock.acquire()
                     conditionLock.notifyAll()
                     conditionLock.release()
                     self.waitingThreadsLock.release()
                     return
 
-            # Les threads synchrones sont mis en attente d'execution
             self.waitingForRestartQueue.put(conditionLock)
 
         self.waitingThreadsLock.release()
 
     def _main(self):
-        # Cette fonction est la boucle principale du thread de controle
+        """
+        Main loop of the control thread
+        Should NOT be called explicitly by the user
+        """
 
         while True:
 
-            # On verifie les messages recus
             while True:
                 try:
                     recvMsg = self.recvQueue.get_nowait()
@@ -231,24 +208,20 @@ class DtmControl(object):
                         self._dispatchResult(recvMsg[3])
                     else:
                         print("DTM warning : unknown message type ("+str(recvMsg[MSG_COMM_TYPE])+") received will be ignored.")
-                except Queue.Empty:     # On a plus rien a recevoir
+                except Queue.Empty:
                     break
 
             if self.exitStatus.is_set():
                 break
 
-            # On update notre etat
             self.nodesStatus[self.workerId] = [self.execQueue.qsize(), self.waitingForRestartQueue.qsize(), len(self.waitingThreads), time.time(), time.time()]
 
 
-            # On determine si on doit envoyer des taches
-            availableNodes = [i for i,n in enumerate(self.nodesStatus) if n[0] <= 5 and n[0] < self.nodesStatus[self.workerId][0] and i != self.workerId]
+            availableNodes = [i for i,n in self.nodesStatus.items() if n[0] <= 5 and n[0] < self.nodesStatus[self.workerId][0] and i != self.workerId]
 
             if self.nodesStatus[self.workerId][0] > 1 and len(availableNodes) > 0:
-                # Cool il y a un slot de libre
                 chosenSlot = random.choice(availableNodes)
 
-                # On essaie de dispatcher equitablement les taches
                 nbrTask = self.execQueue.qsize() / self.poolSize
                 if nbrTask == 0:
                     nbrTask = 1
@@ -260,27 +233,20 @@ class DtmControl(object):
                             taskList.append(self.execQueue.get_nowait())
                     except Queue.Empty:
                         if len(taskList) == 0:
-                            raise Queue.Empty       # Si on a aucune tache a envoyer, on va au prochain catch
+                            raise Queue.Empty
                         else:
-                            pass                    # Sinon, on envoie ce qu'on peut
+                            pass
 
-                    # On lui envoie la tache
                     nbrTask = len(taskList)
-                    self.sendQueue.put((chosenSlot, ("Task", self.workerId, self.nodesStatus[:], nbrTask, taskList)))
-
-                    # On peut supposer que le noeud aura maintenant 'nbrTask' taches de plus dans son execQ
+                    self.sendQueue.put((chosenSlot, ("Task", self.workerId, self.nodesStatus, nbrTask, taskList)))
                     self.nodesStatus[chosenSlot][0] += nbrTask
-                except Queue.Empty: # On a rien a lui donner
+                except Queue.Empty:
                     pass
 
-            # Si on est deja en train d'executer un thread, ca ne sert a rien d'en ajouter un
-            # Mieux vaut le laisser dans la execQueue, et peut-etre qu'un autre node libre
-            # pourra le demander et l'executer avant nous
-            if dtmGlobalExecutionLock.acquire(False):    # On verifie deja si on est en train de faire quelque chose
+            if dtmGlobalExecutionLock.acquire(False):
                 dtmGlobalExecutionLock.release()
 
                 try:
-                    # On redemarre en priorite les taches en attente (qui ont recu leurs resultats)
                     wTaskLock = self.waitingForRestartQueue.get_nowait()
                     wTaskLock.acquire()
                     wTaskLock.notifyAll()
@@ -290,7 +256,6 @@ class DtmControl(object):
                     pass
 
                 try:
-                    # On recupere une nouvelle tache dans la queue d'execution
                     newTask = self.execQueue.get_nowait()
                     newThread = DtmThread(tid=newTask[0], returnInfo=(newTask[1],newTask[2],newTask[3]), target=newTask[6], args=newTask[7], kwargs=newTask[8], control=self)
                     newThread.start()
@@ -299,12 +264,8 @@ class DtmControl(object):
                 except Queue.Empty:
                     pass
 
-                # Si on ne fait toujours rien
-                # on demande une nouvelle tache
                 self._askForTask()
 
-            # Si on n'a rien a faire ou que on est deja en train d'executer quelque chose
-            # On attend un peu
             time.sleep(DTM_CONTROL_THREAD_LATENCY)
 
         if self.commThread.isRootWorker:
@@ -313,47 +274,81 @@ class DtmControl(object):
 
 
     def setOptions(self, *args, **kwargs):
-        # Pas encore implementee
-        # Sera utilisee pour modifier des options du taskmanager (latence, etc.)
-        # Sauf si on veut vraiment s'attirer du trouble, l'ideal serait de ne l'appeller
-        # QUE dans le thread principal (i.e. avant que start() ne soit execute)
-        return
+        """
+        Set a DTM global option.
+        .. warning::
+            This function must be called BEFORE ``start()``. It is also the user responsability to ensure that the same option is set on every worker.
+
+        Currently, the supported options are :
+            * **communicationManager** : can be *pympi* (default), *mpi4py* (experimental) or *multiprocTCP* (experimental)
+
+        This function can be called more than once.
+        """
+        assert not self.isStarted, "Fatal error : dtm.setOptions() called after dtm.start()!"
+        for opt in kwargs:
+            if opt == "communicationManager":
+                self.commManagerType = kwargs[opt]
+
 
     def start(self, initialTarget):
-        # On demarre le thread de communication
+        """
+        Start the execution with the target `initialTarget`.
+        Calling this function create and launch the first task on the root worker
+        (defined by the communication manager, for instance, with MPI, the root worker is the worker with rank 0.).
+        
+        .. warning::
+            This function must be called only ONCE, and after the target has been parsed by the Python interpreter.
+        """
+        self.isStarted = True
+        
+        if self.commManagerType == "pympi":
+            from commManager import DtmCommThread
+        elif self.commManagerType == "mpi4py":
+            from commManagerMpi4py import DtmCommThread
+        elif self.commManagerType == "multiprocTCP":
+            from commManagerTCP import DtmCommThread
+        else:
+            _printDtmMsg("Warning : '"+str(self.commManagerType)+"' is not a suitable communication manager. Default to pyMPI.")
+            from commManager import DtmCommThread
+            
+        self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.commExitNotification, self.commReadyEvent)
 
         self.commThread.start()
+        self.commReadyEvent.wait()
 
-        self.commReadyEvent.wait()      # On attend que le thread de communication indique qu'il est pret
+        self.poolSize = self.commThread.poolSize
+        self.workerId = self.commThread.workerId
 
-        # Sur le node principal (rank 0 dans le cas de MPI), on met la premiere tache dans la queue d'execution
+        self.idGenerator = DtmTaskIdGenerator(self.workerId)
+
+        self.nodesStatus = {}
+        for wId in self.commThread.iterOverIDs():
+            self.nodesStatus[wId] = [0,0,0,time.time(), time.time()]
+        
         if self.commThread.isRootWorker:
+            _printDtmMsg("DTM started with " + str(self.poolSize) + " workers")
             initTask = (self.idGenerator.tid, None, None, None, [self.workerId], time.time(), initialTarget, (), {})
             self.execQueue.put(initTask)
 
-        # Entree dans la boucle principale
         self._main()
 
 
-    # Les fonctions suivantes ne SONT PAS APPELEES PAR LE THREAD PRINCIPAL
-    # Elles sont APPELEES PAR LES THREADS D'EXECUTION
-    # TOUS LES OBJETS NON-LOCAUX QU'ELLES MODIFIENT _DOIVENT_ ETRE THREAD-SAFE
-    # LES THREADS D'EXECUTION Y RESTENT BLOQUES TANT QUE LE RESULTAT N'ARRIVE PAS
-    # (sauf pour les asynchrones, mais eux-memes vont creer un thread qui restera bloque)
+
+    # The following methods are NOT called by the control thread, but by the EXECUTION THREADS
+    # All the non-local objects used MUST be thread-safe
 
     def map(self, function, iterable):
-        # Pour l'instant, map() ne supporte pas plusieurs iterables
-        # En concordance avec l'API de multiprocessing
-        # A discuter...
+        """
+        A parallel equivalent of the `map() <http://docs.python.org/library/functions.html#map>`_ built-in function (it supports only one iterable argument though). It blocks till the result is ready.
+        This method chops the iterable into a number of chunks determined by DTM in order to get the most efficient use of the workers.
+        """
 
         listTid = []
         currentId = threading.currentThread().tid
         conditionObject = threading.currentThread().waitingCondition
 
-        # On cree tout de suite l'espace pour recevoir les resultats
         listResults = [None] * len(iterable)
 
-        # On cree toutes les taches et on les ajoute a la queue d'execution
         self.waitingThreadsLock.acquire()
         for index,elem in enumerate(iterable):
             task = (self.idGenerator.tid, self.workerId, currentId, index, [self.workerId], time.time(), function, (elem,), {})
@@ -363,37 +358,38 @@ class DtmControl(object):
         self.waitingThreads[currentId] = (conditionObject, listTid, time.time(), listResults)
         self.waitingThreadsLock.release()
 
-        time_wait = threading.currentThread().waitForCondition()        # On attend que les resultats soient disponibles
+        time_wait = threading.currentThread().waitForCondition()
 
-        # A ce point-ci, les resultats sont arrives ET on a le lock global d'execution (voir DtmThread.waitForCondition())
         self.waitingThreadsLock.acquire()
         ret = self.waitingThreads[currentId][3]
         del self.waitingThreads[currentId]
         self.waitingThreadsLock.release()
 
-        # On revient au target du thread en retournant la liste des resultats
         return ret
 
 
     def map_async(self, function, iterable, callback=None):
-        # Callback n'est pas encore implemente
+        """
+        A non-blocking variant of the ``DtmControl.map()`` method which returns a result object.
+        .. note::
+            As on version 0.6, callback is not implemented.
+        """
 
-        # On cree un thread special, qui "attendra pour nous"
-        # ainsi qu'une structure fournissant l'API de multiprocessing.AsyncResult
         threadAsync = DtmAsyncWaitingThread(tid=self.idGenerator.tid, target=function, args=iterable, control=self)
         asyncRequest = DtmAsyncResult(threadAsync, control=self)
 
-        # On revient tout de suite au thread (pas de mise en pause)
         return asyncRequest
 
 
     def _apply(self, function, args, kwargs):
-        # Fonction qui permet de regrouper apply() et apply_async()
+        """
+        Special function that can be used on boot apply() and apply_async()
+        Should not be called directly by the user, as apply() do almost the same job.
+        """
+        
         currentId = threading.currentThread().tid
         conditionObject = threading.currentThread().waitingCondition
 
-
-        # On cree la tache et on la met sur la queue d'execution
         self.waitingThreadsLock.acquire()
         task = (self.idGenerator.tid, self.workerId, currentId, 0, [self.workerId], time.time(), function, args, kwargs)
         listTid = [task[0]]
@@ -401,40 +397,59 @@ class DtmControl(object):
         self.waitingThreads[currentId] = (conditionObject, listTid, time.time(), [None])
         self.waitingThreadsLock.release()
 
-        time_wait = threading.currentThread().waitForCondition()        # On attend le resultat
+        time_wait = threading.currentThread().waitForCondition()
 
-        # A ce point-ci, le resultat est arrive ET on a le lock global d'execution (voir DtmThread.waitForCondition())
         self.waitingThreadsLock.acquire()
         ret = self.waitingThreads[currentId][3]
         del self.waitingThreads[currentId]
         self.waitingThreadsLock.release()
 
-        # On revient au target du thread en retournant le resultat
         return ret[0]
 
     def apply(self, function, *args, **kwargs):
+        """
+        Equivalent of the `apply() <http://docs.python.org/library/functions.html#apply>`_ built-in function. It blocks till the result is ready.
+        Given this blocks, `apply_async()` is better suited for performing work in parallel.
+        Additionally, the passed in function is only executed in one of the workers of the pool.
+        """
         return self._apply(function, args, kwargs)
 
     def apply_async(self, function, *args, **kwargs):
-        # Voir map_async
+        """
+        A non-blocking variant of the apply() method which returns a result object.
+        """
         threadAsync = DtmAsyncWaitingThread(tid=self.idGenerator.tid, target=function, args=args, kwargs=kwargs, control=self, areArgsIterable = False)
         asyncRequest = DtmAsyncResult(threadAsync, control=self)
         return asyncRequest
 
     def imap(self, function, iterable, chunksize=1):
+        """
+        An equivalent of `itertools.imap() <http://docs.python.org/library/itertools.html#itertools.imap>`_.
+
+        The chunksize argument can be used to tell DTM how many elements should be computed at the same time.
+        For very long iterables using a large value for chunksize can make make the job complete much faster than using the default value of 1.
+        """
         currentIndex = 0
 
-        #while currentIndex < len(iterable):
-            #maxIndex = currentIndex+chunksize if currentIndex + chunksize < len(iterable) else len(iterable)-1
-            #r = self.map(function, iterable[currentIndex:maxIndex])
-            # TODO
+        while currentIndex < len(iterable):          
+            maxIndex = currentIndex+chunksize if currentIndex + chunksize < len(iterable) else len(iterable)
+            asyncResults = [None] * (maxIndex - currentIndex)
+            for i in xrange(currentIndex, maxIndex):
+                asyncResults[i%chunksize] = self.apply_async(function, iterable[i])
+            
+            for result in asyncResults:
+                ret = result.get()
+                yield ret
 
-        # Not implemented
-        raise NotImplementedError
+            currentIndex = maxIndex
+
 
     def imap_unordered(self, function, iterable, chunksize=1):
-        # Not implemented (vraiment utile par rapport a imap?)
+        # Cette implementation a un probleme : contrairement a imap(),
+        # on n'attend pas un resultat specifique, mais n'importe lequel
+        # Idealement, il faudrait implementer un dtm.waitAny()
         raise NotImplementedError
+        
 
     def filter(self, function, iterable):
         # Le filtrage s'effectue dans ce thread, mais le calcul est distribue
@@ -445,6 +460,8 @@ class DtmControl(object):
         # Repete une fonction avec les memes arguments et renvoie une liste contenant les resultats
         # Pas encore implemente
         results = [None] * howManyTimes
+
+        raise NotImplementedError
         return results
 
     def terminate(self):
@@ -590,8 +607,7 @@ class DtmAsyncWaitingThread(threading.Thread):
 
 class DtmAsyncResult(object):
     """
-    La classe correspondante a multiprocessing.AsyncResult
-    Elle offre sensiblement la meme interface, a l'exception notable pret des timeout
+    The class of the result returned by **DtmControl.map_async()** and **DtmControl.apply_async()**.
     """
     def __init__(self, asyncThread, control):
         self.rThread = asyncThread
@@ -625,6 +641,12 @@ class DtmAsyncResult(object):
 
     
     def get(self):
+        """
+        Return the result when it arrives.
+        .. note::
+            This is a blocking call : caller will wait in this function until the result is ready.
+            To check for the avaibility of the result, use ready()
+        """
         if self.ready():
             return self.resultVal
         self.wait()
@@ -632,6 +654,9 @@ class DtmAsyncResult(object):
         return self.resultVal
 
     def wait(self):
+        """
+        Wait until the result is available
+        """
         if self.ready():
             return
 
@@ -646,12 +671,18 @@ class DtmAsyncResult(object):
 
 
     def ready(self):
+        """
+        Return whether the asynchronous task has completed.
+        """
         return not self.rThread.isAlive()
 
     def successful(self):
+        """
+        Return whether the task completed without error. Will raise AssertionError if the result is not ready.
+        """
         if self.rThread.isAlive():
             raise AssertionError("Call DtmAsyncResult.successful() before the results were ready!")
         return self.resultReturned
 
-# On cree une instance du taskmanager (qui pourra etre importee directement)
+
 dtm = DtmControl()
