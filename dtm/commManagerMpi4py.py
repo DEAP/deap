@@ -32,6 +32,9 @@ class DtmCommThread(threading.Thread):
     def isRootWorker(self):
         return self.currentId == 0
 
+    def iterOverIDs(self):
+        return xrange(self.pSize)
+
     def _mpiSend(self, msg, dest):
         # Stupidite de mpi4py pourri qui demande des buffers en Python...
         # Pourquoi pas un GOTO tant qu'a y etre...

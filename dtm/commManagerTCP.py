@@ -63,7 +63,6 @@ class DtmCommThread(threading.Thread):
                 self.listeners.append(tmpListener)
                 self.connections.append(tmpListener.accept())       # Attention, call bloquant
 
-        print(str(self.connections))
         commReadyEvent.set()         # On doit notifier le thread principal qu'on est pret
         
     @property
@@ -77,6 +76,9 @@ class DtmCommThread(threading.Thread):
     @property
     def isRootWorker(self):
         return self.wId == 0
+
+    def iterOverIDs(self):
+        return xrange(self.pSize)
 
     def run(self):
         working = True
