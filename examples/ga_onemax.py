@@ -44,7 +44,7 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-if __name__ == "__main__":
+def main():
     random.seed(64)
     
     pop = tools.pop()
@@ -108,3 +108,6 @@ if __name__ == "__main__":
     
     best_ind = toolbox.selBest(pop, 1)[0]
     print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
+
+if __name__ == "__main__":
+    main()
