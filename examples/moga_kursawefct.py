@@ -47,13 +47,10 @@ def evalKursawe(ind):
     f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[:]))
     return f1, f2
 
-def checkBounds(min, max, *argsname):
+def checkBounds(min, max):
     def decCheckBounds(func):
-        args_name = inspect.getargspec(func)[0]
-        args_pos = [args_name.index(name) for name in argsname]
         def wrapCheckBounds(*args, **kargs):
-            func(*args, **kargs)
-            offsprings = [args[index] for index in args_pos]
+            offsprings = func(*args, **kargs)
             for child in offsprings:
                 for i in xrange(len(child)):
                     if child[i] > max:
