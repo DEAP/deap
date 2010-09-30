@@ -57,7 +57,7 @@ def checkBounds(min, max):
                         child[i] = max
                     elif child[i] < min:
                         child[i] = min
-            return children
+            return offsprings
         return wrapCheckBounds
     return decCheckBounds
 
