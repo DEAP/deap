@@ -15,7 +15,6 @@
 
 import sys
 import random
-import copy
 
 sys.path.append("..")
 
@@ -28,26 +27,27 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 creator.create("Population", list)
 
 tools = toolbox.Toolbox()
-
 # Attribute generator
 tools.register("attr_bool", random.randint, 0, 1)
-
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.attr_bool, size_init=100)
-tools.register("pop", creator.Population, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual,
+    content_init=tools.attr_bool, size_init=100)
+tools.register("population", creator.Population,
+    content_init=tools.individual, size_init=300)
 
 def evalOneMax(individual):
     return sum(individual),
 
+# Operator registering
 tools.register("evaluate", evalOneMax)
 tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-if __name__ == "__main__":
+def main():
     random.seed(64)
     
-    pop = tools.pop()
+    pop = tools.population()
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     print "Start of evolution"
@@ -68,17 +68,17 @@ if __name__ == "__main__":
         # Clone the selected individuals
         offsprings = map(tools.clone, offsprings)
     
-        # Apply crossover and mutation
-        for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
+        # Apply crossover and mutation on the offsprings
+        for child1, child2 in zip(offsprings[::2], offsprings[1::2]):
             if random.random() < CXPB:
-                tools.mate(ind1, ind2)
-                del ind1.fitness.values
-                del ind2.fitness.values
-    
-        for ind in offsprings:
+                tools.mate(child1, child2)
+                del child1.fitness.values
+                del child2.fitness.values
+
+        for mutant in offsprings:
             if random.random() < MUTPB:
-                tools.mutate(ind)
-                del ind.fitness.values
+                tools.mutate(mutant)
+                del mutant.fitness.values
     
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
@@ -108,3 +108,6 @@ if __name__ == "__main__":
     
     best_ind = toolbox.selBest(pop, 1)[0]
     print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
+
+if __name__ == "__main__":
+    main()
