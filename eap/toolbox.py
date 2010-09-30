@@ -22,8 +22,8 @@ since once an oprerator is set, it can be reused with a simple keyword that
 contains all its arguments. Plus, every keyword or argument can be overriden
 at all time.
 
-The toolbox is also used in predefined algorithms from the :mod:`~eap.algorithms`
-module.
+The toolbox is also used in predefined algorithms from the
+:mod:`~eap.algorithms` module.
 """
 
 import copy
@@ -103,8 +103,8 @@ class Toolbox(object):
         *content_init* and *size_init* the initialization is different. If
         *content_init* is an iterable, then the iterable is consumed enterily
         to intialize each object, in that case *size_init* is not used.
-        Otherwise, *content_init* may be a simple function that will be repeated
-        *size_init* times in order to fill the object.
+        Otherwise, *content_init* may be a simple function that will be
+        repeated *size_init* times in order to fill the object.
         """
         if "content_init" in kargs:
             content = kargs["content_init"]
@@ -171,6 +171,7 @@ def cxTwoPoints(ind1, ind2):
    
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
         = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
+        
     return ind1, ind2
 
 def cxOnePoint(ind1, ind2):
@@ -310,7 +311,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             # Position bookkeeping
             p1[temp1], p1[temp2] = p1[temp2], p1[temp1]
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
-
+    
     return ind1, ind2
 
 def cxBlend(ind1, ind2, alpha):
@@ -380,7 +381,7 @@ def cxMessyOnePoint(ind1, ind2):
     cxpoint1 = random.randint(0, len(ind1))
     cxpoint2 = random.randint(0, len(ind2))
     ind1[cxpoint1:], ind2[cxpoint2:] = ind2[cxpoint2:], ind1[cxpoint1:]
-
+    
     return ind1, ind2
     
 ######################################
@@ -409,7 +410,7 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
             ind1.strategy[indx] = minstrategy
         if ind2.strategy[indx] < minstrategy:
             ind2.strategy[indx] = minstrategy
-
+    
     return ind1, ind2
 
 def cxESTwoPoints(ind1, ind2):

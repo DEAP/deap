@@ -48,9 +48,10 @@ class HallOfFame(object):
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
-            self.items = deepcopy(sorted(chain(self, population), 
-                                         key=attrgetter("fitness"), 
-                                         reverse=True)[:self.maxsize])
+            self.items = sorted(chain(self, population), 
+                                key=attrgetter("fitness"), 
+                                reverse=True)[:self.maxsize]
+            self.items = [deepcopy(item) for item in self.items]
             # The keys are the fitnesses in reverse order to allow the use
             # of the bisection algorithm 
             self.keys = map(attrgetter("fitness"), reversed(self.items))
@@ -64,14 +65,13 @@ class HallOfFame(object):
     
     def insert(self, item):
         """Insert a new individual in the hall of fame using the
-        :func:`~bisect.bisect_right` function. The inserted individual is inserted
-        on the right side of an equal individual. Inserting a new individual
-        in the hall of fame also preserve the hall of order's. This method
-        **does not** check for the size of the hall of fame, in a way that
-        inserting an new individual in a full hall of fame will not remove
-        the worst individual to maintain a constant size.
+        :func:`~bisect.bisect_right` function. The inserted individual is
+        inserted on the right side of an equal individual. Inserting a new 
+        individual in the hall of fame also preserve the hall of fame's order.
+        This method **does not** check for the size of the hall of fame, in a
+        way that inserting an new individual in a full hall of fame will not
+        remove the worst individual to maintain a constant size.
         """
-        #print "insert"
         item = deepcopy(item)
         i = bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
@@ -79,7 +79,6 @@ class HallOfFame(object):
     
     def remove(self, index):
         """Remove the specified *index* from the hall of fame."""
-        #print "remove"
         del self.keys[len(self) - (index % len(self) + 1)]
         del self.items[index]
     
@@ -100,8 +99,8 @@ class HallOfFame(object):
     def __reversed__(self):
         return reversed(self.items)
     
-    def __repr__(self):
-        return repr(self.items) + "\n" + repr(self.keys)
+    def __str__(self):
+        return str(self.items) + "\n" + str(self.keys)
 
         
 class ParetoFront(HallOfFame):
