@@ -73,7 +73,7 @@ tools.register("expr_mut", gp.generate_full, min=0, max=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":
-    random.seed(1348779701)
+    random.seed(959)
     
     logging.basicConfig(level=logging.DEBUG)
 
