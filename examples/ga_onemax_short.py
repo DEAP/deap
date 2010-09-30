@@ -47,8 +47,7 @@ tools.register("mate", toolbox.cxTwoPoints)
 tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-
-if __name__ == "__main__":
+def main():
     random.seed(64)
     
     pop = tools.population()
@@ -56,3 +55,6 @@ if __name__ == "__main__":
 
     algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+
+if __name__ == "__main__":
+    main()

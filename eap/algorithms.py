@@ -71,8 +71,8 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         halloffame.update(population)
 
     # Begin the generational process
-    for g in range(ngen):
-        _logger.info("Evolving generation %i", g)
+    for gen in range(ngen):
+        _logger.info("Evolving generation %i", gen)
         
         # Select the next generation individuals
         offsprings = toolbox.select(population, n=len(population))
@@ -162,8 +162,8 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         halloffame.update(population)
 
     # Begin the generational process
-    for g in range(ngen):
-        _logger.info("Evolving generation %i", g)
+    for gen in range(ngen):
+        _logger.info("Evolving generation %i", gen)
 
         offsprings = []
         nb_offsprings = 0
@@ -267,8 +267,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         halloffame.update(population)
     
     # Begin the generational process
-    for g in range(ngen):
-        _logger.info("Evolving generation %i", g)
+    for gen in range(ngen):
+        _logger.info("Evolving generation %i", gen)
         evaluations = 0
 
         offsprings = []
@@ -349,8 +349,8 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         halloffame.update(population)
     
     # Begin the generational process
-    for g in range(ngen):
-        _logger.info("Evolving generation %i", g)
+    for gen in range(ngen):
+        _logger.info("Evolving generation %i", gen)
         
         p1, p2 = toolbox.select(population, 2)
         p1 = toolbox.clone(p1)

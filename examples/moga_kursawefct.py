@@ -47,11 +47,11 @@ def evalKursawe(ind):
     f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[:]))
     return f1, f2
 
-def checkBounds(min, max, *argsname):
+def checkBounds(min, max):
     def decCheckBounds(func):
         def wrapCheckBounds(*args, **kargs):
-            children = func(*args, **kargs)
-            for child in children:
+            offsprings = func(*args, **kargs)
+            for child in offsprings:
                 for i in xrange(len(child)):
                     if child[i] > max:
                         child[i] = max
@@ -84,9 +84,9 @@ if __name__ == "__main__":
                  hof[-1], hof[-1].fitness.values)
 
     # You can plot the Hall of Fame if you have matplotlib installed
-    import matplotlib.pyplot as plt
-    plt.figure()
-    fit1 = [ind.fitness.values[0] for ind in hof]
-    fit2 = [ind.fitness.values[1] for ind in hof]
-    plt.scatter(fit1, fit2)
-    plt.show()
+    # import matplotlib.pyplot as plt
+    # plt.figure()
+    # fit1 = [ind.fitness.values[0] for ind in hof]
+    # fit2 = [ind.fitness.values[1] for ind in hof]
+    # plt.scatter(fit1, fit2)
+    # plt.show()
