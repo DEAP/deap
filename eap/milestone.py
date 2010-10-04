@@ -19,16 +19,16 @@ try:
     import yaml
     USE_YAML = True
     try:
-        from yaml import CDumper as Dumper  # CLoader and CDumper ar much faster
-        from yaml import CLoader as Loader  # than default ones, but requires
-    except ImportError:                     # LibYAML to be compiled
+        from yaml import CDumper as Dumper  # CLoader and CDumper are much
+        from yaml import CLoader as Loader  # faster than default ones, but 
+    except ImportError:                     # requires LibYAML to be compiled
         from yaml import Dumper
         from yaml import Loader
 except ImportError:
     USE_YAML = False
                                             # If yaml ain't present, use 
 try:                                        # pickling to dump
-    import cPickle as pickle                # cPickle if much faster than 
+    import cPickle as pickle                # cPickle is much faster than 
 except ImportError:                         # pickle but only present under
     import pickle                           # CPython
 
