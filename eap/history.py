@@ -81,7 +81,8 @@ class History(object):
             self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = parent_indices
     
-    def getDecorator(self):
+    @property
+    def decorator(self):
         """Function that returns an appropriate decorator to enhance the
         operators of the toolbox. The returned decorator assumes that the
         individuals are returned by the operator. First the decorator calls
