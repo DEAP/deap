@@ -22,7 +22,6 @@ tree of the famillies of individuals in an evolution.
 """
 
 import copy
-import inspect
 
 class History(object):
     """The :class:`History` class helps to build a genealogy of all the
@@ -82,22 +81,20 @@ class History(object):
             self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = parent_indices
     
-    def getDecorator(self, *argsname):
+    def getDecorator(self):
         """Function that returns an appropriate decorator to enhance the
-        operators of the toolbox. *argsname* is the name of the arguments that
-        shall be treated as individuals in the decorated function. The order
-        of operations is first the call to the undecorated operator then to
-        the update function with as arguments the arguments of the operator
-        specified by *argsname*.
+        operators of the toolbox. The returned decorator assumes that the
+        individuals are returned by the operator. First the decorator calls
+        the underlying operation and then calls the update function with what
+        has been returned by the operator as argument. Finally, it returns 
+        the individuals with their history parameters modified according to
+        the update function.
         """
         def decFunc(func):
-            args_name = inspect.getargspec(func)[0]
-            args_pos = [args_name.index(name) for name in argsname]
             def wrapFunc(*args, **kargs):
-                result = func(*args, **kargs)
-                ind_list = [args[index] for index in args_pos]
-                self.update(*ind_list)
-                return result
+                individuals = func(*args, **kargs)
+                self.update(*individuals)
+                return individuals
             return wrapFunc
         return decFunc
             
