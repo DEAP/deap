@@ -42,8 +42,8 @@ def evaluate(expr, pset=None):
         return _stringify(expr)
 
 def evaluateADF(seq):
-    """ Evaluate a list of ADF and return a dict mapping the ADF name with its
-        lambda function.
+    """Evaluate a list of ADF and return a dict mapping the ADF name with its
+    lambda function.
     """
     adfdict = {}
     for i, expr in enumerate(reversed(seq[1:])):
@@ -63,14 +63,14 @@ def lambdify(pset, expr):
     """
     expr = evaluate(expr)
     args = ",".join(a for a in pset.arguments)
-    lstr = "lambda %s: (%s)" % (args, expr)
+    lstr = "lambda %s: %s" % (args, expr)
     return eval(lstr, dict(pset.func_dict))
 
 def lambdifyList(expr):
-    """ Return a lambda function created from a list of trees. The first 
-        element of the list is the main tree, and the following elements are
-        automatically defined functions (ADF) that can be called by the first
-        tree.
+    """Return a lambda function created from a list of trees. The first 
+    element of the list is the main tree, and the following elements are
+    automatically defined functions (ADF) that can be called by the first
+    tree.
     """
     adfdict = evaluateADF(expr)
     expr[0].pset.func_dict.update(adfdict)   
@@ -79,8 +79,8 @@ def lambdifyList(expr):
 ## Loosely + Strongly Typed GP 
 
 class Primitive(object):
-    """ Class that encapsulates a primitive and when called with arguments it
-        returns the Python code to call the primitive with the arguments.
+    """Class that encapsulates a primitive and when called with arguments it
+    returns the Python code to call the primitive with the arguments.
         
         >>> import operator
         >>> pr = Primitive(operator.mul, (int, int), int)
@@ -101,10 +101,10 @@ class Primitive(object):
         return self.name 
 
 class Operator(Primitive):
-    """ Class that encapsulates an operator and when called with arguments it
-        returns the Python code to call the operator with the arguments. It acts
-        as the Primitive class, but instead of returning a function and its 
-        arguments, it returns an operator and its operands.
+    """Class that encapsulates an operator and when called with arguments it
+    returns the Python code to call the operator with the arguments. It acts
+    as the Primitive class, but instead of returning a function and its 
+    arguments, it returns an operator and its operands.
         
         >>> import operator
         >>> op = Operator(operator.mul, (int, int), int)
@@ -128,10 +128,9 @@ class Operator(Primitive):
             raise ValueError("Operator arity can be either 1 or 2.")
 
 class Terminal(object):
-    """ Class that encapsulates terminal primitive in expression. Terminals can
-        be symbols, values, or 0-arity functions.
+    """Class that encapsulates terminal primitive in expression. Terminals can
+    be symbols, values, or 0-arity functions.
     """
-   
     def __init__(self, terminal, ret = __type__):
         self.ret = ret
         try:
@@ -144,8 +143,8 @@ class Terminal(object):
         return str(self.value)
 
 class Ephemeral(Terminal):
-    """ Class that encapsulates a terminal which value is set at run-time. 
-        The value of the `Ephemeral` can be regenerated with the method `regen`.
+    """Class that encapsulates a terminal which value is set at run-time. 
+    The value of the `Ephemeral` can be regenerated with the method `regen`.
     """
     def __init__(self, func, ret = __type__):
         self.func = func
@@ -154,7 +153,7 @@ class Ephemeral(Terminal):
         self.value = self.func()
         
 class EphemeralGenerator(object):
-    """ Class that generates `Ephemeral` to be added to an expression."""
+    """Class that generates `Ephemeral` to be added to an expression."""
     def __init__(self, ephemeral, ret = __type__):
         self.ret = ret
         self.name = ephemeral.__name__
@@ -165,6 +164,10 @@ class EphemeralGenerator(object):
         return self.name
 
 class PrimitiveSetTyped(object):
+    """Class that contains the primitives that can be used to solve a
+    Strongly Typed GP problem. The set also defined the researched
+    function return type, and input arguments type and number.
+    """
     def __init__(self, name, in_types, ret_type, prefix = "ARG"):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
@@ -182,6 +185,8 @@ class PrimitiveSetTyped(object):
             PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type)
             
     def renameArguments(self, new_args):
+        """Rename function arguments with new arguments name *new_args*.
+        """
         for i, argument in enumerate(self.arguments):
             if new_args.has_key(argument):
                 self.arguments[i] = new_args[argument]
@@ -192,6 +197,12 @@ class PrimitiveSetTyped(object):
                     terminal.value = new_args[terminal.value]
 
     def addPrimitive(self, primitive, in_types, ret_type):
+        """Add a primitive to the set. 
+
+        *primitive* is a callable object or a function.
+        *in_types* is a list of argument's types the primitive takes.
+        *ret_type* is the type returned by the primitive.
+        """
         try:
             prim = Operator(primitive, in_types, ret_type)
         except (KeyError, ValueError):
@@ -201,6 +212,11 @@ class PrimitiveSetTyped(object):
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type):
+        """Add a terminal to the set. 
+
+        *terminal* is an object, or a function with no arguments.
+        *ret_type* is the type of the terminal.
+        """
         if callable(terminal):
             self.func_dict[terminal.__name__] = terminal
         prim = Terminal(terminal, ret_type)
@@ -208,39 +224,59 @@ class PrimitiveSetTyped(object):
         self.terms_count += 1
         
     def addEphemeralConstant(self, ephemeral, ret_type):
+        """Add an ephemeral constant to the set. An ephemeral constant
+        is a no argument function that returns a random value. The value
+        of the constant is constant for a Tree, but may differ from one
+        Tree to another.
+
+        *ephemeral* function with no arguments that returns a random value.
+        *ret_type* is the type of the object returned by the function.
+        """
         prim = EphemeralGenerator(ephemeral, ret_type)
         self.terminals[ret_type].append(prim)
         self.terms_count += 1
         
     def addADF(self, adfset):
+        """Add an Automatically Defined Function (ADF) to the set.
+
+        *adfset* is a PrimitiveSetTyped containing the primitives with which
+        the ADF can be built.        
+        """
         prim = Primitive(adfset, adfset.ins, adfset.ret)
         self.primitives[adfset.ret].append(prim)
+        self.prims_count += 1
     
     @property
     def terminalRatio(self):
-        """ Return the ratio of the number of terminals on the number of all
-            kinds of primitives.
+        """Return the ratio of the number of terminals on the number of all
+        kind of primitives.
         """
         return self.terms_count / float(self.terms_count + self.prims_count)
 
 class PrimitiveSet(PrimitiveSetTyped):
+    """Class same as PrimitiveSetTyped, except there is no 
+    definition of type.
+    """
     def __init__(self, name, arity, prefix="ARG"):
         args = [__type__]*arity
         PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
 
     def addPrimitive(self, primitive, arity):
+        """Add primitive *primitive* with arity *arity* to the set."""
         assert arity > 0, "arity should be >= 1"
         args = [__type__] * arity 
         PrimitiveSetTyped.addPrimitive(self, primitive, args, __type__)
 
-    def addTerminal(self, terminal):    
+    def addTerminal(self, terminal):
+        """Add a terminal to the set.""" 
         PrimitiveSetTyped.addTerminal(self, terminal, __type__)
 
     def addEphemeralConstant(self, ephemeral):
+        """Add an ephemeral constant to the set."""
         PrimitiveSetTyped.addEphemeralConstant(self, ephemeral, __type__)
 
-# Tree class faster than base Tree, optimized for Primitives
 class PrimitiveTree(base.Tree):
+    """Tree class faster than base Tree, optimized for Primitives."""
     pset = None   
     
     def _getstate(self):
@@ -253,11 +289,11 @@ class PrimitiveTree(base.Tree):
         return state
 
     def __deepcopy__(self, memo):
-        """ Deepcopy a Tree by first converting it back to a list of list.
+        """Deepcopy a Tree by first converting it back to a list of list.
         
-            This deepcopy is faster than the default implementation. From
-            quick testing, up to 1.6 times faster, and at least 2 times less
-            function calls.
+        This deepcopy is faster than the default implementation. From
+        quick testing, up to 1.6 times faster, and at least 2 times less
+        function calls.
         """
         new = self.__class__(self._getstate())
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
@@ -265,33 +301,43 @@ class PrimitiveTree(base.Tree):
 
 # Expression generation functions
 
-def generate_ramped(pset, min, max, type=__type__):
-    method = random.choice([generate_grow, generate_full])
+def generateRamped(pset, min, max, type=__type__):
+    """Generate an expression with a PrimitiveSet *pset*.
+    Half the time, the expression is generated with generateGrow,
+    the other half, the expression is generated with generateFull.
+    """
+    method = random.choice((generateGrow, generateFull))
     return method(pset, min, max, type)
 
-def generate_full(pset, min, max, type=__type__):
+def generateFull(pset, min, max, type=__type__):
+    """Generate an expression where each leaf has a the same depth 
+    between *min* and *max*.
+    """
     def condition(max_depth):
         return max_depth == 0
     return _generate(pset, min, max, condition, type)
 
-def generate_grow(pset, min, max, type=__type__):
+def generateGrow(pset, min, max, type=__type__):
+    """Generate an expression where each leaf might have a different depth 
+    between *min* and *max*.
+    """
     def condition(max_depth):
         return max_depth == 0 or random.random() < pset.terminalRatio
     return _generate(pset, min, max, condition, type)
 
 def _generate(pset, min, max, condition, type=__type__):
-    def generate_expr(max_depth, type):
+    def genExpr(max_depth, type):
         if condition(max_depth):
             term = random.choice(pset.terminals[type])
             expr = term()
         else:
             prim = random.choice(pset.primitives[type])
             expr = [prim]
-            args = (generate_expr(max_depth-1, arg) for arg in prim.args)
+            args = (genExpr(max_depth-1, arg) for arg in prim.args)
             expr.extend(args)
         return expr
     max_depth = random.randint(min, max)
-    expr = generate_expr(max_depth, type)
+    expr = genExpr(max_depth, type)
     if not isinstance(expr, list):
         expr = [expr]
     return expr
