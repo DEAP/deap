@@ -24,7 +24,7 @@ from collections import deque
 from itertools import izip, repeat, count
         
 class Tree(list):
-    """ Basic N-ary tree class."""
+    """Basic N-ary tree class."""
     class NodeProxy(object):
         def __new__(cls, obj, *args, **kargs):
             if isinstance(obj, cls):
@@ -60,8 +60,8 @@ class Tree(list):
             return self.obj.__str__()
                 
     @classmethod        
-    def convert_node(cls, node):
-        """ Convert node into the proper object either a Tree or a Node."""
+    def convertNode(cls, node):
+        """Convert node into the proper object either a Tree or a Node."""
         if isinstance(node, cls):
             if len(node) == 1:
                 return cls.NodeProxy(node[0])
@@ -75,51 +75,47 @@ class Tree(list):
             return cls.NodeProxy(node)
 
     def __init__(self, content=None):
-        """ Initialize a tree with a list `content`.
+        """Initialize a tree with a list `content`.
         
-            The first element of the list is the root of the tree, then the
-            following elements are the nodes. A node could be a list, then
-            representing a subtree.
+        The first element of the list is the root of the tree, then the
+        following elements are the nodes. A node could be a list, then
+        representing a subtree.
         """
         for elem in content:
-            self.append(self.convert_node(elem))
+            self.append(self.convertNode(elem))
         
     def getstate(self):
-        """ Return the state of the Tree
-            as a list of arbitrary elements. It is mainly
-            used for pickling a Tree object.
+        """Return the state of the Tree as a list of arbitrary elements.
+        It is mainly used for pickling a Tree object.
         """
         return [elem.getstate() for elem in self] 
     
     def __reduce__(self):
-        """ Return the class init, the object's state and the object
-            dict in a tuple. The function is used to pickle Tree.
+        """Return the class init, the object's state and the object's
+        dict in a tuple. The function is used to pickle Tree.
         """
         return (self.__class__, (self.getstate(),), self.__dict__)
     
     def __deepcopy__(self, memo):
-        """ Deepcopy a Tree by first converting it back to a list of list.
-        """
+        """Deepcopy a Tree by first converting it back to a list of list."""
         new = self.__class__(copy.deepcopy(self.getstate()))
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
         return new        
         
     def __setitem__(self, key, value):
-        """ Set the item at `key` with the corresponding `value`.
-        """
-        list.__setitem__(self, key, self.convert_node(value))
+        """Set the item at `key` with the corresponding `value`."""
+        list.__setitem__(self, key, self.convertNode(value))
         
     def __setslice__(self, i, j, value):
-        """ Set the slice at `i` to `j` with the corresponding `value`.
-        """
-        list.__setslice__(self, i, j, self.convert_node(value))
+        """Set the slice at `i` to `j` with the corresponding `value`."""
+        list.__setslice__(self, i, j, self.convertNode(value))
             
     def __str__(self):
-        """ Return the tree in its original form, a list, as a string."""
+        """Return the tree in its original form, a list, as a string."""
         return list.__str__(self)
         
     def __repr__(self):
-        """ Return the Python code to build a copy of the object."""
+        """Return the Python code to build a copy of the object."""
         module = self.__module__
         name = self.__class__.__name__
         return "%s.%s(%s)" % (module, name, list.__repr__(self))
@@ -135,10 +131,9 @@ class Tree(list):
 
     @property
     def size(self):
-        """ Return the number of nodes in the tree.
+        """Return the number of nodes in the tree.
         
-            The size of a node is the number of descendants it has including 
-            itself.
+        The size of a node is the number of descendants it has including itself.
         """
         return sum(elem.size for elem in self)
 
@@ -155,9 +150,9 @@ class Tree(list):
         except ValueError:
             return 0
 
-    def search_subtree_dfs(self, index):
-        """ Search the subtree with the corresponding index based on a depth 
-            first search.
+    def searchSubtreeDF(self, index):
+        """Search the subtree with the corresponding index based on a 
+        depth-first search.
         """
         if index == 0:
             return self
@@ -167,12 +162,12 @@ class Tree(list):
                 return child
             nbr_child = child.size
             if nbr_child + total > index:
-                return child.search_subtree_dfs(index-total)
+                return child.searchSubtreeDF(index-total)
             total += nbr_child
 
-    def set_subtree_dfs(self, index, subtree):
-        """ Replace the tree with the corresponding index by subtree based
-            on a depth-first search.
+    def setSubtreeDF(self, index, subtree):
+        """Replace the tree with the corresponding index by subtree based
+        on a depth-first search.
         """
         if index == 0:
             try:
@@ -189,13 +184,13 @@ class Tree(list):
                 return
             nbr_child = child.size
             if nbr_child + total > index:
-                child.set_subtree_dfs(index-total, subtree)
+                child.setSubtreeDF(index-total, subtree)
                 return
             total += nbr_child
 
-    def search_subtree_bfs(self, index):
-        """ Search the subtree with the corresponding index based on a 
-            breadth-first search.
+    def searchSubtreeBF(self, index):
+        """Search the subtree with the corresponding index based on a 
+        breadth-first search.
         """
         if index == 0:
             return self
@@ -206,9 +201,9 @@ class Tree(list):
                 queue.extend(subtree[1:])
         return subtree
 
-    def set_subtree_bfs(self, index, subtree):
-        """ Replace the subtree with the corresponding index by subtree based
-            on a breadth-first search.
+    def setSubtreeBF(self, index, subtree):
+        """Replace the subtree with the corresponding index by subtree based
+        on a breadth-first search.
         """
         if index == 0:
             try:
@@ -344,11 +339,11 @@ class Fitness(object):
         return self.__class__(self.values)
     
     def __str__(self):
-        """ Return the values of the Fitness object."""
+        """Return the values of the Fitness object."""
         return str(self.values)
     
     def __repr__(self):
-        """ Return the Python code to build a copy of the object."""
+        """Return the Python code to build a copy of the object."""
         module = self.__module__
         name = self.__class__.__name__
         return "%s.%s(%r)" % (module, name, self.values)

@@ -48,7 +48,7 @@ def evaluateADF(seq):
     adfdict = {}
     for i, expr in enumerate(reversed(seq[1:])):
         func = lambdify(expr.pset, expr)
-        adfdict.update({expr.pset.name : func})
+        adfdict.update({expr.pset.__name__ : func})
         for expr2 in reversed(seq[1:i+1]):
             expr2.pset.func_dict.update(adfdict)
             
@@ -154,8 +154,7 @@ class Ephemeral(Terminal):
         self.value = self.func()
         
 class EphemeralGenerator(object):
-    """ Class that generates `Ephemeral` to be added to an expression.
-    """
+    """ Class that generates `Ephemeral` to be added to an expression."""
     def __init__(self, ephemeral, ret = __type__):
         self.ret = ret
         self.name = ephemeral.__name__
@@ -175,7 +174,7 @@ class PrimitiveSetTyped(object):
         self.prims_count = 0
         self.adfs_count = 0
         
-        self.name = name 
+        self.__name__ = name 
         self.ret = ret_type
         self.ins = in_types
         for i, type in enumerate(in_types):
@@ -214,7 +213,7 @@ class PrimitiveSetTyped(object):
         self.terms_count += 1
         
     def addADF(self, adfset):
-        prim = Primitive(adfset.name, adfset.ins, adfset.ret)
+        prim = Primitive(adfset, adfset.ins, adfset.ret)
         self.primitives[adfset.ret].append(prim)
     
     @property
