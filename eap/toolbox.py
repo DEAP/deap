@@ -152,7 +152,7 @@ def cxTwoPoints(ind1, ind2):
         >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)]
         >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
         >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
-        >>> twoPointsCx(ind1, ind2)
+        >>> cxTwoPoints(ind1, ind2)
         >>> print ind1, len(ind1)
         [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)], m
         >>> print ind2, len(ind2)
@@ -183,7 +183,7 @@ def cxOnePoint(ind1, ind2):
         >>> ind1 = [A(1), ..., A(n), ..., A(m)]
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
         >>> # Crossover with mating point i, 1 < i <= min(m, k)
-        >>> twoPointsCx(ind1, ind2)
+        >>> cxOnePoint(ind1, ind2)
         >>> print ind1, len(ind1)
         [A(1), ..., B(i), ..., B(k)], k
         >>> print ind2, len(ind2)
@@ -552,9 +552,13 @@ def cxTypedTreeOnePoint(ind1, ind2):
     """Randomly select in each individual and exchange each subtree with the 
     point as root between each individual. Since the node are strongly typed, 
     the operator then make sure the type of second node correspond to the type
-    of the first node. It it doesn't it randomly select another point in the
-    second individual and try again. It tries up to 5 times before returning
-    the unmodified individuals.
+    of the first node. If it doesn't, it randomly selects another point in the
+    second individual and try again. It tries up to *5* times before
+    giving up on the crossover.
+    
+    .. note:
+       This crossover is subject to change for a more effective method 
+       of selecting the crossover points.
     """
     # choose the crossover point in each individual
     try:
@@ -570,11 +574,11 @@ def cxTypedTreeOnePoint(ind1, ind2):
     type2 = subtree2.root.ret 
 
     # try to mate the trees
-    # if not crossover point is found after MAX_CX_TRY
-    # the children are returned without modifications.
+    # if no crossover point is found after 5 it gives up trying
+    # mating individuals.
     tries = 0
-    MAX_CX_TRY = 5
-    while not (type1 == type2) and tries != MAX_CX_TRY:
+    MAX_TRIES = 5
+    while not (type1 == type2) and tries < MAX_TRIES:
         index2 = random.randint(1, ind2.size-1)
         subtree2 = ind2.search_subtree_dfs(index2)
         type2 = subtree2.root.ret
@@ -612,7 +616,7 @@ def mutTypedTreeUniform(individual, expr):
     index = random.randint(0, individual.size-1)
     subtree = individual.search_subtree_dfs(index)  
     individual.set_subtree_dfs(index, expr(pset=individual.pset,
-                                           type= subtree.root.ret))
+                                           type=subtree.root.ret))
     
     return individual,
 
@@ -622,7 +626,7 @@ def mutTypedTreeUniform(individual, expr):
 
 def selRandom(individuals, n):
     """Select *n* individuals at random from the input *individuals*. The
-    list returned contains shallow copies of the input *individuals*.
+    list returned contains references to the input *individuals*.
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
@@ -632,22 +636,22 @@ def selRandom(individuals, n):
 
 def selBest(individuals, n):
     """Select the *n* best individuals among the input *individuals*. The
-    list returned contains shallow copies of the input *individuals*.
+    list returned contains references to the input *individuals*.
     """
     return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
 
 
 def selWorst(individuals, n):
     """Select the *n* worst individuals among the input *individuals*. The
-    list returned contains shallow copies of the input *individuals*.
+    list returned contains references to the input *individuals*.
     """
     return sorted(individuals, key=attrgetter("fitness"))[:n]
 
 
 def selTournament(individuals, n, tournsize):
     """Select *n* individuals from the input *individuals* using *n*
-    tournaments of *tournSize* individuals. The list returned contains shallow
-    copies of the input *individuals*.
+    tournaments of *tournSize* individuals. The list returned contains
+    references to the input *individuals*.
     
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
@@ -665,8 +669,8 @@ def selTournament(individuals, n, tournsize):
 def selRoulette(individuals, n):
     """Select *n* individuals from the input *individuals* using *n*
     spins of a roulette. The selection is made by looking only at the first
-    objective of each individual. The list returned contains shallow
-    copies of the input *individuals*.
+    objective of each individual. The list returned contains references to
+    the input *individuals*.
     
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
@@ -695,7 +699,8 @@ def nsga2(individuals, n):
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a non-domination sheme.
+    than sorting the population according to a non-domination sheme. The list
+    returned contains references to the input *individuals*.
     
     For more details on the NSGA-II operator see Deb, Pratab, Agarwal,
     and Meyarivan, "A fast elitist non-dominated sorting genetic algorithm for
@@ -787,7 +792,8 @@ def spea2(individuals, n):
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a strength pareto sheme.
+    than sorting the population according to a strength pareto sheme. The list
+    returned contains references to the input *individuals*.
     
     For more details on the SPEA-II operator see Zitzler, Laumanns and Thiele,
     "SPEA 2: Improving the strength pareto evolutionary algorithm", 2001.
