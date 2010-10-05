@@ -113,7 +113,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
         maximums = map(max, fits_t)
         length = len(population)
         sums = map(sum, fits_t)
-        sums2 = [sum([x**2 for x in fit]) for fit in fits_t]
+        sums2 = [sum(x*x for x in fit) for fit in fits_t]
         means = [sum_ / length for sum_ in sums]
         std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 
@@ -217,7 +217,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloffa
         maximums = map(max, fits_t)
         length = len(population)
         sums = map(sum, fits_t)
-        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        sums2 = [sum(x*x for x in fit) for fit in fits_t]
         means = [sum_ / length for sum_ in sums]
         std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 
@@ -323,7 +323,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         maximums = map(max, fits_t)
         length = len(population)
         sums = map(sum, fits_t)
-        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        sums2 = [sum(x*x for x in fit) for fit in fits_t]
         means = [sum_ / length for sum_ in sums]
         std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 
@@ -375,7 +375,7 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
         maximums = map(max, fits_t)
         length = len(population)
         sums = map(sum, fits_t)
-        sums2 = [sum([x*x for x in fit]) for fit in fits_t]
+        sums2 = [sum(x*x for x in fit) for fit in fits_t]
         means = [sum_ / length for sum_ in sums]
         std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
         
