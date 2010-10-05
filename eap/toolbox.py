@@ -371,9 +371,9 @@ def cxMessyOnePoint(ind1, ind2):
         >>> # Crossover with mating points i, j, 1 <= i <= m, 1 <= j <= n
         >>> cxMessyOnePoint(ind1, ind2)
         >>> print ind1, len(ind1)
-        [A(1), ..., A(i - 1), B(j), B(n)], n + j - i
+        [A(1), ..., A(i - 1), B(j), ..., B(n)], n + j - i
         >>> print ind2, len(ind2)
-        [B(1), ..., B(j - 1), A(i), A(m)], m + i - j
+        [B(1), ..., B(j - 1), A(i), ..., A(m)], m + i - j
     
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.        
@@ -390,6 +390,8 @@ def cxMessyOnePoint(ind1, ind2):
 
 def cxESBlend(ind1, ind2, alpha, minstrategy=None):
     """Execute a blend crossover on both, the individual and the strategy.
+    *minstrategy* defaults to None so that if it is not present, the minimal
+    strategy will be minus infinity.
     """
     size = min(len(ind1), len(ind2))
     
@@ -556,7 +558,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
     second individual and try again. It tries up to *5* times before
     giving up on the crossover.
     
-    .. note:
+    .. note::
        This crossover is subject to change for a more effective method 
        of selecting the crossover points.
     """
@@ -990,25 +992,6 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     for i, immigrant in enumerate(immigrants[to_deme]):
         indx = populations[to_deme].index(immigrant)
         populations[to_deme][indx] = mig_buf[i]
-
-######################################
-# Decorators                         #
-######################################
-
-def deepcopyArgs(*argsname):
-    """Pre-execution function that deepcopies argument specified by
-    *argname*. We prefer the use of the :meth:`toolbox.clone()` method. 
-    """
-    def decDeepcopyArgs(func):
-        args_name = inspect.getargspec(func)[0]
-        args_pos = [args_name.index(name) for name in argsname]
-        def wrapDeepcopyArgs(*args, **kargs):
-            args = list(args)
-            for pos in args_pos:
-                args[pos] = copy.deepcopy(args[pos])
-            return func(*args, **kargs)
-        return wrapDeepcopyArgs
-    return decDeepcopyArgs
 
 ######################################
 # Decoration tool                    #
