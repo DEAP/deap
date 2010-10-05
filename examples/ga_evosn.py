@@ -82,16 +82,18 @@ def main():
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
-    # Evaluate the entire population
-    for ind in population:
-        ind.fitness.values = tools.evaluate(ind)
+    # Evaluate the individuals with an invalid fitness
+    invalid_ind = [ind for ind in population if not ind.fitness.valid]
+    fitnesses = tools.map(tools.evaluate, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
     
     hof.update(population)
     
     # Begin the evolution
     for g in xrange(NGEN):
         print "-- Generation %i --" % g
-        offsprings = [copy.deepcopy(ind) for ind in population]
+        offsprings = [tools.clone(ind) for ind in population]
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
@@ -99,7 +101,9 @@ def main():
                 tools.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
-    
+        
+        # Note here that we have a different sheme of mutation than in the
+        # original algorithm, we use 3 different mutations subsequently.
         for ind in offsprings:
             if random.random() < MUTPB:
                 tools.mutate(ind)
@@ -112,9 +116,12 @@ def main():
                 del ind.fitness.values
                 
         # Evaluate the individuals with an invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                ind.fitness.values = tools.evaluate(ind)
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = tools.map(tools.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+        
+        print "  Evaluated %i individuals" % len(invalid_ind)
         
         population = tools.select(population+offsprings, n=len(offsprings))
         hof.update(population)
@@ -127,7 +134,7 @@ def main():
         maximums = map(max, fits_t)
         lenght = len(population)
         sums = map(sum, fits_t)
-        sums2 = [sum(map(lambda x: x**2, fit)) for fit in fits_t]
+        sums2 = [sum(x*x for x in fit) for fit in fits_t]
         means = [sum_ / lenght for sum_ in sums]
         std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
         

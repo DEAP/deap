@@ -59,12 +59,14 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
         
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in population]
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
+        
         length = len(population)
         mean = sum(fits) / length
-        sum2 = sum(map(lambda x: x**2, fits))
+        sum2 = sum(fit**2 for fit in fits)
         std_dev = abs(sum2 / length - mean**2)**0.5
+        
+        _logger.debug("Min %f", min(fits))
+        _logger.debug("Max %f", max(fits))
         _logger.debug("Mean %f", mean)
         _logger.debug("Std. Dev. %f", std_dev)
         
@@ -255,7 +257,7 @@ def cigar(x):
     """Cigar test objective function."""
     return x[0]**2 + 1e6 * sum(imap(pow, x, repeat(2)))
 
-def rosen(x):  
+def rosenbrock(x):  
     """Rosenbrock test objective function."""
     return sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
                    x[:-1], x[1:]))
