@@ -110,7 +110,7 @@ if __name__ == "__main__":
         fits = [ind.fitness.values[0] for ind in pop_ga]
         length = len(pop_ga)
         mean = sum(fits) / length
-        sum2 = sum(map(lambda x: x**2, fits))
+        sum2 = sum(x*x for x in fits)
         std_dev = abs(sum2 / length - mean**2)**0.5
             
         print "--GA Population--"
@@ -125,7 +125,7 @@ if __name__ == "__main__":
         print "  Max %f" % max(fits)
         length = len(pop_gp)
         mean = sum(fits) / length
-        sum2 = sum(map(lambda x: x**2, fits))
+        sum2 = sum(x*x for x in fits)
         std_dev = abs(sum2 / length - mean**2)**0.5
         print "  Avg %f" % (mean)
         print "  Std %f" % std_dev

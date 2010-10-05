@@ -132,8 +132,9 @@ if __name__ == "__main__":
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     # Evaluate the entire population
-    for ind in population:
-        ind.fitness.values = tools.evaluate(ind)
+    fitnesses = tools.map(tools.evaluate, pop)
+    for ind, fit in zip(pop, fitnesses):
+        ind.fitness.values = fit
     
     for g in range(NGEN):
         print "-- Generation %i --" % g
@@ -162,22 +163,26 @@ if __name__ == "__main__":
         # for elem in pop:
         #     del elem.fitness.values
 
-        # Evaluate the individuals with an invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                ind.fitness.values = tools.evaluate(ind)
+         # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = tools.map(tools.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        print "  Evaluated %i individuals" % len(invalid_ind)
                 
         # Replacement of the population by the offspring
         population[:] = offsprings
     
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in offsprings]
-        print "  Min %f" % min(fits)
-        print "  Max %f" % max(fits)
         lenght = len(population)
         mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
+        sum2 = sum(x*x for x in fits)
         std_dev = (sum2 / lenght - mean**2)
+        
+        print "  Min %f" % min(fits)
+        print "  Max %f" % max(fits)
         print "  Avg %f" % (mean)
         print "  Std %f" % std_dev
     
