@@ -129,10 +129,12 @@ class SortingNetwork(list):
     
     @property
     def depth(self):
-        """Return the number of parallel steps that it takes to sort any input."""
+        """Return the number of parallel steps that it takes to sort any input.
+        """
         return len(self)
     
     @property
     def length(self):
         """Return the number of comparison-swap used."""
         return sum(len(level) for level in self)
+
