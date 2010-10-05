@@ -542,10 +542,10 @@ def cxTreeUniformOnePoint(ind1, ind2):
     except ValueError:
         return ind1, ind2
 
-    sub1 = ind1.search_subtree_dfs(index1)
-    sub2 = ind2.search_subtree_dfs(index2)
-    ind1.set_subtree_dfs(index1, sub2)
-    ind2.set_subtree_dfs(index2, sub1)
+    sub1 = ind1.searchSubtreeDF(index1)
+    sub2 = ind2.searchSubtreeDF(index2)
+    ind1.setSubtreeDF(index1, sub2)
+    ind2.setSubtreeDF(index2, sub1)
     
     return ind1, ind2
     
@@ -569,8 +569,8 @@ def cxTypedTreeOnePoint(ind1, ind2):
     except ValueError:
         return ind1, ind2
         
-    subtree1 = ind1.search_subtree_dfs(index1)
-    subtree2 = ind2.search_subtree_dfs(index2)
+    subtree1 = ind1.searchSubtreeDF(index1)
+    subtree2 = ind2.searchSubtreeDF(index2)
 
     type1 = subtree1.root.ret
     type2 = subtree2.root.ret 
@@ -582,15 +582,15 @@ def cxTypedTreeOnePoint(ind1, ind2):
     MAX_TRIES = 5
     while not (type1 == type2) and tries < MAX_TRIES:
         index2 = random.randint(1, ind2.size-1)
-        subtree2 = ind2.search_subtree_dfs(index2)
+        subtree2 = ind2.searchSubtreeDF(index2)
         type2 = subtree2.root.ret
         tries += 1
     
     if type1 == type2:
-        sub1 = ind1.search_subtree_dfs(index1)
-        sub2 = ind2.search_subtree_dfs(index2)
-        ind1.set_subtree_dfs(index1, sub2)
-        ind2.set_subtree_dfs(index2, sub1)
+        sub1 = ind1.searchSubtreeDF(index1)
+        sub2 = ind2.searchSubtreeDF(index2)
+        ind1.setSubtreeDF(index1, sub2)
+        ind2.setSubtreeDF(index2, sub1)
     
     return ind1, ind2
 
@@ -603,7 +603,7 @@ def mutTreeUniform(individual, expr):
     is generated using the method `expr`.
     """
     index = random.randint(0, individual.size-1)
-    individual.set_subtree_dfs(index, expr(pset=individual.pset))
+    individual.setSubtreeDF(index, expr(pset=individual.pset))
     
     return individual,
 
@@ -616,9 +616,9 @@ def mutTypedTreeUniform(individual, expr):
     subtree is replaced by the new subtree, and the mutant is returned.
     """
     index = random.randint(0, individual.size-1)
-    subtree = individual.search_subtree_dfs(index)  
-    individual.set_subtree_dfs(index, expr(pset=individual.pset,
-                                           type=subtree.root.ret))
+    subtree = individual.searchSubtreeDF(index)  
+    individual.setSubtreeDF(index, expr(pset=individual.pset,
+                                        type=subtree.root.ret))
     
     return individual,
 
