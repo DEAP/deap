@@ -21,12 +21,13 @@ import copy
 sys.path.append("..")
 logging.basicConfig(level=logging.DEBUG)
 
-import sortingnetwork as sn
 from eap import algorithms
 from eap import base
 from eap import creator
 from eap import halloffame
 from eap import toolbox
+
+import sortingnetwork as sn
 
 INPUTS = 6
 
