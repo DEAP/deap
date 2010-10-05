@@ -67,7 +67,7 @@ tools.register("mutate", toolbox.mutGaussian, mu=0, sigma=3, indpb=0.3)
 tools.register("select", toolbox.nsga2)
 
 tools.decorate("mate", checkBounds(-5, 5))
-tools.decorate("mutate", checkBounds(-5, 5))               
+tools.decorate("mutate", checkBounds(-5, 5)) 
 
 if __name__ == "__main__":
     random.seed(64)
