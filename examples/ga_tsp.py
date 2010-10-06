@@ -24,7 +24,7 @@ except ImportError:
         "read the data files.")
 
 sys.path.append("..")
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import base
 from eap import creator

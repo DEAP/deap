@@ -26,7 +26,7 @@ from eap import creator
 from eap import halloffame
 from eap import toolbox
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 IND_SIZE = 30
 

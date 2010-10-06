@@ -21,7 +21,7 @@ import sys
 import random
 
 sys.path.append("..")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 from eap import algorithms
 from eap import base
