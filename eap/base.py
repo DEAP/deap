@@ -279,7 +279,7 @@ class Fitness(object):
         self.wvalues = ()
 
     values = property(getValues, setValues, delValue,
-        ("Fitness values. Use directly ``individual.fitness.values = some_value`` "
+        ("Fitness values. Use directly ``individual.fitness.values = values`` "
          "in order to set the fitness and ``del individual.fitness.values`` "
          "in order to clear (invalidate) the fitness. The (unweighted) fitness "
          "can be directly accessed via ``individual.fitness.values``."))
