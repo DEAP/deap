@@ -258,7 +258,7 @@ def sphere(individual):
 
 def cigar(individual):
     """Cigar test objective function."""
-    return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual))
+    return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual)
 
 def rosenbrock(individual):  
     """Rosenbrock test objective function."""
