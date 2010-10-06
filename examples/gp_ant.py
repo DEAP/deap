@@ -166,7 +166,7 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=
 tools = toolbox.Toolbox()
 
 # Attribute generator
-tools.register("expr_init", gp.generate_full, pset=pset, min=1, max=2)
+tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
 tools.register("individual", creator.Individual, content_init=tools.expr_init)
@@ -182,7 +182,7 @@ def evalArtificialAnt(individual):
 tools.register("evaluate", evalArtificialAnt)
 tools.register("select", toolbox.selTournament, tournsize=7)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generate_full, min=0, max=2)
+tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":

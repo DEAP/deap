@@ -77,7 +77,7 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
-tools.register("expr", gp.generate_ramped, pset=pset, type=pset.ret, min=1, max=2)
+tools.register("expr", gp.generateRamped, pset=pset, type_=pset.ret, min_=1, max_=2)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=100)
 tools.register("lambdify", gp.lambdify, pset=pset)
@@ -94,7 +94,7 @@ def evalSpambase(individual):
 tools.register("evaluate", evalSpambase)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTypedTreeOnePoint)
-tools.register("expr_mut", gp.generate_full, min=0, max=2)
+tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
 tools.register("mutate", toolbox.mutTypedTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":
