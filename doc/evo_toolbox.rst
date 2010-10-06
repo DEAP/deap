@@ -63,7 +63,7 @@ Mutation
 
 .. autofunction:: eap.toolbox.mutFlipBit
 
-.. autofunction:: eap.toolbox.mutES
+.. autofunction:: eap.toolbox.mutES(individual, indpb[, minstrategy])
 
 .. autofunction:: eap.toolbox.mutTreeUniform
 
@@ -89,7 +89,7 @@ Selection
 Migration
 ---------
 
-.. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
+.. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
 
 Decoration
 ----------

@@ -87,19 +87,25 @@ The evolution of the population is the last thing to do before getting results. 
 
 Is that simple enough? Lets continue with more complicated things, mating and mutating the population. The crossover and mutation operators provided with eap usually take respectively 2 and 1 individual(s) on input and return 2 and 1 *new* individual(s). The simple GA algorithm states that the produced individuals shall replace their parents in the population, this is what is done by the following lines of code, where a crossover is applied with probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. ::
 
-    for i in range(1, len(pop), 2):
-        if random.random() < CXPB:
-            pop[i - 1], pop[i] = tools.mate(pop[i - 1], pop[i])
+	# Apply crossover and mutation on the offsprings
+	for child1, child2 in zip(offsprings[::2], offsprings[1::2]):
+	    if random.random() < CXPB:
+	        tools.mate(child1, child2)
+	        del child1.fitness.values
+	        del child2.fitness.values
 
-    for i in range(len(pop)):
-        if random.random() < MUTPB:
-            pop[i] = tools.mutate(pop[i])
+	for mutant in offsprings:
+	    if random.random() < MUTPB:
+	        tools.mutate(mutant)
+	        del mutant.fitness.values
 
 The population now needs to be evaluated, we then apply the evaluation on every individual in the population that has an invalid fitness. ::
 
-    for ind in pop:
-        if not ind.fitness.valid:
-            ind.fitness.values = tools.evaluate(ind)
+	# Evaluate the individuals with an invalid fitness
+	invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+	fitnesses = map(tools.evaluate, invalid_ind)
+	for ind, fit in zip(invalid_ind, fitnesses):
+	    ind.fitness.values = fit
 
 And finally, last but not least, the selection part occurs. We replace the whole population by individuals selected by tournament (as defined in the toolbox) in that same population. ::
 
@@ -109,14 +115,17 @@ The ``[:]`` needs to be used in order to replace the slice of objects with the n
 
 Some statistics may be gathered on the population, the following lines print the min, max, mean and standard deviation of the population. ::
 
-    fits = [ind.fitness[0] for ind in pop]
-    print '  Min %f' % min(fits)
-    print '  Max %f' % max(fits)
-    length = len(pop)
-    mean = sum(fits) / length
-    sum2 = sum(map(lambda x: x**2, fits))
-    std_dev = abs(sum2 / length - mean**2)**0.5
-    print '  Mean %f' % (mean)
-    print '  Std. Dev. %f' % std_dev
+	# Gather all the fitnesses in one list and print the stats
+	fits = [ind.fitness.values[0] for ind in pop]
+
+	length = len(pop)
+	mean = sum(fits) / length
+	sum2 = sum(x*x for x in fits)
+	std_dev = abs(sum2 / length - mean**2)**0.5
+
+	print "  Min %s" % min(fits)
+	print "  Max %s" % max(fits)
+	print "  Avg %s" % mean
+	print "  Std %s" % std_dev
 
 The complete `One Max Genetic Algorithm <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code is available. It may be a little different but it does the overall same thing.
