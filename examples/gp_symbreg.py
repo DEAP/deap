@@ -75,7 +75,7 @@ tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
 if __name__ == "__main__":
     random.seed(959)
     
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     pop = tools.population()
     hof = halloffame.HallOfFame(1)

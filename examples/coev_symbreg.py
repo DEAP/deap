@@ -1,15 +1,29 @@
-import sys
-import os
-import random
-import copy
+#    This file is part of EAP.
+#
+#    EAP is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as
+#    published by the Free Software Foundation, either version 3 of
+#    the License, or (at your option) any later version.
+#
+#    EAP is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-sys.path.append(os.path.abspath('..'))
+import sys
+import random
+
+sys.path.append("..")
 
 from eap import base
 from eap import creator
 from eap import toolbox
 from eap import gp
 
+# gp_symbreg already defines some usefull structures
 import gp_symbreg
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -31,8 +45,8 @@ def evalSymbReg(expr, data):
 tools_ga = toolbox.Toolbox()
 
 tools_ga.register("float", random.uniform, -1, 1)
-tools_ga.register('individual', creator.IndGA, content_init=tools_ga.float, size_init=10)
-tools_ga.register('population', list, content_init=tools_ga.individual, size_init=200)
+tools_ga.register("individual", creator.IndGA, content_init=tools_ga.float, size_init=10)
+tools_ga.register("population", list, content_init=tools_ga.individual, size_init=200)
 
 tools_ga.register("select", toolbox.selTournament, tournsize=3)
 tools_ga.register("mate", toolbox.cxTwoPoints)
@@ -63,8 +77,8 @@ if __name__ == "__main__":
         # Select and clone the offsprings
         off_ga = tools_ga.select(pop_ga, n=len(pop_ga))
         off_gp = tools_gp.select(pop_gp, n=len(pop_gp))
-        off_ga = [copy.deepcopy(ind) for ind in off_ga]        
-        off_gp = [copy.deepcopy(ind) for ind in off_gp]
+        off_ga = [tools.clone(ind) for ind in off_ga]        
+        off_gp = [tools.clone(ind) for ind in off_gp]
     
     
         # Apply crossover and mutation
