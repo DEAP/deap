@@ -250,7 +250,7 @@ def rastrigin(individual):
     for this test function.
     """
     return 10 * len(individual) + sum(gene * gene - 10 * \
-                        math.cos(2 * math.pi * gene) for gene in individual))
+                        math.cos(2 * math.pi * gene) for gene in individual)
     
 def sphere(individual):
     """Sphere test objective function."""
