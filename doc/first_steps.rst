@@ -74,12 +74,12 @@ The evaluation is the most crucial part of an evolutionary algorithm, it is also
     ...     b = len(individual)
     ...     return a, 1. / b
     ...         
-    >>> child.fitness.values = eval(child1)
+    >>> child1.fitness.values = eval(child1)
     >>> print child1.fitness
-    [1.7, 0.2]
+    eap.creator.FitnessMax((1.7, 0.2))
     >>> child2.fitness.values = eval(child2)
-    >>> print child2
-    [2.23, 0.2]
+    >>> print child2.fitness
+    eap.creator.FitnessMax((2.23, 0.2))
     >>> print child1.fitness.valid
     True
     

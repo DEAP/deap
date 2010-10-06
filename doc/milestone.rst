@@ -4,7 +4,7 @@ Milestone
 
 .. automodule:: eap.milestone
 
-.. autoclass:: eap.milestone.Milestone([yaml,] [object[, ...]])
+.. autoclass:: eap.milestone.Milestone([yaml,object[, ...]])
    
    .. automethod:: eap.milestone.Milestone.dump(prefix)
    
