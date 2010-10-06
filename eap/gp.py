@@ -301,43 +301,43 @@ class PrimitiveTree(base.Tree):
 
 # Expression generation functions
 
-def generateRamped(pset, min, max, type=__type__):
+def generateRamped(pset, min_, max_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
     Half the time, the expression is generated with generateGrow,
     the other half, the expression is generated with generateFull.
     """
     method = random.choice((generateGrow, generateFull))
-    return method(pset, min, max, type)
+    return method(pset, min_, max_, type_)
 
-def generateFull(pset, min, max, type=__type__):
+def generateFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
     """
     def condition(max_depth):
         return max_depth == 0
-    return _generate(pset, min, max, condition, type)
+    return _generate(pset, min_, max_, condition, type_)
 
-def generateGrow(pset, min, max, type=__type__):
+def generateGrow(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
     between *min* and *max*.
     """
     def condition(max_depth):
         return max_depth == 0 or random.random() < pset.terminalRatio
-    return _generate(pset, min, max, condition, type)
+    return _generate(pset, min_, max_, condition, type_)
 
-def _generate(pset, min, max, condition, type=__type__):
-    def genExpr(max_depth, type):
+def _generate(pset, min_, max_, condition, type_=__type__):
+    def genExpr(max_depth, type_):
         if condition(max_depth):
-            term = random.choice(pset.terminals[type])
+            term = random.choice(pset.terminals[type_])
             expr = term()
         else:
-            prim = random.choice(pset.primitives[type])
+            prim = random.choice(pset.primitives[type_])
             expr = [prim]
             args = (genExpr(max_depth-1, arg) for arg in prim.args)
             expr.extend(args)
         return expr
-    max_depth = random.randint(min, max)
-    expr = genExpr(max_depth, type)
+    max_depth = random.randint(min_, max_)
+    expr = genExpr(max_depth, type_)
     if not isinstance(expr, list):
         expr = [expr]
     return expr
