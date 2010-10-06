@@ -45,7 +45,10 @@ def create(name, base, **kargs):
         else:
             dict_cls[obj_name] = obj
 
-    def init_type(self, *args, **kargs):
+    def initType(self, *args, **kargs):
+        """Replace the __init__ function of the new type, in order to
+        add attributes, that were defined with **kargs, to the instance.
+        """
         for elem in dict_inst.items():
             obj_name, obj = elem
             if hasattr(obj, "__call__"):
@@ -65,7 +68,7 @@ def create(name, base, **kargs):
     objtype = type(name, (base,), dict_cls)
 
     if issubclass(base, array.array):
-        def deepcopy_array(self, memo):
+        def deepcopyArray(self, memo):
             """Overrides the deepcopy from array.array that does not copy
             the object's attributes.
             """
@@ -75,8 +78,8 @@ def create(name, base, **kargs):
             copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
             return copy_
     
-        objtype.__deepcopy__ = deepcopy_array
+        objtype.__deepcopy__ = deepcopyArray
 
-    objtype.__init__ = init_type
+    objtype.__init__ = initType
     globals()[name] = objtype
 
