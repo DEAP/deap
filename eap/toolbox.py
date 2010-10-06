@@ -612,7 +612,7 @@ def mutTypedTreeUniform(individual, expr):
     index = random.randint(0, individual.size-1)
     subtree = individual.searchSubtreeDF(index)  
     individual.setSubtreeDF(index, expr(pset=individual.pset,
-                                        type=subtree.root.ret))
+                                        type_=subtree.root.ret))
     
     return individual,
 
