@@ -7,7 +7,7 @@ The statistics in EAP are relatively easy to implement in your code. In fact, th
 Retrieving the information
 ==========================
 
-The statistic module has been removed since it is really easy and efficient in python to access all the data of the evolutionary algorithm and built a list with it. Every EA is different, with different configurations, different levels of population, different kind of individuals and so on. A module that computes the statistics would have been limited by or would have limit your imagination in a way that it cannot be enough general to cover every single configuration that EAP makes possible.
+The statistic module has been removed since it is really easy and efficient in python to access all the data of the evolutionary algorithm and built a list with it. Every EA is different, with different configurations, different levels of population, different kind of individuals and so on. A module that computes the statistics would have been limited or would have limit your imagination in a way that it cannot be enough general to cover every single configuration that EAP makes possible.
 
 Accessing the data is made really efficient in python by the list comprehension. Here are some simple examples of evolutionary algorithms and the list comprehension needed to retrieve the fitness.
 
@@ -17,7 +17,7 @@ Mono-objective, mono-demic population
 In this example, we have a single population that contains the individuals, each individual has a fitness. In order to retrieve the minimum, maximum and average fitness of the population we may simply use ::
 
     fits = [ind.fitness.values[0] for ind in pop]
-    sum2 = sum((x**2 for x in fits))
+    sum2 = sum(x*x for x in fits)
     
     minimum = min(fits)
     maximum = max(fits)
@@ -31,7 +31,7 @@ In this example, we have a single population of multiple demes that contains the
 
     # Gather all the fitnesses in one list and compute the stats
     fits = [ind.fitness.values[0] for deme in pop for ind in deme]
-    sum2 = sum((x**2 for x in fits))
+    sum2 = sum(x*x for x in fits)
     
     minimum = min(fits)
     maximum = max(fits)
@@ -51,7 +51,7 @@ In this example, we have a single population that contains the individuals, each
    maximums = map(max, fits_t)
    length = len(population)
    sums = map(sum, fits_t)
-   sums2 = [sum((x**2 for x in fit)) for fit in fits_t]
+   sums2 = [sum(x*x for x in fit) for fit in fits_t]
    means = [sum_ / length for sum_ in sums]
    std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
 

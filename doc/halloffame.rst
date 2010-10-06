@@ -14,6 +14,6 @@ Hall of Fame
    
    .. automethod:: eap.halloffame.HallOfFame.clear
 
-.. autoclass:: eap.halloffame.ParetoFront(similar)
+.. autoclass:: eap.halloffame.ParetoFront([similar])
 
    .. automethod:: eap.halloffame.ParetoFront.update

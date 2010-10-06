@@ -19,7 +19,7 @@ import logging
 import copy
 
 sys.path.append("..")
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import algorithms
 from eap import base

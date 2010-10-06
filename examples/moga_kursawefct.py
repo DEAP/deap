@@ -21,7 +21,7 @@ import sys
 import random
 
 sys.path.append("..")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 from eap import algorithms
 from eap import base
@@ -43,8 +43,8 @@ tools.register("individual", creator.Individual, "f", content_init=tools.attr_fl
 tools.register("population", creator.Population, content_init=tools.individual, size_init=50)
 
 def evalKursawe(ind):
-    f1 = sum(map(lambda x, y: -10 * math.exp(-0.2 * math.sqrt(x * x + y * y)), ind[:-1], ind[1:]))
-    f2 = sum(map(lambda x: abs(x)**0.8 + 5 * math.sin(x * x * x), ind[:]))
+    f1 = sum(-10 * math.exp(-0.2 * math.sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
+    f2 = sum(abs(x)**0.8 + 5 * math.sin(x * x * x) for x in ind)
     return f1, f2
 
 def checkBounds(min, max):

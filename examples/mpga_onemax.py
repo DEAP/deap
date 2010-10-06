@@ -1,4 +1,3 @@
-#!python2.7
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -21,7 +20,7 @@ import random
 import sys
 
 sys.path.append("..")
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 from eap import algorithms
 from eap import base

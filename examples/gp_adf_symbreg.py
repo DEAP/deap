@@ -14,20 +14,16 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import os
 import random
 import operator
 import math
-import logging
 
-sys.path.append(os.path.abspath('..'))
+sys.path.append("..")
 
 from eap import base
 from eap import creator
 from eap import toolbox
 from eap import gp
-
-logging.basicConfig(level=logging.DEBUG)
 
 #random.seed(1626)
 
@@ -132,16 +128,16 @@ if __name__ == "__main__":
     
     # Evaluate the entire population
     for ind in pop:
-        ind.fitness.values = tools.evaluate(ind)
-
+    	ind.fitness.values = tools.evaluate(ind)
+    
     for g in range(NGEN):
         print "-- Generation %i --" % g
     
         # Select the offsprings
         offsprings = tools.select(pop, n=len(pop))
         # Clone the offsprings
-        offsprings = map(tools.clone, offsprings)
-   
+        offsprings = [tools.clone(ind) for ind in offsprings]
+    
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             for tree1, tree2 in zip(ind1, ind2):
