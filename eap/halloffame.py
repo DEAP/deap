@@ -18,11 +18,10 @@ individuals that ever lived in the evolutionary process. It is used by the
 algorithms provided in the :mod:`~eap.algorithms` module.
 """
 
-from toolbox import sortFastND
-from bisect import bisect_right
-from copy import deepcopy
-from itertools import chain
-from operator import attrgetter, eq
+import bisect
+import copy
+import itertools
+import operator
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
@@ -48,13 +47,14 @@ class HallOfFame(object):
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
-            self.items = sorted(chain(self, population), 
-                                key=attrgetter("fitness"), 
+            self.items = sorted(itertools.chain(self, population), 
+                                key=operator.attrgetter("fitness"), 
                                 reverse=True)[:self.maxsize]
-            self.items = [deepcopy(item) for item in self.items]
+            self.items = [copy.deepcopy(item) for item in self.items]
             # The keys are the fitnesses in reverse order to allow the use
             # of the bisection algorithm 
-            self.keys = map(attrgetter("fitness"), reversed(self.items))
+            self.keys = map(operator.attrgetter("fitness"),
+                            reversed(self.items))
         else:
             for ind in population: 
                 if ind.fitness > self[-1].fitness:
@@ -69,11 +69,11 @@ class HallOfFame(object):
         inserted on the right side of an equal individual. Inserting a new 
         individual in the hall of fame also preserve the hall of fame's order.
         This method **does not** check for the size of the hall of fame, in a
-        way that inserting an new individual in a full hall of fame will not
+        way that inserting a new individual in a full hall of fame will not
         remove the worst individual to maintain a constant size.
         """
-        item = deepcopy(item)
-        i = bisect_right(self.keys, item.fitness)
+        item = copy.deepcopy(item)
+        i = bisect.bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
         self.keys.insert(i, item.fitness)
     
@@ -118,7 +118,7 @@ class ParetoFront(HallOfFame):
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
     it is sorted lexicographically at every moment.
     """
-    def __init__(self, similar=eq):
+    def __init__(self, similar=operator.eq):
         self.similar = similar
         HallOfFame.__init__(self, None)
     

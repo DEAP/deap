@@ -114,9 +114,12 @@ class CMAStrategy(object):
     +----------------+---------------------------+----------------------------+
     """
     def __init__(self, population, sigma, params={}):
-        self.centroid = copy.deepcopy(population[0])    # Create a centroid individual
-        self.centroid[:] = self.centroid[0:0]           # Clear its content
-        self.centroid.extend(numpy.mean(population, 0)) # The centroid is used in new individual creation
+        # Create a centroid individual
+        self.centroid = copy.deepcopy(population[0])
+        # Clear its content
+        self.centroid[:] = self.centroid[0:0]
+        # The centroid is used in new individual creation
+        self.centroid.extend(numpy.mean(population, 0))
         
         self.dim = len(self.centroid)
         self.sigma = sigma
@@ -161,7 +164,7 @@ class CMAStrategy(object):
         old_centroid = numpy.array(self.centroid)
         centroid = numpy.dot(self.weights, sorted_pop[0:self.mu])
         
-        del self.centroid[:]                        # Clear the centroid individual
+        del self.centroid[:]                # Clear the centroid individual
         self.centroid.extend(centroid)
         
         c_diff = centroid - old_centroid
@@ -234,31 +237,31 @@ class CMAStrategy(object):
         self.damps = params.get("damps", self.damps)
         
 
-def rand(x):
+def rand(individual):
     """Random test objective function."""
     return numpy.random.random()
     
-def plane(x):
+def plane(individual):
     """Plane test objective function."""
-    return x[0]
+    return individual[0]
 
-def rastrigin(x):
+def rastrigin(individual):
     """Rastrigin test objective function. Consider using ``lambda_ = 20 * N`` 
     for this test function.
     """
-    return 10 * len(x) + sum(map(lambda a: a**2 - 10 * math.cos(2 * math.pi * a), x))
-    #return 10 * len(x) + sum(x**2 - 10 * numpy.cos(2 * numpy.pi * x))
+    return 10 * len(individual) + sum(gene * gene - 10 * \
+                        math.cos(2 * math.pi * gene) for gene in individual))
     
-def sphere(x):
+def sphere(individual):
     """Sphere test objective function."""
-    return sum(imap(pow, x, repeat(2)))
+    return sum(gene * gene for gene in individual)
 
-def cigar(x):
+def cigar(individual):
     """Cigar test objective function."""
-    return x[0]**2 + 1e6 * sum(imap(pow, x, repeat(2)))
+    return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual))
 
-def rosenbrock(x):  
+def rosenbrock(individual):  
     """Rosenbrock test objective function."""
-    return sum(map(lambda x, y: 100 * (x**2 - y)**2 + (1. - x)**2, 
-                   x[:-1], x[1:]))
+    return sum(100 * (x * x - y)**2 + (1. - x)**2 \
+                   for x, y in zip(individual[:-1], individual[1:]))
     
