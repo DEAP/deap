@@ -34,18 +34,22 @@ class Tree(list):
             return inst
             
         def getstate(self):
+            """Return the state of the NodeProxy: the proxied object."""
             return self.obj
             
         @property
         def size(self):
+            """Return the size of a leaf: 1."""
             return 1
             
         @property
         def height(self):
+            """Return the height of a leaf: 0."""
             return 0
             
         @property
         def root(self):
+            """Return the root of a leaf: itself."""
             return self
         
         def __eq__(self, other):

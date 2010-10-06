@@ -23,7 +23,6 @@ import math
 import numpy
 import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
-from itertools import imap, repeat
 
 numpy.random.seed(random.randint(0, sys.maxint))
 
