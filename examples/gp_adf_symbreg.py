@@ -19,7 +19,6 @@ import random
 import operator
 import math
 import logging
-import copy
 
 sys.path.append(os.path.abspath('..'))
 
@@ -77,7 +76,7 @@ pset.addPrimitive(safeDiv, 2)
 pset.addPrimitive(operator.neg, 1)
 pset.addPrimitive(math.cos, 1)
 pset.addPrimitive(math.sin, 1)
-pset.addEphemeralConstant(lambda: random.randint(-1,1))
+pset.addEphemeralConstant(lambda: random.randint(-1, 1))
 pset.addADF(adfset0)
 pset.addADF(adfset1)
 pset.addADF(adfset2)
@@ -112,7 +111,7 @@ def evalSymbReg(individual):
     func = tools.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
-    values = (x/10. for x in xrange(-10,10))
+    values = (x/10. for x in xrange(-10, 10))
     diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
     diff = sum(map(diff_func, values))
     return diff,
@@ -178,7 +177,7 @@ if __name__ == "__main__":
         print "  Avg %f" % mean
         print "  Std %f" % std_dev
     
-    best = toolbox.selBest(pop,1)[0]
+    best = toolbox.selBest(pop, 1)[0]
     
     print 'Best individual : ', gp.evaluate(best[0]), best.fitness
 
