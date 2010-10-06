@@ -62,7 +62,7 @@ from eap import gp
 from eap import algorithms
 from eap import halloffame
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 def progn(*args):
     for arg in args:

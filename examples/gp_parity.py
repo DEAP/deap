@@ -27,7 +27,7 @@ from eap import gp
 from eap import algorithms
 from eap import halloffame
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 # Initialize Parity problem input and output matrices
 PARITY_FANIN_M = 6

@@ -14,14 +14,13 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
-import os
 import random
 import operator
 import logging
 import csv
 import itertools
 
-sys.path.append(os.path.abspath(".."))
+sys.path.append("..")
 
 from eap import base
 from eap import creator
@@ -30,7 +29,7 @@ from eap import gp
 from eap import algorithms
 from eap import halloffame
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 # Read the spam list features and put it in a list of lists.
 # The dataset is from http://archive.ics.uci.edu/ml/datasets/Spambase

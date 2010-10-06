@@ -40,7 +40,7 @@ Crossover
 
 .. autofunction:: eap.toolbox.cxBlend
 
-.. autofunction:: eap.toolbox.cxESBlend
+.. autofunction:: eap.toolbox.cxESBlend(ind1, ind2, alpha[, minstrategy])
 
 .. autofunction:: eap.toolbox.cxESTwoPoints
 
@@ -63,7 +63,7 @@ Mutation
 
 .. autofunction:: eap.toolbox.mutFlipBit
 
-.. autofunction:: eap.toolbox.mutES
+.. autofunction:: eap.toolbox.mutES(individual, indpb[, minstrategy])
 
 .. autofunction:: eap.toolbox.mutTreeUniform
 
@@ -89,12 +89,9 @@ Selection
 Migration
 ---------
 
-.. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement][, migarray][, sel_kargs][, repl_kargs])
+.. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
 
-Decorators
+Decoration
 ----------
-The toolbox also contains some basic decorators to enhance operator's functionality.
-
-.. autofunction:: eap.toolbox.deepcopyArgs(argname[, ...])
 
 .. autofunction:: eap.toolbox.decorate

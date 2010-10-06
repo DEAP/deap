@@ -17,10 +17,14 @@ import array
 import sys
 import logging
 import random
-import yaml
+try:
+    import yaml
+except ImportError:
+    raise ImportError, ("This example requires a YAML library in order to "
+        "read the data files.")
 
 sys.path.append("..")
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import base
 from eap import creator
