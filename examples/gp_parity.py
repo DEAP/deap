@@ -63,7 +63,7 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 tools = toolbox.Toolbox()
-tools.register("expr", gp.generate_full, pset=pset, min=3, max=5)
+tools.register("expr", gp.generateFull, pset=pset, min_=3, max_=5)
 tools.register("individual", creator.Individual, content_init=tools.expr)
 tools.register("population", list, content_init=tools.individual, size_init=300)
 tools.register("lambdify", gp.lambdify, pset=pset)
@@ -76,7 +76,7 @@ def evalParity(individual):
 tools.register("evaluate", evalParity)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generate_grow, min=0, max=2)
+tools.register("expr_mut", gp.generateGrow, min_=0, max_=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":

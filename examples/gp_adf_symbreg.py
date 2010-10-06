@@ -92,10 +92,10 @@ creator.create("MAIN", gp.PrimitiveTree, pset=pset)
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
-tools.register('adf_expr0', gp.generate_full, pset=adfset0, min=1, max=2)
-tools.register('adf_expr1', gp.generate_full, pset=adfset1, min=1, max=2)
-tools.register('adf_expr2', gp.generate_full, pset=adfset2, min=1, max=2)
-tools.register('main_expr', gp.generate_ramped, pset=pset, min=1, max=2)
+tools.register('adf_expr0', gp.generateFull, pset=adfset0, min_=1, max_=2)
+tools.register('adf_expr1', gp.generateFull, pset=adfset1, min_=1, max_=2)
+tools.register('adf_expr2', gp.generateFull, pset=adfset2, min_=1, max_=2)
+tools.register('main_expr', gp.generateRamped, pset=pset, min_=1, max_=2)
 
 tools.register('ADF0', creator.ADF0, content_init=tools.adf_expr0)
 tools.register('ADF1', creator.ADF1, content_init=tools.adf_expr1)
@@ -121,28 +121,28 @@ tools.register('lambdify', gp.lambdifyList)
 tools.register('evaluate', evalSymbReg)
 tools.register('select', toolbox.selTournament, tournsize=3)
 tools.register('mate', toolbox.cxTreeUniformOnePoint)
-tools.register('expr', gp.generate_full, min=1, max=2)
+tools.register('expr', gp.generateFull, min_=1, max_=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr)
 
 if __name__ == "__main__":
     random.seed(1024)
     
-    population = tools.population()
+    pop = tools.population()
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     # Evaluate the entire population
-    for ind in population:
+    for ind in pop:
         ind.fitness.values = tools.evaluate(ind)
-    
+
     for g in range(NGEN):
         print "-- Generation %i --" % g
     
         # Select the offsprings
-        offsprings = tools.select(population, n=len(population))
+        offsprings = tools.select(pop, n=len(pop))
         # Clone the offsprings
-        offsprings = [copy.deepcopy(ind) for ind in offsprings]
-    
+        offsprings = map(tools.clone, offsprings)
+   
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             for tree1, tree2 in zip(ind1, ind2):
@@ -157,31 +157,28 @@ if __name__ == "__main__":
                     tools.mutate(tree)
                     del ind.fitness.values
                             
-        # example of a clever oneline to do mutation
-        # map(tools.mutate, (tree for ind in pop for tree in ind if random.random() < MUTPB))
-        # for elem in pop:
-        #     del elem.fitness.values
-
         # Evaluate the individuals with an invalid fitness
-        for ind in offsprings:
-            if not ind.fitness.valid:
-                ind.fitness.values = tools.evaluate(ind)
+        invalids = [ind for ind in offsprings if not ind.fitness.valid]
+        for ind in invalids:
+            ind.fitness.values = tools.evaluate(ind)
                 
         # Replacement of the population by the offspring
-        population[:] = offsprings
+        pop[:] = offsprings
     
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in offsprings]
+        fits = [ind.fitness.values[0] for ind in pop]
+
+        length = len(pop)
+        mean = sum(fits) / length
+        sum2 = sum(fit*fit for fit in fits)
+        std_dev = (sum2 / length - mean**2)**0.5
+
         print "  Min %f" % min(fits)
         print "  Max %f" % max(fits)
-        lenght = len(population)
-        mean = sum(fits) / lenght
-        sum2 = sum(map(lambda x: x**2, fits))
-        std_dev = (sum2 / lenght - mean**2)
-        print "  Avg %f" % (mean)
+        print "  Avg %f" % mean
         print "  Std %f" % std_dev
     
-    best = toolbox.selBest(population,1)[0]
+    best = toolbox.selBest(pop,1)[0]
     
     print 'Best individual : ', gp.evaluate(best[0]), best.fitness
 
