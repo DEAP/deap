@@ -1193,12 +1193,12 @@ def decorate(decorator):
         assert func.__name__
         if inspect.isfunction(func):
             argspec = inspect.getargspec(func)
-            args, varargs, keywords, defaults = argspec
+            defaults = argspec[-1]
             signature = inspect.formatargspec(formatvalue=lambda val: "",
                                               *argspec)[1:-1]
         elif inspect.isclass(func):
             argspec = inspect.getargspec(func.__init__)
-            args, varargs, keywords, defaults = argspec
+            defaults = argspec[-1]
             signature = inspect.formatargspec(formatvalue=lambda val: "",
                                               *argspec)[1:-1]
         if not signature:
@@ -1213,9 +1213,9 @@ def decorate(decorator):
         evaldict = dict(_call_=decorator(func))
         reserved_names = set([func.__name__] + \
             [arg.strip(' *') for arg in signature.split(',')])
-        for n, v in evaldict.iteritems():
-            if n in reserved_names:
-                raise NameError("%s is overridden in\n%s" % (n, src))
+        for name in evaldict.iterkeys():
+            if name in reserved_names:
+                raise NameError("%s is overridden in\n%s" % (name, src))
         try:
             # This line does all the dirty work of reassigning the signature
             code = compile(src, "<string>", "single")
