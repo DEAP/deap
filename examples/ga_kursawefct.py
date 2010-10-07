@@ -20,7 +20,6 @@ import math
 import sys
 import random
 
-sys.path.append("..")
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import algorithms

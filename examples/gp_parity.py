@@ -18,8 +18,6 @@ import random
 import operator
 import logging
 
-sys.path.append("..")
-
 from eap import base
 from eap import creator
 from eap import toolbox

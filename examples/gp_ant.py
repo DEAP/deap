@@ -53,8 +53,6 @@ import random
 
 from functools import partial
 
-sys.path.append("..")
-
 from eap import base
 from eap import creator
 from eap import toolbox

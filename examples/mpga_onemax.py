@@ -19,7 +19,6 @@ import multiprocessing
 import random
 import sys
 
-sys.path.append("..")
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
 from eap import algorithms

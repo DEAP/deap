@@ -23,7 +23,6 @@ except ImportError:
     raise ImportError, ("This example requires a YAML library in order to "
         "read the data files.")
 
-sys.path.append("..")
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import base
