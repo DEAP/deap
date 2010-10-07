@@ -17,6 +17,10 @@ try:
     from itertools import permutations
 except ImportError:
     def permutations(iterable, r=None):
+        """Permutation function as defined in the itertools module. It is used
+        if the permutation function in itertools ain't present (python 2.5 and
+        lower).
+        """
         # permutations('ABCD', 2) --> AB AC AD BA BC BD CA CB CD DA DB DC
         # permutations(range(3)) --> 012 021 102 120 201 210
         pool = tuple(iterable)
