@@ -8,7 +8,6 @@ import math
 
 
 def foo(arg):
-    time.sleep(0.1)
     return arg*(math.sqrt(math.pow(arg,2)))
 
 def bar(a, b, c):
@@ -26,7 +25,7 @@ def primaryTest(nbr):
     return True
 
 def main():
-    listInit = range(150)
+    listInit = range(2050)
     print("Voici une liste :")
     print(listInit)
     print("\n")

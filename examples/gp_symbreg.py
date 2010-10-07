@@ -70,15 +70,15 @@ tools.register("evaluate", evalSymbReg)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
+tools.register('mutate', toolbox.mutTreeRandomMethod, expr=tools.expr_mut)
 
 if __name__ == "__main__":
-    random.seed(959)
+    random.seed(567)
     
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
     
-    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, halloffame=hof)
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
