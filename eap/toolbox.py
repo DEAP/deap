@@ -553,10 +553,75 @@ def cxTreeUniformOnePoint(ind1, ind2):
     """Randomly select in each individual and exchange each subtree with the
     point as root between each individual.
     """    
-    # Probability to choose a terminal as crossover point
-    CXTERMPB = 0.1
-    size1,size2 = ind1.size, ind2.size
+    try:
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
+    except ValueError:
+        return ind1, ind2
+
+    sub1 = ind1.searchSubtreeDF(index1)
+    sub2 = ind2.searchSubtreeDF(index2)
+    ind1.setSubtreeDF(index1, sub2)
+    ind2.setSubtreeDF(index2, sub1)
     
+    return ind1, ind2
+    
+## Strongly Typed GP crossovers
+def cxTypedTreeOnePoint(ind1, ind2):
+    """Randomly select in each individual and exchange each subtree with the 
+    point as root between each individual. Since the node are strongly typed, 
+    the operator then make sure the type of second node correspond to the type
+    of the first node. If it doesn't, it randomly selects another point in the
+    second individual and try again. It tries up to *5* times before
+    giving up on the crossover.
+    
+    .. note::
+       This crossover is subject to change for a more effective method 
+       of selecting the crossover points.
+    """
+    # choose the crossover point in each individual
+    try:
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
+    except ValueError:
+        return ind1, ind2
+        
+    subtree1 = ind1.searchSubtreeDF(index1)
+    subtree2 = ind2.searchSubtreeDF(index2)
+
+    type1 = subtree1.root.ret
+    type2 = subtree2.root.ret 
+
+    # try to mate the trees
+    # if no crossover point is found after 5 it gives up trying
+    # mating individuals.
+    tries = 0
+    MAX_TRIES = 5
+    while not (type1 == type2) and tries < MAX_TRIES:
+        index2 = random.randint(1, ind2.size-1)
+        subtree2 = ind2.searchSubtreeDF(index2)
+        type2 = subtree2.root.ret
+        tries += 1
+    
+    if type1 == type2:
+        sub1 = ind1.searchSubtreeDF(index1)
+        sub2 = ind2.searchSubtreeDF(index2)
+        ind1.setSubtreeDF(index1, sub2)
+        ind2.setSubtreeDF(index2, sub1)
+    
+    return ind1, ind2
+
+
+def cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
+    """Randomly select in each individual and exchange each subtree with the
+    point as root between each individual.
+
+    As defined by Koza, non-terminal primitives are selected for 90% of the
+    crossover points, and terminals for 10%. This probability can be adjusted
+    with the *cxtermpb* argument.
+    """
+    size1,size2 = ind1.size, ind2.size
+
     if size1 == 1 or size2 == 1:
         return ind1,ind2
 
@@ -566,7 +631,7 @@ def cxTreeUniformOnePoint(ind1, ind2):
     primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
     # Crossovers should take primitives 90% of time and terminals 10%
-    if random.random() < CXTERMPB or len(primList1) == 0:
+    if random.random() < cxtermpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
         subtree1 = ind1.searchSubtreeDF(index1)
@@ -575,7 +640,7 @@ def cxTreeUniformOnePoint(ind1, ind2):
         index1 = random.choice(primList1)
         subtree1 = ind1.searchSubtreeDF(index1)
 
-    if random.random() < CXTERMPB or len(primList2) == 0:
+    if random.random() < cxtermpb or len(primList2) == 0:
         # Choose a terminal from the second parent
         index2 = random.choice(termsList2)
         subtree2 = ind2.searchSubtreeDF(index2)
@@ -588,9 +653,9 @@ def cxTreeUniformOnePoint(ind1, ind2):
     ind2.setSubtreeDF(index2, subtree1)
 
     return ind1, ind2
-    
+
 ## Strongly Typed GP crossovers
-def cxTypedTreeOnePoint(ind1, ind2):
+def cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
     """Randomly select in each individual and exchange each subtree with the
     point as root between each individual. Since the node are strongly typed,
     the operator then make sure the type of second node correspond to the type
@@ -598,15 +663,15 @@ def cxTypedTreeOnePoint(ind1, ind2):
     second individual and try again. It tries up to *5* times before
     giving up on the crossover.
 
+    As defined by Koza, non-terminal primitives are selected for 90% of the
+    crossover points, and terminals for 10%. This probability can be adjusted
+    with the *cxtermpb* argument.
     .. note::
        This crossover is subject to change for a more effective method
        of selecting the crossover points.
     """
-
-    # Probability to choose a terminal as crossover point
-    CXTERMPB = 0.1
     size1,size2 = ind1.size, ind2.size
-    
+
     if size1 == 1 or size2 == 1:
         return ind1,ind2
 
@@ -616,7 +681,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
     primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
     # Crossovers should take primitives 90% of time and terminals 10%
-    if random.random() < CXTERMPB or len(primList1) == 0:
+    if random.random() < cxtermpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
         subtree1 = ind1.searchSubtreeDF(index1)
@@ -625,7 +690,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
         index1 = random.choice(primList1)
         subtree1 = ind1.searchSubtreeDF(index1)
 
-    if random.random() < CXTERMPB or len(primList2) == 0:
+    if random.random() < cxtermpb or len(primList2) == 0:
         # Choose a terminal from the second parent
         index2 = random.choice(termsList2)
         subtree2 = ind2.searchSubtreeDF(index2)
@@ -643,7 +708,7 @@ def cxTypedTreeOnePoint(ind1, ind2):
     tries = 0
     MAX_CX_TRY = 5
     while not (type1 is type2) and tries != MAX_CX_TRY:
-        if random.random() < CXTERMPB or len(primList2) == 0:
+        if random.random() < cxtermpb or len(primList2) == 0:
             index2 = random.choice(termsList2)
             subtree2 = ind2.searchSubtreeDF(index2)
         else:
