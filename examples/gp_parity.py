@@ -77,7 +77,7 @@ tools.register("evaluate", evalParity)
 tools.register("select", toolbox.selTournament, tournsize=3)
 tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateGrow, min_=0, max_=2)
-tools.register("mutate", toolbox.mutTreeRandomMethod, expr=tools.expr_mut)
+tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
 if __name__ == "__main__":
 
