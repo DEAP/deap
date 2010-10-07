@@ -18,7 +18,6 @@ import sys
 import random
 import logging
 
-sys.path.append("..")
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import algorithms

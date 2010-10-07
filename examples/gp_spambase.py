@@ -20,8 +20,6 @@ import logging
 import csv
 import itertools
 
-sys.path.append("..")
-
 from eap import base
 from eap import creator
 from eap import toolbox
