@@ -4,10 +4,10 @@ from distutils.core import setup
 
 import eap
 
-setup(name='DEAP',
+setup(name='deap',
       version=eap.__version__,
       description='Distributed Evolutionary Algorithms in Python',
-      long_description='',
+      long_description=open('README.txt').read(),
       author='DEAP Development Team',
       author_email='deap-users@googlegroups.com',
       url='http://deap.googlecode.com',
