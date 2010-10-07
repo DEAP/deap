@@ -640,18 +640,18 @@ def mutTypedTreeNodeReplacement(individual, expr):
     node = individual.searchSubtreeDF(index)
 
     if node.size == 1:
-        individual.setSubtreeDF(index, random.choice(individual.pset.terminals[node.root.obj.ret])())
+        individual.setSubtreeDF(index, random.choice(individual.pset.terminals[node.root.ret])())
 
     else:
         # We're going to replace one of the *node* children
         indexReplace = random.randint(1, len(node) - 1)
         if node[indexReplace].size > 1:
-            replacementNode = random.choice(individual.pset.primitives[node[indexReplace].root.obj.ret])
-            while replacementNode.args != node[indexReplace].root.obj.args:
-                replacementNode = random.choice(individual.pset.primitives[node[indexReplace].root.obj.ret])
+            replacementNode = random.choice(individual.pset.primitives[node[indexReplace].root.ret])
+            while replacementNode.args != node[indexReplace].root.args:
+                replacementNode = random.choice(individual.pset.primitives[node[indexReplace].root.ret])
             node[indexReplace][0] = replacementNode
         else:
-            replacementNode = random.choice(individual.pset.terminals[node[indexReplace].root.obj.ret])()
+            replacementNode = random.choice(individual.pset.terminals[node[indexReplace].root.ret])()
             node[indexReplace] = replacementNode
 
     return individual,
@@ -682,7 +682,7 @@ def mutTypedTreeEphemeral(individual, expr):
             indexList = ephemeralsList
 
         for i in indexList:
-            individual.searchSubtreeDF(i).obj.regen()
+            individual.searchSubtreeDF(i).regen()
         return individual,
 
 def mutTreeShrink(individual, expr):
@@ -724,10 +724,10 @@ def mutTypedTreeInsert(individual, expr):
     pset = individual.pset
     index = random.randint(0, individual.size-1)
     node = individual.searchSubtreeDF(index)
-    if hasattr(node, 'searchSubtreeDF'):     # We do not need to deepcopy the leafs
+    if node.size > 1:     # We do not need to deepcopy the leafs
         node = copy.deepcopy(node)
-
-    newPmt = random.choice(pset.primitives[node.root.obj.ret])
+        
+    newPmt = random.choice(pset.primitives[node.root.ret])
 
     insertedList = [newPmt]
     for i in xrange(0, newPmt.arity):
@@ -735,6 +735,7 @@ def mutTypedTreeInsert(individual, expr):
         insertedList.append(newChild())
 
     insertedList[random.randint(1, newPmt.arity)] = node
+
     individual.setSubtreeDF(index, insertedList)
     return individual,
 
