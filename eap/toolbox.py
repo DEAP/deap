@@ -627,10 +627,10 @@ def mutTreeUniform(individual, expr):
 ## Strongly Typed GP mutations
 def mutTypedTreeUniform(individual, expr):
     """The mutation of strongly typed GP expression is pretty easy. First,
-    it finds a subtree. Second, ithas to identify the return type of the root
+    it finds a subtree. Second, it has to identify the return type of the root
     of  this subtree. Third, it generates a new subtree with a root's type
     corresponding to the original subtree root's type. Finally, the old
-    subtree is replaced by the new subtree, and the mutant is returned.
+    subtree is replaced by the new subtree.
     """
     index = random.randint(0, individual.size-1)
     subtree = individual.searchSubtreeDF(index)  
@@ -640,10 +640,9 @@ def mutTypedTreeUniform(individual, expr):
     return individual,
 
 
-def mutTypedTreeNodeReplacement(individual, expr):
-    """
-    This operator mutates the individual *ind* that are subjected to it.
-    The operator randomly chooses a primitive in the individual
+def mutTypedTreeNodeReplacement(individual):
+    """This operator mutates the individual *individual* that are subjected to
+    it. The operator randomly chooses a primitive in the individual
     and replaces it with a randomly selected primitive in *pset* that takes
     the same number of arguments.
 
@@ -656,56 +655,57 @@ def mutTypedTreeNodeReplacement(individual, expr):
     node = individual.searchSubtreeDF(index)
 
     if node.size == 1:
-        individual.setSubtreeDF(index, random.choice(individual.pset.terminals[node.root.ret])())
+        subtree = random.choice(individual.pset.terminals[node.root.ret])()
+        individual.setSubtreeDF(index, subtree)
 
     else:
         # We're going to replace one of the *node* children
-        indexReplace = random.randint(1, len(node) - 1)
-        if node[indexReplace].size > 1:
-            replacementNode = random.choice(individual.pset.primitives[node[indexReplace].root.ret])
-            while replacementNode.args != node[indexReplace].root.args:
-                replacementNode = random.choice(individual.pset.primitives[node[indexReplace].root.ret])
-            node[indexReplace][0] = replacementNode
+        index = random.randint(1, len(node) - 1)
+        if node[index].size > 1:
+            prim_set = individual.pset.primitives[node[index].root.ret]
+            repl_node = random.choice(prim_set)
+            while repl_node.args != node[index].root.args:
+                repl_node = random.choice(prim_set)
+            node[index][0] = repl_node
         else:
-            replacementNode = random.choice(individual.pset.terminals[node[indexReplace].root.ret])()
-            node[indexReplace] = replacementNode
+            term_set = individual.pset.terminals[node[index].root.ret]
+            repl_node = random.choice(term_set)()
+            node[index] = repl_node
 
     return individual,
 
-def mutTypedTreeEphemeral(individual, expr):
-    """
-    This operator works on the constants of the tree *ind*.
-    In the *mode* 'changeOne', it will change the value of ONE
+def mutTypedTreeEphemeral(individual, mode):
+    """This operator works on the constants of the tree *ind*.
+    In  *mode* ``"one"``, it will change the value of **one**
     of the individual ephemeral constants by calling its generator function.
-    In the *mode* 'changeAll', it will change the value of ALL
+    In  *mode* ``"all"``, it will change the value of **all**
     the ephemeral constants.
 
     This operator works on strongly typed trees as on normal GP trees.
     """
-    mode = "changeOne"
-    ephemeralsList = []
+    if mode not in ["one", "all"]:
+        raise ValueError("Mode must be one of \"one\" or \"all\"")
+    ephemerals = []
     for i in xrange(1, individual.size):
         subtree = individual.searchSubtreeDF(i)
         if hasattr(subtree.root.obj, 'regen'):
-            ephemeralsList.append(i)
+            ephemerals.append(i)
 
-    if len(ephemeralsList) == 0:
-        return individual,
-    else:
-        if mode == "changeOne":
-            indexList = [random.choice(ephemeralsList)]
-        elif mode == "changeAll":
-            indexList = ephemeralsList
+    if len(ephemerals) > 0:
+        if mode == "one":
+            ephemerals = [random.choice(ephemerals)]
+        elif mode == "all":
+            pass
 
-        for i in indexList:
+        for i in ephemerals:
             individual.searchSubtreeDF(i).regen()
-        return individual,
+            
+    return individual,
 
-def mutTreeShrink(individual, expr):
-    """
-    This operator shrinks the individual *ind* that are subjected to it.
-    The operator randomly chooses a branch in the individual and replaces it
-    with one of the branch's arguments (also randomly chosen).
+def mutTreeShrink(individual):
+    """This operator shrinks the individual *individual* that are subjected to
+    it. The operator randomly chooses a branch in the individual and replaces
+    it with one of the branch's arguments (also randomly chosen).
 
     This operator is not usable with STGP.
     """
@@ -713,22 +713,22 @@ def mutTreeShrink(individual, expr):
         return individual,       # We don't want to "shrink" the root
 
     index = random.randint(1, individual.size-2)
-
-    while individual.searchSubtreeDF(index).size == 1:       # Shrink a terminal is useless
+    
+    # Shrinking a terminal is useless
+    while individual.searchSubtreeDF(index).size == 1:
         index = random.randint(1, individual.size-2)
 
-    deletedNode = individual.searchSubtreeDF(index)
-    replSubTreeIndice = random.randint(1, len(deletedNode)-1)
+    deleted_node = individual.searchSubtreeDF(index)
+    repl_subtree_index = random.randint(1, len(deleted_node)-1)
 
-    individual.setSubtreeDF(index, deletedNode[replSubTreeIndice])
+    individual.setSubtreeDF(index, deleted_node[repl_subtree_index])
 
     return individual,
 
-def mutTypedTreeInsert(individual, expr):
-    """
-    This operator mutate the GP tree of the *ind* passed and the primitive set *pset*,
-    by inserting a new branch at a random position in a tree,
-    using the original subtree at this position as one argument,
+def mutTypedTreeInsert(individual):
+    """This operator mutate the GP tree of the *individual* passed and the
+    primitive set *expr*, by inserting a new branch at a random position in a
+    tree, using the original subtree at this position as one argument,
     and if necessary randomly selecting terminal primitives
     to complete the arguments of the inserted node.
     Note that the original subtree will become one of the children of the new
@@ -742,29 +742,36 @@ def mutTypedTreeInsert(individual, expr):
     node = individual.searchSubtreeDF(index)
     if node.size > 1:     # We do not need to deepcopy the leafs
         node = copy.deepcopy(node)
-        
-    newPmt = random.choice(pset.primitives[node.root.ret])
+    
+    new_primitive = random.choice(pset.primitives[node.root.ret])
 
-    insertedList = [newPmt]
-    for i in xrange(0, newPmt.arity):
-        newChild = random.choice(pset.terminals[newPmt.args[i]])
-        insertedList.append(newChild())
+    inserted_list = [new_primitive]
+    for i in xrange(0, new_primitive.arity):
+        # Why don't we use expr to create the other subtrees?
+        # Bloat control?
+        new_child = random.choice(pset.terminals[new_primitive.args[i]])
+        inserted_list.append(new_child())
 
-    insertedList[random.randint(1, newPmt.arity)] = node
+    inserted_list[random.randint(1, new_primitive.arity)] = node
 
-    individual.setSubtreeDF(index, insertedList)
+    individual.setSubtreeDF(index, inserted_list)
     return individual,
 
 
-def mutTreeRandomMethod(individual, expr):
-    """
-    This operator performs a mutation over the individual *ind*.
-    The mutation operator is randomly chosen between the insertion,
-    the shrink, the node replacement, the subtree replacement (mutTreeUniform)
-    and the ephemeral constants change.
-    """
-    method = random.choice([mutTreeUniform, mutTypedTreeInsert, mutTreeShrink, mutTypedTreeNodeReplacement, mutTypedTreeEphemeral])
-    return functools.partial(method, individual=individual, expr=expr)()
+# In order to use different mutations, wheter build your own algorithms
+# or define your own mutate function that calls explicitely the needed
+# methods
+# def mutTreeRandomMethod(individual, expr):
+#     """This operator performs a mutation over the individual *ind*.
+#     The mutation operator is randomly chosen between the insertion,
+#     the shrink, the node replacement, the subtree replacement (mutTreeUniform)
+#     and the ephemeral constants change.
+#     """
+#     method = random.choice([mutTreeUniform, mutTypedTreeInsert,
+#                             mutTreeShrink, mutTypedTreeNodeReplacement,
+#                             mutTypedTreeEphemeral])
+#     # Partial? 
+#     return functools.partial(method, individual=individual, expr=expr)()
 
 ######################################
 # Selections                         #
@@ -981,7 +988,8 @@ def spea2(individuals, n):
             density = 1.0 / (kth_dist + 2.0)
             fits[i] += density
             
-        next_indices = [(fits[i], i) for i in xrange(N) if not i in chosen_indices]
+        next_indices = [(fits[i], i) for i in xrange(N) \
+                                                if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
         chosen_indices += [i for fit, i in next_indices[:n - len(chosen_indices)]]
