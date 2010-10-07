@@ -31,14 +31,20 @@ import functools
 import inspect
 import math
 import random
-import warnings
 # Needed by Nondominated sorting
-from itertools import chain, izip, repeat, cycle
+from itertools import chain, cycle
 from operator import attrgetter
 
 
 class Repeat(object):
-    def __init__(self, func, times,):
+    """Functional object that repeat a function *func*
+    a number of times *times*, then raise a StopIteration
+    exception. It implements the Python iterator model.
+
+    This class allows to fill a list with objects produced
+    by a function.
+    """
+    def __init__(self, func, times):
         self.func = func
         self.count = cycle(xrange(times+1))
         self.times = times
@@ -47,11 +53,17 @@ class Repeat(object):
         return self
         
     def next(self):
+        """Function use to iterate."""
         if self.count.next() == self.times:
             raise StopIteration
         return self.func()
         
 class Iterate(object):
+    """Class use to cycle on the iterable object
+    returned by a function *func*. The function is
+    called when there is no longer any possible 
+    iteration that can be done on the object.
+    """
     def __init__(self, func):
         self.func = func
         self.iter = None
@@ -60,6 +72,7 @@ class Iterate(object):
         return self
         
     def next(self):
+        """Function use to iterate."""
         try:
             return self.iter.next()
         except StopIteration:
@@ -70,6 +83,9 @@ class Iterate(object):
             return self.iter.next()
 
 class FuncCycle(object):
+    """Functionnal object use to cycle and call a 
+    list of functions.
+    """
     def __init__(self, seq_func):
         self.cycle = cycle(func for func in seq_func)
     def __call__(self):
@@ -748,7 +764,7 @@ def mutTreeRandomMethod(individual, expr):
     and the ephemeral constants change.
     """
     method = random.choice([mutTreeUniform, mutTypedTreeInsert, mutTreeShrink, mutTypedTreeNodeReplacement, mutTypedTreeEphemeral])
-    return functools.partial(method, individual=individual, expr=expr)(),
+    return functools.partial(method, individual=individual, expr=expr)()
 
 ######################################
 # Selections                         #
@@ -1088,7 +1104,7 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     giving a dictionary to *sel_kargs* and *repl_kargs*.
     """
     if migarray is None:
-        migarray = [(i + 1) % len(populations) for i in xrange(len(populations))]
+        migarray = range(1, len(populations)) + [0]
     
     immigrants = [[] for i in xrange(len(migarray))]
     emigrants = [[] for i in xrange(len(migarray))]
@@ -1197,9 +1213,7 @@ def decorate(decorator):
             code = compile(src, "<string>", "single")
             exec code in evaldict
         except:
-            print >> sys.stderr, "Error in generated code:"
-            print >> sys.stderr, src
-            raise
+            raise RuntimeError("Error in generated code:\n%s" % src)
         new_func = evaldict[func.__name__]
     
         # From update

@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import gzip
+#import gzip
 import random
 try:
     import yaml
@@ -95,18 +95,18 @@ class Milestone(object):
         the ``"randomizer_state"`` tag.
         """
 #        if not self.zipped:
-        file = open(prefix + ".ems", "w")
+        ms_file = open(prefix + ".ems", "w")
 #        else:
 #            file = gzip.open(prefix + ".ems.gz", "w")
         ms = self._dict.copy()
         ms.update({"randomizer_state" : random.getstate()})
         
         if self.use_yaml:
-            file.write(yaml.dump(ms, Dumper=Dumper))
+            ms_file.write(yaml.dump(ms, Dumper=Dumper))
         else:
-            pickle.dump(ms, file)
+            pickle.dump(ms, ms_file)
         
-        file.close()
+        ms_file.close()
     
     def load(self, filename):
         """Load a milestone file retreiving the dumped objects, it is not safe
