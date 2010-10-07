@@ -17,6 +17,10 @@
 #    this code. The CMA-ES algorithm is provided in many other languages
 #    and advanced versions at http://www.lri.fr/~hansen/cmaesintro.html.
 
+"""A module that provides support for the Covariance Matrix Adaptation 
+Evolution Strategy.
+"""
+
 import copy
 import logging
 import math
