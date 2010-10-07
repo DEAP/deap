@@ -77,8 +77,8 @@ if __name__ == "__main__":
         # Select and clone the offsprings
         off_ga = tools_ga.select(pop_ga, n=len(pop_ga))
         off_gp = tools_gp.select(pop_gp, n=len(pop_gp))
-        off_ga = [tools.clone(ind) for ind in off_ga]        
-        off_gp = [tools.clone(ind) for ind in off_gp]
+        off_ga = [tools_ga.clone(ind) for ind in off_ga]        
+        off_gp = [tools_gp.clone(ind) for ind in off_gp]
     
     
         # Apply crossover and mutation

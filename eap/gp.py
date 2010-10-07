@@ -13,6 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""The :mod:`gp` module provides the methods and classes to perform
+Genetic Programming with EAP. It essentially contains the classes to
+build a Genetic Program Tree, and the functions to evaluate it.
+
+This module support both strongly and loosely typed GP.
+"""
+
+
 import copy
 import random
 
@@ -180,9 +188,9 @@ class PrimitiveSetTyped(object):
         self.__name__ = name 
         self.ret = ret_type
         self.ins = in_types
-        for i, type in enumerate(in_types):
+        for i, type_ in enumerate(in_types):
             self.arguments.append(prefix + ("%s" % i))
-            PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type)
+            PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type_)
             
     def renameArguments(self, new_args):
         """Rename function arguments with new arguments name *new_args*.
