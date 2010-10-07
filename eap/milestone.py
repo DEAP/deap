@@ -13,6 +13,10 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""The :mod:`milestone` provides a way to save the state of some specified
+objects all the way through the evolution.
+"""
+
 #import gzip
 import random
 try:
