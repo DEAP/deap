@@ -10,4 +10,4 @@ History
    
    .. automethod:: eap.history.History.update(individual[, ...])
    
-   .. automethod:: eap.history.History.decorator
+   .. autoattribute:: eap.history.History.decorator

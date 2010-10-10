@@ -35,8 +35,8 @@ __type__ = None
 ## GP Tree utility functions
 
 def evaluate(expr, pset=None):
-    """Evaluate the expression expr into a string if pset is None
-    or into Python code is pset is not None.
+    """Evaluate the expression *expr* into a string if *pset* is None
+    or into Python code if *pset* is not None.
     """
     def _stringify(expr):
         try:
@@ -63,11 +63,11 @@ def evaluateADF(seq):
     return adfdict
 
 def lambdify(pset, expr):
-    """Return a lambda function of the expression.
+    """Return a lambda function of the expression *expr*.
 
-    Remark:
-    This function is a stripped version of the lambdify
-    function of sympy0.6.6.
+    .. note::
+       This function is a stripped version of the lambdify
+       function of sympy0.6.6.
     """
     expr = evaluate(expr)
     args = ",".join(a for a in pset.arguments)

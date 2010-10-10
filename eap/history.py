@@ -83,7 +83,7 @@ class History(object):
     
     @property
     def decorator(self):
-        """Function that returns an appropriate decorator to enhance the
+        """Property that returns an appropriate decorator to enhance the
         operators of the toolbox. The returned decorator assumes that the
         individuals are returned by the operator. First the decorator calls
         the underlying operation and then calls the update function with what
