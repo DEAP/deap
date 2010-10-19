@@ -25,7 +25,6 @@ You are encouraged to write your own algorithms in order to make them do what
 you realy want them to do.
 """
 
-import copy
 import logging
 import random
 
@@ -288,7 +287,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
                 nb_offsprings += 2
             elif op_choice < cxpb + mutpb:  # Apply mutation
                 ind = random.choice(population) # select
-                ind = copy.deepcopy(ind) # clone
+                ind = toolbox.clone(ind) # clone
                 toolbox.mutate(ind)
                 del ind.fitness.values
                 offsprings.append(ind)
