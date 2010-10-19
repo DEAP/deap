@@ -1,0 +1,22 @@
+UNIX based platforms
+====================
+
+In order to install DEAP from sources, change directory to the root of deap and type in :
+
+$ python setup.py install
+
+This will try to install deap into your package directory, you might need permissions to write to this directory.
+
+Windows
+=======
+
+Ain't tryed yet ... sorry
+
+Options
+=======
+
+You might want to install this software somewhere else by addind the prefix options to the installation.
+
+$ python setup.py install --prefix=somewhere/else
+
+Other basic options are provided by the building tools of python, see http://docs.python.org/install/ for more information.
