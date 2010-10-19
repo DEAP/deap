@@ -279,10 +279,10 @@ class Fitness(object):
         except (AttributeError, TypeError):
             self.wvalues = ()
             
-    def delValue(self):
+    def delValues(self):
         self.wvalues = ()
 
-    values = property(getValues, setValues, delValue,
+    values = property(getValues, setValues, delValues,
         ("Fitness values. Use directly ``individual.fitness.values = values`` "
          "in order to set the fitness and ``del individual.fitness.values`` "
          "in order to clear (invalidate) the fitness. The (unweighted) fitness "
