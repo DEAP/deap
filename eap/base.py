@@ -265,19 +265,14 @@ class Fitness(object):
     """
     
     def __init__(self, values=()):
-        self.values = values
+        if len(values) > 0:
+            self.values = values
         
     def getValues(self):
-        try :
-            return tuple(map(operator.div, self.wvalues, self.weights))
-        except (AttributeError, TypeError):
-            return ()
+        return tuple(map(operator.div, self.wvalues, self.weights))
             
     def setValues(self, values):
-        try :
-            self.wvalues = tuple(map(operator.mul, values, self.weights))
-        except (AttributeError, TypeError):
-            self.wvalues = ()
+        self.wvalues = tuple(map(operator.mul, values, self.weights))
             
     def delValues(self):
         self.wvalues = ()
@@ -340,7 +335,11 @@ class Fitness(object):
         immutable and the fitness does not contain any other object 
         than :attr:`values` and :attr:`weights`.
         """
-        return self.__class__(self.values)
+        if len(self.wvalues) > 0:
+            return self.__class__(self.values)
+        else:
+            return self.__class__()
+            
     
     def __str__(self):
         """Return the values of the Fitness object."""

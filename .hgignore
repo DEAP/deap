@@ -1,12 +1,15 @@
+# use glob syntax
 syntax: glob
-main.py
-.DS_Store
-*.tmproj
-nbproject
+
+# folder to ignore
+build/
+dist/
+doc/_build/
+
+# file to ignore
+MANIFEST
+
+# file pattern to ignore
 *.pyc
-doc/_build
-\.orig\..*$
-\.orig$
-\.chg\..*$
-\.rej$
-\.conflict\~$
+*.orig
+
