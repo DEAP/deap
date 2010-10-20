@@ -1,15 +1,15 @@
 # use glob syntax
 syntax: glob
 
-# folder to ignore
+# folders to ignore
 build/
 dist/
 doc/_build/
 
-# file to ignore
+# files to ignore
 MANIFEST
 
-# file pattern to ignore
+# file patterns to ignore
 *.pyc
 *.orig
 
