@@ -21,9 +21,8 @@
 Evolution Strategy.
 """
 
-import copy
 import logging
-import math
+from math import sqrt, cos, log, pi
 import numpy
 import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
@@ -32,7 +31,7 @@ numpy.random.seed(random.randint(0, sys.maxint))
 
 _logger = logging.getLogger("eap.cma")
     
-def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
+def esCMA(toolbox, population, ngen, halloffame=None):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
@@ -41,14 +40,9 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
     :class:`~eap.cma.CMAStrategy`.
     """
     _logger.info("Start of evolution")
-    strategy = CMAStrategy(population, sigma, kargs)  # Initialize the strategy
-    
+        
     for g in xrange(ngen):
         _logger.info("Evolving generation %i", g)
-        
-        # Replace the whole population with the generated individuals from the
-        # cma strategy
-        population[:] = strategy.generate()
         
         # Evaluate the individuals
         for ind in population:
@@ -58,14 +52,14 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
             halloffame.update(population)
         
         # Update the Strategy with the evaluated individuals
-        strategy.update(population)
+        toolbox.update(population)
         
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in population]
         
         length = len(population)
         mean = sum(fits) / length
-        sum2 = sum(fit**2 for fit in fits)
+        sum2 = sum(fit*fit for fit in fits)
         std_dev = abs(sum2 / length - mean**2)**0.5
         
         _logger.debug("Min %f", min(fits))
@@ -78,7 +72,7 @@ def esCMA(toolbox, population, sigma, ngen, halloffame=None, **kargs):
 
 class CMAStrategy(object):
     """
-    Additional configuration may be passed throught the *params* argument as a 
+    Additional configuration may be passed through the *params* argument as a 
     dictionary,
     
     +----------------+---------------------------+----------------------------+
@@ -116,19 +110,17 @@ class CMAStrategy(object):
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
     """
-    def __init__(self, population, sigma, params={}):
-        # Create a centroid individual
-        self.centroid = copy.deepcopy(population[0])
-        # Clear its content
-        self.centroid[:] = self.centroid[0:0]
-        # The centroid is used in new individual creation
-        self.centroid.extend(numpy.mean(population, 0))
+    def __init__(self, centroid, sigma, **kargs):
+        self.params = kargs
+        
+        # Create a centroid as a numpy array
+        self.centroid = numpy.array(centroid)
         
         self.dim = len(self.centroid)
         self.sigma = sigma
         self.pc = numpy.zeros(self.dim)
         self.ps = numpy.zeros(self.dim)
-        self.chiN = math.sqrt(self.dim) * (1 - 1. / (4. * self.dim) + \
+        self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) + \
                                       1. / (21. * self.dim**2))
         
         self.B = numpy.identity(self.dim)
@@ -136,60 +128,47 @@ class CMAStrategy(object):
         self.diagD = numpy.ones(self.dim)
         self.BD = self.B * self.diagD
         
-        self.lambda_ = params.get("lambda_", int(4 + 3 * math.log(self.dim)))
+        self.lambda_ = self.params.get("lambda_", int(4 + 3 * log(self.dim)))
         
         self.update_count = 0
         
-        self.params = params
         self.computeParams(self.params)
         
-    def generate(self):
-        """Generate lambda offsprings from the current strategy using the 
+    def generate(self, ind_init):
+        """Generate a population from the current strategy using the 
         centroid individual as parent.
         """
         arz = numpy.random.randn(self.lambda_, self.dim)
-        offsprings = list()
-        empty_ind = copy.deepcopy(self.centroid)    # Create an individual
-        del empty_ind[:]                            # faster to copy
-        for i in xrange(self.lambda_):
-            ind = copy.deepcopy(empty_ind)
-            ind.extend(self.centroid + self.sigma * numpy.dot(self.BD, arz[i]))
-            offsprings.append(ind)
-        
-        return offsprings
+        return [ind_init(self.centroid + self.sigma * numpy.dot(self.BD, arzi)) for arzi in arz]
         
     def update(self, population):
         """Update the current covariance matrix strategy.
         """
-        sorted_pop = sorted(population, key=lambda ind: ind.fitness,
-                            reverse=True)
+        population.sort(key=lambda ind: ind.fitness, reverse=True)
         
-        old_centroid = numpy.array(self.centroid)
-        centroid = numpy.dot(self.weights, sorted_pop[0:self.mu])
+        old_centroid = self.centroid
+        self.centroid = numpy.dot(self.weights, population[0:self.mu])
         
-        del self.centroid[:]                # Clear the centroid individual
-        self.centroid.extend(centroid)
-        
-        c_diff = centroid - old_centroid
+        c_diff = self.centroid - old_centroid
         
         # Cumulation : update evolution path
         self.ps = (1 - self.cs) * self.ps \
-             + math.sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
+             + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
              * numpy.dot(self.B, (1. / self.diagD) \
                           * numpy.dot(self.B.T, c_diff))
         
         hsig = numpy.linalg.norm(self.ps) \
-               / math.sqrt(1 - (1 - self.cs)**(2 * self.update_count)) \
+               / sqrt(1 - (1 - self.cs)**(2 * self.update_count)) \
                / self.chiN < 1.4 + 2 / (self.dim + 1)
                
         self.update_count += 1
                
         self.pc = (1 - self.cc) * self.pc \
-             + hsig * (math.sqrt(self.cc * (2 - self.cc) * self.mueff) / \
+             + hsig * (sqrt(self.cc * (2 - self.cc) * self.mueff) / \
                      self.sigma) * c_diff
         
         # Update covariance matrix
-        artmp = sorted_pop[0:self.mu] - old_centroid
+        artmp = population[0:self.mu] - old_centroid
         self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) \
                    * self.ccov1 * self.cc * (2 - self.cc)) * self.C \
                  + numpy.outer(self.ccov1 * self.pc, self.pc) \
@@ -202,10 +181,14 @@ class CMAStrategy(object):
         
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
-        self.diagD = self.diagD[indx]
-        self.diagD **= 0.5
+        self.diagD = self.diagD[indx]**0.5
         self.B = self.B[:,indx]
         self.BD = self.B * self.diagD
+        
+        arz = numpy.random.randn(self.lambda_, self.dim)
+        for ind, arzi in zip(population, arz):
+            del ind[:]
+            ind.extend(self.centroid + self.sigma * numpy.dot(self.BD, arzi))
 
     def computeParams(self, params):
         """Those parameters depends on lambda and need to computed again if it 
@@ -214,7 +197,7 @@ class CMAStrategy(object):
         self.mu = params.get("mu", self.lambda_ / 2)
         rweights = params.get("weights", "superlinear")
         if rweights == "superlinear":
-            self.weights = math.log(self.mu + 0.5) - \
+            self.weights = log(self.mu + 0.5) - \
                         numpy.log(numpy.arange(1, self.mu + 1))
         elif rweights == "linear":
             self.weights = self.mu + 0.5 - numpy.arange(1, self.mu + 1)
@@ -235,7 +218,7 @@ class CMAStrategy(object):
                                                  1. / self.mueff) / \
                                            ((self.dim + 2.)**2 + self.mueff))
         self.ccovmu = min(1 - self.ccov1, self.ccovmu)
-        self.damps = 1. + 2. * max(0, math.sqrt((self.mueff - 1.) / \
+        self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.) / \
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
         
@@ -253,7 +236,7 @@ def rastrigin(individual):
     for this test function.
     """
     return 10 * len(individual) + sum(gene * gene - 10 * \
-                        math.cos(2 * math.pi * gene) for gene in individual)
+                        cos(2 * pi * gene) for gene in individual)
     
 def sphere(individual):
     """Sphere test objective function."""
