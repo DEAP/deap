@@ -33,11 +33,14 @@ from eap import toolbox
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
-# The first individual is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
+# The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
 # for more details about the rastrigin and other tests for CMA-ES
-tools.register("individual", creator.Individual, "d", content_init=lambda: 5.0, size_init=30)
-tools.register("population", list, content_init=tools.individual, size_init=1)
+strategy = cma.CMAStrategy(centroid=[5.0]*30, sigma=5.0, lambda_=600)
+
+tools = toolbox.Toolbox()
+tools.register("individual", creator.Individual, "d")
+tools.register("population", strategy.generate, ind_init=tools.individual)
+tools.register("update", strategy.update)
 
 def evalCMA(ind):
     return cma.rastrigin(ind),
@@ -52,6 +55,6 @@ if __name__ == "__main__":
     hof = halloffame.HallOfFame(1)
     
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(tools, pop, sigma=5.0, ngen=250, lambda_=600, halloffame=hof)
+    cma.esCMA(tools, pop, ngen=250, halloffame=hof)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
