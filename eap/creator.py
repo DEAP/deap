@@ -29,9 +29,9 @@ warnings.filterwarnings("error", "", DeprecationWarning, "eap.creator")
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
     inheriting from *base* in the :mod:`~eap.creator` module. The new
-    class can have attributes defined by the subsequent keyworded
+    class can have attributes defined by the subsequent keyword
     arguments passed to the function create. If the argument is callable,
-    it is automatically called in the initialisation of an instance of
+    it is automatically called in the initialization of an instance of
     this class and the returned object is added as an attribute of the
     class' instance. Otherwise, if the argument is not callable, (for
     example an :class:`int`), it is added as a "static" attribute of the

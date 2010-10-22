@@ -14,12 +14,12 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 """The :mod:`toolbox` module is intended to contain the operators that you need
-in your evolutionary algorithms, from initialisation to evaluation. It is
+in your evolutionary algorithms, from initialization to evaluation. It is
 always possible to use directly the operators from this module but the toolbox
 does also contain the default values of the different parameters for each
 method. More over, it makes your algorithms easier to understand and modify,
-since once an oprerator is set, it can be reused with a simple keyword that
-contains all its arguments. Plus, every keyword or argument can be overriden
+since once an operator is set, it can be reused with a simple keyword that
+contains all its arguments. Plus, every keyword or argument can be overridden
 at all time.
 
 The toolbox is also used in predefined algorithms from the
@@ -109,16 +109,16 @@ class Toolbox(object):
 
     def register(self, methodname, method, *args, **kargs):
         """Register a *method* in the toolbox under the name *methodname*. You
-        may provide default arguments that will be passed automaticaly when
+        may provide default arguments that will be passed automatically when
         calling the registered method.
         
-        Keyworded arguments *content_init* and *size_init* may be used to
+        Keyword arguments *content_init* and *size_init* may be used to
         simulate iterable initializers. For example, when building objects
         deriving from :class:`list`, the content argument will provide to
         the built list its initial content. Depending on what is given to
         *content_init* and *size_init* the initialization is different. If
-        *content_init* is an iterable, then the iterable is consumed enterily
-        to intialize each object, in that case *size_init* is not used.
+        *content_init* is an iterable, then the iterable is consumed entirely
+        to initialize each object, in that case *size_init* is not used.
         Otherwise, *content_init* may be a simple function that will be
         repeated *size_init* times in order to fill the object.
         """
@@ -229,13 +229,13 @@ def cxUniform(ind1, ind2, indpb):
     return ind1, ind2
     
 def cxPartialyMatched(ind1, ind2):
-    """Execute a partialy matched crossover (PMX) on the input indviduals.
+    """Execute a partially matched crossover (PMX) on the input individuals.
     The two individuals are modified in place. This crossover expect iterable
     individuals of indices, the result for any other type of individuals is
     unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
-    pairs of values in a certain range of the two parents and swaping the values
+    pairs of values in a certain range of the two parents and swapping the values
     of those indexes. For more details see Goldberg and Lingel, "Alleles,
     loci, and the traveling salesman problem", 1985.
 
@@ -283,14 +283,14 @@ def cxPartialyMatched(ind1, ind2):
     return ind1, ind2
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
-    """Execute a uniform partialy matched crossover (UPMX) on the input
-    indviduals. The two individuals are modified in place. This crossover
+    """Execute a uniform partially matched crossover (UPMX) on the input
+    individuals. The two individuals are modified in place. This crossover
     expect iterable individuals of indices, the result for any other type of
     individuals is unpredictable.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
-    parents and swaping the values of those indexes. For more details see
+    parents and swapping the values of those indexes. For more details see
     Cicirello and Smith, "Modeling GA performance for control parameter
     optimization", 2000.
 
@@ -331,7 +331,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     return ind1, ind2
 
 def cxBlend(ind1, ind2, alpha):
-    """Executes a blend crossover that modify inplace the input individuals.
+    """Executes a blend crossover that modify in-place the input individuals.
     The blend crossover expect individuals formed of a list of floating point
     numbers.
     
@@ -350,7 +350,7 @@ def cxBlend(ind1, ind2, alpha):
     return ind1, ind2
 
 def cxSimulatedBinary(ind1, ind2, nu):
-    """Executes a simulated binary crossover that modify inplace the input
+    """Executes a simulated binary crossover that modify in-place the input
     individuals. The simulated binary crossover expect individuals formed of
     a list of floating point numbers.
     
@@ -466,10 +466,10 @@ def mutGaussian(individual, mu, sigma, indpb):
     .. note::
        The mutation is not responsible for constraints checking, because
        there is too many possibilities for
-       resetting the values. Wich way is closer to the representation used
+       resetting the values. Which way is closer to the representation used
        is up to you.
        
-       One easy way to add cronstraint checking to an operator is to 
+       One easy way to add constraint checking to an operator is to 
        use the function decoration in the toolbox. See the multi-objective
        example (moga_kursawefct.py) for an explicit example.
 
@@ -484,7 +484,7 @@ def mutGaussian(individual, mu, sigma, indpb):
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
-    The *individual* is left intact and the mutant is an independant copy. The
+    The *individual* is left intact and the mutant is an independent copy. The
     *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
     probability of each attribute to be moved.
 
@@ -504,7 +504,7 @@ def mutShuffleIndexes(individual, indpb):
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
-    mutant. The *individual* is left intact and the mutant is an independant
+    mutant. The *individual* is left intact and the mutant is an independent
     copy. The *individual* is expected to be iterable and the values of the
     attributes shall stay valid after the ``not`` operator is called on them.
     The *flipIndxPb* argument is the probability of each attribute to be
@@ -967,7 +967,7 @@ def nsga2(individuals, n):
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a non-domination sheme. The list
+    than sorting the population according to a non-domination scheme. The list
     returned contains references to the input *individuals*.
     
     For more details on the NSGA-II operator see Deb, Pratab, Agarwal,
@@ -1060,11 +1060,11 @@ def spea2(individuals, n):
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a strength pareto sheme. The list
+    than sorting the population according to a strength Pareto scheme. The list
     returned contains references to the input *individuals*.
     
     For more details on the SPEA-II operator see Zitzler, Laumanns and Thiele,
-    "SPEA 2: Improving the strength pareto evolutionary algorithm", 2001.
+    "SPEA 2: Improving the strength Pareto evolutionary algorithm", 2001.
     """
     N = len(individuals)
     L = len(individuals[0].fitness.values)
@@ -1223,7 +1223,7 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     by the *replacement* operator. The migration array, if provided, shall
     contain each population's index once and only once. If no migration array
     is provided, it defaults to a serial ring migration (1 -- 2 -- ... -- n
-    -- 1). You may pass keyworded arguments to the two selection operators by
+    -- 1). You may pass keyword arguments to the two selection operators by
     giving a dictionary to *sel_kargs* and *repl_kargs*.
     """
     if migarray is None:
@@ -1294,7 +1294,7 @@ def decorate(decorator):
             do_some_work()
             return "some_result"
     
-    Using the :mod:`inspect` module, we can retreive the signature of the
+    Using the :mod:`inspect` module, we can retrieve the signature of the
     decorated function, what is not possible when not using this method. ::
     
         print inspect.getargspec(myFunc)
