@@ -16,13 +16,13 @@
 """The :mod:`algorithms` module is intended to contain some specific algorithms
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
-evolutionary algorithm may vary infinitly. Most of the algorithms in this module
+evolutionary algorithm may vary infinitely. Most of the algorithms in this module
 use operators registered in the toolbox with the same keywords,
 :meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~eap.select`
 for selection and :meth:`evaluate` for evaluation.
 
 You are encouraged to write your own algorithms in order to make them do what
-you realy want them to do.
+you really want them to do.
 """
 
 import logging
@@ -43,7 +43,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, halloffame=None):
     untouched individuals are placed in :math:`P'(g+1)`. Thereafter, a
     proportion of :math:`P'(g+1)`, determined by *mutpb*, is 
     mutated and placed in :math:`P''(g+1)`, the untouched individuals are
-    transfered :math:`P''(g+1)`. Finally, those new individuals are evaluated
+    transferred :math:`P''(g+1)`. Finally, those new individuals are evaluated
     and the evolution loop continues until *ngen* generations are completed.
     Briefly, the operators are applied in the following order ::
     

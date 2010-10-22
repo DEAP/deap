@@ -14,7 +14,7 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 """The :mod:`history` module provides a way to generate the genealogy
-tree of the famillies of individuals in an evolution.
+tree of the families of individuals in an evolution.
 
 .. note::
    The genealogy tree might get very big if your population and/or the number
@@ -27,7 +27,7 @@ class History(object):
     """The :class:`History` class helps to build a genealogy of all the
     individuals produced in the evolution. It contains two attributes,
     the :attr:`genealogy_tree` that is a dictionary of lists indexed by
-    individual, the list contain the indice of the parents. The second
+    individual, the list contain the indices of the parents. The second
     attribute :attr:`genealogy_history` contains every individual indexed
     by their individual number as in the genealogy tree.
     
@@ -55,7 +55,7 @@ class History(object):
     def populate(self, individuals):
         """Populate the history with the initial *individuals*. An attribute
         :attr:`history_index` is added to every individual, this index will 
-        help to track the parents and the childs through evolution. This index
+        help to track the parents and the children through evolution. This index
         will be modified by the :meth:`update` method when a child is produced.
         Modifying the internal :attr:`genealogy_index` of the history or the
         :attr:`history_index` of an individual may lead to unpredictable
