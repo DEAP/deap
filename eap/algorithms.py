@@ -252,7 +252,6 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
         "probabilities must be smaller or equal to 1.0.")
         
     _logger.info("Start of evolution")
-    evaluations = 0
     
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -268,7 +267,6 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, halloff
     # Begin the generational process
     for gen in range(ngen):
         _logger.info("Evolving generation %i", gen)
-        evaluations = 0
 
         offsprings = []
         nb_offsprings = 0
