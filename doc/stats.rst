@@ -82,4 +82,14 @@ Then, at the end of the evolution (or during the evolution with some more comman
 The above will produce for the One Max example a very impressive look at the propagation of the *ones* in the population. Each row of the graphic is a generation and each column represent the evolution in time of the average value of a specific attribute of the individuals.
 
 .. image:: _images/one_averages.*
-    
+
+
+Using the statistics module
+===========================
+
+ 
+.. automodule:: eap.statistics
+.. autofunction:: eap.statistics.mean
+.. autofunction:: eap.statistics.median
+.. autofunction:: eap.statistics.var
+.. autofunction:: eap.statistics.std_dev
