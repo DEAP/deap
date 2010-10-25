@@ -83,7 +83,7 @@ if __name__ == "__main__":
     pop = tools.population()
     hof = halloffame.ParetoFront()
     
-    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, hof)
+    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, halloffame=hof)
     
     logging.info("Best individual for measure 1 is %s, %s", 
                  hof[0], hof[0].fitness.values)
