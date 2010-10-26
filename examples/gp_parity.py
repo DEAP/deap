@@ -18,12 +18,13 @@ import random
 import operator
 import logging
 
+from eap import algorithms
 from eap import base
 from eap import creator
-from eap import toolbox
 from eap import gp
-from eap import algorithms
 from eap import halloffame
+from eap import statistics
+from eap import toolbox
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
@@ -77,11 +78,23 @@ tools.register("mate", toolbox.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateGrow, min_=0, max_=2)
 tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
 
-if __name__ == "__main__":
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
 
+def main():
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
+    stats = tools.clone(stats_t)
     
-    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, stats, halloffame=hof)
     
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    
+    return pop, stats, hof
+
+if __name__ == "__main__":
+    main()
+

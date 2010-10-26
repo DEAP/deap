@@ -22,6 +22,7 @@ from eap import algorithms
 from eap import base
 from eap import creator
 from eap import halloffame
+from eap import statistics
 from eap import toolbox
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -52,13 +53,26 @@ tools.register("mate", toolbox.cxESBlend, alpha=0.1, minstrategy=1e-10)
 tools.register("mutate", toolbox.mutES, indpb=0.1, minstrategy=1e-10)
 tools.register("select", toolbox.selTournament, tournsize=3)
 
-if __name__ == "__main__":
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
+
+def main():
     random.seed(64)
     
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
+    stats = tools.clone(stats_t)
     
     algorithms.eaMuCommaLambda(tools, pop, mu=8, lambda_=32, 
-                               cxpb=0.6, mutpb=0.3, ngen=500, halloffame=hof)
+                               cxpb=0.6, mutpb=0.3, ngen=500, 
+                               stats=stats, halloffame=hof)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    
+    return pop, stats, hof
+    
+if __name__ == "__main__":
+    main()

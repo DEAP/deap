@@ -25,11 +25,11 @@ except ImportError:
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
+from eap import algorithms
 from eap import base
 from eap import creator
 from eap import toolbox
 from eap import halloffame
-from eap import algorithms
 from eap import statistics
 
 # gr*.yml contains the distance map in list of list style in YAML/JSON format
@@ -67,12 +67,18 @@ stats_t.register("Std", statistics.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
-if __name__ == "__main__":
+def main():
     random.seed(264)
 
     pop = tools.population()
     hof = halloffame.HallOfFame(1)
+    stats = tools.clone(stats_t)
     
-    algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, stats_t, hof)
+    algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, stats, hof)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    
+    return pop, stats, hof
+
+if __name__ == "__main__":
+    main()
