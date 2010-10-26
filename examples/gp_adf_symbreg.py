@@ -19,10 +19,10 @@ import math
 
 from eap import base
 from eap import creator
-from eap import toolbox
 from eap import gp
-
-#random.seed(1626)
+from eap import halloffame
+from eap import statistics
+from eap import toolbox
 
 # Define new functions
 def safeDiv(left, right):
@@ -116,16 +116,27 @@ tools.register('mate', toolbox.cxTreeUniformOnePoint)
 tools.register('expr', gp.generateFull, min_=1, max_=2)
 tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr)
 
-if __name__ == "__main__":
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
+
+def main():
     random.seed(1024)
     
     pop = tools.population()
+    hof = halloffame.HallOfFame(1)
+    stats = tools.clone(stats_t)
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     # Evaluate the entire population
     for ind in pop:
     	ind.fitness.values = tools.evaluate(ind)
+
+    hof.update(pop)
+    stats.update(pop)    
     
     for g in range(NGEN):
         print "-- Generation %i --" % g
@@ -156,21 +167,15 @@ if __name__ == "__main__":
                 
         # Replacement of the population by the offspring
         pop[:] = offsprings
+        hof.update(pop)
+        stats.update(pop)
+        for key, stat in stats.data.items():
+            print "  %s %s" % (key, stat[-1][0])
     
-        # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in pop]
-
-        length = len(pop)
-        mean = sum(fits) / length
-        sum2 = sum(fit*fit for fit in fits)
-        std_dev = (sum2 / length - mean**2)**0.5
-
-        print "  Min %f" % min(fits)
-        print "  Max %f" % max(fits)
-        print "  Avg %f" % mean
-        print "  Std %f" % std_dev
+    print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
     
-    best = toolbox.selBest(pop, 1)[0]
+    return pop, stats, hof
     
-    print 'Best individual : ', gp.evaluate(best[0]), best.fitness
+if __name__ == "__main__":
+    main()
 

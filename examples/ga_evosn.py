@@ -24,6 +24,7 @@ from eap import algorithms
 from eap import base
 from eap import creator
 from eap import halloffame
+from eap import statistics
 from eap import toolbox
 
 import sortingnetwork as sn
@@ -74,11 +75,18 @@ tools.register("delwire", mutDelWire)
 
 tools.register("select", toolbox.nsga2)
 
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
+
 def main():
     #random.seed(64)
 
     population = tools.population()
     hof = halloffame.ParetoFront()
+    stats = tools.clone(stats_t)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
@@ -89,6 +97,7 @@ def main():
         ind.fitness.values = fit
     
     hof.update(population)
+    stats.update(population)
     
     # Begin the evolution
     for g in xrange(NGEN):
@@ -125,28 +134,16 @@ def main():
         
         population = tools.select(population+offsprings, n=len(offsprings))
         hof.update(population)
-        fits = [ind.fitness.values for ind in population]
-        
-        # Gather all the fitnesses in one list and print the stats
-        fits_t = zip(*fits)             # Transpose fitnesses for analysis
-
-        minimums = map(min, fits_t)
-        maximums = map(max, fits_t)
-        lenght = len(population)
-        sums = map(sum, fits_t)
-        sums2 = [sum(x*x for x in fit) for fit in fits_t]
-        means = [sum_ / lenght for sum_ in sums]
-        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
-        
-        print "  Min %s" % ", ".join(map(str, minimums))
-        print "  Max %s" % ", ".join(map(str, maximums))
-        print "  Avg %s" % ", ".join(map(str, means))
-        print "  Std %s" % ", ".join(map(str, std_devs))
+        stats.update(population)
+        for key, stat in stats.data.items():
+            print "  %s %s" % (key, ", ".join(map(str, stat[-1])))        
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
     print best_network.draw()
     print "%i errors, length %i, depth %i" % hof[0].fitness.values
+    
+    return population, stats, hof
 
 if __name__ == "__main__":
     main()

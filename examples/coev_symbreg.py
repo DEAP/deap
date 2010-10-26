@@ -17,10 +17,11 @@ import random
 
 from eap import base
 from eap import creator
-from eap import toolbox
 from eap import gp
+from eap import statistics
+from eap import toolbox
 
-# gp_symbreg already defines some usefull structures
+# gp_symbreg already defines some useful structures
 import gp_symbreg
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -51,10 +52,18 @@ tools_ga.register("mutate", toolbox.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
 tools_gp = gp_symbreg.tools
 
-if __name__ == "__main__":
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
 
+def main():
     pop_ga = tools_ga.population()
     pop_gp = tools_gp.population()
+    
+    stats_ga = tools_ga.clone(stats_t)
+    stats_gp = tools_gp.clone(stats_t)
     
     best_ga = toolbox.selRandom(pop_ga, 1)[0]
     best_gp = toolbox.selRandom(pop_gp, 1)[0]
@@ -113,33 +122,24 @@ if __name__ == "__main__":
         # Replace the old population by the offsprings
         pop_ga = off_ga
         pop_gp = off_gp
-                
+        
+        stats_ga.update(pop_ga)
+        stats_gp.update(pop_gp)
+        
         best_ga = toolbox.selBest(pop_ga, 1)[0]
         best_gp = toolbox.selBest(pop_gp, 1)[0]    
     
-        # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in pop_ga]
-        length = len(pop_ga)
-        mean = sum(fits) / length
-        sum2 = sum(x*x for x in fits)
-        std_dev = abs(sum2 / length - mean**2)**0.5
-            
-        print "--GA Population--"
-        print "  Min %f" % min(fits)
-        print "  Max %f" % max(fits)
-        print "  Avg %f" % (mean)
-        print "  Std %f" % std_dev
-        
-        fits = [ind.fitness.values[0] for ind in pop_gp]    
-        print "--GP Population--"
-        print "  Min %f" % min(fits)
-        print "  Max %f" % max(fits)
-        length = len(pop_gp)
-        mean = sum(fits) / length
-        sum2 = sum(x*x for x in fits)
-        std_dev = abs(sum2 / length - mean**2)**0.5
-        print "  Avg %f" % (mean)
-        print "  Std %f" % std_dev
+        print "  -- GA statistics --"
+        for key, stat in stats_ga.data.items():
+            print "  %s %s" % (key, stat[-1][0])
+        print "  -- GP statistics --"        
+        for key, stat in stats_gp.data.items():
+            print "  %s %s" % (key, stat[-1][0])            
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
     print "Best individual GP is %s, %s" % (gp.evaluate(best_gp), best_gp.fitness.values)
+
+    return pop_ga, pop_gp, stats_ga, stats_gp, best_ga, best_gp
+
+if __name__ == "__main__":
+    main()

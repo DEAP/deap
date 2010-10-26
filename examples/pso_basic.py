@@ -20,6 +20,7 @@ from math import sin
 
 from eap import base
 from eap import creator
+from eap import statistics
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -62,12 +63,20 @@ tools.register("population", list, content_init=tools.particle, size_init=200)
 tools.register("update", updateParticle, phi1=2.0, phi2=2.0)
 tools.register("evaluate", evalH1)
 
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
+
 def main():
     pop = tools.population()
+    stats = tools.clone(stats_t)
     GEN = 1000
     best = None
 
     for g in xrange(GEN):
+        print "-- Generation %i --" % g        
         for part in pop:
             part.fitness.values = tools.evaluate(part)
             if not part.best or part.best.fitness < part.fitness:
@@ -78,18 +87,12 @@ def main():
             tools.update(part, best)
 
         # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in pop]
+        stats.update(pop)
+        for key, stat in stats.data.items():
+            print "  %s %s" % (key, stat[-1][0])
+        print "  Best so far: %s - %s" % (best, best.fitness)
     
-        length = len(pop)
-        mean = sum(fits) / length
-        std_dev = abs(sum(x*x for x in fits) / length - mean**2)**0.5
-
-        print "-- Generation %i --" % g
-        print "  Min %s" % min(fits)
-        print "  Max %s" % max(fits)
-        print "  Avg %s" % mean
-        print "  Std %s" % std_dev
-        print "  Best so far : %s - %s" % (best, best.fitness)
+    return pop, stats, best
 
 if __name__ == "__main__":
     main()

@@ -24,6 +24,7 @@ from eap import algorithms
 from eap import base
 from eap import creator
 from eap import halloffame
+from eap import statistics
 from eap import toolbox
 
 MAX_ITEM = 50
@@ -77,25 +78,27 @@ tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
 tools.register("select", toolbox.spea2)
 
-if __name__ == "__main__":
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
+
+def main():
     random.seed(64)         # Seed does not include item creation
 
     pop = tools.population()
     hof = halloffame.ParetoFront()
+    stats = tools.clone(stats_t)
     
-    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, halloffame=hof)
+    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, stats, halloffame=hof)
     
     logging.info("Best individual for measure 1 is %s, %s", 
                  hof[0], hof[0].fitness.values)
     logging.info("Best individual for measure 2 is %s, %s", 
                  hof[-1], hof[-1].fitness.values)
-
-    # # You can plot the Hall of Fame if you have matplotlib installed
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # weights = [ind.fitness.values[0] for ind in hof]
-    # values = [ind.fitness.values[1] for ind in hof]
-    # plt.scatter(weights, values)
-    # plt.xlabel("Weight")
-    # plt.ylabel("Value")
-    # plt.show()
+    
+    return pop, stats, hof
+                 
+if __name__ == "__main__":
+    main()                 

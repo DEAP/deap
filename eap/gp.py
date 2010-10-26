@@ -59,7 +59,6 @@ def evaluateADF(seq):
         adfdict.update({expr.pset.__name__ : func})
         for expr2 in reversed(seq[1:i+1]):
             expr2.pset.func_dict.update(adfdict)
-            
     return adfdict
 
 def lambdify(pset, expr):
