@@ -39,13 +39,12 @@ class Stats(object):
         self.key = key
         self.functions = {}
         self.data = defaultdict(list)
-            
+
     def register(self, name, function):
         self.functions[name] = function
     
     def update(self, seq):
-        values = (self.key(elem) for elem in seq)
         # Transpose the values
-        values = zip(*values)
+        values = zip(*(self.key(elem) for elem in seq))
         for key, func in self.functions.items():
             self.data[key].append(map(func, values))
