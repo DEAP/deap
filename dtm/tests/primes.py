@@ -18,7 +18,8 @@ def bar(a, b, c):
 def primaryTest(nbr):
     if nbr <= 2:
         return True
-        
+    
+   # print("PRIMARY TEST")
     for i in xrange(2, int(math.sqrt(nbr))+1):
         if nbr % i == 0:
             return False
@@ -48,7 +49,7 @@ def main():
     print("Resultat de foo() calcule en meme temps :")
     print(weirdPow.get())
     
-dtm.setOptions(communicationManager="pympi")
+dtm.setOptions(communicationManager="mpi4py")
 dtm.start(main)
 
     

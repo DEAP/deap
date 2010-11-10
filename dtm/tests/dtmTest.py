@@ -77,5 +77,6 @@ def main():
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 
+dtm.setOptions(communicationManager="mpi4py")
 dtm.start(main)
 
