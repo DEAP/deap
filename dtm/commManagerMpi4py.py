@@ -3,10 +3,12 @@ import Queue
 import time
 import threading
 import cPickle
-#import pickle as cPickle
-import numpy
-#import array
+#import numpy
+import array
 import copy
+import logging
+
+_logger = logging.getLogger("dtm.communication")
 
 DTM_MPI_LATENCY = 0.1
 
@@ -40,25 +42,17 @@ class DtmCommThread(threading.Thread):
     def _mpiSend(self, msg, dest):
         # Stupidite de mpi4py pourri qui demande des buffers en Python...
         # Pourquoi pas un GOTO tant qu'a y etre...
-        #buf = array.array('c', cPickle.dumps(msg))
-        sBuf = cPickle.dumps(msg)
-        arrayBuf = numpy.array(sBuf, dtype='a')
+        arrayBuf = array.array('c', cPickle.dumps(msg))
+        #sBuf = cPickle.dumps(msg)
+        #arrayBuf = numpy.array(sBuf, dtype='a')
         
-        #lMessageLenght = array.array('i', [self.currentId, len(buf), self.msgSendTag])
-        lMessageLength = numpy.array([self.currentId, len(sBuf), self.msgSendTag], dtype='i')
+        lMessageLength = array.array('i', [self.currentId, len(arrayBuf), self.msgSendTag])
+        #lMessageLength = numpy.array([self.currentId, len(sBuf), self.msgSendTag], dtype='i')
 
-        #if self.currentId == 0:
-            #print(str(msg) + "###" + str(lMessageLength) + " ### " + str(len(buf)) + " ### " + str(self.msgSendTag) + "\n\n\n" + str(buf) + "\n\n\n")
-        #else:
-            #print("\t\t" + str(msg) + "###" + str(lMessageLength) + " ### " + str(len(buf)) + " ### " + str(self.msgSendTag))
         
         a=MPI.COMM_WORLD.Isend([lMessageLength, MPI.INT], dest=dest, tag=1)
-        #a.Wait()
         b=MPI.COMM_WORLD.Isend([arrayBuf, MPI.BYTE], dest=dest, tag=self.msgSendTag)
-        ##print("STOP SEND TEST")
-        #while not b.Test() or not a.Test():
-            #time.sleep(0.001)
-        ##print("OK SEND FINISHED")
+
         self.msgSendTag += 1
         return a,b,lMessageLength,arrayBuf
 
@@ -66,9 +60,9 @@ class DtmCommThread(threading.Thread):
     def run(self):
         lRecvWaiting = []
         lSendWaiting = []
-        #lMessageNotif = array.array('L', [0,0,0])
-        lMessageNotif = numpy.empty(3, dtype='i')   # Index 0 : Rank source, index 1 : taille du message, index 2 : tag du prochain message
-        recvAsync = MPI.COMM_WORLD.Irecv([lMessageNotif, 3, MPI.INT], source=MPI.ANY_SOURCE, tag=1)
+        lMessageNotif = array.array('i', [0,0,0]) # Index 0 : Rank source, index 1 : taille du message, index 2 : tag du prochain message
+        #lMessageNotif = numpy.empty(3, dtype='i')   
+        recvAsync = MPI.COMM_WORLD.Irecv([lMessageNotif, MPI.INT], source=MPI.ANY_SOURCE, tag=1)
         working = True
 
         while working:
@@ -82,29 +76,23 @@ class DtmCommThread(threading.Thread):
 
             if recvAsync.Test():
                 # On a recu quelque chose
-                #lBuf = array.array('c', ["#" for i in xrange(lMessageNotif[1])])
-                lBuf = numpy.empty(lMessageNotif[1], dtype='a')
+                lBuf = array.array('c', ["#"]*lMessageNotif[1])
+                #lBuf = numpy.empty(lMessageNotif[1], dtype='a')
                 
                 lRecvWaiting.append((lBuf, MPI.COMM_WORLD.Irecv([lBuf, MPI.CHAR], source=lMessageNotif[0], tag=lMessageNotif[2])))
                 
-                #lMessageNotif = array.array('L', [0,0,0])
-                lMessageNotif = numpy.empty(3, dtype='i')
+                lMessageNotif = array.array('i', [0,0,0])
+                #lMessageNotif = numpy.empty(3, dtype='i')
                 del recvAsync
-                recvAsync = MPI.COMM_WORLD.Irecv([lMessageNotif, 3, MPI.INT], source=MPI.ANY_SOURCE, tag=1)
+                recvAsync = MPI.COMM_WORLD.Irecv([lMessageNotif, MPI.INT], source=MPI.ANY_SOURCE, tag=1)
                 recvSomething = True
-                # La ligne suivante a demande 1 heure de recherche
-                # Visiblement, de temps en temps, Wait() n'attend pas reellement jusqu'a la completion du receive.
-                # Cela dit, ca plante encore de temps en temps avec dtm/tests/primes.py
+
 	    
             for i,reqTuple in enumerate(lRecvWaiting):
                 if reqTuple[1].Test():
                     strUnpickle = ""
-                    #try:
                     self.recvQ.put(cPickle.loads(strUnpickle.join(reqTuple[0])))
-                    #except cPickle.UnpicklingError:
-                        #print("MPI TRANSFER ERROR. Received buffer follows.")
-                        #print(reqTuple[0])
-                        #raise cPickle.UnpicklingError
+
                     recvSomething = True
                     lRecvWaiting[i] = None
             lRecvWaiting = filter(lambda d: not d is None, lRecvWaiting)
@@ -124,3 +112,7 @@ class DtmCommThread(threading.Thread):
             
             if not recvSomething:
                 time.sleep(DTM_MPI_LATENCY)
+
+        del lSendWaiting
+        del lRecvWaiting
+        
