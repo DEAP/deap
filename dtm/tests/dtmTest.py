@@ -5,7 +5,9 @@ from taskmanager import dtm
 
 import time
 import math
+import logging
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 def reboum(c):
     return c-100+22-math.sqrt(12)
