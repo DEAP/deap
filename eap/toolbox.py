@@ -135,7 +135,7 @@ class Toolbox(object):
                 args = list(args)
                 args.append(Iterate(content))
         pfunc = functools.partial(method, *args, **kargs)
-        pfunc.__name__ = method
+        pfunc.__name__ = methodname
         setattr(self, methodname, pfunc)
     
     def unregister(self, methodname):
