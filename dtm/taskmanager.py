@@ -388,6 +388,8 @@ class DtmControl(object):
         self._DEBUG_COUNT_EXEC_TASKS = 0
 
         self.lastRetValue = None
+        
+        self.dtmRandom = random.Random()
 
 
 
@@ -461,11 +463,11 @@ class DtmControl(object):
 
             a = 0.
             for i in xrange(10000):
-                a = math.sqrt(random.random() / (random.uniform(0,i)+1))
+                a = math.sqrt(self.dtmRandom.random() / (self.dtmRandom.uniform(0,i)+1))
 
             strT = ""
             for i in xrange(5000):
-                strT += str(random.randint(0,9999))
+                strT += str(self.dtmRandom.randint(0,9999))
 
             for i in xrange(500):
                 pickStr = pickle.dumps(strT)
@@ -713,7 +715,7 @@ class DtmControl(object):
 
         self.idGenerator = DtmTaskIdGenerator(self.workerId)
 
-        self.loadBalancer = DtmLoadBalancer(self.commThread.iterOverIDs(), self.workerId, self.execQueue)
+        self.loadBalancer = DtmLoadBalancer(self.commThread.iterOverIDs(), self.workerId, self.execQueue, self.dtmRandom)
 
         if self.commThread.isRootWorker:
             _logger.info("DTM started with %i workers", self.poolSize)
@@ -977,16 +979,11 @@ class DtmThread(threading.Thread):
     def waitForCondition(self):
         # Libere le lock d'execution et attend que la condition soit remplie pour continuer
         
-        # IMPORTANT : prepareWaitForCondition DOIT avoir ete appelee AVANT cette fonction
-        
         self.waitingCondition.acquire()
 
         beginTimeWait = time.clock()
         self.timeExec += beginTimeWait - self.timeBegin
         self.control.dtmExecLock.release()
-
-        # On tente de lancer tout de suite une nouvelle tache
-        #self.control._startNewTask()
         
         self.waitingCondition.wait()
         self.waitingCondition.release()
