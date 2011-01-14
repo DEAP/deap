@@ -1,6 +1,5 @@
 import threading
 import Queue
-import random
 import time
 import copy
 import logging
@@ -15,13 +14,14 @@ DTM_RESTART_QUEUE_BLOCKING_FROM = 1.
 class DtmLoadBalancer(object):
     """
     """
-    def __init__(self, workersIterator, workerId, execQueue):
+    def __init__(self, workersIterator, workerId, execQueue, randomizer):
         self.wid = workerId
         self.ws = {}
         self.execQ = execQueue      # Les autres queues ne sont pas necessaires
         self.wIter = workersIterator
         self.dLock = threading.Lock()
         self.tmpRecvJob = False
+        self.localRandom = randomizer
 
         for w in workersIterator:
             self.ws[w] = [0.,0.,0.,0.,0, False, []]
@@ -116,8 +116,8 @@ class DtmLoadBalancer(object):
                 i += 1
                 
             while diffLoad > 0.00000001 and len(scores) > 0 and self.ws[self.wid][1] > 0.:
-                selectedIndex = random.randint(0,len(scores)-1)
-                if random.random() > scores[selectedIndex][1]:
+                selectedIndex = self.localRandom.randint(0,len(scores)-1)
+                if self.localRandom.random() > scores[selectedIndex][1]:
                     del scores[selectedIndex]
                     continue
 
