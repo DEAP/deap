@@ -8,7 +8,8 @@ import logging
 _logger = logging.getLogger("dtm.loadBalancing")
 
 
-DTM_ASK_FOR_TASK_DELAY = 0.5
+DTM_ASK_FOR_TASK_DELAY = 2.5
+DTM_SEND_TASK_DELAY = 0.001
 DTM_RESTART_QUEUE_BLOCKING_FROM = 1.
 
 class DtmLoadBalancer(object):
@@ -20,15 +21,19 @@ class DtmLoadBalancer(object):
         self.execQ = execQueue      # Les autres queues ne sont pas necessaires
         self.wIter = workersIterator
         self.dLock = threading.Lock()
+        self.tmpRecvJob = False
 
         for w in workersIterator:
-            self.ws[w] = [0.,0.,0.,0.,0, time.time(), []]
+            self.ws[w] = [0.,0.,0.,0.,0, False, []]
             """
             [Load_current_exec, Load_execQueue, Load_WaitingForRestart,
             Load_Waiting, numero de sequence de derniere mise a jour, temps de derniere comm, en attente d'un/des ACK]
             """
         self.totalExecLoad, self.totalEQueueLoad, self.totalWaitingRQueueLoad, self.totalWaitingQueueLoad = 0., 0., 0., 0.
-
+        self.sendDelayMultiplier = DTM_SEND_TASK_DELAY*float(len(self.ws))**0.5
+        self.lastTaskSend = time.time() - self.sendDelayMultiplier
+        self.lastQuerySend = time.time()
+        
     def getNodesDict(self):
         return self.ws
 
@@ -40,6 +45,10 @@ class DtmLoadBalancer(object):
         for wId in otherDict:
             if len(self.ws[wId][6]) == 0 and otherDict[wId][4] > self.ws[wId][4] and wId != self.wid:
                 self.ws[wId][:5] = otherDict[wId][:5]   # Les deux dernieres infos sont "personnelles"
+    
+    def notifyTaskReceivedFrom(self, fromId):
+        self.ws[fromId][5] = True
+        self.tmpRecvJob = True
 
     def acked(self, fromWorker, ackN):
         try:
@@ -51,7 +60,7 @@ class DtmLoadBalancer(object):
     #print("TAKE DECISION CALLED ON WORKER " + str(self.wid) + " with thread " + str(threading.currentThread()))
 
         MAX_PROB = 1.
-        MIN_PROB = 0.05
+        MIN_PROB = 0.00
 
         sendTasksList = []
         sendNotifList = []
@@ -75,15 +84,18 @@ class DtmLoadBalancer(object):
       #print(sum([len(x[6]) for x in self.ws.values()]))
         #print(str(time.clock()) + " ["+str(self.wid)+"] has a load of " + str(sum(self.ws[self.wid][:3])) + " (avg : "+str(avgLoad)+")")
 
-
-        if diffLoad <= 0 and avgLoad != 0 and self.ws[self.wid][2] < DTM_RESTART_QUEUE_BLOCKING_FROM and (selfLoad == 0 or random.random() < (stdDevLoad/(avgLoad*selfLoad))):
+        listPossibleSendTo = filter(lambda d: d[1][5] and sum(d[1][:3]) > avgLoad, self.ws.items())
+        if selfLoad == 0 and len(listPossibleSendTo) > 0 and avgLoad != 0 and self.ws[self.wid][2] < DTM_RESTART_QUEUE_BLOCKING_FROM:
             # Algorithme d'envoi de demandes de taches
-            for wid in self.ws:
-                if sum(self.ws[wid][:3]) > diffLoad and wid != self.wid and time.time() - self.ws[wid][5] > DTM_ASK_FOR_TASK_DELAY:
-                    sendNotifList.append(wid)
-                    self.ws[wid][5] = time.time()
+            self.lastQuerySend = time.time()
+            for worker in listPossibleSendTo:
+                sendNotifList.append(worker[0])
+                self.ws[worker[0]][5] = False
 
-        if self.ws[self.wid][1] > 0 and diffLoad > -stdDevLoad and avgLoad != 0 and stdDevLoad != 0 and random.random() < (stdDevLoad * selfLoad/(avgLoad**2)):
+           
+        if self.ws[self.wid][1] > 0 and diffLoad > -stdDevLoad and avgLoad != 0\
+            and stdDevLoad != 0\
+            and time.time()-self.lastTaskSend > self.sendDelayMultiplier:
             # Algorithme d'envoi de taches
             def scoreFunc(loadi):
                 if loadi < (avgLoad-2*stdDevLoad):
@@ -95,14 +107,14 @@ class DtmLoadBalancer(object):
                     b = MIN_PROB - a*(avgLoad + stdDevLoad)
                     return a*loadi + b      # Lineaire entre Avg-2*stdDev et Avg+stdDev
 
-            scores = [(None,0)] * (len(self.ws)-1)
+            scores = [(None,0)] * (len(self.ws)-1)      # Gagne-t-on vraiment du temps en prechargeant la liste?
             i = 0
             for worker in self.ws:
                 if worker == self.wid:
                     continue
                 scores[i] = (worker, scoreFunc(sum(self.ws[worker][:3])))
                 i += 1
-
+                
             while diffLoad > 0.00000001 and len(scores) > 0 and self.ws[self.wid][1] > 0.:
                 selectedIndex = random.randint(0,len(scores)-1)
                 if random.random() > scores[selectedIndex][1]:
@@ -123,7 +135,6 @@ class DtmLoadBalancer(object):
                     sendT = 0.
 
                 tasksIDs, retiredTime = self.execQ.getTasksIDsWithExecTime(sendT)
-
                 tasksObj = []
                 for tID in tasksIDs:
                     t = self.execQ.getSpecificTask(tID)
@@ -140,6 +151,7 @@ class DtmLoadBalancer(object):
 
                     sendTasksList.append((widToSend, tasksObj, ackNbr))
 
-                del scores[selectedIndex]
-
+                del scores[selectedIndex]       # On s'assure de ne pas reprendre le meme worker
+                
+            self.lastTaskSend = time.time()
         return sendNotifList, sendTasksList
