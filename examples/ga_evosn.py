@@ -29,7 +29,7 @@ from eap import toolbox
 
 import sortingnetwork as sn
 
-INPUTS = 6
+INPUTS = 12
 
 def evalEvoSN(individual, dimension):
     network = sn.SortingNetwork(dimension, individual)
@@ -82,7 +82,7 @@ stats_t.register("Min", min)
 stats_t.register("Max", max)
 
 def main():
-    #random.seed(64)
+    random.seed(64)
 
     population = tools.population()
     hof = halloffame.ParetoFront()

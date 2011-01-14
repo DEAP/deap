@@ -74,11 +74,11 @@ class SortingNetwork(list):
         and return the number of incorrectly sorted inputs.
         """
         misses = 0
+        ordered = [[0]*(self.dimension-i) + [1]*i for i in range(self.dimension+1)]
         for sequence in product(range(2), repeat=self.dimension):
             sequence = list(sequence)
             self.sort(sequence)
-            if sequence != sorted(sequence):
-                misses += 1
+            misses += (sequence != ordered[sum(sequence)])
         return misses
     
     def draw(self):
