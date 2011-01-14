@@ -60,6 +60,9 @@ def main():
     dstats = [tools.clone(stats_t), tools.clone(stats_t), tools.clone(stats_t)]
     pstats = tools.clone(stats_t)
 
+    gmeans = statistics.Stats()
+    gmeans.register("Avg", statistics.mean)
+
     NGEN = 40
     CXPB = 0.5
     MUTPB = 0.2
@@ -82,12 +85,13 @@ def main():
         if gen > 0 and gen % 5 == 0:
             toolbox.migRing(demes, n=5, selection=tools.select)
         pstats.update(demes[0]+demes[1]+demes[2])
+        gmeans.update(demes[0]+demes[1]+demes[2])
         print "  -- Population --"  
         for key, stat in pstats.data.items():
             print "    %s %s" % (key, stat[-1][0])        
         gen += 1
     
-    return demes, dstats, hof    
+    return demes, dstats, pstats, hof, gmeans
 
 if __name__ == "__main__":
     main()
