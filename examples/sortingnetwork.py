@@ -14,37 +14,18 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 try:
-    from itertools import permutations
+    from itertools import product
 except ImportError:
-    def permutations(iterable, r=None):
-        """Permutation function as defined in the itertools module. It is used
-        if the permutation function in itertools ain't present (python 2.5 and
-        lower).
-        """
-        # permutations('ABCD', 2) --> AB AC AD BA BC BD CA CB CD DA DB DC
-        # permutations(range(3)) --> 012 021 102 120 201 210
-        pool = tuple(iterable)
-        n = len(pool)
-        r = n if r is None else r
-        if r > n:
-            return
-        indices = range(n)
-        cycles = range(n, n-r, -1)
-        yield tuple(pool[i] for i in indices[:r])
-        while n:
-            for i in reversed(range(r)):
-                cycles[i] -= 1
-                if cycles[i] == 0:
-                    indices[i:] = indices[i+1:] + indices[i:i+1]
-                    cycles[i] = n - i
-                else:
-                    j = cycles[i]
-                    indices[i], indices[-j] = indices[-j], indices[i]
-                    yield tuple(pool[i] for i in indices[:r])
-                    break
-            else:
-                return
-
+    def product(*args, **kwds):
+        # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
+        # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
+        pools = map(tuple, args) * kwds.get('repeat', 1)
+        result = [[]]
+        for pool in pools:
+            result = [x+[y] for x in result for y in pool]
+        for prod in result:
+            yield tuple(prod)
+            
 class SortingNetwork(list):
     """Sorting network class.
     
@@ -92,12 +73,11 @@ class SortingNetwork(list):
         """Test all possible inputs given the dimension of the network,
         and return the number of incorrectly sorted inputs.
         """
-        ordered = range(self.dimension)
         misses = 0
-        for sequence in permutations(ordered):
+        for sequence in product(range(2), repeat=self.dimension):
             sequence = list(sequence)
             self.sort(sequence)
-            if ordered != sequence:
+            if sequence != sorted(sequence):
                 misses += 1
         return misses
     
