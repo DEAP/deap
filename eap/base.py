@@ -260,7 +260,7 @@ class Fitness(object):
     weights is made when the values are set via the property :attr:`values`.
     Multiplication is made on setting of the values for efficiency.
     
-    Generaly it is unnecessary to manipulate *wvalues* as it is an internal
+    Generally it is unnecessary to manipulate *wvalues* as it is an internal
     attribute of the fitness used in the comparison operators.
     """
     
@@ -289,12 +289,12 @@ class Fitness(object):
         return len(self.wvalues) != 0
 
     def isDominated(self, other):
-        """In addition to the comparaison operators that are used to sort
+        """In addition to the comparison operators that are used to sort
         lexically the fitnesses, this method returns :data:`True` if this
         fitness is dominated by the *other* fitness and :data:`False` otherwise.
         The weights are used to compare minimizing and maximizing fitnesses. If
         there is more fitness values than weights, the las weight get repeated
-        until the end of the comparaison.
+        until the end of the comparison.
         """
         not_equal = False
         for self_wvalue, other_wvalue in izip(self.wvalues, other.wvalues):

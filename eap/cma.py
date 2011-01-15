@@ -36,7 +36,7 @@ def esCMA(toolbox, population, ngen, halloffame=None):
     Evolution Strategy: A Comparing Rewiew.*
     
     The provided *population* should be a list of one or more individuals. The
-    other keyworded arguments are passed to the class
+    other keyword arguments are passed to the class
     :class:`~eap.cma.CMAStrategy`.
     """
     _logger.info("Start of evolution")

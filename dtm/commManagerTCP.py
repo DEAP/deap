@@ -45,7 +45,7 @@ class DtmCommThread(threading.Thread):
         listWorkers = fWorkers.readlines()
         self.pSize = len(listWorkers)
 
-        self.address = listWorkers[self.wId]
+        self.address = listWorkers[self.wId].replace("\n","")
 
         self.connections = []
         self.listeners = []
