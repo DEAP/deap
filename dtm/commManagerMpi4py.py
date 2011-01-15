@@ -99,12 +99,13 @@ class DtmCommThread(threading.Thread):
                 # On envoie tous les messages
                 try:
                     sendMsg = self.sendQ.get_nowait()
+                except Queue.Empty:
+                    break
+                else:
                     countSend += 1
                     commA, buf1 = self._mpiSend(sendMsg[1], sendMsg[0])
                     lSendWaiting.append((commA,buf1))
-                    sendSomething = True
-                except Queue.Empty:
-                    break
+                    sendSomething = True                    
             
             lSendWaiting = [req for req in lSendWaiting if req[0].Test()]
             #lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
