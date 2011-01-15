@@ -57,7 +57,6 @@ class DtmCommThread(threading.Thread):
 
     
     def run(self):
-        global MPI
         lRecvWaiting = []
         lSendWaiting = []
         countSend = 0
