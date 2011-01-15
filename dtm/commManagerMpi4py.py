@@ -92,7 +92,8 @@ class DtmCommThread(threading.Thread):
                     self.recvQ.put(cPickle.loads(reqTuple[0].tostring()))
                     lRecvWaiting[i] = None
                     recvSomething = True
-            lRecvWaiting = filter(lambda d: not d is None, lRecvWaiting)
+            lRecvWaiting = [req for req in lRecvWaiting if req]
+            #lRecvWaiting = filter(lambda d: not d is None, lRecvWaiting)
 
             while len(lSendWaiting) < DTM_CONCURRENT_SEND_LIMIT:
                 # On envoie tous les messages
@@ -105,14 +106,16 @@ class DtmCommThread(threading.Thread):
                 except Queue.Empty:
                     break
             
-            lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
+            lSendWaiting = [req for req in lSendWaiting if req[0].Test()]
+            #lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
             
             if not recvSomething:
                 time.sleep(DTM_MPI_LATENCY)
                 
         while len(lSendWaiting) > 0:
             # On envoie les derniers messages
-            lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
+            lSendWaiting = [req for req in lSendWaiting if req[0].Test()]
+            #lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
             time.sleep(DTM_MPI_LATENCY)
             
         del lSendWaiting
