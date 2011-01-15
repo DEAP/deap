@@ -14,6 +14,8 @@ class DtmCommThread(threading.Thread):
         self.pSize = mpi.size
         self.currentId = mpi.rank
         self.exitStatus = exitEvent
+        self.countSend = 0
+        self.countRecv = 0
         commReadyEvent.set()         # On doit notifier le thread principal qu'on est pret
         
     @property
@@ -43,21 +45,26 @@ class DtmCommThread(threading.Thread):
                 # Note importante : le thread de communication DOIT vider la sendQ
                 # AVANT de quitter (les ordres de quit doivent etre envoyes)
                 working = False
-
+                time.sleep(2)
+	    
             if recvAsync:
                 # On a recu quelque chose
                 self.recvQ.put(recvAsync.message)
                 recvAsync = mpi.irecv()
+                self.countRecv += 1
                 recvSomething = True
 
             while True:
                 # On envoie tous les messages
-                try:
+                try:		    
                     sendMsg = self.sendQ.get_nowait()
                     mpi.isend(sendMsg[1], sendMsg[0])
                     sendSomething = True
+                    self.countSend += 1
                 except Queue.Empty:
                     break
 
             if not recvSomething:
                 time.sleep(DTM_MPI_LATENCY)
+        
+        print("/////////////////////", mpi.rank, self.countSend, self.countRecv)

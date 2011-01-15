@@ -44,7 +44,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     untouched individuals are placed in :math:`P'(g+1)`. Thereafter, a
     proportion of :math:`P'(g+1)`, determined by *mutpb*, is 
     mutated and placed in :math:`P''(g+1)`, the untouched individuals are
-    transfered :math:`P''(g+1)`. Finally, those new individuals are evaluated
+    transferred :math:`P''(g+1)`. Finally, those new individuals are evaluated
     and the evolution loop continues until *ngen* generations are completed.
     Briefly, the operators are applied in the following order ::
     
@@ -155,8 +155,6 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         "probabilities must be smaller or equal to 1.0.")
         
     _logger.info("Start of evolution")
-    evaluations = 0
-        
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)

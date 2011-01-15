@@ -39,14 +39,14 @@ except ImportError:                         # pickle but only present under
 class Milestone(object):
     """A milestone is a file containing the state of any object that has been
     hooked. While initializing a milestone, add the objects that you want to
-    be dumped by appending keyworded arguments to the initializer or using the 
-    :meth:`add`. By default the milestone tries to use the YAML format wich
-    is human readable, if PyYAML is not installed, it uses pickling wich is
+    be dumped by appending keyword arguments to the initializer or using the 
+    :meth:`add`. By default the milestone tries to use the YAML format which
+    is human readable, if PyYAML is not installed, it uses pickling which is
     not readable. You can force the use of pickling by setting the argument
     *yaml* to :data:`False`. 
     
     In order to use efficiently this module, you must understand properly the
-    assignement principles in Python. This module use the *pointers* you passed
+    assignment principles in Python. This module use the *pointers* you passed
     to dump the object, for example the following won't work as desired ::
     
         >>> my_object = [1, 2, 3]
@@ -79,7 +79,7 @@ class Milestone(object):
     
     def add(self, **kargs):
         """Add objects to the list of objects to be dumped. The object is added
-        under the name specified by the argument's name. Keyworded arguments
+        under the name specified by the argument's name. Keyword arguments
         are mandatory in this function."""
         self._dict.update(*kargs)
     
@@ -113,8 +113,8 @@ class Milestone(object):
         ms_file.close()
     
     def load(self, filename):
-        """Load a milestone file retreiving the dumped objects, it is not safe
-        to load a milestone file in a milestone object that contians
+        """Load a milestone file retrieving the dumped objects, it is not safe
+        to load a milestone file in a milestone object that contains
         references as all conflicting names will be updated with the new
         values.
         """

@@ -5,7 +5,9 @@ from taskmanager import dtm
 
 import time
 import math
+import logging
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 def reboum(c):
     return c-100+22-math.sqrt(12)
@@ -77,5 +79,6 @@ def main():
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 
+dtm.setOptions(communicationManager="mpi4py")
 dtm.start(main)
 
