@@ -25,6 +25,19 @@ This module contains the operators for an evolutionary algorithm. They are used 
 .. versionchanged:: 0.6
    In earlier versions, the resposability of cloning the individuals was left to the operator that wanted to modify an individuals. The new offsprings were returned via a tuple and the parents were left intact. In version 0.6, cloning is made prior to the operation on the individuals and the operators can now modify the individuals directly. At a user level, this may not affect your evolution if you were using the algorithms, but if you developped your own algorithms, you better take a look at the changes made in the algorithms source code.
 
+
+===================================== ============================== =========================
+ Operator                             Arguments                      Results                  
+===================================== ============================== =========================
+ :func:`cxOnePoint`                   seq1, seq2                                              
+ :func:`cxTwoPoints`                  seq1, seq2                                              
+ :func:`cxUniform`                    seq1, seq2
+ :func:`cxPartialyMatched`            int seq1, int seq2
+ :func:`cxUniformPartialyMatched`     int seq1, int seq2
+ :func:`cxBlend`                      float seq1, float seq2
+===================================== ============================== =========================
+
+
 Crossover
 ---------
 
@@ -76,8 +89,6 @@ Mutation
 .. autofunction:: eap.toolbox.mutTreeShrink
 
 .. autofunction:: eap.toolbox.mutTypedTreeInsert
-
-.. .. autofunction:: eap.toolbox.mutTreeRandomMethod
 
 Selection
 ---------
