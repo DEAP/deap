@@ -77,7 +77,7 @@ class DtmCommThread(threading.Thread):
             ##while recvAsync.Test():
             while len(lRecvWaiting) < DTM_CONCURRENT_RECV_LIMIT and MPI.COMM_WORLD.Iprobe(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=lMessageStatus):
                 # On a recu quelque chose
-                lBuf = array.array('c', ["#"]*lMessageStatus.Get_elements(MPI.CHAR))
+                lBuf = array.array('c', '#'*lMessageStatus.Get_elements(MPI.CHAR))
                 
                 lRecvWaiting.append((lBuf, MPI.COMM_WORLD.Irecv([lBuf, MPI.CHAR], source=lMessageStatus.Get_source(), tag=lMessageStatus.Get_tag())))
 
