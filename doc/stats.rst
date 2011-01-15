@@ -58,26 +58,29 @@ In this example, we have a single population that contains the individuals, each
 Observing something else
 ========================
 
-It may be useful to have some statistics about something else than the population's fitness. For example, one may need to observe the mean value of each attribute of the individuals. Just as before, it is possible using the generator expressions. ::
+It may be useful to have some statistics about something else than the population's fitness. For example, one may need to observe the mean value of each attribute of the individuals. First, we create an object :class:`Stats`, and register a mean function ::
 
-    attrs = list(pop)         # Create a new list of individuals
-    trans = zip(*attrs)       # Transpose the attributes
+    attr_stats = statistics.Stats()
+    attr_stats.register("Avg", statistics.mean)
     
-    sums = map(sum, trans)
-    attr_means = [sum_ / len(attrs) for sum_ in sums]
-    
-`Matplotlib <http://matplotlib.sourceforge.net/>`_ makes it possible to plot the evolution of the attribute's value in function of the generation number. First, we need to create a list where every *mean* produced will be saved. ::
+We then have to update the statistics after each generation, so we add the next line at the end of the evolution loop. ::
 
-    g_means.append(attr_means)
-    
-Then, at the end of the evolution (or during the evolution with some more commands), we can draw theses *averages* with matplotlib's :func:`imshow` function. ::
+    attr_stats.update(population)
 
-    plt.figure()
-    plt.imshow(g_means)
-    plt.colorbar()
-    plt.xlabel('Attribute')
-    plt.ylabel('Generation')
-    plt.show()
+    
+The `Stats` object is returned after the execution of the main function. `Matplotlib <http://matplotlib.sourceforge.net/>`_ makes it possible to plot the evolution of the attribute's value in function of the generation number. We can draw theses *averages* with matplotlib's :func:`imshow` function. ::
+
+    >>> from pylab import *
+    >>> figure()
+    >>> imshow(attr_stats.data['Avg'])
+    <matplotlib.image.AxesImage object at 0x9876543>
+    >>> colorbar()
+    <matplotlib.colorbar.Colorbar instance at 0x0123456>
+    >>> xlabel('Attribute')
+    <matplotlib.text.Text object at 0x0012345>
+    >>> ylabel('Generation')
+    <matplotlib.text.Text object at 0x0098764>
+    >>> show()
     
 The above will produce for the One Max example a very impressive look at the propagation of the *ones* in the population. Each row of the graphic is a generation and each column represent the evolution in time of the average value of a specific attribute of the individuals.
 
