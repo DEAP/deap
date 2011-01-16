@@ -18,12 +18,12 @@ MSG_COMM_TYPE = 0
 MSG_SENDER_INFO = 1
 MSG_NODES_INFOS = 2
 
-
-def erf(x):
-    try:    # math.erf() is implemented only since Python 2.7
-        return math.erf(x)
-    except AttributeError:
-        # See http://stackoverflow.com/questions/457408/is-there-an-easily-available-implementation-of-erf-for-python
+try:
+     # math.erf() is implemented only since Python 2.7
+    from math import erf
+except ImportError:
+    def erf(x):
+        # See http://stackoverflow.com/questions/457408/
         # save the sign of x
         sign = 1
         if x < 0:
@@ -42,7 +42,6 @@ def erf(x):
         t = 1.0/(1.0 + p*x)
         y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*math.exp(-x*x)
         return sign*y # erf(-x) = -erf(x)
-
 
 class DtmTaskIdGenerator(object):
     """
