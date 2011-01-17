@@ -10,7 +10,7 @@ from taskmanager import dtm
 import time
 import math
 
-RECURSIVITY_LEVEL = 13
+RECURSIVITY_LEVEL = 11
 
 def foo(arg):
     return arg*(math.sqrt(math.pow(arg,2)))

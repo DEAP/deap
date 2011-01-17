@@ -43,6 +43,7 @@ except ImportError:
         y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*math.exp(-x*x)
         return sign*y # erf(-x) = -erf(x)
 
+
 class DtmTaskIdGenerator(object):
     """
     A thread-safe ID generator.
@@ -133,13 +134,35 @@ class DtmExecInfo(object):
 
     def getLoad(self):
         try:
-            self.tStatsLock.acquire()
-            tInfo = self.tStats.get(self.eCurrent.t, [1,1,0,0])
-            val = self._execTimeRemaining(tInfo[0], tInfo[1], self.eCurrent.timeExec)
-            self.tStatsLock.release()
-            return val
+            timeDone = self.eCurrent.timeExec
+            if hasattr(self.eCurrent.t, 'dtmExpectedDuration'):
+                if isinstance(self.eCurrent.t.dtmExpectedDuration, tuple):
+                    return self._execTimeRemaining(self.eCurrent.t.dtmExpectedDuration[0], self.eCurrent.t.dtmExpectedDuration[1], timeDone)
+                else:
+                    if self.eCurrent.t.dtmExpectedDuration-timeDone <= 0:
+                        return 1.
+                    else:
+                        return self.eCurrent.t.dtmExpectedDuration-timeDone
+            elif hasattr(self.eCurrent.t, 'dtmDurationMetric'):
+                self.eCurrent.t.dtmExpectedDuration = self.eCurrent.t.dtmDurationMetric(*self.eCurrent.argsL, **self.eCurrent.kwargsL)
+                if isinstance(self.eCurrent.t.dtmExpectedDuration, tuple):
+                    return self._execTimeRemaining(self.eCurrent.t.dtmExpectedDuration[0], self.eCurrent.t.dtmExpectedDuration[1], timeDone)
+                else:
+                    if self.eCurrent.t.dtmExpectedDuration-timeDone <= 0:
+                        return 1.
+                    else:
+                        return self.eCurrent.t.dtmExpectedDuration-timeDone
+            else:
+                try:
+                    self.tStatsLock.acquire()
+                    tInfo = self.tStats.get(self.eCurrent.t, [1,1,0,0])
+                    val = self._execTimeRemaining(tInfo[0], tInfo[1], timeDone)
+                    self.tStatsLock.release()
+                    return val
+                except AttributeError:
+                    self.tStatsLock.release()
+                    return 0.
         except AttributeError:
-            self.tStatsLock.release()
             return 0.
 
 
@@ -158,6 +181,9 @@ class DtmTaskQueue(object):
         self.changed = True
 
     def _getTimeInfoAbout(self, task):
+        # Attention, cette fonction peut modifier les taches
+        # qui lui sont passees (elle peut ajouter ou enlever
+        # des attributs au target)
         if isinstance(task, tuple):
             target = task[7]
             timeDone = 0.
@@ -165,11 +191,34 @@ class DtmTaskQueue(object):
             target = task.t
             timeDone = task.timeExec
 
-        self.tStatsLock.acquire()
-        tInfo = self.tStats.get(target, [1,1,0,0])
-        self.tStatsLock.release()
+        
+        if hasattr(target, 'dtmExpectedDuration'):
+            if isinstance(target.dtmExpectedDuration, tuple):
+                return self._execTimeRemaining(target.dtmExpectedDuration[0], target.dtmExpectedDuration[1], timeDone)
+            else:
+                if target.dtmExpectedDuration-timeDone <= 0:
+                    return 1.
+                else:
+                    return target.dtmExpectedDuration-timeDone
+        elif hasattr(target, 'dtmDurationMetric'):
+            if isinstance(task, tuple):
+                argsT, kwargsT = task[8], task[9]
+            else:
+                argsT, kwargsT = task.argsL, task.kwargsL
 
-        return self._execTimeRemaining(tInfo[0], tInfo[1], timeDone)
+            target.dtmExpectedDuration = target.dtmDurationMetric(*argsT, **kwargsT)
+            if isinstance(target.dtmExpectedDuration, tuple):
+                return self._execTimeRemaining(target.dtmExpectedDuration[0], target.dtmExpectedDuration[1], timeDone)
+            else:
+                if target.dtmExpectedDuration-timeDone <= 0:
+                    return 1.
+                else:
+                    return target.dtmExpectedDuration-timeDone
+        else:    
+            self.tStatsLock.acquire()
+            tInfo = self.tStats.get(target, [1,1,0,0])
+            self.tStatsLock.release()
+            return self._execTimeRemaining(tInfo[0], tInfo[1], timeDone)
 
     def _execTimeRemaining(self, mean, stdDev, alreadyDone):
         if alreadyDone == 0. or stdDev == 0:
@@ -268,6 +317,7 @@ class DtmTaskQueue(object):
         self.previousLoad = tmpLoad
         self.changed = False
         self._actionLock.release()
+        #print("LOAD", tmpLoad)
         return self.previousLoad
 
     def getSpecificTask(self, taskId):
@@ -384,11 +434,16 @@ class DtmControl(object):
 
         self.loadBalancer = None
 
-        self._DEBUG_COUNT_EXEC_TASKS = 0
+        self.nbrTasksDone = 0
 
         self.lastRetValue = None
         
         self.dtmRandom = random.Random()
+
+        """
+        dtmExpectedDuration
+        dtmDurationMetric
+        """
 
 
 
@@ -399,7 +454,7 @@ class DtmControl(object):
         """
 
         if self.printExecSummary:
-             _logger.info("[%s] did %i tasks", str(self.workerId), self._DEBUG_COUNT_EXEC_TASKS)
+             _logger.info("[%s] did %i tasks", str(self.workerId), self.nbrTasksDone)
 
         if self.exitSetHere:
             for n in self.commThread.iterOverIDs():
@@ -426,7 +481,7 @@ class DtmControl(object):
                 _logger.info(msgT)
 
             _logger.info("DTM execution ended (no more tasks)")
-            _logger.info("Total execution time : %s", str(time.clock() - self.sTime))
+            _logger.info("Total execution time for root worker : %s", str(time.clock() - self.sTime))
 
         return self.lastRetValue
 
@@ -524,16 +579,26 @@ class DtmControl(object):
         if len(self.waitingThreads[tidParent][1]) == 0:
             conditionLock = self.waitingThreads[tidParent][0]
             wTask = self.waitingThreadsQueue.getSpecificTask(tidParent)
-            assert not wTask is None
+            while wTask is None:
+                # Peut se produire si le thread parent ne s'est pas encore mis en sleep
+                time.sleep(0.001)
+                wTask = self.waitingThreadsQueue.getSpecificTask(tidParent)
+            #assert not wTask is None
 
+            self.asyncWaitingListLock.acquire()
             for listAsync in self.asyncWaitingList.values():
-                if tidParent in listAsync:
-                    conditionLock.acquire()
-                    conditionLock.notifyAll()
-                    conditionLock.release()
-                    self.waitingThreadsLock.release()
-                    return
-            
+                # Les threads representant les taches asynchrones
+                # peuvent recommencer immediatement
+                for taskAsync in listAsync:
+                    if taskAsync[0] == tidParent:
+                        conditionLock.acquire()
+                        conditionLock.notifyAll()
+                        conditionLock.release()
+                        self.asyncWaitingListLock.release()
+                        self.waitingThreadsLock.release()
+                        return
+
+            self.asyncWaitingListLock.release()
             self.waitingForRestartQueue.put(wTask)
 
         self.waitingThreadsLock.release()
@@ -569,7 +634,7 @@ class DtmControl(object):
                     newTask = self.execQueue.getTask()
                     newThread = DtmThread(tid=newTask[0], returnInfo=(newTask[1],newTask[2],newTask[3]), depth=newTask[6], target=newTask[7], taskCreationTime=newTask[5], args=newTask[8], kwargs=newTask[9], control=self)
                     newThread.start()
-                    #self._DEBUG_COUNT_EXEC_TASKS += 1
+                    self.nbrTasksDone += 1
                     taskLauched = True
                 except Queue.Empty:
                     pass
@@ -586,9 +651,7 @@ class DtmControl(object):
         timeBegin = time.time()
         dataStep = 30
         stepCount = 0
-        #print("Control thread on worker " + str(self.workerId) + " :\n PID : " + str(os.getpid()) + "\n PPID : " + str(os.getppid()) + "\n UID : " + str(os.getuid()) + "\n TID? : ")
-        #os.system('./getID')
-        #print("\n")
+
         while True:
             stepCount += 1
             while True:
@@ -602,6 +665,7 @@ class DtmControl(object):
                         self._updateStats(recvMsg[MSG_SENDER_INFO], recvMsg[MSG_NODES_INFOS])
                         self.execQueue.putList(recvMsg[4])
                         self.loadBalancer.updateSelfStatus(self._getLoadTuple())
+                        self.loadBalancer.notifyTaskReceivedFrom(recvMsg[MSG_SENDER_INFO])
                         self.sendQueue.put((recvMsg[MSG_SENDER_INFO], ("AckReceptTask", self.workerId, (self.loadBalancer.getNodesDict(), self.tasksStats), recvMsg[5])))
                     elif recvMsg[MSG_COMM_TYPE] == "RequestTask":
                         self._updateStats(recvMsg[MSG_SENDER_INFO], recvMsg[MSG_NODES_INFOS])
@@ -633,11 +697,11 @@ class DtmControl(object):
                 self.sendQueue.put((updateTo, ("RequestTask", self.workerId, (self.loadBalancer.getNodesDict(), self.tasksStats), time.time())))
             self.tasksStatsLock.release()
 
-            if stepCount >= dataStep:
-                dataLoadB += str(time.time()-timeBegin) + "," + str(self.execQueue.getLen()+\
-                self.waitingForRestartQueue.getLen()+\
-                self.waitingThreadsQueue.getLen()+int(self.dtmExecLock.isLocked())) + "\n"
-                stepCount = 0
+            #if stepCount >= dataStep:
+                #dataLoadB += str(time.time()-timeBegin) + "," + str(self.execQueue.getLen()+\
+                #self.waitingForRestartQueue.getLen()+\
+                #self.waitingThreadsQueue.getLen()+int(self.dtmExecLock.isLocked())) + "\n"
+                #stepCount = 0
                 #print("//////////////////////", self.workerId, self.execQueue.getLen(), self.waitingForRestartQueue.getLen(), self.waitingThreadsQueue.getLen())
             
             if not self._startNewTask():
@@ -741,23 +805,16 @@ class DtmControl(object):
         listResults = [None] * len(iterable)
         listTasks = []
 
-        self.waitingThreadsLock.acquire()
-
         for index,elem in enumerate(iterable):
             task = (self.idGenerator.tid, self.workerId, currentId, index, [self.workerId], time.time(), threading.currentThread().depth+1, function, (elem,), {})
             listTid.append(task[0])
             listTasks.append(task)
-        
+            
+        self.waitingThreadsLock.acquire()
         self.waitingThreads[currentId] = (threading.currentThread().waitingCondition, listTid, time.clock(), listResults)        
-        self.waitingThreadsQueue.put(threading.currentThread())
-
         self.waitingThreadsLock.release()
         
         self.execQueue.putList(listTasks)
-        
-        #self._addWaitingTask(threading.currentThread(), listTid, listResults)
-        #self.waitingThreads[currentId] = (conditionObject, listTid, time.clock(), listResults)
-        #self.waitingThreadsLock.release()
 
         time_wait = threading.currentThread().waitForCondition()
 
@@ -790,11 +847,8 @@ class DtmControl(object):
         currentId = threading.currentThread().tid
         
         task = (self.idGenerator.tid, self.workerId, currentId, 0, [self.workerId], time.time(), threading.currentThread().depth+1, function, args, kwargs)
-        self.waitingThreadsLock.acquire()
-        
+        self.waitingThreadsLock.acquire()       
         self.waitingThreads[currentId] = (threading.currentThread().waitingCondition, [task[0]], time.clock(), [None])        
-        self.waitingThreadsQueue.put(threading.currentThread())
-        
         self.waitingThreadsLock.release()
         
         self.execQueue.put(task)
@@ -867,16 +921,17 @@ class DtmControl(object):
         listTid = []
         currentId = threading.currentThread().tid
 
-        self.waitingThreadsLock.acquire()
+        
         for i in xrange(howManyTimes):
             task = (self.idGenerator.tid, self.workerId, currentId, i, [self.workerId], time.time(), threading.currentThread().depth+1, function, args, kwargs)
             listTid.append(task[0])
             listTasks.append(task)
-
-        self.execQueue.putList(listTasks)
+            
+        self.waitingThreadsLock.acquire()
+        self.waitingThreads[currentId] = (threading.currentThread().waitingCondition, listTid, time.clock(), listResults)
         self.waitingThreadsLock.release()
 
-        self._addWaitingTask(threading.currentThread(), listTid, listResults)
+        self.execQueue.putList(listTasks)
 
         time_wait = threading.currentThread().waitForCondition()
 
@@ -947,9 +1002,7 @@ class DtmThread(threading.Thread):
     def run(self):
         # On s'assure qu'aucun autre thread ne s'execute
         self.control.dtmExecLock.acquire()
-        #print("Execution thread on worker " + str(self.control.workerId) + " :\n PID : " + str(os.getpid()) + "\n PPID : " + str(os.getppid()) + "\n UID : " + str(os.getuid()) + "\n TID? : ")
-        #os.system('./getID')
-        #print("\n")
+
         self.timeBegin = time.clock()
         returnedR = self.t(*self.argsL, **self.kwargsL)
         self.timeExec += time.clock() - self.timeBegin
@@ -983,7 +1036,10 @@ class DtmThread(threading.Thread):
         beginTimeWait = time.clock()
         self.timeExec += beginTimeWait - self.timeBegin
         self.control.dtmExecLock.release()
-        
+
+        self.control._startNewTask()
+
+        self.control.waitingThreadsQueue.put(threading.currentThread())
         self.waitingCondition.wait()
         self.waitingCondition.release()
 
@@ -1027,6 +1083,7 @@ class DtmAsyncWaitingThread(threading.Thread):
 
     def waitForCondition(self):
         self.waitingCondition.acquire()
+        self.control.waitingThreadsQueue.put(threading.currentThread())
         self.waitingCondition.wait()
         self.waitingCondition.release()
 
@@ -1051,19 +1108,25 @@ class DtmAsyncResult(object):
 
     def _giveResult(self, result):
         # This method will be used by the async thread to return result
-        self.resultReturned = True
         self.resultVal = result
         self.dtmInterface.asyncWaitingListLock.acquire()
         blockingAsyncTasksBefore = len([aTask for aTask in self.dtmInterface.asyncWaitingList[self.returnThread.tid] if aTask[1]])
-        for index,aTask in enumerate(self.dtmInterface.asyncWaitingList[self.returnThread.tid]):
-            if aTask[0] == self.rThread.tid:
-                del self.dtmInterface.asyncWaitingList[self.returnThread.tid][index]
+
+        self.dtmInterface.asyncWaitingList[self.returnThread.tid] = filter(lambda aTask: not aTask[0] == self.rThread.tid,
+            self.dtmInterface.asyncWaitingList[self.returnThread.tid])
 
         if blockingAsyncTasksBefore > 0 and len([aTask for aTask in self.dtmInterface.asyncWaitingList[self.returnThread.tid] if aTask[1]]) == 0:
             # Toutes les taches asynchrones bloquantes sont terminees
             # On est pret a repartir
+            wTask = self.dtmInterface.waitingThreadsQueue.getSpecificTask(self.returnThread.tid)
+            while wTask is None:
+                # Peut se produire si le thread parent ne s'est pas encore mis en sleep
+                time.sleep(0.001)
+                wTask = self.dtmInterface.waitingThreadsQueue.getSpecificTask(self.returnThread.tid)
             self.dtmInterface.waitingForRestartQueue.put(self.returnThread)
         self.dtmInterface.asyncWaitingListLock.release()
+
+        self.resultReturned = True
 
 
     def get(self):
@@ -1085,14 +1148,26 @@ class DtmAsyncResult(object):
         """
         if self.ready():
             return
-
-        self.dtmInterface.asyncWaitingListLock.acquire()
+       
         # On indique au thread de controle que l'on wait sur cette tache
-        for index,aTask in enumerate(self.dtmInterface.asyncWaitingList[self.returnThread.tid]):
-            if aTask[0] == self.rThread.tid:
-                self.dtmInterface.asyncWaitingList[self.returnThread.tid][index][1] = True
-                break
-        self.dtmInterface.asyncWaitingListLock.release()
+        taskBlockAdded = False
+        while not taskBlockAdded:
+            self.dtmInterface.asyncWaitingListLock.acquire()
+            for index,aTask in enumerate(self.dtmInterface.asyncWaitingList[self.returnThread.tid]):
+                if aTask[0] == self.rThread.tid:
+                    self.dtmInterface.asyncWaitingList[self.returnThread.tid][index][1] = True
+                    #print(self.dtmInterface.asyncWaitingList[self.returnThread.tid])
+                    taskBlockAdded = True
+                    break
+            self.dtmInterface.asyncWaitingListLock.release()
+            
+            if not taskBlockAdded:
+                # Tricky : il se peut que la tache soit retourne, mais le thread pas encore termine
+                # (il est dans _giveResult)
+                if self.ready():
+                    return
+                time.sleep(0.1)
+            
         threading.currentThread().waitForCondition()
 
 

@@ -106,7 +106,7 @@ class DtmCommThread(threading.Thread):
                     lSendWaiting.append((commA,buf1))
                     sendSomething = True                    
             
-            lSendWaiting = [req for req in lSendWaiting if req[0].Test()]
+            lSendWaiting = [req for req in lSendWaiting if not req[0].Test()]
             #lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
             
             if not recvSomething:
