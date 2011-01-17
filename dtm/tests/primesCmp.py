@@ -32,7 +32,7 @@ def primaryTest(nbr):
 
 def main():
 	t = time.time()
-	listNbr = range(3,75003,2)
+	listNbr = range(3,5003,2)
 	print("BOUM")
 	listPrimes = dtm.filter(primaryTest, listNbr)
 	print("NBR : ", len(listPrimes))

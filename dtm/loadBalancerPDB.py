@@ -76,7 +76,11 @@ class DtmLoadBalancer(object):
             totalSum2 += (r[0]+r[1]+r[2])**2
 
         avgLoad = (self.totalExecLoad + self.totalEQueueLoad + self.totalWaitingRQueueLoad) / float(len(self.ws))
-        stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
+        if totalSum2/float(len(self.ws)) - avgLoad**2 < 0:
+            # Cas bizarre, il faudra investiguer...
+            stdDevLoad = 0
+        else:
+            stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
         selfLoad = sum(self.ws[self.wid][:3])
         diffLoad = selfLoad - avgLoad
 

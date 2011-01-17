@@ -65,17 +65,22 @@ def main():
     print(r.get())
     print(w.get())
 
+    boumtest.dtmExpectedDuration = 1
+
+    dtm.repeat(reboum, 10, 312)
+    
     listT = [TrucChose(i) for i in xrange(25)]
     listW = dtm.map_async(boumtest, listT)
     listK = dtm.map_async(boumtest3, [i for i in xrange(14)])
     #print("BOUM!")
-    listZ = dtm.imap(boumtest2, [i for i in xrange(10)], 4)
+    listZ = dtm.imap(boumtest2, [i for i in xrange(20)], 4)
     
     print("YEAH")
     listW.wait()
     print(listW.get())
     for z in listZ:
         print(z)
+
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 
