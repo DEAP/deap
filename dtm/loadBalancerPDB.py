@@ -56,7 +56,7 @@ class DtmLoadBalancer(object):
         except ValueError:
             print("ERROR : Tentative to delete an already received or non-existant ACK!", self.ws[fromWorker][6], ackN)
     
-    def scoreFunc(loadi, avgLoad, stdDevLoad):
+    def scoreFunc(self, loadi, avgLoad, stdDevLoad):
         MAX_PROB = 1.
         MIN_PROB = 0.00
         if loadi < (avgLoad-2*stdDevLoad) or loadi < 0.0001:
@@ -116,7 +116,7 @@ class DtmLoadBalancer(object):
             for worker in self.ws:
                 if worker == self.wid:
                     continue
-                scores[i] = (worker, scoreFunc(sum(self.ws[worker][:3]), avgLoad, stdDevLoad))
+                scores[i] = (worker, self.scoreFunc(sum(self.ws[worker][:3]), avgLoad, stdDevLoad))
                 i += 1
                 
             while diffLoad > 0.00000001 and len(scores) > 0 and self.ws[self.wid][1] > 0.:
