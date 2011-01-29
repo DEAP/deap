@@ -134,7 +134,7 @@ class DtmExecInfo(object):
 
     def getLoad(self):
         try:
-            timeDone = self.eCurrent.timeExec
+            timeDone = self.eCurrent.timeExec + time.clock() - self.eCurrent.timeBegin
             if hasattr(self.eCurrent.t, 'dtmExpectedDuration'):
                 if isinstance(self.eCurrent.t.dtmExpectedDuration, tuple):
                     return self._execTimeRemaining(self.eCurrent.t.dtmExpectedDuration[0], self.eCurrent.t.dtmExpectedDuration[1], timeDone)
@@ -628,7 +628,7 @@ class DtmControl(object):
                 wTask.waitingCondition.notifyAll()
                 wTask.waitingCondition.release()
                 taskLauched = True
-
+            
             if not taskLauched:
                 try:
                     newTask = self.execQueue.getTask()
@@ -638,7 +638,6 @@ class DtmControl(object):
                     taskLauched = True
                 except Queue.Empty:
                     pass
-            
         self.launchTaskLock.release()
         return taskLauched
     
@@ -1023,10 +1022,9 @@ class DtmThread(threading.Thread):
             # Sinon on retourne le resultat
             resultTuple = (self.tid, self.returnInfo[1], self.returnInfo[2], self.timeExec, returnedR)
             self.control._returnResult(self.returnInfo[0], resultTuple)
-
+        
         # On tente de lancer tout de suite une nouvelle tache
         self.control._startNewTask()
-    
 
     def waitForCondition(self):
         # Libere le lock d'execution et attend que la condition soit remplie pour continuer
@@ -1124,9 +1122,9 @@ class DtmAsyncResult(object):
                 time.sleep(0.001)
                 wTask = self.dtmInterface.waitingThreadsQueue.getSpecificTask(self.returnThread.tid)
             self.dtmInterface.waitingForRestartQueue.put(self.returnThread)
-        self.dtmInterface.asyncWaitingListLock.release()
 
         self.resultReturned = True
+        self.dtmInterface.asyncWaitingListLock.release()
 
 
     def get(self):
@@ -1146,9 +1144,13 @@ class DtmAsyncResult(object):
         """
         Wait until the result is available
         """
-        if self.ready():
+        
+        self.dtmInterface.asyncWaitingListLock.acquire()
+        if self.resultReturned:
+            self.dtmInterface.asyncWaitingListLock.release()
             return
-       
+        self.dtmInterface.asyncWaitingListLock.release()
+        
         # On indique au thread de controle que l'on wait sur cette tache
         taskBlockAdded = False
         while not taskBlockAdded:
@@ -1156,17 +1158,12 @@ class DtmAsyncResult(object):
             for index,aTask in enumerate(self.dtmInterface.asyncWaitingList[self.returnThread.tid]):
                 if aTask[0] == self.rThread.tid:
                     self.dtmInterface.asyncWaitingList[self.returnThread.tid][index][1] = True
-                    #print(self.dtmInterface.asyncWaitingList[self.returnThread.tid])
                     taskBlockAdded = True
                     break
             self.dtmInterface.asyncWaitingListLock.release()
             
             if not taskBlockAdded:
-                # Tricky : il se peut que la tache soit retourne, mais le thread pas encore termine
-                # (il est dans _giveResult)
-                if self.ready():
-                    return
-                time.sleep(0.1)
+                print("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB")
             
         threading.currentThread().waitForCondition()
 
