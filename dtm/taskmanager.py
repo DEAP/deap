@@ -134,7 +134,7 @@ class DtmExecInfo(object):
 
     def getLoad(self):
         try:
-            timeDone = self.eCurrent.timeExec + time.clock() - self.eCurrent.timeBegin
+            timeDone = self.eCurrent.timeExec #+ time.clock() - self.eCurrent.timeBegin
             if hasattr(self.eCurrent.t, 'dtmExpectedDuration'):
                 if isinstance(self.eCurrent.t.dtmExpectedDuration, tuple):
                     return self._execTimeRemaining(self.eCurrent.t.dtmExpectedDuration[0], self.eCurrent.t.dtmExpectedDuration[1], timeDone)
