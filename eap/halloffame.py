@@ -41,9 +41,8 @@ class HallOfFame(object):
     
     def update(self, population):
         """Update the hall of fame with the *population* by replacing the worst
-        individuals in the hall of fame by the best individuals in the
-        *population* (if they are better). The size of the hall of fame is kept
-        constant.
+        individuals in the it by the best individuals present in *population*
+        (if they are better). The size of the hall of fame is kept constant.
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
