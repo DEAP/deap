@@ -31,7 +31,7 @@ numpy.random.seed(random.randint(0, sys.maxint))
 
 _logger = logging.getLogger("eap.cma")
     
-def esCMA(toolbox, population, ngen, halloffame=None):
+def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
@@ -54,21 +54,12 @@ def esCMA(toolbox, population, ngen, halloffame=None):
         # Update the Strategy with the evaluated individuals
         toolbox.update(population)
         
-        # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in population]
-        
-        length = len(population)
-        mean = sum(fits) / length
-        sum2 = sum(fit*fit for fit in fits)
-        std_dev = abs(sum2 / length - mean**2)**0.5
-        
-        _logger.debug("Min %f", min(fits))
-        _logger.debug("Max %f", max(fits))
-        _logger.debug("Mean %f", mean)
-        _logger.debug("Std. Dev. %f", std_dev)
-        
+        if statistics is not None:
+            statistics.update(population)
+            for key, stat in statistics.data.items():
+                _logger.debug("%s %s" % (key, stat[-1][0]))
+
     _logger.info("End of (successful) evolution")
-    
 
 class CMAStrategy(object):
     """

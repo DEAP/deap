@@ -28,6 +28,7 @@ from eap import base
 from eap import cma
 from eap import creator
 from eap import halloffame
+from eap import statistics
 from eap import toolbox
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -42,6 +43,12 @@ tools.register("individual", creator.Individual, "d")
 tools.register("population", strategy.generate, ind_init=tools.individual)
 tools.register("update", strategy.update)
 
+stats_t = statistics.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", statistics.mean)
+stats_t.register("Std", statistics.std_dev)
+stats_t.register("Min", min)
+stats_t.register("Max", max)
+
 def evalCMA(ind):
     return cma.rastrigin(ind),
 
@@ -51,10 +58,11 @@ tools.register("evaluate", evalCMA)
 if __name__ == "__main__":
     # The CMA-ES algorithm takes a population of one individual as argument
     pop = tools.population()
+    stats = tools.clone(stats_t)
     
     hof = halloffame.HallOfFame(1)
     
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(tools, pop, ngen=250, halloffame=hof)
+    cma.esCMA(tools, pop, ngen=250, halloffame=hof, statistics=stats)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
