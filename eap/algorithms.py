@@ -31,6 +31,20 @@ import iterations
 
 _logger = logging.getLogger("eap.algorithms")
 
+def varSimple(toolbox, population, cxpb, mutpb):
+    # Apply crossover and mutation on the offsprings
+    for ind1, ind2 in zip(population[::2], population[1::2]):
+        if random.random() < cxpb:
+            toolbox.mate(ind1, ind2)
+            del ind1.fitness.values, ind2.fitness.values
+
+    for ind in population:
+        if random.random() < mutpb:
+            toolbox.mutate(ind)
+            del ind.fitness.values
+    
+    return population
+
 def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of Back, Fogel and Michalewicz,
@@ -67,17 +81,76 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
 
     if halloffame is not None:
         halloffame.update(population)
+    if stats is not None:
+        stats.update(population)
 
     # Begin the generational process
     for gen in range(ngen):
         _logger.info("Evolving generation %i", gen)
-        evals = iterations.eaSimple(toolbox, population, cxpb, mutpb, stats, halloffame)
-        _logger.debug("Evaluated %i individuals", evals)      
+        # Select and clone the next generation individuals
+        offsprings = toolbox.select(population, n=len(population))
+        offsprings = map(toolbox.clone, offsprings)
+        
+        # Variate the pool of individuals
+        offsprings = varSimple(toolbox, offsprings, cxpb, mutpb)
+        
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+        
+        # Update the hall of fame with the generated individuals
+        if halloffame is not None:
+            halloffame.update(offsprings)
+            
+        _logger.debug("Evaluated %i individuals", len(invalid_ind))  
+        
+        # Replace the current population by the offsprings
+        population[:] = offsprings
+        
+        # Update the statistics with the new population
+        if stats is not None:
+            stats.update(population)
+        
+        # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.items():
                  _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
+    return population
+
+def varMuLambda(toolbox, population, lambda_, cxpb, mutpb):
+    offsprings = []
+    nb_offsprings = 0
+    while nb_offsprings < lambda_:
+        op_choice = random.random()
+        if op_choice < cxpb:            # Apply crossover
+            ind1, ind2 = random.sample(population, 2)
+            ind1 = toolbox.clone(ind1)
+            ind2 = toolbox.clone(ind2)
+            toolbox.mate(ind1, ind2)
+            del ind1.fitness.values, ind2.fitness.values
+            offsprings.append(ind1)
+            offsprings.append(ind2)
+            nb_offsprings += 2
+        elif op_choice < cxpb + mutpb:  # Apply mutation
+            ind = random.choice(population) # select
+            ind = toolbox.clone(ind) # clone
+            toolbox.mutate(ind)
+            del ind.fitness.values
+            offsprings.append(ind)
+            nb_offsprings += 1
+        else:                           # Apply reproduction
+            offsprings.append(random.choice(population))
+            nb_offsprings += 1
+    
+    # Remove the exedant of offsprings
+    if nb_offsprings > lambda_:
+        del offsprings[lambda_:]
+    
+    return offsprings
 
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm. First, 
@@ -96,7 +169,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
             population = select(population + offsprings)
     
     .. note::
-       Both produced individuals from the crossover are put in the offspring
+       Both produced individuals from a crossover are put in the offspring
        pool. 
     
     """
@@ -121,14 +194,36 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
     # Begin the generational process
     for gen in range(ngen):
         _logger.info("Evolving generation %i", gen)
-        evals = iterations.eaMuPlusLambda(toolbox, population,  mu, lambda_, cxpb, mutpb, stats, halloffame)
-        _logger.debug("Evaluated %i individuals", evals)
+        
+        # Variate the population
+        offsprings = varMuLambda(toolbox, population, lambda_, cxpb, mutpb)
+        
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+        
+        _logger.debug("Evaluated %i individuals", len(invalid_ind))
+        
+        # Update the hall of fame with the generated individuals
+        if halloffame is not None:
+            halloffame.update(offsprings)
+
+        # Select the next generation population
+        population[:] = toolbox.select(population + offsprings, mu)
+
+        # Update the statistics with the new population
+        if stats is not None:
+            stats.update(population)
+        
+        # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.items():
                  _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
-
     _logger.info("End of (successful) evolution")
+    return population
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm. First, 
@@ -155,6 +250,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         "probabilities must be smaller or equal to 1.0.")
         
     _logger.info("Start of evolution")
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -162,22 +258,60 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         ind.fitness.values = fit
 
     _logger.debug("Evaluated %i individuals", len(invalid_ind))
-            
+
     if halloffame is not None:
         halloffame.update(population)
-    
+    if stats is not None:
+        stats.update(population)
+
     # Begin the generational process
     for gen in range(ngen):
         _logger.info("Evolving generation %i", gen)
-        evals = iterations.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, stats, halloffame)
-        _logger.debug("Evaluated %i individuals", evals)
+        
+        # Variate the population
+        offsprings = varMuLambda(toolbox, population, lambda_, cxpb, mutpb)
+
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        _logger.debug("Evaluated %i individuals", len(invalid_ind))
+
+        # Update the hall of fame with the generated individuals
+        if halloffame is not None:
+            halloffame.update(offsprings)
+
+        # Select the next generation population
+        population[:] = toolbox.select(offsprings, mu)
+
+        # Update the statistics with the new population
+        if stats is not None:
+            stats.update(population)
+
+        # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.items():
-                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))        
+                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
+    return population
+
+def varSteadyState(toolbox, population):
+    # Select two individuals for crossover
+    p1, p2 = toolbox.select(population, 2)
+    p1 = toolbox.clone(p1)
+    p2 = toolbox.clone(p2)
+    toolbox.mate(p1, p2)
     
-def eaSteadyState(toolbox, population, ngen, halloffame=None):
+    # Randomly choose amongst the offsprings the returned child and mutate it
+    child = random.choice((p1, p2))
+    toolbox.mutate(child)
+    
+    return child
+
+def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
     """The is the steady-state evolutionary algorithm
     """
     _logger.info("Start of evolution")
@@ -195,37 +329,27 @@ def eaSteadyState(toolbox, population, ngen, halloffame=None):
     for gen in range(ngen):
         _logger.info("Evolving generation %i", gen)
         
-        p1, p2 = toolbox.select(population, 2)
-        p1 = toolbox.clone(p1)
-        p2 = toolbox.clone(p2)
-        toolbox.mate(p1, p2)
-        child = random.choice(p1, p2)
-        toolbox.mutate(child)
+        # Variate the population
+        child = varSteadyState(toolbox, population)
         
+        # Evaluate the produced child
         child.fitness.values = toolbox.evaluate(child)
         
+        # Update the hall of fame
         if halloffame is not None:
-            halloffame.update(child)
+            halloffame.update((child,))
         
         # Select the next generation population
         population[:] = toolbox.select(population + [child], len(population))
         
-        # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values for ind in population]
-        fits_t = zip(*fits)             # Transpose fitnesses for analysis
-        
-        minimums = map(min, fits_t)
-        maximums = map(max, fits_t)
-        length = len(population)
-        sums = map(sum, fits_t)
-        sums2 = [sum(x*x for x in fit) for fit in fits_t]
-        means = [sum_ / length for sum_ in sums]
-        std_devs = [abs(sum2 / length - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
-        
-        _logger.debug("Min %s", ", ".join(map(str, minimums)))
-        _logger.debug("Max %s", ", ".join(map(str, maximums)))
-        _logger.debug("Avg %s", ", ".join(map(str, means)))
-        _logger.debug("Std %s", ", ".join(map(str, std_devs)))
+        # Update the statistics with the new population
+        if stats is not None:
+            stats.update(population)
+
+        # Log statistics on the current generation
+        if stats is not None:
+            for key, stat in stats.data.items():
+                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
-
+    return population
