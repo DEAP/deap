@@ -75,4 +75,4 @@ From here, everything else is just as usual, register the operators in the toolb
     
     algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, hof)
 
-Finally, a :class:`~eap.halloffame.ParetoFront` may be used to retreive the best individuals of the evolution. The complete `Knapsack Genetic Algorithm <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code is available.
+Finally, a :class:`~eap.halloffame.ParetoFront` may be used to retreive the best individuals of the evolution. The complete `Knapsack Genetic Algorithm <http://deap.googlecode.com/hg/examples/ga_knapsack.py>`_ code is available.
