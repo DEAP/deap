@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import sys
 import random
 import logging
@@ -43,8 +42,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_item", random.choice, items.keys())
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.attr_item, size_init=30)
-tools.register("population", creator.Population, content_init=tools.individual, size_init=100)
+tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_item, 30))
+tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 100))
 
 def evalKnapsack(individual):
     weight = 0.0

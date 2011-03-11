@@ -50,7 +50,6 @@ import sys
 import logging
 import copy
 import random
-
 from functools import partial
 
 from eap import algorithms
@@ -169,8 +168,8 @@ tools = toolbox.Toolbox()
 tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.expr_init)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr_init))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code

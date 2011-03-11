@@ -89,15 +89,15 @@ tools.register('adf_expr1', gp.generateFull, pset=adfset1, min_=1, max_=2)
 tools.register('adf_expr2', gp.generateFull, pset=adfset2, min_=1, max_=2)
 tools.register('main_expr', gp.generateRamped, pset=pset, min_=1, max_=2)
 
-tools.register('ADF0', creator.ADF0, content_init=tools.adf_expr0)
-tools.register('ADF1', creator.ADF1, content_init=tools.adf_expr1)
-tools.register('ADF2', creator.ADF2, content_init=tools.adf_expr2)
-tools.register('MAIN', creator.MAIN, content_init=tools.main_expr)
+tools.register('ADF0', creator.ADF0, toolbox.Iterate(tools.adf_expr0))
+tools.register('ADF1', creator.ADF1, toolbox.Iterate(tools.adf_expr1))
+tools.register('ADF2', creator.ADF2, toolbox.Iterate(tools.adf_expr2))
+tools.register('MAIN', creator.MAIN, toolbox.Iterate(tools.main_expr))
 
-tools.register('individual', creator.Individual, 
-                             content_init=[tools.MAIN, tools.ADF0, tools.ADF1, tools.ADF2], 
-                             size_init=4)
-tools.register('population', list, content_init=tools.individual, size_init=100)
+func_cycle = toolbox.FuncCycle([tools.MAIN, tools.ADF0, tools.ADF1, tools.ADF2])
+
+tools.register('individual', creator.Individual, toolbox.Repeat(func_cycle, 4))
+tools.register('population', list, toolbox.Repeat(tools.individual, 100))
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function

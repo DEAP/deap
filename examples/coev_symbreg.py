@@ -43,8 +43,8 @@ def evalSymbReg(expr, data):
 tools_ga = toolbox.Toolbox()
 
 tools_ga.register("float", random.uniform, -1, 1)
-tools_ga.register("individual", creator.IndGA, content_init=tools_ga.float, size_init=10)
-tools_ga.register("population", list, content_init=tools_ga.individual, size_init=200)
+tools_ga.register("individual", creator.IndGA, toolbox.Repeat(tools_ga.float, 10))
+tools_ga.register("population", list, toolbox.Repeat(tools_ga.individual, 200))
 
 tools_ga.register("select", toolbox.selTournament, tournsize=3)
 tools_ga.register("mate", toolbox.cxTwoPoints)

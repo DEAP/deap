@@ -14,7 +14,6 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import inspect
 import logging
 import math
 import sys
@@ -39,8 +38,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "f", content_init=tools.attr_float, size_init=3)
-tools.register("population", creator.Population, content_init=tools.individual, size_init=50)
+tools.register("individual", creator.Individual, "f", toolbox.Repeat(tools.attr_float, 3))
+tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 50))
 
 def evalKursawe(ind):
     f1 = sum(-10 * math.exp(-0.2 * math.sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
