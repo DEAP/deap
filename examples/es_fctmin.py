@@ -33,7 +33,7 @@ tools = toolbox.Toolbox()
 
 creator.create("Strategy", array.array)
 
-tools.register("strategy", creator.Strategy, "d", content_init=lambda: 1., size_init=IND_SIZE) 
+tools.register("strategy", creator.Strategy, "d", toolbox.Repeat(lambda: 1., IND_SIZE)) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=tools.strategy)
@@ -42,8 +42,8 @@ creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=t
 tools.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "d", content_init=tools.attr_float, size_init=IND_SIZE)
-tools.register("population", list, content_init=tools.individual, size_init=50)
+tools.register("individual", creator.Individual, "d", toolbox.Repeat(tools.attr_float, IND_SIZE))
+tools.register("population", list, toolbox.Repeat(tools.individual, 50))
 
 def evalSphere(individual):
     return sum(map(lambda x: x * x, individual)),

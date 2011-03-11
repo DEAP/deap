@@ -17,11 +17,7 @@ import array
 import sys
 import logging
 import random
-try:
-    import yaml
-except ImportError:
-    raise ImportError, ("This example requires a YAML library in order to "
-        "read the data files.")
+import json
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
@@ -32,9 +28,9 @@ from eap import toolbox
 from eap import halloffame
 from eap import statistics
 
-# gr*.yml contains the distance map in list of list style in YAML/JSON format
+# gr*.json contains the distance map in list of list style in JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
-tsp = yaml.load(open("gr17.yml", "r"))
+tsp = json.load(open("gr17.json", "r"))
 distance_map = tsp["DistanceMatrix"]
 IND_SIZE = tsp["TourSize"]
 
@@ -47,8 +43,8 @@ tools = toolbox.Toolbox()
 tools.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "i", content_init=tools.indices)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, "i", toolbox.Iterate(tools.indices))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]

@@ -63,8 +63,8 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generateFull, pset=pset, min_=3, max_=5)
-tools.register("individual", creator.Individual, content_init=tools.expr)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalParity(individual):

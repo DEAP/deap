@@ -15,7 +15,6 @@
 
 import operator
 import random
-
 from math import sin
 
 from eap import base
@@ -59,7 +58,7 @@ def evalH1(x):
 
 tools = toolbox.Toolbox()
 tools.register("particle", generate, size=2, pmin=-100, pmax=100, smin=-50, smax=50)
-tools.register("population", list, content_init=tools.particle, size_init=200)
+tools.register("population", list, toolbox.Repeat(tools.particle, 200))
 tools.register("update", updateParticle, phi1=2.0, phi2=2.0)
 tools.register("evaluate", evalH1)
 

@@ -16,7 +16,6 @@
 import sys
 import random
 import logging
-import copy
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
@@ -29,7 +28,7 @@ from eap import toolbox
 
 import sortingnetwork as sn
 
-INPUTS = 12
+INPUTS = 6
 
 def evalEvoSN(individual, dimension):
     network = sn.SortingNetwork(dimension, individual)
@@ -64,8 +63,8 @@ tools = toolbox.Toolbox()
 tools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.network)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.network))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 tools.register("evaluate", evalEvoSN, dimension=INPUTS)
 tools.register("mate", toolbox.cxTwoPoints)

@@ -111,29 +111,7 @@ class Toolbox(object):
         """Register a *method* in the toolbox under the name *methodname*. You
         may provide default arguments that will be passed automatically when
         calling the registered method.
-        
-        Keyword arguments *content_init* and *size_init* may be used to
-        simulate iterable initializers. For example, when building objects
-        deriving from :class:`list`, the content argument will provide to
-        the built list its initial content. Depending on what is given to
-        *content_init* and *size_init* the initialization is different. If
-        *content_init* is an iterable, then the iterable is consumed entirely
-        to initialize each object, in that case *size_init* is not used.
-        Otherwise, *content_init* may be a simple function that will be
-        repeated *size_init* times in order to fill the object.
         """
-        if "content_init" in kargs:
-            content = kargs["content_init"]
-            del kargs["content_init"]
-            if hasattr(content, "__iter__"):
-                content = FuncCycle(content)
-            if "size_init" in kargs:
-                args = list(args)
-                args.append(Repeat(content, kargs["size_init"]))
-                del kargs["size_init"]
-            else:
-                args = list(args)
-                args.append(Iterate(content))
         pfunc = functools.partial(method, *args, **kargs)
         pfunc.__name__ = methodname
         setattr(self, methodname, pfunc)
