@@ -27,7 +27,6 @@ you really want them to do.
 
 import logging
 import random
-import iterations
 
 _logger = logging.getLogger("eap.algorithms")
 
