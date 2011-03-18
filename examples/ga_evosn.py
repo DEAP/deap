@@ -16,7 +16,6 @@
 import sys
 import random
 import logging
-import copy
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
