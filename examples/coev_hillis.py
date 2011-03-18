@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys; sys.path.append("..")
 import random
 
 import sortingnetwork as sn
@@ -68,12 +67,12 @@ htools = toolbox.Toolbox()
 ptools = toolbox.Toolbox()
 
 htools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
-htools.register("individual", creator.Host, content_init=htools.network)
-htools.register("population", list, content_init=htools.individual, size_init=3000)
+htools.register("individual", creator.Host, toolbox.Iterate(htools.network))
+htools.register("population", list, toolbox.Repeat(htools.individual, 3000))
 
 ptools.register("parasite", getParasite, dimension=INPUTS)
-ptools.register("individual", creator.Parasite, content_init=ptools.parasite, size_init=20)
-ptools.register("population", list, content_init=ptools.individual, size_init=3000)
+ptools.register("individual", creator.Parasite, toolbox.Repeat(ptools.parasite, 20))
+ptools.register("population", list, toolbox.Repeat(ptools.individual, 3000))
 
 htools.register("evaluate", evalNetwork, dimension=INPUTS)
 htools.register("mate", toolbox.cxTwoPoints)
