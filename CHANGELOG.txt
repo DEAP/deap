@@ -1,0 +1,1 @@
+2011-03-17 Added the CHANGELOG file to log every change in DEAP from now.
