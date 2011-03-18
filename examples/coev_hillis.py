@@ -91,13 +91,32 @@ stats_t.register("Std", statistics.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
+def cloneHost(individual):
+    """Specialized copy function that will work only on a list of tuples
+    with no other member than a fitness.
+    """
+    clone = individual.__class__(individual)
+    clone.fitness.values = individual.fitness.values
+    return clone
+
+def cloneParasite(individual):
+    """Specialized copy function that will work only on a list of lists
+    with no other member than a fitness.
+    """
+    clone = individual.__class__(list(seq) for seq in individual)
+    clone.fitness.values = individual.fitness.values
+    return clone
+
+htools.register("clone", cloneHost)
+ptools.register("clone", cloneParasite)
+
 def main():
     random.seed(64)
     
     hosts = htools.population()
     parasites = ptools.population()
     hof = halloffame.HallOfFame(1)
-    hstats = htools.clone(stats_t)
+    hstats = stats_t
     
     MAXGEN = 50
     H_CXPB, H_MUTPB = 0.5, 0.3
