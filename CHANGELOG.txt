@@ -1,0 +1,5 @@
+2011-03-17 Tagged revision 0.7-a1.
+
+2011-03-17 Added the Hillis coevolution example.
+
+2011-03-17 Added the CHANGELOG file to log every change in DEAP from now.
