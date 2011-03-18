@@ -69,13 +69,17 @@ class SortingNetwork(list):
                 if values[wire1] > values[wire2]:
                     values[wire1], values[wire2] = values[wire2], values[wire1]
     
-    def assess(self):
-        """Test all possible inputs given the dimension of the network,
-        and return the number of incorrectly sorted inputs.
+    def assess(self, cases=None):
+        """Try to sort the **cases** using the network, return the number of
+        misses. If **cases** is None, test all possible cases according to
+        the network dimensionality.
         """
+        if cases is None:
+            cases = product(range(2), repeat=self.dimension)
+        
         misses = 0
         ordered = [[0]*(self.dimension-i) + [1]*i for i in range(self.dimension+1)]
-        for sequence in product(range(2), repeat=self.dimension):
+        for sequence in cases:
             sequence = list(sequence)
             self.sort(sequence)
             misses += (sequence != ordered[sum(sequence)])
