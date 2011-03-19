@@ -26,37 +26,35 @@ Creator
 .. automodule:: eap.creator
 
 .. autofunction:: eap.creator.create(name, base[, attribute[, ...]])
-
-   For example, using ::
-   
-       creator("MyType", object, value=4, data=lambda: random.random())
-       
-   is the same as defining in the module :mod:`eap.creator` ::
-   
-       class MyType(object):
-           value = 4
-           def __init__(self):
-               self.data = random.random()
    
 
 Population, Individual and Other Structures
 ============================================
 
 All application specific structures may be built using the
-:func:`~eap.creator.create` function and types defined in python or the
-:mod:`~eap.base` module. Here are some simple recipes to build very simple
-types.
+:func:`~eap.creator.create` function and types defined in the standard python 
+library or the :mod:`~eap.base` module. Here are some simple recipes to build 
+very simple types.
 
 Fitness
 +++++++
 
-As described earlier, the :class:`eap.base.Fitness` instantiate by default a
-minimizing fitness. This can be changed using the :mod:`~eap.creator` and its
-:func:`eap.creator.create` function. A maximizing fitness can be created using
+As described earlier, the :class:`~eap.base.Fitness` class is practically 
+virtual and cannot be used directly as no weights are defined. In order to 
+create a valid Fitness object one have to add the proper 
+:attr:`~eap.base.Fitness.weights` attribute to the class object. This last 
+step is done using the :func:`~eap.creator.create` function with an added
+``weights`` argument. The following block of code does create a maximizing 
+fitness class named :class:`FitnessMax`.
 ::
 
-    create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 
+This newly created class can be accessed via the creator module. An instance 
+of the class can be created as in the following.
+::
+
+    fit = creator.FitnessMax()
 
 Individual
 ++++++++++
@@ -69,30 +67,40 @@ Individual List
 ---------------
 
 The individual list is suited for binary, integer, float and even funky
-individuals. It may contain any type and/or any type mix that is needed. The
+individuals. It may contain any type and/or any type mix that is needed as it
+is based on the Python standard library type :class:`list`. The
 :class:`IndividualList` type is created with ::
 
-    create("IndividualList", list, fitness=creator.FitnessMax)
+    creator.create("IndividualList", list, fitness=creator.FitnessMax)
 
-and an individual of *size* 5 is instantiated with ::
+The last code block created an :class:`IndividualList` class in the creator 
+module as seen for the fitness. This class inherits the :class:`list` 
+constructor, thus, it is initialized from an iterable. The following block of 
+code builds an initialized :class:`IndividualList` from a pre-allocated 
+content.
+::
 
     content = [random.random() for i in xrange(5)]
     ind = creator.IndividualList(content)
 
 .. note::
    For individuals containing only a single numeric type, it may be more
-   suited to use the :class:`array` base class, as the copy operation is way
-   more efficient.
+   suited to use the :class:`array.array` base class, as the copy operation is
+   way more efficient.
 
 Individual Indices
 ------------------
 
 The individual indices is almost the same as the individual list, except for
-its content. Here we will use the maximizing fitness describes earlier ::
+its content. Here we will use the maximizing fitness describes earlier 
+::
 
-    create("IndividualIndices", list, fitness=creator.FitnessMax)
+    creator.create("IndividualIndices", list, fitness=creator.FitnessMax)
 
-and an individual indices of *size* 5 is instantiated with ::
+and an :class:`IndividualIndices` of containing numbers in 
+:math:`\mathit{ind}_i \in \{1, \ldots, 5\}, \mathit{ind}_i \neq 
+\mathit{ind}_j, \forall i, j` is instantiated with 
+::
 
     content = random.sample(xrange(5), 5)
     ind = creator.IndividualIndices(content)
@@ -101,7 +109,7 @@ Individual Tree
 ---------------
 
 The individual tree is a bit harder to create. We first must define a
-primitive set and the operator we need in our post-fix trees. ::
+primitive set and the operator we need in our trees. ::
 
     pset = gp.PrimitiveSet("MAIN", 1)
     pset.addPrimitive(operator.add, 2)
