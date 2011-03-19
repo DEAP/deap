@@ -27,7 +27,13 @@ from collections import deque
 from itertools import izip, repeat, count
         
 class Tree(list):
-    """Basic N-ary tree class."""
+    """Basic N-ary tree class. A tree is initialized from the list `content`.
+    The first element of the list is the root of the tree, then the
+    following elements are the nodes. Each node can be either a list or a 
+    single element. In the case of a list, it is considered as a subtree, 
+    otherwise a leaf.
+    """
+    
     class NodeProxy(object):
         def __new__(cls, obj, *args, **kargs):
             if isinstance(obj, cls):
@@ -236,10 +242,10 @@ class Fitness(object):
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
     ``!=``. The comparison of those operators is made
     lexicographically. Maximization and minimization are taken
-    care off by a multiplication between the :attr:`weights` and the fitness values.
-    The comparison can be made between fitnesses of different size, if the
-    fitnesses are equal until the extra elements, the longer fitness will be
-    superior to the shorter.
+    care off by a multiplication between the :attr:`weights` and the fitness 
+    :attr:`values`. The comparison can be made between fitnesses of different 
+    size, if the fitnesses are equal until the extra elements, the longer 
+    fitness will be superior to the shorter.
 
     .. note::
        When comparing fitness values that are minimized, ``a > b`` will return

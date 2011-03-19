@@ -11,17 +11,13 @@ Evolutionary Algorithm Bases
 Container Types
 ===============
 
-
-
-
-
 .. autoclass:: eap.base.Tree([content])
    :members:
 
 Fitness
 =======
 
-.. autoclass:: eap.base.Fitness
+.. autoclass:: eap.base.Fitness([values])
    :members:
 
 Creator
