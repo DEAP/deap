@@ -14,7 +14,10 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 """The :mod:`~eap.base` module provides basic structures to build evolutionary
-algorithms.
+algorithms. It contains only two simple containers that are a basic N-ary 
+:class:`~eap.base.Tree`, usefull for implementing genetic programing, and a 
+virtual :class:`~eap.base.Fitness` class used as base class, for the fitness 
+member of any individual.
 """
 
 import copy
