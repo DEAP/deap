@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`~eap.creator` module is the heart and soul of EAP, it allows to
-create, at runtime, classes that will fulfill the needs of your evolutionary
-algorithms.
+"""The :mod:`~eap.creator` module is a meta-factory that allows the run-time 
+creation of classes via both inheritance and composition. Attributes, both 
+data and functions, can be dynamically added to create new object classes 
+empowered by the user to provide user specific EA functionalities.
 """
 
 import array
@@ -27,7 +28,7 @@ import warnings
 warnings.filterwarnings("error", "", DeprecationWarning, "eap.creator")
 
 def create(name, base, **kargs):
-    """The function :func:`create` does create a new class named *name*
+    """Creates a new class named *name*
     inheriting from *base* in the :mod:`~eap.creator` module. The new
     class can have attributes defined by the subsequent keyword
     arguments passed to the function create. If the argument is callable,
@@ -36,6 +37,17 @@ def create(name, base, **kargs):
     class' instance. Otherwise, if the argument is not callable, (for
     example an :class:`int`), it is added as a "static" attribute of the
     class.
+    
+    For example, using ::
+
+        creator("MyType", object, value=4, data=lambda: random.random())
+
+    is the same as defining in the module :mod:`eap.creator` ::
+
+        class MyType(object):
+            value = 4
+            def __init__(self):
+                self.data = random.random()
     """
     dict_inst = {}
     dict_cls = {}
