@@ -37,5 +37,5 @@ complex or complicated.
 """
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
-__version__ = "0.6"
-__revision__ = "0.6.0"
+__version__ = "0.7"
+__revision__ = "0.7.0+"
