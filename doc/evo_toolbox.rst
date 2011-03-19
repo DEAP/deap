@@ -8,7 +8,7 @@ Evolutionary Toolbox
 
 .. autoclass:: eap.toolbox.Toolbox
    
-   .. automethod:: register(methodname, method[, content_init[, size_init]], ...)
+   .. automethod:: register(methodname, method [, ...])
    
    .. automethod:: unregister(methodname)
    
