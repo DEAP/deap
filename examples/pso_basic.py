@@ -19,7 +19,7 @@ from math import sin
 
 from eap import base
 from eap import creator
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -62,9 +62,9 @@ tools.register("population", list, toolbox.Repeat(tools.particle, 200))
 tools.register("update", updateParticle, phi1=2.0, phi2=2.0)
 tools.register("evaluate", evalH1)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 

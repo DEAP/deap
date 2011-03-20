@@ -22,8 +22,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 MAX_ITEM = 50
@@ -75,11 +74,11 @@ def mutSet(individual):
 tools.register("evaluate", evalKnapsack)
 tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
-tools.register("select", toolbox.spea2)
+tools.register("select", operators.selSPEA2)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -87,7 +86,7 @@ def main():
     random.seed(64)         # Seed does not include item creation
 
     pop = tools.population()
-    hof = halloffame.ParetoFront()
+    hof = operators.ParetoFront()
     stats = tools.clone(stats_t)
     
     algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, stats, halloffame=hof)

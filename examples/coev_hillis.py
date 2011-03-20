@@ -19,8 +19,7 @@ import sortingnetwork as sn
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 INPUTS = 12
@@ -75,19 +74,19 @@ ptools.register("individual", creator.Parasite, toolbox.Repeat(ptools.parasite, 
 ptools.register("population", list, toolbox.Repeat(ptools.individual, 3000))
 
 htools.register("evaluate", evalNetwork, dimension=INPUTS)
-htools.register("mate", toolbox.cxTwoPoints)
+htools.register("mate", operators.cxTwoPoints)
 htools.register("mutate", mutNetwork, dimension=INPUTS, mutpb=0.2, addpb=0.01, 
     delpb=0.01, indpb=0.05)
-htools.register("select", toolbox.selTournament, tournsize=3)
+htools.register("select", operators.selTournament, tournsize=3)
 
-ptools.register("mate", toolbox.cxTwoPoints)
-ptools.register("indMutate", toolbox.mutFlipBit, indpb=0.05)
+ptools.register("mate", operators.cxTwoPoints)
+ptools.register("indMutate", operators.mutFlipBit, indpb=0.05)
 ptools.register("mutate", mutParasite, indmut=ptools.indMutate, indpb=0.05)
-ptools.register("select", toolbox.selTournament, tournsize=3)
+ptools.register("select", operators.selTournament, tournsize=3)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -115,7 +114,7 @@ def main():
     
     hosts = htools.population()
     parasites = ptools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     hstats = stats_t
     
     MAXGEN = 50

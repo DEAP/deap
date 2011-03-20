@@ -16,13 +16,11 @@
 import array
 import random
 
+from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
+from eap import operators
 from eap import toolbox
-
-from eap import iterations
-from eap import statistics
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMax)
@@ -40,14 +38,15 @@ def evalOneMax(individual):
     return sum(individual),
 
 tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
-tools.register("select", toolbox.selTournament, tournsize=3)
-tools.register("migrate", toolbox.migRing, n=5, selection=tools.select)
+tools.register("mate", operators.cxTwoPoints)
+tools.register("mutate", operators.mutFlipBit, indpb=0.05)
+tools.register("select", operators.selTournament, tournsize=3)
+tools.register("migrate", operators.migRing, n=5, selection=operators.selBest,
+    replacement=operators.selRandom)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -55,12 +54,12 @@ def main():
     random.seed(64)
 
     demes = [tools.population(), tools.population(), tools.population()]
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     dstats = [tools.clone(stats_t), tools.clone(stats_t), tools.clone(stats_t)]
     pstats = tools.clone(stats_t)
 
-    gmeans = statistics.Stats()
-    gmeans.register("Avg", statistics.mean)
+    gmeans = operators.Stats()
+    gmeans.register("Avg", operators.mean)
 
     NGEN = 40
     CXPB = 0.5
@@ -77,8 +76,16 @@ def main():
     while gen < NGEN and pstats.data['Max'][-1][0] < 100.0:
         print "-- Generation %i --" % gen        
         for idx, deme, stats in zip(xrange(len(demes)), demes, dstats):
-            print "  -- Deme %i --" % (idx+1)                
-            iterations.eaSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB, stats=stats, halloffame=hof)
+            print "  -- Deme %i --" % (idx+1)  
+            deme[:] = tools.select(deme, len(deme)) 
+            deme[:] = tools.clone([ind for ind in deme])
+            deme[:] = algorithms.varSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB)
+            
+            for ind in deme:
+                ind.fitness.values = tools.evaluate(ind)
+            
+            stats.update(deme)
+            hof.update(deme)
             for key, stat in stats.data.items():
                 print "    %s %s" % (key, stat[-1][0])
         if gen > 0 and gen % 5 == 0:

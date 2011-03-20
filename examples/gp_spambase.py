@@ -24,8 +24,7 @@ from eap import algorithms
 from eap import base
 from eap import creator
 from eap import gp
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 
@@ -91,20 +90,20 @@ def evalSpambase(individual):
     return result,
     
 tools.register("evaluate", evalSpambase)
-tools.register("select", toolbox.selTournament, tournsize=3)
-tools.register("mate", toolbox.cxTypedTreeOnePoint)
+tools.register("select", operators.selTournament, tournsize=3)
+tools.register("mate", operators.cxTypedTreeOnePoint)
 tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register("mutate", toolbox.mutTypedTreeUniform, expr=tools.expr_mut)
+tools.register("mutate", operators.mutTypedTreeUniform, expr=tools.expr_mut)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
 def main():
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, stats, halloffame=hof)
