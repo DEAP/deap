@@ -14,26 +14,55 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 """
-EAP stands for Evolutionary Algorithm in Python, it is dedicated to people who
-wish to learn how to use evolutionary algorithms and to those who wish to
-rediscover evolutionary algorithms. The concepts of EAP may be extremely well
-resumed by some statements of the :pep:`20`, *the Zen of Python* by Tim Peters.
+DEAP (Distributed Evolutionary Algorithms in Python) is a novel 
+evolutionary computation framework for rapid prototyping and testing of 
+ideas. Its design departs from most other existing frameworks in that it 
+seeks to make algorithms explicit and data structures transparent, as 
+opposed to the more common black box type of frameworks. It also 
+incorporates easy parallelism where users need not concern themselves with 
+gory implementation details like synchronization and load balancing, only 
+functional decomposition.
 
-- Beautiful is better than ugly.
-- Explicit is better than implicit.
-- Simple is better than complex.
-- Complex is better than complicated.
-- Readability counts.
-- Special cases aren't special enough to break the rules.
-- Although practicality beats purity.
-- In the face of ambiguity, refuse the temptation to guess.
-- There should be one-- and preferably only one --obvious way to do it.
-- Although that way may not be obvious at first unless you're *Canadian*.
-- If the implementation is hard to explain, it's a bad idea.
-- If the implementation is easy to explain, it may be a good idea.
+The five founding hypotheses of DEAP are:
 
-EAP is the proof that evolutionary algorithms do **not** need to be neither
-complex or complicated.
+(1) The user knows best. Users should be able to understand the internal 
+    mechanisms of the framework so that they can extend them easily to better 
+    suit their specific needs.
+
+(2) User needs in terms of algorithms and operators are so vast that it would 
+    beunrealistic to think of implementing them all in a single framework. 
+    However, it should be possible to build basic tools and generic mechanisms 
+    that enable easy user implementation of most any EA variant.
+
+(3) Speedy prototyping of ideas is often more precious than speedy execution 
+    of programs. Moreover, code compactness and clarity is also very precious.
+
+(4) Even though interpreted, Python is fast enough to execute EAs. Whenever 
+    execution time becomes critical, compute intensive components can always 
+    be recoded in C. Many efficient numerical libraries are already available 
+    through Python APIs.
+
+(5) Easy parallelism can alleviate slow execution.
+
+And these hypotheses lead to the following objectives:
+
+**Rapid prototyping**
+    Provide an environment allowing users to quickly implement their own 
+    algorithms without compromise.
+
+**Parallelization made easy**
+   Allow for straightforward parallelization; users should not be forced to 
+   specify more than the granularity level of their functional decomposition.
+
+**Adaptive load balancing**
+    The workload should automatically and dynamically be distributed among 
+    available compute units; user intervention should be optional and limited 
+    to hints of relative loads of tasks.
+
+**Preach by examples**
+    Although the aim of the framework is not to provide ready made solutions, 
+    it should nevertheless come with a substantial set of real-world examples 
+    to guide the apprenticeship of users.
 """
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
