@@ -42,15 +42,6 @@ class Repeat(object):
 
     This class allows to fill a list with objects produced
     by a function.
-    ::
-        
-        def func():
-            return random.random()
-        
-        it = Repeat(func, 5)
-        seq = list(it)
-    
-    The sequence ``seq`` will be a list containing 5 random numbers.
     """
     def __init__(self, func, times):
         self.func = func
@@ -67,7 +58,7 @@ class Repeat(object):
         return self.func()
         
 class Iterate(object):
-    """Class use to cycle on the iterable object
+    """Functional object used to cycle on the iterable object
     returned by a function *func*. The function is
     called when there is no longer any possible 
     iteration that can be done on the object.
