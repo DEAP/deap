@@ -1,4 +1,4 @@
 include *.txt
-recursive-include examples *.py *.csv *.yml
+recursive-include examples *.py *.csv *.json
 recursive-include doc *
 prune doc/_build
