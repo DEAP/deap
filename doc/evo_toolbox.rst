@@ -184,16 +184,23 @@ DEAP. Bellow are the complete descriptions.
 
 Other Tools
 ===========
-This section contains references to the helper functions found in the toolbox.
+This section contains references to helper functions found in the toolbox.
+For the moment, users are refered to the examples for how to use those tools.
 
 Initialization
 --------------
 
-.. autofunction:: eap.toolbox.Repeat
+.. autoclass:: eap.toolbox.Repeat
 
-.. autofunction:: eap.toolbox.Iterate
+:class:`Repeat` is used in the ``examples/ga_onemax.py`` example.
 
-.. autofunction:: eap.toolbox.FuncCycle
+.. autoclass:: eap.toolbox.Iterate
+
+:class:`Iterate` is used in the ``examples/ga_tsp.py`` example.
+
+.. autoclass:: eap.toolbox.FuncCycle
+
+:class:`FuncCycle` is used in the ``examples/gp_adf_symbreg.py`` example.
 
 Decoration
 ----------
