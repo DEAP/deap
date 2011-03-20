@@ -22,8 +22,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 import sortingnetwork as sn
@@ -67,16 +66,16 @@ tools.register("individual", creator.Individual, toolbox.Iterate(tools.network))
 tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 tools.register("evaluate", evalEvoSN, dimension=INPUTS)
-tools.register("mate", toolbox.cxTwoPoints)
+tools.register("mate", operators.cxTwoPoints)
 tools.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
 tools.register("addwire", mutAddWire, dimension=INPUTS)
 tools.register("delwire", mutDelWire)
 
-tools.register("select", toolbox.nsga2)
+tools.register("select", operators.selNSGA2)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -84,7 +83,7 @@ def main():
     random.seed(64)
 
     population = tools.population()
-    hof = halloffame.ParetoFront()
+    hof = operators.ParetoFront()
     stats = tools.clone(stats_t)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40

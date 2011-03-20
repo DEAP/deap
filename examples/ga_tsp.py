@@ -24,9 +24,8 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
+from eap import operators
 from eap import toolbox
-from eap import halloffame
-from eap import statistics
 
 # gr*.json contains the distance map in list of list style in JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
@@ -52,14 +51,14 @@ def evalTSP(individual):
         distance += distance_map[gene1][gene2]
     return distance,
 
-tools.register("mate", toolbox.cxPartialyMatched)
-tools.register("mutate", toolbox.mutShuffleIndexes, indpb=0.05)
-tools.register("select", toolbox.selTournament, tournsize=3)
+tools.register("mate", operators.cxPartialyMatched)
+tools.register("mutate", operators.mutShuffleIndexes, indpb=0.05)
+tools.register("select", operators.selTournament, tournsize=3)
 tools.register("evaluate", evalTSP)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -67,7 +66,7 @@ def main():
     random.seed(264)
 
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
     algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, stats, hof)
