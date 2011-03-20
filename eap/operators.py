@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import division
 import bisect
 import copy
 import math
@@ -20,8 +21,8 @@ import random
 # Needed by Nondominated sorting
 from itertools import chain, cycle
 from operator import attrgetter
-import operator     # used in pareto-front hall of fame for eq
-from __future__ import division
+ # used in pareto-front hall of fame for eq
+import operator
 from collections import defaultdict
 
 try:
@@ -891,6 +892,7 @@ def cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
     As defined by Koza, non-terminal primitives are selected for 90% of the
     crossover points, and terminals for 10%. This probability can be adjusted
     with the *cxtermpb* argument.
+    
     .. note::
        This crossover is subject to change for a more effective method
        of selecting the crossover points.
@@ -1187,7 +1189,7 @@ def selRoulette(individuals, n):
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
-def nsga2(individuals, n):
+def selNSGA2(individuals, n):
     """Apply NSGA-II selection operator on the *individuals*. Usually,
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
@@ -1280,7 +1282,7 @@ def sortCrowdingDist(individuals, n):
 # Strength Pareto         (SPEA-II)  #
 ######################################
 
-def spea2(individuals, n):
+def selSPEA2(individuals, n):
     """Apply SPEA-II selection operator on the *individuals*. Usually,
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
