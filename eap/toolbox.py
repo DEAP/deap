@@ -33,6 +33,7 @@ algorithms from the :mod:`~eap.algorithms` module.
 import copy
 import functools
 import inspect
+from itertools import cycle
 
 class Repeat(object):
     """Functional object that repeat a function *func*
@@ -41,6 +42,15 @@ class Repeat(object):
 
     This class allows to fill a list with objects produced
     by a function.
+    ::
+        
+        def func():
+            return random.random()
+        
+        it = Repeat(func, 5)
+        seq = list(it)
+    
+    The sequence ``seq`` will be a list containing 5 random numbers.
     """
     def __init__(self, func, times):
         self.func = func
