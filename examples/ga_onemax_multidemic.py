@@ -64,7 +64,7 @@ def main():
     NGEN = 40
     CXPB = 0.5
     MUTPB = 0.2
-    gen = 0
+    gen = 1
     
     for deme, stats in zip(demes, dstats):
         for ind in deme:
@@ -73,13 +73,12 @@ def main():
         hof.update(deme)
     pstats.update(demes[0]+demes[1]+demes[2])
     
-    while gen < NGEN and pstats.data['Max'][-1][0] < 100.0:
+    while gen <= NGEN and pstats.data['Max'][-1][0] < 100.0:
         print "-- Generation %i --" % gen        
         for idx, deme, stats in zip(xrange(len(demes)), demes, dstats):
             print "  -- Deme %i --" % (idx+1)  
-            deme[:] = tools.select(deme, len(deme)) 
-            deme[:] = tools.clone([ind for ind in deme])
-            deme[:] = algorithms.varSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB)
+            deme[:] = [tools.clone(ind) for ind in tools.select(deme, len(deme))]
+            algorithms.varSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB)
             
             for ind in deme:
                 ind.fitness.values = tools.evaluate(ind)
@@ -88,7 +87,7 @@ def main():
             hof.update(deme)
             for key, stat in stats.data.items():
                 print "    %s %s" % (key, stat[-1][0])
-        if gen > 0 and gen % 5 == 0:
+        if gen % 5 == 0:
             tools.migrate(demes)
         pstats.update(demes[0]+demes[1]+demes[2])
         gmeans.update(demes[0]+demes[1]+demes[2])
