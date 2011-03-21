@@ -87,7 +87,7 @@ def main():
 
         # Gather all the fitnesses in one list and print the stats
         stats.update(pop)
-        for key, stat in stats.data.items():
+        for key, stat in stats.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])
         print "  Best so far: %s - %s" % (best, best.fitness)
     

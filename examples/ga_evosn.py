@@ -133,7 +133,7 @@ def main():
         population = tools.select(population+offsprings, n=len(offsprings))
         hof.update(population)
         stats.update(population)
-        for key, stat in stats.data.items():
+        for key, stat in stats.data.iteritems():
             print "  %s %s" % (key, ", ".join(map(str, stat[-1])))        
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])

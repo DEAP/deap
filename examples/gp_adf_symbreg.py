@@ -168,7 +168,7 @@ def main():
         pop[:] = offsprings
         hof.update(pop)
         stats.update(pop)
-        for key, stat in stats.data.items():
+        for key, stat in stats.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])
     
     print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
