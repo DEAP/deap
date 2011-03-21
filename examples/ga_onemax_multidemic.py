@@ -85,14 +85,14 @@ def main():
             
             stats.update(deme)
             hof.update(deme)
-            for key, stat in stats.data.items():
+            for key, stat in stats.data.iteritems():
                 print "    %s %s" % (key, stat[-1][0])
         if gen % 5 == 0:
             tools.migrate(demes)
         pstats.update(demes[0]+demes[1]+demes[2])
         gmeans.update(demes[0]+demes[1]+demes[2])
         print "  -- Population --"  
-        for key, stat in pstats.data.items():
+        for key, stat in pstats.data.iteritems():
             print "    %s %s" % (key, stat[-1][0])        
         gen += 1
     

@@ -130,10 +130,10 @@ def main():
         best_gp = operators.selBest(pop_gp, 1)[0]    
     
         print "  -- GA statistics --"
-        for key, stat in stats_ga.data.items():
+        for key, stat in stats_ga.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])
         print "  -- GP statistics --"        
-        for key, stat in stats_gp.data.items():
+        for key, stat in stats_gp.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])            
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)

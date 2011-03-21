@@ -255,7 +255,7 @@ class Stats(object):
     def update(self, seq):
         # Transpose the values
         values = zip(*(self.key(elem) for elem in seq))
-        for key, func in self.functions.items():
+        for key, func in self.functions.iteritems():
             self.data[key].append(map(func, values))
 
 

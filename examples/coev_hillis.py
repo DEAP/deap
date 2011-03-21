@@ -145,7 +145,7 @@ def main():
         hof.update(hosts)
         hstats.update(hosts)
         
-        for key, stat in hstats.data.items():
+        for key, stat in hstats.data.iteritems():
             print "  %s %s" % (key, ", ".join(map(str, stat[-1])))
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
