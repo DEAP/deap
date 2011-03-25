@@ -29,7 +29,7 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)
 
 def update(ind, mu, std):
-    for i in xrange(IND_SIZE):
+    for i in xrange(len(mu)):
         ind[i] = random.gauss(mu[i],std)
 
 def evalSphere(individual):
