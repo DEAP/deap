@@ -14,17 +14,13 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
 import random
-import time
 
+from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
+from eap import operators
 from eap import toolbox
-
-from eap import iterations
-from eap import statistics
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMax)
@@ -35,20 +31,22 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalOneMax(individual):
     return sum(individual),
 
 tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
-tools.register("select", toolbox.selTournament, tournsize=3)
+tools.register("mate", operators.cxTwoPoints)
+tools.register("mutate", operators.mutFlipBit, indpb=0.05)
+tools.register("select", operators.selTournament, tournsize=3)
+tools.register("migrate", operators.migRing, n=5, selection=operators.selBest,
+    replacement=operators.selRandom)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -56,17 +54,17 @@ def main():
     random.seed(64)
 
     demes = [tools.population(), tools.population(), tools.population()]
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     dstats = [tools.clone(stats_t), tools.clone(stats_t), tools.clone(stats_t)]
     pstats = tools.clone(stats_t)
 
-    gmeans = statistics.Stats()
-    gmeans.register("Avg", statistics.mean)
+    gmeans = operators.Stats()
+    gmeans.register("Avg", operators.mean)
 
     NGEN = 40
     CXPB = 0.5
     MUTPB = 0.2
-    gen = 0
+    gen = 1
     
     for deme, stats in zip(demes, dstats):
         for ind in deme:
@@ -75,19 +73,26 @@ def main():
         hof.update(deme)
     pstats.update(demes[0]+demes[1]+demes[2])
     
-    while gen < NGEN and pstats.data['Max'][-1][0] < 100.0:
+    while gen <= NGEN and pstats.data['Max'][-1][0] < 100.0:
         print "-- Generation %i --" % gen        
         for idx, deme, stats in zip(xrange(len(demes)), demes, dstats):
-            print "  -- Deme %i --" % (idx+1)                
-            iterations.eaSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB, stats=stats, halloffame=hof)
-            for key, stat in stats.data.items():
+            print "  -- Deme %i --" % (idx+1)  
+            deme[:] = [tools.clone(ind) for ind in tools.select(deme, len(deme))]
+            algorithms.varSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB)
+            
+            for ind in deme:
+                ind.fitness.values = tools.evaluate(ind)
+            
+            stats.update(deme)
+            hof.update(deme)
+            for key, stat in stats.data.iteritems():
                 print "    %s %s" % (key, stat[-1][0])
-        if gen > 0 and gen % 5 == 0:
-            toolbox.migRing(demes, n=5, selection=tools.select)
+        if gen % 5 == 0:
+            tools.migrate(demes)
         pstats.update(demes[0]+demes[1]+demes[2])
         gmeans.update(demes[0]+demes[1]+demes[2])
         print "  -- Population --"  
-        for key, stat in pstats.data.items():
+        for key, stat in pstats.data.iteritems():
             print "    %s %s" % (key, stat[-1][0])        
         gen += 1
     

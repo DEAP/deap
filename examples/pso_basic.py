@@ -15,12 +15,11 @@
 
 import operator
 import random
-
 from math import sin
 
 from eap import base
 from eap import creator
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -59,13 +58,13 @@ def evalH1(x):
 
 tools = toolbox.Toolbox()
 tools.register("particle", generate, size=2, pmin=-100, pmax=100, smin=-50, smax=50)
-tools.register("population", list, content_init=tools.particle, size_init=200)
+tools.register("population", list, toolbox.Repeat(tools.particle, 200))
 tools.register("update", updateParticle, phi1=2.0, phi2=2.0)
 tools.register("evaluate", evalH1)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -88,7 +87,7 @@ def main():
 
         # Gather all the fitnesses in one list and print the stats
         stats.update(pop)
-        for key, stat in stats.data.items():
+        for key, stat in stats.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])
         print "  Best so far: %s - %s" % (best, best.fitness)
     

@@ -23,12 +23,10 @@ random.seed(64)     # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.
 
-from eap import algorithms
 from eap import base
 from eap import cma
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -43,9 +41,9 @@ tools.register("individual", creator.Individual, "d")
 tools.register("population", strategy.generate, ind_init=tools.individual)
 tools.register("update", strategy.update)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -60,7 +58,7 @@ if __name__ == "__main__":
     pop = tools.population()
     stats = tools.clone(stats_t)
     
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     
     # The CMA-ES algorithm converge with good probability with those settings
     cma.esCMA(tools, pop, ngen=250, halloffame=hof, statistics=stats)

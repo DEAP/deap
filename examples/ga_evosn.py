@@ -16,20 +16,18 @@
 import sys
 import random
 import logging
-import copy
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 import sortingnetwork as sn
 
-INPUTS = 12
+INPUTS = 6
 
 def evalEvoSN(individual, dimension):
     network = sn.SortingNetwork(dimension, individual)
@@ -64,20 +62,20 @@ tools = toolbox.Toolbox()
 tools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.network)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.network))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 tools.register("evaluate", evalEvoSN, dimension=INPUTS)
-tools.register("mate", toolbox.cxTwoPoints)
+tools.register("mate", operators.cxTwoPoints)
 tools.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
 tools.register("addwire", mutAddWire, dimension=INPUTS)
 tools.register("delwire", mutDelWire)
 
-tools.register("select", toolbox.nsga2)
+tools.register("select", operators.selNSGA2)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -85,7 +83,7 @@ def main():
     random.seed(64)
 
     population = tools.population()
-    hof = halloffame.ParetoFront()
+    hof = operators.ParetoFront()
     stats = tools.clone(stats_t)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
@@ -135,7 +133,7 @@ def main():
         population = tools.select(population+offsprings, n=len(offsprings))
         hof.update(population)
         stats.update(population)
-        for key, stat in stats.data.items():
+        for key, stat in stats.data.iteritems():
             print "  %s %s" % (key, ", ".join(map(str, stat[-1])))        
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])

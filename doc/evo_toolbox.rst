@@ -8,7 +8,7 @@ Evolutionary Toolbox
 
 .. autoclass:: eap.toolbox.Toolbox
    
-   .. automethod:: register(methodname, method[, content_init[, size_init]], ...)
+   .. automethod:: register(methodname, method [, ...])
    
    .. automethod:: unregister(methodname)
    
@@ -17,100 +17,190 @@ Evolutionary Toolbox
 Operators
 =========
 
-This module contains the operators for an evolutionary algorithm. They are used to modify, select and move the individuals in their environment. A good set of operators should allow to move from an initial population of good solutions, equivalent to random sampling, to excellent configurations optimizing the studied problem.
+This module contains the operators for an evolutionary algorithm. They are
+used to modify, select and move the individuals in their environment. A good
+set of operators should allow to move from an initial population of good
+solutions, equivalent to random sampling, to excellent configurations
+optimizing the studied problem.
 
-.. note::
-   The responsibility of making offspring(s) independent of their parent(s) and invalidating the fitness is left to the user and is generally fulfilled in the algorithms by calling toolbox.clone on an individuals to duplicate it and del on the values attribute of the individual's fitness.
+.. note:: The responsibility of making offspring(s) independent of their
+   parent(s) and invalidating the fitness is left to the user and is generally
+   fulfilled in the algorithms by calling :func:`toolbox.clone` on an 
+   individuals to duplicate it and ``del`` on the values attribute of the 
+   individual's fitness.
 
 .. versionchanged:: 0.6
-   In earlier versions, the resposability of cloning the individuals was left to the operator that wanted to modify an individuals. The new offsprings were returned via a tuple and the parents were left intact. In version 0.6, cloning is made prior to the operation on the individuals and the operators can now modify the individuals directly. At a user level, this may not affect your evolution if you were using the algorithms, but if you developped your own algorithms, you better take a look at the changes made in the algorithms source code.
+   In earlier versions, the resposability of cloning the individuals was left
+   to the operator that wanted to modify an individuals. The new offsprings
+   were returned via a tuple and the parents were left intact. In version 0.6,
+   cloning is made prior to the operation on the individuals and the operators
+   can now modify the individuals directly. At a user level, this may not
+   affect your evolution if you were using the algorithms, but if you
+   developped your own algorithms, you better take a look at the changes made
+   in the algorithms source code.
 
-
-===================================== ============================== =========================
- Operator                             Arguments                      Results                  
-===================================== ============================== =========================
- :func:`cxOnePoint`                   seq1, seq2                                              
- :func:`cxTwoPoints`                  seq1, seq2                                              
- :func:`cxUniform`                    seq1, seq2
- :func:`cxPartialyMatched`            int seq1, int seq2
- :func:`cxUniformPartialyMatched`     int seq1, int seq2
- :func:`cxBlend`                      float seq1, float seq2
-===================================== ============================== =========================
+.. automodule:: eap.operators
 
 
 Crossover
 ---------
 
-.. autofunction:: eap.toolbox.cxTwoPoints
+Here is a quick table reference to the different implemented crossovers in 
+DEAP. Bellow are the complete descriptions.
 
-.. autofunction:: eap.toolbox.cxOnePoint
+===================================== ==================================
+ Crossover Operator                    Input Type                      
+===================================== ==================================
+ :func:`cxOnePoint`                    sequences                    
+ :func:`cxTwoPoints`                   sequences                    
+ :func:`cxUniform`                     sequences
+ :func:`cxPartialyMatched`             integer sequences
+ :func:`cxUniformPartialyMatched`      integer sequences
+ :func:`cxBlend`                       float sequences
+ :func:`cxESBlend`                     float sequences with strategy
+ :func:`cxESTwoPoints`                 sequences with strategy
+ :func:`cxSimulatedBinary`             float sequences
+ :func:`cxMessyOnePoint`               sequences
+ :func:`cxTreeUniformOnePoint`         trees
+ :func:`cxTypedTreeOnePoint`           typed trees
+ :func:`cxTreeKozaOnePoint`            trees
+ :func:`cxTypedTreeKozaOnePoint`       typed trees
+===================================== ==================================
 
-.. autofunction:: eap.toolbox.cxUniform
+.. autofunction:: eap.operators.cxTwoPoints
 
-.. autofunction:: eap.toolbox.cxPartialyMatched
+.. autofunction:: eap.operators.cxOnePoint
 
-.. autofunction:: eap.toolbox.cxUniformPartialyMatched
+.. autofunction:: eap.operators.cxUniform
 
-.. autofunction:: eap.toolbox.cxBlend
+.. autofunction:: eap.operators.cxPartialyMatched
 
-.. autofunction:: eap.toolbox.cxESBlend(ind1, ind2, alpha[, minstrategy])
+.. autofunction:: eap.operators.cxUniformPartialyMatched
 
-.. autofunction:: eap.toolbox.cxESTwoPoints
+.. autofunction:: eap.operators.cxBlend
 
-.. autofunction:: eap.toolbox.cxSimulatedBinary
+.. autofunction:: eap.operators.cxESBlend(ind1, ind2, alpha[, minstrategy])
 
-.. autofunction:: eap.toolbox.cxMessyOnePoint
+.. autofunction:: eap.operators.cxESTwoPoints
 
-.. autofunction:: eap.toolbox.cxTreeUniformOnePoint
+.. autofunction:: eap.operators.cxSimulatedBinary
 
-.. autofunction:: eap.toolbox.cxTypedTreeOnePoint
+.. autofunction:: eap.operators.cxMessyOnePoint
 
+.. autofunction:: eap.operators.cxTreeUniformOnePoint
 
+.. autofunction:: eap.operators.cxTypedTreeOnePoint
+
+.. autofunction:: eap.operators.cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1)
+
+.. autofunction:: eap.operators.cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1)
 
 Mutation
 --------
 
-.. autofunction:: eap.toolbox.mutGaussian
+Here is a quick table reference to the different implemented mutations in 
+DEAP. Bellow are the complete descriptions.
 
-.. autofunction:: eap.toolbox.mutShuffleIndexes
+===================================== ==================================
+ Mutation Operator                     Input Type                      
+===================================== ==================================
+ :func:`mutGaussian`                   float sequence
+ :func:`mutShuffleIndexes`             sequence                    
+ :func:`mutFlipBit`                    binary sequence
+ :func:`mutES`                         float sequence with strategy
+ :func:`mutTreeUniform`                tree
+ :func:`mutTypedTreeUniform`           typed tree
+ :func:`mutTypedTreeEphemeral`         typed tree
+ :func:`mutTreeShrink`                 tree
+ :func:`mutTypedTreeInsert`            typed tree
+===================================== ==================================
 
-.. autofunction:: eap.toolbox.mutFlipBit
+.. autofunction:: eap.operators.mutGaussian
 
-.. autofunction:: eap.toolbox.mutES(individual, indpb[, minstrategy])
+.. autofunction:: eap.operators.mutShuffleIndexes
 
-.. autofunction:: eap.toolbox.mutTreeUniform
+.. autofunction:: eap.operators.mutFlipBit
 
-.. autofunction:: eap.toolbox.mutTypedTreeUniform
+.. autofunction:: eap.operators.mutES(individual, indpb[, minstrategy])
 
-.. autofunction:: eap.toolbox.mutTypedTreeNodeReplacement
+.. autofunction:: eap.operators.mutTreeUniform
 
-.. autofunction:: eap.toolbox.mutTypedTreeEphemeral
+.. autofunction:: eap.operators.mutTypedTreeUniform
 
-.. autofunction:: eap.toolbox.mutTreeShrink
+.. autofunction:: eap.operators.mutTypedTreeNodeReplacement
 
-.. autofunction:: eap.toolbox.mutTypedTreeInsert
+.. autofunction:: eap.operators.mutTypedTreeEphemeral
+
+.. autofunction:: eap.operators.mutTreeShrink
+
+.. autofunction:: eap.operators.mutTypedTreeInsert
 
 Selection
 ---------
 
-.. autofunction:: eap.toolbox.selTournament
+Here is a quick table reference to the different implemented selections in 
+DEAP. Bellow are the complete descriptions.
 
-.. autofunction:: eap.toolbox.selRoulette
+===================================== ==================================
+ Selection Operator                    Input Type                      
+===================================== ==================================
+ :func:`selTournament`                 multi-objective sequence
+ :func:`selRoulette`                   mono-objective sequence
+ :func:`selNSGA2`                      multi-objective sequence
+ :func:`selSPEA2`                      multi-objective sequence
+ :func:`selRandom`                     multi-objective sequence
+ :func:`selBest`                       multi-objective sequence
+ :func:`selWorst`                      multi-objective sequence
+===================================== ==================================
 
-.. autofunction:: eap.toolbox.nsga2
+.. autofunction:: eap.operators.selTournament
 
-.. autofunction:: eap.toolbox.spea2
+.. autofunction:: eap.operators.selRoulette
 
-.. autofunction:: eap.toolbox.selRandom
+.. autofunction:: eap.operators.selNSGA2
 
-.. autofunction:: eap.toolbox.selBest
+.. autofunction:: eap.operators.selSPEA2
 
-.. autofunction:: eap.toolbox.selWorst
+.. autofunction:: eap.operators.selRandom
+
+.. autofunction:: eap.operators.selBest
+
+.. autofunction:: eap.operators.selWorst
 
 Migration
 ---------
 
-.. autofunction:: eap.toolbox.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
+Here is a quick table reference to the different implemented migrations in 
+DEAP. Bellow are the complete descriptions.
+
+===================================== ==================================
+ Selection Operator                    Input Type                      
+===================================== ==================================
+ :func:`migRing`                       one level multi-demic sequence
+===================================== ==================================
+
+.. autofunction:: eap.operators.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
+
+
+Other Tools
+===========
+This section contains references to helper functions found in the toolbox.
+For the moment, users are refered to the examples for how to use those tools.
+
+Initialization
+--------------
+
+.. autoclass:: eap.toolbox.Repeat
+
+:class:`Repeat` is used in the ``examples/ga_onemax.py`` example.
+
+.. autoclass:: eap.toolbox.Iterate
+
+:class:`Iterate` is used in the ``examples/ga_tsp.py`` example.
+
+.. autoclass:: eap.toolbox.FuncCycle
+
+:class:`FuncCycle` is used in the ``examples/gp_adf_symbreg.py`` example.
 
 Decoration
 ----------

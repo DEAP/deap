@@ -18,7 +18,7 @@ import random
 from eap import base
 from eap import creator
 from eap import gp
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 # gp_symbreg already defines some useful structures
@@ -43,18 +43,18 @@ def evalSymbReg(expr, data):
 tools_ga = toolbox.Toolbox()
 
 tools_ga.register("float", random.uniform, -1, 1)
-tools_ga.register("individual", creator.IndGA, content_init=tools_ga.float, size_init=10)
-tools_ga.register("population", list, content_init=tools_ga.individual, size_init=200)
+tools_ga.register("individual", creator.IndGA, toolbox.Repeat(tools_ga.float, 10))
+tools_ga.register("population", list, toolbox.Repeat(tools_ga.individual, 200))
 
-tools_ga.register("select", toolbox.selTournament, tournsize=3)
-tools_ga.register("mate", toolbox.cxTwoPoints)
-tools_ga.register("mutate", toolbox.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
+tools_ga.register("select", operators.selTournament, tournsize=3)
+tools_ga.register("mate", operators.cxTwoPoints)
+tools_ga.register("mutate", operators.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
 tools_gp = gp_symbreg.tools
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -65,8 +65,8 @@ def main():
     stats_ga = tools_ga.clone(stats_t)
     stats_gp = tools_gp.clone(stats_t)
     
-    best_ga = toolbox.selRandom(pop_ga, 1)[0]
-    best_gp = toolbox.selRandom(pop_gp, 1)[0]
+    best_ga = operators.selRandom(pop_ga, 1)[0]
+    best_gp = operators.selRandom(pop_gp, 1)[0]
     
     for ind in pop_gp:
         ind.fitness.values = evalSymbReg(ind, best_ga)  
@@ -126,14 +126,14 @@ def main():
         stats_ga.update(pop_ga)
         stats_gp.update(pop_gp)
         
-        best_ga = toolbox.selBest(pop_ga, 1)[0]
-        best_gp = toolbox.selBest(pop_gp, 1)[0]    
+        best_ga = operators.selBest(pop_ga, 1)[0]
+        best_gp = operators.selBest(pop_gp, 1)[0]    
     
         print "  -- GA statistics --"
-        for key, stat in stats_ga.data.items():
+        for key, stat in stats_ga.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])
         print "  -- GP statistics --"        
-        for key, stat in stats_gp.data.items():
+        for key, stat in stats_gp.data.iteritems():
             print "  %s %s" % (key, stat[-1][0])            
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)

@@ -23,8 +23,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -36,20 +35,20 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalOneMax(individual):
     return sum(individual),
 
 tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
-tools.register("select", toolbox.selTournament, tournsize=3)
+tools.register("mate", operators.cxTwoPoints)
+tools.register("mutate", operators.mutFlipBit, indpb=0.05)
+tools.register("select", operators.selTournament, tournsize=3)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -57,7 +56,7 @@ def main():
     random.seed(64)
     
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
 
     algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats, halloffame=hof)

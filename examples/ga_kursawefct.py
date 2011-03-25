@@ -14,7 +14,6 @@
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import inspect
 import logging
 import math
 import sys
@@ -25,8 +24,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
@@ -39,8 +37,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "f", content_init=tools.attr_float, size_init=3)
-tools.register("population", creator.Population, content_init=tools.individual, size_init=50)
+tools.register("individual", creator.Individual, "f", toolbox.Repeat(tools.attr_float, 3))
+tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 50))
 
 def evalKursawe(ind):
     f1 = sum(-10 * math.exp(-0.2 * math.sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
@@ -62,16 +60,16 @@ def checkBounds(min, max):
     return decCheckBounds
 
 tools.register("evaluate", evalKursawe)
-tools.register("mate", toolbox.cxBlend, alpha=1.5)
-tools.register("mutate", toolbox.mutGaussian, mu=0, sigma=3, indpb=0.3)
-tools.register("select", toolbox.nsga2)
+tools.register("mate", operators.cxBlend, alpha=1.5)
+tools.register("mutate", operators.mutGaussian, mu=0, sigma=3, indpb=0.3)
+tools.register("select", operators.selNSGA2)
 
 tools.decorate("mate", checkBounds(-5, 5))
 tools.decorate("mutate", checkBounds(-5, 5)) 
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -79,7 +77,7 @@ def main():
     random.seed(64)
 
     pop = tools.population()
-    hof = halloffame.ParetoFront()
+    hof = operators.ParetoFront()
     stats = tools.clone(stats_t)
     
     algorithms.eaMuPlusLambda(tools, pop, mu=50, lambda_=100, 
