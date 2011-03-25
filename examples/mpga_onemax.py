@@ -1,3 +1,4 @@
+#!/usr/bin/env python2.7
 #    This file is part of EAP.
 #
 #    EAP is free software: you can redistribute it and/or modify
@@ -24,7 +25,7 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
+from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -36,16 +37,16 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalOneMax(individual):
     return sum(individual),
 
 tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
-tools.register("select", toolbox.selTournament, tournsize=3)
+tools.register("mate", operators.cxTwoPoints)
+tools.register("mutate", operators.mutFlipBit, indpb=0.05)
+tools.register("select", operators.selTournament, tournsize=3)
 
 # Process Pool of 4 workers
 pool = multiprocessing.Pool(processes=4)
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     random.seed(64)
     
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     
     algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

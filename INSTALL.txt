@@ -10,7 +10,7 @@ This will try to install deap into your package directory, you might need permis
 Windows
 =======
 
-Ain't tryed yet ... sorry
+Not tried yet ... tell us if it works.
 
 Options
 =======
@@ -19,4 +19,4 @@ You might want to install this software somewhere else by addind the prefix opti
 
 $ python setup.py install --prefix=somewhere/else
 
-Other basic options are provided by the building tools of python, see http://docs.python.org/install/ for more information.
+Other basic options are provided by the building tools of Python, see http://docs.python.org/install/ for more information.

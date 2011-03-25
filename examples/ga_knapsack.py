@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import copy
 import sys
 import random
 import logging
@@ -23,8 +22,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 MAX_ITEM = 50
@@ -43,8 +41,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_item", random.choice, items.keys())
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.attr_item, size_init=30)
-tools.register("population", creator.Population, content_init=tools.individual, size_init=100)
+tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_item, 30))
+tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 100))
 
 def evalKnapsack(individual):
     weight = 0.0
@@ -76,11 +74,11 @@ def mutSet(individual):
 tools.register("evaluate", evalKnapsack)
 tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
-tools.register("select", toolbox.spea2)
+tools.register("select", operators.selSPEA2)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -88,7 +86,7 @@ def main():
     random.seed(64)         # Seed does not include item creation
 
     pop = tools.population()
-    hof = halloffame.ParetoFront()
+    hof = operators.ParetoFront()
     stats = tools.clone(stats_t)
     
     algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, stats, halloffame=hof)

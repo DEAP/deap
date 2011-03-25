@@ -21,8 +21,7 @@ import logging
 from eap import algorithms
 from eap import base
 from eap import creator
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -33,7 +32,7 @@ tools = toolbox.Toolbox()
 
 creator.create("Strategy", array.array)
 
-tools.register("strategy", creator.Strategy, "d", content_init=lambda: 1., size_init=IND_SIZE) 
+tools.register("strategy", creator.Strategy, "d", toolbox.Repeat(lambda: 1., IND_SIZE)) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=tools.strategy)
@@ -42,20 +41,20 @@ creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=t
 tools.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "d", content_init=tools.attr_float, size_init=IND_SIZE)
-tools.register("population", list, content_init=tools.individual, size_init=50)
+tools.register("individual", creator.Individual, "d", toolbox.Repeat(tools.attr_float, IND_SIZE))
+tools.register("population", list, toolbox.Repeat(tools.individual, 50))
 
 def evalSphere(individual):
     return sum(map(lambda x: x * x, individual)),
                    
 tools.register("evaluate", evalSphere)
-tools.register("mate", toolbox.cxESBlend, alpha=0.1, minstrategy=1e-10)
-tools.register("mutate", toolbox.mutES, indpb=0.1, minstrategy=1e-10)
-tools.register("select", toolbox.selTournament, tournsize=3)
+tools.register("mate", operators.cxESBlend, alpha=0.1, minstrategy=1e-10)
+tools.register("mutate", operators.mutES, indpb=0.1, minstrategy=1e-10)
+tools.register("select", operators.selTournament, tournsize=3)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -63,7 +62,7 @@ def main():
     random.seed(64)
     
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
     algorithms.eaMuCommaLambda(tools, pop, mu=8, lambda_=32, 

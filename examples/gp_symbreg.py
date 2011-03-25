@@ -23,8 +23,7 @@ from eap import algorithms
 from eap import base
 from eap import creator
 from eap import gp
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 # Define new functions
@@ -50,9 +49,8 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
-tools.register("individual", creator.Individual, content_init=tools.expr)
-
-tools.register("population", list, content_init=tools.individual, size_init=100)
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr))
+tools.register("population", list, toolbox.Repeat(tools.individual, 100))
 tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSymbReg(individual):
@@ -66,14 +64,14 @@ def evalSymbReg(individual):
     return diff,
 
 tools.register("evaluate", evalSymbReg)
-tools.register("select", toolbox.selTournament, tournsize=3)
-tools.register("mate", toolbox.cxTreeUniformOnePoint)
+tools.register("select", operators.selTournament, tournsize=3)
+tools.register("mate", operators.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
+tools.register('mutate', operators.mutTreeUniform, expr=tools.expr_mut)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -83,7 +81,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
     algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, stats, halloffame=hof)

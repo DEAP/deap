@@ -50,15 +50,13 @@ import sys
 import logging
 import copy
 import random
-
 from functools import partial
 
 from eap import algorithms
 from eap import base
 from eap import creator
 from eap import gp
-from eap import halloffame
-from eap import statistics
+from eap import operators
 from eap import toolbox
 
 
@@ -169,8 +167,8 @@ tools = toolbox.Toolbox()
 tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.expr_init)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr_init))
+tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code
@@ -180,14 +178,14 @@ def evalArtificialAnt(individual):
     return ant.eaten,
 
 tools.register("evaluate", evalArtificialAnt)
-tools.register("select", toolbox.selTournament, tournsize=7)
-tools.register("mate", toolbox.cxTreeUniformOnePoint)
+tools.register("select", operators.selTournament, tournsize=7)
+tools.register("mate", operators.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
+tools.register("mutate", operators.mutTreeUniform, expr=tools.expr_mut)
 
-stats_t = statistics.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", statistics.mean)
-stats_t.register("Std", statistics.std_dev)
+stats_t = operators.Stats(lambda ind: ind.fitness.values)
+stats_t.register("Avg", operators.mean)
+stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
@@ -198,7 +196,7 @@ def main():
     ant.parse_matrix(trail_file)
     
     pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
     algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, stats, halloffame=hof)

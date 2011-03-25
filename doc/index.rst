@@ -1,5 +1,5 @@
-EAP User Guide
-==============
+DEAP User Guide
+===============
 
 .. automodule:: eap
 

@@ -55,7 +55,7 @@ class SortingNetwork(list):
             self.append({wire1: wire2})
             return
         
-        for wires in last_level.items():
+        for wires in last_level.iteritems():
             if wires[1] >= wire1 and wires[0] <= wire2:
                 self.append({wire1: wire2})
                 return
@@ -65,17 +65,21 @@ class SortingNetwork(list):
     def sort(self, values):
         """Sort the values in-place based on the connectors in the network."""
         for level in self:
-            for wire1, wire2 in level.items():
+            for wire1, wire2 in level.iteritems():
                 if values[wire1] > values[wire2]:
                     values[wire1], values[wire2] = values[wire2], values[wire1]
     
-    def assess(self):
-        """Test all possible inputs given the dimension of the network,
-        and return the number of incorrectly sorted inputs.
+    def assess(self, cases=None):
+        """Try to sort the **cases** using the network, return the number of
+        misses. If **cases** is None, test all possible cases according to
+        the network dimensionality.
         """
+        if cases is None:
+            cases = product(range(2), repeat=self.dimension)
+        
         misses = 0
         ordered = [[0]*(self.dimension-i) + [1]*i for i in range(self.dimension+1)]
-        for sequence in product(range(2), repeat=self.dimension):
+        for sequence in cases:
             sequence = list(sequence)
             self.sort(sequence)
             misses += (sequence != ordered[sum(sequence)])
@@ -95,7 +99,7 @@ class SortingNetwork(list):
             str_wires[i][1] = " o"
         
         for index, level in enumerate(self):
-            for wire1, wire2 in level.items():
+            for wire1, wire2 in level.iteritems():
                 str_wires[wire1][(index+1)*6] = "x"
                 str_wires[wire2][(index+1)*6] = "x"
                 for i in xrange(wire1, wire2):

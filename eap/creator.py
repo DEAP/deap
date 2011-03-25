@@ -20,26 +20,37 @@ algorithms.
 
 import array
 import copy
+import types
 
 # Warning are turned into errors to catch the DeprecationWarning in the method
 # init_type of create.
 import warnings
 warnings.filterwarnings("error", "", DeprecationWarning, "eap.creator")
 
+def _deepcopyArray(self, memo):
+    """Overrides the deepcopy from array.array that does not copy
+    the object's attributes.
+    """
+    cls = self.__class__
+    copy_ = cls.__new__(cls, self.typecode, self)
+    memo[id(self)] = copy_
+    copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
+    return copy_
+
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
     inheriting from *base* in the :mod:`~eap.creator` module. The new
     class can have attributes defined by the subsequent keyword
-    arguments passed to the function create. If the argument is callable,
-    it is automatically called in the initialization of an instance of
-    this class and the returned object is added as an attribute of the
-    class' instance. Otherwise, if the argument is not callable, (for
+    arguments passed to the function create. If the argument is a class,
+    the __init__ function is called in the initialization of an instance of
+    the new object and the returned instance is added as an attribute of the
+    class' instance. Otherwise, if the argument is not a class, (for
     example an :class:`int`), it is added as a "static" attribute of the
     class.
     """
     dict_inst = {}
     dict_cls = {}
-    for obj_name, obj in kargs.items():
+    for obj_name, obj in kargs.iteritems():
         if hasattr(obj, "__call__"):
             dict_inst[obj_name] = obj
         else:
@@ -47,18 +58,15 @@ def create(name, base, **kargs):
 
     def initType(self, *args, **kargs):
         """Replace the __init__ function of the new type, in order to
-        add attributes, that were defined with **kargs, to the instance.
+        add attributes that were defined with **kargs to the instance.
         """
-        for elem in dict_inst.items():
-            obj_name, obj = elem
-            if hasattr(obj, "__call__"):
-                obj = obj()
-            setattr(self, obj_name, obj)
+        for obj_name, obj in dict_inst.iteritems():
+            setattr(self, obj_name, obj())
         
         # A DeprecationWarning is raised when the object inherits from the 
         # class "object" which leave the option of passing arguments, but
         # raise a warning stating that it will eventually stop permitting
-        # this option. Usually this appens when the base class does not
+        # this option. Usually this happens when the base class does not
         # override the __init__ method from object.
         try:
             base.__init__(self, *args, **kargs)
@@ -68,17 +76,7 @@ def create(name, base, **kargs):
     objtype = type(name, (base,), dict_cls)
 
     if issubclass(base, array.array):
-        def deepcopyArray(self, memo):
-            """Overrides the deepcopy from array.array that does not copy
-            the object's attributes.
-            """
-            cls = self.__class__
-            copy_ = cls.__new__(cls, self.typecode, self)
-            memo[id(self)] = copy_
-            copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
-            return copy_
-    
-        objtype.__deepcopy__ = deepcopyArray
+        objtype.__deepcopy__ = _deepcopyArray
 
     objtype.__init__ = initType
     globals()[name] = objtype

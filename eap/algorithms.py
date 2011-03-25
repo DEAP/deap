@@ -17,7 +17,7 @@
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
 evolutionary algorithm may vary infinitely. Most of the algorithms in this module
-use operators registered in the toolbox with the same keywords,
+use operators registered in the toolbox. Generaly, the keyword used are
 :meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~eap.select`
 for selection and :meth:`evaluate` for evaluation.
 
@@ -31,6 +31,12 @@ import random
 _logger = logging.getLogger("eap.algorithms")
 
 def varSimple(toolbox, population, cxpb, mutpb):
+    """Part of the :func:`~eap.algorithmes.eaSimple` algorithm applying only
+    the variation part (crossover followed by mutation). The modified 
+    individuals have their fitness invalidated.
+    
+    This function is not responsible for duplicating the individuals.
+    """
     # Apply crossover and mutation on the offsprings
     for ind1, ind2 in zip(population[::2], population[1::2]):
         if random.random() < cxpb:
@@ -114,13 +120,20 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         
         # Log statistics on the current generation
         if stats is not None:
-            for key, stat in stats.data.items():
+            for key, stat in stats.data.iteritems():
                  _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
     return population
 
 def varMuLambda(toolbox, population, lambda_, cxpb, mutpb):
+    """Part of the :func:`~eap.algorithmes.eaMuPlusLambda` and
+    :func:`~eap.algorithmes.eaMuCommaLambda` algorithms that produce the 
+    lambda new individuals. The modified individuals have their fitness 
+    invalidated.
+    
+    This function is not responsible for duplicating the individuals.
+    """
     offsprings = []
     nb_offsprings = 0
     while nb_offsprings < lambda_:
@@ -218,7 +231,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         
         # Log statistics on the current generation
         if stats is not None:
-            for key, stat in stats.data.items():
+            for key, stat in stats.data.iteritems():
                  _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
@@ -291,13 +304,20 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
 
         # Log statistics on the current generation
         if stats is not None:
-            for key, stat in stats.data.items():
+            for key, stat in stats.data.iteritems():
                  _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
     return population
 
 def varSteadyState(toolbox, population):
+    """Part of the :func:`~eap.algorithmes.eaSteadyState` algorithm 
+    that produce the new individual by crossover of two randomly selected 
+    parents and mutation on one randomly selected child. The modified 
+    individual has its fitness invalidated.
+    
+    This function is not responsible for duplicating the individuals.
+    """
     # Select two individuals for crossover
     p1, p2 = toolbox.select(population, 2)
     p1 = toolbox.clone(p1)
@@ -311,7 +331,10 @@ def varSteadyState(toolbox, population):
     return child
 
 def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
-    """The is the steady-state evolutionary algorithm
+    """The steady-state evolutionary algorithm. Every generation, a single new
+    individual is produced and put in the population producing a population of
+    size :math:`lambda+1`, then :math:`lambda` individuals are kept according
+    to the selection operator present in the toolbox.
     """
     _logger.info("Start of evolution")
     
@@ -347,7 +370,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
 
         # Log statistics on the current generation
         if stats is not None:
-            for key, stat in stats.data.items():
+            for key, stat in stats.data.iteritems():
                  _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
