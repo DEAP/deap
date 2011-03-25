@@ -19,30 +19,33 @@ def bar(a, b, c):
 
 
 def primaryTest(nbr):
+   #print(nbr)
 #    print(nbr)
     if nbr <= 2:
         return True
     
+    #if nbr == 7001:
+    #    raise AssertionError("UN TEST D'EXCEPTION!")
     #time.sleep(25)
-    for i in xrange(2, int(math.sqrt(nbr))+1):
+    
+    for i in range(2, int(math.sqrt(nbr))+1):
         if nbr % i == 0:
             return False
 #    a = dtm.apply(foo, 3)
     return True
 
 def main():
-	t = time.time()
-	listNbr = range(3,20000,2)
-	print("BOUM")
-	listPrimes = dtm.filter(primaryTest, listNbr)
-	print("NBR : ", len(listPrimes))
-	print("Duree : " + str(time.time()-t))
-#	time.sleep(10)
-#	for i in listNbr:
-#		i = i+0
-#	a = dtm.apply(foo,3)
-#	print(a,"END")
-	time.sleep(1)
+    t = time.time()
+    listNbr = range(3,10003,2)
+    print("BOUM")
+    listPrimes = dtm.filter(primaryTest, listNbr)
+    print("NBR : ", len(listPrimes))
+    print("Duree : " + str(time.time()-t))
+#   time.sleep(10)
+#   for i in listNbr:
+#       i = i+0
+#   a = dtm.apply(foo,3)
+#   print(a,"END")
 	
-dtm.setOptions(communicationManager="mpi4py")
+dtm.setOptions(communicationManager="commManagerMpi4py")
 dtm.start(main)
