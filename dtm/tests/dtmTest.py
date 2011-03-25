@@ -20,7 +20,7 @@ def boumtest(a):
 def boumtest2(b):
     print("\t\t\t2\t\t" + str(dtm.getWorkerId()))
     time.sleep(0.1)
-    listK = [b for i in xrange(30)]
+    listK = [b for i in range(30)]
     newList = dtm.map(reboum, listK)
     return b+b-b*b+b*b - newList[5]
 
@@ -65,25 +65,21 @@ def main():
     print(r.get())
     print(w.get())
 
-    boumtest.dtmExpectedDuration = 1
-
-    dtm.repeat(reboum, 10, 312)
-    
-    listT = [TrucChose(i) for i in xrange(25)]
+    listT = [TrucChose(i) for i in range(25)]
     listW = dtm.map_async(boumtest, listT)
-    listK = dtm.map_async(boumtest3, [i for i in xrange(14)])
+    listK = dtm.map_async(boumtest3, [i for i in range(14)])
     #print("BOUM!")
-    listZ = dtm.imap(boumtest2, [i for i in xrange(20)], 4)
+    #listZ = dtm.imap(boumtest2, [i for i in range(10)], 4)
     
     print("YEAH")
     listW.wait()
     print(listW.get())
-    for z in listZ:
-        print(z)
-
+    listK.wait()
+    #for z in listZ:
+    #    print(z)
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 
-dtm.setOptions(communicationManager="mpi4py")
+dtm.setOptions(communicationManager="commManagerMpi4py")
 dtm.start(main)
 

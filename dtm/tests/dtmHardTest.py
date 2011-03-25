@@ -31,6 +31,4 @@ def recursiveFunc(level):
             print(s)
         return s
 
-    
-dtm.setOptions(communicationManager="mpi4py")
 dtm.start(recursiveFunc, RECURSIVITY_LEVEL)
