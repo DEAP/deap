@@ -22,11 +22,6 @@ import array
 import copy
 import types
 
-# Warning are turned into errors to catch the DeprecationWarning in the method
-# init_type of create.
-import warnings
-warnings.filterwarnings("error", "", DeprecationWarning, "eap.creator")
-
 def _deepcopyArray(self, memo):
     """Overrides the deepcopy from array.array that does not copy
     the object's attributes.
@@ -56,21 +51,20 @@ def create(name, base, **kargs):
         else:
             dict_cls[obj_name] = obj
 
+    # A DeprecationWarning is raised when the object inherits from the 
+    # class "object" which leave the option of passing arguments, but
+    # raise a warning stating that it will eventually stop permitting
+    # this option. Usually this happens when the base class does not
+    # override the __init__ method from object.
     def initType(self, *args, **kargs):
         """Replace the __init__ function of the new type, in order to
         add attributes that were defined with **kargs to the instance.
         """
         for obj_name, obj in dict_inst.iteritems():
             setattr(self, obj_name, obj())
-        
-        # A DeprecationWarning is raised when the object inherits from the 
-        # class "object" which leave the option of passing arguments, but
-        # raise a warning stating that it will eventually stop permitting
-        # this option. Usually this happens when the base class does not
-        # override the __init__ method from object.
-        try:
+        if base.__init__ is not object.__init__:
             base.__init__(self, *args, **kargs)
-        except DeprecationWarning:
+        else:
             base.__init__(self)
 
     objtype = type(name, (base,), dict_cls)
