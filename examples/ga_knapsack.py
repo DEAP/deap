@@ -25,24 +25,27 @@ from eap import creator
 from eap import operators
 from eap import toolbox
 
+IND_SIZE = 30
 MAX_ITEM = 50
 MAX_WEIGHT = 50
+NBR_ITEMS = 100
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
 creator.create("Individual", set, fitness=creator.Fitness)
 creator.create("Population", list)
 
-# Create the item dictionary, items' name is an integer, and value is a (weight, value) 2-uple
-items = dict([(i, (random.randint(1, 10), random.uniform(0, 100))) for i in xrange(100)])
+# Create the item dictionary, items' name is an integer, and value is a (weight, value) 2-uple.
+# The items will be created during the runtime to enable reproducibility.
+items = {}
 
 tools = toolbox.Toolbox()
 
 # Attribute generator
-tools.register("attr_item", random.choice, items.keys())
+tools.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_item, 30))
-tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 100))
+tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_item, IND_SIZE))
+tools.register("population", creator.Population, toolbox.Repeat(tools.individual, NBR_ITEMS))
 
 def evalKnapsack(individual):
     weight = 0.0
@@ -69,7 +72,7 @@ def mutSet(individual):
         if len(individual) > 0:     # We cannot pop from an empty set
             individual.pop()
     else:
-        individual.add(random.choice(items.keys()))
+        individual.add(random.randrange(NBR_ITEMS))
 
 tools.register("evaluate", evalKnapsack)
 tools.register("mate", cxSet)
@@ -83,7 +86,10 @@ stats_t.register("Min", min)
 stats_t.register("Max", max)
 
 def main():
-    random.seed(64)         # Seed does not include item creation
+    random.seed(64)
+    # Create random items and store them in the items' dictionary.
+    for i in xrange(NBR_ITEMS):
+        items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
     pop = tools.population()
     hof = operators.ParetoFront()
