@@ -943,7 +943,7 @@ def selRoulette(individuals, n):
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
+    s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)
     sum_fits = sum(map(lambda ind: ind.fitness.values[0], individuals))
     
     chosen = []
