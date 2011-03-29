@@ -21,7 +21,7 @@ from eap import base
 from eap import creator
 from eap import toolbox
 
-IND_SIZE = 30
+IND_SIZE = 10
 
 tools = toolbox.Toolbox()
 
@@ -29,8 +29,8 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)
 
 def update(ind, mu, std):
-    for i in xrange(len(mu)):
-        ind[i] = random.gauss(mu[i],std)
+    for i, mu_i in enumerate(mu):
+        ind[i] = random.gauss(mu_i,std)
 
 def evalSphere(individual):
     return sum(x*x for x in individual),

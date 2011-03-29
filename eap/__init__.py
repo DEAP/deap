@@ -30,7 +30,7 @@ The five founding hypotheses of DEAP are:
     suit their specific needs.
 
 (2) User needs in terms of algorithms and operators are so vast that it would 
-    beunrealistic to think of implementing them all in a single framework. 
+    be unrealistic to think of implementing them all in a single framework. 
     However, it should be possible to build basic tools and generic mechanisms 
     that enable easy user implementation of most any EA variant.
 
