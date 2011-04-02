@@ -17,6 +17,8 @@ Evolutionary Toolbox
 Operators
 =========
 
+.. automodule:: eap.operators
+
 This module contains the operators for an evolutionary algorithm. They are
 used to modify, select and move the individuals in their environment. A good
 set of operators should allow to move from an initial population of good
@@ -38,9 +40,6 @@ optimizing the studied problem.
    affect your evolution if you were using the algorithms, but if you
    developped your own algorithms, you better take a look at the changes made
    in the algorithms source code.
-
-.. automodule:: eap.operators
-
 
 Crossover
 ---------
@@ -184,6 +183,8 @@ DEAP. Bellow are the complete descriptions.
 
 Other Tools
 ===========
+.. _other-tools:
+
 This section contains references to helper functions found in the toolbox.
 For the moment, users are refered to the examples for how to use those tools.
 

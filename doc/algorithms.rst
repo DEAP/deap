@@ -16,3 +16,11 @@ Algorithms
 .. autofunction:: eap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame])
 
 .. autofunction:: eap.algorithms.varSteadyState
+
+Covariance Matrix Adaptation Evolution Strategy
+===============================================
+
+.. autofunction:: eap.cma.esCMA(toolbox, population, sigma, ngen[, halloffame, **kargs])
+
+.. autoclass:: eap.cma.CMAStrategy(population, sigma[, params])
+   :members:

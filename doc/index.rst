@@ -14,11 +14,7 @@ Evolutionary Content
    evo_toolbox
    algorithms
    gp
-   stats
-   halloffame
-   milestone
-   history
-   cma
+   extensions
    
 Tutorials
 ---------
