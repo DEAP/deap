@@ -22,9 +22,15 @@ import array
 import copy
 import types
 
+try:
+    import numpy
+    NUMPY_PRESENT = True
+except ImportError:
+    NUMPY_PRESENT = False
+    
 def _deepcopyArray(self, memo):
     """Overrides the deepcopy from array.array that does not copy
-    the object's attributes.
+    the object's attributes and class type.
     """
     cls = self.__class__
     copy_ = cls.__new__(cls, self.typecode, self)
@@ -32,6 +38,30 @@ def _deepcopyArray(self, memo):
     copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
     return copy_
 
+def _deepcopyNumPyArray(self, memo):
+    """Overrides the deepcopy from numpy.ndarray that does not copy
+    the object's attributes.
+    """
+    copy_ = numpy.ndarray.__deepcopy__(self, memo)
+    copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
+    return copy_
+
+@staticmethod
+def _newNumPyArray(cls, iterable):
+    """Creates a new instance of a numpy.ndarray from a function call"""
+    return numpy.array(list(iterable)).view(cls)
+
+def _finalizeNumPyArray(self, obj):
+    # __init__ will reinitialize every member of the subclass.
+    # this might not be desirable for example in the case of an ES. 
+    self.__init__()
+    
+    # Instead, e could use the following that will simply deepcopy every 
+    # member that is present in the original class
+    # This is significantly slower. 
+    #if self.__class__ == obj.__class__:
+    #    self.__dict__.update(copy.deepcopy(obj.__dict__))
+    
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
     inheriting from *base* in the :mod:`~eap.creator` module. The new
@@ -71,6 +101,10 @@ def create(name, base, **kargs):
 
     if issubclass(base, array.array):
         objtype.__deepcopy__ = _deepcopyArray
+    elif NUMPY_PRESENT and issubclass(base, numpy.ndarray):
+        objtype.__deepcopy__ = _deepcopyNumPyArray
+        objtype.__new__ = _newNumPyArray
+        objtype.__array_finalize__ = _finalizeNumPyArray
 
     objtype.__init__ = initType
     globals()[name] = objtype
