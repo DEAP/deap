@@ -1,3 +1,5 @@
+2011-04-02 Added support for numpy.ndarray in the creator.
+
 2011-03-20 Renamed the nsga2 and spea2 selections to selNSGA2 and selSPEA2.
 
 2011-03-19 Moved all the operators from the toolbox to a new operators module.
