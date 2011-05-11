@@ -118,7 +118,9 @@ class CMAStrategy(object):
         self.C = numpy.identity(self.dim)
         self.diagD = numpy.ones(self.dim)
         self.BD = self.B * self.diagD
-        
+
+        self.cond = 1       
+ 
         self.lambda_ = self.params.get("lambda_", int(4 + 3 * log(self.dim)))
         
         self.update_count = 0
@@ -172,6 +174,9 @@ class CMAStrategy(object):
         
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
+
+        self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
+
         self.diagD = self.diagD[indx]**0.5
         self.B = self.B[:,indx]
         self.BD = self.B * self.diagD
