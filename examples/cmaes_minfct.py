@@ -34,7 +34,8 @@ creator.create("Individual", array.array, fitness=creator.FitnessMin)
 
 # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
 # for more details about the rastrigin and other tests for CMA-ES
-strategy = cma.CMAStrategy(centroid=[5.0]*30, sigma=5.0, lambda_=600)
+N=30
+strategy = cma.CMAStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
 
 tools = toolbox.Toolbox()
 tools.register("individual", creator.Individual, "d")
@@ -49,7 +50,7 @@ stats_t.register("Max", max)
 
 def evalCMA(ind):
     return cma.rastrigin(ind),
-
+    
 # The rastrigin function is one of the hardest function to optimize
 tools.register("evaluate", evalCMA)
 
