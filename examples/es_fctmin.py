@@ -24,6 +24,8 @@ from eap import creator
 from eap import operators
 from eap import toolbox
 
+from eap import benchmarks
+
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 IND_SIZE = 30
@@ -43,14 +45,10 @@ tools.register("attr_float", random.uniform, -3, 3)
 # Structure initializers
 tools.register("individual", creator.Individual, "d", toolbox.Repeat(tools.attr_float, IND_SIZE))
 tools.register("population", list, toolbox.Repeat(tools.individual, 50))
-
-def evalSphere(individual):
-    return sum(map(lambda x: x * x, individual)),
-                   
-tools.register("evaluate", evalSphere)
 tools.register("mate", operators.cxESBlend, alpha=0.1, minstrategy=1e-10)
 tools.register("mutate", operators.mutES, indpb=0.1, minstrategy=1e-10)
 tools.register("select", operators.selTournament, tournsize=3)
+tools.register("evaluate", benchmarks.sphere)
 
 stats_t = operators.Stats(lambda ind: ind.fitness.values)
 stats_t.register("Avg", operators.mean)

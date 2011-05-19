@@ -18,6 +18,8 @@ from eap import operators
 from eap import creator
 from eap import toolbox
 
+from eap import benchmarks
+
 import random
 
 # Differential evolution parameters
@@ -27,9 +29,6 @@ NGEN = 200
 CR = 0.25
 F = 1
 
-def sphere(individual):
-    return sum(value**2 for value in individual),
-
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
@@ -38,7 +37,7 @@ tools.register("attr_float", random.uniform, -3, 3)
 tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, NDIM))
 tools.register("population", list, toolbox.Repeat(tools.individual, NP))
 tools.register("select", operators.selRandom, n=3)
-tools.register("evaluate", sphere)
+tools.register("evaluate", benchmarks.sphere)
 
 stats = operators.Stats(lambda ind: ind.fitness.values)
 stats.register("Avg", operators.mean)

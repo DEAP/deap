@@ -21,6 +21,8 @@ from eap import base
 from eap import creator
 from eap import toolbox
 
+from eap import benchmarks
+
 IND_SIZE = 10
 
 tools = toolbox.Toolbox()
@@ -31,13 +33,10 @@ creator.create("Individual", array.array, fitness=creator.FitnessMin)
 def update(ind, mu, std):
     for i, mu_i in enumerate(mu):
         ind[i] = random.gauss(mu_i,std)
-
-def evalSphere(individual):
-    return sum(x*x for x in individual),
                    
 tools.register("individual", creator.Individual, "d",)
 tools.register("update", update)
-tools.register("evaluate", evalSphere)
+tools.register("evaluate", benchmarks.sphere)
 
 def main():
     """Implements the One-Fifth rule algorithm as expressed in :
