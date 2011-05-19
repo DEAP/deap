@@ -29,6 +29,8 @@ from eap import creator
 from eap import operators
 from eap import toolbox
 
+from eap import benchmarks
+
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, fitness=creator.FitnessMin)
 
@@ -41,18 +43,13 @@ tools = toolbox.Toolbox()
 tools.register("individual", creator.Individual, "d")
 tools.register("population", strategy.generate, ind_init=tools.individual)
 tools.register("update", strategy.update)
+tools.register("evaluate", benchmarks.rastrigin)
 
 stats_t = operators.Stats(lambda ind: ind.fitness.values)
 stats_t.register("Avg", operators.mean)
 stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
-
-def evalCMA(ind):
-    return cma.rastrigin(ind),
-    
-# The rastrigin function is one of the hardest function to optimize
-tools.register("evaluate", evalCMA)
 
 if __name__ == "__main__":
     # The CMA-ES algorithm takes a population of one individual as argument
