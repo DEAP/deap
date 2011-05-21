@@ -22,11 +22,13 @@ class KNN(object):
         self.k = k
         self.data = None
         self.labels = None
+        self.ndim = 0
     
     def train(self, data, labels):
         self.data = numpy.array(data)
         self.labels = numpy.array(labels)
         self.classes = numpy.unique(self.labels)
+        self.ndim = len(self.data[0])
     
     def predict(self, data, features=None):
         data = numpy.array(data)
