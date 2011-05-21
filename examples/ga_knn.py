@@ -19,14 +19,36 @@ import logging
 import random
 import sys
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
-import knn
 from eap import algorithms
 from eap import base
 from eap import creator
 from eap import operators
 from eap import toolbox
+
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+# kNN parameters
+import knn
+FILE="heart_scale.csv"
+N_TRAIN=175
+K=1
+
+data = csv.reader(open(FILE, "rb"))
+trainset = list()
+trainlabels = list()
+rows = [row for row in data]
+random.shuffle(rows)
+for row in rows:
+    trainlabels.append(float(row[0]))
+    trainset.append([float(e) for e in row[1:]])
+
+classifier = knn.KNN(K)
+classifier.train(trainset[:N_TRAIN], trainlabels[:N_TRAIN])
+
+def evalClassifier(individual):
+    labels = classifier.predict(trainset[N_TRAIN:], individual)
+    return sum(1 for x, y in zip(labels, trainlabels) if x == y)  / float(len(trainlabels)), \
+           sum(individual) / float(classifier.ndim)
 
 creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMulti)
@@ -35,28 +57,12 @@ tools = toolbox.Toolbox()
 # Attribute generator
 tools.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-tools.register("individual", creator.Individual, 
-    toolbox.Repeat(tools.attr_bool, 13))
-tools.register("population", list,
-    toolbox.Repeat(tools.individual, 300))
-
-reader = csv.reader(open("heart_scale.csv", "rb"))
-trainset = list()
-trainlabels = list()
-for row in reader:
-    trainlabels.append(float(row[0]))
-    trainset.append([float(e) for e in row[1:]])
-
-classifier = knn.KNN(1)
-classifier.train(trainset[:175], trainlabels[:175])
-
-def evalOneMax(individual):
-    labels = classifier.predict(trainset[175:], individual)
-    return sum([1 for x, y in zip(labels, trainlabels[175:]) if x == y]), sum(individual)
+tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_bool, classifier.ndim))
+tools.register("population", list, toolbox.Repeat(tools.individual, 100))
 
 # Operator registering
-tools.register("evaluate", evalOneMax)
-tools.register("mate", operators.cxTwoPoints)
+tools.register("evaluate", evalClassifier)
+tools.register("mate", operators.cxUniform, indpb=0.1)
 tools.register("mutate", operators.mutFlipBit, indpb=0.05)
 tools.register("select", operators.selNSGA2)
 
@@ -67,7 +73,7 @@ stats_t.register("Min", min)
 stats_t.register("Max", max)
 
 def main():
-    random.seed(64)
+    # random.seed(64)
     
     pop = tools.population()
     hof = operators.HallOfFame(1)
