@@ -257,7 +257,9 @@ class Stats(object):
         values = zip(*(self.key(elem) for elem in seq))
         for key, func in self.functions.iteritems():
             self.data[key].append(map(func, values))
-
+    
+    def __str__(self):
+        return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.data.iteritems())
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
