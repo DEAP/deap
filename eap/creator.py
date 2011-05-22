@@ -33,7 +33,7 @@ def _deepcopyArray(self, memo):
     the object's attributes and class type.
     """
     cls = self.__class__
-    copy_ = cls.__new__(cls, self.typecode, self)
+    copy_ = cls.__new__(cls, self)
     memo[id(self)] = copy_
     copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
     return copy_
@@ -101,6 +101,10 @@ def create(name, base, **kargs):
 
     if issubclass(base, array.array):
         objtype.__deepcopy__ = _deepcopyArray
+        @staticmethod
+        def newArray(cls, seq):
+            return super(objtype, cls).__new__(cls, kargs["typecode"], seq)
+        objtype.__new__ = newArray
     elif NUMPY_PRESENT and issubclass(base, numpy.ndarray):
         objtype.__deepcopy__ = _deepcopyNumPyArray
         objtype.__new__ = _newNumPyArray
