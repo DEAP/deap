@@ -32,7 +32,7 @@ from eap import toolbox
 from eap import benchmarks
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMin)
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
 # for more details about the rastrigin and other tests for CMA-ES
@@ -40,8 +40,7 @@ N=30
 strategy = cma.CMAStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
 
 tools = toolbox.Toolbox()
-tools.register("individual", creator.Individual, "d")
-tools.register("population", strategy.generate, ind_init=tools.individual)
+tools.register("population", strategy.generate, ind_init=creator.Individual)
 tools.register("update", strategy.update)
 tools.register("evaluate", benchmarks.rastrigin)
 

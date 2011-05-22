@@ -50,7 +50,6 @@ stats_t.register("Std", operators.std_dev)
 stats_t.register("Min", min)
 stats_t.register("Max", max)
 
-
 def main():
     random.seed(64)
     numpy.random.seed(11)

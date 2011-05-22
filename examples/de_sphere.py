@@ -21,6 +21,7 @@ from eap import toolbox
 from eap import benchmarks
 
 import random
+import array
 
 # Differential evolution parameters
 NDIM = 10
@@ -30,14 +31,14 @@ CR = 0.25
 F = 1
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", list, fitness=creator.FitnessMin)
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -3, 3)
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, NDIM))
-tools.register("population", list, toolbox.Repeat(tools.individual, NP))
+tools.register("individual", toolbox.fill_repeat, creator.Individual, tools.attr_float, dim=NDIM)
+tools.register("population", toolbox.fill_repeat, list, tools.individual, dim=NP)
 tools.register("select", operators.selRandom, n=3)
-tools.register("evaluate", benchmarks.sphere)
+tools.register("evaluate", benchmarks.rastrigin)
 
 stats = operators.Stats(lambda ind: ind.fitness.values)
 stats.register("Avg", operators.mean)
@@ -69,8 +70,7 @@ def main():
         stats.update(pop)
         
         print "Generation", g 
-        for key, stat in stats.data.iteritems():
-            print "  %s %s" % (key, ", ".join(map(str, stat[-1])))
+        print stats
             
     print "Best individual is ", hof[0], hof[0].fitness.values[0]
             

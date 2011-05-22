@@ -32,18 +32,18 @@ IND_SIZE = 30
 
 tools = toolbox.Toolbox()
 
-creator.create("Strategy", array.array)
+creator.create("Strategy", array.array, typecode='d')
 
-tools.register("strategy", creator.Strategy, "d", toolbox.Repeat(lambda: 1., IND_SIZE)) 
+tools.register("strategy", toolbox.fill_repeat, creator.Strategy, lambda: 1., IND_SIZE) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMin, strategy=tools.strategy)
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin, strategy=tools.strategy)
 
 # Attribute generator
 tools.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "d", toolbox.Repeat(tools.attr_float, IND_SIZE))
+tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, IND_SIZE))
 tools.register("population", list, toolbox.Repeat(tools.individual, 50))
 tools.register("mate", operators.cxESBlend, alpha=0.1, minstrategy=1e-10)
 tools.register("mutate", operators.mutES, indpb=0.1, minstrategy=1e-10)
