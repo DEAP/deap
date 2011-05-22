@@ -56,7 +56,7 @@ class Repeat(object):
         if self.count.next() == self.times:
             raise StopIteration
         return self.func()
-        
+    
 class Iterate(object):
     """Functional object used to cycle on the iterable object
     returned by a function *func*. The function is
@@ -89,6 +89,14 @@ class FuncCycle(object):
         self.cycle = cycle(func for func in seq_func)
     def __call__(self):
         return self.cycle.next()()
+        
+def fill_repeat(container, func, dim):
+    return container(func() for _ in xrange(dim))
+
+def fill_iter(container, generator):
+    return container(generator())
+
+# def fill_funccycle(container, seq_func):
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
