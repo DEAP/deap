@@ -28,8 +28,7 @@ from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
-creator.create("Individual", array.array, fitness=creator.FitnessMax)
-creator.create("Population", list)
+creator.create("Individual", array.array, typecode='f', fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
 
@@ -37,8 +36,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "f", toolbox.Repeat(tools.attr_float, 3))
-tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 50))
+tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, 3))
+tools.register("population", list, toolbox.Repeat(tools.individual, 50))
 
 def evalKursawe(ind):
     f1 = sum(-10 * math.exp(-0.2 * math.sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))

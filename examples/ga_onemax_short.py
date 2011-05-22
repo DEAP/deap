@@ -27,7 +27,7 @@ from eap import operators
 from eap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMax)
+creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
 
@@ -35,7 +35,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
+# tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
+tools.register("individual", toolbox.fill_repeat, creator.Individual, tools.attr_bool, 100)
 tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalOneMax(individual):

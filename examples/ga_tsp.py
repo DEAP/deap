@@ -34,7 +34,7 @@ distance_map = tsp["DistanceMatrix"]
 IND_SIZE = tsp["TourSize"]
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMin)
+creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
 
@@ -42,7 +42,7 @@ tools = toolbox.Toolbox()
 tools.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "i", toolbox.Iterate(tools.indices))
+tools.register("individual", creator.Individual, toolbox.Iterate(tools.indices))
 tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalTSP(individual):

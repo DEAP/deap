@@ -28,13 +28,12 @@ IND_SIZE = 10
 tools = toolbox.Toolbox()
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMin)
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 def update(ind, mu, std):
     for i, mu_i in enumerate(mu):
         ind[i] = random.gauss(mu_i,std)
                    
-tools.register("individual", creator.Individual, "d",)
 tools.register("update", update)
 tools.register("evaluate", benchmarks.sphere)
 
@@ -57,9 +56,9 @@ def main():
     sigma = (interval[1] - interval[0])/2.0
     alpha = 2.0**(1.0/IND_SIZE)
 
-    best = tools.individual(mu)
+    best = creator.Individual(mu)
     best.fitness.values = tools.evaluate(best)
-    worst = tools.individual((0.0,)*IND_SIZE)
+    worst = creator.Individual((0.0,)*IND_SIZE)
 
     NGEN = 1500
     for g in xrange(NGEN):

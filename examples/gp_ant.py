@@ -167,8 +167,10 @@ tools = toolbox.Toolbox()
 tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr_init))
-tools.register("population", list, toolbox.Repeat(tools.individual, 300))
+# tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr_init))
+# tools.register("population", list, toolbox.Repeat(tools.individual, 300))
+tools.register("individual", toolbox.fill_iter, creator.Individual, tools.expr_init)
+tools.register("population", toolbox.fill_repeat, list, tools.individual, 300)
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code
@@ -195,7 +197,7 @@ def main():
     trail_file = open("santafe_trail.txt")
     ant.parse_matrix(trail_file)
     
-    pop = tools.population()
+    pop = tools.population(150)
     hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
