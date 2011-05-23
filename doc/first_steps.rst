@@ -4,22 +4,22 @@
 First Steps of Evolution
 ========================
 
-Before starting with complex algorithms, we will see some basis of EAP. First,
+Before starting with complex algorithms, we will see some basis of DEAP. First,
 we will start by creating simple individuals and make them interact with each
 other. After, we will learn how to use different operators, and then, we will
-learn how to use the :class:`~eap.toolbox.Toolbox` in order to build the
+learn how to use the :class:`~deap.toolbox.Toolbox` in order to build the
 desired structures.
 
 A First Individual
 ==================
 
-First open a python console and import the :mod:`eap.base` and
-:mod:`eap.creator` modules. ::
+First open a python console and import the :mod:`deap.base` and
+:mod:`deap.creator` modules. ::
 
-    >>> from eap import base
-    >>> from eap import creator
+    >>> from deap import base
+    >>> from deap import creator
 
-From the :mod:`~eap.creator` module you can now build your first individual
+From the :mod:`~deap.creator` module you can now build your first individual
 class using any base type defined in python or by yourself. Lets create an
 individual class that inherits from :class:`list` containing a maximizing
 :attr:`fitness` attribute. ::
@@ -53,7 +53,7 @@ time we call it.
 Mutation
 ========
 The first kind of operator that we will present is the mutation operator.
-There is a variety of mutation operators in the :mod:`eap.operators` module.
+There is a variety of mutation operators in the :mod:`deap.operators` module.
 Each mutation has its own caracteristics and may be applied to different type
 of individual. Be carefull to read the documentation of the selected operator
 in order to avoid undesirable behavior.
@@ -66,16 +66,16 @@ instance of individual (see the selection operator).
 In order to apply a mutation (here a gaussian mutation) on an individual,
 simply apply the desired function. ::
 
-    >>> from eap import toolbox
+    >>> from deap import toolbox
     >>> ind = creator.Individual(content())
-    >>> toolbox.mutGaussian(ind, sigma=0.2, indpb=0.2)
+    >>> operators.mutGaussian(ind, sigma=0.2, indpb=0.2)
     >>> del ind.fitness.values
 
 Crossover
 =========
 
 The second kind of operator that we will present is the crossover operator.
-There is a variety of crossover operators in the :mod:`eap.operators` module.
+There is a variety of crossover operators in the :mod:`deap.operators` module.
 Each crossover has its own caracteristics and may be applied to different type
 of individuals. Be carefull to read the documentation of the selected operator
 in order to avoid undesirable behavior.
@@ -90,7 +90,7 @@ crossover operation to produce the two children. ::
 
     >>> ind1 = creator.Individual(content())
     >>> ind2 = creator.Individual(content())
-    >>> toolbox.cxBlend(ind1, ind2, 0.5)
+    >>> operators.cxBlend(ind1, ind2, 0.5)
     >>> del ind1.fitness.values
     >>> del ind2.fitness.values
 
@@ -103,7 +103,7 @@ evaluation function takes one individual as argument and return its fitness as
 a :class:`tuple`. As shown in the in the :ref:`Evolutionary Algorithm Bases
 <ea-bases>` section, a fitness is a list of floating point values and has a
 property :attr:`valid` to know if this individual shall be re-evaluated. The
-fitness is set by setting the :attr:`~eap.base.Fitness.values` to the
+fitness is set by setting the :attr:`~deap.base.Fitness.values` to the
 associated :class:`tuple`. ::
 
     >>> def eval(individual):
@@ -114,10 +114,10 @@ associated :class:`tuple`. ::
     ...         
     >>> child1.fitness.values = eval(child1)
     >>> print child1.fitness
-    eap.creator.FitnessMax((1.7, 0.2))
+    creator.FitnessMax((1.7, 0.2))
     >>> child2.fitness.values = eval(child2)
     >>> print child2.fitness
-    eap.creator.FitnessMax((2.23, 0.2))
+    creator.FitnessMax((2.23, 0.2))
     >>> print child1.fitness.valid
     True
     
@@ -126,13 +126,13 @@ Selection
 =========
 
 Selection is made among a population by the selection operators that are
-available in the :mod:`eap.operators` module. The selection operator usually
+available in the :mod:`deap.operators` module. The selection operator usually
 takes as first argument an iterable container of individuals and the number of
 individuals to select. It returns a list containing the references to the
 selected individuals. The selection is made as follow.
 ::
 
-    >>> selected = toolbox.selBest([child1, child2], n=1)
+    >>> selected = operators.selBest([child1, child2], n=1)
     >>> selected[0] is child2
     True
 
@@ -147,7 +147,7 @@ one another you should use deepcopy as follow.
 ::
     
     >>> import copy
-    >>> selected = [copy.deepcopy(ind) for ind in toolbox.selBest([child1, child2], n=1)]
+    >>> selected = [copy.deepcopy(ind) for ind in operators.selBest([child1, child2], n=1)]
     >>> selected[0] is child2
     False
 
@@ -160,17 +160,17 @@ The Toolbox
 The toolbox is intended to contain all the evolutionary tools, from the object
 constructors to the evaluation operators. It allows easy configuration of each
 algorithms (discussed later). The toolbox has basicaly two methods,
-:meth:`~eap.toolbox.Toolbox.register` and
-:meth:`~eap.toolbox.Toolbox.unregister`, that are used to add or remove tools
+:meth:`~deap.toolbox.Toolbox.register` and
+:meth:`~deap.toolbox.Toolbox.unregister`, that are used to add or remove tools
 from the toolbox. The toolbox makes it very easy to build a population. Usualy
 this is done in a python file instead of a console. Lets look at a basic
 example. We also use here some :ref:`other functional tools <other-tools>` 
 made available for simplification.
 ::
 
-    from eap import base
-    from eap import creator
-    from eap import toolbox
+    from deap import base
+    from deap import creator
+    from deap import toolbox
     from random import uniform
     
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -186,7 +186,7 @@ made available for simplification.
     
     pop = tools.population()
     
-The first three :func:`~eap.creator.create` calls do create the needed
+The first three :func:`~deap.creator.create` calls do create the needed
 classes. Then three construction methods are registered in the toolbox, they
 add to the toolbox three methods :meth:`attr_flt`, :meth:`individual` and
 :meth:`population` that can be used as object constructors. It may not seem
@@ -205,9 +205,9 @@ The first kind of individual has boolean (``b`` suffix) attributes with a
 minimizing fitness and the second kind is a mix of integers and floats (``if``
 suffix) with a maximizing fitness. ::
 
-    from eap import base
-    from eap import creator
-    from eap import toolbox
+    from deap import base
+    from deap import creator
+    from deap import toolbox
     from random import random, choice, randint
     
     # A funky generator of subsequent int and float
@@ -244,21 +244,22 @@ The Algorithms
 ==============
 
 There is several algorithms implemented in a couple modules, but principaly in 
-the :mod:`~eap.algorithms` module. They are very simple and reflects the basic
+the :mod:`~deap.algorithms` module. They are very simple and reflects the basic
 types of evolutionary algorithms present in the litterature. The algorithms
-use the :class:`~eap.toolbox.Toolbox` as a container for the evolutionary
+use the :class:`~deap.toolbox.Toolbox` as a container for the evolutionary
 operators so any operator can be used in any algorithm. In order to setup a
 toolbox for an algorithm, you must register the desired operators under a
 specified names, usualy the names are :func:`mate` for the crossover operator,
-:func:`mutate` for the mutation operator, :func:`~eap.Toolbox.select` for the
+:func:`mutate` for the mutation operator, :func:`~deap.Toolbox.select` for the
 selection operator and last but not least :func:`evaluate` for the evaluation
-operator. The :class:`~eap.toolbox.Toolbox` uses :func:`functools.partial`
+operator. The :class:`~deap.toolbox.Toolbox` uses :func:`functools.partial`
 functions internaly so you can register the operator's default arguments
 within the toolbox. The following lines of code register the 4 basic operators
 and their default arguments in order to setup a toolbox for the
-:func:`~eap.algorithms.eaSimple` algorithm. ::
+:func:`~deap.algorithms.eaSimple` algorithm. ::
 
-    from eap import toolbox
+    from deap import toolbox
+    from deap import operators
     
     tools = toolbox.Toolbox()
     tools.register("mate", operators.cxBlend, alpha=0.5)
@@ -272,7 +273,7 @@ propability of mating each individual at each generation (*cxpb*), a
 propability of mutating each individual at each generation (*mutpb*) and a max
 number of generations (*ngen*). ::
 
-    from eap import algorithms
+    from deap import algorithms
     
     algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=50)
     
@@ -281,4 +282,4 @@ take a look at the source code or the documentation.
 
 Now that you built your own evolutionary algorithm in python, you are welcome
 to gives us feedback and appreciation. We would also really like to hear about
-your project and success stories with EAP.
+your project and success stories with DEAP.

@@ -1,17 +1,17 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
 import sys
@@ -23,13 +23,13 @@ random.seed(64)     # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.
 
-from eap import base
-from eap import cma
-from eap import creator
-from eap import operators
-from eap import toolbox
+from deap import base
+from deap import cma
+from deap import creator
+from deap import operators
+from deap import toolbox
 
-from eap import benchmarks
+from deap import benchmarks
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)

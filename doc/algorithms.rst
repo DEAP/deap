@@ -1,26 +1,26 @@
 Algorithms
 ==========
 
-.. automodule:: eap.algorithms
+.. automodule:: deap.algorithms
    
-.. autofunction:: eap.algorithms.eaSimple(toolbox, population, cxpb, mutpb, ngen[, stats, halloffame])
+.. autofunction:: deap.algorithms.eaSimple(toolbox, population, cxpb, mutpb, ngen[, stats, halloffame])
 
-.. autofunction:: eap.algorithms.varSimple
+.. autofunction:: deap.algorithms.varSimple
    
-.. autofunction:: eap.algorithms.eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
+.. autofunction:: deap.algorithms.eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
 
-.. autofunction:: eap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
+.. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
 
-.. autofunction:: eap.algorithms.varMuLambda
+.. autofunction:: deap.algorithms.varMuLambda
 
-.. autofunction:: eap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame])
+.. autofunction:: deap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame])
 
-.. autofunction:: eap.algorithms.varSteadyState
+.. autofunction:: deap.algorithms.varSteadyState
 
 Covariance Matrix Adaptation Evolution Strategy
 ===============================================
 
-.. autofunction:: eap.cma.esCMA(toolbox, population, sigma, ngen[, halloffame, **kargs])
+.. autofunction:: deap.cma.esCMA(toolbox, population, sigma, ngen[, halloffame, **kargs])
 
-.. autoclass:: eap.cma.CMAStrategy(population, sigma[, params])
+.. autoclass:: deap.cma.CMAStrategy(population, sigma[, params])
    :members:

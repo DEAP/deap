@@ -1,19 +1,19 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :class:`~eap.toolbox.Toolbox` is intended to contain the operators that
+"""The :class:`~deap.toolbox.Toolbox` is intended to contain the operators that
 you need in your evolutionary algorithms, from initialization to evaluation.
 It is always possible to use directly the operators from this module, but the
 toolbox is also intended to contain the default values of the different
@@ -27,7 +27,7 @@ will be able to build algorithms that are decoupled from operator sets. If he
 later decides that some other hammer is better suited, his algorithm will
 remain unchanged, he will only need to update the toolbox used by the
 algorithm. In that same way, the toolbox is integrand part of the predefined
-algorithms from the :mod:`~eap.algorithms` module.
+algorithms from the :mod:`~deap.algorithms` module.
 """
 
 import copy
@@ -104,13 +104,13 @@ def fill_cycle(container, seq_func, dim=1):
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
     At first the toolbox contains two simple methods. The first method
-    :meth:`~eap.toolbox.clone` duplicates any element it is passed as
+    :meth:`~deap.toolbox.clone` duplicates any element it is passed as
     argument, this method defaults to the :func:`copy.deepcopy` function.
-    The second method :meth:`~eap.toolbox.map` applies the function given
+    The second method :meth:`~deap.toolbox.map` applies the function given
     as first argument to every items of the iterables given as next
     arguments, this method defaults to the :func:`map` function. You may
     populate the toolbox with any other function by using the
-    :meth:`~eap.toolbox.register` method.
+    :meth:`~deap.toolbox.register` method.
     """
     
     def __init__(self):
@@ -146,7 +146,7 @@ class Toolbox(object):
         """Decorate *methodname* with the specified *decorators*, *methodname*
         has to be a registered function in the current toolbox. Decorate uses
         the signature preserving decoration function
-        :func:`~eap.toolbox.decorate`.
+        :func:`~deap.toolbox.decorate`.
         """
         partial_func = getattr(self, methodname)
         method = partial_func.func

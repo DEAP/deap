@@ -13,12 +13,13 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-from eap import base
-from eap import operators
-from eap import creator
-from eap import toolbox
+from deap import base
+from deap import operators
+from deap import creator
+from deap import toolbox
 
-from eap import benchmarks
+from deap import benchmarks
+
 
 import random
 import array

@@ -1,24 +1,24 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """The :mod:`algorithms` module is intended to contain some specific algorithms
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
 evolutionary algorithm may vary infinitely. Most of the algorithms in this module
 use operators registered in the toolbox. Generaly, the keyword used are
-:meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~eap.select`
+:meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~deap.select`
 for selection and :meth:`evaluate` for evaluation.
 
 You are encouraged to write your own algorithms in order to make them do what
@@ -28,10 +28,10 @@ you really want them to do.
 import logging
 import random
 
-_logger = logging.getLogger("eap.algorithms")
+_logger = logging.getLogger("deap.algorithms")
 
 def varSimple(toolbox, population, cxpb, mutpb):
-    """Part of the :func:`~eap.algorithmes.eaSimple` algorithm applying only
+    """Part of the :func:`~deap.algorithmes.eaSimple` algorithm applying only
     the variation part (crossover followed by mutation). The modified 
     individuals have their fitness invalidated.
     
@@ -127,8 +127,8 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     return population
 
 def varMuLambda(toolbox, population, lambda_, cxpb, mutpb):
-    """Part of the :func:`~eap.algorithmes.eaMuPlusLambda` and
-    :func:`~eap.algorithmes.eaMuCommaLambda` algorithms that produce the 
+    """Part of the :func:`~deap.algorithms.eaMuPlusLambda` and
+    :func:`~deap.algorithms.eaMuCommaLambda` algorithms that produce the 
     lambda new individuals. The modified individuals have their fitness 
     invalidated.
     
@@ -311,7 +311,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
     return population
 
 def varSteadyState(toolbox, population):
-    """Part of the :func:`~eap.algorithmes.eaSteadyState` algorithm 
+    """Part of the :func:`~deap.algorithms.eaSteadyState` algorithm 
     that produce the new individual by crossover of two randomly selected 
     parents and mutation on one randomly selected child. The modified 
     individual has its fitness invalidated.
