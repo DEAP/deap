@@ -1,7 +1,7 @@
 DEAP User Guide
 ===============
 
-.. automodule:: eap
+.. automodule:: deap
 
 Evolutionary Content
 --------------------
