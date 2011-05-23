@@ -96,6 +96,9 @@ def fill_repeat(container, func, dim):
 def fill_iter(container, generator):
     return container(generator())
 
+def fill_cycle(container, seq_func, dim=1):
+    return container(func() for _ in xrange(dim) for func in seq_func)
+
 # def fill_funccycle(container, seq_func):
 
 class Toolbox(object):
