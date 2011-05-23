@@ -32,6 +32,7 @@ def primaryTest(nbr):
         if nbr % i == 0:
             return False
 #    a = dtm.apply(foo, 3)
+    time.sleep(0.001)
     return True
 
 def main():
@@ -39,6 +40,7 @@ def main():
     listNbr = range(3,10003,2)
     print("BOUM")
     listPrimes = dtm.filter(primaryTest, listNbr)
+    
     print("NBR : ", len(listPrimes))
     print("Duree : " + str(time.time()-t))
 #   time.sleep(10)
@@ -47,5 +49,4 @@ def main():
 #   a = dtm.apply(foo,3)
 #   print(a,"END")
 	
-dtm.setOptions(communicationManager="commManagerMpi4py")
 dtm.start(main)
