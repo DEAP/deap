@@ -1,18 +1,3 @@
-#    This file is part of DEAP.
-#
-#    DEAP is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as
-#    published by the Free Software Foundation, either version 3 of
-#    the License, or (at your option) any later version.
-#
-#    DEAP is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU Lesser General Public License for more details.
-#
-#    You should have received a copy of the GNU Lesser General Public
-#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
-
 import threading
 import time
 import math
@@ -36,7 +21,7 @@ except ImportError:
         # Python 2.5
         import xml.etree.ElementTree as etree
 
-from dtm.dtmTypes import *
+from deap.dtm.dtmTypes import *
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 _logger = logging.getLogger("dtm.control")
@@ -344,8 +329,8 @@ class DtmTaskQueue(object):
 
 class DtmControl(object):
     """
-    DtmControl is the main DTM class. The dtm object you receive when you use ``from dtm.taskmanager import dtm``
-    is an instance of this class.
+    DtmControl is the main DTM class. The dtm object you receive when you use ``from deap import dtm``
+    is a proxy over an instance of this class.
 
     Most of its methods are used by your program, in the execution tasks; however, two of thems (start() and setOptions()) MUST be called
     in the MainThread (i.e. the thread started by the Python interpreter).
@@ -388,8 +373,8 @@ class DtmControl(object):
         self.runningFlag = threading.Event()
         self.runningFlag.set()
 
-        self.commManagerType = "dtm.commManagerMpi4py"
-        self.loadBalancerType = "dtm.loadBalancerPDB"
+        self.commManagerType = "deap.dtm.commManagerMpi4py"
+        self.loadBalancerType = "deap.dtm.loadBalancerPDB"
         self.printExecSummary = True
         
         self.isStarted = False
@@ -756,6 +741,7 @@ class DtmControl(object):
     def setOptions(self, *args, **kwargs):
         """
         Set a DTM global option.
+        
         .. warning::
             This function must be called BEFORE ``start()``. It is also the user responsability to ensure that the same option is set on every worker.
 
@@ -800,7 +786,7 @@ class DtmControl(object):
             DtmCommThread = tmpImport.DtmCommThread
         except ImportError:
             _logger.warning("Warning : %s is not a suitable communication manager. Default to commManagerMpi4py.", self.commManagerType)
-            tmpImport = __import__('dtm.commManagerMpi4py', globals(), locals(), ['DtmCommThread'], 0)
+            tmpImport = __import__('deap.dtm.commManagerMpi4py', globals(), locals(), ['DtmCommThread'], 0)
             DtmCommThread = tmpImport.DtmCommThread
 
         try:
@@ -810,7 +796,7 @@ class DtmControl(object):
             DtmLoadBalancer = tmpImport.DtmLoadBalancer
         except ImportError:
             _logger.warning("Warning : %s is not a suitable load balancer. Default to loadBalancerPDB.", self.loadBalancerType)
-            tmpImport = __import__('dtm.loadBalancerPDB', globals(), locals(), ['DtmLoadBalancer'], 0)
+            tmpImport = __import__('deap.dtm.loadBalancerPDB', globals(), locals(), ['DtmLoadBalancer'], 0)
             DtmLoadBalancer = tmpImport.DtmLoadBalancer
         
         self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.runningFlag, self.commExitNotification, self.commReadyEvent, self.dtmRandom)
@@ -956,6 +942,7 @@ class DtmControl(object):
     def map_async(self, function, iterable, callback=None):
         """
         A non-blocking variant of the ``DtmControl.map()`` method which returns a result object.
+        
         .. note::
             As on version 0.1, callback is not implemented.
         """
@@ -1296,6 +1283,7 @@ class DtmControl(object):
         Return a unique ID for the current worker. Depending of the
         communication manager type, it can be virtually any Python
         immutable type.
+        
         .. note::
             With MPI, the value returned is the MPI slot number.
         """
@@ -1457,6 +1445,7 @@ class DtmAsyncResult(object):
     def get(self):
         """
         Return the result when it arrives.
+        
         .. note::
             This is a blocking call : caller will wait in this function until the result is ready.
             To check for the avaibility of the result, use ready()
@@ -1504,6 +1493,3 @@ class DtmAsyncResult(object):
         if not self.resultReturned:
             raise AssertionError("Call DtmAsyncResult.successful() before the results were ready!")
         return self.resultSuccess
-
-
-dtm = DtmControl()

@@ -14,17 +14,29 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 # DTM : Distributed Task Manager
-# Pre-alpha version
+# Alpha version
 
 __author__ = "Marc-Andre Gardner"
 __version__ = "0.2"
 __revision__ = "0.2.1"
 
-from taskmanager import DtmControl
-_controller = DtmControl()
+from deap.dtm.taskmanager import DtmControl
 
-map = _controller.map
-apply = _controller.apply
+_dtmObj = DtmControl()
+
+setOptions = _dtmObj.setOptions
+start = _dtmObj.start
+map = _dtmObj.map
+map_async = _dtmObj.map_async
+apply = _dtmObj.apply
+apply_async = _dtmObj.apply_async
+imap = _dtmObj.imap
+imap_unordered = _dtmObj.imap_unordered
+filter = _dtmObj.filter
+repeat = _dtmObj.repeat
+waitForAll = _dtmObj.waitForAll
+testAllAsync = _dtmObj.testAllAsync
+getWorkerId = _dtmObj.getWorkerId
 
 # DtmControl shall not be imported that way
 del DtmControl
