@@ -9,14 +9,22 @@ try:
     import cPickle
 except ImportError:
     import pickle as cPickle
-#import numpy
 import array
 import copy
 import logging
 
+try:
+    from lxml import etree
+except ImportError:
+    try:
+        import xml.etree.cElementTree as etree
+    except ImportError:
+        # Python 2.5
+        import xml.etree.ElementTree as etree
+
 import os
 
-from dtmTypes import *
+from dtm.dtmTypes import *
 
 _logger = logging.getLogger("dtm.communication")
 
@@ -38,6 +46,9 @@ class DtmCommThread(threading.Thread):
         self.wakeUpMainThread = mainThreadEvent
         self.random = randomGenerator
         
+        self.traceMode = False
+        self.traceTo = None
+        
         assert MPI.Is_initialized(), "Error in MPI Init!"                
         commReadyEvent.set()         # On doit notifier le thread principal qu'on est pret
         
@@ -52,6 +63,10 @@ class DtmCommThread(threading.Thread):
     @property
     def isRootWorker(self):
         return self.currentId == 0
+    
+    def setTraceModeOn(self, xmlLogger):
+        self.traceMode = True
+        self.traceTo = xmlLogger
 
     def iterOverIDs(self):
         return range(self.pSize)
@@ -63,10 +78,12 @@ class DtmCommThread(threading.Thread):
         arrayBuf.fromstring(cPickle.dumps(msg))
         #arrayBuf = array.array('c', cPickle.dumps(msg))
         
-        b=MPI.COMM_WORLD.Isend([arrayBuf, MPI.CHAR], dest=dest, tag=self.msgSendTag)
-
+        b = MPI.COMM_WORLD.Isend([arrayBuf, MPI.CHAR], dest=dest, tag=self.msgSendTag)
+        if self.traceMode:
+            etree.SubElement(self.traceTo, "msg", {"direc" : "out", "type" : str(msg.msgType), "otherWorker" : str(dest), "msgtag" : str(self.msgSendTag), "time" : str(time.time())})
+        
         self.msgSendTag += 1
-        return b,arrayBuf
+        return b, arrayBuf
 
     
     def run(self):
@@ -94,23 +111,27 @@ class DtmCommThread(threading.Thread):
             while len(lRecvWaiting) < DTM_CONCURRENT_RECV_LIMIT and MPI.COMM_WORLD.Iprobe(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=lMessageStatus):
                 # On a recu quelque chose
                 lBuf = array.array('b')
-                lBuf.fromlist([0]*lMessageStatus.Get_elements(MPI.CHAR))
+                lBuf.fromlist([0] * lMessageStatus.Get_elements(MPI.CHAR))
                 #lBuf = array.array('c', ["#"]*lMessageStatus.Get_elements(MPI.CHAR))
                 
-                lRecvWaiting.append((lBuf, MPI.COMM_WORLD.Irecv([lBuf, MPI.CHAR], source=lMessageStatus.Get_source(), tag=lMessageStatus.Get_tag())))
+                lRecvWaiting.append((lBuf, MPI.COMM_WORLD.Irecv([lBuf, MPI.CHAR], source=lMessageStatus.Get_source(), tag=lMessageStatus.Get_tag()), lMessageStatus.Get_tag()))
 
                 lMessageStatus = MPI.Status()
                 recvSomething = True
 
             
-            for i,reqTuple in enumerate(lRecvWaiting):
+            for i, reqTuple in enumerate(lRecvWaiting):
                 if reqTuple[1].Test():
                     countRecv += 1
-                    self.recvQ.put(cPickle.loads(reqTuple[0].tostring()))
+                    dataS = cPickle.loads(reqTuple[0].tostring())
+                    if self.traceMode:
+                        etree.SubElement(self.traceTo, "msg", {"direc" : "in", "type" : str(dataS.msgType), "otherWorker" : str(dataS.senderWid), "msgtag" : str(reqTuple[2]), "time" : str(time.time())})
+                    self.recvQ.put(dataS)
                     lRecvWaiting[i] = None
                     recvSomething = True
                     # On avertit le main thread
                     countRecvNotTransmit += 1
+                    
                     
             if countRecvNotTransmit > 50 or (time.time() - countRecvTimeInit > 0.1 and countRecvNotTransmit > 0):
                 countRecvNotTransmit = 0
@@ -128,7 +149,7 @@ class DtmCommThread(threading.Thread):
                     countSend += 1
                     sendMsg.sendTime = time.time()
                     commA, buf1 = self._mpiSend(sendMsg, sendMsg.receiverWid)
-                    lSendWaiting.append((commA,buf1))
+                    lSendWaiting.append((commA, buf1))
                     sendSomething = True
                 except Queue.Empty:
                     break
