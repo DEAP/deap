@@ -1,22 +1,22 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`~eap.base` module provides basic structures to build evolutionary
+"""The :mod:`~deap.base` module provides basic structures to build evolutionary
 algorithms. It contains only two simple containers that are a basic N-ary 
-:class:`~eap.base.Tree`, usefull for implementing genetic programing, and a 
-virtual :class:`~eap.base.Fitness` class used as base class, for the fitness 
+:class:`~deap.base.Tree`, usefull for implementing genetic programing, and a 
+virtual :class:`~deap.base.Fitness` class used as base class, for the fitness 
 member of any individual.
 """
 

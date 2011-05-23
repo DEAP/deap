@@ -11,16 +11,16 @@
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import random
 
 import sortingnetwork as sn
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import operators
-from eap import toolbox
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import operators
+from deap import toolbox
 
 INPUTS = 12
 

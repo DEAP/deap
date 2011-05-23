@@ -4,46 +4,46 @@
 Evolutionary Algorithm Bases
 ============================
 
-.. automodule:: eap.base
+.. automodule:: deap.base
 
 .. _containers:
 
 Container Types
 ===============
 
-.. autoclass:: eap.base.Tree([content])
+.. autoclass:: deap.base.Tree([content])
    :members:
 
 Fitness
 =======
 
-.. autoclass:: eap.base.Fitness([values])
+.. autoclass:: deap.base.Fitness([values])
    :members:
 
 Creator
 =======
 
-.. automodule:: eap.creator
+.. automodule:: deap.creator
 
-.. autofunction:: eap.creator.create(name, base[, attribute[, ...]])
+.. autofunction:: deap.creator.create(name, base[, attribute[, ...]])
    
 
 Population, Individual and Other Structures
 ============================================
 
 All application specific structures may be built using the
-:func:`~eap.creator.create` function and types defined in the standard python 
-library or the :mod:`~eap.base` module. Here are some simple recipes to build 
+:func:`~deap.creator.create` function and types defined in the standard python 
+library or the :mod:`~deap.base` module. Here are some simple recipes to build 
 very simple types.
 
 Fitness
 +++++++
 
-As described earlier, the :class:`~eap.base.Fitness` class is practically 
+As described earlier, the :class:`~deap.base.Fitness` class is practically 
 virtual and cannot be used directly as no weights are defined. In order to 
 create a valid Fitness object one have to add the proper 
-:attr:`~eap.base.Fitness.weights` attribute to the class object. This last 
-step is done using the :func:`~eap.creator.create` function with an added
+:attr:`~deap.base.Fitness.weights` attribute to the class object. This last 
+step is done using the :func:`~deap.creator.create` function with an added
 ``weights`` argument. The following block of code does create a maximizing 
 fitness class named :class:`FitnessMax`.
 ::
@@ -117,8 +117,8 @@ primitive set and the operator we need in our trees. ::
     pset.addPrimitive(operator.mul, 2)
 
 Then it is just as easy as other types, the tree class may be initialized from
-a iterable. The :mod:`~eap.gp` module contains some helper functions to build
-trees. For example, the :func:`~eap.gp.generate_full` will produce a full
+a iterable. The :mod:`~deap.gp` module contains some helper functions to build
+trees. For example, the :func:`~deap.gp.generate_full` will produce a full
 tree. ::
 
     creator.create("IndividualTree", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
@@ -129,7 +129,7 @@ Population
 
 A population is usually a list of individuals or sub-populations, it is no
 more complicated to create than an individual. When using a
-:class:`~eap.toolbox.Toolbox`, it is often not necessary to create a class
+:class:`~deap.toolbox.Toolbox`, it is often not necessary to create a class
 :class:`Population`, it is made here just to show how it would be created. ::
 
     create("Population", list)
@@ -147,4 +147,4 @@ A population of 10 individuals of indices is instanciated using ::
 .. seealso::
     
     The :ref:`First Steps of Evolution <first-steps>` shows how to combine the
-    :mod:`~eap.creator` and the :mod:`~eap.toolbox` to initialize types.
+    :mod:`~deap.creator` and the :mod:`~deap.toolbox` to initialize types.

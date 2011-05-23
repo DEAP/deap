@@ -6,10 +6,10 @@ Short One Max Genetic Algorithm
 
 The short one max genetic algorithm example is very similar to one max
 example. The only difference is that it makes use of the
-:mod:`~eap.algorithms` module that implements some basic evolutionary
+:mod:`~deap.algorithms` module that implements some basic evolutionary
 algorithms. The initialization are the same so we will skip this phase. The
 algorithms impemented use specific functions from the toolbox, in this case
-:func:`evaluate`, :func:`mate`, :func:`mutate` and :func:`~eap.Toolbox.select`
+:func:`evaluate`, :func:`mate`, :func:`mutate` and :func:`~deap.Toolbox.select`
 must be registered. 
 ::
 
@@ -28,8 +28,8 @@ registered function.
     algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
 
 The short GA One max example makes use of a
-:class:`~eap.halloffame.HallOfFame` in order to keep track of the best
+:class:`~deap.halloffame.HallOfFame` in order to keep track of the best
 individual to appear in the evolution (it keeps them even in the case they
-estinguish). All algorithms from the :mod:`eap.algorithms` module do take a
+estinguish). All algorithms from the :mod:`deap.algorithms` module do take a
 *halloffame* argument that gets updated after every evaluation section of the
 basic algorithms.

@@ -9,40 +9,40 @@ Statistics
 Hall of Fame
 ------------
 
-.. autoclass:: eap.operators.HallOfFame
+.. autoclass:: deap.operators.HallOfFame
 
-   .. automethod:: eap.operators.HallOfFame.update
+   .. automethod:: deap.operators.HallOfFame.update
    
-   .. automethod:: eap.operators.HallOfFame.insert
+   .. automethod:: deap.operators.HallOfFame.insert
    
-   .. automethod:: eap.operators.HallOfFame.remove
+   .. automethod:: deap.operators.HallOfFame.remove
    
-   .. automethod:: eap.operators.HallOfFame.clear
+   .. automethod:: deap.operators.HallOfFame.clear
 
-.. autoclass:: eap.operators.ParetoFront([similar])
+.. autoclass:: deap.operators.ParetoFront([similar])
 
-   .. automethod:: eap.operators.ParetoFront.update
+   .. automethod:: deap.operators.ParetoFront.update
 
 Milestone
 ---------
 
-.. autoclass:: eap.operators.Milestone([yaml,object[, ...]])
+.. autoclass:: deap.operators.Milestone([yaml,object[, ...]])
    
-   .. automethod:: eap.operators.Milestone.dump(prefix)
+   .. automethod:: deap.operators.Milestone.dump(prefix)
    
-   .. automethod:: eap.operators.Milestone.load(filename)
+   .. automethod:: deap.operators.Milestone.load(filename)
    
-   .. automethod:: eap.operators.Milestone.add(object[, ...])
+   .. automethod:: deap.operators.Milestone.add(object[, ...])
    
-   .. automethod:: eap.operators.Milestone.remove(object[, ...])
+   .. automethod:: deap.operators.Milestone.remove(object[, ...])
 
 History
 -------
 
-.. autoclass:: eap.operators.History
+.. autoclass:: deap.operators.History
    
-   .. automethod:: eap.operators.History.populate
+   .. automethod:: deap.operators.History.populate
    
-   .. automethod:: eap.operators.History.update(individual[, ...])
+   .. automethod:: deap.operators.History.update(individual[, ...])
    
-   .. autoattribute:: eap.operators.History.decorator
+   .. autoattribute:: deap.operators.History.decorator

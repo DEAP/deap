@@ -4,9 +4,9 @@
 Evolutionary Toolbox
 ====================
 
-.. automodule:: eap.toolbox
+.. automodule:: deap.toolbox
 
-.. autoclass:: eap.toolbox.Toolbox
+.. autoclass:: deap.toolbox.Toolbox
    
    .. automethod:: register(methodname, method [, ...])
    
@@ -17,7 +17,7 @@ Evolutionary Toolbox
 Operators
 =========
 
-.. automodule:: eap.operators
+.. automodule:: deap.operators
 
 This module contains the operators for an evolutionary algorithm. They are
 used to modify, select and move the individuals in their environment. A good
@@ -66,33 +66,33 @@ DEAP. Bellow are the complete descriptions.
  :func:`cxTypedTreeKozaOnePoint`       typed trees
 ===================================== ==================================
 
-.. autofunction:: eap.operators.cxTwoPoints
+.. autofunction:: deap.operators.cxTwoPoints
 
-.. autofunction:: eap.operators.cxOnePoint
+.. autofunction:: deap.operators.cxOnePoint
 
-.. autofunction:: eap.operators.cxUniform
+.. autofunction:: deap.operators.cxUniform
 
-.. autofunction:: eap.operators.cxPartialyMatched
+.. autofunction:: deap.operators.cxPartialyMatched
 
-.. autofunction:: eap.operators.cxUniformPartialyMatched
+.. autofunction:: deap.operators.cxUniformPartialyMatched
 
-.. autofunction:: eap.operators.cxBlend
+.. autofunction:: deap.operators.cxBlend
 
-.. autofunction:: eap.operators.cxESBlend(ind1, ind2, alpha[, minstrategy])
+.. autofunction:: deap.operators.cxESBlend(ind1, ind2, alpha[, minstrategy])
 
-.. autofunction:: eap.operators.cxESTwoPoints
+.. autofunction:: deap.operators.cxESTwoPoints
 
-.. autofunction:: eap.operators.cxSimulatedBinary
+.. autofunction:: deap.operators.cxSimulatedBinary
 
-.. autofunction:: eap.operators.cxMessyOnePoint
+.. autofunction:: deap.operators.cxMessyOnePoint
 
-.. autofunction:: eap.operators.cxTreeUniformOnePoint
+.. autofunction:: deap.operators.cxTreeUniformOnePoint
 
-.. autofunction:: eap.operators.cxTypedTreeOnePoint
+.. autofunction:: deap.operators.cxTypedTreeOnePoint
 
-.. autofunction:: eap.operators.cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1)
+.. autofunction:: deap.operators.cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1)
 
-.. autofunction:: eap.operators.cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1)
+.. autofunction:: deap.operators.cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1)
 
 Mutation
 --------
@@ -109,30 +109,31 @@ DEAP. Bellow are the complete descriptions.
  :func:`mutES`                         float sequence with strategy
  :func:`mutTreeUniform`                tree
  :func:`mutTypedTreeUniform`           typed tree
+ :func:`mutTypedTreeNodeReplacement`   typed tree
  :func:`mutTypedTreeEphemeral`         typed tree
  :func:`mutTreeShrink`                 tree
  :func:`mutTypedTreeInsert`            typed tree
 ===================================== ==================================
 
-.. autofunction:: eap.operators.mutGaussian
+.. autofunction:: deap.operators.mutGaussian
 
-.. autofunction:: eap.operators.mutShuffleIndexes
+.. autofunction:: deap.operators.mutShuffleIndexes
 
-.. autofunction:: eap.operators.mutFlipBit
+.. autofunction:: deap.operators.mutFlipBit
 
-.. autofunction:: eap.operators.mutES(individual, indpb[, minstrategy])
+.. autofunction:: deap.operators.mutES(individual, indpb[, minstrategy])
 
-.. autofunction:: eap.operators.mutTreeUniform
+.. autofunction:: deap.operators.mutTreeUniform
 
-.. autofunction:: eap.operators.mutTypedTreeUniform
+.. autofunction:: deap.operators.mutTypedTreeUniform
 
-.. autofunction:: eap.operators.mutTypedTreeNodeReplacement
+.. autofunction:: deap.operators.mutTypedTreeNodeReplacement
 
-.. autofunction:: eap.operators.mutTypedTreeEphemeral
+.. autofunction:: deap.operators.mutTypedTreeEphemeral
 
-.. autofunction:: eap.operators.mutTreeShrink
+.. autofunction:: deap.operators.mutTreeShrink
 
-.. autofunction:: eap.operators.mutTypedTreeInsert
+.. autofunction:: deap.operators.mutTypedTreeInsert
 
 Selection
 ---------
@@ -152,19 +153,19 @@ DEAP. Bellow are the complete descriptions.
  :func:`selWorst`                      multi-objective sequence
 ===================================== ==================================
 
-.. autofunction:: eap.operators.selTournament
+.. autofunction:: deap.operators.selTournament
 
-.. autofunction:: eap.operators.selRoulette
+.. autofunction:: deap.operators.selRoulette
 
-.. autofunction:: eap.operators.selNSGA2
+.. autofunction:: deap.operators.selNSGA2
 
-.. autofunction:: eap.operators.selSPEA2
+.. autofunction:: deap.operators.selSPEA2
 
-.. autofunction:: eap.operators.selRandom
+.. autofunction:: deap.operators.selRandom
 
-.. autofunction:: eap.operators.selBest
+.. autofunction:: deap.operators.selBest
 
-.. autofunction:: eap.operators.selWorst
+.. autofunction:: deap.operators.selWorst
 
 Migration
 ---------
@@ -178,7 +179,7 @@ DEAP. Bellow are the complete descriptions.
  :func:`migRing`                       one level multi-demic sequence
 ===================================== ==================================
 
-.. autofunction:: eap.operators.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
+.. autofunction:: deap.operators.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
 
 
 Other Tools
@@ -191,19 +192,19 @@ For the moment, users are refered to the examples for how to use those tools.
 Initialization
 --------------
 
-.. autoclass:: eap.toolbox.Repeat
+.. autoclass:: deap.toolbox.Repeat
 
 :class:`Repeat` is used in the ``examples/ga_onemax.py`` example.
 
-.. autoclass:: eap.toolbox.Iterate
+.. autoclass:: deap.toolbox.Iterate
 
 :class:`Iterate` is used in the ``examples/ga_tsp.py`` example.
 
-.. autoclass:: eap.toolbox.FuncCycle
+.. autoclass:: deap.toolbox.FuncCycle
 
 :class:`FuncCycle` is used in the ``examples/gp_adf_symbreg.py`` example.
 
 Decoration
 ----------
 
-.. autofunction:: eap.toolbox.decorate
+.. autofunction:: deap.toolbox.decorate

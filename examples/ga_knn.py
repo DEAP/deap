@@ -19,11 +19,12 @@ import logging
 import random
 import sys
 
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import operators
-from eap import toolbox
+import knn
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import operators
+from deap import toolbox
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 

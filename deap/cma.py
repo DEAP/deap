@@ -1,17 +1,17 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 #    Special thanks to Nikolaus Hansen for providing major part of 
 #    this code. The CMA-ES algorithm is provided in many other languages
@@ -29,7 +29,7 @@ import sys      # Used to get maxint
 
 numpy.random.seed(random.randint(0, sys.maxint))
 
-_logger = logging.getLogger("eap.cma")
+_logger = logging.getLogger("deap.cma")
     
 def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
@@ -37,7 +37,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
     
     The provided *population* should be a list of one or more individuals. The
     other keyword arguments are passed to the class
-    :class:`~eap.cma.CMAStrategy`.
+    :class:`~deap.cma.CMAStrategy`.
     """
     _logger.info("Start of evolution")
         

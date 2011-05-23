@@ -1,17 +1,17 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """
 This example is from "John R. Koza. Genetic Programming: On the Programming 
@@ -20,7 +20,7 @@ of Computers by Natural Selection. MIT Press, Cambridge, MA, USA, 1992.".
 The problem is called The Artificial Ant Problem. 
 <http://www.cs.ucl.ac.uk/staff/w.langdon/bloat_csrp-97-29/node2.html>
 
-The goal of this example is to show how to use EAP and its GP framework with
+The goal of this example is to show how to use DEAP and its GP framework with
 with complex system of functions and object. 
 
 Given an AntSimulator ant, this solution should get the 89 pieces of food
@@ -30,7 +30,7 @@ ant.routine = ant.if_food_ahead(ant.move_forward, prog3(ant.turn_left,
                                                         prog2(ant.turn_right, prog2(ant.turn_left, ant.turn_right))),
                                                   prog2(ant.if_food_ahead(ant.move_forward, ant.turn_left), ant.move_forward)))
 
-Best solution found with EAP:
+Best solution found with DEAP:
 prog3(prog3(move_forward, 
             turn_right, 
             if_food_ahead(if_food_ahead(prog3(move_forward,
@@ -52,12 +52,12 @@ import copy
 import random
 from functools import partial
 
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import gp
-from eap import operators
-from eap import toolbox
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import gp
+from deap import operators
+from deap import toolbox
 
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)

@@ -2,5 +2,5 @@
 Genetic Programming
 ===================
 
-.. automodule:: eap.gp
+.. automodule:: deap.gp
    :members:
