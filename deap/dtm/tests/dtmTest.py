@@ -81,5 +81,6 @@ def main():
     return 0
 
 dtm.setOptions(communicationManager="commManagerMpi4py")
+dtm.setOptions(setTraceMode=True)
 dtm.start(main)
 

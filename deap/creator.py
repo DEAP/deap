@@ -1,19 +1,19 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`~eap.creator` module is the heart and soul of EAP, it allows to
+"""The :mod:`~deap.creator` module is the heart and soul of DEAP, it allows to
 create, at runtime, classes that will fulfill the needs of your evolutionary
 algorithms.
 """
@@ -64,7 +64,7 @@ def _finalizeNumPyArray(self, obj):
     
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
-    inheriting from *base* in the :mod:`~eap.creator` module. The new
+    inheriting from *base* in the :mod:`~deap.creator` module. The new
     class can have attributes defined by the subsequent keyword
     arguments passed to the function create. If the argument is a class,
     the __init__ function is called in the initialization of an instance of

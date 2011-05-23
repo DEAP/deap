@@ -3,7 +3,7 @@ Individual Inheriting from Set
 ==============================
 
 Again for this example we will use a very simple problem, the 0-1 Knapsack.
-The purpose of this example is to show the simplicity of EAP and the ease to
+The purpose of this example is to show the simplicity of DEAP and the ease to
 inherit from anyting else than a simple list or array.
 
 Many evolutionary algorithm textbooks mention that the best way to have an
@@ -59,7 +59,7 @@ Voilà! The *last* thing to do is to define our evaluation function.
             return 10000, 0             # Ensure overweighted bags are dominated
         return weight, value
 
-Everything is ready for evolution. Ho no wait, since EAP's developpers are
+Everything is ready for evolution. Ho no wait, since DEAP's developpers are
 lazy, there is no crossover and mutation operators that can be applyed
 directly on sets available. Lets build some then. A crossover may be, for
 example, producing two child from two parents, the first child would be the

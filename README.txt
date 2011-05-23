@@ -1,6 +1,6 @@
-EAP stands for Evolutionary Algorithm in Python, it is dedicated to people who
+DEAP stands for Distributed Evolutionary Algorithm in Python, it is dedicated to people who
 wish to learn how to use evolutionary algorithms and to those who wish to
-rediscover evolutionary algorithms. EAP is the proof that evolutionary 
+rediscover evolutionary algorithms. DEAP is the proof that evolutionary 
 algorithms do **not** need to be neither complex or complicated.
 
 EAP is part of the DEAP project, that also includes some facilities for the 

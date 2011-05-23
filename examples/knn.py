@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 #    This file is part of DEAP.
 #
 #    DEAP is free software: you can redistribute it and/or modify

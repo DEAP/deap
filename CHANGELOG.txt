@@ -1,3 +1,6 @@
+2011-05-23 Modified structure of the project so that deap include both dtm and 
+           eap.
+
 2011-04-02 Added support for numpy.ndarray in the creator.
 
 2011-03-20 Renamed the nsga2 and spea2 selections to selNSGA2 and selSPEA2.

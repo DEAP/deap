@@ -20,12 +20,18 @@ import logging
 import csv
 import itertools
 
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import gp
-from eap import operators
-from eap import toolbox
+from deap 
+ import algorithms
+from deap 
+ import base
+from deap 
+ import creator
+from deap 
+ import gp
+from deap 
+ import operators
+from deap 
+ import toolbox
 
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
