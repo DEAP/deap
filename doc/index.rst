@@ -28,6 +28,7 @@ Tutorials
    short_onemax
    knapsack
    mp
+   dtm_base
    
 Indices and tables
 ==================
