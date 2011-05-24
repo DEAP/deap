@@ -197,7 +197,7 @@ def main():
     trail_file = open("santafe_trail.txt")
     ant.parse_matrix(trail_file)
     
-    pop = tools.population(150)
+    pop = tools.population()
     hof = operators.HallOfFame(1)
     stats = tools.clone(stats_t)
     
