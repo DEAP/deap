@@ -121,7 +121,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.iteritems():
-                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
+                _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
     return population
@@ -232,7 +232,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.iteritems():
-                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
+                _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
     return population
@@ -305,7 +305,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.iteritems():
-                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
+                _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
     return population
@@ -371,7 +371,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
         # Log statistics on the current generation
         if stats is not None:
             for key, stat in stats.data.iteritems():
-                 _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
+                _logger.debug("%s %s" % (key, ", ".join(map(str, stat[-1]))))
 
     _logger.info("End of (successful) evolution")
     return population
