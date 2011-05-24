@@ -22,48 +22,57 @@ import array
 import copy
 import types
 
+_class_replacers = {}
+
 try:
     import numpy
-    NUMPY_PRESENT = True
 except ImportError:
-    NUMPY_PRESENT = False
+    pass
+else:
+    class _numpy_array(numpy.ndarray):
+        def __deepcopy__(self, memo):
+            """Overrides the deepcopy from numpy.ndarray that does not copy
+            the object's attributes.
+            """
+            copy_ = numpy.ndarray.__deepcopy__(self, memo)
+            copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
+            return copy_
+
+        @staticmethod
+        def __new__(cls, iterable):
+            """Creates a new instance of a numpy.ndarray from a function call"""
+            return numpy.array(list(iterable)).view(cls)
+
+        def __array_finalize__(self, obj):
+            # __init__ will reinitialize every member of the subclass.
+            # this might not be desirable for example in the case of an ES. 
+            self.__init__()
+
+            # Instead, e could use the following that will simply deepcopy every 
+            # member that is present in the original class
+            # This is significantly slower. 
+            #if self.__class__ == obj.__class__:
+            #    self.__dict__.update(copy.deepcopy(obj.__dict__))
+    _class_replacers[numpy.ndarray] = _numpy_array
+
+class _array(array.array):
+    @staticmethod
+    def __new__(cls, seq=()):
+        return super(_array, cls).__new__(cls, cls.typecode, seq)
     
-def _deepcopyArray(self, memo):
-    """Overrides the deepcopy from array.array that does not copy
-    the object's attributes and class type.
-    """
-    cls = self.__class__
-    copy_ = cls.__new__(cls, self)
-    memo[id(self)] = copy_
-    copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
-    return copy_
+    def __deepcopy__(self, memo):
+        """Overrides the deepcopy from array.array that does not copy
+        the object's attributes and class type.
+        """
+        cls = self.__class__
+        copy_ = cls.__new__(cls, self)
+        memo[id(self)] = copy_
+        copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        return copy_
 
-def _deepcopyNumPyArray(self, memo):
-    """Overrides the deepcopy from numpy.ndarray that does not copy
-    the object's attributes.
-    """
-    copy_ = numpy.ndarray.__deepcopy__(self, memo)
-    copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
-    return copy_
-
-@staticmethod
-def _newNumPyArray(cls, iterable):
-    """Creates a new instance of a numpy.ndarray from a function call"""
-    return numpy.array(list(iterable)).view(cls)
-
-def _finalizeNumPyArray(self, obj):
-    # __init__ will reinitialize every member of the subclass.
-    # this might not be desirable for example in the case of an ES. 
-    self.__init__()
-    
-    # Instead, e could use the following that will simply deepcopy every 
-    # member that is present in the original class
-    # This is significantly slower. 
-    #if self.__class__ == obj.__class__:
-    #    self.__dict__.update(copy.deepcopy(obj.__dict__))
-
-def reduceArray(self):
-    return (self.__class__, (list(self),), self.__dict__)
+    def __reduce__(self):
+        return (self.__class__, (list(self),), self.__dict__)
+_class_replacers[array.array] = _array
 
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
@@ -84,6 +93,10 @@ def create(name, base, **kargs):
         else:
             dict_cls[obj_name] = obj
 
+    # Check if the base class has to be replaced
+    if base in _class_replacers:
+        base = _class_replacers[base]
+
     # A DeprecationWarning is raised when the object inherits from the 
     # class "object" which leave the option of passing arguments, but
     # raise a warning stating that it will eventually stop permitting
@@ -101,19 +114,5 @@ def create(name, base, **kargs):
             base.__init__(self)
 
     objtype = type(name, (base,), dict_cls)
-
-    if issubclass(base, array.array):
-        objtype.__deepcopy__ = _deepcopyArray
-        @staticmethod
-        def newArray(cls, seq=()):
-            return super(objtype, cls).__new__(cls, cls.typecode, seq)        
-        objtype.__new__ = newArray
-        objtype.__reduce__ = reduceArray
-    elif NUMPY_PRESENT and issubclass(base, numpy.ndarray):
-        objtype.__deepcopy__ = _deepcopyNumPyArray
-        objtype.__new__ = _newNumPyArray
-        objtype.__array_finalize__ = _finalizeNumPyArray
-
     objtype.__init__ = initType
     globals()[name] = objtype
-
