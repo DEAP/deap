@@ -61,7 +61,10 @@ def _finalizeNumPyArray(self, obj):
     # This is significantly slower. 
     #if self.__class__ == obj.__class__:
     #    self.__dict__.update(copy.deepcopy(obj.__dict__))
-    
+
+def reduceArray(self):
+    return (self.__class__, (list(self),), self.__dict__)
+
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
     inheriting from *base* in the :mod:`~deap.creator` module. The new
@@ -102,9 +105,10 @@ def create(name, base, **kargs):
     if issubclass(base, array.array):
         objtype.__deepcopy__ = _deepcopyArray
         @staticmethod
-        def newArray(cls, seq):
-            return super(objtype, cls).__new__(cls, kargs["typecode"], seq)
+        def newArray(cls, seq=()):
+            return super(objtype, cls).__new__(cls, cls.typecode, seq)        
         objtype.__new__ = newArray
+        objtype.__reduce__ = reduceArray
     elif NUMPY_PRESENT and issubclass(base, numpy.ndarray):
         objtype.__deepcopy__ = _deepcopyNumPyArray
         objtype.__new__ = _newNumPyArray
