@@ -20,8 +20,6 @@ algorithms.
 
 import array
 import copy
-import types
-
 
 """Some classes in Python's standard library as well as third party library
 may be in part incompatible with the logic used in DEAP. In order to palliate 
@@ -58,8 +56,8 @@ else:
             # this might not be desirable for example in the case of an ES. 
             self.__init__()
 
-            # Instead, e could use the following that will simply deepcopy every 
-            # member that is present in the original class
+            # Instead, e could use the following that will simply deepcopy 
+            # every member that is present in the original class
             # This is significantly slower. 
             #if self.__class__ == obj.__class__:
             #    self.__dict__.update(copy.deepcopy(obj.__dict__))
