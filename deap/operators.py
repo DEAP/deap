@@ -19,7 +19,7 @@ import copy
 import math
 import random
 # Needed by Nondominated sorting
-from itertools import chain, cycle
+from itertools import chain
 from operator import attrgetter
  # used in pareto-front hall of fame for eq
 import operator
@@ -848,10 +848,10 @@ def cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
     crossover points, and terminals for 10%. This probability can be adjusted
     with the *cxtermpb* argument.
     """
-    size1,size2 = ind1.size, ind2.size
+    size1, size2 = ind1.size, ind2.size
 
     if size1 == 1 or size2 == 1:
-        return ind1,ind2
+        return ind1, ind2
 
     termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
     termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
@@ -899,10 +899,10 @@ def cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
        This crossover is subject to change for a more effective method
        of selecting the crossover points.
     """
-    size1,size2 = ind1.size, ind2.size
+    size1, size2 = ind1.size, ind2.size
 
     if size1 == 1 or size2 == 1:
-        return ind1,ind2
+        return ind1, ind2
 
     termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
     termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
@@ -1336,7 +1336,7 @@ def selSPEA2(individuals, n):
                                                 if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
-        chosen_indices += [i for fit, i in next_indices[:n - len(chosen_indices)]]
+        chosen_indices += [i for _, i in next_indices[:n - len(chosen_indices)]]
                 
     elif len(chosen_indices) > n:   # The archive is too large
         N = len(chosen_indices)
