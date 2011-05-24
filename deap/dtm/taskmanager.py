@@ -36,7 +36,7 @@ except ImportError:
         # Python 2.5
         import xml.etree.ElementTree as etree
 
-from dtm.dtmTypes import *
+from dtmTypes import *
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 _logger = logging.getLogger("dtm.control")
