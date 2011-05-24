@@ -30,8 +30,8 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 # kNN parameters
 import knn
-# FILE="heart_scale.csv"
-FILE="spambase.csv"
+FILE="heart_scale.csv"
+# FILE="spambase.csv"
 N_TRAIN=175
 K=1
 
