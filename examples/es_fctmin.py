@@ -35,7 +35,7 @@ tools = toolbox.Toolbox()
 
 creator.create("Strategy", array.array, typecode='d')
 
-tools.register("strategy", toolbox.fill_repeat, creator.Strategy, lambda: 1., IND_SIZE) 
+tools.register("strategy", toolbox.fillRepeat, creator.Strategy, lambda: 1., IND_SIZE) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin, strategy=tools.strategy)

@@ -36,8 +36,8 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 
 tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -3, 3)
-tools.register("individual", toolbox.fill_repeat, creator.Individual, tools.attr_float, dim=NDIM)
-tools.register("population", toolbox.fill_repeat, list, tools.individual, dim=NP)
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, dim=NDIM)
+tools.register("population", toolbox.fillRepeat, list, tools.individual, dim=NP)
 tools.register("select", operators.selRandom, n=3)
 tools.register("evaluate", benchmarks.rastrigin)
 
