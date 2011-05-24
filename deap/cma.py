@@ -179,7 +179,7 @@ class CMAStrategy(object):
         self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
 
         self.diagD = self.diagD[indx]**0.5
-        self.B = self.B[:,indx]
+        self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
             
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
