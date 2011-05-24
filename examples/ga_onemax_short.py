@@ -36,7 +36,7 @@ tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
 # tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
-tools.register("individual", toolbox.fill_repeat, creator.Individual, tools.attr_bool, 100)
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_bool, 100)
 tools.register("population", list, toolbox.Repeat(tools.individual, 300))
 
 def evalOneMax(individual):

@@ -169,8 +169,8 @@ tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
 # Structure initializers
 # tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr_init))
 # tools.register("population", list, toolbox.Repeat(tools.individual, 300))
-tools.register("individual", toolbox.fill_iter, creator.Individual, tools.expr_init)
-tools.register("population", toolbox.fill_repeat, list, tools.individual, 300)
+tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr_init)
+tools.register("population", toolbox.fillRepeat, list, tools.individual, 300)
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code

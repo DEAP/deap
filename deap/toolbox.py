@@ -89,17 +89,15 @@ class FuncCycle(object):
         self.cycle = cycle(func for func in seq_func)
     def __call__(self):
         return self.cycle.next()()
-        
-def fill_repeat(container, func, dim):
+
+def fillRepeat(container, func, dim):
     return container(func() for _ in xrange(dim))
 
-def fill_iter(container, generator):
+def fillIter(container, generator):
     return container(generator())
 
-def fill_cycle(container, seq_func, dim=1):
+def fillCycle(container, seq_func, dim=1):
     return container(func() for _ in xrange(dim) for func in seq_func)
-
-# def fill_funccycle(container, seq_func):
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
