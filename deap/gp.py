@@ -157,6 +157,7 @@ class Ephemeral(Terminal):
         self.func = func
         Terminal.__init__(self, self.func(), ret)
     def regen(self):
+        """Regenerate the ephemeral value."""
         self.value = self.func()
         
 class EphemeralGenerator(object):
