@@ -18,18 +18,12 @@ import random
 import operator
 import logging
 
-from deap 
- import algorithms
-from deap 
- import base
-from deap 
- import creator
-from deap 
- import gp
-from deap 
- import operators
-from deap 
- import toolbox
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import gp
+from deap import operators
+from deap import toolbox
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 

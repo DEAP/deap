@@ -28,8 +28,6 @@ from deap import creator
 from deap import operators
 from deap import toolbox
 
-from deap import dtm
-print dtm.map
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)

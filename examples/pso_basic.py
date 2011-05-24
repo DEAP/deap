@@ -17,8 +17,6 @@ import operator
 import random
 from math import sin
 
-import sys; sys.path.append("..")
-
 from deap import base
 from deap import creator
 from deap import operators
