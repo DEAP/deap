@@ -22,7 +22,17 @@ import array
 import copy
 import types
 
-_class_replacers = {}
+
+"""Some classes in Python's standard library as well as third party library
+may be in part incompatible with the logic used in DEAP. In order to palliate 
+to this problem, the method `create` used the dictionary `class_replacers` to 
+identify if the base type provided is problematic, and if so inherits the new 
+class from the replacement base class instead of the original base class. 
+
+`class_replacers` keys are classes to be replaced and the values are the 
+replacing classes.
+"""
+class_replacers = {}
 
 try:
     import numpy
@@ -53,7 +63,7 @@ else:
             # This is significantly slower. 
             #if self.__class__ == obj.__class__:
             #    self.__dict__.update(copy.deepcopy(obj.__dict__))
-    _class_replacers[numpy.ndarray] = _numpy_array
+    class_replacers[numpy.ndarray] = _numpy_array
 
 class _array(array.array):
     @staticmethod
@@ -72,7 +82,7 @@ class _array(array.array):
 
     def __reduce__(self):
         return (self.__class__, (list(self),), self.__dict__)
-_class_replacers[array.array] = _array
+class_replacers[array.array] = _array
 
 def create(name, base, **kargs):
     """The function :func:`create` does create a new class named *name*
@@ -94,8 +104,8 @@ def create(name, base, **kargs):
             dict_cls[obj_name] = obj
 
     # Check if the base class has to be replaced
-    if base in _class_replacers:
-        base = _class_replacers[base]
+    if base in class_replacers:
+        base = class_replacers[base]
 
     # A DeprecationWarning is raised when the object inherits from the 
     # class "object" which leave the option of passing arguments, but
