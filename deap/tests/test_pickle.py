@@ -21,7 +21,7 @@ class Pickling(unittest.TestCase):
     def setUp(self):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("IndList", list, fitness=creator.FitnessMax)
-        creator.create("IndArray", array.array, fitness=creator.FitnessMax)
+        creator.create("IndArray", array.array,  typecode='f', fitness=creator.FitnessMax)
         creator.create("IndTree", base.Tree, fitness=creator.FitnessMax)
         self.toolbox = toolbox.Toolbox()
         self.toolbox.register("func", func)
@@ -43,7 +43,7 @@ class Pickling(unittest.TestCase):
         self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
          
     def test_pickle_ind_array(self):
-        ind = creator.IndArray("f", [1.0, 2.0, 3.0])
+        ind = creator.IndArray([1.0, 2.0, 3.0])
         ind.fitness.values = (4.0,)
         ind_s = pickle.dumps(ind)
         ind_l = pickle.loads(ind_s)
