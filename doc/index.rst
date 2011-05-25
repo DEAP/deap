@@ -29,6 +29,11 @@ Tutorials
    knapsack
    mp
    dtm_base
+   symbreg
+   parity
+   multiplexer
+   artificial_ant
+   spambase
    
 Indices and tables
 ==================
