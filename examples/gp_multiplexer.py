@@ -36,25 +36,24 @@ MUX_SELECT_LINES = 3
 MUX_IN_LINES = 2 ** MUX_SELECT_LINES
 MUX_TOTAL_LINES = MUX_SELECT_LINES + MUX_IN_LINES
 
+# input : [A0 A1 A2 D0 D1 D2 D3 D4 D5 D6 D7] for a 8-3 mux
 inputs = [[0] * MUX_TOTAL_LINES for i in range(2 ** MUX_TOTAL_LINES)]
 outputs = [None] * (2 ** MUX_TOTAL_LINES)
 
 for i in range(2 ** MUX_TOTAL_LINES):
     value = i
-    dividor = 2 ** MUX_TOTAL_LINES
+    divisor = 2 ** MUX_TOTAL_LINES
+    # Fill the input bits
     for j in range(MUX_TOTAL_LINES):
-        dividor /= 2
-        if value >= dividor:
+        divisor /= 2
+        if value >= divisor:
             inputs[i][j] = 1
-            value -= dividor
-            
-    indexOutput = 3
-    if inputs[i][0]:
-        indexOutput += 1
-    if inputs[i][1]:
-        indexOutput += 2
-    if inputs[i][2]:
-        indexOutput += 4    
+            value -= divisor
+    
+    # Determine the corresponding output
+    indexOutput = MUX_SELECT_LINES
+    for j, k in enumerate(inputs[i][:MUX_SELECT_LINES]):
+        if k:   indexOutput += 2 ** j
     outputs[i] = inputs[i][indexOutput]
 
 pset = gp.PrimitiveSet("MAIN", MUX_TOTAL_LINES, "IN")
@@ -77,7 +76,7 @@ tools.register("lambdify", gp.lambdify, pset=pset)
 def evalMultiplexer(individual):
     func = tools.lambdify(expr=individual)
     good = sum((func(*(inputs[i])) == outputs[i] for i in range(2 ** MUX_TOTAL_LINES)))
-    return good / float(2 ** MUX_TOTAL_LINES),
+    return good,
 
 tools.register("evaluate", evalMultiplexer)
 tools.register("select", operators.selTournament, tournsize=7)
