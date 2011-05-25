@@ -1,0 +1,204 @@
+.. _symbreg:
+    
+========================================================
+A Genetic Programming Introduction : Symbolic Regression
+========================================================
+
+Symbolic regression is one of the best known problems in GP (see :ref:`refPapersSymbreg`). It is commonly used as a tuning problem for new algorithms, but is also widely used with real-life distributions, where others regression methods may not work. It is conceptually a simple problem, and therefore makes a good introductory example for the GP framework in DEAP.
+
+All symbolic regression problems use an arbitrary data distribution, and try to fit the most accurately the data with a symbolic formula. Usually, a measure like the RMSE (Root Mean Square Error) is used to measure an individual's fitness.
+
+In this example, we use a classical distribution, the quartic polynomial :math:`(x^4 + x^3 + x^2 + x)`, a one-dimension distribution. *20* equidistant points are generated in the range [-1, 1], and are used to evaluate the fitness.
+
+
+Creating the primitives set
+===========================
+
+One of the most crucial aspect of a GP program is the choice of the primitives set. They should make good building blocks for the individuals so the evolution can succeed. In this problem, we use a classical set of primitives, which are basic arithmetic functions : ::
+    
+    def safeDiv(left, right):
+        try:
+            return left / right
+        except ZeroDivisionError:
+            return 0
+
+    pset = gp.PrimitiveSet("MAIN", 1)
+    pset.addPrimitive(operator.add, 2)
+    pset.addPrimitive(operator.sub, 2)
+    pset.addPrimitive(operator.mul, 2)
+    pset.addPrimitive(safeDiv, 2)
+    pset.addPrimitive(operator.neg, 1)
+    pset.addPrimitive(math.cos, 1)
+    pset.addPrimitive(math.sin, 1)
+    pset.addEphemeralConstant(lambda: random.randint(-1,1))
+    
+The redefinition of the division is made to protect it against a zero division error (which would crash the program). The other functions are simply a mapping from the Python `operator <http://docs.python.org/library/operator.html>`_ module. The number following the function is the *arity* of the primitive, that is the number of entries it takes (this will be used by DTM to make the individuals).
+
+On the last line, we declare an *ephemeral constant*. This is a special terminal type, which does not have a fixed value. When the program append an ephemeral constant terminal to a tree, the function it contains is executed, and its result is inserted as a constant terminal. In this case, those constant terminals can take the values -1, 0 or 1.
+
+The second argument of PrimitiveSet() is the number of inputs. In this case, as we have only a one dimension regression problem, there is only one input, but it could have as many as you want. By default, those inputs are named "ARGx", where "x" is a number, but you can easily rename them : ::
+    
+    pset.renameArguments({"ARG0" : "x"})
+
+Creator
+=======
+
+As any evolutionnary program, symbolic regression needs (at least) two object types : an individual containing the genotype and a fitness. We can easily create them with the creator : ::
+    
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
+
+The first line creates the fitness object (this is a minimization problem, so the weight is negative). The `weights` argument must be an iterable of weights, even if there is only one fitness measure. The second line create the individual object itself. Very straightforward, we can see that it will be based upon a tree, to which we add two attributes : a fitness and the primitive set. If, for any reason, the user would want to add any other attribute (for instance, a file in which the individual will be saved), it will be as easy as adding this attribute of any type to this line. After this declaration, any individual produced will contain those wanted attributes.
+    
+
+Toolbox
+=======
+
+Now, we want to register some parameters specific to the evolution process. In DEAP, this is done through the toolbox : ::
+    
+    tools = toolbox.Toolbox()
+    tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
+    tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
+    tools.register("population", toolbox.fillRepeat, list, tools.individual, 100)
+    tools.register("lambdify", gp.lambdify, pset=pset)
+
+    def evalSymbReg(individual):
+        # Transform the tree expression in a callable function
+        func = tools.lambdify(expr=individual)
+        # Evaluate the sum of squared difference between the expression
+        # and the real function : x**4 + x**3 + x**2 + x
+        values = (x/10. for x in xrange(-10,10))
+        diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
+        diff = sum(map(diff_func, values))
+        return diff,
+
+    tools.register("evaluate", evalSymbReg)
+    tools.register("select", operators.selTournament, tournsize=3)
+    tools.register("mate", operators.cxTreeUniformOnePoint)
+    tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
+    tools.register('mutate', operators.mutTreeUniform, expr=tools.expr_mut)
+
+First, a toolbox instance is created. Then, we can register any parameters. The first lines register how to create an individual (by calling gp.generateRamped with the previously defined primitive set), then how to create the population (by repeating the individual initialization 100 times).
+
+We may now introduce the evaluation function, which will receive an individual as input, and return the corresponding fitness. This function use the `lambdify` function previously defined to transform the individual into its executable form -- that is, a program. After that, the evaluation is only simple maths, where the difference between the values produced by the evaluated individual and the real values are squared and summed to compute the RMSE, which is returned as the fitness of the individual.
+
+Afterwards, we register the evaluation function. We also choose the selection method (a tournament of size 3), the mate method (one point crossover with uniform probability over all the nodes), the mutation method (an uniform probability mutation which may append a new full subtree to a node).
+
+At this point, any structure with an access to the toolbox instance will also have access to all of those registered parameters. Of course, the user could register other parameters basing on his needs.
+
+
+Statistics
+==========
+
+Although optionnal, statistics are often useful in evolutionnary programming. DEAP offers a simple class which can handle most of the "boring work". In this case, we want to keep four measures over the fitness distribution : the mean, the standard deviation, the minimum and the maximum. ::
+    
+    stats_t = operators.Stats(lambda ind: ind.fitness.values)
+    stats_t.register("Avg", operators.mean)
+    stats_t.register("Std", operators.std_dev)
+    stats_t.register("Min", min)
+    stats_t.register("Max", max)
+    
+
+Launching the evolution
+=======================
+
+At this point, DEAP has all the informations needed to begin the evolutionnary process, but nothing has been initialized. We can begin the evolution by creating the population and then call a pre-made algorithm, as eaSimple : ::
+
+    def main():
+        logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+        pop = tools.population()
+        hof = operators.HallOfFame(1)
+        stats = tools.clone(stats_t)
+        
+        algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, stats, halloffame=hof)
+        
+        # eaSimple() will return when the evolution reach the stopping criterion
+        logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+
+    if __name__ == "__main__":
+        main()
+
+The hall of fame is a specific structure which contains the *n* best individuals (here, the best one only). The first line set up the Python logger used by DEAP to provide informations, warnings or errors about the evolution. Its level can be adjusted according to the desired verbosity level (see `logging module <http://docs.python.org/library/logging.html>`_).
+
+Complete Example
+================
+::
+    
+    from deap import algorithms
+    from deap import base
+    from deap import creator
+    from deap import gp
+    from deap import operators
+    from deap import toolbox
+
+    # Define new functions
+    def safeDiv(left, right):
+        try:
+            return left / right
+        except ZeroDivisionError:
+            return 0
+
+    pset = gp.PrimitiveSet("MAIN", 1)
+    pset.addPrimitive(operator.add, 2)
+    pset.addPrimitive(operator.sub, 2)
+    pset.addPrimitive(operator.mul, 2)
+    pset.addPrimitive(safeDiv, 2)
+    pset.addPrimitive(operator.neg, 1)
+    pset.addPrimitive(math.cos, 1)
+    pset.addPrimitive(math.sin, 1)
+    pset.addEphemeralConstant(lambda: random.randint(-1,1))
+    pset.renameArguments({"ARG0" : "x"})
+
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+    creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
+
+    tools = toolbox.Toolbox()
+    tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
+    tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
+    tools.register("population", toolbox.fillRepeat, list, tools.individual, 100)
+    tools.register("lambdify", gp.lambdify, pset=pset)
+
+    def evalSymbReg(individual):
+        # Transform the tree expression in a callable function
+        func = tools.lambdify(expr=individual)
+        # Evaluate the sum of squared difference between the expression
+        # and the real function : x**4 + x**3 + x**2 + x
+        values = (x/10. for x in xrange(-10,10))
+        diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
+        diff = sum(map(diff_func, values))
+        return diff,
+
+    tools.register("evaluate", evalSymbReg)
+    tools.register("select", operators.selTournament, tournsize=3)
+    tools.register("mate", operators.cxTreeUniformOnePoint)
+    tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
+    tools.register('mutate', operators.mutTreeUniform, expr=tools.expr_mut)
+
+    stats_t = operators.Stats(lambda ind: ind.fitness.values)
+    stats_t.register("Avg", operators.mean)
+    stats_t.register("Std", operators.std_dev)
+    stats_t.register("Min", min)
+    stats_t.register("Max", max)
+
+    def main():
+        logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
+        pop = tools.population()
+        hof = operators.HallOfFame(1)
+        stats = tools.clone(stats_t)
+        
+        algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, stats, halloffame=hof)
+        logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+        
+        return pop, stats, hof
+
+    if __name__ == "__main__":
+        main()
+
+.. _refPapersSymbreg:
+
+Reference
+=========
+
+*John R. Koza, "Genetic Programming: On the Programming of Computers by Means of Natural Selection", MIT Press, 1992, pages 162-169.*

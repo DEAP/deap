@@ -76,8 +76,8 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generateRamped, pset=pset, type_=pset.ret, min_=1, max_=2)
-tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr))
-tools.register("population", list, toolbox.Repeat(tools.individual, 100))
+tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
+tools.register("population", toolbox.fillRepeat, list, tools.individual, 100)
 tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSpambase(individual):
