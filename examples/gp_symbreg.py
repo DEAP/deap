@@ -50,7 +50,7 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
 tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr))
-tools.register("population", list, toolbox.Repeat(tools.individual, 1000))
+tools.register("population", list, toolbox.Repeat(tools.individual, 100))
 tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSymbReg(individual):
