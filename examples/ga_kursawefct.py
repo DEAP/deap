@@ -15,7 +15,6 @@
 
 import array
 import logging
-import math
 import sys
 import random
 
@@ -23,6 +22,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
+from deap import benchmarks
 from deap import creator
 from deap import operators
 from deap import toolbox
@@ -39,11 +39,6 @@ tools.register("attr_float", random.uniform, -5, 5)
 tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, 3))
 tools.register("population", list, toolbox.Repeat(tools.individual, 50))
 
-def evalKursawe(ind):
-    f1 = sum(-10 * math.exp(-0.2 * math.sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
-    f2 = sum(abs(x)**0.8 + 5 * math.sin(x * x * x) for x in ind)
-    return f1, f2
-
 def checkBounds(min, max):
     def decCheckBounds(func):
         def wrapCheckBounds(*args, **kargs):
@@ -58,7 +53,7 @@ def checkBounds(min, max):
         return wrapCheckBounds
     return decCheckBounds
 
-tools.register("evaluate", evalKursawe)
+tools.register("evaluate", benchmarks.kursawe)
 tools.register("mate", operators.cxBlend, alpha=1.5)
 tools.register("mutate", operators.mutGaussian, mu=0, sigma=3, indpb=0.3)
 tools.register("select", operators.selNSGA2)

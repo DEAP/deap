@@ -46,6 +46,17 @@ def rosenbrock(individual):
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
                    for x, y in zip(individual[:-1], individual[1:])),
 
+def h1(x):
+   """ Simple two-dimensional function containing several local maxima,
+   H1 has a unique maximum value of 2.0 at the point (8.6998, 6.7665).
+   From : The Merits of a Parallel Genetic Algorithm in Solving Hard 
+   Optimization Problems, A. J. Knoek van Soest and L. J. R. Richard 
+   Casius, J. Biomech. Eng. 125, 141 (2003)
+   """
+   num = (sin(x[0] - x[1] / 8))**2 + (sin(x[1] + x[0] / 8))**2
+   denum = ((x[0] - 8.6998)**2 + (x[1] - 6.7665)**2)**0.5 + 1
+   return num / denum,
+
 # Multimodal
 def ackley(individual):
     """Ackley test objective function."""
@@ -84,4 +95,9 @@ def schaffer(individual):
 def schwefel(individual):
     N = len(individual)
     return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
-    
+
+# Multiobjectives
+def kursawe(ind):
+    f1 = sum(-10 * exp(-0.2 * sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
+    f2 = sum(abs(x)**0.8 + 5 * sin(x * x * x) for x in ind)
+    return f1, f2
