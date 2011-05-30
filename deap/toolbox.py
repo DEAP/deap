@@ -90,14 +90,14 @@ class FuncCycle(object):
     def __call__(self):
         return self.cycle.next()()
 
-def fillRepeat(container, func, dim):
-    return container(func() for _ in xrange(dim))
+def fillRepeat(container, func, n):
+    return container(func() for _ in xrange(n))
 
 def fillIter(container, generator):
     return container(generator())
 
-def fillCycle(container, seq_func, dim=1):
-    return container(func() for _ in xrange(dim) for func in seq_func)
+def fillCycle(container, seq_func, n=1):
+    return container(func() for _ in xrange(n) for func in seq_func)
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
