@@ -47,24 +47,23 @@ def updateParticle(part, best, phi1, phi2):
 
 tools = toolbox.Toolbox()
 tools.register("particle", generate, size=2, pmin=-100, pmax=100, smin=-50, smax=50)
-tools.register("population", list, toolbox.Repeat(tools.particle, 50))
+tools.register("population", toolbox.fillRepeat, list, tools.particle)
 tools.register("update", updateParticle, phi1=2.0, phi2=2.0)
 tools.register("evaluate", benchmarks.h1)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
-    pop = tools.population()
-    stats = tools.clone(stats_t)
+    pop = tools.population(n=50)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
+
     GEN = 1000
     best = None
 
     for g in xrange(GEN):
-        print "-- Generation %i --" % g        
+        print "-- Generation %i --" % g
         for part in pop:
             part.fitness.values = tools.evaluate(part)
             if not part.best or part.best.fitness < part.fitness:
@@ -76,8 +75,7 @@ def main():
 
         # Gather all the fitnesses in one list and print the stats
         stats.update(pop)
-        for key, stat in stats.data.iteritems():
-            print "  %s %s" % (key, stat[-1][0])
+        print stats
         print "  Best so far: %s - %s" % (best, best.fitness)
     
     return pop, stats, best

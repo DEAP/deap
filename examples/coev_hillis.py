@@ -66,12 +66,12 @@ htools = toolbox.Toolbox()
 ptools = toolbox.Toolbox()
 
 htools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
-htools.register("individual", creator.Host, toolbox.Iterate(htools.network))
-htools.register("population", list, toolbox.Repeat(htools.individual, 3000))
+htools.register("individual", toolbox.fillIter, creator.Host, htools.network)
+htools.register("population", toolbox.fillRepeat, list, htools.individual)
 
 ptools.register("parasite", getParasite, dimension=INPUTS)
-ptools.register("individual", creator.Parasite, toolbox.Repeat(ptools.parasite, 20))
-ptools.register("population", list, toolbox.Repeat(ptools.individual, 3000))
+ptools.register("individual", toolbox.fillRepeat, creator.Parasite, ptools.parasite, 20)
+ptools.register("population", toolbox.fillRepeat, list, ptools.individual)
 
 htools.register("evaluate", evalNetwork, dimension=INPUTS)
 htools.register("mate", operators.cxTwoPoints)
@@ -83,12 +83,6 @@ ptools.register("mate", operators.cxTwoPoints)
 ptools.register("indMutate", operators.mutFlipBit, indpb=0.05)
 ptools.register("mutate", mutParasite, indmut=ptools.indMutate, indpb=0.05)
 ptools.register("select", operators.selTournament, tournsize=3)
-
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
 
 def cloneHost(individual):
     """Specialized copy function that will work only on a list of tuples
@@ -112,10 +106,14 @@ ptools.register("clone", cloneParasite)
 def main():
     random.seed(64)
     
-    hosts = htools.population()
-    parasites = ptools.population()
+    hosts = htools.population(n=3000)
+    parasites = ptools.population(n=3000)
     hof = operators.HallOfFame(1)
-    hstats = stats_t
+    hstats = operators.Statistics(lambda ind: ind.fitness.values)
+    hstats.register("Avg", operators.mean)
+    hstats.register("Std", operators.std_dev)
+    hstats.register("Min", min)
+    hstats.register("Max", max)
     
     MAXGEN = 50
     H_CXPB, H_MUTPB = 0.5, 0.3
@@ -145,8 +143,7 @@ def main():
         hof.update(hosts)
         hstats.update(hosts)
         
-        for key, stat in hstats.data.iteritems():
-            print "  %s %s" % (key, ", ".join(map(str, stat[-1])))
+        print hstats
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network

@@ -56,8 +56,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
         
         if statistics is not None:
             statistics.update(population)
-            for key, stat in statistics.data.items():
-                _logger.debug("%s %s" % (key, stat[-1][0]))
+            _logger.debug(statistics)
 
     _logger.info("End of (successful) evolution")
 

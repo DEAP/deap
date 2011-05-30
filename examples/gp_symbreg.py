@@ -49,8 +49,8 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
-tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr))
-tools.register("population", list, toolbox.Repeat(tools.individual, 100))
+tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSymbReg(individual):
@@ -69,20 +69,18 @@ tools.register("mate", operators.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
 tools.register('mutate', operators.mutTreeUniform, expr=tools.expr_mut)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(318)
     
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-    pop = tools.population()
+    pop = tools.population(n=200)
     hof = operators.HallOfFame(1)
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
     algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, stats, halloffame=hof)
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)

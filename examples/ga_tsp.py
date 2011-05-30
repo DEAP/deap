@@ -42,8 +42,8 @@ tools = toolbox.Toolbox()
 tools.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Iterate(tools.indices))
-tools.register("population", list, toolbox.Repeat(tools.individual, 300))
+tools.register("individual", toolbox.fillIter, creator.Individual, tools.indices)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
@@ -56,18 +56,16 @@ tools.register("mutate", operators.mutShuffleIndexes, indpb=0.05)
 tools.register("select", operators.selTournament, tournsize=3)
 tools.register("evaluate", evalTSP)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(264)
 
-    pop = tools.population()
+    pop = tools.population(n=300)
     hof = operators.HallOfFame(1)
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
     algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, stats, hof)
     

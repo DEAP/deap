@@ -38,8 +38,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_bool, 100))
-tools.register("population", list, toolbox.Repeat(tools.individual, 300))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_bool, 100)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -56,7 +56,7 @@ tools.register("map", pool.map)
 if __name__ == "__main__":
     random.seed(64)
     
-    pop = tools.population()
+    pop = tools.population(n=300)
     hof = operators.HallOfFame(1)
     
     algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)

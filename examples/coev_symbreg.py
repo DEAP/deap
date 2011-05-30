@@ -43,8 +43,8 @@ def evalSymbReg(expr, data):
 tools_ga = toolbox.Toolbox()
 
 tools_ga.register("float", random.uniform, -1, 1)
-tools_ga.register("individual", creator.IndGA, toolbox.Repeat(tools_ga.float, 10))
-tools_ga.register("population", list, toolbox.Repeat(tools_ga.individual, 200))
+tools_ga.register("individual", toolbox.fillRepeat, creator.IndGA, tools_ga.float, 10)
+tools_ga.register("population", toolbox.fillRepeat, list, tools_ga.individual)
 
 tools_ga.register("select", operators.selTournament, tournsize=3)
 tools_ga.register("mate", operators.cxTwoPoints)
@@ -52,18 +52,21 @@ tools_ga.register("mutate", operators.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
 tools_gp = gp_symbreg.tools
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
-    pop_ga = tools_ga.population()
-    pop_gp = tools_gp.population()
+    pop_ga = tools_ga.population(n=200)
+    pop_gp = tools_gp.population(n=200)
     
-    stats_ga = tools_ga.clone(stats_t)
-    stats_gp = tools_gp.clone(stats_t)
+    stats_ga = operators.Statistics(lambda ind: ind.fitness.values)
+    stats_ga.register("Avg", operators.mean)
+    stats_ga.register("Std", operators.std_dev)
+    stats_ga.register("Min", min)
+    stats_ga.register("Max", max)
+    
+    stats_gp = operators.Statistics(lambda ind: ind.fitness.values)
+    stats_gp.register("Avg", operators.mean)
+    stats_gp.register("Std", operators.std_dev)
+    stats_gp.register("Min", min)
+    stats_gp.register("Max", max)
     
     best_ga = operators.selRandom(pop_ga, 1)[0]
     best_gp = operators.selRandom(pop_gp, 1)[0]
@@ -130,11 +133,9 @@ def main():
         best_gp = operators.selBest(pop_gp, 1)[0]    
     
         print "  -- GA statistics --"
-        for key, stat in stats_ga.data.iteritems():
-            print "  %s %s" % (key, stat[-1][0])
+        print stats_ga
         print "  -- GP statistics --"        
-        for key, stat in stats_gp.data.iteritems():
-            print "  %s %s" % (key, stat[-1][0])            
+        print stats_gp          
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
     print "Best individual GP is %s, %s" % (gp.evaluate(best_gp), best_gp.fitness.values)

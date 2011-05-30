@@ -69,8 +69,8 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=
 
 tools = toolbox.Toolbox()
 tools.register("expr", gp.generateFull, pset=pset, min_=2, max_=4)
-tools.register("individual", creator.Individual, toolbox.Iterate(tools.expr))
-tools.register("population", list, toolbox.Repeat(tools.individual, 800))
+tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 tools.register("lambdify", gp.lambdify, pset=pset)
 
 def evalMultiplexer(individual):
@@ -84,17 +84,15 @@ tools.register("mate", operators.cxTreeUniformOnePoint)
 tools.register("expr_mut", gp.generateGrow, min_=0, max_=2)
 tools.register("mutate", operators.mutTreeUniform, expr=tools.expr_mut)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed()
-    pop = tools.population()
+    pop = tools.population(n=800)
     hof = operators.HallOfFame(1)
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
     algorithms.eaSimple(tools, pop, 0.8, 0.1, 40, stats, halloffame=hof)
     

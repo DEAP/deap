@@ -24,6 +24,7 @@ from operator import attrgetter
  # used in pareto-front hall of fame for eq
 import operator
 from collections import defaultdict
+from functools import partial
 
 try:
     import yaml
@@ -241,25 +242,42 @@ def std_dev(seq):
     """
     return var(seq)**0.5
 
-class Stats(object):
-    """A statistic object.
+class Statistics(object):
+    """A statistics object.
     """
-    def __init__(self, key=lambda x: x):
+    class Data(defaultdict):
+        def __init__(self):
+            defaultdict.__init__(self, list)
+        def __str__(self):
+            return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.iteritems())
+    
+    def __init__(self, key=lambda x: x, n=1):
         self.key = key
         self.functions = {}
-        self.data = defaultdict(list)
-
+        self.data = tuple(self.Data() for _ in xrange(n))
+    
+    def __getitem__(self, idx):
+        return self.data[idx]
+        
+    def _getFuncValue(self, name, idx=0):
+        return self.data[idx][name][-1]
+    
     def register(self, name, function):
         self.functions[name] = function
+        setattr(self, name, partial(self._getFuncValue, name))
     
-    def update(self, seq):
+    def update(self, seq, idx=0):
         # Transpose the values
-        values = zip(*(self.key(elem) for elem in seq))
+        data = self.data[idx]
+        try:
+            values = zip(*(self.key(elem) for elem in seq))
+        except TypeError:
+            values = zip(*[(self.key(elem),) for elem in seq])
         for key, func in self.functions.iteritems():
-            self.data[key].append(map(func, values))
+            data[key].append(map(func, values))
     
     def __str__(self):
-        return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.data.iteritems())
+        return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.data[-1].iteritems())
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the

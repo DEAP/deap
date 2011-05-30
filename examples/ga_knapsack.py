@@ -28,11 +28,10 @@ from deap import toolbox
 IND_SIZE = 30
 MAX_ITEM = 50
 MAX_WEIGHT = 50
-NBR_ITEMS = 100
+NBR_ITEMS = 20
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
 creator.create("Individual", set, fitness=creator.Fitness)
-creator.create("Population", list)
 
 # Create the item dictionary, items' name is an integer, and value is a (weight, value) 2-uple.
 # The items will be created during the runtime to enable reproducibility.
@@ -44,8 +43,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_item, IND_SIZE))
-tools.register("population", creator.Population, toolbox.Repeat(tools.individual, NBR_ITEMS))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_item, IND_SIZE)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 def evalKnapsack(individual):
     weight = 0.0
@@ -70,33 +69,34 @@ def mutSet(individual):
     """Mutation that pops or add an element."""
     if random.random() < 0.5:
         if len(individual) > 0:     # We cannot pop from an empty set
-            individual.pop()
+            individual.remove(random.choice(sorted(tuple(individual))))
     else:
         individual.add(random.randrange(NBR_ITEMS))
 
 tools.register("evaluate", evalKnapsack)
 tools.register("mate", cxSet)
 tools.register("mutate", mutSet)
-tools.register("select", operators.selSPEA2)
-
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
+tools.register("select", operators.selNSGA2)
 
 def main():
     random.seed(64)
+    NGEN = 50
+    MU = 50
+    LAMBDA = 100    
     # Create random items and store them in the items' dictionary.
     for i in xrange(NBR_ITEMS):
         items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
-    pop = tools.population()
+    pop = tools.population(n=MU)
     hof = operators.ParetoFront()
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
-    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, stats, halloffame=hof)
-    
+    algorithms.eaMuPlusLambda(tools, pop, MU, LAMBDA, 0.7, 0.2, NGEN, stats, halloffame=hof)
+
     logging.info("Best individual for measure 1 is %s, %s", 
                  hof[0], hof[0].fitness.values)
     logging.info("Best individual for measure 2 is %s, %s", 

@@ -28,7 +28,7 @@ from deap import operators
 from deap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
-creator.create("Individual", array.array, typecode='f', fitness=creator.FitnessMax)
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMax)
 
 tools = toolbox.Toolbox()
 
@@ -36,8 +36,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, 3))
-tools.register("population", list, toolbox.Repeat(tools.individual, 50))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, 3)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 def checkBounds(min, max):
     def decCheckBounds(func):
@@ -61,20 +61,19 @@ tools.register("select", operators.selNSGA2)
 tools.decorate("mate", checkBounds(-5, 5))
 tools.decorate("mutate", checkBounds(-5, 5)) 
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(64)
 
-    pop = tools.population()
+    MU, LAMBDA = 50, 100
+    pop = tools.population(n=MU)
     hof = operators.ParetoFront()
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
-    algorithms.eaMuPlusLambda(tools, pop, mu=50, lambda_=100, 
+    algorithms.eaMuPlusLambda(tools, pop, mu=MU, lambda_=LAMBDA, 
                               cxpb=0.5, mutpb=0.2, ngen=50, 
                               stats=stats, halloffame=hof)
     

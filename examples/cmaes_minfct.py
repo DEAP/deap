@@ -44,20 +44,20 @@ tools.register("population", strategy.generate, ind_init=creator.Individual)
 tools.register("update", strategy.update)
 tools.register("evaluate", benchmarks.rastrigin)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
-if __name__ == "__main__":
+def main():
     # The CMA-ES algorithm takes a population of one individual as argument
     pop = tools.population()
-    stats = tools.clone(stats_t)
-    
-    hof = operators.HallOfFame(1)
-    
+    hof = operators.HallOfFame(1)    
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
+   
     # The CMA-ES algorithm converge with good probability with those settings
     cma.esCMA(tools, pop, ngen=250, halloffame=hof, statistics=stats)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+
+if __name__ == "__main__":
+    main()

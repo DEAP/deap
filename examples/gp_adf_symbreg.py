@@ -95,8 +95,8 @@ tools.register('MAIN', creator.MAIN, toolbox.Iterate(tools.main_expr))
 
 func_cycle = toolbox.FuncCycle([tools.MAIN, tools.ADF0, tools.ADF1, tools.ADF2])
 
-tools.register('individual', creator.Individual, toolbox.Repeat(func_cycle, 4))
-tools.register('population', list, toolbox.Repeat(tools.individual, 100))
+tools.register('individual', toolbox.fillRepeat, creator.Individual, func_cycle, 4)
+tools.register('population', toolbox.fillRepeat, list, tools.individual)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
@@ -115,18 +115,16 @@ tools.register('mate', operators.cxTreeUniformOnePoint)
 tools.register('expr', gp.generateFull, min_=1, max_=2)
 tools.register('mutate', operators.mutTreeUniform, expr=tools.expr)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(1024)
     
-    pop = tools.population()
+    pop = tools.population(n=100)
     hof = operators.HallOfFame(1)
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
@@ -165,11 +163,10 @@ def main():
             ind.fitness.values = tools.evaluate(ind)
                 
         # Replacement of the population by the offspring
-        pop[:] = offsprings
+        pop = offsprings
         hof.update(pop)
         stats.update(pop)
-        for key, stat in stats.data.iteritems():
-            print "  %s %s" % (key, stat[-1][0])
+        print stats
     
     print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
     
