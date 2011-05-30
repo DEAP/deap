@@ -22,7 +22,7 @@ Evolution Strategy.
 """
 
 import logging
-from math import sqrt, log
+from math import sqrt, log, exp
 import numpy
 import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
@@ -35,9 +35,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
-    The provided *population* should be a list of one or more individuals. The
-    other keyword arguments are passed to the class
-    :class:`~deap.cma.CMAStrategy`.
+    The provided *population* should be a list of one or more individuals.
     """
     _logger.info("Start of evolution")
         
@@ -218,3 +216,52 @@ class CMAStrategy(object):
         self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.) / \
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
+        
+class CMA11Strategy(object):
+    def __init__(self, parent, sigma, **kargs):
+        self.parent = parent
+        self.sigma = sigma
+        self.dim = len(self.parent)
+
+        self.C = numpy.identity(self.dim)
+        self.A = numpy.identity(self.dim)
+        
+        self.pc = numpy.zeros(self.dim)
+        
+        self.computeParams(kargs)
+        self.psucc = self.ptarg
+        
+    def computeParams(self, params):
+        self.d = params.get("d", 1.0 + self.dim/2.0)
+        self.ptarg = params.get("ptarg", 2.0/11.0)
+        self.cp = params.get("cp", 1.0/12.0)
+        self.cc = params.get("cc", 2.0/(self.dim+2.0))
+        self.ccov = params.get("ccov", 2.0/(self.dim*self.dim+6.0))
+        self.pthresh = params.get("pthresh", 0.44)
+    
+    def generate(self, ind_init):
+        self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
+        return (ind_init(self.parent + self.sigma * self.y),)
+    
+    def update(self, offsprings):
+        offspring = offsprings[0]
+        lambda_succ = self.parent.fitness <= offspring.fitness
+        self.psucc = (1-self.cp)*self.psucc + self.cp*lambda_succ
+        self.sigma = self.sigma * exp(1.0/self.d * (self.psucc - self.ptarg/(1-self.ptarg)*(1-self.psucc)))
+        
+        if lambda_succ:
+            del self.parent[:]
+            self.parent.extend(offspring)
+            self.parent.fitness.values = offspring.fitness.values
+            if self.psucc < self.pthresh:
+                self.pc = (1 - self.cc)*self.pc + sqrt(self.cc * (2 - self.cc)) * self.y
+                self.C = (1-self.ccov)*self.C + self.ccov * numpy.dot(self.pc, self.pc.T)
+            else:
+                self.pc = (1 - self.cc)*self.pc
+                self.C = (1-self.ccov)*self.C + self.ccov * (numpy.dot(self.pc, self.pc.T) + self.cc*(2-self.cc)*self.C)
+        
+        self.A = numpy.linalg.cholesky(self.C)
+        self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
+        del offspring[:]
+        offspring.extend(self.parent + self.sigma * self.y)
+        
