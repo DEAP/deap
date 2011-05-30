@@ -31,8 +31,9 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_bool, 100))
-tools.register("population", list, toolbox.Repeat(tools.individual, 300))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, 
+    tools.attr_bool, 100)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -44,59 +45,63 @@ tools.register("select", operators.selTournament, tournsize=3)
 tools.register("migrate", operators.migRing, n=5, selection=operators.selBest,
     replacement=operators.selRandom)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(64)
 
-    demes = [tools.population(), tools.population(), tools.population()]
-    hof = operators.HallOfFame(1)
-    dstats = [tools.clone(stats_t), tools.clone(stats_t), tools.clone(stats_t)]
-    pstats = tools.clone(stats_t)
-
-    gmeans = operators.Stats()
-    gmeans.register("Avg", operators.mean)
-
+    NBR_DEMES = 3
+    MU = 300
     NGEN = 40
     CXPB = 0.5
     MUTPB = 0.2
-    gen = 1
+    MIG_RATE = 5    
     
-    for deme, stats in zip(demes, dstats):
+    demes = [tools.population(n=MU) for _ in xrange(NBR_DEMES)]
+    hof = operators.HallOfFame(1)
+    stats = operators.Statistics(lambda ind: ind.fitness.values, 4)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
+    
+    stats0 = operators.Statistics(lambda ind: ind[0], 4)
+    stats0.register("Avg", operators.mean)
+    stats0.register("Std", operators.std_dev)
+    stats0.register("Min", min)
+    stats0.register("Max", max)    
+    
+    for idx, deme in enumerate(demes):
         for ind in deme:
             ind.fitness.values = tools.evaluate(ind)
-        stats.update(deme)
+        stats.update(deme, idx)
         hof.update(deme)
-    pstats.update(demes[0]+demes[1]+demes[2])
+    stats.update(demes[0]+demes[1]+demes[2], 3)
     
-    while gen <= NGEN and pstats.data['Max'][-1][0] < 100.0:
+    gen = 1
+    while gen <= NGEN and stats.Max(3)[0] < 100.0:
         print "-- Generation %i --" % gen        
-        for idx, deme, stats in zip(xrange(len(demes)), demes, dstats):
-            print "  -- Deme %i --" % (idx+1)  
+        for idx, deme in enumerate(demes):
+            print "-- Deme %i --" % (idx+1)  
             deme[:] = [tools.clone(ind) for ind in tools.select(deme, len(deme))]
             algorithms.varSimple(tools, deme, cxpb=CXPB, mutpb=MUTPB)
             
             for ind in deme:
                 ind.fitness.values = tools.evaluate(ind)
             
-            stats.update(deme)
+            stats.update(deme, idx)
+            stats0.update(deme, idx)
             hof.update(deme)
-            for key, stat in stats.data.iteritems():
-                print "    %s %s" % (key, stat[-1][0])
-        if gen % 5 == 0:
+            print stats[idx]
+        if gen % MIG_RATE == 0:
             tools.migrate(demes)
-        pstats.update(demes[0]+demes[1]+demes[2])
-        gmeans.update(demes[0]+demes[1]+demes[2])
-        print "  -- Population --"  
-        for key, stat in pstats.data.iteritems():
-            print "    %s %s" % (key, stat[-1][0])        
+        stats.update(demes[0]+demes[1]+demes[2], 3)
+        stats0.update(demes[0]+demes[1]+demes[2], 3)
+        print "-- Population --"
+        print stats[3]
+        print "--- Stats ind[0] ----"
+        print stats0
         gen += 1
     
-    return demes, dstats, pstats, hof, gmeans
+    return demes, stats, hof
 
 if __name__ == "__main__":
     main()

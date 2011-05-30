@@ -22,16 +22,14 @@ from deap import toolbox
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
-creator.create("Population", list)
 
 tools = toolbox.Toolbox()
 # Attribute generator
 tools.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-tools.register("individual", creator.Individual, 
-    toolbox.Repeat(tools.attr_bool, 100))
-tools.register("population", creator.Population,
-    toolbox.Repeat(tools.individual, 300))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, 
+    tools.attr_bool, 100)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -45,7 +43,7 @@ tools.register("select", operators.selTournament, tournsize=3)
 def main():
     random.seed(64)
     
-    pop = tools.population()
+    pop = tools.population(n=300)
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     print "Start of evolution"

@@ -44,27 +44,25 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 tools.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_float, IND_SIZE))
-tools.register("population", list, toolbox.Repeat(tools.individual, 50))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, IND_SIZE)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 tools.register("mate", operators.cxESBlend, alpha=0.1, minstrategy=1e-10)
 tools.register("mutate", operators.mutES, indpb=0.1, minstrategy=1e-10)
 tools.register("select", operators.selTournament, tournsize=3)
 tools.register("evaluate", benchmarks.sphere)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(64)
-    
-    pop = tools.population()
+    MU, LAMBDA = 8, 32
+    pop = tools.population(n=MU)
     hof = operators.HallOfFame(1)
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
-    algorithms.eaMuCommaLambda(tools, pop, mu=8, lambda_=32, 
+    algorithms.eaMuCommaLambda(tools, pop, mu=MU, lambda_=LAMBDA, 
                                cxpb=0.6, mutpb=0.3, ngen=500, 
                                stats=stats, halloffame=hof)
     

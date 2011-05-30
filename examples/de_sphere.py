@@ -17,39 +17,39 @@ from deap import base
 from deap import operators
 from deap import creator
 from deap import toolbox
-
 from deap import benchmarks
 
 
 import random
 import array
 
-# Differential evolution parameters
+# Problem dimension
 NDIM = 10
-NP = 300
-NGEN = 200
-CR = 0.25
-F = 1
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
 tools.register("attr_float", random.uniform, -3, 3)
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, dim=NDIM)
-tools.register("population", toolbox.fillRepeat, list, tools.individual, dim=NP)
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, NDIM)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 tools.register("select", operators.selRandom, n=3)
-tools.register("evaluate", benchmarks.rastrigin)
-
-stats = operators.Stats(lambda ind: ind.fitness.values)
-stats.register("Avg", operators.mean)
-stats.register("Std", operators.std_dev)
-stats.register("Min", min)
-stats.register("Max", max)
+tools.register("evaluate", benchmarks.sphere)
 
 def main():
-    pop = tools.population();
+    # Differential evolution parameters
+    CR = 0.25
+    F = 1  
+    MU = 300
+    NGEN = 200    
+    
+    pop = tools.population(n=MU);
     hof = operators.HallOfFame(1)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
     # Evaluate the individuals
     fitnesses = tools.map(tools.evaluate, pop)
@@ -70,7 +70,7 @@ def main():
         hof.update(pop)
         stats.update(pop)
         
-        print "Generation", g 
+        print "-- Generation %i --" % g
         print stats
             
     print "Best individual is ", hof[0], hof[0].fitness.values[0]

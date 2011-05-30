@@ -31,7 +31,6 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 # kNN parameters
 import knn
 FILE="heart_scale.csv"
-# FILE="spambase.csv"
 N_TRAIN=175
 K=1
 
@@ -59,8 +58,8 @@ tools = toolbox.Toolbox()
 # Attribute generator
 tools.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_bool, classifier.ndim))
-tools.register("population", list, toolbox.Repeat(tools.individual, 100))
+tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_bool, classifier.ndim)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 # Operator registering
 tools.register("evaluate", evalClassifier)
@@ -68,20 +67,19 @@ tools.register("mate", operators.cxUniform, indpb=0.1)
 tools.register("mutate", operators.mutFlipBit, indpb=0.05)
 tools.register("select", operators.selNSGA2)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
 
 def main():
     # random.seed(64)
-    
-    pop = tools.population()
+    MU, LAMBDA = 100, 200
+    pop = tools.population(n=MU)
     hof = operators.HallOfFame(1)
-    stats = tools.clone(stats_t)
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
 
-    algorithms.eaMuPlusLambda(tools, pop, mu=100, lambda_=200,
+    algorithms.eaMuPlusLambda(tools, pop, mu=MU, lambda_=LAMBDA,
                               cxpb=0.5, mutpb=0.2, ngen=40, 
                               stats=stats, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

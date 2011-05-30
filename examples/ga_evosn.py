@@ -62,8 +62,8 @@ tools = toolbox.Toolbox()
 tools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
 
 # Structure initializers
-tools.register("individual", creator.Individual, toolbox.Iterate(tools.network))
-tools.register("population", list, toolbox.Repeat(tools.individual, 300))
+tools.register("individual", toolbox.fillIter, creator.Individual, tools.network)
+tools.register("population", toolbox.fillRepeat, list, tools.individual)
 
 tools.register("evaluate", evalEvoSN, dimension=INPUTS)
 tools.register("mate", operators.cxTwoPoints)
@@ -73,25 +73,23 @@ tools.register("delwire", mutDelWire)
 
 tools.register("select", operators.selNSGA2)
 
-stats_t = operators.Stats(lambda ind: ind.fitness.values)
-stats_t.register("Avg", operators.mean)
-stats_t.register("Std", operators.std_dev)
-stats_t.register("Min", min)
-stats_t.register("Max", max)
-
 def main():
     random.seed(64)
 
-    population = tools.population()
+    population = tools.population(n=300)
     hof = operators.ParetoFront()
-    stats = tools.clone(stats_t)
+    
+    stats = operators.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", operators.mean)
+    stats.register("Std", operators.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = tools.map(tools.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
+    # Evaluate every individuals
+    fitnesses = tools.map(tools.evaluate, population)
+    for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
     
     hof.update(population)
@@ -133,8 +131,10 @@ def main():
         population = tools.select(population+offsprings, n=len(offsprings))
         hof.update(population)
         stats.update(population)
-        for key, stat in stats.data.iteritems():
-            print "  %s %s" % (key, ", ".join(map(str, stat[-1])))        
+        print stats
+        
+        if stats.Min() < (100,):
+            break
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
