@@ -17,7 +17,7 @@ Strongly-typed GP is a more generic GP where each primitive, in addition to have
 .. note::
     Actually, when the user does not specify return or parameters type, a default type is selected by DEAP. On standard GP, because all the primitives use this default type, this behaves as there was no type requirement.
     
-We define a typed primitive set almost the same way than a normal one, but we have to also specify the types used. ::
+We define a typed primitive set almost the same way than a normal one, but we have to specify the types used. ::
     
     pset = gp.PrimitiveSetTyped("MAIN", itertools.repeat("float", 57), "bool", "IN")
 
@@ -87,7 +87,7 @@ The toolbox used is very similar to the one presented in the symbolic regression
 Complete Example
 ================
 
-This is the complete code for the spambase example. Although it does not really differ from the other problems, it is interesting to note how Python can speed up the programming time. Indeed, the spam database is in csv form : with many frameworks, you would have to manually read it, or use a non-standard library, but with Python, you can use the built-in mode :mod:`csv` and, within 2 lines, it is done! The data is now in a the matrix *spam* and can easily be used through all the program :
+This is the complete code for the spambase example. Although it does not really differ from the other problems, it is interesting to note how Python can decrease the programming time. Indeed, the spam database is in csv form : with many frameworks, you would have to manually read it, or use a non-standard library, but with Python, you can use the built-in module :mod:`csv` and, within 2 lines, it is done! The data is now in the matrix *spam* and can easily be used through all the program :
 
 .. literalinclude:: ../examples/gp_spambase.py
     :lines: 20-

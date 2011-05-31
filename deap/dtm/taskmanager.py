@@ -746,9 +746,12 @@ class DtmControl(object):
             This function must be called BEFORE ``start()``. It is also the user responsability to ensure that the same option is set on every worker.
 
         Currently, the supported options are :
-            * **communicationManager** : can be *pympi* (experimental), *mpi4py* (default) or *multiprocTCP* (experimental)
-
-        This function can be called more than once.
+            * **communicationManager** : can be *mpi4py* (default), *pympi* (experimental and probably buggy because of the backend itself), or *multiprocTCP* (experimental)
+            * **loadBalancer** : currently only the default *PDB* is available.
+            * **printSummary** : if set, DTM will print a task execution summary at the end (mean execution time of each tasks, how many tasks did each worker do, ...)
+            * **setTraceMode** : if set, will enable a special DTM tracemode. In this mode, DTM logs all its activity in XML files (one by worker). Mainly for DTM debug purpose, but can also be used for profiling.
+        
+        This function can be called more than once. Any unknown parameter will have no effect.
         """
         if self.isStarted:
             if self.commThread.isRootWorker:
@@ -857,7 +860,7 @@ class DtmControl(object):
 
     def map(self, function, *iterables, **kwargs):
         """
-        A parallel equivalent of the `map() <http://docs.python.org/library/functions.html#map>`_ built-in function. It blocks till the result is ready.
+        A parallel equivalent of the :func:`map` built-in function. It blocks till the result is ready.
         This method chops the iterables into a number of chunks determined by DTM in order to get the most efficient use of the workers.
         It takes any number of iterables (though it will shrink all of them to the len of the smallest one), and any others kwargs that will be
         transmitted as is to the *function* target.
@@ -941,10 +944,10 @@ class DtmControl(object):
 
     def map_async(self, function, iterable, callback=None):
         """
-        A non-blocking variant of the ``DtmControl.map()`` method which returns a result object.
+        A non-blocking variant of the :func:`~deap.dtm.taskmanager.DtmControl.map` method which returns a :class:`~deap.dtm.taskmanager.DtmAsyncResult` object.
         
         .. note::
-            As on version 0.1, callback is not implemented.
+            As on version 0.2, callback is not implemented.
         """
         
         cThread = threading.currentThread()
@@ -1011,8 +1014,8 @@ class DtmControl(object):
 
     def apply(self, function, *args, **kwargs):
         """
-        Equivalent of the `apply() <http://docs.python.org/library/functions.html#apply>`_ built-in function. It blocks till the result is ready.
-        Given this blocks, `apply_async()` is better suited for performing work in parallel.
+        Equivalent of the :func:`apply` built-in function. It blocks till the result is ready.
+        Given this blocks, :func:`~deap.dtm.taskmanager.DtmControl.apply_async()` is better suited for performing work in parallel.
         Additionally, the passed in function is only executed in one of the workers of the pool.
         """
         cThread = threading.currentThread()
@@ -1082,7 +1085,7 @@ class DtmControl(object):
 
     def apply_async(self, function, *args, **kwargs):
         """
-        A non-blocking variant of the apply() method which returns a result object.
+        A non-blocking variant of the :func:`~deap.dtm.taskmanager.DtmControl.apply` method which returns a :class:`~deap.dtm.taskmanager.DtmAsyncResult` object.
         """
         cThread = threading.currentThread()
         currentId = cThread.tid
@@ -1138,7 +1141,7 @@ class DtmControl(object):
 
     def imap(self, function, iterable, chunksize=1):
         """
-        An equivalent of `itertools.imap() <http://docs.python.org/library/itertools.html#itertools.imap>`_.
+        An equivalent of :func:`itertools.imap`.
 
         The chunksize argument can be used to tell DTM how many elements should be computed at the same time.
         For very long iterables using a large value for chunksize can make make the job complete much faster than using the default value of 1.
@@ -1166,22 +1169,25 @@ class DtmControl(object):
 
 
     def filter(self, function, iterable):
-        # Le filtrage s'effectue dans ce thread, mais le calcul est distribue
+        """
+        Same behavior as the built-in :func:`filter`. The filtering is done localy, but the computation is distributed.
+        """
         results = self.map(function, iterable)
         return [item for result, item in zip(results, iterable) if result]
 
-    def repeat(self, function, howManyTimes, *args, **kwargs):
+    def repeat(self, function, n, *args, **kwargs):
         """
-        Repeat the function 
+        Repeat the function *function* *n* times, with given args and keyworded args.
+        Return a list containing the results.
         """
         cThread = threading.currentThread()
         currentId = cThread.tid
 
-        listResults = [None] * howManyTimes
+        listResults = [None] * n
         listTasks = []
         listTids = []
         
-        for index in range(howManyTimes):
+        for index in range(n):
             task = DtmTaskContainer({'tid' : self.idGenerator.tid,
                                     'creatorWid' : self.workerId,
                                     'creatorTid' : currentId,
