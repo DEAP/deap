@@ -19,7 +19,7 @@ First, lets take a look to a very simple distribution example. The sequential pr
         results = map(op, nbrs)
     
 This program simply applies an arbitrary operation to each item of a list. Although it is a very trivial program (and therefore would not benefit from a parallelization), lets assume we want to distribute the workload over a cluster.
-We just use the DTM parallel version of `map()`, and import correctly the taskmanager. ::
+We just import the task manager, and use the DTM parallel version of :func:`map` : ::
     
     from deap import dtm
     
@@ -32,7 +32,7 @@ We just use the DTM parallel version of `map()`, and import correctly the taskma
     
     dtm.start(main)
     
-And we are done! This program can now run over 2, 4, 7, or 256 processors, without changing anything. The operation done in the op() function can be virtually any operation, including other DTM calls.
+And we are done! This program can now run over an arbitrary number of processors, without changing anything. The operation done in the op() function can be virtually any operation, including other DTM calls (which in turn may also spawn sub-tasks, and so on).
 
 .. note::
     The encapsulation of the main execution code into a function is required by DTM, in order to be able to control which worker will start the execution.
@@ -62,7 +62,7 @@ Functions documentation
 DTM + EAP = DEAP
 ================
 
-As part of the DEAP framework, EAP offers an easy DTM integration. As the EAP algorithms use a map function stored in the toolbox to spawn the individuals evaluations (by default, this is simply the traditional Python `map() <http://docs.python.org/library/functions.html#map>`_), the parallelization can be made very easily, by replacing the map operator in the toolbox : ::
+As part of the DEAP framework, EAP offers an easy DTM integration. As the EAP algorithms use a map function stored in the toolbox to spawn the individuals evaluations (by default, this is simply the traditional Python :func:`map`), the parallelization can be made very easily, by replacing the map operator in the toolbox : ::
     
     from deap import dtm
     tools.register("map", dtm.map)
@@ -181,6 +181,17 @@ You may experience some unusual outputs, as task1 and task2 writings will probab
 In doubt, use local variables.
 
 
+Exceptions
+++++++++++
+
+When an Python exception occurs during a task execution, DTM catchs it (and try to run another task on this worker). This exception is then raised in the *parent task*. If there is no such task (the task where the exception occurs is the root task), then it is thrown and DTM stops its execution.
+
+The moment when the exception will be raised in the parent tasks depends on the child task type : if it is a synchronous call (like :func:`~deap.dtm.taskmanager.DtmControl.apply` or :func:`~deap.dtm.taskmanager.DtmControl.map`), it is raised when the parent awake (i.e. as if it has been raised by the DTM function itself). If it is an asynchronous call (like :func:`~deap.dtm.taskmanager.DtmControl.apply_async` or :func:`~deap.dtm.taskmanager.DtmControl.map_async`), the exception is raised when the parent task performs a :func:`~deap.dtm.taskmanager.DtmAsyncResult.get` on the :class:`~deap.dtm.taskmanager.DtmAsyncResult` object. Also, the :func:`~deap.dtm.taskmanager.DtmAsyncResult.successful` will return *False* if an exception occured, without raising it.
+
+.. note::
+    When DTM catches an exception, it outputs a warning on the standard error output stating the exception type and arguments. This warning does not mean that the exception has been raised in the parent task (actually, in some situations, it may take a lot of time if every workers are busy); it is logged only for information purpose.
+
+
 MPI and threads
 +++++++++++++++
 
@@ -243,7 +254,7 @@ DTM supports both synchronous and asynchronous tasks (that do not stop the paren
         while not asyncReturn.ready():
             continue
         
-        # Others instructions...
+        # Other instructions...
     
     dtm.start(main)
 
