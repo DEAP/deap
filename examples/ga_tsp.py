@@ -14,7 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
+import sys;sys.path.append("..")
 import logging
 import random
 import json
@@ -24,8 +24,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from deap import algorithms
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 # gr*.json contains the distance map in list of list style in JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
@@ -36,14 +35,14 @@ IND_SIZE = tsp["TourSize"]
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
+toolbox.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
 
 # Structure initializers
-tools.register("individual", toolbox.fillIter, creator.Individual, tools.indices)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.indices)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
 def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
@@ -51,23 +50,24 @@ def evalTSP(individual):
         distance += distance_map[gene1][gene2]
     return distance,
 
-tools.register("mate", operators.cxPartialyMatched)
-tools.register("mutate", operators.mutShuffleIndexes, indpb=0.05)
-tools.register("select", operators.selTournament, tournsize=3)
-tools.register("evaluate", evalTSP)
+toolbox.register("mate", tools.cxPartialyMatched)
+toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
+toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("evaluate", evalTSP)
 
 def main():
-    random.seed(264)
+    random.seed(169)
 
-    pop = tools.population(n=300)
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=300)
+
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaSimple(tools, pop, 0.7, 0.2, 40, stats, hof)
+    algorithms.eaSimple(toolbox, pop, 0.7, 0.2, 40, stats, hof)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
     

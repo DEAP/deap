@@ -24,20 +24,19 @@ from deap import algorithms
 from deap import base
 from deap import benchmarks
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("attr_float", random.uniform, -5, 5)
+toolbox.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, 3)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_float, 3)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
 def checkBounds(min, max):
     def decCheckBounds(func):
@@ -53,27 +52,27 @@ def checkBounds(min, max):
         return wrapCheckBounds
     return decCheckBounds
 
-tools.register("evaluate", benchmarks.kursawe)
-tools.register("mate", operators.cxBlend, alpha=1.5)
-tools.register("mutate", operators.mutGaussian, mu=0, sigma=3, indpb=0.3)
-tools.register("select", operators.selNSGA2)
+toolbox.register("evaluate", benchmarks.kursawe)
+toolbox.register("mate", tools.cxBlend, alpha=1.5)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=3, indpb=0.3)
+toolbox.register("select", tools.selNSGA2)
 
-tools.decorate("mate", checkBounds(-5, 5))
-tools.decorate("mutate", checkBounds(-5, 5)) 
+toolbox.decorate("mate", checkBounds(-5, 5))
+toolbox.decorate("mutate", checkBounds(-5, 5)) 
 
 def main():
     random.seed(64)
 
     MU, LAMBDA = 50, 100
-    pop = tools.population(n=MU)
-    hof = operators.ParetoFront()
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=MU)
+    hof = tools.ParetoFront()
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaMuPlusLambda(tools, pop, mu=MU, lambda_=LAMBDA, 
+    algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
                               cxpb=0.5, mutpb=0.2, ngen=50, 
                               stats=stats, halloffame=hof)
     
