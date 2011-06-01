@@ -23,8 +23,7 @@ import knn
 from deap import algorithms
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
@@ -34,6 +33,7 @@ FILE="heart_scale.csv"
 N_TRAIN=175
 K=1
 
+# Read data from file
 data = csv.reader(open(FILE, "rb"))
 trainset = list()
 trainlabels = list()
@@ -54,32 +54,32 @@ def evalClassifier(individual):
 creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMulti)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 # Attribute generator
-tools.register("attr_bool", random.randint, 0, 1)
+toolbox.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_bool, classifier.ndim)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_bool, classifier.ndim)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
 # Operator registering
-tools.register("evaluate", evalClassifier)
-tools.register("mate", operators.cxUniform, indpb=0.1)
-tools.register("mutate", operators.mutFlipBit, indpb=0.05)
-tools.register("select", operators.selNSGA2)
+toolbox.register("evaluate", evalClassifier)
+toolbox.register("mate", tools.cxUniform, indpb=0.1)
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("select", tools.selNSGA2)
 
 
 def main():
     # random.seed(64)
     MU, LAMBDA = 100, 200
-    pop = tools.population(n=MU)
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=MU)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
 
-    algorithms.eaMuPlusLambda(tools, pop, mu=MU, lambda_=LAMBDA,
+    algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA,
                               cxpb=0.5, mutpb=0.2, ngen=40, 
                               stats=stats, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

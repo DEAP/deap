@@ -22,8 +22,7 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from deap import algorithms
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 import sortingnetwork as sn
 
@@ -56,39 +55,38 @@ def mutDelWire(individual):
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Gene initializer
-tools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
+toolbox.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
 
 # Structure initializers
-tools.register("individual", toolbox.fillIter, creator.Individual, tools.network)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.network)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
-tools.register("evaluate", evalEvoSN, dimension=INPUTS)
-tools.register("mate", operators.cxTwoPoints)
-tools.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
-tools.register("addwire", mutAddWire, dimension=INPUTS)
-tools.register("delwire", mutDelWire)
-
-tools.register("select", operators.selNSGA2)
+toolbox.register("evaluate", evalEvoSN, dimension=INPUTS)
+toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
+toolbox.register("addwire", mutAddWire, dimension=INPUTS)
+toolbox.register("delwire", mutDelWire)
+toolbox.register("select", tools.selNSGA2)
 
 def main():
     random.seed(64)
 
-    population = tools.population(n=300)
-    hof = operators.ParetoFront()
+    population = toolbox.population(n=300)
+    hof = tools.ParetoFront()
     
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
     # Evaluate every individuals
-    fitnesses = tools.map(tools.evaluate, population)
+    fitnesses = toolbox.map(toolbox.evaluate, population)
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
     
@@ -98,12 +96,12 @@ def main():
     # Begin the evolution
     for g in xrange(NGEN):
         print "-- Generation %i --" % g
-        offsprings = [tools.clone(ind) for ind in population]
+        offsprings = [toolbox.clone(ind) for ind in population]
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             if random.random() < CXPB:
-                tools.mate(ind1, ind2)
+                toolbox.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
         
@@ -111,30 +109,27 @@ def main():
         # original algorithm, we use 3 different mutations subsequently.
         for ind in offsprings:
             if random.random() < MUTPB:
-                tools.mutate(ind)
+                toolbox.mutate(ind)
                 del ind.fitness.values
             if random.random() < ADDPB:
-                tools.addwire(ind)
+                toolbox.addwire(ind)
                 del ind.fitness.values
             if random.random() < DELPB:
-                tools.delwire(ind)
+                toolbox.delwire(ind)
                 del ind.fitness.values
                 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-        fitnesses = tools.map(tools.evaluate, invalid_ind)
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
         print "  Evaluated %i individuals" % len(invalid_ind)
         
-        population = tools.select(population+offsprings, n=len(offsprings))
+        population = toolbox.select(population+offsprings, n=len(offsprings))
         hof.update(population)
         stats.update(population)
         print stats
-        
-        if stats.Min() < (100,):
-            break
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
