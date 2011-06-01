@@ -24,12 +24,10 @@ random.seed(64)     # Random must be seeded before importing cma because it is
                     # This will be fixed in future release.
 
 from deap import base
+from deap import benchmarks
 from deap import cma
 from deap import creator
-from deap import operators
-from deap import toolbox
-
-from deap import benchmarks
+from deap import tools
 
 # Problem size
 N=30
@@ -37,8 +35,8 @@ N=30
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
-tools.register("evaluate", benchmarks.rastrigin)
+toolbox = base.Toolbox()
+toolbox.register("evaluate", benchmarks.rastrigin)
 
 def main():
     # The CMA-ES algorithm takes a population of one individual as argument
@@ -46,17 +44,17 @@ def main():
     # for more details about the rastrigin and other tests for CMA-ES    
     strategy = cma.CMAStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
     pop = strategy.generate(creator.Individual)
-    hof = operators.HallOfFame(1)
-    tools.register("update", strategy.update)
+    hof = tools.HallOfFame(1)
+    toolbox.register("update", strategy.update)
 
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(tools, pop, ngen=250, halloffame=hof, statistics=stats)
+    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, statistics=stats)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
 

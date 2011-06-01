@@ -18,8 +18,7 @@ import random
 from deap import base
 from deap import creator
 from deap import gp
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 # gp_symbreg already defines some useful structures
 import gp_symbreg
@@ -40,36 +39,36 @@ def evalSymbReg(expr, data):
     diff = sum(map(diff_func, values))
     return diff,
 
-tools_ga = toolbox.Toolbox()
+toolbox_ga = base.Toolbox()
 
-tools_ga.register("float", random.uniform, -1, 1)
-tools_ga.register("individual", toolbox.fillRepeat, creator.IndGA, tools_ga.float, 10)
-tools_ga.register("population", toolbox.fillRepeat, list, tools_ga.individual)
+toolbox_ga.register("float", random.uniform, -1, 1)
+toolbox_ga.register("individual", tools.fillRepeat, creator.IndGA, toolbox_ga.float, 10)
+toolbox_ga.register("population", tools.fillRepeat, list, toolbox_ga.individual)
 
-tools_ga.register("select", operators.selTournament, tournsize=3)
-tools_ga.register("mate", operators.cxTwoPoints)
-tools_ga.register("mutate", operators.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
+toolbox_ga.register("select", tools.selTournament, tournsize=3)
+toolbox_ga.register("mate", tools.cxTwoPoints)
+toolbox_ga.register("mutate", tools.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
-tools_gp = gp_symbreg.tools
+tools_gp = gp_symbreg.toolbox
 
 def main():
-    pop_ga = tools_ga.population(n=200)
+    pop_ga = toolbox_ga.population(n=200)
     pop_gp = tools_gp.population(n=200)
     
-    stats_ga = operators.Statistics(lambda ind: ind.fitness.values)
-    stats_ga.register("Avg", operators.mean)
-    stats_ga.register("Std", operators.std_dev)
+    stats_ga = tools.Statistics(lambda ind: ind.fitness.values)
+    stats_ga.register("Avg", tools.mean)
+    stats_ga.register("Std", tools.std_dev)
     stats_ga.register("Min", min)
     stats_ga.register("Max", max)
     
-    stats_gp = operators.Statistics(lambda ind: ind.fitness.values)
-    stats_gp.register("Avg", operators.mean)
-    stats_gp.register("Std", operators.std_dev)
+    stats_gp = tools.Statistics(lambda ind: ind.fitness.values)
+    stats_gp.register("Avg", tools.mean)
+    stats_gp.register("Std", tools.std_dev)
     stats_gp.register("Min", min)
     stats_gp.register("Max", max)
     
-    best_ga = operators.selRandom(pop_ga, 1)[0]
-    best_gp = operators.selRandom(pop_gp, 1)[0]
+    best_ga = tools.selRandom(pop_ga, 1)[0]
+    best_gp = tools.selRandom(pop_gp, 1)[0]
     
     for ind in pop_gp:
         ind.fitness.values = evalSymbReg(ind, best_ga)  
@@ -84,16 +83,16 @@ def main():
         print "-- Generation %i --" % g
     
         # Select and clone the offsprings
-        off_ga = tools_ga.select(pop_ga, n=len(pop_ga))
+        off_ga = toolbox_ga.select(pop_ga, n=len(pop_ga))
         off_gp = tools_gp.select(pop_gp, n=len(pop_gp))
-        off_ga = [tools_ga.clone(ind) for ind in off_ga]        
+        off_ga = [toolbox_ga.clone(ind) for ind in off_ga]        
         off_gp = [tools_gp.clone(ind) for ind in off_gp]
     
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(off_ga[::2], off_ga[1::2]):
             if random.random() < CXPB:
-                tools_ga.mate(ind1, ind2)
+                toolbox_ga.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
     
@@ -105,7 +104,7 @@ def main():
     
         for ind in off_ga:
             if random.random() < MUTPB:
-                tools_ga.mutate(ind)
+                toolbox_ga.mutate(ind)
                 del ind.fitness.values
     
         for ind in off_gp:
@@ -129,8 +128,8 @@ def main():
         stats_ga.update(pop_ga)
         stats_gp.update(pop_gp)
         
-        best_ga = operators.selBest(pop_ga, 1)[0]
-        best_gp = operators.selBest(pop_gp, 1)[0]    
+        best_ga = tools.selBest(pop_ga, 1)[0]
+        best_gp = tools.selBest(pop_gp, 1)[0]    
     
         print "  -- GA statistics --"
         print stats_ga

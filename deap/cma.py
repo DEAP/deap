@@ -270,6 +270,16 @@ class CMA1pLStrategy(object):
 
         self.sigma = self.sigma * exp(1.0/self.d * (self.psucc - self.ptarg)/(1.0-self.ptarg))
         
+        # We use Cholesky since for now we have no use of eigen decomposition
+        # Basically, Cholesky returns a matrix A as C = A*A.T
+        # Eigen decomposition returns two matrix B and D^2 as C = B*D^2*B.T = B*D*D*B.T
+        # So A == B*D
+        # To compute the new individual we need to multiply each vector z by A
+        # as y = centroid + sigma * A*z
+        # So the Cholesky is more straightforward as we don't need to compute 
+        # the squareroot of D^2, and multiply B and D in order to get A, we directly get A.
+        # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
+        # to compute covariance matrix inverse in the step-size evolutionary path computation.
         self.A = numpy.linalg.cholesky(self.C)
         
         arz = numpy.random.standard_normal((self.lambda_, self.dim))

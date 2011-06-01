@@ -19,8 +19,7 @@ import random
 from deap import base
 from deap import benchmarks
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 creator.create("FitnessMax", base.Fitness, weights=(-1.0,))
 creator.create("Particle", list, fitness=creator.FitnessMax, speed=list, 
@@ -46,25 +45,19 @@ def updateParticle(part, best, phi1, phi2):
             part.speed[i] = part.smax
     part[:] = map(operator.add, part, part.speed)
 
-tools = toolbox.Toolbox()
-tools.register("particle", generate, size=2, pmin=-6, pmax=6, smin=-3, smax=3)
-tools.register("population", toolbox.fillRepeat, list, tools.particle)
-tools.register("update", updateParticle, phi1=2.0, phi2=2.0)
-tools.register("evaluate", benchmarks.himmelblau)
+toolbox = base.Toolbox()
+toolbox.register("particle", generate, size=2, pmin=-6, pmax=6, smin=-3, smax=3)
+toolbox.register("population", tools.fillRepeat, list, toolbox.particle)
+toolbox.register("update", updateParticle, phi1=2.0, phi2=2.0)
+toolbox.register("evaluate", benchmarks.himmelblau)
 
 def main():
-    pop = tools.population(n=5)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=5)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
-    
-    stats_ind = operators.Statistics(lambda ind: ind.speed)
-    stats_ind.register("Avg", operators.mean)
-    stats_ind.register("Std", operators.std_dev)
-    stats_ind.register("Min", min)
-    stats_ind.register("Max", max)
 
     GEN = 1000
     best = None
@@ -72,7 +65,7 @@ def main():
     for g in xrange(GEN):
         print "-- Generation %i --" % g
         for part in pop:
-            part.fitness.values = tools.evaluate(part)
+            part.fitness.values = toolbox.evaluate(part)
             if not part.best or part.best.fitness < part.fitness:
                 part.best = creator.Particle(part)
                 part.best.fitness.values = part.fitness.values
@@ -80,13 +73,11 @@ def main():
                 best = creator.Particle(part)
                 best.fitness.values = part.fitness.values
         for part in pop:
-            tools.update(part, best)
+            toolbox.update(part, best)
 
         # Gather all the fitnesses in one list and print the stats
         stats.update(pop)
-        stats_ind.update(pop)
         print stats
-        print stats_ind
         print "  Best so far: %s - %s" % (best, best.fitness)
     
     return pop, stats, best
