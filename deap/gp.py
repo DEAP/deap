@@ -48,11 +48,11 @@ def evaluate(expr, pset=None):
         try:
             return eval(_stringify(expr), pset.func_dict)
         except MemoryError:
-            print("DEAP : Error in tree evaluation : Python cannot evaluate a\
- tree with a height bigger than 90.\nTo avoid this problem, you should use\
- bloat control on your operators.\nSee the DEAP documentation for\
- more information.\nDEAP will now abort.")
-            exit()
+            raise MemoryError,("DEAP : Error in tree evaluation :"
+            " Python cannot evaluate a tree with a height bigger than 90. "
+            "To avoid this problem, you should use bloat control on your "
+            "operators. See the DEAP documentation for more information. "
+            "DEAP will now abort.")
     else:
         return _stringify(expr)
 
@@ -81,11 +81,11 @@ def lambdify(pset, expr):
     try:
         return eval(lstr, dict(pset.func_dict))
     except MemoryError:
-        print("DEAP : Error in tree evaluation : Python cannot evaluate a tree\
- with a height bigger than 90.\nTo avoid this problem, you should use\
- bloat control on your operators.\nSee the DEAP documentation for\
- more information.\nDEAP will now abort.")
-        exit()
+        raise MemoryError,("DEAP : Error in tree evaluation :"
+        " Python cannot evaluate a tree with a height bigger than 90. "
+        "To avoid this problem, you should use bloat control on your "
+        "operators. See the DEAP documentation for more information. "
+        "DEAP will now abort.")
 
 def lambdifyList(expr):
     """Return a lambda function created from a list of trees. The first 
