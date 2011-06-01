@@ -24,41 +24,40 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
                     # This will be fixed in future release.
 
 from deap import base
+from deap import benchmarks
 from deap import cma
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
-from deap import benchmarks
 N=5
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
 # for more details about the rastrigin and other tests for CMA-ES
-tools = toolbox.Toolbox()
-tools.register("attr", random.uniform, -1, 5)
-tools.register("evaluate", benchmarks.sphere)
+toolbox = base.Toolbox()
+toolbox.register("attr", random.uniform, -1, 5)
+toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
     # The CMA-ES algorithm takes a population of one individual as argument
     
-    parent = toolbox.fillRepeat(creator.Individual, tools.attr, N)
-    parent.fitness.values = tools.evaluate(parent)
+    parent = tools.fillRepeat(creator.Individual, toolbox.attr, N)
+    parent.fitness.values = toolbox.evaluate(parent)
     
-    strategy = cma.CMA1pLStrategy(parent, sigma=5.0, lambda_=2)
-    tools.register("update", strategy.update)
+    strategy = cma.CMA1pLStrategy(parent, sigma=5.0, lambda_=8)
+    toolbox.register("update", strategy.update)
     pop = strategy.generate(creator.Individual)
     
-    hof = operators.HallOfFame(1)    
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    hof = tools.HallOfFame(1)    
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(tools, pop, ngen=600, halloffame=hof, statistics=stats)
+    cma.esCMA(toolbox, pop, ngen=600, halloffame=hof, statistics=stats)
     
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
 

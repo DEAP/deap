@@ -15,13 +15,12 @@
 
 import random
 
-import sortingnetwork as sn
 from deap import algorithms
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
+import sortingnetwork as sn
 INPUTS = 12
 
 def evalNetwork(host, parasite, dimension):
@@ -62,27 +61,27 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Host", list, fitness=creator.FitnessMin)
 creator.create("Parasite", list, fitness=creator.FitnessMax)
 
-htools = toolbox.Toolbox()
-ptools = toolbox.Toolbox()
+htoolbox = base.Toolbox()
+ptoolbox = base.Toolbox()
 
-htools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
-htools.register("individual", toolbox.fillIter, creator.Host, htools.network)
-htools.register("population", toolbox.fillRepeat, list, htools.individual)
+htoolbox.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
+htoolbox.register("individual", tools.fillIter, creator.Host, htoolbox.network)
+htoolbox.register("population", tools.fillRepeat, list, htoolbox.individual)
 
-ptools.register("parasite", getParasite, dimension=INPUTS)
-ptools.register("individual", toolbox.fillRepeat, creator.Parasite, ptools.parasite, 20)
-ptools.register("population", toolbox.fillRepeat, list, ptools.individual)
+ptoolbox.register("parasite", getParasite, dimension=INPUTS)
+ptoolbox.register("individual", tools.fillRepeat, creator.Parasite, ptoolbox.parasite, 20)
+ptoolbox.register("population", tools.fillRepeat, list, ptoolbox.individual)
 
-htools.register("evaluate", evalNetwork, dimension=INPUTS)
-htools.register("mate", operators.cxTwoPoints)
-htools.register("mutate", mutNetwork, dimension=INPUTS, mutpb=0.2, addpb=0.01, 
+htoolbox.register("evaluate", evalNetwork, dimension=INPUTS)
+htoolbox.register("mate", tools.cxTwoPoints)
+htoolbox.register("mutate", mutNetwork, dimension=INPUTS, mutpb=0.2, addpb=0.01, 
     delpb=0.01, indpb=0.05)
-htools.register("select", operators.selTournament, tournsize=3)
+htoolbox.register("select", tools.selTournament, tournsize=3)
 
-ptools.register("mate", operators.cxTwoPoints)
-ptools.register("indMutate", operators.mutFlipBit, indpb=0.05)
-ptools.register("mutate", mutParasite, indmut=ptools.indMutate, indpb=0.05)
-ptools.register("select", operators.selTournament, tournsize=3)
+ptoolbox.register("mate", tools.cxTwoPoints)
+ptoolbox.register("indMutate", tools.mutFlipBit, indpb=0.05)
+ptoolbox.register("mutate", mutParasite, indmut=ptoolbox.indMutate, indpb=0.05)
+ptoolbox.register("select", tools.selTournament, tournsize=3)
 
 def cloneHost(individual):
     """Specialized copy function that will work only on a list of tuples
@@ -100,18 +99,18 @@ def cloneParasite(individual):
     clone.fitness.values = individual.fitness.values
     return clone
 
-htools.register("clone", cloneHost)
-ptools.register("clone", cloneParasite)
+htoolbox.register("clone", cloneHost)
+ptoolbox.register("clone", cloneParasite)
 
 def main():
     random.seed(64)
     
-    hosts = htools.population(n=3000)
-    parasites = ptools.population(n=3000)
-    hof = operators.HallOfFame(1)
-    hstats = operators.Statistics(lambda ind: ind.fitness.values)
-    hstats.register("Avg", operators.mean)
-    hstats.register("Std", operators.std_dev)
+    hosts = htoolbox.population(n=300)
+    parasites = ptoolbox.population(n=300)
+    hof = tools.HallOfFame(1)
+    hstats = tools.Statistics(lambda ind: ind.fitness.values)
+    hstats.register("Avg", tools.mean)
+    hstats.register("Std", tools.std_dev)
     hstats.register("Min", min)
     hstats.register("Max", max)
     
@@ -119,7 +118,7 @@ def main():
     H_CXPB, H_MUTPB = 0.5, 0.3
     P_CXPB, P_MUTPB = 0.5, 0.3
     
-    fits = htools.map(htools.evaluate, hosts, parasites)
+    fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
     for host, parasite, fit in zip(hosts, parasites, fits):
         host.fitness.values = parasite.fitness.values = fit
     
@@ -128,15 +127,15 @@ def main():
     
     for g in range(MAXGEN):
         print "-- Generation %i --" % g
-        hosts = htools.select(hosts, len(hosts))
-        hosts = [htools.clone(ind) for ind in hosts]
-        parasites = ptools.select(parasites, len(parasites))
-        parasites = [ptools.clone(ind) for ind in parasites]
+        hosts = htoolbox.select(hosts, len(hosts))
+        hosts = [htoolbox.clone(ind) for ind in hosts]
+        parasites = ptoolbox.select(parasites, len(parasites))
+        parasites = [ptoolbox.clone(ind) for ind in parasites]
         
-        hosts = algorithms.varSimple(htools, hosts, H_CXPB, H_MUTPB)
-        parasites = algorithms.varSimple(ptools, parasites, P_CXPB, P_MUTPB)
+        hosts = algorithms.varSimple(htoolbox, hosts, H_CXPB, H_MUTPB)
+        parasites = algorithms.varSimple(ptoolbox, parasites, P_CXPB, P_MUTPB)
         
-        fits = htools.map(htools.evaluate, hosts, parasites)
+        fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
         for host, parasite, fit in zip(hosts, parasites, fits):
             host.fitness.values = parasite.fitness.values = fit
         

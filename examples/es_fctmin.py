@@ -18,51 +18,48 @@ import sys
 import random
 import logging
 
+logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+
 from deap import algorithms
 from deap import base
-from deap import creator
-from deap import operators
-from deap import toolbox
-
 from deap import benchmarks
-
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+from deap import creator
+from deap import tools
 
 IND_SIZE = 30
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 creator.create("Strategy", array.array, typecode='d')
 
-tools.register("strategy", toolbox.fillRepeat, creator.Strategy, lambda: 1., IND_SIZE) 
+toolbox.register("strategy", tools.fillRepeat, creator.Strategy, lambda: 1., IND_SIZE) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin, strategy=tools.strategy)
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin, strategy=toolbox.strategy)
 
 # Attribute generator
-tools.register("attr_float", random.uniform, -3, 3)
+toolbox.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, IND_SIZE)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
-tools.register("mate", operators.cxESBlend, alpha=0.1, minstrategy=1e-10)
-tools.register("mutate", operators.mutES, indpb=0.1, minstrategy=1e-10)
-tools.register("select", operators.selTournament, tournsize=3)
-tools.register("evaluate", benchmarks.sphere)
+toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_float, IND_SIZE)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("mate", tools.cxESBlend, alpha=0.1, minstrategy=1e-10)
+toolbox.register("mutate", tools.mutES, indpb=0.1, minstrategy=1e-10)
+toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
     random.seed(64)
     MU, LAMBDA = 8, 32
-    pop = tools.population(n=MU)
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=MU)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaMuCommaLambda(tools, pop, mu=MU, lambda_=LAMBDA, 
+    algorithms.eaMuCommaLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
                                cxpb=0.6, mutpb=0.3, ngen=500, 
                                stats=stats, halloffame=hof)
     
