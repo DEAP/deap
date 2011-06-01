@@ -49,7 +49,7 @@ toolbox_ga.register("select", tools.selTournament, tournsize=3)
 toolbox_ga.register("mate", tools.cxTwoPoints)
 toolbox_ga.register("mutate", tools.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
-tools_gp = gp_symbreg.tools
+tools_gp = gp_symbreg.toolbox
 
 def main():
     pop_ga = toolbox_ga.population(n=200)
