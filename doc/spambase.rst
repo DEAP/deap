@@ -65,7 +65,7 @@ The evaluation function is very simple : it picks 400 mails at random in the spa
     
     def evalSpambase(individual):
         # Transform the tree expression in a callable function
-        func = tools.lambdify(expr=individual)
+        func = toolbox.lambdify(expr=individual)
         # Randomly sample 400 mails in the spam database (defined before)
         spam_samp = random.sample(spam, 400)
         # Evaluate the sum of correctly identified mail as spam
@@ -77,11 +77,11 @@ Toolbox
 
 The toolbox used is very similar to the one presented in the symbolic regression example, but notice that we now use specific STGP operators for crossovers and mutations : ::
     
-    tools.register("evaluate", evalSpambase)
-    tools.register("select", operators.selTournament, tournsize=3)
-    tools.register("mate", operators.cxTypedTreeOnePoint)
-    tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-    tools.register("mutate", operators.mutTypedTreeUniform, expr=tools.expr_mut)
+    toolbox.register("evaluate", evalSpambase)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("mate", gp.cxTypedOnePoint)
+    toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+    toolbox.register("mutate", gp.mutTypedUniform, expr=toolbox.expr_mut))
     
 
 Complete Example

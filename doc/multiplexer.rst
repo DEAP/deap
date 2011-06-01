@@ -55,7 +55,7 @@ To speed up the evaluation, the computation of the input/output pairs is done at
 After that, the evaluation function is trivial, as we have both inputs and output values. The fitness is then the number of well predicted outputs over the 2048 cases (for a 3-8 multiplexer). ::
 
     def evalMultiplexer(individual):
-        func = tools.lambdify(expr=individual)
+        func = toolbox.lambdify(expr=individual)
         good = sum((func(*(inputs[i])) == outputs[i] for i in range(2 ** MUX_TOTAL_LINES)))
         return good,
 

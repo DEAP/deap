@@ -56,15 +56,15 @@ Toolbox
 
 Now, we want to register some parameters specific to the evolution process. In DEAP, this is done through the toolbox : ::
     
-    tools = toolbox.Toolbox()
-    tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
-    tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
-    tools.register("population", toolbox.fillRepeat, list, tools.individual, 100)
-    tools.register("lambdify", gp.lambdify, pset=pset)
+    toolbox = base.Toolbox()
+    toolbox.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
+    toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.expr)
+    toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+    toolbox.register("lambdify", gp.lambdify, pset=pset)
 
     def evalSymbReg(individual):
         # Transform the tree expression in a callable function
-        func = tools.lambdify(expr=individual)
+        func = toolbox.lambdify(expr=individual)
         # Evaluate the sum of squared difference between the expression
         # and the real function : x**4 + x**3 + x**2 + x
         values = (x/10. for x in xrange(-10,10))
@@ -72,13 +72,13 @@ Now, we want to register some parameters specific to the evolution process. In D
         diff = sum(map(diff_func, values))
         return diff,
 
-    tools.register("evaluate", evalSymbReg)
-    tools.register("select", operators.selTournament, tournsize=3)
-    tools.register("mate", operators.cxTreeUniformOnePoint)
-    tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-    tools.register('mutate', operators.mutTreeUniform, expr=tools.expr_mut)
+    toolbox.register("evaluate", evalSymbReg)
+    toolbox.register("select", tools.selTournament, tournsize=3)
+    toolbox.register("mate", gp.cxUniformOnePoint)
+    toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+    toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut)
 
-First, a toolbox instance is created (in some problem types like coevolution, you may consider creating more than one toolbox). Then, we can register any parameters. The first lines register how to create an individual (by calling gp.generateRamped with the previously defined primitive set), and how to create the population (by repeating the individual initialization 100 times).
+First, a toolbox instance is created (in some problem types like coevolution, you may consider creating more than one toolbox). Then, we can register any parameters. The first lines register how to create an individual (by calling gp.generateRamped with the previously defined primitive set), and how to create the population (by repeating the individual initialization).
 
 We may now introduce the evaluation function, which will receive an individual as input, and return the corresponding fitness. This function uses the `lambdify` function previously defined to transform the individual into its executable form -- that is, a program. After that, the evaluation is only simple maths, where the difference between the values produced by the evaluated individual and the real values are squared and summed to compute the RMSE, which is returned as the fitness of the individual.
 
@@ -99,11 +99,11 @@ Statistics
 
 Although optional, statistics are often useful in evolutionary programming. DEAP offers a simple class which can handle most of the "boring work". In this case, we want to keep four measures over the fitness distribution : the mean, the standard deviation, the minimum and the maximum. ::
     
-    stats_t = operators.Stats(lambda ind: ind.fitness.values)
-    stats_t.register("Avg", operators.mean)
-    stats_t.register("Std", operators.std_dev)
-    stats_t.register("Min", min)
-    stats_t.register("Max", max)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
 
 Launching the evolution
@@ -114,14 +114,19 @@ At this point, DEAP has all the information needed to begin the evolutionary pro
     def main():
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-        pop = tools.population()
-        hof = operators.HallOfFame(1)
-        stats = tools.clone(stats_t)
+        stats = tools.Statistics(lambda ind: ind.fitness.values)
+        stats.register("Avg", tools.mean)
+        stats.register("Std", tools.std_dev)
+        stats.register("Min", min)
+        stats.register("Max", max)
         
-        algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, stats, halloffame=hof)
+        pop = toolbox.population(n=300)         # Population length
+        hof = tools.HallOfFame(1)
         
-        # eaSimple() will return when the evolution reach the stopping criterion
+        algorithms.eaSimple(toolbox, pop, 0.5, 0.1, 40, stats, halloffame=hof)
         logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+        
+        return pop, stats, hof
 
     if __name__ == "__main__":
         main()
