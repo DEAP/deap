@@ -38,14 +38,15 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 # for more details about the rastrigin and other tests for CMA-ES
 tools = toolbox.Toolbox()
 tools.register("attr", random.uniform, -1, 5)
-tools.register("evaluate", benchmarks.ackley)
+tools.register("evaluate", benchmarks.sphere)
 
 def main():
     # The CMA-ES algorithm takes a population of one individual as argument
     
     parent = toolbox.fillRepeat(creator.Individual, tools.attr, N)
     parent.fitness.values = tools.evaluate(parent)
-    strategy = cma.CMA11Strategy(parent, sigma=5.0)
+    
+    strategy = cma.CMA1pLStrategy(parent, sigma=5.0, lambda_=2)
     tools.register("update", strategy.update)
     pop = strategy.generate(creator.Individual)
     

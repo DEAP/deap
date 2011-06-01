@@ -26,6 +26,7 @@ from math import sqrt, log, exp
 import numpy
 import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
+import copy
 
 numpy.random.seed(random.randint(0, sys.maxint))
 
@@ -217,7 +218,7 @@ class CMAStrategy(object):
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
         
-class CMA11Strategy(object):
+class CMA1pLStrategy(object):
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
         self.sigma = sigma
@@ -232,36 +233,48 @@ class CMA11Strategy(object):
         self.psucc = self.ptarg
         
     def computeParams(self, params):
-        self.d = params.get("d", 1.0 + self.dim/2.0)
-        self.ptarg = params.get("ptarg", 2.0/11.0)
-        self.cp = params.get("cp", 1.0/12.0)
+        # Selection :
+        self.lambda_ = params.get("lambda_", 1)
+        
+        # Step size control :
+        self.d = params.get("d", 1.0 + self.dim/(2.0*self.lambda_))
+        self.ptarg = params.get("ptarg", 1.0/(5+sqrt(self.lambda_)/2.0))
+        self.cp = params.get("cp", self.ptarg*self.lambda_/(2+self.ptarg*self.lambda_))
+        
+        # Covariance matrix adaptation
         self.cc = params.get("cc", 2.0/(self.dim+2.0))
-        self.ccov = params.get("ccov", 2.0/(self.dim*self.dim+6.0))
+        self.ccov = params.get("ccov", 2.0/(self.dim**2 + 6.0))
         self.pthresh = params.get("pthresh", 0.44)
     
     def generate(self, ind_init):
-        self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
-        return (ind_init(self.parent + self.sigma * self.y),)
+        # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
+        arz = numpy.random.standard_normal((self.lambda_, self.dim))
+        arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)        
+        return [ind_init(arzi) for arzi in arz]
     
-    def update(self, offsprings):
-        offspring = offsprings[0]
-        lambda_succ = self.parent.fitness <= offspring.fitness
-        self.psucc = (1-self.cp)*self.psucc + self.cp*lambda_succ
-        self.sigma = self.sigma * exp(1.0/self.d * (self.psucc - self.ptarg/(1-self.ptarg)*(1-self.psucc)))
+    def update(self, population):
+        population.sort(key=lambda ind: ind.fitness, reverse=True)
+        lambda_succ = sum(self.parent.fitness <= ind.fitness for ind in population)
+        p_succ = float(lambda_succ) / self.lambda_
+        self.psucc = (1-self.cp)*self.psucc + self.cp*p_succ
         
-        if lambda_succ:
-            del self.parent[:]
-            self.parent.extend(offspring)
-            self.parent.fitness.values = offspring.fitness.values
+        if self.parent.fitness <= population[0].fitness:
+            x_step = (population[0] - numpy.array(self.parent)) / self.sigma
+            self.parent = copy.deepcopy(population[0])
             if self.psucc < self.pthresh:
-                self.pc = (1 - self.cc)*self.pc + sqrt(self.cc * (2 - self.cc)) * self.y
+                self.pc = (1 - self.cc)*self.pc + sqrt(self.cc * (2 - self.cc)) * x_step
                 self.C = (1-self.ccov)*self.C + self.ccov * numpy.dot(self.pc, self.pc.T)
             else:
                 self.pc = (1 - self.cc)*self.pc
                 self.C = (1-self.ccov)*self.C + self.ccov * (numpy.dot(self.pc, self.pc.T) + self.cc*(2-self.cc)*self.C)
+
+        self.sigma = self.sigma * exp(1.0/self.d * (self.psucc - self.ptarg)/(1.0-self.ptarg))
         
         self.A = numpy.linalg.cholesky(self.C)
-        self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
-        del offspring[:]
-        offspring.extend(self.parent + self.sigma * self.y)
+        
+        arz = numpy.random.standard_normal((self.lambda_, self.dim))
+        arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)
+        for ind, arzi in zip(population, arz):
+            del ind[:]
+            ind.extend(arzi)
         
