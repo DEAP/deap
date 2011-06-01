@@ -27,8 +27,8 @@ from deap import creator
 from deap import operators
 from deap import toolbox
 
-creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
-creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMax)
+creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
 tools = toolbox.Toolbox()
 

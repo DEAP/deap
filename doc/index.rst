@@ -15,6 +15,7 @@ Evolutionary Content
    algorithms
    gp
    extensions
+   benchmarks
    
 Tutorials
 ---------

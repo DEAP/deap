@@ -17,39 +17,38 @@ import random
 
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 # Attribute generator
-tools.register("attr_bool", random.randint, 0, 1)
+toolbox.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-tools.register("individual", toolbox.fillRepeat, creator.Individual, 
-    tools.attr_bool, 100)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillRepeat, creator.Individual, 
+    toolbox.attr_bool, 100)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
     return sum(individual),
 
 # Operator registering
-tools.register("evaluate", evalOneMax)
-tools.register("mate", operators.cxTwoPoints)
-tools.register("mutate", operators.mutFlipBit, indpb=0.05)
-tools.register("select", operators.selTournament, tournsize=3)
+toolbox.register("evaluate", evalOneMax)
+toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
     random.seed(64)
     
-    pop = tools.population(n=300)
+    pop = toolbox.population(n=300)
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
     print "Start of evolution"
     
     # Evaluate the entire population
-    fitnesses = map(tools.evaluate, pop)
+    fitnesses = map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
@@ -60,25 +59,25 @@ def main():
         print "-- Generation %i --" % g
         
         # Select the next generation individuals
-        offsprings = tools.select(pop, n=len(pop))
+        offsprings = toolbox.select(pop, n=len(pop))
         # Clone the selected individuals
-        offsprings = map(tools.clone, offsprings)
+        offsprings = map(toolbox.clone, offsprings)
     
         # Apply crossover and mutation on the offsprings
         for child1, child2 in zip(offsprings[::2], offsprings[1::2]):
             if random.random() < CXPB:
-                tools.mate(child1, child2)
+                toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
 
         for mutant in offsprings:
             if random.random() < MUTPB:
-                tools.mutate(mutant)
+                toolbox.mutate(mutant)
                 del mutant.fitness.values
     
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-        fitnesses = map(tools.evaluate, invalid_ind)
+        fitnesses = map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
@@ -102,7 +101,7 @@ def main():
     
     print "-- End of (successful) evolution --"
     
-    best_ind = operators.selBest(pop, 1)[0]
+    best_ind = tools.selBest(pop, 1)[0]
     print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
 
 if __name__ == "__main__":

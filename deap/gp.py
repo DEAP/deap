@@ -350,7 +350,335 @@ def _generate(pset, min_, max_, condition, type_=__type__):
         expr = [expr]
     return expr
 
+
+######################################
+# GP Crossovers                      #
+######################################
+
+def cxUniformOnePoint(ind1, ind2):
+    """Randomly select in each individual and exchange each subtree with the
+    point as root between each individual.
+    """    
+    try:
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
+    except ValueError:
+        return ind1, ind2
+
+    sub1 = ind1.searchSubtreeDF(index1)
+    sub2 = ind2.searchSubtreeDF(index2)
+    ind1.setSubtreeDF(index1, sub2)
+    ind2.setSubtreeDF(index2, sub1)
+    
+    return ind1, ind2
+    
+## Strongly Typed GP crossovers
+def cxTypedOnePoint(ind1, ind2):
+    """Randomly select in each individual and exchange each subtree with the 
+    point as root between each individual. Since the node are strongly typed, 
+    the operator then make sure the type of second node correspond to the type
+    of the first node. If it doesn't, it randomly selects another point in the
+    second individual and try again. It tries up to *5* times before
+    giving up on the crossover.
+    
+    .. note::
+       This crossover is subject to change for a more effective method 
+       of selecting the crossover points.
+    """
+    # choose the crossover point in each individual
+    try:
+        index1 = random.randint(1, ind1.size-1)
+        index2 = random.randint(1, ind2.size-1)
+    except ValueError:
+        return ind1, ind2
+        
+    subtree1 = ind1.searchSubtreeDF(index1)
+    subtree2 = ind2.searchSubtreeDF(index2)
+
+    type1 = subtree1.root.ret
+    type2 = subtree2.root.ret 
+
+    # try to mate the trees
+    # if no crossover point is found after 5 it gives up trying
+    # mating individuals.
+    tries = 0
+    MAX_TRIES = 5
+    while not (type1 == type2) and tries < MAX_TRIES:
+        index2 = random.randint(1, ind2.size-1)
+        subtree2 = ind2.searchSubtreeDF(index2)
+        type2 = subtree2.root.ret
+        tries += 1
+    
+    if type1 == type2:
+        sub1 = ind1.searchSubtreeDF(index1)
+        sub2 = ind2.searchSubtreeDF(index2)
+        ind1.setSubtreeDF(index1, sub2)
+        ind2.setSubtreeDF(index2, sub1)
+    
+    return ind1, ind2
+
+
+def cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
+    """Randomly select in each individual and exchange each subtree with the
+    point as root between each individual.
+
+    As defined by Koza, non-terminal primitives are selected for 90% of the
+    crossover points, and terminals for 10%. This probability can be adjusted
+    with the *cxtermpb* argument.
+    """
+    size1, size2 = ind1.size, ind2.size
+
+    if size1 == 1 or size2 == 1:
+        return ind1, ind2
+
+    termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
+    termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
+    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
+    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
+
+    # Crossovers should take primitives 90% of time and terminals 10%
+    if random.random() < cxtermpb or len(primList1) == 0:
+        # Choose a terminal from the first parent
+        index1 = random.choice(termsList1)
+        subtree1 = ind1.searchSubtreeDF(index1)
+    else:
+        # Choose a primitive (non-terminal) from the first parent
+        index1 = random.choice(primList1)
+        subtree1 = ind1.searchSubtreeDF(index1)
+
+    if random.random() < cxtermpb or len(primList2) == 0:
+        # Choose a terminal from the second parent
+        index2 = random.choice(termsList2)
+        subtree2 = ind2.searchSubtreeDF(index2)
+    else:
+        # Choose a primitive (non-terminal) from the second parent
+        index2 = random.choice(primList2)
+        subtree2 = ind2.searchSubtreeDF(index2)
+
+    ind1.setSubtreeDF(index1, subtree2)
+    ind2.setSubtreeDF(index2, subtree1)
+
+    return ind1, ind2
+
+## Strongly Typed GP crossovers
+def cxTypedKozaOnePoint(ind1, ind2, cxtermpb=0.1):
+    """Randomly select in each individual and exchange each subtree with the
+    point as root between each individual. Since the node are strongly typed,
+    the operator then make sure the type of second node correspond to the type
+    of the first node. If it doesn't, it randomly selects another point in the
+    second individual and try again. It tries up to *5* times before
+    giving up on the crossover.
+
+    As defined by Koza, non-terminal primitives are selected for 90% of the
+    crossover points, and terminals for 10%. This probability can be adjusted
+    with the *cxtermpb* argument.
+    
+    .. note::
+       This crossover is subject to change for a more effective method
+       of selecting the crossover points.
+    """
+    size1, size2 = ind1.size, ind2.size
+
+    if size1 == 1 or size2 == 1:
+        return ind1, ind2
+
+    termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
+    termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
+    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
+    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
+
+    # Crossovers should take primitives 90% of time and terminals 10%
+    if random.random() < cxtermpb or len(primList1) == 0:
+        # Choose a terminal from the first parent
+        index1 = random.choice(termsList1)
+        subtree1 = ind1.searchSubtreeDF(index1)
+    else:
+        # Choose a primitive (non-terminal) from the first parent
+        index1 = random.choice(primList1)
+        subtree1 = ind1.searchSubtreeDF(index1)
+
+    if random.random() < cxtermpb or len(primList2) == 0:
+        # Choose a terminal from the second parent
+        index2 = random.choice(termsList2)
+        subtree2 = ind2.searchSubtreeDF(index2)
+    else:
+        # Choose a primitive (non-terminal) from the second parent
+        index2 = random.choice(primList2)
+        subtree2 = ind2.searchSubtreeDF(index2)
+
+    type1 = subtree1.root.ret
+    type2 = subtree2.root.ret
+
+    # try to mate the trees
+    # if no crossover point is found after MAX_CX_TRY
+    # the children are returned without modifications.
+    tries = 0
+    MAX_CX_TRY = 5
+    while not (type1 is type2) and tries != MAX_CX_TRY:
+        if random.random() < cxtermpb or len(primList2) == 0:
+            index2 = random.choice(termsList2)
+            subtree2 = ind2.searchSubtreeDF(index2)
+        else:
+            index2 = random.choice(primList2)
+            subtree2 = ind2.searchSubtreeDF(index2)
+
+        type2 = subtree2.root.ret
+
+        tries += 1
+
+
+    if type1 is type2:
+        ind1.setSubtreeDF(index1, subtree2)
+        ind2.setSubtreeDF(index2, subtree1)
+
+    return ind1, ind2
+
+######################################
+# GP Mutations                       #
+######################################
+def mutUniform(individual, expr):
+    """Randomly select a point in the Tree, then replace the subtree with
+    the point as a root by a randomly generated expression. The expression
+    is generated using the method `expr`.
+    """
+    index = random.randint(0, individual.size-1)
+    individual.setSubtreeDF(index, expr(pset=individual.pset))
+    
+    return individual,
+
+## Strongly Typed GP mutations
+def mutTypedUniform(individual, expr):
+    """The mutation of strongly typed GP expression is pretty easy. First,
+    it finds a subtree. Second, it has to identify the return type of the root
+    of  this subtree. Third, it generates a new subtree with a root's type
+    corresponding to the original subtree root's type. Finally, the old
+    subtree is replaced by the new subtree.
+    """
+    index = random.randint(0, individual.size-1)
+    subtree = individual.searchSubtreeDF(index)  
+    individual.setSubtreeDF(index, expr(pset=individual.pset,
+                                        type_=subtree.root.ret))
+    
+    return individual,
+
+
+def mutTypedNodeReplacement(individual):
+    """This operator mutates the individual *individual* that are subjected to
+    it. The operator randomly chooses a primitive in the individual
+    and replaces it with a randomly selected primitive in *pset* that takes
+    the same number of arguments.
+
+    This operator works on strongly typed trees as on normal GP trees.
+    """
+    if individual.size < 2:
+        return individual,
+
+    index = random.randint(1, individual.size-1)
+    node = individual.searchSubtreeDF(index)
+
+    if node.size == 1:
+        subtree = random.choice(individual.pset.terminals[node.root.ret])()
+        individual.setSubtreeDF(index, subtree)
+
+    else:
+        # We're going to replace one of the *node* children
+        index = random.randint(1, len(node) - 1)
+        if node[index].size > 1:
+            prim_set = individual.pset.primitives[node[index].root.ret]
+            repl_node = random.choice(prim_set)
+            while repl_node.args != node[index].root.args:
+                repl_node = random.choice(prim_set)
+            node[index][0] = repl_node
+        else:
+            term_set = individual.pset.terminals[node[index].root.ret]
+            repl_node = random.choice(term_set)()
+            node[index] = repl_node
+
+    return individual,
+
+def mutTypedEphemeral(individual, mode):
+    """This operator works on the constants of the tree *ind*.
+    In  *mode* ``"one"``, it will change the value of **one**
+    of the individual ephemeral constants by calling its generator function.
+    In  *mode* ``"all"``, it will change the value of **all**
+    the ephemeral constants.
+
+    This operator works on strongly typed trees as on normal GP trees.
+    """
+    if mode not in ["one", "all"]:
+        raise ValueError("Mode must be one of \"one\" or \"all\"")
+    ephemerals = []
+    for i in xrange(1, individual.size):
+        subtree = individual.searchSubtreeDF(i)
+        if hasattr(subtree.root.obj, 'regen'):
+            ephemerals.append(i)
+
+    if len(ephemerals) > 0:
+        if mode == "one":
+            ephemerals = [random.choice(ephemerals)]
+        elif mode == "all":
+            pass
+
+        for i in ephemerals:
+            individual.searchSubtreeDF(i).regen()
+            
+    return individual,
+
+def mutShrink(individual):
+    """This operator shrinks the individual *individual* that are subjected to
+    it. The operator randomly chooses a branch in the individual and replaces
+    it with one of the branch's arguments (also randomly chosen).
+
+    This operator is not usable with STGP.
+    """
+    if individual.size < 3 or individual.height <= 2:
+        return individual,       # We don't want to "shrink" the root
+
+    index = random.randint(1, individual.size-2)
+    
+    # Shrinking a terminal is useless
+    while individual.searchSubtreeDF(index).size == 1:
+        index = random.randint(1, individual.size-2)
+
+    deleted_node = individual.searchSubtreeDF(index)
+    repl_subtree_index = random.randint(1, len(deleted_node)-1)
+
+    individual.setSubtreeDF(index, deleted_node[repl_subtree_index])
+
+    return individual,
+
+def mutTypedInsert(individual):
+    """This operator mutate the GP tree of the *individual* passed and the
+    primitive set *expr*, by inserting a new branch at a random position in a
+    tree, using the original subtree at this position as one argument,
+    and if necessary randomly selecting terminal primitives
+    to complete the arguments of the inserted node.
+    Note that the original subtree will become one of the children of the new
+    primitive inserted, but not perforce the first (its position is
+    randomly selected if the new primitive has more than one child)
+
+    This operator works on strongly typed trees as on normal GP trees.
+    """
+    pset = individual.pset
+    index = random.randint(0, individual.size-1)
+    node = individual.searchSubtreeDF(index)
+    if node.size > 1:     # We do not need to deepcopy the leafs
+        node = copy.deepcopy(node)
+    
+    new_primitive = random.choice(pset.primitives[node.root.ret])
+
+    inserted_list = [new_primitive]
+    for i in xrange(0, new_primitive.arity):
+        # Why don't we use expr to create the other subtrees?
+        # Bloat control?
+        new_child = random.choice(pset.terminals[new_primitive.args[i]])
+        inserted_list.append(new_child())
+
+    inserted_list[random.randint(1, new_primitive.arity)] = node
+
+    individual.setSubtreeDF(index, inserted_list)
+    return individual,
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
