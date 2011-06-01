@@ -23,9 +23,8 @@ import itertools
 from deap import algorithms
 from deap import base
 from deap import creator
+from deap import tools
 from deap import gp
-from deap import operators
-from deap import toolbox
 
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -74,37 +73,37 @@ pset.addTerminal(1, "bool")
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
-tools = toolbox.Toolbox()
-tools.register("expr", gp.generateRamped, pset=pset, type_=pset.ret, min_=1, max_=2)
-tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
-tools.register("lambdify", gp.lambdify, pset=pset)
+toolbox = base.Toolbox()
+toolbox.register("expr", gp.generateRamped, pset=pset, type_=pset.ret, min_=1, max_=2)
+toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.expr)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSpambase(individual):
     # Transform the tree expression in a callable function
-    func = tools.lambdify(expr=individual)
+    func = toolbox.lambdify(expr=individual)
     # Randomly sample 400 mails in the spam database
     spam_samp = random.sample(spam, 400)
     # Evaluate the sum of correctly identified mail as spam
     result = sum(bool(func(*mail[:57])) is bool(mail[57]) for mail in spam_samp)
     return result,
     
-tools.register("evaluate", evalSpambase)
-tools.register("select", operators.selTournament, tournsize=3)
-tools.register("mate", operators.cxTypedTreeOnePoint)
-tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register("mutate", operators.mutTypedTreeUniform, expr=tools.expr_mut)
+toolbox.register("evaluate", evalSpambase)
+toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("mate", gp.cxTypedOnePoint)
+toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+toolbox.register("mutate", gp.mutTypedUniform, expr=toolbox.expr_mut)
 
 def main():
-    pop = tools.population(n=100)
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=100)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, stats, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
     
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
 
