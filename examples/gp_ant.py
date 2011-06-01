@@ -55,9 +55,8 @@ from functools import partial
 from deap import algorithms
 from deap import base
 from deap import creator
+from deap import tools
 from deap import gp
-from deap import operators
-from deap import toolbox
 
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -161,14 +160,14 @@ pset.addTerminal(ant.turn_right)
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
+toolbox.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
-tools.register("individual", toolbox.fillIter, creator.Individual, tools.expr_init)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.expr_init)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code
@@ -177,27 +176,27 @@ def evalArtificialAnt(individual):
     ant.run(routine)
     return ant.eaten,
 
-tools.register("evaluate", evalArtificialAnt)
-tools.register("select", operators.selTournament, tournsize=7)
-tools.register("mate", operators.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register("mutate", operators.mutTreeUniform, expr=tools.expr_mut)
+toolbox.register("evaluate", evalArtificialAnt)
+toolbox.register("select", tools.selTournament, tournsize=7)
+toolbox.register("mate", gp.cxUniformOnePoint)
+toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
-    random.seed(101)
+    random.seed()
 
     trail_file = open("santafe_trail.txt")
     ant.parse_matrix(trail_file)
     
-    pop = tools.population(n=300)
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=300)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, stats, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
     
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
     
