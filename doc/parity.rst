@@ -33,7 +33,7 @@ Evaluation function
 In this implementation, the fitness of a Parity individual is simply the number of successful cases. Thus, the fitness is maximized, and the maximum value is 64 in the case of a 6 inputs problems. ::
     
     def evalParity(individual):
-        func = tools.lambdify(expr=individual)
+        func = toolbox.lambdify(expr=individual)
         good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
         return good,
 
