@@ -19,13 +19,12 @@ import random
 
 from deap import base
 from deap import creator
-from deap import toolbox
 
 from deap import benchmarks
 
 IND_SIZE = 10
 
-tools = toolbox.Toolbox()
+tools = base.Toolbox()
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)

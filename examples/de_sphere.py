@@ -13,15 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-from deap import base
-from deap import operators
-from deap import creator
-from deap import toolbox
-from deap import benchmarks
-
 
 import random
 import array
+
+from deap import base
+from deap import benchmarks
+from deap import creator
+from deap import tools
 
 # Problem dimension
 NDIM = 10
@@ -29,12 +28,12 @@ NDIM = 10
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
-tools.register("attr_float", random.uniform, -3, 3)
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_float, NDIM)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
-tools.register("select", operators.selRandom, n=3)
-tools.register("evaluate", benchmarks.sphere)
+toolbox = base.Toolbox()
+toolbox.register("attr_float", random.uniform, -3, 3)
+toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_float, NDIM)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("select", tools.selRandom, n=3)
+toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
     # Differential evolution parameters
@@ -43,28 +42,28 @@ def main():
     MU = 300
     NGEN = 200    
     
-    pop = tools.population(n=MU);
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=MU);
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
     # Evaluate the individuals
-    fitnesses = tools.map(tools.evaluate, pop)
+    fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
     for g in range(NGEN):
         for k, agent in enumerate(pop):
-            a,b,c = tools.select(pop)
-            y = tools.clone(agent)
+            a,b,c = toolbox.select(pop)
+            y = toolbox.clone(agent)
             index = random.randrange(NDIM)
             for i, value in enumerate(agent):
                 if i == index or random.random() < CR:
                     y[i] = a[i] + F*(b[i]-c[i])
-            y.fitness.values = tools.evaluate(y)
+            y.fitness.values = toolbox.evaluate(y)
             if y.fitness > agent.fitness:
                 pop[k] = y
         hof.update(pop)
