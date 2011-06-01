@@ -45,7 +45,14 @@ def evaluate(expr, pset=None):
         except TypeError:
             return str(expr)
     if not pset is None:
-        return eval(_stringify(expr), pset.func_dict)
+        try:
+            return eval(_stringify(expr), pset.func_dict)
+        except MemoryError:
+            print("DEAP : Error in tree evaluation : Python cannot evaluate a\
+ tree with a height bigger than 90.\nTo avoid this problem, you should use\
+ bloat control on your operators.\nSee the DEAP documentation for\
+ more information.\nDEAP will now abort.")
+            exit()
     else:
         return _stringify(expr)
 
@@ -71,7 +78,14 @@ def lambdify(pset, expr):
     expr = evaluate(expr)
     args = ",".join(a for a in pset.arguments)
     lstr = "lambda %s: %s" % (args, expr)
-    return eval(lstr, dict(pset.func_dict))
+    try:
+        return eval(lstr, dict(pset.func_dict))
+    except MemoryError:
+        print("DEAP : Error in tree evaluation : Python cannot evaluate a tree\
+ with a height bigger than 90.\nTo avoid this problem, you should use\
+ bloat control on your operators.\nSee the DEAP documentation for\
+ more information.\nDEAP will now abort.")
+        exit()
 
 def lambdifyList(expr):
     """Return a lambda function created from a list of trees. The first 
