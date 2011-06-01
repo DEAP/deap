@@ -16,6 +16,7 @@
 from __future__ import division
 import bisect
 import copy
+import inspect
 import math
 import random
 from itertools import chain

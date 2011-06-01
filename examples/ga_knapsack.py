@@ -22,29 +22,31 @@ logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 from deap import algorithms
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 IND_SIZE = 30
 MAX_ITEM = 50
 MAX_WEIGHT = 50
 NBR_ITEMS = 20
 
+# Create the item dictionary, items' name is an integer, and value is 
+# a (weight, value) 2-uple. The items will be created during the runtime
+# to enable reproducibility. It must be available in the global space
+# because of the evaluation
+items = {}
+
 creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
 creator.create("Individual", set, fitness=creator.Fitness)
 
-# Create the item dictionary, items' name is an integer, and value is a (weight, value) 2-uple.
-# The items will be created during the runtime to enable reproducibility.
-items = {}
-
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("attr_item", random.randrange, NBR_ITEMS)
+toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_item, IND_SIZE)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+toolbox.register("individual", tools.fillRepeat, creator.Individual, 
+    toolbox.attr_item, IND_SIZE)
+toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
 
 def evalKnapsack(individual):
     weight = 0.0
@@ -73,29 +75,31 @@ def mutSet(individual):
     else:
         individual.add(random.randrange(NBR_ITEMS))
 
-tools.register("evaluate", evalKnapsack)
-tools.register("mate", cxSet)
-tools.register("mutate", mutSet)
-tools.register("select", operators.selNSGA2)
+toolbox.register("evaluate", evalKnapsack)
+toolbox.register("mate", cxSet)
+toolbox.register("mutate", mutSet)
+toolbox.register("select", tools.selNSGA2)
 
 def main():
     random.seed(64)
     NGEN = 50
     MU = 50
     LAMBDA = 100    
+    
+
     # Create random items and store them in the items' dictionary.
     for i in xrange(NBR_ITEMS):
         items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
-    pop = tools.population(n=MU)
-    hof = operators.ParetoFront()
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=MU)
+    hof = tools.ParetoFront()
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaMuPlusLambda(tools, pop, MU, LAMBDA, 0.7, 0.2, NGEN, stats, halloffame=hof)
+    algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, 0.7, 0.2, NGEN, stats, halloffame=hof)
 
     logging.info("Best individual for measure 1 is %s, %s", 
                  hof[0], hof[0].fitness.values)
