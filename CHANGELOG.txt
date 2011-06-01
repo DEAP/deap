@@ -1,3 +1,5 @@
+2011-06-01 Reorganized modules in a more permanent API.
+
 2011-05-23 Modified structure of the project so that deap include both dtm and 
            eap.
 
