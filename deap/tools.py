@@ -18,11 +18,8 @@ import bisect
 import copy
 import math
 import random
-# Needed by Nondominated sorting
 from itertools import chain
-from operator import attrgetter
- # used in pareto-front hall of fame for eq
-import operator
+from operator import attrgetter, eq
 from collections import defaultdict
 from functools import partial
 
@@ -42,6 +39,15 @@ try:                                        # pickling to dump
     import cPickle as pickle                # cPickle is much faster than 
 except ImportError:                         # pickle but only present under
     import pickle                           # CPython
+
+def fillRepeat(container, func, n):
+    return container(func() for _ in xrange(n))
+
+def fillIter(container, generator):
+    return container(generator())
+
+def fillCycle(container, seq_func, n=1):
+    return container(func() for _ in xrange(n) for func in seq_func)
 
 class History(object):
     """The :class:`History` class helps to build a genealogy of all the
@@ -373,7 +379,7 @@ class ParetoFront(HallOfFame):
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
     it is sorted lexicographically at every moment.
     """
-    def __init__(self, similar=operator.eq):
+    def __init__(self, similar=eq):
         self.similar = similar
         HallOfFame.__init__(self, None)
     
@@ -790,350 +796,7 @@ def mutES(individual, indpb, minstrategy=None):
             individual[indx] += individual.strategy[indx] * ni
     
     return individual,
-
-######################################
-# GP Crossovers                      #
-######################################
-
-def cxTreeUniformOnePoint(ind1, ind2):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual.
-    """    
-    try:
-        index1 = random.randint(1, ind1.size-1)
-        index2 = random.randint(1, ind2.size-1)
-    except ValueError:
-        return ind1, ind2
-
-    sub1 = ind1.searchSubtreeDF(index1)
-    sub2 = ind2.searchSubtreeDF(index2)
-    ind1.setSubtreeDF(index1, sub2)
-    ind2.setSubtreeDF(index2, sub1)
     
-    return ind1, ind2
-    
-## Strongly Typed GP crossovers
-def cxTypedTreeOnePoint(ind1, ind2):
-    """Randomly select in each individual and exchange each subtree with the 
-    point as root between each individual. Since the node are strongly typed, 
-    the operator then make sure the type of second node correspond to the type
-    of the first node. If it doesn't, it randomly selects another point in the
-    second individual and try again. It tries up to *5* times before
-    giving up on the crossover.
-    
-    .. note::
-       This crossover is subject to change for a more effective method 
-       of selecting the crossover points.
-    """
-    # choose the crossover point in each individual
-    try:
-        index1 = random.randint(1, ind1.size-1)
-        index2 = random.randint(1, ind2.size-1)
-    except ValueError:
-        return ind1, ind2
-        
-    subtree1 = ind1.searchSubtreeDF(index1)
-    subtree2 = ind2.searchSubtreeDF(index2)
-
-    type1 = subtree1.root.ret
-    type2 = subtree2.root.ret 
-
-    # try to mate the trees
-    # if no crossover point is found after 5 it gives up trying
-    # mating individuals.
-    tries = 0
-    MAX_TRIES = 5
-    while not (type1 == type2) and tries < MAX_TRIES:
-        index2 = random.randint(1, ind2.size-1)
-        subtree2 = ind2.searchSubtreeDF(index2)
-        type2 = subtree2.root.ret
-        tries += 1
-    
-    if type1 == type2:
-        sub1 = ind1.searchSubtreeDF(index1)
-        sub2 = ind2.searchSubtreeDF(index2)
-        ind1.setSubtreeDF(index1, sub2)
-        ind2.setSubtreeDF(index2, sub1)
-    
-    return ind1, ind2
-
-
-def cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual.
-
-    As defined by Koza, non-terminal primitives are selected for 90% of the
-    crossover points, and terminals for 10%. This probability can be adjusted
-    with the *cxtermpb* argument.
-    """
-    size1, size2 = ind1.size, ind2.size
-
-    if size1 == 1 or size2 == 1:
-        return ind1, ind2
-
-    termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
-    termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
-    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
-    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
-
-    # Crossovers should take primitives 90% of time and terminals 10%
-    if random.random() < cxtermpb or len(primList1) == 0:
-        # Choose a terminal from the first parent
-        index1 = random.choice(termsList1)
-        subtree1 = ind1.searchSubtreeDF(index1)
-    else:
-        # Choose a primitive (non-terminal) from the first parent
-        index1 = random.choice(primList1)
-        subtree1 = ind1.searchSubtreeDF(index1)
-
-    if random.random() < cxtermpb or len(primList2) == 0:
-        # Choose a terminal from the second parent
-        index2 = random.choice(termsList2)
-        subtree2 = ind2.searchSubtreeDF(index2)
-    else:
-        # Choose a primitive (non-terminal) from the second parent
-        index2 = random.choice(primList2)
-        subtree2 = ind2.searchSubtreeDF(index2)
-
-    ind1.setSubtreeDF(index1, subtree2)
-    ind2.setSubtreeDF(index2, subtree1)
-
-    return ind1, ind2
-
-## Strongly Typed GP crossovers
-def cxTypedTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual. Since the node are strongly typed,
-    the operator then make sure the type of second node correspond to the type
-    of the first node. If it doesn't, it randomly selects another point in the
-    second individual and try again. It tries up to *5* times before
-    giving up on the crossover.
-
-    As defined by Koza, non-terminal primitives are selected for 90% of the
-    crossover points, and terminals for 10%. This probability can be adjusted
-    with the *cxtermpb* argument.
-    
-    .. note::
-       This crossover is subject to change for a more effective method
-       of selecting the crossover points.
-    """
-    size1, size2 = ind1.size, ind2.size
-
-    if size1 == 1 or size2 == 1:
-        return ind1, ind2
-
-    termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
-    termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
-    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
-    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
-
-    # Crossovers should take primitives 90% of time and terminals 10%
-    if random.random() < cxtermpb or len(primList1) == 0:
-        # Choose a terminal from the first parent
-        index1 = random.choice(termsList1)
-        subtree1 = ind1.searchSubtreeDF(index1)
-    else:
-        # Choose a primitive (non-terminal) from the first parent
-        index1 = random.choice(primList1)
-        subtree1 = ind1.searchSubtreeDF(index1)
-
-    if random.random() < cxtermpb or len(primList2) == 0:
-        # Choose a terminal from the second parent
-        index2 = random.choice(termsList2)
-        subtree2 = ind2.searchSubtreeDF(index2)
-    else:
-        # Choose a primitive (non-terminal) from the second parent
-        index2 = random.choice(primList2)
-        subtree2 = ind2.searchSubtreeDF(index2)
-
-    type1 = subtree1.root.ret
-    type2 = subtree2.root.ret
-
-    # try to mate the trees
-    # if no crossover point is found after MAX_CX_TRY
-    # the children are returned without modifications.
-    tries = 0
-    MAX_CX_TRY = 5
-    while not (type1 is type2) and tries != MAX_CX_TRY:
-        if random.random() < cxtermpb or len(primList2) == 0:
-            index2 = random.choice(termsList2)
-            subtree2 = ind2.searchSubtreeDF(index2)
-        else:
-            index2 = random.choice(primList2)
-            subtree2 = ind2.searchSubtreeDF(index2)
-
-        type2 = subtree2.root.ret
-
-        tries += 1
-
-
-    if type1 is type2:
-        ind1.setSubtreeDF(index1, subtree2)
-        ind2.setSubtreeDF(index2, subtree1)
-
-    return ind1, ind2
-
-######################################
-# GP Mutations                       #
-######################################
-def mutTreeUniform(individual, expr):
-    """Randomly select a point in the Tree, then replace the subtree with
-    the point as a root by a randomly generated expression. The expression
-    is generated using the method `expr`.
-    """
-    index = random.randint(0, individual.size-1)
-    individual.setSubtreeDF(index, expr(pset=individual.pset))
-    
-    return individual,
-
-## Strongly Typed GP mutations
-def mutTypedTreeUniform(individual, expr):
-    """The mutation of strongly typed GP expression is pretty easy. First,
-    it finds a subtree. Second, it has to identify the return type of the root
-    of  this subtree. Third, it generates a new subtree with a root's type
-    corresponding to the original subtree root's type. Finally, the old
-    subtree is replaced by the new subtree.
-    """
-    index = random.randint(0, individual.size-1)
-    subtree = individual.searchSubtreeDF(index)  
-    individual.setSubtreeDF(index, expr(pset=individual.pset,
-                                        type_=subtree.root.ret))
-    
-    return individual,
-
-
-def mutTypedTreeNodeReplacement(individual):
-    """This operator mutates the individual *individual* that are subjected to
-    it. The operator randomly chooses a primitive in the individual
-    and replaces it with a randomly selected primitive in *pset* that takes
-    the same number of arguments.
-
-    This operator works on strongly typed trees as on normal GP trees.
-    """
-    if individual.size < 2:
-        return individual,
-
-    index = random.randint(1, individual.size-1)
-    node = individual.searchSubtreeDF(index)
-
-    if node.size == 1:
-        subtree = random.choice(individual.pset.terminals[node.root.ret])()
-        individual.setSubtreeDF(index, subtree)
-
-    else:
-        # We're going to replace one of the *node* children
-        index = random.randint(1, len(node) - 1)
-        if node[index].size > 1:
-            prim_set = individual.pset.primitives[node[index].root.ret]
-            repl_node = random.choice(prim_set)
-            while repl_node.args != node[index].root.args:
-                repl_node = random.choice(prim_set)
-            node[index][0] = repl_node
-        else:
-            term_set = individual.pset.terminals[node[index].root.ret]
-            repl_node = random.choice(term_set)()
-            node[index] = repl_node
-
-    return individual,
-
-def mutTypedTreeEphemeral(individual, mode):
-    """This operator works on the constants of the tree *ind*.
-    In  *mode* ``"one"``, it will change the value of **one**
-    of the individual ephemeral constants by calling its generator function.
-    In  *mode* ``"all"``, it will change the value of **all**
-    the ephemeral constants.
-
-    This operator works on strongly typed trees as on normal GP trees.
-    """
-    if mode not in ["one", "all"]:
-        raise ValueError("Mode must be one of \"one\" or \"all\"")
-    ephemerals = []
-    for i in xrange(1, individual.size):
-        subtree = individual.searchSubtreeDF(i)
-        if hasattr(subtree.root.obj, 'regen'):
-            ephemerals.append(i)
-
-    if len(ephemerals) > 0:
-        if mode == "one":
-            ephemerals = [random.choice(ephemerals)]
-        elif mode == "all":
-            pass
-
-        for i in ephemerals:
-            individual.searchSubtreeDF(i).regen()
-            
-    return individual,
-
-def mutTreeShrink(individual):
-    """This operator shrinks the individual *individual* that are subjected to
-    it. The operator randomly chooses a branch in the individual and replaces
-    it with one of the branch's arguments (also randomly chosen).
-
-    This operator is not usable with STGP.
-    """
-    if individual.size < 3 or individual.height <= 2:
-        return individual,       # We don't want to "shrink" the root
-
-    index = random.randint(1, individual.size-2)
-    
-    # Shrinking a terminal is useless
-    while individual.searchSubtreeDF(index).size == 1:
-        index = random.randint(1, individual.size-2)
-
-    deleted_node = individual.searchSubtreeDF(index)
-    repl_subtree_index = random.randint(1, len(deleted_node)-1)
-
-    individual.setSubtreeDF(index, deleted_node[repl_subtree_index])
-
-    return individual,
-
-def mutTypedTreeInsert(individual):
-    """This operator mutate the GP tree of the *individual* passed and the
-    primitive set *expr*, by inserting a new branch at a random position in a
-    tree, using the original subtree at this position as one argument,
-    and if necessary randomly selecting terminal primitives
-    to complete the arguments of the inserted node.
-    Note that the original subtree will become one of the children of the new
-    primitive inserted, but not perforce the first (its position is
-    randomly selected if the new primitive has more than one child)
-
-    This operator works on strongly typed trees as on normal GP trees.
-    """
-    pset = individual.pset
-    index = random.randint(0, individual.size-1)
-    node = individual.searchSubtreeDF(index)
-    if node.size > 1:     # We do not need to deepcopy the leafs
-        node = copy.deepcopy(node)
-    
-    new_primitive = random.choice(pset.primitives[node.root.ret])
-
-    inserted_list = [new_primitive]
-    for i in xrange(0, new_primitive.arity):
-        # Why don't we use expr to create the other subtrees?
-        # Bloat control?
-        new_child = random.choice(pset.terminals[new_primitive.args[i]])
-        inserted_list.append(new_child())
-
-    inserted_list[random.randint(1, new_primitive.arity)] = node
-
-    individual.setSubtreeDF(index, inserted_list)
-    return individual,
-
-
-# In order to use different mutations, wheter build your own algorithms
-# or define your own mutate function that calls explicitely the needed
-# methods
-# def mutTreeRandomMethod(individual, expr):
-#     """This operator performs a mutation over the individual *ind*.
-#     The mutation operator is randomly chosen between the insertion,
-#     the shrink, the node replacement, the subtree replacement (mutTreeUniform)
-#     and the ephemeral constants change.
-#     """
-#     method = random.choice([mutTreeUniform, mutTypedTreeInsert,
-#                             mutTreeShrink, mutTypedTreeNodeReplacement,
-#                             mutTypedTreeEphemeral])
-#     # Partial? 
-#     return functools.partial(method, individual=individual, expr=expr)()
 
 ######################################
 # Selections                         #
@@ -1189,6 +852,10 @@ def selRoulette(individuals, n):
     
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
+    
+    .. warning::
+       The roulette selection by definition cannot be used for minimization 
+       or when the fitness can be smaller or equal to 0.
     """
     s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)
     sum_fits = sum(map(lambda ind: ind.fitness.values[0], individuals))
@@ -1506,3 +1173,96 @@ def migRing(populations, n, selection, replacement=None, migarray=None,
     for i, immigrant in enumerate(immigrants[to_deme]):
         indx = populations[to_deme].index(immigrant)
         populations[to_deme][indx] = mig_buf[i]
+
+
+######################################
+# Decoration tool                    #
+######################################
+
+# This function is a simpler version of the decorator module (version 3.2.0)
+# from Michele Simionato available at http://pypi.python.org/pypi/decorator.
+# Copyright (c) 2005, Michele Simionato
+# All rights reserved.
+# Modified by Francois-Michel De Rainville, 2010
+
+def decorate(decorator):
+    """Decorate a function preserving its signature. There is two way of
+    using this function, first as a decorator passing the decorator to
+    use as argument, for example ::
+
+        @decorate(a_decorator)
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+
+    Or as a decorator ::
+
+        @decorate
+        def myDecorator(func):
+            def wrapFunc(*args, **kargs):
+                decoration_work()
+                return func(*args, **kargs)
+            return wrapFunc
+
+        @myDecorator
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+
+    Using the :mod:`inspect` module, we can retrieve the signature of the
+    decorated function, what is not possible when not using this method. ::
+
+        print inspect.getargspec(myFunc)
+
+    It shall return something like ::
+
+        (["arg1", "arg2", "arg3"], None, None, ("default",))
+
+    This function is a simpler version of the decorator module (version 3.2.0)
+    from Michele Simionato available at http://pypi.python.org/pypi/decorator.
+    """
+    def wrapDecorate(func):
+        # From __init__
+        assert func.__name__
+        if inspect.isfunction(func):
+            argspec = inspect.getargspec(func)
+            defaults = argspec[-1]
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        elif inspect.isclass(func):
+            argspec = inspect.getargspec(func.__init__)
+            defaults = argspec[-1]
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        if not signature:
+            raise TypeError("You are decorating a non function: %s" % func)
+
+        # From create
+        src = ("def %(name)s(%(signature)s):\n"
+               "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
+                                                           signature=signature)
+
+        # From make
+        evaldict = dict(_call_=decorator(func))
+        reserved_names = set([func.__name__] + \
+            [arg.strip(' *') for arg in signature.split(',')])
+        for name in evaldict.iterkeys():
+            if name in reserved_names:
+                raise NameError("%s is overridden in\n%s" % (name, src))
+        try:
+            # This line does all the dirty work of reassigning the signature
+            code = compile(src, "<string>", "single")
+            exec code in evaldict
+        except:
+            raise RuntimeError("Error in generated code:\n%s" % src)
+        new_func = evaldict[func.__name__]
+
+        # From update
+        new_func.__source__ = src
+        new_func.__name__ = func.__name__
+        new_func.__doc__ = func.__doc__
+        new_func.__dict__ = func.__dict__.copy()
+        new_func.func_defaults = defaults
+        new_func.__module__ = func.__module__
+        return new_func
+    return wrapDecorate

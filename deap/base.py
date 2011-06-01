@@ -22,10 +22,190 @@ member of any individual.
 
 import copy
 import operator
-
+import functools
 from collections import deque
 from itertools import izip, repeat, count
         
+class Toolbox(object):
+    """A toolbox for evolution that contains the evolutionary operators.
+    At first the toolbox contains two simple methods. The first method
+    :meth:`~deap.toolbox.clone` duplicates any element it is passed as
+    argument, this method defaults to the :func:`copy.deepcopy` function.
+    The second method :meth:`~deap.toolbox.map` applies the function given
+    as first argument to every items of the iterables given as next
+    arguments, this method defaults to the :func:`map` function. You may
+    populate the toolbox with any other function by using the
+    :meth:`~deap.toolbox.register` method.
+    """
+
+    def __init__(self):
+        self.register("clone", copy.deepcopy)
+        self.register("map", map)
+
+    def register(self, methodname, method, *args, **kargs):
+        """Register a *method* in the toolbox under the name *methodname*. You 
+        may provide default arguments that will be passed automatically when 
+        calling the registered method. Fixed arguments can then be overriden 
+        at function call time. The following code block is a example of how
+        the toolbox is used.
+        ::
+
+            >>> def func(a, b, c=3):
+            ...     print a, b, c
+            ... 
+            >>> tools = Toolbox()
+            >>> tools.register("myFunc", func, 2, c=4)
+            >>> tools.myFunc(3)
+            2 3 4
+
+        """
+        pfunc = functools.partial(method, *args, **kargs)
+        pfunc.__name__ = methodname
+        setattr(self, methodname, pfunc)
+
+    def unregister(self, methodname):
+        """Unregister *methodname* from the toolbox."""
+        delattr(self, methodname)
+
+    def decorate(self, methodname, *decorators):
+        """Decorate *methodname* with the specified *decorators*, *methodname*
+        has to be a registered function in the current toolbox. Decorate uses
+        the signature preserving decoration function
+        :func:`~deap.toolbox.decorate`.
+        """
+        from tools import decorate
+        partial_func = getattr(self, methodname)
+        method = partial_func.func
+        args = partial_func.args
+        kargs = partial_func.keywords
+        for decorator in decorators:
+            method = decorate(decorator)(method)
+        setattr(self, methodname, functools.partial(method, *args, **kargs))
+
+class Fitness(object):
+    """The fitness is a measure of quality of a solution.
+
+    Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
+    ``!=``. The comparison of those operators is made
+    lexicographically. Maximization and minimization are taken
+    care off by a multiplication between the :attr:`weights` and the fitness 
+    :attr:`values`. The comparison can be made between fitnesses of different 
+    size, if the fitnesses are equal until the extra elements, the longer 
+    fitness will be superior to the shorter.
+
+    .. note::
+       When comparing fitness values that are minimized, ``a > b`` will return
+       :data:`True` if *a* is inferior to *b*.
+    """
+    
+    weights = ()
+    """The weights are used in the fitness comparison. They are shared among
+    all fitnesses of the same type.
+    This member is **not** meant to be manipulated since it may influence how
+    fitnesses are compared and may
+    result in undesirable effects. However if you wish to manipulate it, in 
+    order to make the change effective to all fitnesses of the same type, use
+    ``FitnessType.weights = new_weights`` or
+    ``self.__class__.weights = new_weights`` or from an individual
+    ``ind.fitness.__class__.weights = new_weights``.
+    """
+    
+    wvalues = ()
+    """Contains the weighted values of the fitness, the multiplication with the
+    weights is made when the values are set via the property :attr:`values`.
+    Multiplication is made on setting of the values for efficiency.
+    
+    Generally it is unnecessary to manipulate *wvalues* as it is an internal
+    attribute of the fitness used in the comparison operators.
+    """
+    
+    def __init__(self, values=()):
+        if len(values) > 0:
+            self.values = values
+        
+    def getValues(self):
+        return tuple(map(operator.div, self.wvalues, self.weights))
+            
+    def setValues(self, values):
+        self.wvalues = tuple(map(operator.mul, values, self.weights))
+            
+    def delValues(self):
+        self.wvalues = ()
+
+    values = property(getValues, setValues, delValues,
+        ("Fitness values. Use directly ``individual.fitness.values = values`` "
+         "in order to set the fitness and ``del individual.fitness.values`` "
+         "in order to clear (invalidate) the fitness. The (unweighted) fitness "
+         "can be directly accessed via ``individual.fitness.values``."))
+    
+    @property 
+    def valid(self):
+        """Asses if a fitness is valid or not."""
+        return len(self.wvalues) != 0
+
+    def isDominated(self, other):
+        """In addition to the comparison operators that are used to sort
+        lexically the fitnesses, this method returns :data:`True` if this
+        fitness is dominated by the *other* fitness and :data:`False` otherwise.
+        The weights are used to compare minimizing and maximizing fitnesses. If
+        there is more fitness values than weights, the las weight get repeated
+        until the end of the comparison.
+        """
+        not_equal = False
+        for self_wvalue, other_wvalue in izip(self.wvalues, other.wvalues):
+            if self_wvalue > other_wvalue:
+                return False
+            elif self_wvalue < other_wvalue:
+                not_equal = True
+        return not_equal
+        
+    def __gt__(self, other):
+        return not self.__le__(other)
+        
+    def __ge__(self, other):
+        return not self.__lt__(other)
+
+    def __le__(self, other):
+        if not other:                   # Protection against yamling
+            return False
+        return self.wvalues <= other.wvalues
+
+    def __lt__(self, other):
+        if not other:                   # Protection against yamling
+            return False
+        return self.wvalues < other.wvalues
+
+    def __eq__(self, other):
+        if not other:                   # Protection against yamling
+            return False
+        return self.wvalues == other.wvalues
+    
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __deepcopy__(self, memo):
+        """Replace the basic deepcopy function with a faster one.
+        
+        It assumes that the elements in the :attr:`values` tuple are 
+        immutable and the fitness does not contain any other object 
+        than :attr:`values` and :attr:`weights`.
+        """
+        if len(self.wvalues) > 0:
+            return self.__class__(self.values)
+        else:
+            return self.__class__()
+            
+    
+    def __str__(self):
+        """Return the values of the Fitness object."""
+        return str(self.values)
+    
+    def __repr__(self):
+        """Return the Python code to build a copy of the object."""
+        module = self.__module__
+        name = self.__class__.__name__
+        return "%s.%s(%r)" % (module, name, self.values)
+
 class Tree(list):
     """Basic N-ary tree class. A tree is initialized from the list `content`.
     The first element of the list is the root of the tree, then the
@@ -235,128 +415,3 @@ class Tree(list):
                 tree = parent[child]
                 queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
         parent[child] = subtree
-
-class Fitness(object):
-    """The fitness is a measure of quality of a solution.
-
-    Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
-    ``!=``. The comparison of those operators is made
-    lexicographically. Maximization and minimization are taken
-    care off by a multiplication between the :attr:`weights` and the fitness 
-    :attr:`values`. The comparison can be made between fitnesses of different 
-    size, if the fitnesses are equal until the extra elements, the longer 
-    fitness will be superior to the shorter.
-
-    .. note::
-       When comparing fitness values that are minimized, ``a > b`` will return
-       :data:`True` if *a* is inferior to *b*.
-    """
-    
-    weights = ()
-    """The weights are used in the fitness comparison. They are shared among
-    all fitnesses of the same type.
-    This member is **not** meant to be manipulated since it may influence how
-    fitnesses are compared and may
-    result in undesirable effects. However if you wish to manipulate it, in 
-    order to make the change effective to all fitnesses of the same type, use
-    ``FitnessType.weights = new_weights`` or
-    ``self.__class__.weights = new_weights`` or from an individual
-    ``ind.fitness.__class__.weights = new_weights``.
-    """
-    
-    wvalues = ()
-    """Contains the weighted values of the fitness, the multiplication with the
-    weights is made when the values are set via the property :attr:`values`.
-    Multiplication is made on setting of the values for efficiency.
-    
-    Generally it is unnecessary to manipulate *wvalues* as it is an internal
-    attribute of the fitness used in the comparison operators.
-    """
-    
-    def __init__(self, values=()):
-        if len(values) > 0:
-            self.values = values
-        
-    def getValues(self):
-        return tuple(map(operator.div, self.wvalues, self.weights))
-            
-    def setValues(self, values):
-        self.wvalues = tuple(map(operator.mul, values, self.weights))
-            
-    def delValues(self):
-        self.wvalues = ()
-
-    values = property(getValues, setValues, delValues,
-        ("Fitness values. Use directly ``individual.fitness.values = values`` "
-         "in order to set the fitness and ``del individual.fitness.values`` "
-         "in order to clear (invalidate) the fitness. The (unweighted) fitness "
-         "can be directly accessed via ``individual.fitness.values``."))
-    
-    @property 
-    def valid(self):
-        """Asses if a fitness is valid or not."""
-        return len(self.wvalues) != 0
-
-    def isDominated(self, other):
-        """In addition to the comparison operators that are used to sort
-        lexically the fitnesses, this method returns :data:`True` if this
-        fitness is dominated by the *other* fitness and :data:`False` otherwise.
-        The weights are used to compare minimizing and maximizing fitnesses. If
-        there is more fitness values than weights, the las weight get repeated
-        until the end of the comparison.
-        """
-        not_equal = False
-        for self_wvalue, other_wvalue in izip(self.wvalues, other.wvalues):
-            if self_wvalue > other_wvalue:
-                return False
-            elif self_wvalue < other_wvalue:
-                not_equal = True
-        return not_equal
-        
-    def __gt__(self, other):
-        return not self.__le__(other)
-        
-    def __ge__(self, other):
-        return not self.__lt__(other)
-
-    def __le__(self, other):
-        if not other:                   # Protection against yamling
-            return False
-        return self.wvalues <= other.wvalues
-
-    def __lt__(self, other):
-        if not other:                   # Protection against yamling
-            return False
-        return self.wvalues < other.wvalues
-
-    def __eq__(self, other):
-        if not other:                   # Protection against yamling
-            return False
-        return self.wvalues == other.wvalues
-    
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __deepcopy__(self, memo):
-        """Replace the basic deepcopy function with a faster one.
-        
-        It assumes that the elements in the :attr:`values` tuple are 
-        immutable and the fitness does not contain any other object 
-        than :attr:`values` and :attr:`weights`.
-        """
-        if len(self.wvalues) > 0:
-            return self.__class__(self.values)
-        else:
-            return self.__class__()
-            
-    
-    def __str__(self):
-        """Return the values of the Fitness object."""
-        return str(self.values)
-    
-    def __repr__(self):
-        """Return the Python code to build a copy of the object."""
-        module = self.__module__
-        name = self.__class__.__name__
-        return "%s.%s(%r)" % (module, name, self.values)
-        

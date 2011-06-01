@@ -46,16 +46,24 @@ def rosenbrock(individual):
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
                    for x, y in zip(individual[:-1], individual[1:])),
 
-def h1(x):
-   """ Simple two-dimensional function containing several local maxima,
-   H1 has a unique maximum value of 2.0 at the point (8.6998, 6.7665).
-   From : The Merits of a Parallel Genetic Algorithm in Solving Hard 
-   Optimization Problems, A. J. Knoek van Soest and L. J. R. Richard 
-   Casius, J. Biomech. Eng. 125, 141 (2003)
-   """
-   num = (sin(x[0] - x[1] / 8))**2 + (sin(x[1] + x[0] / 8))**2
-   denum = ((x[0] - 8.6998)**2 + (x[1] - 6.7665)**2)**0.5 + 1
-   return num / denum,
+def h1(individual):
+    """ Simple two-dimensional function containing several local maxima,
+    H1 has a unique maximum value of 2.0 at the point (8.6998, 6.7665).
+    From : The Merits of a Parallel Genetic Algorithm in Solving Hard 
+    Optimization Problems, A. J. Knoek van Soest and L. J. R. Richard 
+    Casius, J. Biomech. Eng. 125, 141 (2003)
+    
+    :math:`f(x_1, x_2) = \\frac{\sin(x_1 - \\frac{x_2}{8})^2 + 
+    \\sin(x_2 + \\frac{x_1}{8})^2}{\\sqrt{(x_1 - 8.6998)^2 + 
+    (x_2 - 6.7665)^2} + 1}`
+    
+    .. image:: _images/h1.*
+       :width: 67 %
+    """
+    num = (sin(individual[0] - individual[1] / 8))**2 + (sin(individual[1] + individual[0] / 8))**2
+    denum = ((individual[0] - 8.6998)**2 + (individual[1] - 6.7665)**2)**0.5 + 1
+    return num / denum,
+
 
 # Multimodal
 def ackley(individual):
@@ -96,8 +104,32 @@ def schwefel(individual):
     N = len(individual)
     return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
 
+def himmelblau(individual):
+    '''The Himmelblau's function is multimodal with 4 defined minimums in 
+    :math:`[-6, 6]^2`.
+    
+    :math:`f(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
+    
+    .. image:: _images/himmelblau.*
+       :width: 67 %
+    
+    '''
+    return (individual[0] * individual[0] + individual[1] - 11)**2 + \
+        (individual[0] + individual[1] * individual[1] - 7)**2,
+
 # Multiobjectives
-def kursawe(ind):
-    f1 = sum(-10 * exp(-0.2 * sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
-    f2 = sum(abs(x)**0.8 + 5 * sin(x * x * x) for x in ind)
+def kursawe(individual):
+    """Kursawe multiobjective function.
+    
+    :math:`f_1(\\mathbf{x}) = \\sum_{i=1}^{N-1} -10 e^{-0.2 \\sqrt{x_i^2 + x_{i+1}^2}}`
+    
+    :math:`f_2(\\mathbf{x}) = \\sum_{i=1}^{N} |x_i|^{0.8} + 5 \\sin(x_i^3)`
+    
+    .. image:: _images/kursawe1.*
+       :width: 48 %
+    .. image:: _images/kursawe2.*
+       :width: 48 %
+    """
+    f1 = sum(-10 * exp(-0.2 * sqrt(x * x + y * y)) for x, y in zip(individual[:-1], individual[1:]))
+    f2 = sum(abs(x)**0.8 + 5 * sin(x * x * x) for x in individual)
     return f1, f2
