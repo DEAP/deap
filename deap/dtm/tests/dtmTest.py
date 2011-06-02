@@ -1,7 +1,7 @@
 import sys
 sys.path.append("..")
 
-from taskmanager import dtm
+from deap import dtm
 
 import time
 import math
@@ -80,7 +80,5 @@ def main():
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 
-dtm.setOptions(communicationManager="commManagerMpi4py")
-dtm.setOptions(setTraceMode=True)
 dtm.start(main)
 
