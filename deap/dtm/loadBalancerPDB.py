@@ -144,12 +144,10 @@ class DtmLoadBalancer(object):
                 self.ws[worker[0]].infoUpToDate = False
 
            
-        if self.ws[self.wid].loadExecQ > 0 and diffLoad > -stdDevLoad and avgLoad != 0\
-            and stdDevLoad != 0\
-            and time.time()-self.lastTaskSend > self.sendDelayMultiplier:
+        if self.ws[self.wid].loadExecQ > 0 and diffLoad > -stdDevLoad and avgLoad != 0 and stdDevLoad != 0:
             # Algorithme d'envoi de taches
             def scoreFunc(loadi):
-                if loadi < (avgLoad-2*stdDevLoad):
+                if loadi < (avgLoad-2*stdDevLoad) or loadi == 0:
                     return MAX_PROB    # Si le load du worker est vraiment tres bas, forte probabilite de lui envoyer des taches
                 elif loadi > (avgLoad + stdDevLoad):
                     return MIN_PROB    # Si le load du worker est tres haut, tres faible probabilite de lui envoyer des taches

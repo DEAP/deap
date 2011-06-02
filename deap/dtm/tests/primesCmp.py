@@ -4,7 +4,7 @@ sys.path.append("..")
 import random
 random.seed(12)
 
-from taskmanager import dtm
+from deap import dtm
 
 import time
 import math
@@ -37,7 +37,7 @@ def primaryTest(nbr):
 
 def main():
     t = time.time()
-    listNbr = range(3,10003,2)
+    listNbr = range(3,35003,2)
     print("BOUM")
     listPrimes = dtm.filter(primaryTest, listNbr)
     
