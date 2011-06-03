@@ -184,7 +184,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
        pool. 
     
     """
-    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation"
+    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
         "probabilities must be smaller or equal to 1.0.")
     
     _logger.info("Start of evolution")
@@ -256,7 +256,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
        pool.
     """
     assert lambda_ >= mu, "lambda must be greater or equal to mu." 
-    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation"
+    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
         "probabilities must be smaller or equal to 1.0.")
         
     _logger.info("Start of evolution")
