@@ -183,7 +183,7 @@ toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
-    random.seed()
+    random.seed(69)
 
     trail_file = open("santafe_trail.txt")
     ant.parse_matrix(trail_file)

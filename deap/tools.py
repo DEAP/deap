@@ -42,12 +42,51 @@ except ImportError:                         # pickle but only present under
     import pickle                           # CPython
 
 def fillRepeat(container, func, n):
+    """Call the function *container* with a generator function corresponding
+    to the calling *n* times the function *func*.
+    
+    This helper function can can be used in conjunction with a Toolbox 
+    to register a generator of filled containers, as individuals or 
+    population.
+    
+        >>> fillRepeat(list, random.random, 2)
+        [0.47615826222934565, 0.6302190543188851]
+
+    """
     return container(func() for _ in xrange(n))
 
 def fillIter(container, generator):
+    """Call the function *container* with an iterable as 
+    its only argument. The iterable must be returned by 
+    the method or the object *generator*.
+    
+    
+    This helper function can can be used in conjunction with a Toolbox 
+    to register a generator of filled containers, as individuals or 
+    population.
+
+        >>> from random import sample
+        >>> from functools import partial
+        >>> gen_idx = partial(sample, range(10), 10)
+        >>> fillIter(list, gen_idx)
+        [4, 5, 3, 6, 0, 9, 2, 7, 1, 8]
+
+    """
     return container(generator())
 
 def fillCycle(container, seq_func, n=1):
+    """Call the function *container* with a generator function corresponding
+    to the calling *n* times the functions present in *seq_func*.
+    
+    This helper function can can be used in conjunction with a Toolbox 
+    to register a generator of filled containers, as individuals or 
+    population.
+    
+        >>> func_seq = [lambda:1 , lambda:'a', lambda:3]
+        >>> fillCycle(list, func_seq, 2)
+        [1, 'a', 3, 1, 'a', 3]
+
+    """
     return container(func() for _ in xrange(n) for func in seq_func)
 
 class History(object):
@@ -1267,3 +1306,16 @@ def decorate(decorator):
         new_func.__module__ = func.__module__
         return new_func
     return wrapDecorate
+    
+if __name__ == "__main__":
+    import doctest
+    import random
+    
+    random.seed(64)
+    doctest.run_docstring_examples(fillRepeat, globals())
+    
+    random.seed(64)
+    doctest.run_docstring_examples(fillIter, globals())
+    doctest.run_docstring_examples(fillCycle, globals())
+    
+    

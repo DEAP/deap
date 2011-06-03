@@ -20,8 +20,7 @@ import math
 from deap import base
 from deap import creator
 from deap import gp
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 # Define new functions
 def safeDiv(left, right):
@@ -82,25 +81,25 @@ creator.create("MAIN", gp.PrimitiveTree, pset=pset)
 
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
-tools.register('adf_expr0', gp.generateFull, pset=adfset0, min_=1, max_=2)
-tools.register('adf_expr1', gp.generateFull, pset=adfset1, min_=1, max_=2)
-tools.register('adf_expr2', gp.generateFull, pset=adfset2, min_=1, max_=2)
-tools.register('main_expr', gp.generateRamped, pset=pset, min_=1, max_=2)
+toolbox = base.Toolbox()
+toolbox.register('adf_expr0', gp.generateFull, pset=adfset0, min_=1, max_=2)
+toolbox.register('adf_expr1', gp.generateFull, pset=adfset1, min_=1, max_=2)
+toolbox.register('adf_expr2', gp.generateFull, pset=adfset2, min_=1, max_=2)
+toolbox.register('main_expr', gp.generateRamped, pset=pset, min_=1, max_=2)
 
-tools.register('ADF0', creator.ADF0, toolbox.Iterate(tools.adf_expr0))
-tools.register('ADF1', creator.ADF1, toolbox.Iterate(tools.adf_expr1))
-tools.register('ADF2', creator.ADF2, toolbox.Iterate(tools.adf_expr2))
-tools.register('MAIN', creator.MAIN, toolbox.Iterate(tools.main_expr))
+toolbox.register('ADF0', tools.fillIter, creator.ADF0, toolbox.adf_expr0)
+toolbox.register('ADF1', tools.fillIter, creator.ADF1, toolbox.adf_expr1)
+toolbox.register('ADF2', tools.fillIter, creator.ADF2, toolbox.adf_expr2)
+toolbox.register('MAIN', tools.fillIter, creator.MAIN, toolbox.main_expr)
 
-func_cycle = toolbox.FuncCycle([tools.MAIN, tools.ADF0, tools.ADF1, tools.ADF2])
+func_cycle = [toolbox.MAIN, toolbox.ADF0, toolbox.ADF1, toolbox.ADF2]
 
-tools.register('individual', toolbox.fillRepeat, creator.Individual, func_cycle, 4)
-tools.register('population', toolbox.fillRepeat, list, tools.individual)
+toolbox.register('individual', tools.fillCycle, creator.Individual, func_cycle)
+toolbox.register('population', tools.fillRepeat, list, toolbox.individual)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
-    func = tools.lambdify(expr=individual)
+    func = toolbox.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
     values = (x/10. for x in xrange(-10, 10))
@@ -108,21 +107,22 @@ def evalSymbReg(individual):
     diff = sum(map(diff_func, values))
     return diff,
 
-tools.register('lambdify', gp.lambdifyList)
-tools.register('evaluate', evalSymbReg)
-tools.register('select', operators.selTournament, tournsize=3)
-tools.register('mate', operators.cxTreeUniformOnePoint)
-tools.register('expr', gp.generateFull, min_=1, max_=2)
-tools.register('mutate', operators.mutTreeUniform, expr=tools.expr)
+toolbox.register('lambdify', gp.lambdifyList)
+toolbox.register('evaluate', evalSymbReg)
+toolbox.register('select', tools.selTournament, tournsize=3)
+toolbox.register('mate', gp.cxUniformOnePoint)
+toolbox.register('expr', gp.generateFull, min_=1, max_=2)
+toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr)
 
 def main():
     random.seed(1024)
+    ind = toolbox.individual()
     
-    pop = tools.population(n=100)
-    hof = operators.HallOfFame(1)
-    stats = operators.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", operators.mean)
-    stats.register("Std", operators.std_dev)
+    pop = toolbox.population(n=100)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std_dev)
     stats.register("Min", min)
     stats.register("Max", max)
     
@@ -130,7 +130,7 @@ def main():
     
     # Evaluate the entire population
     for ind in pop:
-    	ind.fitness.values = tools.evaluate(ind)
+    	ind.fitness.values = toolbox.evaluate(ind)
 
     hof.update(pop)
     stats.update(pop)    
@@ -139,28 +139,28 @@ def main():
         print "-- Generation %i --" % g
     
         # Select the offsprings
-        offsprings = tools.select(pop, n=len(pop))
+        offsprings = toolbox.select(pop, n=len(pop))
         # Clone the offsprings
-        offsprings = [tools.clone(ind) for ind in offsprings]
+        offsprings = [toolbox.clone(ind) for ind in offsprings]
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             for tree1, tree2 in zip(ind1, ind2):
                 if random.random() < CXPB:
-                    tools.mate(tree1, tree2)
+                    toolbox.mate(tree1, tree2)
                     del ind1.fitness.values
                     del ind2.fitness.values
 
         for ind in offsprings:
             for tree in ind:
                 if random.random() < MUTPB:
-                    tools.mutate(tree)
+                    toolbox.mutate(tree)
                     del ind.fitness.values
                             
         # Evaluate the individuals with an invalid fitness
         invalids = [ind for ind in offsprings if not ind.fitness.valid]
         for ind in invalids:
-            ind.fitness.values = tools.evaluate(ind)
+            ind.fitness.values = toolbox.evaluate(ind)
                 
         # Replacement of the population by the offspring
         pop = offsprings
