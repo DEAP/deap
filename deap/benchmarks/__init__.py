@@ -42,7 +42,13 @@ def cigar(individual):
     return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual),
 
 def rosenbrock(individual):  
-    """Rosenbrock test objective function."""
+    """Rosenbrock test objective function.
+    
+    :math:`f(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 
+    100 (x_{i+1} - x_i^2 )^2`
+    
+    .. image:: _images/rosenbrock.*
+       :width: 67 %"""
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
                    for x, y in zip(individual[:-1], individual[1:])),
 
@@ -81,8 +87,12 @@ def griewank(individual):
         reduce(mul, (cos(x/sqrt(i+1.0)) for i, x in enumerate(individual)), 1) + 1,
             
 def rastrigin(individual):
-    """Rastrigin test objective function. Consider using ``lambda_ = 20 * N`` 
-    for this test function.
+    """Rastrigin test objective function.
+    
+    :math:`f(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
+    
+    .. image:: _images/rastrigin.*
+       :width: 67 %
     """     
     return 10 * len(individual) + sum(gene * gene - 10 * \
                         cos(2 * pi * gene) for gene in individual),
