@@ -197,12 +197,12 @@ the min, max, mean and standard deviation of the population. ::
 	length = len(pop)
 	mean = sum(fits) / length
 	sum2 = sum(x*x for x in fits)
-	std_dev = abs(sum2 / length - mean**2)**0.5
+	std = abs(sum2 / length - mean**2)**0.5
 
 	print "  Min %s" % min(fits)
 	print "  Max %s" % max(fits)
 	print "  Avg %s" % mean
-	print "  Std %s" % std_dev
+	print "  Std %s" % std
 
 The complete `One Max Genetic Algorithm
 <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code is available. It

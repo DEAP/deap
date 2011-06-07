@@ -80,7 +80,7 @@ The toolbox used is very similar to the one presented in the symbolic regression
     toolbox.register("evaluate", evalSpambase)
     toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("mate", gp.cxTypedOnePoint)
-    toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+    toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
     toolbox.register("mutate", gp.mutTypedUniform, expr=toolbox.expr_mut))
     
 

@@ -152,7 +152,7 @@ For instance, take a look at the short version of the onemax. This is how it may
 
     stats_t = operators.Stats(lambda ind: ind.fitness.values)
     stats_t.register("Avg", operators.mean)
-    stats_t.register("Std", operators.std_dev)
+    stats_t.register("Std", operators.std)
     stats_t.register("Min", min)
     stats_t.register("Max", max)
 

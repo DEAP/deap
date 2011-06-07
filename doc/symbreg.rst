@@ -57,9 +57,9 @@ Toolbox
 Now, we want to register some parameters specific to the evolution process. In DEAP, this is done through the toolbox : ::
     
     toolbox = base.Toolbox()
-    toolbox.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
-    toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.expr)
-    toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+    toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
+    toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("lambdify", gp.lambdify, pset=pset)
 
     def evalSymbReg(individual):
@@ -75,10 +75,10 @@ Now, we want to register some parameters specific to the evolution process. In D
     toolbox.register("evaluate", evalSymbReg)
     toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("mate", gp.cxUniformOnePoint)
-    toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+    toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
     toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut)
 
-First, a toolbox instance is created (in some problem types like coevolution, you may consider creating more than one toolbox). Then, we can register any parameters. The first lines register how to create an individual (by calling gp.generateRamped with the previously defined primitive set), and how to create the population (by repeating the individual initialization).
+First, a toolbox instance is created (in some problem types like coevolution, you may consider creating more than one toolbox). Then, we can register any parameters. The first lines register how to create an individual (by calling gp.genRamped with the previously defined primitive set), and how to create the population (by repeating the individual initialization).
 
 We may now introduce the evaluation function, which will receive an individual as input, and return the corresponding fitness. This function uses the `lambdify` function previously defined to transform the individual into its executable form -- that is, a program. After that, the evaluation is only simple maths, where the difference between the values produced by the evaluated individual and the real values are squared and summed to compute the RMSE, which is returned as the fitness of the individual.
 
@@ -101,7 +101,7 @@ Although optional, statistics are often useful in evolutionary programming. DEAP
     
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     
@@ -116,7 +116,7 @@ At this point, DEAP has all the information needed to begin the evolutionary pro
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("Avg", tools.mean)
-        stats.register("Std", tools.std_dev)
+        stats.register("Std", tools.std)
         stats.register("Min", min)
         stats.register("Max", max)
         
