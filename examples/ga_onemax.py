@@ -26,9 +26,9 @@ toolbox = base.Toolbox()
 # Attribute generator
 toolbox.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-toolbox.register("individual", tools.fillRepeat, creator.Individual, 
+toolbox.register("individual", tools.initRepeat, creator.Individual, 
     toolbox.attr_bool, 100)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -92,12 +92,12 @@ def main():
         length = len(pop)
         mean = sum(fits) / length
         sum2 = sum(x*x for x in fits)
-        std_dev = abs(sum2 / length - mean**2)**0.5
+        std = abs(sum2 / length - mean**2)**0.5
         
         print "  Min %s" % min(fits)
         print "  Max %s" % max(fits)
         print "  Avg %s" % mean
-        print "  Std %s" % std_dev
+        print "  Std %s" % std
     
     print "-- End of (successful) evolution --"
     

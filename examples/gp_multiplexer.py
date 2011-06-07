@@ -67,9 +67,9 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
 toolbox = base.Toolbox()
-toolbox.register("expr", gp.generateFull, pset=pset, min_=2, max_=4)
-toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.expr)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("expr", gp.genFull, pset=pset, min_=2, max_=4)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalMultiplexer(individual):
@@ -80,7 +80,7 @@ def evalMultiplexer(individual):
 toolbox.register("evaluate", evalMultiplexer)
 toolbox.register("select", tools.selTournament, tournsize=7)
 toolbox.register("mate", gp.cxUniformOnePoint)
-toolbox.register("expr_mut", gp.generateGrow, min_=0, max_=2)
+toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
@@ -89,7 +89,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

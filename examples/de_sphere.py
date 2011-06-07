@@ -30,8 +30,8 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 
 toolbox = base.Toolbox()
 toolbox.register("attr_float", random.uniform, -3, 3)
-toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_float, NDIM)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, NDIM)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("select", tools.selRandom, n=3)
 toolbox.register("evaluate", benchmarks.sphere)
 
@@ -46,7 +46,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

@@ -35,20 +35,19 @@ class Toolbox(object):
     as first argument to every items of the iterables given as next
     arguments, this method defaults to the :func:`map` function. You may
     populate the toolbox with any other function by using the
-    :meth:`~deap.toolbox.register` method.
+    :meth:`~deap.base.Toolbox.register` method.
     """
 
     def __init__(self):
         self.register("clone", copy.deepcopy)
         self.register("map", map)
 
-    def register(self, methodname, method, *args, **kargs):
-        """Register a *method* in the toolbox under the name *methodname*. You 
+    def register(self, alias, method, *args, **kargs):
+        """Register a *method* in the toolbox under the name *alias*. You 
         may provide default arguments that will be passed automatically when 
         calling the registered method. Fixed arguments can then be overriden 
         at function call time. The following code block is a example of how
-        the toolbox is used.
-        ::
+        the toolbox is used. ::
 
             >>> def func(a, b, c=3):
             ...     print a, b, c
@@ -60,54 +59,55 @@ class Toolbox(object):
 
         """
         pfunc = functools.partial(method, *args, **kargs)
-        pfunc.__name__ = methodname
-        setattr(self, methodname, pfunc)
+        pfunc.__name__ = alias
+        setattr(self, alias, pfunc)
 
-    def unregister(self, methodname):
-        """Unregister *methodname* from the toolbox."""
-        delattr(self, methodname)
+    def unregister(self, alias):
+        """Unregister *alias* from the toolbox."""
+        delattr(self, alias)
 
-    def decorate(self, methodname, *decorators):
-        """Decorate *methodname* with the specified *decorators*, *methodname*
+    def decorate(self, alias, *decorators):
+        """Decorate *alias* with the specified *decorators*, *alias*
         has to be a registered function in the current toolbox. Decorate uses
         the signature preserving decoration function
-        :func:`~deap.toolbox.decorate`.
+        :func:`~deap.tools.decorate`.
         """
         from tools import decorate
-        partial_func = getattr(self, methodname)
+        partial_func = getattr(self, alias)
         method = partial_func.func
         args = partial_func.args
         kargs = partial_func.keywords
         for decorator in decorators:
             method = decorate(decorator)(method)
-        setattr(self, methodname, functools.partial(method, *args, **kargs))
+        setattr(self, alias, functools.partial(method, *args, **kargs))
 
 class Fitness(object):
-    """The fitness is a measure of quality of a solution.
+    """The fitness is a measure of quality of a solution. If *values* are
+    provided as a tuple, the fitness is initalized using those values,
+    otherwise it is empty (or invalid).
 
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
-    ``!=``. The comparison of those operators is made
-    lexicographically. Maximization and minimization are taken
-    care off by a multiplication between the :attr:`weights` and the fitness 
-    :attr:`values`. The comparison can be made between fitnesses of different 
-    size, if the fitnesses are equal until the extra elements, the longer 
-    fitness will be superior to the shorter.
+    ``!=``. The comparison of those operators is made lexicographically.
+    Maximization and minimization are taken care off by a multiplication
+    between the :attr:`weights` and the fitness :attr:`values`. The comparison
+    can be made between fitnesses of different size, if the fitnesses are
+    equal until the extra elements, the longer fitness will be superior to the
+    shorter.
 
     .. note::
-       When comparing fitness values that are minimized, ``a > b`` will return
-       :data:`True` if *a* is inferior to *b*.
+       When comparing fitness values that are **minimized**, ``a > b`` will
+       return :data:`True` if *a* is **inferior** to *b*.
     """
     
     weights = ()
     """The weights are used in the fitness comparison. They are shared among
-    all fitnesses of the same type.
-    This member is **not** meant to be manipulated since it may influence how
-    fitnesses are compared and may
-    result in undesirable effects. However if you wish to manipulate it, in 
+    all fitnesses of the same type. This member is **not** meant to be
+    manipulated since it may influence how fitnesses are compared and may
+    result in undesirable effects. However if you wish to manipulate it, in
     order to make the change effective to all fitnesses of the same type, use
-    ``FitnessType.weights = new_weights`` or
-    ``self.__class__.weights = new_weights`` or from an individual
-    ``ind.fitness.__class__.weights = new_weights``.
+    ``FitnessType.weights = new_weights`` or ``self.__class__.weights =
+    new_weights`` or from an individual ``ind.fitness.__class__.weights =
+    new_weights``.
     """
     
     wvalues = ()

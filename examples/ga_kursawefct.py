@@ -35,8 +35,8 @@ toolbox = base.Toolbox()
 toolbox.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_float, 3)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 3)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def checkBounds(min, max):
     def decCheckBounds(func):
@@ -68,7 +68,7 @@ def main():
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

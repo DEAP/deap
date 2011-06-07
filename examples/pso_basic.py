@@ -47,7 +47,7 @@ def updateParticle(part, best, phi1, phi2):
 
 toolbox = base.Toolbox()
 toolbox.register("particle", generate, size=2, pmin=-6, pmax=6, smin=-3, smax=3)
-toolbox.register("population", tools.fillRepeat, list, toolbox.particle)
+toolbox.register("population", tools.initRepeat, list, toolbox.particle)
 toolbox.register("update", updateParticle, phi1=2.0, phi2=2.0)
 toolbox.register("evaluate", benchmarks.himmelblau)
 
@@ -55,7 +55,7 @@ def main():
     pop = toolbox.population(n=5)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
 

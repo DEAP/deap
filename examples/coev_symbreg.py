@@ -42,8 +42,8 @@ def evalSymbReg(expr, data):
 toolbox_ga = base.Toolbox()
 
 toolbox_ga.register("float", random.uniform, -1, 1)
-toolbox_ga.register("individual", tools.fillRepeat, creator.IndGA, toolbox_ga.float, 10)
-toolbox_ga.register("population", tools.fillRepeat, list, toolbox_ga.individual)
+toolbox_ga.register("individual", tools.initRepeat, creator.IndGA, toolbox_ga.float, 10)
+toolbox_ga.register("population", tools.initRepeat, list, toolbox_ga.individual)
 
 toolbox_ga.register("select", tools.selTournament, tournsize=3)
 toolbox_ga.register("mate", tools.cxTwoPoints)
@@ -57,13 +57,13 @@ def main():
     
     stats_ga = tools.Statistics(lambda ind: ind.fitness.values)
     stats_ga.register("Avg", tools.mean)
-    stats_ga.register("Std", tools.std_dev)
+    stats_ga.register("Std", tools.std)
     stats_ga.register("Min", min)
     stats_ga.register("Max", max)
     
     stats_gp = tools.Statistics(lambda ind: ind.fitness.values)
     stats_gp.register("Avg", tools.mean)
-    stats_gp.register("Std", tools.std_dev)
+    stats_gp.register("Std", tools.std)
     stats_gp.register("Min", min)
     stats_gp.register("Max", max)
     

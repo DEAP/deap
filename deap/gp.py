@@ -323,15 +323,15 @@ class PrimitiveTree(base.Tree):
 
 # Expression generation functions
 
-def generateRamped(pset, min_, max_, type_=__type__):
+def genRamped(pset, min_, max_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
-    Half the time, the expression is generated with generateGrow,
-    the other half, the expression is generated with generateFull.
+    Half the time, the expression is generated with genGrow,
+    the other half, the expression is generated with genFull.
     """
-    method = random.choice((generateGrow, generateFull))
+    method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
 
-def generateFull(pset, min_, max_, type_=__type__):
+def genFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
     """
@@ -339,7 +339,7 @@ def generateFull(pset, min_, max_, type_=__type__):
         return max_depth == 0
     return _generate(pset, min_, max_, condition, type_)
 
-def generateGrow(pset, min_, max_, type_=__type__):
+def genGrow(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
     between *min* and *max*.
     """
@@ -432,7 +432,7 @@ def cxTypedOnePoint(ind1, ind2):
     return ind1, ind2
 
 
-def cxTreeKozaOnePoint(ind1, ind2, cxtermpb=0.1):
+def cxKozaOnePoint(ind1, ind2, cxtermpb=0.1):
     """Randomly select in each individual and exchange each subtree with the
     point as root between each individual.
 

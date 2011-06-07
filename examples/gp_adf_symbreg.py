@@ -82,20 +82,20 @@ creator.create("MAIN", gp.PrimitiveTree, pset=pset)
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
-toolbox.register('adf_expr0', gp.generateFull, pset=adfset0, min_=1, max_=2)
-toolbox.register('adf_expr1', gp.generateFull, pset=adfset1, min_=1, max_=2)
-toolbox.register('adf_expr2', gp.generateFull, pset=adfset2, min_=1, max_=2)
-toolbox.register('main_expr', gp.generateRamped, pset=pset, min_=1, max_=2)
+toolbox.register('adf_expr0', gp.genFull, pset=adfset0, min_=1, max_=2)
+toolbox.register('adf_expr1', gp.genFull, pset=adfset1, min_=1, max_=2)
+toolbox.register('adf_expr2', gp.genFull, pset=adfset2, min_=1, max_=2)
+toolbox.register('main_expr', gp.genRamped, pset=pset, min_=1, max_=2)
 
-toolbox.register('ADF0', tools.fillIter, creator.ADF0, toolbox.adf_expr0)
-toolbox.register('ADF1', tools.fillIter, creator.ADF1, toolbox.adf_expr1)
-toolbox.register('ADF2', tools.fillIter, creator.ADF2, toolbox.adf_expr2)
-toolbox.register('MAIN', tools.fillIter, creator.MAIN, toolbox.main_expr)
+toolbox.register('ADF0', tools.initIterate, creator.ADF0, toolbox.adf_expr0)
+toolbox.register('ADF1', tools.initIterate, creator.ADF1, toolbox.adf_expr1)
+toolbox.register('ADF2', tools.initIterate, creator.ADF2, toolbox.adf_expr2)
+toolbox.register('MAIN', tools.initIterate, creator.MAIN, toolbox.main_expr)
 
 func_cycle = [toolbox.MAIN, toolbox.ADF0, toolbox.ADF1, toolbox.ADF2]
 
-toolbox.register('individual', tools.fillCycle, creator.Individual, func_cycle)
-toolbox.register('population', tools.fillRepeat, list, toolbox.individual)
+toolbox.register('individual', tools.initCycle, creator.Individual, func_cycle)
+toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
@@ -111,7 +111,7 @@ toolbox.register('lambdify', gp.lambdifyList)
 toolbox.register('evaluate', evalSymbReg)
 toolbox.register('select', tools.selTournament, tournsize=3)
 toolbox.register('mate', gp.cxUniformOnePoint)
-toolbox.register('expr', gp.generateFull, min_=1, max_=2)
+toolbox.register('expr', gp.genFull, min_=1, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr)
 
 def main():
@@ -122,7 +122,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

@@ -44,9 +44,9 @@ toolbox = base.Toolbox()
 toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
-toolbox.register("individual", tools.fillRepeat, creator.Individual, 
+toolbox.register("individual", tools.initRepeat, creator.Individual, 
     toolbox.attr_item, IND_SIZE)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalKnapsack(individual):
     weight = 0.0
@@ -95,7 +95,7 @@ def main():
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

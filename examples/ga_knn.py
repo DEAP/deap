@@ -58,8 +58,8 @@ toolbox = base.Toolbox()
 # Attribute generator
 toolbox.register("attr_bool", random.randint, 0, 1)
 # Structure initializers
-toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_bool, classifier.ndim)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, classifier.ndim)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # Operator registering
 toolbox.register("evaluate", evalClassifier)
@@ -75,7 +75,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
 

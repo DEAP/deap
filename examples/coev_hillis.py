@@ -65,12 +65,12 @@ htoolbox = base.Toolbox()
 ptoolbox = base.Toolbox()
 
 htoolbox.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
-htoolbox.register("individual", tools.fillIter, creator.Host, htoolbox.network)
-htoolbox.register("population", tools.fillRepeat, list, htoolbox.individual)
+htoolbox.register("individual", tools.initIterate, creator.Host, htoolbox.network)
+htoolbox.register("population", tools.initRepeat, list, htoolbox.individual)
 
 ptoolbox.register("parasite", getParasite, dimension=INPUTS)
-ptoolbox.register("individual", tools.fillRepeat, creator.Parasite, ptoolbox.parasite, 20)
-ptoolbox.register("population", tools.fillRepeat, list, ptoolbox.individual)
+ptoolbox.register("individual", tools.initRepeat, creator.Parasite, ptoolbox.parasite, 20)
+ptoolbox.register("population", tools.initRepeat, list, ptoolbox.individual)
 
 htoolbox.register("evaluate", evalNetwork, dimension=INPUTS)
 htoolbox.register("mate", tools.cxTwoPoints)
@@ -110,7 +110,7 @@ def main():
     hof = tools.HallOfFame(1)
     hstats = tools.Statistics(lambda ind: ind.fitness.values)
     hstats.register("Avg", tools.mean)
-    hstats.register("Std", tools.std_dev)
+    hstats.register("Std", tools.std)
     hstats.register("Min", min)
     hstats.register("Max", max)
     

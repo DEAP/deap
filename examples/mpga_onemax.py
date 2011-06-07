@@ -38,8 +38,8 @@ tools = toolbox.Toolbox()
 tools.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", toolbox.fillRepeat, creator.Individual, tools.attr_bool, 100)
-tools.register("population", toolbox.fillRepeat, list, tools.individual)
+tools.register("individual", toolbox.initRepeat, creator.Individual, tools.attr_bool, 100)
+tools.register("population", toolbox.initRepeat, list, tools.individual)
 
 def evalOneMax(individual):
     return sum(individual),
