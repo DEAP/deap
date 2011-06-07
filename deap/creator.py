@@ -15,22 +15,30 @@
 
 """The :mod:`~deap.creator` module is the heart and soul of DEAP, it allows to
 create, at runtime, classes that will fulfill the needs of your evolutionary
-algorithms.
+algorithms. This module follows the meta-factory paradigm by allowing to
+create new classes via both composition and inheritance. Attributes both datas
+and functions are added to existing types in order to create new types
+empowered with user specific evolutionary computation capabilities. In effect,
+new classes can be built from any imaginable type, from :class:`list` to
+:class:`set`, :class:`dict`, :class:`~deap.base.Tree` and more,
+providing the possibility to implement genetic algorithms, genetic
+programming, evolution strategies, particle swarm optimizers, and many more.
 """
 
 import array
 import copy
 
+class_replacers = {}
 """Some classes in Python's standard library as well as third party library
-may be in part incompatible with the logic used in DEAP. In order to palliate 
-to this problem, the method `create` used the dictionary `class_replacers` to 
-identify if the base type provided is problematic, and if so inherits the new 
-class from the replacement base class instead of the original base class. 
+may be in part incompatible with the logic used in DEAP. In order to palliate
+to this problem, the method :func:`create` uses the dictionary
+`class_replacers` to identify if the base type provided is problematic, and if
+so inherits the new class from the replacement base class instead of the
+original base class.
 
-`class_replacers` keys are classes to be replaced and the values are the 
+`class_replacers` keys are classes to be replaced and the values are the
 replacing classes.
 """
-class_replacers = {}
 
 try:
     import numpy
@@ -83,15 +91,29 @@ class _array(array.array):
 class_replacers[array.array] = _array
 
 def create(name, base, **kargs):
-    """The function :func:`create` does create a new class named *name*
-    inheriting from *base* in the :mod:`~deap.creator` module. The new
-    class can have attributes defined by the subsequent keyword
-    arguments passed to the function create. If the argument is a class,
-    the __init__ function is called in the initialization of an instance of
-    the new object and the returned instance is added as an attribute of the
-    class' instance. Otherwise, if the argument is not a class, (for
-    example an :class:`int`), it is added as a "static" attribute of the
-    class.
+    """Creates a new class named *name* inheriting from *base* in the
+    :mod:`~deap.creator` module. The new class can have attributes defined by
+    the subsequent keyword arguments passed to the function create. If the
+    argument is a class (without the parenthesis), the __init__ function is
+    called in the initialization of an instance of the new object and the
+    returned instance is added as an attribute of the class' instance.
+    Otherwise, if the argument is not a class, (for example an :class:`int`),
+    it is added as a "static" attribute of the class.
+    
+    The following is used to create a class :class:`Foo` inheriting from the
+    standard :class:`list` and having an attribute :attr:`bar` being an empty
+    dictionary and a static attribute :attr:`spam` initialized to 1. ::
+    
+        create("Foo", list, bar=dict, spam=1)
+        
+    This above line is exactly the same as defining in the :mod:`creator`
+    module something like the following. ::
+    
+        def Foo(list):
+            spam = 1
+            
+            def __init__(self):
+                self.bar = dict()
     """
     dict_inst = {}
     dict_cls = {}

@@ -26,7 +26,7 @@ from functools import partial
 
 try:
     import yaml
-    MILESTONE_USE_YAML = True
+    CHECKPOINT_USE_YAML = True
     try:
         from yaml import CDumper as Dumper  # CLoader and CDumper are much
         from yaml import CLoader as Loader  # faster than default ones, but 
@@ -34,14 +34,14 @@ try:
         from yaml import Dumper
         from yaml import Loader
 except ImportError:
-    MILESTONE_USE_YAML = False
+    CHECKPOINT_USE_YAML = False
                                             # If yaml ain't present, use 
 try:                                        # pickling to dump
     import cPickle as pickle                # cPickle is much faster than 
 except ImportError:                         # pickle but only present under
     import pickle                           # CPython
 
-def fillRepeat(container, func, n):
+def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the function *func*.
     
@@ -49,13 +49,13 @@ def fillRepeat(container, func, n):
     to register a generator of filled containers, as individuals or 
     population.
     
-        >>> fillRepeat(list, random.random, 2)
+        >>> initRepeat(list, random.random, 2)
         [0.47615826222934565, 0.6302190543188851]
 
     """
     return container(func() for _ in xrange(n))
 
-def fillIter(container, generator):
+def initIterate(container, generator):
     """Call the function *container* with an iterable as 
     its only argument. The iterable must be returned by 
     the method or the object *generator*.
@@ -68,13 +68,13 @@ def fillIter(container, generator):
         >>> from random import sample
         >>> from functools import partial
         >>> gen_idx = partial(sample, range(10), 10)
-        >>> fillIter(list, gen_idx)
+        >>> initIterate(list, gen_idx)
         [4, 5, 3, 6, 0, 9, 2, 7, 1, 8]
 
     """
     return container(generator())
 
-def fillCycle(container, seq_func, n=1):
+def initCycle(container, seq_func, n=1):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the functions present in *seq_func*.
     
@@ -83,7 +83,7 @@ def fillCycle(container, seq_func, n=1):
     population.
     
         >>> func_seq = [lambda:1 , lambda:'a', lambda:3]
-        >>> fillCycle(list, func_seq, 2)
+        >>> initCycle(list, func_seq, 2)
         [1, 'a', 3, 1, 'a', 3]
 
     """
@@ -124,12 +124,12 @@ class History(object):
     
     def populate(self, individuals):
         """Populate the history with the initial *individuals*. An attribute
-        :attr:`history_index` is added to every individual, this index will 
-        help to track the parents and the children through evolution. This index
-        will be modified by the :meth:`update` method when a child is produced.
-        Modifying the internal :attr:`genealogy_index` of the history or the
-        :attr:`history_index` of an individual may lead to unpredictable
-        results and corruption of the history.
+        :attr:`history_index` is added to every individual, this index will
+        help to track the parents and the children through evolution. This
+        index will be modified by the :meth:`update` method when a child is
+        produced. Modifying the internal :attr:`genealogy_index` of the
+        history or the :attr:`history_index` of an individual may lead to
+        unpredictable results and corruption of the history.
         """
         for ind in individuals:
             self.genealogy_index += 1
@@ -170,11 +170,11 @@ class History(object):
         return decFunc
 
 
-class Milestone(object):
-    """A milestone is a file containing the state of any object that has been
-    hooked. While initializing a milestone, add the objects that you want to
+class Checkpoint(object):
+    """A checkpoint is a file containing the state of any object that has been
+    hooked. While initializing a checkpoint, add the objects that you want to
     be dumped by appending keyword arguments to the initializer or using the 
-    :meth:`add`. By default the milestone tries to use the YAML format which
+    :meth:`add`. By default the checkpoint tries to use the YAML format which
     is human readable, if PyYAML is not installed, it uses pickling which is
     not readable. You can force the use of pickling by setting the argument
     *yaml* to :data:`False`. 
@@ -184,37 +184,38 @@ class Milestone(object):
     to dump the object, for example the following won't work as desired ::
 
         >>> my_object = [1, 2, 3]
-        >>> ms = Milestone(obj=my_object)
+        >>> cp = Checkpoint(obj=my_object)
         >>> my_object = [3, 5, 6]
-        >>> ms.dump("example")
-        >>> ms.load("example.ems")
-        >>> ms["obj"]
+        >>> cp.dump("example")
+        >>> cp.load("example.ems")
+        >>> cp["obj"]
         [1, 2, 3]
 
     In order to dump the new value of ``my_object`` it is needed to change its
     internal values directly and not touch the *label*, as in the following ::
 
         >>> my_object = [1, 2, 3]
-        >>> ms = Milestone(obj=my_object)
+        >>> cp = Checkpoint(obj=my_object)
         >>> my_object[:] = [3, 5, 6]
-        >>> ms.dump("example")
-        >>> ms.load("example.ems")
-        >>> ms["obj"]
+        >>> cp.dump("example")
+        >>> cp.load("example.ems")
+        >>> cp["obj"]
         [3, 5, 6]
 
     """
     def __init__(self, yaml=True, **kargs):
 #        self.zipped = zipped
         self._dict = kargs
-        if MILESTONE_USE_YAML and yaml:
+        if CHECKPOINT_USE_YAML and yaml:
             self.use_yaml = True
         else:
             self.use_yaml = False
 
     def add(self, **kargs):
-        """Add objects to the list of objects to be dumped. The object is added
-        under the name specified by the argument's name. Keyword arguments
-        are mandatory in this function."""
+        """Add objects to the list of objects to be dumped. The object is
+        added under the name specified by the argument's name. Keyword
+        arguments are mandatory in this function.
+        """
         self._dict.update(*kargs)
 
     def remove(self, *args):
@@ -228,27 +229,27 @@ class Milestone(object):
         return self._dict[value]
 
     def dump(self, prefix):
-        """Dump the current registered objects in a file named *prefix.ems*,
+        """Dump the current registered objects in a file named *prefix.ecp*,
         the randomizer state is always added to the file and available under
         the ``"randomizer_state"`` tag.
         """
 #        if not self.zipped:
-        ms_file = open(prefix + ".ems", "w")
+        cp_file = open(prefix + ".ecp", "w")
 #        else:
 #            file = gzip.open(prefix + ".ems.gz", "w")
-        ms = self._dict.copy()
-        ms.update({"randomizer_state" : random.getstate()})
+        cp = self._dict.copy()
+        cp.update({"randomizer_state" : random.getstate()})
 
         if self.use_yaml:
-            ms_file.write(yaml.dump(ms, Dumper=Dumper))
+            cp_file.write(yaml.dump(ms, Dumper=Dumper))
         else:
-            pickle.dump(ms, ms_file)
+            pickle.dump(cp, cp_file)
 
-        ms_file.close()
+        cp_file.close()
 
     def load(self, filename):
-        """Load a milestone file retrieving the dumped objects, it is not safe
-        to load a milestone file in a milestone object that contains
+        """Load a checkpoint file retrieving the dumped objects, it is not
+        safe to load a checkpoint file in a checkpoint object that contains
         references as all conflicting names will be updated with the new
         values.
         """
@@ -283,7 +284,7 @@ def var(seq):
     """
     return abs(sum(x*x for x in seq) / len(seq) - mean(seq)**2)
 
-def std_dev(seq):
+def std(seq):
     """Returns the square root of the variance :math:`\sigma^2` of *seq*.
     """
     return var(seq)**0.5
@@ -333,8 +334,8 @@ class HallOfFame(object):
     fitness at creation time.
     
     The class :class:`HallOfFame` provides an interface similar to a list
-    (without being one completely). It is possible to retrieve its length,
-    to iterate on it forward and backward and to get an item or a slice from it.
+    (without being one completely). It is possible to retrieve its length, to
+    iterate on it forward and backward and to get an item or a slice from it.
     """
     def __init__(self, maxsize):
         self.maxsize = maxsize
@@ -342,9 +343,10 @@ class HallOfFame(object):
         self.items = list()
     
     def update(self, population):
-        """Update the hall of fame with the *population* by replacing the worst
-        individuals in the it by the best individuals present in *population*
-        (if they are better). The size of the hall of fame is kept constant.
+        """Update the hall of fame with the *population* by replacing the
+        worst individuals in it by the best individuals present in
+        *population* (if they are better). The size of the hall of fame is
+        kept constant.
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
@@ -1312,10 +1314,10 @@ if __name__ == "__main__":
     import random
     
     random.seed(64)
-    doctest.run_docstring_examples(fillRepeat, globals())
+    doctest.run_docstring_examples(initRepeat, globals())
     
     random.seed(64)
-    doctest.run_docstring_examples(fillIter, globals())
-    doctest.run_docstring_examples(fillCycle, globals())
+    doctest.run_docstring_examples(initIterate, globals())
+    doctest.run_docstring_examples(initCycle, globals())
     
     

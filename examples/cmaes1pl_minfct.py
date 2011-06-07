@@ -42,7 +42,7 @@ toolbox.register("evaluate", benchmarks.sphere)
 def main():
     # The CMA-ES algorithm takes a population of one individual as argument
     
-    parent = tools.fillRepeat(creator.Individual, toolbox.attr, N)
+    parent = tools.initRepeat(creator.Individual, toolbox.attr, N)
     parent.fitness.values = toolbox.evaluate(parent)
     
     strategy = cma.CMA1pLStrategy(parent, sigma=5.0, lambda_=8)
@@ -52,7 +52,7 @@ def main():
     hof = tools.HallOfFame(1)    
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
    

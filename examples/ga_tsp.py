@@ -41,8 +41,8 @@ toolbox = base.Toolbox()
 toolbox.register("indices", random.sample, xrange(IND_SIZE), IND_SIZE)
 
 # Structure initializers
-toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.indices)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
@@ -63,7 +63,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

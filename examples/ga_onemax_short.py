@@ -34,8 +34,8 @@ toolbox = base.Toolbox()
 toolbox.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_bool, 100)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
     return sum(individual),
@@ -52,7 +52,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

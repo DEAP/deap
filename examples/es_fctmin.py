@@ -32,7 +32,7 @@ toolbox = base.Toolbox()
 
 creator.create("Strategy", array.array, typecode='d')
 
-toolbox.register("strategy", tools.fillRepeat, creator.Strategy, lambda: 1., IND_SIZE) 
+toolbox.register("strategy", tools.initRepeat, creator.Strategy, lambda: 1., IND_SIZE) 
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin, strategy=toolbox.strategy)
@@ -41,8 +41,8 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 toolbox.register("attr_float", random.uniform, -3, 3)
 
 # Structure initializers
-toolbox.register("individual", tools.fillRepeat, creator.Individual, toolbox.attr_float, IND_SIZE)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, IND_SIZE)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("mate", tools.cxESBlend, alpha=0.1, minstrategy=1e-10)
 toolbox.register("mutate", tools.mutES, indpb=0.1, minstrategy=1e-10)
 toolbox.register("select", tools.selTournament, tournsize=3)
@@ -55,7 +55,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     

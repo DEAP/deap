@@ -61,8 +61,8 @@ toolbox = base.Toolbox()
 toolbox.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
 
 # Structure initializers
-toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.network)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.network)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 toolbox.register("evaluate", evalEvoSN, dimension=INPUTS)
 toolbox.register("mate", tools.cxTwoPoints)
@@ -79,7 +79,7 @@ def main():
     
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
 

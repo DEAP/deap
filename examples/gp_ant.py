@@ -163,11 +163,11 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=
 toolbox = base.Toolbox()
 
 # Attribute generator
-toolbox.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
+toolbox.register("expr_init", gp.genFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
-toolbox.register("individual", tools.fillIter, creator.Individual, toolbox.expr_init)
-toolbox.register("population", tools.fillRepeat, list, toolbox.individual)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr_init)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code
@@ -179,7 +179,7 @@ def evalArtificialAnt(individual):
 toolbox.register("evaluate", evalArtificialAnt)
 toolbox.register("select", tools.selTournament, tournsize=7)
 toolbox.register("mate", gp.cxUniformOnePoint)
-toolbox.register("expr_mut", gp.generateFull, min_=0, max_=2)
+toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
@@ -192,7 +192,7 @@ def main():
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std_dev)
+    stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
     
