@@ -31,9 +31,9 @@ in DEAP. Bellow are the complete descriptions.
  :func:`initRepeat`                    sequences    ...
  :func:`initIterate`                   sequences    ...
  :func:`initCycle`                     sequences    ...
- :func:`~deap.gp.genRamped`            sequences    ...
  :func:`~deap.gp.genFull`              sequences    ...
  :func:`~deap.gp.genGrow`              sequences    ...
+ :func:`~deap.gp.genRamped`            sequences    ...
 ===================================== ============ =====================
 
 .. autofunction:: deap.tools.initRepeat
@@ -42,11 +42,11 @@ in DEAP. Bellow are the complete descriptions.
 
 .. autofunction:: deap.tools.initCycle
 
-.. autofunction:: deap.gp.genRamped
-
 .. autofunction:: deap.gp.genFull
 
 .. autofunction:: deap.gp.genGrow
+
+.. autofunction:: deap.gp.genRamped
 
 Crossover
 +++++++++
@@ -57,7 +57,7 @@ DEAP. Bellow are the complete descriptions.
 ===================================== ==================================
  Crossover Operator                    Input Type                      
 ===================================== ==================================
- :func:`cxOnePoint`                    sequences                    
+ :func:`cxOnePoint`                    sequences            
  :func:`cxTwoPoints`                   sequences                    
  :func:`cxUniform`                     sequences
  :func:`cxPartialyMatched`             integer sequences
@@ -68,9 +68,9 @@ DEAP. Bellow are the complete descriptions.
  :func:`cxSimulatedBinary`             float sequences
  :func:`cxMessyOnePoint`               sequences
  :func:`~deap.gp.cxUniformOnePoint`    trees
- :func:`~deap.gp.cxTypedOnePoint`      typed trees
+ :func:`~deap.gp.cxTypedOnePoint`      primitive typed trees
  :func:`~deap.gp.cxKozaOnePoint`       trees
- :func:`~deap.gp.cxTypedKozaOnePoint`  typed trees
+ :func:`~deap.gp.cxTypedKozaOnePoint`  primitive typed trees
 ===================================== ==================================
 
 .. autofunction:: deap.tools.cxTwoPoints
@@ -114,12 +114,12 @@ DEAP. Bellow are the complete descriptions.
  :func:`mutShuffleIndexes`                 sequence                    
  :func:`mutFlipBit`                        binary sequence
  :func:`mutES`                             float sequence with strategy
- :func:`~deap.gp.mutUniform`               tree
- :func:`~deap.gp.mutTypedUniform`          typed tree
- :func:`~deap.gp.mutTypedNodeReplacement`  typed tree
- :func:`~deap.gp.mutTypedEphemeral`        typed tree
+ :func:`~deap.gp.mutUniform`               primitive tree
+ :func:`~deap.gp.mutTypedUniform`          primitive typed tree
+ :func:`~deap.gp.mutTypedNodeReplacement`  primitive typed tree
+ :func:`~deap.gp.mutTypedEphemeral`        primitive typed tree
  :func:`~deap.gp.mutShrink`                tree
- :func:`~deap.gp.mutTypedInsert`           typed tree
+ :func:`~deap.gp.mutTypedInsert`           primitive typed tree
 ========================================= ==================================
 
 .. autofunction:: deap.tools.mutGaussian
