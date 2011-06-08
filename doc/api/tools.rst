@@ -42,11 +42,11 @@ in DEAP. Bellow are the complete descriptions.
 
 .. autofunction:: deap.tools.initCycle
 
-.. autofunction:: deap.gp.genRamped
-
 .. autofunction:: deap.gp.genFull
 
 .. autofunction:: deap.gp.genGrow
+
+.. autofunction:: deap.gp.genRamped
 
 Crossover
 +++++++++
