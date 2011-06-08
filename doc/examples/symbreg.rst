@@ -136,7 +136,7 @@ The hall of fame is a specific structure which contains the *n* best individuals
 Complete Example
 ================
 
-.. literalinclude:: ../examples/gp_symbreg.py
+.. literalinclude:: ../../examples/gp_symbreg.py
     :lines: 21-
     
 
