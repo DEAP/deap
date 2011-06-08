@@ -28,9 +28,7 @@ Simply by thinking of the different flavours of evolutionary algorithms (GA,
 GP, ES, PSO, DE, ...), we notice that an extremely large variety of
 individuals are possible. Here is a guide on how to create some of those
 individuals using the :mod:`~deap.creator` and initializing them using a
-:class:`~deap.base.Toolbox`. The single thing in common for all those
-individuals is their :attr:`fitness` attribute that will for the sake of
-completeness the :class:`FitnessMin` created in the last section.
+:class:`~deap.base.Toolbox`.
 
 List of Floats
 ++++++++++++++
@@ -51,7 +49,7 @@ function.
 	
 	import random
 	
-	creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+	creator.create("FitnessMin", base.Fitness, weights=(1.0,))
 	creator.create("Individual", list, fitness=creator.FitnessMin)
 	
 	toolbox = base.Toolbox()
@@ -60,7 +58,7 @@ function.
 	    toolbox.attr_float, n=IND_SIZE)
 
 Calling :func:`toolbox.individual` will readily return a complete individual
-composed of ``IND_SIZE`` floating point numbers with a minimizing single
+composed of ``IND_SIZE`` floating point numbers with a maximizing single
 objective fitness attribute.
 
 Permutation
@@ -161,6 +159,12 @@ attribute.
 
 Particle
 ++++++++
+A particle is another special type of individual as it usually has a speed and generally remember its best position. This type of individual is created (once again) the same way.
+::
+
+	creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+	creator.create("Particle", list, fitness=creator.FitnessMax, speed=list, 
+	    smin=None, smax=None, best=None)
 
 Population
 ----------
