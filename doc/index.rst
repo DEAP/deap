@@ -9,13 +9,12 @@ API
 	:maxdepth: 2
 	:numbered:
    
-	core
-	tools
-	algo
-	gp
-	dtm
-	benchmarks
-   
+	api/core
+	api/tools
+	api/algo
+	api/gp
+	api/dtm
+	api/benchmarks
    
 Tutorials
 ---------
@@ -23,25 +22,25 @@ Tutorials
 	:maxdepth: 2
 	:numbered:
    
-	types
-	algorithms
-	distribution
+	tutorials/types
+	tutorials/algorithms
+	tutorials/distribution
    
 
-Examples Explained
-------------------
+Examples
+--------
 .. toctree::
 	:maxdepth: 2
 	:numbered:
 
-	onemax
-	short_onemax
-	knapsack
-	symbreg
-	parity
-	multiplexer
-	artificial_ant
-	spambase
+	examples/onemax
+	examples/short_onemax
+	examples/knapsack
+	examples/symbreg
+	examples/parity
+	examples/multiplexer
+	examples/artificial_ant
+	examples/spambase
    
 Indices and tables
 ==================

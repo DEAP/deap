@@ -69,14 +69,14 @@ arguments. The :class:`~deap.toolbox.Toolbox` contains two simple methods,
 :meth:`~deap.toolbox.Toolbox.unregister`. 
 ::
 
-    tools = toolbox.Toolbox()
-    
-    # Attribute generator
-    tools.register("attr_bool", random.randint, 0, 1)
-    
-    # Structure initializer
-    tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_bool, 100))
-    tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 300))
+	toolbox = base.Toolbox()
+	
+	# Attribute generator
+	toolbox.register("attr_bool", random.randint, 0, 1)
+	
+	# Structure initializers
+	toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+	toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
 The two last lines of code create two functions within the toolbox, the first
@@ -87,7 +87,7 @@ The Evaluation Function
 =======================
 
 The evaluation function is pretty simple in this case, we need to count the
-number of :data:`1` in the individual and this value. This is done by the
+number of ones in the individual. This is done by the
 following lines of code. 
 ::
     
@@ -102,7 +102,7 @@ function from the :mod:`~deap.toolbox` module and the second one is to register
 them with their argument in the a :class:`~deap.toolbox.Toolbox`. The most
 convenient way is to register them in the toolbox, because it allows to easily
 switch between operators if desired. The toolbox method is also used in the
-algorithms `one max short version
+algorithms, see the `one max short version
 <http://doc.deap.googlecode.com/hg/short_ga_onemax.html one max short
 version>`_.
 
@@ -110,10 +110,10 @@ Registering the operators and their default arguments in the toolbox is done
 as follow. 
 ::
 
-    tools.register("evaluate", evalOneMax)
-    tools.register("mate", operators.cxTwoPoints)
-    tools.register("mutate", operators.mutFlipBit, indpb=0.05)
-    tools.register("select", operators.selTournament, tournsize=3)
+    toolbox.register("evaluate", evalOneMax)
+    toolbox.register("mate", tools.cxTwoPoints)
+    toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+    toolbox.register("select", tools.selTournament, tournsize=3)
 
 Evolving the Population
 =======================
@@ -127,7 +127,7 @@ effortless using the method we registered in the
 :class:`~deap.toolbox.Toolbox`. 
 ::
 
-    pop = tools.population()
+    pop = toolbox.population()
 
 -----------------------
 The Appeal of Evolution
@@ -156,13 +156,13 @@ del statement simply invalidate the fitness of the modified individuals.
 	# Apply crossover and mutation on the offsprings
 	for child1, child2 in zip(offsprings[::2], offsprings[1::2]):
 	    if random.random() < CXPB:
-	        tools.mate(child1, child2)
+	        toolbox.mate(child1, child2)
 	        del child1.fitness.values
 	        del child2.fitness.values
 
 	for mutant in offsprings:
 	    if random.random() < MUTPB:
-	        tools.mutate(mutant)
+	        toolbox.mutate(mutant)
 	        del mutant.fitness.values
 
 The population now needs to be evaluated, we then apply the evaluation on
@@ -171,7 +171,7 @@ every individual in the population that has an invalid fitness.
 
 	# Evaluate the individuals with an invalid fitness
 	invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-	fitnesses = map(tools.evaluate, invalid_ind)
+	fitnesses = map(toolbox.evaluate, invalid_ind)
 	for ind, fit in zip(invalid_ind, fitnesses):
 	    ind.fitness.values = fit
 
@@ -181,7 +181,7 @@ toolbox) in that same population. The chosen individuals are duplicated
 according to the :meth:`clone` operator of the toolbox.
 ::
 
-    pop[:] = [tools.clone(ind) for ind in tools.select(pop, n=len(pop))]
+    pop[:] = [toolbox.clone(ind) for ind in toolbox.select(pop, n=len(pop))]
 
 The ``[:]`` needs to be used in order to replace the slice of objects with the
 new list of individuals and not the whole population object that would lose
