@@ -57,7 +57,7 @@ DEAP. Bellow are the complete descriptions.
 ===================================== ==================================
  Crossover Operator                    Input Type                      
 ===================================== ==================================
- :func:`cxOnePoint`                    sequences                    
+ :func:`cxOnePoint`                    sequences            
  :func:`cxTwoPoints`                   sequences                    
  :func:`cxUniform`                     sequences
  :func:`cxPartialyMatched`             integer sequences

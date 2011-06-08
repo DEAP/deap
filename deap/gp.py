@@ -276,7 +276,7 @@ class PrimitiveSetTyped(object):
         return self.terms_count / float(self.terms_count + self.prims_count)
 
 class PrimitiveSet(PrimitiveSetTyped):
-    """Class same as PrimitiveSetTyped, except there is no 
+    """Class same as :class:`~deap.gp.PrimitiveSetTyped`, except there is no 
     definition of type.
     """
     def __init__(self, name, arity, prefix="ARG"):
