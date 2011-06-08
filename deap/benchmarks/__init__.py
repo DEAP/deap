@@ -26,19 +26,33 @@ from functools import reduce
 
 # Unimodal
 def rand(individual):
-    """Random test objective function."""
+    """Random test objective function.
+    
+    :math:`f(\mathbf{x}) = random(0,1)`
+    """
     return random.random(),
     
 def plane(individual):
-    """Plane test objective function."""
+    """Plane test objective function.
+    
+    :math:`f(\mathbf{x}) = x_0`
+    
+    """
     return individual[0],
 
 def sphere(individual):
-    """Sphere test objective function."""
+    """Sphere test objective function.
+    
+    :math:`f(\mathbf{x}) = \sum_{i=1}^N\,x_i^2`
+    
+    """
     return sum(gene * gene for gene in individual),
 
 def cigar(individual):
-    """Cigar test objective function."""
+    """Cigar test objective function.
+    
+    :math:`f(\mathbf{x}) = x_0^2 + 10^6\\sum_{i=1}^N\,x_i^2`
+    """
     return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual),
 
 def rosenbrock(individual):  
@@ -71,19 +85,41 @@ def h1(individual):
     denum = ((individual[0] - 8.6998)**2 + (individual[1] - 6.7665)**2)**0.5 + 1
     return num / denum,
 
-
+ # 
 # Multimodal
 def ackley(individual):
-    """Ackley test objective function."""
+    """Ackley test objective function.
+    
+    :math:`f(\\mathbf{x}) = 20 - 20\cdot\exp\\left(-0.2\sqrt{\\frac{1}{N}\sum_{i=1}^N x_i^2}\\right) + e - \exp\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i)\\right)`
+    
+    .. plot:: _scripts/ackley.py
+       :width: 67 %
+    """
     N = len(individual)
     return 20 - 20 * exp(-0.2*sqrt(1.0/N * sum(x**2 for x in individual))) \
             + e - exp(1.0/N * sum(cos(2*pi*x) for x in individual)),
             
 def bohachevsky(individual):
+    """Bohachevsky test objective function
+    
+    :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - 0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
+    
+    .. plot:: _scripts/bohachevsky.py
+       :width: 67 %
+    
+    """
     return sum(x**2 + 2*x1**2 - 0.3*cos(3*pi*x) - 0.4*cos(4*pi*x1) + 0.7 
                 for x, x1 in zip(individual[:-1], individual[1:])),
 
 def griewank(individual):
+    """Griewank test objective function
+    
+    :math:`f(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
+      
+   .. plot:: _scripts/griewank.py
+      :width: 67 %
+    
+    """
     return 1.0/4000.0 * sum(x**2 for x in individual) - \
         reduce(mul, (cos(x/sqrt(i+1.0)) for i, x in enumerate(individual)), 1) + 1,
             
@@ -108,10 +144,21 @@ def rastrigin_skew(individual):
     return 10*N + sum((10*x if x > 0 else x)**2 
                     - 10*cos(2*pi*(10*x if x > 0 else x)) for x in individual),
 def schaffer(individual):
+    """Schaffer test objective function.
+    
+    :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \\right]`
+    
+    """
+    
     return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0) 
                 for x, x1 in zip(individual[:-1], individual[1:])),
 
 def schwefel(individual):
+    """Schwefel test objective function.
+    
+    :math:`f(\mathbf{x}) = 418.9828872724339\cdot N - \sum_{i=1}^N\,x_i\sin\\left(\sqrt{|x_i|}\\right)`
+    
+    """    
     N = len(individual)
     return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
 
