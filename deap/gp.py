@@ -276,7 +276,7 @@ class PrimitiveSetTyped(object):
         return self.terms_count / float(self.terms_count + self.prims_count)
 
 class PrimitiveSet(PrimitiveSetTyped):
-    """Class same as PrimitiveSetTyped, except there is no 
+    """Class same as :class:`~deap.gp.PrimitiveSetTyped`, except there is no 
     definition of type.
     """
     def __init__(self, name, arity, prefix="ARG"):
@@ -323,14 +323,6 @@ class PrimitiveTree(base.Tree):
 
 # Expression generation functions
 
-def genRamped(pset, min_, max_, type_=__type__):
-    """Generate an expression with a PrimitiveSet *pset*.
-    Half the time, the expression is generated with genGrow,
-    the other half, the expression is generated with genFull.
-    """
-    method = random.choice((genGrow, genFull))
-    return method(pset, min_, max_, type_)
-
 def genFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
@@ -346,6 +338,14 @@ def genGrow(pset, min_, max_, type_=__type__):
     def condition(max_depth):
         return max_depth == 0 or random.random() < pset.terminalRatio
     return _generate(pset, min_, max_, condition, type_)
+    
+def genRamped(pset, min_, max_, type_=__type__):
+    """Generate an expression with a PrimitiveSet *pset*.
+    Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
+    the other half, the expression is generated with :func:`~deap.gp.genFull`.
+    """
+    method = random.choice((genGrow, genFull))
+    return method(pset, min_, max_, type_)
 
 def _generate(pset, min_, max_, condition, type_=__type__):
     def genExpr(max_depth, type_):
