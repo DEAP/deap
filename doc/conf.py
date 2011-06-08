@@ -34,9 +34,8 @@ try:
 except:
     pass
 else:
-    extensions += ['matplotlib.sphinxext.mathmpl', 
-                   'matplotlib.sphinxext.only_directives',
-                   'matplotlib.sphinxext.plot_directive']
+      extensions += ['matplotlib.sphinxext.only_directives',
+                     'matplotlib.sphinxext.plot_directive']
 
 #extensions = [
 #              
