@@ -130,7 +130,7 @@ minimizing single objective fitness attribute.
 
 Evolution Strategy
 ++++++++++++++++++
-Evolution strategies individuals are slightly different as they contain generally two list, one for the actual individual and one for its mutation parameters. This time instead of using the list base class we will inherit from an :class:`array.array` for both the individual and the strategy. Since there is no helper function to generate two different vectors in a single object we must define this function our-self. The :func:`generateES` function receives two classes and instantiate them generating itself the random numbers in the intervals provided for individuals of a given size.
+Evolution strategies individuals are slightly different as they contain generally two list, one for the actual individual and one for its mutation parameters. This time instead of using the list base class we will inherit from an :class:`array.array` for both the individual and the strategy. Since there is no helper function to generate two different vectors in a single object we must define this function our-self. The :func:`initES` function receives two classes and instantiate them generating itself the random numbers in the intervals provided for individuals of a given size.
 ::
 
 	from deap import base
@@ -145,13 +145,13 @@ Evolution strategies individuals are slightly different as they contain generall
 	    fitness=creator.FitnessMin, strategy=None)
 	creator.create("Strategy", array.array, typecode="d")
 
-	def generateES(icls, scls, size, imin, imax, smin, smax):
+	def initES(icls, scls, size, imin, imax, smin, smax):
 	    ind = icls(random.uniform(imin, imax) for _ in range(size))
 	    ind.strategy = scls(random.uniform(smin, smax) for _ in range(size))
 	    return ind
 
 	toolbox = base.Toolbox()
-	toolbox.register("individual", generateES, creator.Individual,
+	toolbox.register("individual", initES, creator.Individual,
 	    creator.Strategy, IND_SIZE, MIN_VALUE, MAX_VALUE, MIN_STRATEGY,
 	    MAX_STRATEGY)
 
