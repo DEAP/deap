@@ -5,7 +5,6 @@ DEAP User Guide
 
 API
 ---
-
 .. toctree::
 	:maxdepth: 2
 	:numbered:
@@ -20,7 +19,6 @@ API
    
 Tutorials
 ---------
-
 .. toctree::
 	:maxdepth: 2
 	:numbered:
