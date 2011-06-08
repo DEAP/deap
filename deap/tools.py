@@ -817,15 +817,15 @@ def mutFlipBit(individual, indpb):
 # ES Mutations                       #
 ######################################
 
-def mutES(individual, indpb, minstrategy=None):
+def mutES(individual, c, indpb, minstrategy=None):
     """Mutate an evolution strategy according to its :attr:`strategy`
     attribute. *minstrategy* defaults to None so that if it is not present,
     the minimal strategy will be minus infinity. The strategy shall be the
     same size as the individual. This is subject to change.
     """
     size = len(individual)
-    t = 1. / math.sqrt(2. * math.sqrt(size))
-    t0 = 1. / math.sqrt(2. * size)
+    t = c / math.sqrt(2. * math.sqrt(size))
+    t0 = c / math.sqrt(2. * size)
     n = random.gauss(0, 1)
     t0_n = t0 * n
     

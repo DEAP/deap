@@ -27,30 +27,34 @@ from deap import creator
 from deap import tools
 
 IND_SIZE = 30
-
-toolbox = base.Toolbox()
-
-creator.create("Strategy", array.array, typecode='d')
-
-toolbox.register("strategy", tools.initRepeat, creator.Strategy, lambda: 1., IND_SIZE) 
+MIN_VALUE = -3
+MAX_VALUE = 3
+MIN_STRATEGY = 0.5
+MAX_STRATEGY = 2
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin, strategy=toolbox.strategy)
+creator.create("Individual", array.array, typecode="d", fitness=creator.FitnessMin, strategy=None)
+creator.create("Strategy", array.array, typecode="d")
 
-# Attribute generator
-toolbox.register("attr_float", random.uniform, -3, 3)
+# Individual generator
+def generateES(icls, scls, size, imin, imax, smin, smax):
+    ind = icls(random.uniform(imin, imax) for _ in range(size))
+    ind.strategy = scls(random.uniform(smin, smax) for _ in range(size))
+    return ind
 
 # Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, IND_SIZE)
+toolbox = base.Toolbox()
+toolbox.register("individual", generateES, creator.Individual, creator.Strategy,
+    IND_SIZE, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("mate", tools.cxESBlend, alpha=0.1, minstrategy=1e-10)
-toolbox.register("mutate", tools.mutES, indpb=0.1, minstrategy=1e-10)
+toolbox.register("mate", tools.cxESBlend, alpha=0.1, minstrategy=1e-3)
+toolbox.register("mutate", tools.mutES, c=1.0, indpb=0.1, minstrategy=1e-3)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
-    random.seed(64)
-    MU, LAMBDA = 8, 32
+    random.seed()
+    MU, LAMBDA = 10, 100
     pop = toolbox.population(n=MU)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
