@@ -341,8 +341,8 @@ def genGrow(pset, min_, max_, type_=__type__):
     
 def genRamped(pset, min_, max_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
-    Half the time, the expression is generated with :func:`deap.gp.genGrow`,
-    the other half, the expression is generated with :func:`deap.gp.genFull`.
+    Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
+    the other half, the expression is generated with :func:`~deap.gp.genFull`.
     """
     method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
