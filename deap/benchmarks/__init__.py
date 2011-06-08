@@ -28,38 +28,35 @@ from functools import reduce
 def rand(individual):
     """Random test objective function.
     
-    :math:`f(\mathbf{x}) = random(0,1)`
+    :math:`f_{\\text{Rand}}(\mathbf{x}) = \\text{\\texttt{random}}(0,1)`
     """
     return random.random(),
     
 def plane(individual):
     """Plane test objective function.
     
-    :math:`f(\mathbf{x}) = x_0`
-    
+    :math:`f_{\\text{Plane}}(\mathbf{x}) = x_0`
     """
     return individual[0],
 
 def sphere(individual):
     """Sphere test objective function.
     
-    :math:`f(\mathbf{x}) = \sum_{i=1}^N\,x_i^2`
-    
+    :math:`f_{\\text{Sphere}}(\mathbf{x}) = \sum_{i=1}^Nx_i^2`
     """
     return sum(gene * gene for gene in individual),
 
 def cigar(individual):
     """Cigar test objective function.
     
-    :math:`f(\mathbf{x}) = x_0^2 + 10^6\\sum_{i=1}^N\,x_i^2`
+    :math:`f_{\\text{Cigar}}(\mathbf{x}) = x_0^2 + 10^6\\sum_{i=1}^N\,x_i^2`
     """
     return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual),
 
 def rosenbrock(individual):  
     """Rosenbrock test objective function.
     
-    :math:`f(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 
-    100 (x_{i+1} - x_i^2 )^2`
+    :math:`f_{\\text{Rosenbrock}}(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 100 (x_{i+1} - x_i^2 )^2`
     
     .. plot:: _scripts/rosenbrock.py
        :width: 67 %
@@ -74,9 +71,9 @@ def h1(individual):
     Optimization Problems, A. J. Knoek van Soest and L. J. R. Richard 
     Casius, J. Biomech. Eng. 125, 141 (2003)
     
-    :math:`f(x_1, x_2) = \\frac{\sin(x_1 - \\frac{x_2}{8})^2 + 
-    \\sin(x_2 + \\frac{x_1}{8})^2}{\\sqrt{(x_1 - 8.6998)^2 + 
-    (x_2 - 6.7665)^2} + 1}`
+    :math:`f_{\\text{H1}}(x_1, x_2) = \\frac{\sin(x_1 - \\frac{x_2}{8})^2 + \
+            \\sin(x_2 + \\frac{x_1}{8})^2}{\\sqrt{(x_1 - 8.6998)^2 + \
+            (x_2 - 6.7665)^2} + 1}`
     
     .. plot:: _scripts/h1.py
        :width: 67 %
@@ -90,8 +87,12 @@ def h1(individual):
 def ackley(individual):
     """Ackley test objective function.
     
-    :math:`f(\\mathbf{x}) = 20 - 20\cdot\exp\\left(-0.2\sqrt{\\frac{1}{N}\sum_{i=1}^N x_i^2}\\right) + e - \exp\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i)\\right)`
-    
+    :math:`f_{\\text{Ackley}}(\\mathbf{x}) = 20 - 20\cdot\exp\left(-0.2\sqrt{\\frac{1}{N} \
+                            \sum_{i=1}^N x_i^2} \\right)\
+                            + e - \
+                            \exp\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i) \
+                            \\right)`
+                            
     .. plot:: _scripts/ackley.py
        :width: 67 %
     """
@@ -102,11 +103,11 @@ def ackley(individual):
 def bohachevsky(individual):
     """Bohachevsky test objective function
     
-    :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - 0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
+    :math:`f_{\\text{Bohachevsky}}(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - \
+                        0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
     
     .. plot:: _scripts/bohachevsky.py
        :width: 67 %
-    
     """
     return sum(x**2 + 2*x1**2 - 0.3*cos(3*pi*x) - 0.4*cos(4*pi*x1) + 0.7 
                 for x, x1 in zip(individual[:-1], individual[1:])),
@@ -114,11 +115,11 @@ def bohachevsky(individual):
 def griewank(individual):
     """Griewank test objective function
     
-    :math:`f(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
-      
-   .. plot:: _scripts/griewank.py
-      :width: 67 %
+    :math:`f_{\\text{Griewank}}(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \
+                        \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
     
+    .. plot:: _scripts/bohachevsky.py
+       :width: 67 %
     """
     return 1.0/4000.0 * sum(x**2 for x in individual) - \
         reduce(mul, (cos(x/sqrt(i+1.0)) for i, x in enumerate(individual)), 1) + 1,
@@ -126,7 +127,7 @@ def griewank(individual):
 def rastrigin(individual):
     """Rastrigin test objective function.
     
-    :math:`f(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
+    :math:`f_{\\text{Rastrigin}}(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
     
     .. plot:: _scripts/rastrigin.py
        :width: 67 %
@@ -135,29 +136,45 @@ def rastrigin(individual):
                         cos(2 * pi * gene) for gene in individual),
 
 def rastrigin_scaled(individual):
+    """Scaled Rastrigin test objective function
+    
+    :math:`f_{\\text{RastScaled}}(\mathbf{x}) = 10N + \sum_{i=1}^N \
+        \left(10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)^2 x_i)^2 - \
+        10\cos\\left(2\\pi 10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)`
+    """
     N = len(individual)
     return 10*N + sum((10**(i/(N-1))*x)**2 - 
-                      10*cos(2*pi*10**(i/(N-1))*x) for x in individual),
+                      10*cos(2*pi*10**(i/(N-1))*x) for i, x in enumerate(individual)),
 
 def rastrigin_skew(individual):
+    """Scaled Rastrigin test objective function
+    
+     :math:`f_{\\text{RastSkew}}(\mathbf{x}) = 10N \sum_{i=1}^N \left(y_i^2 - 10 \\cos(2\\pi x_i)\\right)`
+        
+     :math:`\\text{with } y_i = \
+                            \\begin{cases} \
+                                10\\cdot x_i & \\text{ if } x_i > 0,\\\ \
+                                x_i & \\text{ otherwise } \
+                            \\end{cases}`
+    """
     N = len(individual)
     return 10*N + sum((10*x if x > 0 else x)**2 
                     - 10*cos(2*pi*(10*x if x > 0 else x)) for x in individual),
 def schaffer(individual):
     """Schaffer test objective function.
     
-    :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \\right]`
-    
+    :math:`f_{\\text{Schaffer}}(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \
+                        \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \
+                        \\right]`
     """
-    
     return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0) 
                 for x, x1 in zip(individual[:-1], individual[1:])),
 
 def schwefel(individual):
     """Schwefel test objective function.
     
-    :math:`f(\mathbf{x}) = 418.9828872724339\cdot N - \sum_{i=1}^N\,x_i\sin\\left(\sqrt{|x_i|}\\right)`
-    
+    :math:`f_{\\text{Schwefel}}(\mathbf{x}) = 418.9828872724339\cdot N - \
+            \sum_{i=1}^N\,x_i\sin\\left(\sqrt{|x_i|}\\right)`
     """    
     N = len(individual)
     return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
@@ -166,7 +183,7 @@ def himmelblau(individual):
     """The Himmelblau's function is multimodal with 4 defined minimums in 
     :math:`[-6, 6]^2`.
     
-    :math:`f(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
+    :math:`f_{\\text{Himmelblau}}(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
     
     .. plot:: _scripts/himmelblau.py
         :width: 67 %
@@ -178,10 +195,10 @@ def himmelblau(individual):
 def kursawe(individual):
     """Kursawe multiobjective function.
     
-    :math:`f_1(\\mathbf{x}) = \\sum_{i=1}^{N-1} -10 e^{-0.2 \\sqrt{x_i^2 + x_{i+1}^2}}`
+    :math:`f_{\\text{Kursawe}1}(\\mathbf{x}) = \\sum_{i=1}^{N-1} -10 e^{-0.2 \\sqrt{x_i^2 + x_{i+1}^2} }`
     
-    :math:`f_2(\\mathbf{x}) = \\sum_{i=1}^{N} |x_i|^{0.8} + 5 \\sin(x_i^3)`
-    
+    :math:`f_{\\text{Kursawe}2}(\\mathbf{x}) = \\sum_{i=1}^{N} |x_i|^{0.8} + 5 \\sin(x_i^3)`
+
     .. plot:: _scripts/kursawe.py
        :width: 100 %
     """
