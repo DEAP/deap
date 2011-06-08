@@ -47,8 +47,9 @@ def rosenbrock(individual):
     :math:`f(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 
     100 (x_{i+1} - x_i^2 )^2`
     
-    .. image:: _images/rosenbrock.*
-       :width: 67 %"""
+    .. plot:: _scripts/rosenbrock.py
+       :width: 67 %
+    """
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
                    for x, y in zip(individual[:-1], individual[1:])),
 
@@ -63,7 +64,7 @@ def h1(individual):
     \\sin(x_2 + \\frac{x_1}{8})^2}{\\sqrt{(x_1 - 8.6998)^2 + 
     (x_2 - 6.7665)^2} + 1}`
     
-    .. image:: _images/h1.*
+    .. plot:: _scripts/h1.py
        :width: 67 %
     """
     num = (sin(individual[0] - individual[1] / 8))**2 + (sin(individual[1] + individual[0] / 8))**2
@@ -91,7 +92,7 @@ def rastrigin(individual):
     
     :math:`f(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
     
-    .. image:: _images/rastrigin.*
+    .. plot:: _scripts/rastrigin.py
        :width: 67 %
     """     
     return 10 * len(individual) + sum(gene * gene - 10 * \
@@ -115,15 +116,14 @@ def schwefel(individual):
     return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
 
 def himmelblau(individual):
-    '''The Himmelblau's function is multimodal with 4 defined minimums in 
+    """The Himmelblau's function is multimodal with 4 defined minimums in 
     :math:`[-6, 6]^2`.
     
     :math:`f(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
     
-    .. image:: _images/himmelblau.*
-       :width: 67 %
-    
-    '''
+    .. plot:: _scripts/himmelblau.py
+        :width: 67 %
+    """
     return (individual[0] * individual[0] + individual[1] - 11)**2 + \
         (individual[0] + individual[1] * individual[1] - 7)**2,
 
@@ -135,10 +135,8 @@ def kursawe(individual):
     
     :math:`f_2(\\mathbf{x}) = \\sum_{i=1}^{N} |x_i|^{0.8} + 5 \\sin(x_i^3)`
     
-    .. image:: _images/kursawe1.*
-       :width: 48 %
-    .. image:: _images/kursawe2.*
-       :width: 48 %
+    .. plot:: _scripts/kursawe.py
+       :width: 100 %
     """
     f1 = sum(-10 * exp(-0.2 * sqrt(x * x + y * y)) for x, y in zip(individual[:-1], individual[1:]))
     f2 = sum(abs(x)**0.8 + 5 * sin(x * x * x) for x in individual)

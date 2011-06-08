@@ -1,0 +1,38 @@
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+from matplotlib.colors import LogNorm
+import matplotlib.pyplot as plt
+import sys
+
+try:
+    import numpy as np
+except:
+    exit()
+
+
+sys.path.append("../..")
+from deap import benchmarks
+
+
+X = np.arange(-5, 5, 0.1)
+Y = np.arange(-5, 5, 0.1)
+X, Y = np.meshgrid(X, Y)
+Z1 = np.zeros(X.shape)
+Z2 = np.zeros(X.shape)
+
+for i in xrange(X.shape[0]):
+    for j in xrange(X.shape[1]):
+        Z1[i,j],  Z2[i,j] = benchmarks.kursawe((X[i,j],Y[i,j]))
+        
+fig = plt.figure(figsize=plt.figaspect(0.5))
+ax = fig.add_subplot(1, 2, 1, projection='3d')
+ax.plot_surface(X, Y, Z1, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
+plt.xlabel("x")
+plt.ylabel("y")
+
+ax = fig.add_subplot(1, 2, 2, projection='3d', elev=60)
+ax.plot_surface(X, Y, Z2, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
+plt.xlabel("x")
+plt.ylabel("y")
+
+plt.show()
