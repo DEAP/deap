@@ -118,7 +118,7 @@ def griewank(individual):
     :math:`f_{\\text{Griewank}}(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \
                         \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
     
-    .. plot:: _scripts/bohachevsky.py
+    .. plot:: _scripts/griewank.py
        :width: 67 %
     """
     return 1.0/4000.0 * sum(x**2 for x in individual) - \
