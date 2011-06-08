@@ -72,7 +72,7 @@ Complete example
 
 Except for the simulator code (about 75 lines), the code does not fundamentally differ from the :ref:`Symbolic Regression example <symbreg>`. Note that as the problem is harder, improving the selection pressure by increasing the size of the tournament to 7 allows to achieve better performance.
     
-.. literalinclude:: ../examples/gp_ant.py
+.. literalinclude:: ../../examples/gp_ant.py
     :lines: 54-
 
 .. _refPapersAnt:

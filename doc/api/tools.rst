@@ -238,3 +238,7 @@ History
    .. automethod:: deap.tools.History.update(individual[, ...])
    
    .. autoattribute:: deap.tools.History.decorator
+
+Other
+-----
+.. autofunction:: deap.tools.decorate

@@ -1,4 +1,4 @@
-.. _multiplexer:
+.. _mux:
     
 ==========================
 GP Multiplexer 3-8 problem
@@ -62,7 +62,7 @@ After that, the evaluation function is trivial, as we have both inputs and outpu
 Complete Example
 ================
 
-.. literalinclude:: ../examples/gp_multiplexer.py
+.. literalinclude:: ../../examples/gp_multiplexer.py
     :lines: 20-
 
 

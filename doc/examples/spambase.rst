@@ -89,7 +89,7 @@ Complete Example
 
 This is the complete code for the spambase example. Although it does not really differ from the other problems, it is interesting to note how Python can decrease the programming time. Indeed, the spam database is in csv form : with many frameworks, you would have to manually read it, or use a non-standard library, but with Python, you can use the built-in module :mod:`csv` and, within 2 lines, it is done! The data is now in the matrix *spam* and can easily be used through all the program :
 
-.. literalinclude:: ../examples/gp_spambase.py
+.. literalinclude:: ../../examples/gp_spambase.py
     :lines: 20-
 
 .. _refPapersSpam:
