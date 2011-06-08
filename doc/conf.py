@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'DEAP'
-copyright = u'2010-11, François-Michel De Rainville, Félix-Antoine Fortin and Marc-André Gardner'
+copyright = u'2009-11, François-Michel De Rainville, Félix-Antoine Fortin and Marc-André Gardner'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
