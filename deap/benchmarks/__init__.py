@@ -147,7 +147,7 @@ def rastrigin_scaled(individual):
                       10*cos(2*pi*10**(i/(N-1))*x) for i, x in enumerate(individual)),
 
 def rastrigin_skew(individual):
-    """Scaled Rastrigin test objective function
+    """Skewed Rastrigin test objective function
     
      :math:`f_{\\text{RastSkew}}(\mathbf{x}) = 10N \sum_{i=1}^N \left(y_i^2 - 10 \\cos(2\\pi x_i)\\right)`
         
