@@ -12,4 +12,4 @@ MANIFEST
 # file patterns to ignore
 *.pyc
 *.orig
-
+.DS_Store
