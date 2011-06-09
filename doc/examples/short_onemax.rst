@@ -13,23 +13,23 @@ algorithms impemented use specific functions from the toolbox, in this case
 must be registered. 
 ::
 
-    tools.register("evaluate", evalOneMax)
-    tools.register("mate", operators.cxTwoPoints)
-    tools.register("mutate", operators.mutFlipBit, indpb=0.05)
-    tools.register("select", operators.selTournament, tournsize=3)
+    toolbox.register("evaluate", evalOneMax)
+    toolbox.register("mate", tools.cxTwoPoints)
+    toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+    toolbox.register("select", tools.selTournament, tournsize=3)
 
 The toolbox is then passed to the algorithm and the algorithm uses the
 registered function. 
 ::
 
-    pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    pop = toolbox.population()
+    hof = tools.HallOfFame(1)
 
-    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
 
 The short GA One max example makes use of a
-:class:`~deap.halloffame.HallOfFame` in order to keep track of the best
+:class:`~deap.tools.HallOfFame` in order to keep track of the best
 individual to appear in the evolution (it keeps them even in the case they
-estinguish). All algorithms from the :mod:`deap.algorithms` module do take a
+extinguish). All algorithms from the :mod:`deap.algorithms` module do take a
 *halloffame* argument that gets updated after every evaluation section of the
 basic algorithms.

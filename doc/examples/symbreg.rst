@@ -34,7 +34,7 @@ One of the most crucial aspect of a GP program is the choice of the primitives s
     
 The redefinition of the division is made to protect it against a zero division error (which would crash the program). The other functions are simply a mapping from the Python :mod:`operator` module. The number following the function is the *arity* of the primitive, that is the number of entries it takes (this will be used by DTM to build the individuals from the primitives).
 
-On the last line, we declare an *ephemeral constant*. This is a special terminal type, which does not have a fixed value. When the program appends an ephemeral constant terminal to a tree, the function it contains is executed, and its result is inserted as a constant terminal. In this case, those constant terminals can take the values -1, 0 or 1.
+On the last line, we declare an :class:`~deap.gp.Ephemeral` constant. This is a special terminal type, which does not have a fixed value. When the program appends an ephemeral constant terminal to a tree, the function it contains is executed, and its result is inserted as a constant terminal. In this case, those constant terminals can take the values -1, 0 or 1.
 
 The second argument of :class:`~deap.gp.PrimitiveSet` is the number of inputs. Here, as we have only a one dimension regression problem, there is only one input, but it could have as many as you want. By default, those inputs are named "ARGx", where "x" is a number, but you can easily rename them : ::
     
