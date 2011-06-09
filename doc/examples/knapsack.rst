@@ -28,23 +28,23 @@ and weights.
     items = dict([(i, (random.randint(1, 10), random.uniform(0, 100))) for i in xrange(100)])
 
 We now need to initialize a population and the individuals there in. For this
-we will need a :class:`~eap.toolbox.Toolbox` to register our generators since
+we will need a :class:`~deap.base.Toolbox` to register our generators since
 sets can also be created with an input iterable. 
 ::
 
-    tools = toolbox.Toolbox()
+	toolbox = base.Toolbox()
     
-    # Attribute generator
-    tools.register("attr_item", random.choice, items.keys())
+	# Attribute generator
+	toolbox.register("attr_item", random.choice, items.keys())
     
-    # Structure initializers
-    tools.register("individual", creator.Individual, toolbox.Repeat(tools.attr_item, 30))
-    tools.register("population", creator.Population, toolbox.Repeat(tools.individual, 100))
+	# Structure initializers
+	toolbox.register("individual", tools.initRepeat, creator.Individual, n=30)
+	toolbox.register("population", tools.initRepeat, creator.Population, n=100)
 
 A population is now initialized with 
 ::
 
-    pop = tools.population()
+    pop = toolbox.population()
     
 Voilà! The *last* thing to do is to define our evaluation function.
 ::
@@ -88,20 +88,20 @@ input individual.
             mutant.add(random.choice(items.keys()))
 
 From here, everything else is just as usual, register the operators in the
-toolbox, and use or write an algorithm. Here we will use the Mu+Lambda
+toolbox, and use or write an algorithm. Here we will use the :func:`~deap.algorithms.eaMuPlusLambda`
 algorithm and the SPEA-II selection scheme. 
 ::
 
-    tools.register("evaluate", evalKnapsack)
-    tools.register("mate", cxSet)
-    tools.register("mutate", mutSet)
-    tools.register("select", operators.selSPEA2)
+    toolbox.register("evaluate", evalKnapsack)
+    toolbox.register("mate", cxSet)
+    toolbox.register("mutate", mutSet)
+    toolbox.register("select", tools.selSPEA2)
     
-    pop = tools.population()
-    hof = ParetoFront()
+    pop = toolbox.population()
+    hof = tools.ParetoFront()
     
-    algorithms.eaMuPlusLambda(tools, pop, 50, 100, 0.7, 0.2, 50, hof)
+    algorithms.eaMuPlusLambda(toolbox, pop, 50, 100, 0.7, 0.2, 50, hof)
 
-Finally, a :class:`~eap.operators.ParetoFront` may be used to retreive the
+Finally, a :class:`~deap.tools.ParetoFront` may be used to retreive the
 best individuals of the evolution. The complete `Knapsack Genetic Algorithm
 <http://deap.googlecode.com/hg/examples/ga_knapsack.py>`_ code is available.
