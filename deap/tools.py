@@ -49,8 +49,9 @@ def initRepeat(container, func, n):
     to register a generator of filled containers, as individuals or 
     population.
     
-        >>> initRepeat(list, random.random, 2)
-        [0.47615826222934565, 0.6302190543188851]
+        >>> initRepeat(list, random.random, 2) # doctest: +ELLIPSIS, 
+        ...                                    # doctest: +NORMALIZE_WHITESPACE
+        [0.4761..., 0.6302...]
 
     """
     return container(func() for _ in xrange(n))
@@ -310,10 +311,41 @@ class Statistics(object):
         return self.data[idx][name][-1]
     
     def register(self, name, function):
+        """Register a function `function` that will be apply on the sequence
+        each time :func:`~deap.tools.Statistics.update` is called.
+        The function result will be accessible by using the string given by
+        the attribute `name` as a function of the `Statistics` object.
+        
+            >>> s = Statistics()
+            >>> s.register("Mean", mean)
+            >>> s.update([1,2,3,4,5,6,7])
+            >>> s.Mean()
+            [4.0]
+        """
         self.functions[name] = function
         setattr(self, name, partial(self._getFuncValue, name))
     
     def update(self, seq, idx=0):
+        """Apply to the input sequence `seq` each registered function 
+        and store each result in a list specific to the function and 
+        the data index `idx`. 
+            
+            >>> s = Statistics()
+            >>> s.register("Mean", mean)
+            >>> s.register("Max", max)
+            >>> s.update([4,5,6,7,8])
+            >>> s.Max()
+            [8]
+            >>> s.Mean()
+            [6.0]
+            >>> s.update([1,2,3])
+            >>> s.Max()
+            [3]
+            >>> s[0]["Max"]
+            [[8], [3]]
+            >>> s[0]["Mean"] 
+            [[6.0], [2.0]]
+        """
         # Transpose the values
         data = self.data[idx]
         try:
@@ -459,7 +491,7 @@ def cxTwoPoints(ind1, ind2):
     individuals are modified in place. This operation apply on an individual
     composed of a list of attributes and act as follow ::
     
-        >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)]
+        >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)] #doctest: +SKIP
         >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
         >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
         >>> cxTwoPoints(ind1, ind2)
@@ -490,7 +522,7 @@ def cxOnePoint(ind1, ind2):
     individual composed of a list of attributes
     and act as follow ::
 
-        >>> ind1 = [A(1), ..., A(n), ..., A(m)]
+        >>> ind1 = [A(1), ..., A(n), ..., A(m)] #doctest: +SKIP
         >>> ind2 = [B(1), ..., B(n), ..., B(k)]
         >>> # Crossover with mating point i, 1 < i <= min(m, k)
         >>> cxOnePoint(ind1, ind2)
@@ -591,7 +623,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     For example, the following parents will produce the two following children
     when mated with the chosen points ``[0, 1, 0, 0, 1]``. ::
 
-        >>> ind1 = [0, 1, 2, 3, 4]
+        >>> ind1 = [0, 1, 2, 3, 4] #doctest: +SKIP
         >>> ind2 = [1, 2, 3, 4, 0]
         >>> cxUniformPartialyMatched(ind1, ind2)
         >>> print ind1
@@ -676,7 +708,7 @@ def cxMessyOnePoint(ind1, ind2):
     This operation apply on an :class:`Individual` composed of a list of
     attributes and act as follow ::
 
-        >>> ind1 = [A(1), ..., A(i), ..., A(m)]
+        >>> ind1 = [A(1), ..., A(i), ..., A(m)] #doctest: +SKIP
         >>> ind2 = [B(1), ..., B(j), ..., B(n)]
         >>> # Crossover with mating points i, j, 1 <= i <= m, 1 <= j <= n
         >>> cxMessyOnePoint(ind1, ind2)
@@ -1319,5 +1351,8 @@ if __name__ == "__main__":
     random.seed(64)
     doctest.run_docstring_examples(initIterate, globals())
     doctest.run_docstring_examples(initCycle, globals())
+    
+    doctest.run_docstring_examples(Statistics.register, globals())
+    doctest.run_docstring_examples(Statistics.update, globals())
     
     
