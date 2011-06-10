@@ -346,7 +346,7 @@ class Tree(list):
     @property
     def iter(self):
         """Return a generator function that iterates on the element
-         of the tree in linear time.
+         of the tree in linear time using depth first algorithm.
         
             >>> t = Tree([1,2,3[4,5,[6,7]],8])
             >>> [i for i in t.iter]:
@@ -362,7 +362,8 @@ class Tree(list):
     @property
     def iter_leaf(self):
         """Return a generator function that iterates on the leaf
-         of the tree in linear time.
+         of the tree in linear time using depth first 
+         algorithm.
     
             >>> t = Tree([1,2,3,[4,5,[6,7]],8])
             >>> [i for i in t.iter_leaf]
@@ -374,6 +375,27 @@ class Tree(list):
                     yield elem2
             else:
                 yield elem
+    
+    @property
+    def iter_leaf_idx(self):
+        """Return a generator function that iterates on the leaf
+        indices of the tree in linear time using depth first 
+        algorithm.
+        
+            >>>  t = Tree([1,2,3,[4,[5,6,7],[8,9]],[10,11]]);
+            >>> [i for i in t.iter_leaf_idx]
+            [1, 2, 5, 6, 8, 10]
+        """
+        def leaf_idx(tree, total):
+            total[0] += 1
+            for elem in tree[1:]:
+                if isinstance(elem, Tree):
+                    for elem2 in leaf_idx(elem, total):
+                        yield total[0]
+                else:
+                    yield total[0]
+                    total[0] += 1
+        return leaf_idx(self, [0])
 
     def searchSubtreeDF(self, index):
         """Search the subtree with the corresponding index based on a 
