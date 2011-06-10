@@ -12,7 +12,12 @@
 #
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
+"""Module including most common operators to initialize, crossover, 
+mutate and select solutions for genetic algorithm and evolution strategies.
 
+It also includes specialized tools like :class:`~deap.tools.Checkpoint` and
+:class:`~deap.tools.Statistics`.
+"""
 from __future__ import division
 import bisect
 import copy
