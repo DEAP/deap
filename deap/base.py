@@ -342,6 +342,38 @@ class Tree(list):
             return max(elem.height for elem in self[1:])+1
         except ValueError:
             return 0
+    
+    @property
+    def iter(self):
+        """Return a generator function that iterates on the element
+         of the tree in linear time.
+        
+            >>> t = Tree([1,2,3[4,5,[6,7]],8])
+            >>> [i for i in t.iter]:
+            [1, 2, 3, 4, 5, 6, 7, 8]
+        """
+        for elem in self:
+            if isinstance(elem, Tree):
+                for elem2 in elem.iter:
+                    yield elem2
+            else:
+                yield elem
+    
+    @property
+    def iter_leaf(self):
+        """Return a generator function that iterates on the leaf
+         of the tree in linear time.
+    
+            >>> t = Tree([1,2,3,[4,5,[6,7]],8])
+            >>> [i for i in t.iter_leaf]
+            [2, 3, 5, 7, 8]
+        """
+        for elem in self[1:]:
+            if isinstance(elem, Tree):
+                for elem2 in elem.iter_leaf:
+                    yield elem2
+            else:
+                yield elem
 
     def searchSubtreeDF(self, index):
         """Search the subtree with the corresponding index based on a 

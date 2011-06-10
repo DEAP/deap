@@ -328,6 +328,7 @@ def genFull(pset, min_, max_, type_=__type__):
     between *min* and *max*.
     """
     def condition(max_depth):
+        """Expression generation stops when the depth is zero."""
         return max_depth == 0
     return _generate(pset, min_, max_, condition, type_)
 
@@ -336,6 +337,9 @@ def genGrow(pset, min_, max_, type_=__type__):
     between *min* and *max*.
     """
     def condition(max_depth):
+        """Expression generation stops when the depth is zero or when
+        it is randomly determined that a a node should be a terminal.
+        """
         return max_depth == 0 or random.random() < pset.terminalRatio
     return _generate(pset, min_, max_, condition, type_)
     
