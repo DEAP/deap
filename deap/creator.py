@@ -33,7 +33,7 @@ class_replacers = {}
 may be in part incompatible with the logic used in DEAP. In order to palliate
 to this problem, the method :func:`create` uses the dictionary
 `class_replacers` to identify if the base type provided is problematic, and if
-so inherits the new class from the replacement base class instead of the
+so  the new class inherits from the replacement class instead of the
 original base class.
 
 `class_replacers` keys are classes to be replaced and the values are the
