@@ -28,18 +28,42 @@ NDIM = 10
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
+def mutDE(y, a, b, c, f):
+    size = len(y)
+    for i in range(len(y)):
+        y[i] = a[i] + f*(b[i]-c[i])
+    return y
+
+def cxBinomial(x, y, cr):
+    size = len(x)
+    index = random.randrange(size)
+    for i in range(size):
+        if i == index or random.random() < cr:
+            x[i] = y[i]
+    return x
+
+def cxExponential(x, y, cr):
+    size = len(x)
+    index = random.randrange(size)
+    # Loop on the indices index -> end, then on 0 -> index
+    for i in range(index, size) + range(0, index):
+        x[i] = y[i]
+        if random.random() < cr:
+            break
+    return x
+
 toolbox = base.Toolbox()
 toolbox.register("attr_float", random.uniform, -3, 3)
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, NDIM)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+toolbox.register("mutate", mutDE, f=0.8)
+toolbox.register("mate", cxExponential, cr=0.8)
 toolbox.register("select", tools.selRandom, n=3)
-toolbox.register("evaluate", benchmarks.sphere)
+toolbox.register("evaluate", benchmarks.griewank)
 
 def main():
     # Differential evolution parameters
-    CR = 0.25
-    F = 1  
-    MU = 300
+    MU = NDIM * 10
     NGEN = 200    
     
     pop = toolbox.population(n=MU);
@@ -56,23 +80,31 @@ def main():
         ind.fitness.values = fit
     
     for g in range(NGEN):
-        for k, agent in enumerate(pop):
-            a,b,c = toolbox.select(pop)
+        children = []
+        for agent in pop:
+            # We must clone everything to ensure independance
+            a, b, c = [toolbox.clone(ind) for ind in toolbox.select(pop)]
+            x = toolbox.clone(agent)
             y = toolbox.clone(agent)
-            index = random.randrange(NDIM)
-            for i, value in enumerate(agent):
-                if i == index or random.random() < CR:
-                    y[i] = a[i] + F*(b[i]-c[i])
-            y.fitness.values = toolbox.evaluate(y)
-            if y.fitness > agent.fitness:
-                pop[k] = y
+            y = toolbox.mutate(y, a, b, c)
+            z = toolbox.mate(x, y)
+            del z.fitness.values
+            children.append(z)
+            
+        fitnesses = toolbox.map(toolbox.evaluate, children)
+        for ind, fit, i in zip(children, fitnesses, range(len(fitnesses))):
+            ind.fitness.values = fit
+            if ind.fitness > pop[i].fitness:
+                pop[i] = ind
+        
         hof.update(pop)
         stats.update(pop)
         
         print "-- Generation %i --" % g
         print stats
             
-    print "Best individual is ", hof[0], hof[0].fitness.values[0]
+    print "Best individual is ", hof[0]
+    print "with fitness", hof[0].fitness.values[0]
             
 if __name__ == "__main__":
     main()
