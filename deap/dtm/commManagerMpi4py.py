@@ -75,8 +75,7 @@ class DtmCommThread(threading.Thread):
         # Stupidite de mpi4py pourri qui demande des buffers en Python...
         # Pourquoi pas un GOTO tant qu'a y etre...
         arrayBuf = array.array('b')
-        arrayBuf.fromstring(cPickle.dumps(msg))
-        #arrayBuf = array.array('c', cPickle.dumps(msg))
+        arrayBuf.fromstring(cPickle.dumps(msg, cPickle.HIGHEST_PROTOCOL))
         
         b = MPI.COMM_WORLD.Isend([arrayBuf, MPI.CHAR], dest=dest, tag=self.msgSendTag)
         if self.traceMode:
@@ -112,7 +111,6 @@ class DtmCommThread(threading.Thread):
                 # On a recu quelque chose
                 lBuf = array.array('b')
                 lBuf.fromlist([0] * lMessageStatus.Get_elements(MPI.CHAR))
-                #lBuf = array.array('c', ["#"]*lMessageStatus.Get_elements(MPI.CHAR))
                 
                 lRecvWaiting.append((lBuf, MPI.COMM_WORLD.Irecv([lBuf, MPI.CHAR], source=lMessageStatus.Get_source(), tag=lMessageStatus.Get_tag()), lMessageStatus.Get_tag()))
 
@@ -170,5 +168,4 @@ class DtmCommThread(threading.Thread):
             
         del lSendWaiting
         del lRecvWaiting
-        #del MPI
         

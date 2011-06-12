@@ -436,25 +436,30 @@ def cxTypedOnePoint(ind1, ind2):
     return ind1, ind2
 
 
-def cxKozaOnePoint(ind1, ind2, cxtermpb=0.1):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual.
-
-    As defined by Koza, non-terminal primitives are selected for 90% of the
-    crossover points, and terminals for 10%. This probability can be adjusted
-    with the *cxtermpb* argument.
+def cxUniformOnePointBiased(ind1, ind2, cxtermpb):
+    """Randomly select crossover point in each individual and exchange each
+    subtree with the point as root between each individual.
+    
+    This operator takes another parameter *cxtermpb*, which set the probability
+    to choose between a terminal or non-terminal crossover point.
+    For instance, as defined by Koza, non-terminal primitives are selected for 
+    90% of the crossover points, and terminals for 10%, so *cxtermpb* should be
+    set to 0.1.
     """
     size1, size2 = ind1.size, ind2.size
 
     if size1 == 1 or size2 == 1:
         return ind1, ind2
+    
+    # Those were not implemented with set because random.choice()
+    # works only on sequencable iterables (it is not clear whether
+    # it would be faster to perform the conversion set->list or
+    # directly use lists)
+    termsList1 = [termIndex for termIndex in ind1.iter_leaf_idx]
+    termsList2 = [termIndex for termIndex in ind2.iter_leaf_idx]
+    primList1 = [i for i in xrange(1,size1) if i not in termsList1]
+    primList2 = [i for i in xrange(1,size2) if i not in termsList2]
 
-    termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
-    termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
-    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
-    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
-
-    # Crossovers should take primitives 90% of time and terminals 10%
     if random.random() < cxtermpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
@@ -479,17 +484,19 @@ def cxKozaOnePoint(ind1, ind2, cxtermpb=0.1):
     return ind1, ind2
 
 ## Strongly Typed GP crossovers
-def cxTypedKozaOnePoint(ind1, ind2, cxtermpb=0.1):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual. Since the node are strongly typed,
-    the operator then make sure the type of second node correspond to the type
-    of the first node. If it doesn't, it randomly selects another point in the
-    second individual and try again. It tries up to *5* times before
-    giving up on the crossover.
-
-    As defined by Koza, non-terminal primitives are selected for 90% of the
-    crossover points, and terminals for 10%. This probability can be adjusted
-    with the *cxtermpb* argument.
+def cxTypedOnePointBiased(ind1, ind2, cxtermpb):
+    """Randomly select crossover point in each individual and exchange each
+    subtree with the point as root between each individual. Since the node are 
+    strongly typed, the operator then make sure the type of second node 
+    correspond to the type of the first node. If it doesn't, it randomly 
+    selects another point in the second individual and try again. It tries up
+    to *5* times before giving up on the crossover.
+    
+    This operator takes another parameter *cxtermpb*, which set the probability
+    to choose between a terminal or non-terminal crossover point.
+    For instance, as defined by Koza, non-terminal primitives are selected for 
+    90% of the crossover points, and terminals for 10%, so *cxtermpb* should be
+    set to 0.1.
     
     .. note::
        This crossover is subject to change for a more effective method
@@ -500,12 +507,15 @@ def cxTypedKozaOnePoint(ind1, ind2, cxtermpb=0.1):
     if size1 == 1 or size2 == 1:
         return ind1, ind2
 
-    termsList1 = [i for i in xrange(1, size1) if ind1.searchSubtreeDF(i).size == 1]
-    termsList2 = [i for i in xrange(1, size2) if ind2.searchSubtreeDF(i).size == 1]
-    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
-    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
+    # Those were not implemented with set because random.choice()
+    # works only on sequencable iterables (it is not clear whether
+    # it would be faster to perform the conversion set->list or
+    # directly use lists)
+    termsList1 = [termIndex for termIndex in ind1.iter_leaf_idx]
+    termsList2 = [termIndex for termIndex in ind2.iter_leaf_idx]
+    primList1 = [i for i in xrange(1,size1) if i not in termsList1]
+    primList2 = [i for i in xrange(1,size2) if i not in termsList2]
 
-    # Crossovers should take primitives 90% of time and terminals 10%
     if random.random() < cxtermpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
