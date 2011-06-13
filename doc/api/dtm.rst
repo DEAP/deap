@@ -6,8 +6,20 @@ Distributed Task Manager Overview
 DTM is a distributed task manager which works over many communication layers. Currently, all modern MPI implementations are supported through `mpi4py <http://code.google.com/p/mpi4py/>`_, and an experimental TCP backend is available.
 
 .. warning::
-    As on version 0.2, DTM is still in *alpha stage*, meaning that some specific bugs may appear. The communication and operation layers are quite stable though, but the load-balancing may not produce optimal results on non trivial situations.
-    Feel free to report bugs and performance issues if you isolate a problematic situation.
+    As on version 0.2, DTM is still in *alpha stage*, meaning that some specific bugs may appear; the communication and operation layers are quite stable, though. Feel free to report bugs and performance issues if you isolate a problematic situation.
+
+
+DTM Main Features
+-----------------
+
+DTM has some very interesting features :
+
+- Offers a similar interface to the Python's multiprocessing module
+- Automatically balances the load between workers (and therefore supports heterogeneous networks and different task duration)
+- Supports an arbitrary number of workers without changing a byte in the program
+- Abstracts the user from the communication management (the same program can be run over MPI, TCP or multiprocessing just by changing the communication manager)
+- Provides easy-to-use parallelization paradigms
+- Offers a trace mode, which can be used to tune the performance of the running program (still experimental)
 
 Introductory example
 --------------------
@@ -44,65 +56,6 @@ The operation done in the op() function can be virtually any operation, includin
 .. note::
     The encapsulation of the main execution code into a function is required by DTM, in order to be able to control which worker will start the execution.
 
-DTM Main Features
------------------
-
-DTM has some very interesting features :
-
-- Offers a similar interface to the Python's multiprocessing module
-- Automatically balances the load between workers (and therefore supports heterogeneous networks and different task duration)
-- Supports an arbitrary number of workers without changing a byte in the program
-- Abstracts the user from the communication management (the same program can be run over MPI, TCP or multiprocessing just by changing the communication manager)
-- Provides easy-to-use parallelization paradigms
-- Offers a trace mode, which can be used to tune the performance of the running program (still experimental)
-
-A Pi Calculation
-----------------
-
-A simple yet interesting use of DTM is the calculation of :math:`\pi` with a Monte Carlo approach. This approach is quite straightforward : if you randomly throw *n* darts on a unit square, approximately :math:`\frac{n * \pi}{4}` will be inside a quadrant delimited by (0,1) and (1,0). Therefore, if a huge quantity of darts are thrown, one could estimate :math:`\pi` simply by computing the ratio between the number of darts inside and outside the quadrant. A comprehensive explanation of the algorithm can be found `here <http://www.physics.buffalo.edu/phy516/jan25.pdf>`_
-
-.. note::
-    This example is intended to show a simple parallelization of an actual algorithm. It should not be taken as a good :math:`\pi` calculation algorithm (it is not).
-
-A possible serial Python code reads as follow : ::
-
-    from random import random
-    from math import hypot
-
-    def test(tries):
-        # Each run of this function makes some tries
-        # and return the number of darts inside the quadrant (r < 1)
-        return sum(hypot(random(), random()) < 1 for i in xrange(tries))
-        
-    def calcPi(n, t):
-        expr = (test(t) for i in range(n))
-        pi2 = 4. * sum(expr) / (n*t)
-        print("pi = " + str(pi2))
-        return pi2
-        
-    piVal = calcPi(1000, 10000)
-
-With DTM, you can now take advantage of the parallelization, and distribute the calls to the function *test()*. There are many ways to do so, but a mere one is to use :func:`~deap.dtm.taskmanager.DtmControl.repeat`, which repeats a function an arbitrary number of times, and returns a results list. In this case, the program may look like this : ::
-    
-    from math import hypot
-    from random import random
-    from deap import dtm
-
-    def test(tries):
-        # Each run of this function makes some tries
-        # and return the number of darts inside the quadrant (r < 1)
-        return sum(hypot(random(), random()) < 1 for i in xrange(tries))
-     
-    def calcPi(n, t):
-        expr = dtm.repeat(test, n, t)
-        pi2 = 4. * sum(expr) / (n*t)
-        print("pi = " + str(pi2))
-        return pi2
-
-    piVal = dtm.start(calcPi, 1000, 10000)
-
-And so, without any major changes (and not at all in the *test()* function), this computation can be distributed.
-
 Functions documentation
 -----------------------
 
@@ -112,66 +65,7 @@ Functions documentation
 .. autoclass:: deap.dtm.taskmanager.DtmAsyncResult
     :members:
         
-DTM + EAP = DEAP
-----------------
 
-As part of the DEAP framework, EAP offers an easy DTM integration. As the EAP algorithms use a map function stored in the toolbox to spawn the individuals evaluations (by default, this is simply the traditional Python :func:`map`), the parallelization can be made very easily, by replacing the map operator in the toolbox : ::
-    
-    from deap import dtm
-    tools.register("map", dtm.map)
-    
-Thereafter, ensure that your main code is in enclosed in a Python function (for instance, main), and just add the last line : ::
-    
-    dtm.start(main)
-    
-For instance, take a look at the short version of the onemax. This is how it may be parallelized : ::
-    
-    from deap import dtm
-    
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", array.array, fitness=creator.FitnessMax)
-
-    tools = toolbox.Toolbox()
-
-    # Attribute generator
-    tools.register("attr_bool", random.randint, 0, 1)
-
-    # Structure initializers
-    tools.register("individual", creator.Individual, "b", toolbox.Repeat(tools.attr_bool, 100))
-    tools.register("population", list, toolbox.Repeat(tools.individual, 300))
-
-    def evalOneMax(individual):
-        return sum(individual),
-
-    tools.register("evaluate", evalOneMax)
-    tools.register("mate", operators.cxTwoPoints)
-    tools.register("mutate", operators.mutFlipBit, indpb=0.05)
-    tools.register("select", operators.selTournament, tournsize=3)
-    tools.register("map", dtm.map)
-
-    stats_t = operators.Stats(lambda ind: ind.fitness.values)
-    stats_t.register("Avg", operators.mean)
-    stats_t.register("Std", operators.std)
-    stats_t.register("Min", min)
-    stats_t.register("Max", max)
-
-    def main():
-        pop = tools.population()
-        hof = operators.HallOfFame(1)
-        stats = tools.clone(stats_t)
-
-        algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats, halloffame=hof)
-        logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
-        
-        return pop, stats, hof
-
-    dtm.start(main)
-
-As one can see, the parallelization requires almost no changes at all (an import, the selection of the distributed map and the starting instruction), even with a non-trivial program. This program can now be run on a multi-cores computer, on a small cluster or on a supercomputer, without any changes, as long as those environments provide a MPI implementation.
-
-.. note::
-    In this specific case, the distributed version would be actually *slower* than the serial one, because of the extreme simplicity of the evaluation function (which takes *less than 0.1 ms* to execute), as the small overhead generated by the serialization, load-balancing, treatment and transfer of the tasks and the results is not balanced by a gain in the evaluation time. In more complex, real-life problems (for instance sorting networks), the benefit of a distributed version is fairly noticeable.
-    
 
 Troubleshooting and Pitfalls
 ----------------------------
@@ -272,7 +166,7 @@ Take also note of the following Python interpreter limitations :
     
 * As on version 2.6, partial functions cannot be pickled. Python 2.7 works fine.
 * Lambda functions cannot be pickled in every Python version (up to 3.2). User should use normal functions, or tools from functools, or ensure that its parallelization never need to explicitly transfer a lambda function (not its result, but the lambda object itself) from a worker to another.
-* Functions are usually never pickled : their just referenced, and should be importable in the unpickling environment, even if they are standard functions (defined with the keyword **def**). For instance, consider this (faulty) code : ::
+* Functions are usually never pickled : the are just referenced, and should be importable in the unpickling environment, even if they are standard functions (defined with the keyword **def**). For instance, consider this (faulty) code : ::
     
     from deap import dtm
     def main():

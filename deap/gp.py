@@ -436,7 +436,7 @@ def cxTypedOnePoint(ind1, ind2):
     return ind1, ind2
 
 
-def cxUniformOnePointBiased(ind1, ind2, cxtermpb):
+def cxOnePointLeafBiased(ind1, ind2, cxtermpb):
     """Randomly select crossover point in each individual and exchange each
     subtree with the point as root between each individual.
     
@@ -484,7 +484,7 @@ def cxUniformOnePointBiased(ind1, ind2, cxtermpb):
     return ind1, ind2
 
 ## Strongly Typed GP crossovers
-def cxTypedOnePointBiased(ind1, ind2, cxtermpb):
+def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
     """Randomly select crossover point in each individual and exchange each
     subtree with the point as root between each individual. Since the node are 
     strongly typed, the operator then make sure the type of second node 
