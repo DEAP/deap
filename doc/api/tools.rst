@@ -46,24 +46,24 @@ Crossover
 Here is a quick table reference to the different implemented crossovers in 
 DEAP. Bellow are the complete descriptions.
 
-===================================== ==================================
- Crossover Operator                    Input Type                      
-===================================== ==================================
- :func:`cxOnePoint`                    sequences            
- :func:`cxTwoPoints`                   sequences                    
- :func:`cxUniform`                     sequences
- :func:`cxPartialyMatched`             integer sequences
- :func:`cxUniformPartialyMatched`      integer sequences
- :func:`cxBlend`                       float sequences
- :func:`cxESBlend`                     float sequences with strategy
- :func:`cxESTwoPoints`                 sequences with strategy
- :func:`cxSimulatedBinary`             float sequences
- :func:`cxMessyOnePoint`               sequences
- :func:`~deap.gp.cxUniformOnePoint`    trees
- :func:`~deap.gp.cxTypedOnePoint`      primitive typed trees
- :func:`~deap.gp.cxKozaOnePoint`       trees
- :func:`~deap.gp.cxTypedKozaOnePoint`  primitive typed trees
-===================================== ==================================
+=========================================== ==================================
+ Crossover Operator                         Input Type                      
+=========================================== ==================================
+ :func:`cxOnePoint`                         sequences            
+ :func:`cxTwoPoints`                        sequences                    
+ :func:`cxUniform`                          sequences
+ :func:`cxPartialyMatched`                  integer sequences
+ :func:`cxUniformPartialyMatched`           integer sequences
+ :func:`cxBlend`                            float sequences
+ :func:`cxESBlend`                          float sequences with strategy
+ :func:`cxESTwoPoints`                      sequences with strategy
+ :func:`cxSimulatedBinary`                  float sequences
+ :func:`cxMessyOnePoint`                    sequences
+ :func:`~deap.gp.cxUniformOnePoint`         trees
+ :func:`~deap.gp.cxTypedOnePoint`           primitive typed trees
+ :func:`~deap.gp.cxOnePointLeafBiased`      trees
+ :func:`~deap.gp.cxTypedOnePointLeafBiased` primitive typed trees
+=========================================== ==================================
 
 .. autofunction:: deap.tools.cxTwoPoints
 
@@ -89,9 +89,9 @@ DEAP. Bellow are the complete descriptions.
 
 .. autofunction:: deap.gp.cxTypedOnePoint
 
-.. autofunction:: deap.gp.cxKozaOnePoint(ind1, ind2, cxtermpb=0.1)
+.. autofunction:: deap.gp.cxOnePointLeafBiased(ind1, ind2, cxtermpb)
 
-.. autofunction:: deap.gp.cxTypedKozaOnePoint(ind1, ind2, cxtermpb=0.1)
+.. autofunction:: deap.gp.cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb)
 
 Mutation
 ++++++++

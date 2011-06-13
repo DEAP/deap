@@ -41,6 +41,8 @@ Examples
 	examples/multiplexer
 	examples/artificial_ant
 	examples/spambase
+	examples/dtmPi
+	examples/dtm_onemax
    
 Indices and tables
 ==================
