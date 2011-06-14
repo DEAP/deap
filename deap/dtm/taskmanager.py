@@ -151,7 +151,7 @@ class DtmExecInfo(object):
     def getLoad(self):
         try:
             self.tStatsLock.acquire()
-            tInfo = self.tStats.get(self.eCurrent.target, DtmStatsContainer({'rAvg':1., 'rStdDev':1., 'rSquareSum':0., 'execCount':0}))
+            tInfo = self.tStats.get(self.eCurrent.target, DtmStatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
             val = self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, self.eCurrent.threadObject.timeExec)
             self.tStatsLock.release()
             return val
@@ -181,7 +181,7 @@ class DtmTaskQueue(object):
             timeDone = task.threadObject.timeExec
 
         self.tStatsLock.acquire()
-        tInfo = self.tStats.get(task.target, DtmStatsContainer({'rAvg':1., 'rStdDev':1., 'rSquareSum':0., 'execCount':0}))
+        tInfo = self.tStats.get(task.target, DtmStatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
         self.tStatsLock.release()
 
         return self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, timeDone)
@@ -408,15 +408,15 @@ class DtmControl(object):
             for n in self.commThread.iterOverIDs():
                 if n == self.workerId:
                     continue
-                self.sendQueue.put(DtmMessageContainer({'msgType' : DTM_MSG_EXIT,
-                                    'senderWid' : self.workerId,
-                                    'receiverWid' : n,
-                                    'loadsDict' : None,
-                                    'targetsStats' : None,
-                                    'prepTime' : time.time(),
-                                    'sendTime' : 0,
-                                    'ackNbr' :-1,
-                                    'msg' : (0, "Exit with success")}))
+                self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_EXIT,
+                                    senderWid = self.workerId,
+                                    receiverWid = n,
+                                    loadsDict = None,
+                                    targetsStats = None,
+                                    prepTime = time.time(),
+                                    sendTime = 0,
+                                    ackNbr = -1,
+                                    msg = (0, "Exit with success")))
 
         self.commExitNotification.set()
         self.commThread.join()
@@ -462,10 +462,10 @@ class DtmControl(object):
         
         self.tasksStatsLock.acquire()
         if not taskKey in self.tasksStats:
-            self.tasksStats[taskKey] = DtmStatsContainer({'rAvg' : timeExec,
-                                                'rStdDev' : 0.,
-                                                'rSquareSum' : timeExec * timeExec,
-                                                'execCount' : 1})
+            self.tasksStats[taskKey] = DtmStatsContainer(rAvg = timeExec,
+                                                rStdDev = 0.,
+                                                rSquareSum = timeExec * timeExec,
+                                                execCount = 1)
         else:
             oldAvg = self.tasksStats[taskKey].rAvg
             oldStdDev = self.tasksStats[taskKey].rStdDev
@@ -518,15 +518,15 @@ class DtmControl(object):
         if idToReturn == self.workerId:
             self._dispatchResults((resultInfo,))
         else:
-            self.sendQueue.put(DtmMessageContainer({'msgType' : DTM_MSG_RESULT,
-                                            'senderWid' : self.workerId,
-                                            'receiverWid' : idToReturn,
-                                            'loadsDict' : self.loadBalancer.getNodesDict(),
-                                            'targetsStats' : self.tasksStats,
-                                            'prepTime' : time.time(),
-                                            'sendTime' : 0,
-                                            'ackNbr' :-1,
-                                            'msg' : (resultInfo,)}))
+            self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_RESULT,
+                                            senderWid = self.workerId,
+                                            receiverWid = idToReturn,
+                                            loadsDict = self.loadBalancer.getNodesDict(),
+                                            targetsStats = self.tasksStats,
+                                            prepTime = time.time(),
+                                            sendTime = 0,
+                                            ackNbr = -1,
+                                            msg = (resultInfo,)))
 
     def _updateStats(self, msg):
         """
@@ -680,15 +680,15 @@ class DtmControl(object):
                     elif recvMsg.msgType == DTM_MSG_TASK:
                         self.execQueue.putList(recvMsg.msg)
                         self.loadBalancer.updateSelfStatus(self._getLoadTuple())
-                        self.sendQueue.put(DtmMessageContainer({'msgType' : DTM_MSG_ACK_RECEIVED_TASK,
-                                                        'senderWid' : self.workerId,
-                                                        'receiverWid' : recvMsg.senderWid,
-                                                        'loadsDict' : self.loadBalancer.getNodesDict(),
-                                                        'targetsStats' : self.tasksStats,
-                                                        'prepTime' : time.time(),
-                                                        'sendTime' : 0,
-                                                        'ackNbr' :-1,
-                                                        'msg' : recvMsg.ackNbr}))
+                        self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_ACK_RECEIVED_TASK,
+                                                        senderWid = self.workerId,
+                                                        receiverWid = recvMsg.senderWid,
+                                                        loadsDict = self.loadBalancer.getNodesDict(),
+                                                        targetsStats = self.tasksStats,
+                                                        prepTime = time.time(),
+                                                        sendTime = 0,
+                                                        ackNbr = -1,
+                                                        msg = recvMsg.ackNbr))
                         self._updateStats(recvMsg)
                     elif recvMsg.msgType == DTM_MSG_RESULT:
                         self._dispatchResults(recvMsg.msg)
@@ -713,26 +713,26 @@ class DtmControl(object):
             sendUpdateList, sendTasksList = self.loadBalancer.takeDecision()
             self.tasksStatsLock.acquire()
             for sendInfo in sendTasksList:
-                self.sendQueue.put(DtmMessageContainer({'msgType' : DTM_MSG_TASK,
-                                            'senderWid' : self.workerId,
-                                            'receiverWid' : sendInfo[0],
-                                            'loadsDict' : self.loadBalancer.getNodesDict(),
-                                            'targetsStats' : self.tasksStats,
-                                            'prepTime' : time.time(),
-                                            'sendTime' : 0,
-                                            'ackNbr' : sendInfo[2],
-                                            'msg' : sendInfo[1]}))
+                self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_TASK,
+                                            senderWid = self.workerId,
+                                            receiverWid = sendInfo[0],
+                                            loadsDict = self.loadBalancer.getNodesDict(),
+                                            targetsStats = self.tasksStats,
+                                            prepTime = time.time(),
+                                            sendTime = 0,
+                                            ackNbr = sendInfo[2],
+                                            msg = sendInfo[1]))
 
             for updateTo in sendUpdateList:
-                self.sendQueue.put(DtmMessageContainer({'msgType' : DTM_MSG_REQUEST_TASK,
-                                            'senderWid' : self.workerId,
-                                            'receiverWid' : updateTo,
-                                            'loadsDict' : self.loadBalancer.getNodesDict(),
-                                            'targetsStats' : self.tasksStats,
-                                            'prepTime' : time.time(),
-                                            'sendTime' : 0,
-                                            'ackNbr' :-1,
-                                            'msg' : None}))
+                self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_REQUEST_TASK,
+                                            senderWid = self.workerId,
+                                            receiverWid = updateTo,
+                                            loadsDict = self.loadBalancer.getNodesDict(),
+                                            targetsStats = self.tasksStats,
+                                            prepTime = time.time(),
+                                            sendTime = 0,
+                                            ackNbr = -1,
+                                            msg = None))
             self.tasksStatsLock.release()
             self._startNewTask()
         return self._doCleanUp()
@@ -838,17 +838,17 @@ class DtmControl(object):
             _logger.info("DTM started with %i workers", self.poolSize)
             _logger.info("DTM load balancer is %s, and communication manager is %s", self.loadBalancerType, self.commManagerType)
             
-            initTask = DtmTaskContainer({'tid' : self.idGenerator.tid,
-                                    'creatorWid' : self.workerId,
-                                    'creatorTid' : None,
-                                    'taskIndex' : 0,
-                                    'taskRoute' : [self.workerId],
-                                    'creationTime' : time.time(),
-                                    'target' : initialTarget,
-                                    'args' : args,
-                                    'kwargs' : kwargs,
-                                    'threadObject' : None,
-                                    'taskState' : DTM_TASK_STATE_IDLE})
+            initTask = DtmTaskContainer(tid = self.idGenerator.tid,
+                                    creatorWid = self.workerId,
+                                    creatorTid = None,
+                                    taskIndex = 0,
+                                    taskRoute = [self.workerId],
+                                    creationTime = time.time(),
+                                    target = initialTarget,
+                                    args = args,
+                                    kwargs = kwargs,
+                                    threadObject = None,
+                                    taskState = DTM_TASK_STATE_IDLE)
             self.execQueue.put(initTask)
 
         return self._main()
@@ -875,17 +875,17 @@ class DtmControl(object):
         listTids = []
         
         for index, elem in enumerate(zipIterable):
-            task = DtmTaskContainer({'tid' : self.idGenerator.tid,
-                                    'creatorWid' : self.workerId,
-                                    'creatorTid' : currentId,
-                                    'taskIndex' : index,
-                                    'taskRoute' : [self.workerId],
-                                    'creationTime' : time.time(),
-                                    'target' : function,
-                                    'args' : elem,
-                                    'kwargs' : kwargs,
-                                    'threadObject' : None,
-                                    'taskState' : DTM_TASK_STATE_IDLE})
+            task = DtmTaskContainer(tid = self.idGenerator.tid,
+                                    creatorWid = self.workerId,
+                                    creatorTid = currentId,
+                                    taskIndex = index,
+                                    taskRoute = [self.workerId],
+                                    creationTime = time.time(),
+                                    target = function,
+                                    args = elem,
+                                    kwargs = kwargs,
+                                    threadObject = None,
+                                    taskState = DTM_TASK_STATE_IDLE)
             listTasks.append(task)
             listTids.append(task.tid)
         
@@ -900,20 +900,20 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()        
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer({'threadObject' : cThread,
-                                                    'eventObject' : cThread.waitingFlag,
-                                                    'waitBeginningTime' : 0,
-                                                    'tasksWaitingCount' : 0,
-                                                    'waitingMode' : DTM_WAIT_NONE,
-                                                    'rWaitingDict' : {}})
+            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+                                                    eventObject = cThread.waitingFlag,
+                                                    waitBeginningTime = 0,
+                                                    tasksWaitingCount = 0,
+                                                    waitingMode = DTM_WAIT_NONE,
+                                                    rWaitingDict = {})
         
         resultKey = listTids[0]
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer({'tids' : listTids,
-                                'waitingOn' : True,
-                                'finished' : False,
-                                'success' : False,
-                                'callbackFunc' : None,
-                                'result' : listResults})
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = listTids,
+                                waitingOn = True,
+                                finished = False,
+                                success = False,
+                                callbackFunc = None,
+                                result = listResults)
                                 
         self.waitingThreads[currentId].tasksWaitingCount += len(listTasks)
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_SOME
@@ -958,17 +958,17 @@ class DtmControl(object):
         listTids = []
 
         for index, elem in enumerate(iterable):
-            task = DtmTaskContainer({'tid' : self.idGenerator.tid,
-                                    'creatorWid' : self.workerId,
-                                    'creatorTid' : currentId,
-                                    'taskIndex' : index,
-                                    'taskRoute' : [self.workerId],
-                                    'creationTime' : time.time(),
-                                    'target' : function,
-                                    'args' : (elem,),
-                                    'kwargs' : {},
-                                    'threadObject' : None,
-                                    'taskState' : DTM_TASK_STATE_IDLE})
+            task = DtmTaskContainer(tid = self.idGenerator.tid,
+                                    creatorWid = self.workerId,
+                                    creatorTid = currentId,
+                                    taskIndex = index,
+                                    taskRoute = [self.workerId],
+                                    creationTime = time.time(),
+                                    target = function,
+                                    args = (elem,),
+                                    kwargs = {},
+                                    threadObject = None,
+                                    taskState = DTM_TASK_STATE_IDLE)
             listTasks.append(task)
             listTids.append(task.tid)
         
@@ -984,19 +984,19 @@ class DtmControl(object):
         self.waitingThreadsLock.acquire()
         
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer({'threadObject' : cThread,
-                                                    'eventObject' : cThread.waitingFlag,
-                                                    'waitBeginningTime' : 0,
-                                                    'tasksWaitingCount' : 0,
-                                                    'waitingMode' : DTM_WAIT_NONE,
-                                                    'rWaitingDict' : {}})
+            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+                                                    eventObject = cThread.waitingFlag,
+                                                    waitBeginningTime = 0,
+                                                    tasksWaitingCount = 0,
+                                                    waitingMode = DTM_WAIT_NONE,
+                                                    rWaitingDict = {})
                                                     
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer({'tids' : listTids,
-                                'waitingOn' : False,
-                                'finished' : False,
-                                'success' : False,
-                                'callbackFunc' : None,
-                                'result' : listResults})
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = listTids,
+                                waitingOn = False,
+                                finished = False,
+                                success = False,
+                                callbackFunc = None,
+                                result = listResults)
 
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
         
@@ -1021,17 +1021,17 @@ class DtmControl(object):
         cThread = threading.currentThread()
         currentId = cThread.tid
         
-        task = DtmTaskContainer({'tid' : self.idGenerator.tid,
-                                    'creatorWid' : self.workerId,
-                                    'creatorTid' : currentId,
-                                    'taskIndex' : 0,
-                                    'taskRoute' : [self.workerId],
-                                    'creationTime' : time.time(),
-                                    'target' : function,
-                                    'args' : args,
-                                    'kwargs' : kwargs,
-                                    'threadObject' : None,
-                                    'taskState' : DTM_TASK_STATE_IDLE})
+        task = DtmTaskContainer(tid = self.idGenerator.tid,
+                                    creatorWid = self.workerId,
+                                    creatorTid = currentId,
+                                    taskIndex = 0,
+                                    taskRoute = [self.workerId],
+                                    creationTime = time.time(),
+                                    target = function,
+                                    args = args,
+                                    kwargs = kwargs,
+                                    threadObject = None,
+                                    taskState = DTM_TASK_STATE_IDLE)
         
         if self.traceMode:
             newTaskElem = etree.SubElement(cThread.xmlTrace, "event",
@@ -1042,21 +1042,21 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer({'threadObject' : cThread,
-                                                    'eventObject' : cThread.waitingFlag,
-                                                    'waitBeginningTime' : 0,
-                                                    'tasksWaitingCount' : 0,
-                                                    'waitingMode' : DTM_WAIT_NONE,
-                                                    'rWaitingDict' : {}})
+            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+                                                    eventObject = cThread.waitingFlag,
+                                                    waitBeginningTime = 0,
+                                                    tasksWaitingCount = 0,
+                                                    waitingMode = DTM_WAIT_NONE,
+                                                    rWaitingDict = {})
         
         resultKey = task.tid
         
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer({'tids' : [task.tid],
-                                'waitingOn' : True,
-                                'finished' : False,
-                                'success' : False,
-                                'callbackFunc' : None,
-                                'result' : [None]})
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = [task.tid],
+                                waitingOn = True,
+                                finished = False,
+                                success = False,
+                                callbackFunc = None,
+                                result = [None])
         
         self.waitingThreads[currentId].tasksWaitingCount += 1
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_SOME
@@ -1090,17 +1090,17 @@ class DtmControl(object):
         cThread = threading.currentThread()
         currentId = cThread.tid
         
-        task = DtmTaskContainer({'tid' : self.idGenerator.tid,
-                                    'creatorWid' : self.workerId,
-                                    'creatorTid' : currentId,
-                                    'taskIndex' : 0,
-                                    'taskRoute' : [self.workerId],
-                                    'creationTime' : time.time(),
-                                    'target' : function,
-                                    'args' : args,
-                                    'kwargs' : kwargs,
-                                    'threadObject' : None,
-                                    'taskState' : DTM_TASK_STATE_IDLE})
+        task = DtmTaskContainer(tid = self.idGenerator.tid,
+                                    creatorWid = self.workerId,
+                                    creatorTid = currentId,
+                                    taskIndex = 0,
+                                    taskRoute = [self.workerId],
+                                    creationTime = time.time(),
+                                    target = function,
+                                    args = args,
+                                    kwargs = kwargs,
+                                    threadObject = None,
+                                    taskState = DTM_TASK_STATE_IDLE)
         
         if self.traceMode:
             newTaskElem = etree.SubElement(cThread.xmlTrace, "event",
@@ -1111,21 +1111,21 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()        
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer({'threadObject' : cThread,
-                                                    'eventObject' : cThread.waitingFlag,
-                                                    'waitBeginningTime' : 0,
-                                                    'tasksWaitingCount' : 0,
-                                                    'waitingMode' : DTM_WAIT_NONE,
-                                                    'rWaitingDict' : {}})
+            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+                                                    eventObject = cThread.waitingFlag,
+                                                    waitBeginningTime = 0,
+                                                    tasksWaitingCount = 0,
+                                                    waitingMode = DTM_WAIT_NONE,
+                                                    rWaitingDict = {})
         
         resultKey = task.tid
         
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer({'tids' : [task.tid],
-                                'waitingOn' : False,
-                                'finished' : False,
-                                'success' : False,
-                                'callbackFunc' : None,
-                                'result' : [None]})
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = [task.tid],
+                                waitingOn = False,
+                                finished = False,
+                                success = False,
+                                callbackFunc = None,
+                                result = [None])
         
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
         
@@ -1188,36 +1188,36 @@ class DtmControl(object):
         listTids = []
         
         for index in range(n):
-            task = DtmTaskContainer({'tid' : self.idGenerator.tid,
-                                    'creatorWid' : self.workerId,
-                                    'creatorTid' : currentId,
-                                    'taskIndex' : index,
-                                    'taskRoute' : [self.workerId],
-                                    'creationTime' : time.time(),
-                                    'target' : function,
-                                    'args' : args,
-                                    'kwargs' : kwargs,
-                                    'threadObject' : None,
-                                    'taskState' : DTM_TASK_STATE_IDLE})
+            task = DtmTaskContainer(tid = self.idGenerator.tid,
+                                    creatorWid = self.workerId,
+                                    creatorTid = currentId,
+                                    taskIndex = index,
+                                    taskRoute = [self.workerId],
+                                    creationTime = time.time(),
+                                    target = function,
+                                    args = args,
+                                    kwargs = kwargs,
+                                    threadObject = None,
+                                    taskState = DTM_TASK_STATE_IDLE)
             listTasks.append(task)
             listTids.append(task.tid)
         
         self.waitingThreadsLock.acquire()        
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer({'threadObject' : cThread,
-                                                    'eventObject' : cThread.waitingFlag,
-                                                    'waitBeginningTime' : 0,
-                                                    'tasksWaitingCount' : 0,
-                                                    'waitingMode' : DTM_WAIT_NONE,
-                                                    'rWaitingDict' : {}})
+            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+                                                    eventObject = cThread.waitingFlag,
+                                                    waitBeginningTime = 0,
+                                                    tasksWaitingCount = 0,
+                                                    waitingMode = DTM_WAIT_NONE,
+                                                    rWaitingDict = {})
         
         resultKey = listTids[0]
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer({'tids' : listTids,
-                                'waitingOn' : True,
-                                'finished' : False,
-                                'success' : False,
-                                'callbackFunc' : None,
-                                'result' : listResults})
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = listTids,
+                                waitingOn = True,
+                                finished = False,
+                                success = False,
+                                callbackFunc = None,
+                                result = listResults)
                                 
         self.waitingThreads[currentId].tasksWaitingCount += len(listTasks)
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_SOME
@@ -1372,12 +1372,12 @@ class DtmThread(threading.Thread):
             self.control.exitStatus.set()
         else:
             # Else, tell the communication thread to return the result
-            resultStruct = DtmResultContainer({'tid' : self.tid,
-                                            'parentTid' : self.taskInfo.creatorTid,
-                                            'taskIndex' : self.taskInfo.taskIndex,
-                                            'execTime' : self.timeExec,
-                                            'success' : success,
-                                            'result' : returnedR})
+            resultStruct = DtmResultContainer(tid = self.tid,
+                                            parentTid = self.taskInfo.creatorTid,
+                                            taskIndex = self.taskInfo.taskIndex,
+                                            execTime = self.timeExec,
+                                            success = success,
+                                            result = returnedR)
                                             
             self.control._returnResult(self.taskInfo.creatorWid, resultStruct)
 

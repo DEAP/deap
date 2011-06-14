@@ -44,8 +44,8 @@ class DtmTaskContainer(object):
                 'kwargs', # Key-worded arguments (dictionnary)
                 'threadObject', # Python representation of the thread
                 'taskState')    # State of the task (DTM_TASK_*)
-    def __init__(self, args):
-        self.__setstate__(args)    
+    def __init__(self, **kwargs):
+        self.__setstate__(kwargs)    
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
@@ -67,8 +67,8 @@ class DtmResultContainer(object):
                 'execTime', # Total execution time (NOT waiting time)
                 'success', # False if an exception occured
                 'result')       # The result; if an exception occured, contains it
-    def __init__(self, args):
-        self.__setstate__(args)    
+    def __init__(self, **kwargs):
+        self.__setstate__(kwargs)    
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
@@ -88,8 +88,8 @@ class DtmExceptedResultContainer(object):
                 'success', # Boolean : False if unfinished or if an exception occured
                 'callbackFunc', # Callback function, FOR USE IN DTM, NO ARGUMENTS PASSED, or None
                 'result')       # Result, or the exception occured
-    def __init__(self, args):
-        self.__setstate__(args)    
+    def __init__(self, **kwargs):
+        self.__setstate__(kwargs)   
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
@@ -109,8 +109,8 @@ class DtmWaitInfoContainer(object):
                 'tasksWaitingCount', # How many tasks are we waiting on
                 'waitingMode', # DTM_WAIT_* : waiting mode (None, One, Any, All)
                 'rWaitingDict')     # List of DtmExceptedResultContainer, key : the first task ID
-    def __init__(self, args):
-        self.__setstate__(args)    
+    def __init__(self, **kwargs):
+        self.__setstate__(kwargs)  
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
@@ -128,8 +128,8 @@ class DtmStatsContainer(object):
                 'rStdDev', # RELATIVE standard deviation of the exec time
                 'rSquareSum', # Square sum of the RELATIVE exec times
                 'execCount')    # Number of executions
-    def __init__(self, args):
-        self.__setstate__(args)    
+    def __init__(self, **kwargs):
+        self.__setstate__(kwargs)    
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
@@ -162,8 +162,8 @@ class DtmMessageContainer(object):
                 'sendTime', # Time when sent
                 'ackNbr', # ACK number (optionnal for some operations)
                 'msg')          # Message (varies with msgType)
-    def __init__(self, args):
-        self.__setstate__(args)    
+    def __init__(self, **kwargs):
+        self.__setstate__(kwargs)  
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
