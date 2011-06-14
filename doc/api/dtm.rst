@@ -166,7 +166,7 @@ Take also note of the following Python interpreter limitations :
     
 * As on version 2.6, partial functions cannot be pickled. Python 2.7 works fine.
 * Lambda functions cannot be pickled in every Python version (up to 3.2). User should use normal functions, or tools from functools, or ensure that its parallelization never need to explicitly transfer a lambda function (not its result, but the lambda object itself) from a worker to another.
-* Functions are usually never pickled : the are just referenced, and should be importable in the unpickling environment, even if they are standard functions (defined with the keyword **def**). For instance, consider this (faulty) code : ::
+* Functions are usually never pickled : they are just referenced, and should be importable in the unpickling environment, even if they are standard functions (defined with the keyword **def**). For instance, consider this (faulty) code : ::
     
     from deap import dtm
     def main():
