@@ -11,7 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
+import sys, time
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -37,10 +37,6 @@ else:
       extensions += ['matplotlib.sphinxext.only_directives',
                      'matplotlib.sphinxext.plot_directive']
 
-#extensions = [
-#              
-#              ,
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -51,11 +47,11 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
 
 # General information about the project.
 project = u'DEAP'
-copyright = u'2009-11, François-Michel De Rainville, Félix-Antoine Fortin and Marc-André Gardner'
+copyright = u'2009-%s, François-Michel De Rainville, Félix-Antoine Fortin and Marc-André Gardner' % time.strftime('%Y')
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -121,7 +117,7 @@ html_theme = 'default'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {'collapsiblesidebar': True}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -153,23 +149,27 @@ html_theme = 'default'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-#html_use_smartypants = True
+html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+html_sidebars = {
+    'index': 'indexsidebar.html',
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+html_additional_pages = {
+    'index': 'indexcontent.html',
+}
 
 # If false, no module index is generated.
 #html_use_modindex = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = True
 
 # If true, the index is split into individual pages for each letter.
-#html_split_index = False
+html_split_index = True
 
 # If true, links to the reST sources are added to the pages.
 #html_show_sourcelink = True
@@ -183,7 +183,7 @@ html_theme = 'default'
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'EAPdoc'
+htmlhelp_basename = 'DEAP-doc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -197,7 +197,7 @@ htmlhelp_basename = 'EAPdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'EAP.tex', u'EAP Documentation',
+  ('contents', 'DEAP.tex', u'DEAP Documentation',
    u'François-Michel De Rainville, Félix-Antoine Fortin', 'manual'),
 ]
 
