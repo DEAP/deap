@@ -1,0 +1,40 @@
+{% extends "defindex.html" %}
+{% block tables %}
+  <p><strong>Parts of the documentation:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("tutorials/index") }}">Tutorial</a><br/>
+         <span class="linkdescr">start here</span></p>
+      
+      <p class="biglink"><a class="biglink" href="{{ pathto("examples/index") }}">Examples</a><br/>
+         <span class="linkdescr">complete examples using common problems</span></p>
+    </td><td width="50%">
+      	<p class="biglink"><a class="biglink" href="{{ pathto("api/index") }}">Library Reference</a><br/>
+	         <span class="linkdescr">the complete api of the framework</span></p>
+    </td></tr>
+  </table>
+
+  <p><strong>Indices and tables:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("py-modindex") }}">Global Module Index</a><br/>
+         <span class="linkdescr">quick access to all modules</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("genindex") }}">General Index</a><br/>
+         <span class="linkdescr">all functions, classes, terms</span></p>
+      <!--<p class="biglink"><a class="biglink" href="{{ pathto("glossary") }}">Glossary</a><br/>
+         <span class="linkdescr">the most important terms explained</span></p>-->
+    </td><td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("search") }}">Search page</a><br/>
+         <span class="linkdescr">search this documentation</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Complete Table of Contents</a><br/>
+         <span class="linkdescr">lists all sections and subsections</span></p>
+    </td></tr>
+  </table>
+
+  <p><strong>Meta information:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("bugs") }}">Reporting bugs</a></p>
+    </td></tr>
+  </table>
+{% endblock %}
