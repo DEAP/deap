@@ -1,3 +1,5 @@
+.. _creating-types:
+
 Creating Types
 ==============
 This tutorial shows how types are created using the creator and initialized using the toolbox.
@@ -49,8 +51,8 @@ function.
 	
 	import random
 	
-	creator.create("FitnessMin", base.Fitness, weights=(1.0,))
-	creator.create("Individual", list, fitness=creator.FitnessMin)
+	creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+	creator.create("Individual", list, fitness=creator.FitnessMax)
 	
 	toolbox = base.Toolbox()
 	toolbox.register("attr_float", random.random)
@@ -188,7 +190,6 @@ arguments.
 ::
 
 	from deap import base
-	from deap import benchmarks
 	from deap import creator
 	from deap import tools
 	
@@ -211,6 +212,31 @@ arguments.
 
 Calling :func:`toolbox.individual` will readily return a complete particle
 with a speed vector and a maximizing two objectives fitness attribute.
+
+A Funky One
++++++++++++
+Supposing your problem have very specific needs. It is also possible to build  custom individuals very easily. The next individual created is a list of alternating integers and floating point numbers, using the :func:`~deap.tools.initCycle` function.
+::
+
+	from deap import base
+	from deap import creator
+	from deap import tools
+	
+	import random
+	
+	creator.create("FitnessMax", base.Fitness, weights=(1.0, 1.0))
+	creator.create("Individual", list, fitness=creator.FitnessMax)
+	
+	toolbox = base.Toolbox()
+	
+	toolbox.register("attr_int", random.randint, INT_MIN, INT_MAX)
+	toolbox.register("attr_flt", random.uniform, FLT_MIN, FLT_MAX)
+	toolbox.register("individual", tools.initCycle, creator.Individual, 
+	    (toolbox.attr_int, toolbox.attr_flt), n=N_CYCLES)
+
+Calling :func:`toolbox.individual` will readily return a complete individual
+of the form ``[int float int float ... int float]`` with a maximizing two
+objectives fitness attribute.
 
 Population
 ----------
@@ -269,3 +295,18 @@ fitness to a :attr:`gbestfit` attribute.
 Calling :func:`toolbox.population` will readily return a complete swarm. After
 each evaluation the :attr:`gbest` and :attr:`gbestfit` are set to reflect the
 best found position and fitness.
+
+Demes
++++++
+A deme is a sub-population that is contained in a population. It is similar
+has an island in the island model. Demes being only sub-population are in fact
+no different than population other than by their names. Here we create a
+population containing 3 demes each having a different number of individuals
+using the *n* argument of the :func:`~deap.tools.initRepeat` function.
+::
+
+	toolbox.register("deme", tools.initRepeat, list, toolbox.individual)
+	
+	DEME_SIZES = 10, 50, 100
+	
+	population = [toolbox.deme(n=i) for i in DEME_SIZES]
