@@ -24,7 +24,6 @@ Tutorials
    
 	tutorials/types
 	tutorials/next_step
-	tutorials/algorithms
 	tutorials/distribution
    
 

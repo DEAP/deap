@@ -58,6 +58,7 @@ The operation done in the op() function can be virtually any operation, includin
 
 Functions documentation
 -----------------------
+.. module:: deap.dtm
 
 .. autoclass:: deap.dtm.taskmanager.DtmControl
     :members:
