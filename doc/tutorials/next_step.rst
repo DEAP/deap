@@ -185,6 +185,8 @@ Using the toolbox for registering tools helps keeping the rest of the
 algorithms independent from the operator set. Using this scheme makes it very
 easy to locate and change any tool in the toolbox if needed.
 
+.. _using-tools:
+
 Using the Tools
 +++++++++++++++
 When building evolutionary algorithms the toolbox is used to contain the operators, which are called using their generic name. For example, here is a very small sample of what looks like a simple generational evolutionary algorithm.
@@ -211,7 +213,7 @@ When building evolutionary algorithms the toolbox is used to contain the operato
 	
 	    # Evaluate the individuals with an invalid fitness
 	    invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-	    fitnesses = map(toolbox.evaluate, invalid_ind)
+	    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
 	    for ind, fit in zip(invalid_ind, fitnesses):
 	        ind.fitness.values = fit
 	
@@ -292,7 +294,7 @@ the writing of an algorithm as follow.
 	
 	    # Evaluate the individuals with an invalid fitness
 	    invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-	    fitnesses = map(toolbox.evaluate, invalid_ind)
+	    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
 	    for ind, fit in zip(invalid_ind, fitnesses):
 	        ind.fitness.values = fit
 	

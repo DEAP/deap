@@ -298,7 +298,61 @@ def std(seq):
     return var(seq)**0.5
 
 class Statistics(object):
-    """A statistics object.
+    """A statistics object that holds the required data for as long as it
+    exists. When created the statistics object receives a *key* argument that
+    is used to get the required data, if not provided the *key* argument
+    defaults to the identity function. A statistics object can be represented
+    as a 4 dimensional matrix. Along the first axis are independent statistics
+    objects that are used on different collections given this index in the
+    :meth:`update` method. The second axis is the function it-self, each
+    element along the second axis (indexed by their name) will represent a
+    different function. The third axis is the accumulator of statistics. each
+    time the update function is called the new statistics are added using the
+    registered functions at the end of this axis. The fourth axis is used when
+    the entered data is an iterable (for example a multiobjective fitness).
+    
+    Data can be retrieved by different means in a statistics object. One can
+    use directly the registered function name with an *index* argument that
+    represent the first axis of the matrix. This method returns the last
+    entered data.
+    ::
+    
+        >>> s = Statistics(n=2)
+        >>> s.register("Mean", mean)
+        >>> s.update([1, 2, 3, 4], index=0)
+        >>> s.update([5, 6, 7, 8], index=1)
+        >>> s.Mean(0)
+        [2.5]
+        >>> s.Mean(1)
+        [6.5]
+    
+    An other way to obtain the statistics is to use directly the ``[]``. In
+    that case all dimensions must be specified. This is how stats that have
+    been registered earlier in the process can be retrieved.
+    ::
+    
+        >>> s.update([10, 20, 30, 40], index=0)
+        >>> s.update([50, 60, 70, 80], index=1)
+        >>> s[0]["Mean"][0]
+        [2.5]
+        >>> s[1]["Mean"][0]
+        [6.5]
+        >>> s[0]["Mean"][1]
+        [25]
+        >>> s[1]["Mean"][1]
+        [65]
+    
+    Finnaly, the fourth dimension is used when stats are needed on lists of
+    lists. The stats are computed on the matching indices of each list.
+    ::
+    
+        >>> s = Statistics()
+        >>> s.register("Mean", mean)
+        >>> s.update([[1, 2, 3], [4, 5, 6]])
+        >>> s.Mean()
+        [2.5, 3.5, 4.5]
+        >>> s[0]["Mean"][-1][0]
+        2.5
     """
     class Data(defaultdict):
         def __init__(self):
@@ -311,17 +365,17 @@ class Statistics(object):
         self.functions = {}
         self.data = tuple(self.Data() for _ in xrange(n))
     
-    def __getitem__(self, idx):
-        return self.data[idx]
+    def __getitem__(self, index):
+        return self.data[index]
         
-    def _getFuncValue(self, name, idx=0):
-        return self.data[idx][name][-1]
+    def _getFuncValue(self, name, index=0):
+        return self.data[index][name][-1]
     
     def register(self, name, function):
-        """Register a function `function` that will be apply on the sequence
+        """Register a function *function* that will be apply on the sequence
         each time :func:`~deap.tools.Statistics.update` is called.
         The function result will be accessible by using the string given by
-        the attribute `name` as a function of the `Statistics` object.
+        the argument *name* as a function of the statistics object.
         
             >>> s = Statistics()
             >>> s.register("Mean", mean)
@@ -332,10 +386,10 @@ class Statistics(object):
         self.functions[name] = function
         setattr(self, name, partial(self._getFuncValue, name))
     
-    def update(self, seq, idx=0):
-        """Apply to the input sequence `seq` each registered function 
+    def update(self, seq, index=0):
+        """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
-        the data index `idx`. 
+        the data index *index*. 
             
             >>> s = Statistics()
             >>> s.register("Mean", mean)
@@ -354,7 +408,7 @@ class Statistics(object):
             [[6.0], [2.0]]
         """
         # Transpose the values
-        data = self.data[idx]
+        data = self.data[index]
         try:
             values = zip(*(self.key(elem) for elem in seq))
         except TypeError:
