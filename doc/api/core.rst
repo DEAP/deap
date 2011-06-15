@@ -1,3 +1,5 @@
+.. _core:
+
 Core Architecture
 =================
 The core architecture of DEAP is composed of two simple structures, the
