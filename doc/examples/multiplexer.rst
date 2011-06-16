@@ -65,6 +65,8 @@ Complete Example
 .. literalinclude:: ../../examples/gp_multiplexer.py
     :lines: 20-
 
+.. note:: The import of the Python standard library modules are not shown.
+
 
 .. _refPapersMux:
 

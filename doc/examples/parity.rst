@@ -48,6 +48,9 @@ The other parts of the program are greatly the same as the :ref:`Symbolic Regres
 .. literalinclude:: ../../examples/gp_parity.py
     :lines: 20-
 
+.. note:: The import of the Python standard library modules are not shown.
+
+
 .. _refPapersParity:
 
 Reference

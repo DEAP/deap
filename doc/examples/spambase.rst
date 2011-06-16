@@ -92,6 +92,8 @@ This is the complete code for the spambase example. Although it does not really 
 .. literalinclude:: ../../examples/gp_spambase.py
     :lines: 20-
 
+.. note:: Some of the import of the Python standard library modules are not shown.
+
 .. _refPapersSpam:
     
 Reference

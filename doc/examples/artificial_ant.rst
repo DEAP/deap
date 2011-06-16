@@ -75,6 +75,8 @@ Except for the simulator code (about 75 lines), the code does not fundamentally 
 .. literalinclude:: ../../examples/gp_ant.py
     :lines: 54-
 
+.. note:: The import of the Python standard library modules are not shown.
+
 .. _refPapersAnt:
 
 Reference
