@@ -215,6 +215,7 @@ class Tree(list):
     """
     
     class NodeProxy(object):
+        __slots__ = ['obj']
         def __new__(cls, obj, *args, **kargs):
             if isinstance(obj, cls):
                 return obj
