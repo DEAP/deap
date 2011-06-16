@@ -55,14 +55,10 @@ Partial functions are a powerful feature of Python which allow to create functio
 Evaluation function
 ===================
 
-The evaluation function use an instance of a simulator class to evaluate the individual. Each individual is given 600 moves on the simulator map (obtained from an external file). The fitness of each individual corresponds to the number of pieces of food picked up. In this example, we are using a classical trail, the *Santa Fe trail*, in which there is 89 pieces of food. Therefore, a perfect individual would achieve a fitness of 89. ::
-    
-    def evalArtificialAnt(individual):
-        # Transform the tree expression to functionnal Python code
-        routine = gp.evaluate(individual, pset)
-        # Run the generated routine
-        ant.run(routine)
-        return ant.eaten,
+The evaluation function use an instance of a simulator class to evaluate the individual. Each individual is given 600 moves on the simulator map (obtained from an external file). The fitness of each individual corresponds to the number of pieces of food picked up. In this example, we are using a classical trail, the *Santa Fe trail*, in which there is 89 pieces of food. Therefore, a perfect individual would achieve a fitness of 89.
+
+.. literalinclude:: ../../examples/gp_ant.py
+   :pyobject: evalArtificialAnt
 
 Where `ant` is the instance of the simulator used. The :func:`~deap.gp.evaluate` function is a convenience one provided by DEAP and returning an executable Python program from a GP individual and its primitives function set.
 
