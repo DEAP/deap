@@ -138,7 +138,8 @@ Complete Example
 
 .. literalinclude:: ../../examples/gp_symbreg.py
     :lines: 21-
-    
+
+.. note:: The import of the Python standard library modules are not shown.
 
 .. _refPapersSymbreg:
 
