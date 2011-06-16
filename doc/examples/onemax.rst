@@ -49,14 +49,12 @@ current scope).
 
     creator.create("FitnessMax", base.Fitness, weights=(1,0))
     creator.create("Individual", list, fitness=creator.FitnessMax)
-    creator.create("Population", list)
 
 The first line creates a maximizing fitness by replacing in the base type
 :class:`~deap.base.Fitness` the weights member with (1.0,) that means to
 maximize this fitness. The second line creates an :class:`Individual` class
 that inherits the properties of :class:`list` and has a :attr:`fitness` member
-of the type :class:`FitnessMax` that was just created. The third line creates
-a :class:`Population` class that is simply a :class:`list`.
+of the type :class:`FitnessMax` that was just created.
 
 -------
 Toolbox
@@ -181,12 +179,13 @@ toolbox) in that same population. The chosen individuals are duplicated
 according to the :meth:`clone` operator of the toolbox.
 ::
 
-    pop[:] = [toolbox.clone(ind) for ind in toolbox.select(pop, n=len(pop))]
+    pop = [toolbox.clone(ind) for ind in toolbox.select(pop, n=len(pop))]
 
-The ``[:]`` needs to be used in order to replace the slice of objects with the
-new list of individuals and not the whole population object that would lose
-its :class:`Population` type. This would not be very problematic anyway as
-a population is only a :class:`list`.
+.. 
+.. The ``[:]`` needs to be used in order to replace the slice of objects with the
+.. new list of individuals and not the whole population object that would lose
+.. its :class:`Population` type. This would not be very problematic anyway as
+.. a population is only a :class:`list`.
 
 Some statistics may be gathered on the population, the following lines print
 the min, max, mean and standard deviation of the population. ::
