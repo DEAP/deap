@@ -30,6 +30,6 @@ registered function.
 The short GA One max example makes use of a
 :class:`~deap.tools.HallOfFame` in order to keep track of the best
 individual to appear in the evolution (it keeps them even in the case they
-extinguish). All algorithms from the :mod:`deap.algorithms` module do take a
+extinguish). All algorithms from the :mod:`~deap.algorithms` module do take a
 *halloffame* argument that gets updated after every evaluation section of the
 basic algorithms.
