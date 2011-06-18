@@ -60,7 +60,7 @@ of the type :class:`FitnessMax` that was just created.
 -------
 Toolbox
 -------
-A :class:`~deap.base.Toolbox`can be found in the base module. It is intended
+A :class:`~deap.base.Toolbox` can be found in the base module. It is intended
 to store functions with their arguments. The toolbox contains two simple
 methods, :meth:`~deap.base.Toolbox.register` and
 :meth:`~deap.base.Toolbox.unregister` that are used to do the tricks.
