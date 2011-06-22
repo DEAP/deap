@@ -20,6 +20,7 @@ virtual :class:`~deap.base.Fitness` class used as base class, for the fitness
 member of any individual.
 """
 
+import abc
 import copy
 import operator
 import functools
@@ -96,18 +97,23 @@ class Fitness(object):
 
     .. note::
        When comparing fitness values that are **minimized**, ``a > b`` will
-       return :data:`True` if *a* is **inferior** to *b*.
+       return :data:`True` if *a* is **smaller** than *b*.
     """
+    __metaclass__ = abc.ABCMeta
     
-    weights = ()
+    weights = abc.abstractproperty()
     """The weights are used in the fitness comparison. They are shared among
-    all fitnesses of the same type. This member is **not** meant to be
-    manipulated since it may influence how fitnesses are compared and may
-    result in undesirable effects. However if you wish to manipulate it, in
-    order to make the change effective to all fitnesses of the same type, use
-    ``FitnessType.weights = new_weights`` or ``self.__class__.weights =
-    new_weights`` or from an individual ``ind.fitness.__class__.weights =
-    new_weights``.
+    all fitnesses of the same type. When subclassing ``Fitness``, ``weights``
+    must be defined as a tuple where each element is associated to an 
+    objective. A negative weight element corresponds to the minimization of the
+    associated objective and positive weight to the maximization.
+
+    .. note::
+        If weights is not defined during subclassing, the following error will 
+        occur at instantiation of a subclass fitness object : 
+        
+        ``TypeError: Can't instantiate abstract class Fitness[...] with abstract 
+        methods weights``
     """
     
     wvalues = ()
@@ -194,12 +200,11 @@ class Fitness(object):
             return self.__class__(self.values)
         else:
             return self.__class__()
-            
-    
+
     def __str__(self):
         """Return the values of the Fitness object."""
         return str(self.values)
-    
+
     def __repr__(self):
         """Return the Python code to build a copy of the object."""
         module = self.__module__
