@@ -802,12 +802,15 @@ class DtmControl(object):
             tmpImport = __import__('deap.dtm.loadBalancerPDB', globals(), locals(), ['DtmLoadBalancer'], 0)
             DtmLoadBalancer = tmpImport.DtmLoadBalancer
         
-        self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.runningFlag, self.commExitNotification, self.commReadyEvent, self.dtmRandom)
-
-        self.refTime = self._calibrateExecTime()
+        self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.runningFlag, self.commExitNotification, self.commReadyEvent, self.dtmRandom, sys.argv)
 
         self.commThread.start()
+        self.refTime = self._calibrateExecTime()
+
         self.commReadyEvent.wait()
+        
+        if self.commThread.isLaunchProcess:
+            sys.exit()
 
         self.poolSize = self.commThread.poolSize
         self.workerId = self.commThread.workerId

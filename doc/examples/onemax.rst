@@ -8,7 +8,7 @@ This is the first complete program built with DEAP. It will help new users to
 overview some of the possibilities in DEAP. The problem is very simple, we
 search for a :data:`1` filled list individual. This problem is widely used in
 the evolutionary computation community since it is very simple and it
-illutrates well the potential of evolutionary algorithms.
+illustrates well the potential of evolutionary algorithms.
 
 Setting Things Up
 =================
@@ -27,44 +27,43 @@ Creator
 
 The creator is a class factory that can build at run-time new classes that
 inherit from base classes. It is very useful since an individual can be any
-type of container from list to n-ary tree. The creator allows to bind those
-base classes together in order to build more complex new structures convenient
-for evolutionary computation.
+type of container from list to n-ary tree. The creator allows build complex
+new structures convenient for evolutionary computation.
 
 Let see an example of how to use the creator to setup an individual that
 contains an array of booleans and a maximizing fitness. We will first need to
-import the :mod:`deap.base` and :mod:`deap.creator` modules. The :mod:`deap.base`
-module contains the basic structure such as List, Array and Tree.
+import the :mod:`deap.base` and :mod:`deap.creator` modules.
 
-The creator defines at first a single function called
+The creator defines at first a single function
 :func:`~deap.creator.create` that is used to create types. The
-:func:`~deap.creator.create` function takes at least 2 arguments plus one
-optional argument. The first argument *name* is the actual name of the type
-that we want to create, here it is :class:`Individual`. The second argument
+:func:`~deap.creator.create` function takes at least 2 arguments plus additional
+optional arguments. The first argument *name* is the actual name of the type
+that we want to create. The second argument
 *base* is the base classes that the new type created should inherit from.
-Finally the optional argument *dict* is a dictionary of members to add to the
+Finally the optional arguments are members to add to the
 new type (this subject is more detailed in the documentation, and out of the
 current scope). 
 ::
 
-    creator.create("FitnessMax", base.Fitness, weights=(1,0))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+	from deap import base
+	from deap import creator
+	
+	creator.create("FitnessMax", base.Fitness, weights=(1,0))
+	creator.create("Individual", list, fitness=creator.FitnessMax)
 
 The first line creates a maximizing fitness by replacing in the base type
-:class:`~deap.base.Fitness` the weights member with (1.0,) that means to
-maximize this fitness. The second line creates an :class:`Individual` class
-that inherits the properties of :class:`list` and has a :attr:`fitness` member
+:class:`~deap.base.Fitness` the :attr:`~deap.base.Fitness.weights` attribute with (1.0,) that means to
+maximize a single objective fitness. The second line creates an :class:`Individual` class
+that inherits the properties of :class:`list` and has a :attr:`fitness` attribute
 of the type :class:`FitnessMax` that was just created.
 
 -------
 Toolbox
 -------
-
-The :mod:`deap.toolbox` is an other convenience module that contains a
-:class:`~deap.toolbox.Toolbox` class intended store functions with their
-arguments. The :class:`~deap.toolbox.Toolbox` contains two simple methods,
-:meth:`~deap.toolbox.Toolbox.register` and
-:meth:`~deap.toolbox.Toolbox.unregister`. 
+A :class:`~deap.base.Toolbox` can be found in the base module. It is intended
+to store functions with their arguments. The toolbox contains two simple
+methods, :meth:`~deap.base.Toolbox.register` and
+:meth:`~deap.base.Toolbox.unregister` that are used to do the tricks.
 ::
 
 	toolbox = base.Toolbox()
@@ -77,9 +76,15 @@ arguments. The :class:`~deap.toolbox.Toolbox` contains two simple methods,
 	toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
-The two last lines of code create two functions within the toolbox, the first
-function registered, when called, will instantiate individuals and the second
-will instantiate populations.
+The three last lines of code create three functions within the toolbox, the
+first function registered, when called, will draw a random integer between 0
+and 1, the second will instantiate an individual initialized with what what
+would be returned by 100 calls to the :meth:`toolbox.attr_bool` method and the
+third one will instantiate populations again with what would be returned by
+``n`` calls to the :meth:`toolbox.individual` method. This last method will
+still require an argument, as the number of time the repeat required by the
+:func:`~deap.tools.initRepeat` is not provided to the toolbox. We will see
+later that argument in the call that instantiate the population.
 
 The Evaluation Function
 =======================
@@ -91,18 +96,20 @@ following lines of code.
     
     def evalOneMax(individual):
         return sum(individual),
+
+The returned value must be a tuple of length equal to the number of
+objectives.
    
 The Genetic Operators
 =====================
 
 There is two way of using operators, the first one, is to simply call the
-function from the :mod:`~deap.toolbox` module and the second one is to register
-them with their argument in the a :class:`~deap.toolbox.Toolbox`. The most
+function from the :mod:`~deap.tools` module and the second one is to register
+them with their argument in a toolbox as for the initialization methods. The most
 convenient way is to register them in the toolbox, because it allows to easily
 switch between operators if desired. The toolbox method is also used in the
 algorithms, see the `one max short version
-<http://doc.deap.googlecode.com/hg/short_ga_onemax.html one max short
-version>`_.
+<http://doc.deap.googlecode.com/hg/short_ga_onemax.html>`_ for an example.
 
 Registering the operators and their default arguments in the toolbox is done
 as follow. 
@@ -121,19 +128,18 @@ Creating the Population
 -----------------------
 
 Before evolving it, we need to instantiate a population. This step is done
-effortless using the method we registered in the
-:class:`~deap.toolbox.Toolbox`. 
+effortless using the method we registered in the toolbox. 
 ::
 
-    pop = toolbox.population()
+    pop = toolbox.population(n=300)
+
+``pop`` will be a :class:`list` composed of 300 individuals.
 
 -----------------------
 The Appeal of Evolution
 -----------------------
 
-The evolution of the population is the last thing to do before getting
-results. In this example we **do not** use the :mod:`deap.algorithms` module in
-order to show how to manipulate the different features of DEAP. Let say that we
+The evolution of the population is the last to accomplish. Let say that we
 want to evolve for a fixed number of generation :data:`MAXGEN`, the evolution
 will then begin with a simple for statement. 
 ::
@@ -142,9 +148,9 @@ will then begin with a simple for statement.
         evolve...
 
 Is that simple enough? Lets continue with more complicated things, mating and
-mutating the population. The crossover and mutation operators provided with
-deap usually take respectively 2 and 1 individual(s) on input and return 2 and
-1 *new* individual(s). The simple GA algorithm states that the produced
+mutating the population. The crossover and mutation operators provided within
+DEAP usually take respectively 2 and 1 individual(s) on input and return 2 and
+1 modified individual(s). The simple GA algorithm states that the produced
 individuals shall replace their parents in the population, this is what is
 done by the following lines of code, where a crossover is applied with
 probability :data:`CXPB` and a mutation with probability :data:`MUTPB`. The 
@@ -203,6 +209,6 @@ the min, max, mean and standard deviation of the population. ::
 	print "  Avg %s" % mean
 	print "  Std %s" % std
 
-The complete `One Max Genetic Algorithm
+A :class:`~deap.tools.Statistics` object has been defined to facilitate how statistics are gathered. It is not presented here so that we can focus on the core and not gravitating helper objects of DEAP. The complete `One Max Genetic Algorithm
 <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code is available. It
 may be a little different but it does the overall same thing.

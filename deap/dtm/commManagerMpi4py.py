@@ -22,6 +22,7 @@ except ImportError:
         import xml.etree.ElementTree as etree
 
 from deap.dtm.dtmTypes import *
+from deap.dtm.abstractCommManager import AbstractDtmCommThread
 
 _logger = logging.getLogger("dtm.communication")
 
@@ -30,21 +31,10 @@ DTM_MPI_MAX_LATENCY = 0.01
 DTM_CONCURRENT_RECV_LIMIT = 1000
 DTM_CONCURRENT_SEND_LIMIT = 1000
 
-class DtmCommThread(threading.Thread):
+class DtmCommThread(AbstractDtmCommThread):
 
-    def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator):
-        threading.Thread.__init__(self)
-        self.recvQ = recvQ
-        self.sendQ = sendQ
-        
-        self.exitStatus = exitEvent
-        self.msgSendTag = 2
-        self.wakeUpMainThread = mainThreadEvent
-        self.random = randomGenerator
-        self.commReadyEvent = commReadyEvent
-        
-        self.traceMode = False
-        self.traceTo = None
+    def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):        
+        AbstractDtmCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
     
     @property
     def poolSize(self):
@@ -57,6 +47,10 @@ class DtmCommThread(threading.Thread):
     @property
     def isRootWorker(self):
         return self.currentId == 0
+    
+    @property
+    def isLaunchProcess(self):
+        return False
     
     def setTraceModeOn(self, xmlLogger):
         self.traceMode = True

@@ -1,6 +1,6 @@
 Tutorial
 --------
-Although this tutorial doesn't make reference directly yo the complete API of
+Although this tutorial doesn't make reference directly to the complete API of
 the framework, we think it is the place to start to understand the principles
 of DEAP. The core of the architecture is based on the :mod:`~deap.creator` and
 the :class:`~deap.base.Toolbox`. Their usage to create types at run-time (!)

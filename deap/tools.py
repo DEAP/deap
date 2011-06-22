@@ -937,32 +937,32 @@ def mutES(individual, c, indpb, minstrategy=None):
 # Selections                         #
 ######################################
 
-def selRandom(individuals, n):
-    """Select *n* individuals at random from the input *individuals*. The
+def selRandom(individuals, k):
+    """Select *k* individuals at random from the input *individuals*. The
     list returned contains references to the input *individuals*.
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     """
-    return [random.choice(individuals) for i in xrange(n)]
+    return [random.choice(individuals) for i in xrange(k)]
 
 
-def selBest(individuals, n):
-    """Select the *n* best individuals among the input *individuals*. The
+def selBest(individuals, k):
+    """Select the *k* best individuals among the input *individuals*. The
     list returned contains references to the input *individuals*.
     """
-    return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:n]
+    return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:k]
 
 
-def selWorst(individuals, n):
-    """Select the *n* worst individuals among the input *individuals*. The
+def selWorst(individuals, k):
+    """Select the *k* worst individuals among the input *individuals*. The
     list returned contains references to the input *individuals*.
     """
-    return sorted(individuals, key=attrgetter("fitness"))[:n]
+    return sorted(individuals, key=attrgetter("fitness"))[:k]
 
 
-def selTournament(individuals, n, tournsize):
-    """Select *n* individuals from the input *individuals* using *n*
+def selTournament(individuals, k, tournsize):
+    """Select *k* individuals from the input *individuals* using *k*
     tournaments of *tournSize* individuals. The list returned contains
     references to the input *individuals*.
     
@@ -970,7 +970,7 @@ def selTournament(individuals, n, tournsize):
     :mod:`random` module.
     """
     chosen = []
-    for i in xrange(n):
+    for i in xrange(k):
         chosen.append(random.choice(individuals))
         for j in xrange(tournsize - 1):
             aspirant = random.choice(individuals)
@@ -979,8 +979,8 @@ def selTournament(individuals, n, tournsize):
                 
     return chosen
 
-def selRoulette(individuals, n):
-    """Select *n* individuals from the input *individuals* using *n*
+def selRoulette(individuals, k):
+    """Select *k* individuals from the input *individuals* using *k*
     spins of a roulette. The selection is made by looking only at the first
     objective of each individual. The list returned contains references to
     the input *individuals*.
@@ -993,10 +993,10 @@ def selRoulette(individuals, n):
        or when the fitness can be smaller or equal to 0.
     """
     s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)
-    sum_fits = sum(map(lambda ind: ind.fitness.values[0], individuals))
+    sum_fits = sum(ind.fitness.values[0] for ind in individuals)
     
     chosen = []
-    for i in xrange(n):
+    for i in xrange(k):
         u = random.random() * sum_fits
         sum_ = 0
         for ind in s_inds:
@@ -1011,9 +1011,9 @@ def selRoulette(individuals, n):
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
-def selNSGA2(individuals, n):
+def selNSGA2(individuals, k):
     """Apply NSGA-II selection operator on the *individuals*. Usually,
-    the size of *individuals* will be larger than *n* because any individual
+    the size of *individuals* will be larger than *k* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
     than sorting the population according to a non-domination scheme. The list
@@ -1023,22 +1023,22 @@ def selNSGA2(individuals, n):
     and Meyarivan, "A fast elitist non-dominated sorting genetic algorithm for
     multi-objective optimization: NSGA-II", 2002.
     """
-    pareto_fronts = sortFastND(individuals, n)
+    pareto_fronts = sortFastND(individuals, k)
     chosen = list(chain(*pareto_fronts[:-1]))
-    n = n - len(chosen)
-    if n > 0:
-        chosen.extend(sortCrowdingDist(pareto_fronts[-1], n))
+    k = k - len(chosen)
+    if k > 0:
+        chosen.extend(sortCrowdingDist(pareto_fronts[-1], k))
     return chosen
     
 
-def sortFastND(individuals, n, first_front_only=False):
-    """Sort the first *n* *individuals* according the the fast non-dominated
+def sortFastND(individuals, k, first_front_only=False):
+    """Sort the first *k* *individuals* according the the fast non-dominated
     sorting algorithm. 
     """
     N = len(individuals)
     pareto_fronts = []
     
-    if n == 0:
+    if k == 0:
         return pareto_fronts
     
     pareto_fronts.append([])
@@ -1062,7 +1062,7 @@ def sortFastND(individuals, n, first_front_only=False):
     if not first_front_only:
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
-        N = min(N, n)
+        N = min(N, k)
         while pareto_sorted < N:
             pareto_fronts.append([])
             for indice_p in pareto_fronts[-2]:
@@ -1075,7 +1075,7 @@ def sortFastND(individuals, n, first_front_only=False):
     return [[individuals[index] for index in front] for front in pareto_fronts]
 
 
-def sortCrowdingDist(individuals, n):
+def sortCrowdingDist(individuals, k):
     """Sort the individuals according to the crowding distance."""
     if len(individuals) == 0:
         return []
@@ -1097,14 +1097,14 @@ def sortCrowdingDist(individuals, n):
                     crowding[j - 1][0].fitness.values[i]
     sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
                          key=lambda value: value[0], reverse=True)
-    return (individuals[index] for dist, index in sorted_dist[:n])
+    return (individuals[index] for dist, index in sorted_dist[:k])
 
 
 ######################################
 # Strength Pareto         (SPEA-II)  #
 ######################################
 
-def selSPEA2(individuals, n):
+def selSPEA2(individuals, k):
     """Apply SPEA-II selection operator on the *individuals*. Usually,
     the size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
@@ -1138,14 +1138,14 @@ def selSPEA2(individuals, n):
     # Choose all non-dominated individuals
     chosen_indices = [i for i in xrange(N) if fits[i] < 1]
     
-    if len(chosen_indices) < n:     # The archive is too small
+    if len(chosen_indices) < k:     # The archive is too small
         for i in xrange(N):
             distances = [0.0] * N
             for j in xrange(i + 1, N):
                 dist = 0.0
-                for k in xrange(L):
-                    val = individuals[i].fitness.values[k] - \
-                          individuals[j].fitness.values[k]
+                for l in xrange(L):
+                    val = individuals[i].fitness.values[l] - \
+                          individuals[j].fitness.values[l]
                     dist += val * val
                 distances[j] = dist
             kth_dist = _randomizedSelect(distances, 0, N - 1, K)
@@ -1156,18 +1156,18 @@ def selSPEA2(individuals, n):
                                                 if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
-        chosen_indices += [i for _, i in next_indices[:n - len(chosen_indices)]]
+        chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
                 
-    elif len(chosen_indices) > n:   # The archive is too large
+    elif len(chosen_indices) > k:   # The archive is too large
         N = len(chosen_indices)
         distances = [[0.0] * N for i in xrange(N)]
         sorted_indices = [[0] * N for i in xrange(N)]
         for i in xrange(N):
             for j in xrange(i + 1, N):
                 dist = 0.0
-                for k in xrange(L):
-                    val = individuals[chosen_indices[i]].fitness.values[k] - \
-                          individuals[chosen_indices[j]].fitness.values[k]
+                for l in xrange(L):
+                    val = individuals[chosen_indices[i]].fitness.values[l] - \
+                          individuals[chosen_indices[j]].fitness.values[l]
                     dist += val * val
                 distances[i][j] = dist
                 distances[j][i] = dist
@@ -1176,15 +1176,15 @@ def selSPEA2(individuals, n):
         # Insert sort is faster than quick sort for short arrays
         for i in xrange(N):
             for j in xrange(1, N):
-                k = j
-                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
-                    sorted_indices[i][k] = sorted_indices[i][k - 1]
-                    k -= 1
-                sorted_indices[i][k] = j
+                l = j
+                while l > 0 and distances[i][j] < distances[i][sorted_indices[i][l - 1]]:
+                    sorted_indices[i][l] = sorted_indices[i][l - 1]
+                    l -= 1
+                sorted_indices[i][l] = j
         
         size = N
         to_remove = []
-        while size > n:
+        while size > k:
             # Search for minimal distance
             min_pos = 0
             for i in xrange(1, N):
