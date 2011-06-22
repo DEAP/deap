@@ -27,10 +27,6 @@ DTM_TCP_MAX_LATENCY = 0.01
 DTM_CONCURRENT_RECV_LIMIT = 1000
 DTM_CONCURRENT_SEND_LIMIT = 1000
 
-# Les communications par multiprocessing.connection ont le defaut
-# de demander enormement de connexions (1 entre chaque paire de workers)
-# soit au total n*(n-1)/2 connexions ouvertes pour n workers
-# Les ports sont automatiquement attribues a partir du numero ci-dessous
 BASE_COMM_PORT = 10011
 
 class DtmCommThread(threading.Thread):
@@ -83,7 +79,7 @@ class DtmCommThread(threading.Thread):
         
     @property
     def poolSize(self):
-        return len(self.tabConn)+1      # +1 parce que nous n'avons pas de connexion avec nous-memes
+        return len(self.tabConn)+1      # +1 because tabConn does not include ourselves
 
     @property
     def workerId(self):
@@ -114,63 +110,39 @@ class DtmCommThread(threading.Thread):
     def run(self):
         # On check si on execute vraiment DTM ou si on est seulement un lanceur
         if int(self.props['dtmTCPGlobalLaunch']):
-            # Lanceur global. On cree une connexion SSH avec chaque host pour
-            # executer un lanceur local, puis on se met en attente
+            # Global launch. Create a SSH connection with each node, and
+            # execute a local launch on them. Then wait for termination
             sshWait = []
             lineTab = []
             maxWorkersByHost = 1
             totalWorkers = 0
-            #print(self.props['dtmTCPGlobalLaunch'], self.props['dtmTCPLocalLaunch'])
-            #print('>>>>',self.props['dtmTCPhosts'])
-            try:
-                with open(self.props['dtmTCPhosts']) as hostFile:
-                    for line in hostFile:
-                        if line[0] == '#' or line[0] == '\n' or line[0] == '\r':
-                            continue
-                        lineTab.append(line.replace("\n", "").replace("\r", "").split(" "))
-                        totalWorkers += int(lineTab[-1][1].split("=")[1])
-                        if int(lineTab[-1][1].split("=")[1]) > maxWorkersByHost:
-                            maxWorkersByHost = int(lineTab[-1][1].split("=")[1])
-                        
-                    # Pour le moment, si on utilise localhost, on va quand meme ouvrir une connexion locale
-                    # Pas trop trop efficace, mais bon
-                    for lineCount,hostH in enumerate(lineTab):
-                        #print(hostH[0], self.props['dtmTCPhosts'], self.cmdArgs[0])
-                        #print(["/usr/bin/ssh", "-x", hostH[0], "cd "+"" +";", "python"+\
-                                    #str(sys.version_info[0])+"."+str(sys.version_info[1])+" " + self.cmdArgs[0] +\
-                                    #" --dtmTCPGlobalLaunch=0 --dtmTCPLocalLaunch=1 --dtmTCPLineNo="+str(lineCount) +\
-                                    #" --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(maxWorkersByHost*(totalWorkers-1)) +\
-                                    #" --dtmTCPstartPort="+ str(self.props['dtmTCPstartPort']) + " --dtmTCPnbrWorkers="+str(hostH[1].split("=")[1])+\
-                                    #" --dtmTCPmaxWorkersByHost="+ str(maxWorkersByHost)+" "+ self.userArgs])
-                        sshWait.append(subprocess.Popen(["/usr/bin/ssh", "-x", hostH[0], "cd "+"/gel/usr/magar207/deap_workon/deap/dtm/tests" +";", "python"+\
-                                    str(sys.version_info[0])+"."+str(sys.version_info[1])+" " + self.cmdArgs[0] +\
-                                    " --dtmTCPGlobalLaunch=0 --dtmTCPLocalLaunch=1 --dtmTCPLineNo="+str(lineCount) +\
-                                    " --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(maxWorkersByHost*(totalWorkers-1)) +\
-                                    " --dtmTCPstartPort="+ str(self.props['dtmTCPstartPort']) + " --dtmTCPnbrWorkers="+str(hostH[1].split("=")[1])+\
-                                    " --dtmTCPmaxWorkersByHost="+ str(maxWorkersByHost)+" "+ self.userArgs], stdout=sys.stdout, stderr=sys.stderr))
-                        #sshWait.append(subprocess.Popen(["/usr/bin/ssh", "-x", hostH[0], "cd "+str(os.getcwd())+";", "python2.7 boumpaf.py"], stdout=sys.stdout, stderr=sys.stderr))
-                        #sshWait.append(subprocess.Popen(["/usr/bin/ssh", "-x", hostH[0], "cd /gel/usr/magar207/deap_workon/examples; python2.7 gp_ant.py"], stdout=sys.stdout, stderr=sys.stderr))
-            except IOError:
-                raise AssertionError, str(sys.argv)
+            with open(self.props['dtmTCPhosts']) as hostFile:
+                for line in hostFile:
+                    if line[0] == '#' or line[0] == '\n' or line[0] == '\r':
+                        continue
+                    lineTab.append(line.replace("\n", "").replace("\r", "").split(" "))
+                    totalWorkers += int(lineTab[-1][1].split("=")[1])
+                    if int(lineTab[-1][1].split("=")[1]) > maxWorkersByHost:
+                        maxWorkersByHost = int(lineTab[-1][1].split("=")[1])
+                    
+                for lineCount,hostH in enumerate(lineTab):
+                    sshWait.append(subprocess.Popen(["/usr/bin/ssh", "-x", hostH[0], "cd "+"/gel/usr/magar207/deap_workon/deap/dtm/tests" +";", "python"+\
+                                str(sys.version_info[0])+"."+str(sys.version_info[1])+" " + self.cmdArgs[0] +\
+                                " --dtmTCPGlobalLaunch=0 --dtmTCPLocalLaunch=1 --dtmTCPLineNo="+str(lineCount) +\
+                                " --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(maxWorkersByHost*(totalWorkers-1)) +\
+                                " --dtmTCPstartPort="+ str(self.props['dtmTCPstartPort']) + " --dtmTCPnbrWorkers="+str(hostH[1].split("=")[1])+\
+                                " --dtmTCPmaxWorkersByHost="+ str(maxWorkersByHost)+" "+ self.userArgs], stdout=sys.stdout, stderr=sys.stderr))
            
             for connJob in sshWait:
                 connJob.wait()
             self.commReadyEvent.set()
             return
         elif int(self.props['dtmTCPLocalLaunch']):
-            # Lanceur local. On utilise subprocess.popen pour lancer les
-            # "vraies" instances de DTM, puis on se met en attente
+            # Local launch. Makes use of subprocess.popen to launch DTM workers
+            # After that, wait until termination
             dtmLocalWorkersList = []
             
-            #currentBasePort = int(self.props['dtmTCPstartPort'])
             for i in range(int(self.props['dtmTCPnbrWorkers'])):
-                #sys.stdout.write(str(["apython"+str(sys.version_info[0])+"."+str(sys.version_info[1]), self.cmdArgs[0],
-                        #" --dtmTCPGlobalLaunch=0 --dtmTCPLocalLaunch=0 --dtmTCPLineNo="+str(self.props['dtmTCPLineNo']) +\
-                        #" --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(self.props['dtmTCPnPortsByHost']) +\
-                        #" --dtmTCPstartPort="+ str(self.props['dtmTCPstartPort']) + " --dtmTCPnbrWorkers="+str(i)+\
-                        #" --dtmTCPmaxWorkersByHost="+ str(self.props['dtmTCPmaxWorkersByHost']) +" --dtmTCPisRootWorker=1", self.userArgs]) + "\n\n")
-                #sys.stdout.flush()
-                #sys.stderr.flush()
                 
                 if i == 0 and int(self.props['dtmTCPLineNo']) == 0:
                     dtmLocalWorkersList.append(subprocess.Popen(["python"+str(sys.version_info[0])+"."+str(sys.version_info[1]), self.cmdArgs[0],
@@ -184,9 +156,7 @@ class DtmCommThread(threading.Thread):
                         " --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(self.props['dtmTCPnPortsByHost']) +\
                         " --dtmTCPstartPort="+ str(self.props['dtmTCPstartPort']) + " --dtmTCPnbrWorkers="+str(i)+\
                         " --dtmTCPmaxWorkersByHost="+ str(self.props['dtmTCPmaxWorkersByHost']), self.userArgs]))
-                        
-                #currentBasePort += int(self.props['dtmTCPnPortsByHost']) / int(self.props['dtmTCPnbrWorkers'])
-            
+                                   
             for dtmW in dtmLocalWorkersList:
                 dtmW.wait()
             
@@ -223,16 +193,11 @@ class DtmCommThread(threading.Thread):
                 
                 if lineC > int(self.props['dtmTCPLineNo']):
                     for i in range(0, int(hostInfos[1].split("=")[1])):
-                        #sys.stdout.write(str(("Listener", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " < ", remoteIp,
-                                        #lineC*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab))) + "\n\n")
-                        #sys.stdout.flush()
                         try:
                             listListeners[(hostInfos[0], i)] = Listener((fullyhost, int(self.props['dtmTCPstartPort']) +\
                                         lineC*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab)))
-                            #self.tabConn[(hostInfos[0], i)] = self._createListener((socket.gethostname(), int(self.props['dtmTCPstartPort']) +\
-                                        #lineC*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab)))
                         except Exception as ex:
-                            sys.stderr.write(str(("><<<<<<<<<<<<<", "Listener", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " < ", remoteIp,
+                            sys.stderr.write(str(("ERROR IN : ", "Listener", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " < ", remoteIp,
                                         lineC*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab))) + "\n\n")
                             raise ex
                 elif lineC == int(self.props['dtmTCPLineNo']):
@@ -242,43 +207,26 @@ class DtmCommThread(threading.Thread):
                             continue    # Pas de connexion avec nous-memes
                         
                         if i > self.workerHostId:
-                            #sys.stdout.write(str(("Listener", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " => ", remoteIp,
-                                        #int(self.props['dtmTCPLineNo'])*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab))) + "\n\n")
-                            #sys.stdout.flush()
                             try:
-                                #self.tabConn[(hostInfos[0], i)] = self._createListener((socket.gethostname(), int(self.props['dtmTCPstartPort']) + lineC*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab)))         
                                 listListeners[(hostInfos[0], i)] = Listener(('127.0.0.1', int(self.props['dtmTCPstartPort']) + lineC*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab)))
                             except Exception as ex:
-                                sys.stderr.write(str((">>>>>>>>>>>>>>>>", "Listener", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " => ", remoteIp,
+                                sys.stderr.write(str(("ERROR IN : ", "Listener", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " => ", remoteIp,
                                         int(self.props['dtmTCPLineNo'])*maxWorkersByHost + i + self.workerHostId*maxWorkersByHost*len(lineTab))) +"\n\n\n")
                                 raise ex
                         else:
-                            #sys.stdout.write(str(("Client", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " <= ", remoteIp,
-                                        #int(self.props['dtmTCPLineNo'])*maxWorkersByHost + self.workerHostId + i*maxWorkersByHost*len(lineTab))) + "\n\n")
-                            #sys.stdout.flush()
-                            # i < self.workerHostId
                             self.tabConn[(hostInfos[0], i)] = Client(('127.0.0.1', int(self.props['dtmTCPstartPort']) + lineC*maxWorkersByHost + self.workerHostId + i*maxWorkersByHost*len(lineTab)))
                             
                 else:
                     # lineC < int(self.props['dtmTCPLineNo'])
                     for i in range(0, int(hostInfos[1].split("=")[1])):
-                        #sys.stdout.write(str(("Client", self.props['dtmTCPLineNo'], self.workerHostId, lineC, i, maxWorkersByHost, len(lineTab), " > ", remoteIp,
-                                        #int(self.props['dtmTCPLineNo'])*maxWorkersByHost + self.workerHostId + i*maxWorkersByHost*len(lineTab))) + "\n\n")
-                        #sys.stdout.flush()
                         self.tabConn[(hostInfos[0], i)] = Client((remoteIp, int(self.props['dtmTCPstartPort']) +\
                                         int(self.props['dtmTCPLineNo'])*maxWorkersByHost + self.workerHostId + i*maxWorkersByHost*len(lineTab)))
         
         
         for le in listListeners.keys():
-            #sys.stdout.write("WAIT FOR ACCEPT "+str(self.workerHostId) + " (" + str(len(self.tabConn))+","+str(len(listListeners))+")\n")
-            #sys.stdout.write(str(socket.gethostbyname(le[0])) + " " + str(le[1]) +" \n")
-            #sys.stdout.flush()
             conn = listListeners[le].accept()
             self.tabConn[le] = conn
-            #sys.stdout.write("FINISH WAIT\n")
-        
-        #sys.stdout.write(str(self.workerId)+"\n" +"\t"+str(self.isRootWorker)+"\n")
-        #sys.stdout.flush()
+
         self.commReadyEvent.set()
         
         working = True

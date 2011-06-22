@@ -1,5 +1,4 @@
 import sys
-sys.path.append("..")
 
 from deap import dtm
 
@@ -79,6 +78,7 @@ def main():
     #    print(z)
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
+
 
 dtm.start(main)
 
