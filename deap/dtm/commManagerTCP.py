@@ -30,7 +30,7 @@ DTM_CONCURRENT_SEND_LIMIT = 1000
 
 BASE_COMM_PORT = 10011
 
-class DtmCommThread(threading.Thread):
+class DtmCommThread(AbstractDtmCommThread):
     
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):
         AbstractDtmCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
@@ -264,5 +264,3 @@ class DtmCommThread(threading.Thread):
 
             if not recvSomething:
                 time.sleep(self.random.uniform(DTM_TCP_MIN_LATENCY, DTM_TCP_MAX_LATENCY))
-
-AbstractDtmCommThread.register(DtmCommThread)

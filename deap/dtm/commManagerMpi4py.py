@@ -31,7 +31,7 @@ DTM_MPI_MAX_LATENCY = 0.01
 DTM_CONCURRENT_RECV_LIMIT = 1000
 DTM_CONCURRENT_SEND_LIMIT = 1000
 
-class DtmCommThread(threading.Thread):
+class DtmCommThread(AbstractDtmCommThread):
 
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):        
         AbstractDtmCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
@@ -172,4 +172,3 @@ class DtmCommThread(threading.Thread):
         del lSendWaiting
         del lRecvWaiting
         
-AbstractDtmCommThread.register(DtmCommThread)
