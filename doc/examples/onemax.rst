@@ -185,7 +185,7 @@ toolbox) in that same population. The chosen individuals are duplicated
 according to the :meth:`clone` operator of the toolbox.
 ::
 
-    pop = [toolbox.clone(ind) for ind in toolbox.select(pop, n=len(pop))]
+    pop = [toolbox.clone(ind) for ind in toolbox.select(pop, len(pop))]
 
 .. 
 .. The ``[:]`` needs to be used in order to replace the slice of objects with the
