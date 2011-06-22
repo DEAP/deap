@@ -21,6 +21,7 @@ import sys
 import os
 import socket
 import subprocess
+from deap.dtm.abstractCommManager import AbstractDtmCommThread
 
 DTM_TCP_MIN_LATENCY = 0.005
 DTM_TCP_MAX_LATENCY = 0.01
@@ -32,19 +33,7 @@ BASE_COMM_PORT = 10011
 class DtmCommThread(threading.Thread):
     
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):
-        threading.Thread.__init__(self)
-        self.recvQ = recvQ
-        self.sendQ = sendQ
-        
-        self.exitStatus = exitEvent
-        self.wakeUpMainThread = mainThreadEvent
-        self.random = randomGenerator
-        self.commReadyEvent = commReadyEvent
-        
-        self.cmdArgs = cmdlineArgs
-        
-        self.traceMode = False
-        self.traceTo = None
+        AbstractDtmCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
 
         self.props = dict(dtmTCPGlobalLaunch = True, 
                         dtmTCPLocalLaunch = False, 
@@ -100,13 +89,6 @@ class DtmCommThread(threading.Thread):
         # Profiling is not currently enabled with TCP
         return
     
-    def _createListener(self, remoteInfo):
-        tmpListener = Listener(remoteInfo)
-        return tmpListener.accept()
-    
-    def _createClient(self, remoteInfo):
-        return Client(remoteInfo)
-    
     def run(self):
         # On check si on execute vraiment DTM ou si on est seulement un lanceur
         if int(self.props['dtmTCPGlobalLaunch']):
@@ -126,7 +108,19 @@ class DtmCommThread(threading.Thread):
                         maxWorkersByHost = int(lineTab[-1][1].split("=")[1])
                     
                 for lineCount,hostH in enumerate(lineTab):
-                    sshWait.append(subprocess.Popen(["/usr/bin/ssh", "-x", hostH[0], "cd "+"/gel/usr/magar207/deap_workon/deap/dtm/tests" +";", "python"+\
+                    if hostH[0] == 'localhost' or hostH[0] == '127.0.0.1' or hostH[0] == socket.gethostname():
+                        # Local launch
+                        if len(lineTab) > 1:
+                            sys.stderr.write("Warning : 'localhost' used as a global hostname!\nDTM will probably hang.\nReplace localhost by the fully qualified name or run only on this host.")
+                            sys.stderr.flush()
+                        sshWait.append(subprocess.Popen(["python"+str(sys.version_info[0])+"."+str(sys.version_info[1]), self.cmdArgs[0], 
+                                " --dtmTCPGlobalLaunch=0 --dtmTCPLocalLaunch=1 --dtmTCPLineNo="+str(lineCount) +\
+                                " --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(maxWorkersByHost*(totalWorkers-1)) +\
+                                " --dtmTCPstartPort="+ str(self.props['dtmTCPstartPort']) + " --dtmTCPnbrWorkers="+str(hostH[1].split("=")[1])+\
+                                " --dtmTCPmaxWorkersByHost="+ str(maxWorkersByHost)+" "+ self.userArgs], stdout=sys.stdout, stderr=sys.stderr))
+                    else:
+                        # Remote launch
+                        sshWait.append(subprocess.Popen(["/usr/bin/ssh", "-x", hostH[0], "cd "+str(os.getcwd()) +";", "python"+\
                                 str(sys.version_info[0])+"."+str(sys.version_info[1])+" " + self.cmdArgs[0] +\
                                 " --dtmTCPGlobalLaunch=0 --dtmTCPLocalLaunch=1 --dtmTCPLineNo="+str(lineCount) +\
                                 " --dtmTCPhosts=" + str(self.props['dtmTCPhosts']) + " --dtmTCPnPortsByHost=" + str(maxWorkersByHost*(totalWorkers-1)) +\
@@ -141,7 +135,6 @@ class DtmCommThread(threading.Thread):
             # Local launch. Makes use of subprocess.popen to launch DTM workers
             # After that, wait until termination
             dtmLocalWorkersList = []
-            
             for i in range(int(self.props['dtmTCPnbrWorkers'])):
                 
                 if i == 0 and int(self.props['dtmTCPLineNo']) == 0:
@@ -163,10 +156,13 @@ class DtmCommThread(threading.Thread):
             self.commReadyEvent.set()
             return
         
-        # Ici, on est rendu a executer DTM a proprement parler
-        # Il faut d'abord ouvrir les bons ports, creer les Client/Listeners
-        # Ensuite, on associe un id (host, numero) a chaque worker
-        # Cet ID est associe a un tuple (IP, port)
+        # Here, we are ready to start DTM
+        # We have to open the TCP ports and create the communication sockets
+        # This is somewhat tricky, because two workers on the same node
+        # must not have the same port number, and we do not want to bind
+        # n^2 different ports (which will be the trivial way).
+        #
+        # Each worker as an ID which is a tuple (host, unique number)
         self.tabConn = {}
         listListeners = {}
         lineTab = []
@@ -178,15 +174,14 @@ class DtmCommThread(threading.Thread):
                 if hostline[0] == '#' or hostline[0] == '\n' or hostline[0] == '\r':
                     continue
                 
-                #hostInfos = hostline.replace("\n", "").replace("\r", "").split(" ")
                 lineTab.append(hostline.replace("\n", "").replace("\r", "").split(" "))
                 if len(lineTab)-1 == int(self.props['dtmTCPLineNo']):
                     fullyhost = lineTab[-1][0]
-                # Si notre # de ligne est SUPERIEUR a celui de l'autre OU que
-                # notre ID est SUPERIEUR a celui d'un autre worker sur le meme host que nous
-                # alors c'est NOUS qui creons le CLIENT
-                # Sinon, on cree l'objet Listener a qui un client va tenter de se connecter
-                # On commence par creer nos Listeners, ensuite nos clients
+                
+                # If our line number is GREATER than the other OR our uniq ID is
+                # GREATER than the ID of another worker on our node,
+                # we create the Client which will attempt to connect to the
+                # listener opened by the other.
             
             for lineC,hostInfos in enumerate(lineTab):
                 remoteIp = socket.gethostbyname(hostInfos[0])
@@ -237,17 +232,15 @@ class DtmCommThread(threading.Thread):
             recvSomething = False
             sendSomething = False
 
-            if self.exitStatus.is_set():    # On quitte
-                # Note importante : le thread de communication DOIT vider la sendQ
-                # AVANT de quitter (les ordres de quit doivent etre envoyes)
+            if self.exitStatus.is_set():    # Exit
+                # Warning : the communication thread MUST clear the sendQ
+                # BEFORE leaving (the exiting orders must be send)
                 working = False
 
-            # On poll les connexions
+            # Check for incoming messages
             for conn in self.tabConn.values():
-                #if conn is None:    # On ne recoit pas de messages de nous-memes
-                    #continue
                 if conn.poll():
-                    # On a recu quelque chose
+                    # We received something
                     try:
                         self.recvQ.put(conn.recv())
                         countRecvNotTransmit += 1
@@ -261,7 +254,7 @@ class DtmCommThread(threading.Thread):
                 self.wakeUpMainThread.set()
 
             while True:
-                # On envoie tous les messages
+                # Send all our messages
                 try:
                     sendMsg = self.sendQ.get_nowait()
                     self.tabConn[sendMsg.receiverWid].send(sendMsg)
@@ -271,4 +264,5 @@ class DtmCommThread(threading.Thread):
 
             if not recvSomething:
                 time.sleep(self.random.uniform(DTM_TCP_MIN_LATENCY, DTM_TCP_MAX_LATENCY))
-                
+
+AbstractDtmCommThread.register(DtmCommThread)
