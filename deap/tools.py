@@ -1261,40 +1261,37 @@ def _partition(array, begin, end):
 # Migrations                         #
 ######################################
 
-def migRing(populations, n, selection, replacement=None, migarray=None,
-            sel_kargs=None, repl_kargs=None):
+def migRing(populations, k, selection, replacement=None, migarray=None):
     """Perform a ring migration between the *populations*. The migration first
-    select *n* emigrants from each population using the specified *selection*
-    operator and then replace *n* individuals from the associated population in
-    the *migarray* by the emigrants. If no *replacement*
-    operator is specified, the immigrants will replace the emigrants of the
-    population, otherwise, the immigrants will replace the individuals selected
-    by the *replacement* operator. The migration array, if provided, shall
-    contain each population's index once and only once. If no migration array
-    is provided, it defaults to a serial ring migration (1 -- 2 -- ... -- n
-    -- 1). You may pass keyword arguments to the two selection operators by
-    giving a dictionary to *sel_kargs* and *repl_kargs*.
+    select *k* emigrants from each population using the specified *selection*
+    operator and then replace *k* individuals from the associated population
+    in the *migarray* by the emigrants. If no *replacement* operator is
+    specified, the immigrants will replace the emigrants of the population,
+    otherwise, the immigrants will replace the individuals selected by the
+    *replacement* operator. The migration array, if provided, shall contain
+    each population's index once and only once. If no migration array is
+    provided, it defaults to a serial ring migration (1 -- 2 -- ... -- n --
+    1). Selection and replacement function are called using the signature
+    ``selection(populations[i], k)`` and ``replacement(populations[i], k)``.
+    It is important to note that the replacement strategy must select *k*
+    **different** individuals. For example, using a traditional tournament for
+    replacement strategy will thus give undesirable effects, two individuals
+    will most likely try to enter the same slot.
     """
     if migarray is None:
         migarray = range(1, len(populations)) + [0]
     
     immigrants = [[] for i in xrange(len(migarray))]
     emigrants = [[] for i in xrange(len(migarray))]
-    if sel_kargs is None:
-        sel_kargs = {}
-    if repl_kargs is None:
-        repl_kargs = {}
 
     for from_deme in xrange(len(migarray)):
-        emigrants[from_deme].extend(selection(populations[from_deme], n=n,
-                                     **sel_kargs))
+        emigrants[from_deme].extend(selection(populations[from_deme], k))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
             immigrants[from_deme] = emigrants[from_deme]
         else:
             # Else select those who will be replaced
-            immigrants[from_deme].extend(replacement(populations[from_deme],
-                                          n=n, **repl_kargs))
+            immigrants[from_deme].extend(replacement(populations[from_deme], k))
 
     mig_buf = emigrants[0]
     for from_deme, to_deme in enumerate(migarray[1:]):

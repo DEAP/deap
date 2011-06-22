@@ -83,8 +83,8 @@ def main():
         print "-- Generation %i --" % g
     
         # Select and clone the offsprings
-        off_ga = toolbox_ga.select(pop_ga, n=len(pop_ga))
-        off_gp = tools_gp.select(pop_gp, n=len(pop_gp))
+        off_ga = toolbox_ga.select(pop_ga, len(pop_ga))
+        off_gp = tools_gp.select(pop_gp, len(pop_gp))
         off_ga = [toolbox_ga.clone(ind) for ind in off_ga]        
         off_gp = [tools_gp.clone(ind) for ind in off_gp]
     

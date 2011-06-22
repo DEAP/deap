@@ -93,7 +93,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     for gen in range(ngen):
         _logger.info("Evolving generation %i", gen)
         # Select and clone the next generation individuals
-        offsprings = toolbox.select(population, n=len(population))
+        offsprings = toolbox.select(population, len(population))
         offsprings = map(toolbox.clone, offsprings)
         
         # Variate the pool of individuals
