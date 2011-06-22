@@ -32,7 +32,7 @@ DTM_CONCURRENT_SEND_LIMIT = 1000
 
 class DtmCommThread(threading.Thread):
 
-    def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator):
+    def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):
         threading.Thread.__init__(self)
         self.recvQ = recvQ
         self.sendQ = sendQ
@@ -42,6 +42,8 @@ class DtmCommThread(threading.Thread):
         self.wakeUpMainThread = mainThreadEvent
         self.random = randomGenerator
         self.commReadyEvent = commReadyEvent
+        
+        self.cmdArgs = cmdlineArgs
         
         self.traceMode = False
         self.traceTo = None
@@ -57,6 +59,10 @@ class DtmCommThread(threading.Thread):
     @property
     def isRootWorker(self):
         return self.currentId == 0
+    
+    @property
+    def isLaunchProcess(self):
+        return False
     
     def setTraceModeOn(self, xmlLogger):
         self.traceMode = True
