@@ -1,5 +1,4 @@
 import sys
-sys.path.append("..")
 
 import random
 random.seed(12)
@@ -23,10 +22,6 @@ def primaryTest(nbr):
 #    print(nbr)
     if nbr <= 2:
         return True
-    
-    #if nbr == 7001:
-    #    raise AssertionError("UN TEST D'EXCEPTION!")
-    #time.sleep(25)
     
     for i in range(2, int(math.sqrt(nbr))+1):
         if nbr % i == 0:

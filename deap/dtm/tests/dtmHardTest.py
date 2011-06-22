@@ -1,11 +1,10 @@
  
 import sys
-sys.path.append("..")
 
 import random
 random.seed(12)
 
-from taskmanager import dtm
+from deap import dtm
 
 import time
 import math
