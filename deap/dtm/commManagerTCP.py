@@ -90,7 +90,7 @@ class DtmCommThread(AbstractDtmCommThread):
         return
     
     def run(self):
-        # On check si on execute vraiment DTM ou si on est seulement un lanceur
+        # Looking if we are in "launch mode" or "execute mode"
         if int(self.props['dtmTCPGlobalLaunch']):
             # Global launch. Create a SSH connection with each node, and
             # execute a local launch on them. Then wait for termination
