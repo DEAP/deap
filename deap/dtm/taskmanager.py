@@ -1,3 +1,18 @@
+#    This file is part of DEAP.
+#
+#    DEAP is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as
+#    published by the Free Software Foundation, either version 3 of
+#    the License, or (at your option) any later version.
+#
+#    DEAP is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
+
 import threading
 import time
 import math
@@ -1431,7 +1446,7 @@ class DtmThread(threading.Thread):
 
 class DtmAsyncResult(object):
     """
-    The class of the result returned by **DtmControl.map_async()** and **DtmControl.apply_async()**.
+    The class of the result returned by :func:`~deap.dtm.taskmanager.DtmControl.map_async()` and :func:`~deap.dtm.taskmanager.DtmControl.apply_async()`.
     """
     def __init__(self, control, waitingInfo, taskKey):
         self.control = control
@@ -1457,7 +1472,7 @@ class DtmAsyncResult(object):
         
         .. note::
             This is a blocking call : caller will wait in this function until the result is ready.
-            To check for the avaibility of the result, use ready()
+            To check for the avaibility of the result, use :func:`~deap.dtm.taskmanager.DtmAsyncResult.ready()`.
         """
         if not self.resultReturned:
             self.wait()
