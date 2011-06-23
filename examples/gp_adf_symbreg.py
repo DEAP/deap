@@ -139,7 +139,7 @@ def main():
         print "-- Generation %i --" % g
     
         # Select the offsprings
-        offsprings = toolbox.select(pop, n=len(pop))
+        offsprings = toolbox.select(pop, len(pop))
         # Clone the offsprings
         offsprings = [toolbox.clone(ind) for ind in offsprings]
     

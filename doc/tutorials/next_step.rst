@@ -135,7 +135,7 @@ individuals to select. It returns a list containing the references to the
 selected individuals. The selection is made as follow.
 ::
 
-	selected = tools.selBest([child1, child2], n=2)
+	selected = tools.selBest([child1, child2], 2)
 	print child1 in selected		# True
 
 .. warning:: It is **very** important here to note that the selection
@@ -147,7 +147,7 @@ selected individuals. The selection is made as follow.
 Usually duplication of the entire population will be made after selection.
 ::
 
-	selected = toolbox.select(population, n=LAMBDA)
+	selected = toolbox.select(population, LAMBDA)
 	offsprings = [toolbox.clone(ind) for ind in selected]
 
 
@@ -194,7 +194,7 @@ When building evolutionary algorithms the toolbox is used to contain the operato
 
 	for g in range(NGEN):
 	    # Select the next generation individuals
-	    offsprings = toolbox.select(pop, n=len(pop))
+	    offsprings = toolbox.select(pop, len(pop))
 	    # Clone the selected individuals
 	    offsprings = map(toolbox.clone, offsprings)
 	
@@ -287,7 +287,7 @@ the writing of an algorithm as follow.
 	
 	for g in range(NGEN):
 	    # Select and clone the next generation individuals
-	    offsprings = map(toolbox.clone, toolbox.select(pop, n=len(pop)))
+	    offsprings = map(toolbox.clone, toolbox.select(pop, len(pop)))
 	
 	    # Apply crossover and mutation on the offsprings
 	    offsprings = algorithms.varSimple(offsprings, CXPB, MUTPB)

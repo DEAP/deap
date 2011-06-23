@@ -59,7 +59,7 @@ def main():
         print "-- Generation %i --" % g
         
         # Select the next generation individuals
-        offsprings = toolbox.select(pop, n=len(pop))
+        offsprings = toolbox.select(pop, len(pop))
         # Clone the selected individuals
         offsprings = map(toolbox.clone, offsprings)
     
