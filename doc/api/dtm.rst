@@ -66,6 +66,43 @@ Functions documentation
 .. autoclass:: deap.dtm.taskmanager.DtmAsyncResult
     :members:
         
+        
+DTM launching
+-------------
+
+DTM can support many communication environment. The only real restriction on the choice of a communication backend is that is must provide an access from each worker to every other (that is, the worker 0 must be able to directly communicate with all other workers, and so for the worker 1, 2, etc.). Currently, two main backends are available : one using MPI through the `mpi4py <http://code.google.com/p/mpi4py/>`_ layer, and another using TCP (with SSH for the launch process).
+
+If you already have a functionnal MPI installation, you should choose the mpi4py backend, as it can provide better performances in some cases and easier configuration. On the other side, MPI implementations may cause some strange errors when you use low-level system operations (such as fork). In any case, both backends should be ready for production use, and as the backend switch is as easy as changing only one line in your script, this choice should not be an issue.
+
+Launch DTM with the mpi4py backend
+++++++++++++++++++++++++++++++++++
+
+When this backend is used, DTM delegates the start-up process to MPI. In this way, any MPI option can be used. For instance : ::
+    
+    mpirun -n 32 -hostfile myHosts -npernode 4 -bind-to-core python yourScript.py --yourScriptParams ...
+
+Will launch your script on 32 workers, distributed over the hosts listed in 'myHosts', without exceeding 4 workers by host, and will bind DTM workers to a CPU core. The bind-to-core option can provide a good performance improvement in some environments, and does not affect the behavior of DTM at all.
+
+
+Launch DTM with the pure-TCP backend
+++++++++++++++++++++++++++++++++++++
+
+The TCP backend includes a launcher which works with SSH in order to start remote DTM workers. Therefore, your execution environment must provide a SSH access to every host, and a shared file system such as NFS (or, at least, ensure that the script you want to execute and the DTM libraries are located in a common path for every worker). You also have to provide a host file which follows the same synthax as the MPI host files, for instance : ::
+    
+    firstComputer.myNetwork.com slots=4
+    otherComputer.myNetwork.com slots=6
+    221.32.118.3 slots=4
+    
+Then you can launch DTM with this file : ::
+    
+    python myScript.py --dtmTCPhosts=myHostFile
+    
+.. warning::
+    Do not forget to explicitly set the communication manager to **deap.dtm.commManagerTCP** : ::
+        
+        dtm.setOptions(communicationManager="deap.dtm.commManagerTCP")
+
+This backend can also be useful if you want to launch local jobs. If your hostfile contains only 'localhost' or '127.0.0.1', DTM will start all the workers locally, without using SSH.
 
 
 Troubleshooting and Pitfalls
