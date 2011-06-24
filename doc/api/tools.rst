@@ -12,21 +12,29 @@ fitness is left to the user and is generally fulfilled in the algorithms by
 calling :func:`toolbox.clone` on an individuals to duplicate it and ``del`` on
 the :attr:`values` attribute of the individual's fitness to invalidate to invalidate this last one.
 
+Here is a list of the implemented operators in DEAP.
+
+============================ =========================================== ========================================= ======================= ================
+ Initialization               Crossover                                   Mutation                                  Selection               Migration 
+============================ =========================================== ========================================= ======================= ================
+ :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`   :func:`migRing` 
+ :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`     ..             
+ :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`        ..             
+ :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutES`                             :func:`selSPEA2`        ..             
+ :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`~deap.gp.mutUniform`               :func:`selRandom`       ..             
+ :func:`~deap.gp.genRamped`   :func:`cxBlend`                             :func:`~deap.gp.mutTypedUniform`          :func:`selBest`         ..             
+ ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedNodeReplacement`  :func:`selWorst`        ..             
+ ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
+ ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutShrink`                ..                      ..             
+ ..                           :func:`cxMessyOnePoint`                     :func:`~deap.gp.mutTypedInsert`           ..                      ..             
+ ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                      ..             
+ ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                      ..             
+ ..                           :func:`~deap.gp.cxOnePointLeafBiased`       ..                                        ..                      ..             
+ ..                           :func:`~deap.gp.cxTypedOnePointLeafBiased`  ..                                        ..                      ..             
+============================ =========================================== ========================================= ======================= ================
+
 Initialization
 ++++++++++++++
-Here is a quick table reference to the different implemented initializations
-in DEAP. Bellow are the complete descriptions.
-
-===================================== ============ =====================
- Initialization Operator               Input Type   Output Type
-===================================== ============ =====================
- :func:`initRepeat`                    sequences    ...
- :func:`initIterate`                   sequences    ...
- :func:`initCycle`                     sequences    ...
- :func:`~deap.gp.genFull`              sequences    ...
- :func:`~deap.gp.genGrow`              sequences    ...
- :func:`~deap.gp.genRamped`            sequences    ...
-===================================== ============ =====================
 
 .. autofunction:: deap.tools.initRepeat
 
@@ -42,28 +50,6 @@ in DEAP. Bellow are the complete descriptions.
 
 Crossover
 +++++++++
-
-Here is a quick table reference to the different implemented crossovers in 
-DEAP. Bellow are the complete descriptions.
-
-=========================================== ==================================
- Crossover Operator                         Input Type                      
-=========================================== ==================================
- :func:`cxOnePoint`                         sequences            
- :func:`cxTwoPoints`                        sequences                    
- :func:`cxUniform`                          sequences
- :func:`cxPartialyMatched`                  integer sequences
- :func:`cxUniformPartialyMatched`           integer sequences
- :func:`cxBlend`                            float sequences
- :func:`cxESBlend`                          float sequences with strategy
- :func:`cxESTwoPoints`                      sequences with strategy
- :func:`cxSimulatedBinary`                  float sequences
- :func:`cxMessyOnePoint`                    sequences
- :func:`~deap.gp.cxUniformOnePoint`         trees
- :func:`~deap.gp.cxTypedOnePoint`           primitive typed trees
- :func:`~deap.gp.cxOnePointLeafBiased`      trees
- :func:`~deap.gp.cxTypedOnePointLeafBiased` primitive typed trees
-=========================================== ==================================
 
 .. autofunction:: deap.tools.cxTwoPoints
 
@@ -96,24 +82,6 @@ DEAP. Bellow are the complete descriptions.
 Mutation
 ++++++++
 
-Here is a quick table reference to the different implemented mutations in 
-DEAP. Bellow are the complete descriptions.
-
-========================================= ==================================
- Mutation Operator                         Input Type                      
-========================================= ==================================
- :func:`mutGaussian`                       float sequence
- :func:`mutShuffleIndexes`                 sequence                    
- :func:`mutFlipBit`                        binary sequence
- :func:`mutES`                             float sequence with strategy
- :func:`~deap.gp.mutUniform`               primitive tree
- :func:`~deap.gp.mutTypedUniform`          primitive typed tree
- :func:`~deap.gp.mutTypedNodeReplacement`  primitive typed tree
- :func:`~deap.gp.mutTypedEphemeral`        primitive typed tree
- :func:`~deap.gp.mutShrink`                tree
- :func:`~deap.gp.mutTypedInsert`           primitive typed tree
-========================================= ==================================
-
 .. autofunction:: deap.tools.mutGaussian
 
 .. autofunction:: deap.tools.mutShuffleIndexes
@@ -137,21 +105,6 @@ DEAP. Bellow are the complete descriptions.
 Selection
 +++++++++
 
-Here is a quick table reference to the different implemented selections in 
-DEAP. Bellow are the complete descriptions.
-
-===================================== ==================================
- Selection Operator                    Input Type                      
-===================================== ==================================
- :func:`selTournament`                 multi-objective sequence
- :func:`selRoulette`                   mono-objective sequence
- :func:`selNSGA2`                      multi-objective sequence
- :func:`selSPEA2`                      multi-objective sequence
- :func:`selRandom`                     multi-objective sequence
- :func:`selBest`                       multi-objective sequence
- :func:`selWorst`                      multi-objective sequence
-===================================== ==================================
-
 .. autofunction:: deap.tools.selTournament
 
 .. autofunction:: deap.tools.selRoulette
@@ -169,16 +122,7 @@ DEAP. Bellow are the complete descriptions.
 Migration
 +++++++++
 
-Here is a quick table reference to the different implemented migrations in 
-DEAP. Bellow are the complete descriptions.
-
-===================================== ==================================
- Selection Operator                    Input Type                      
-===================================== ==================================
- :func:`migRing`                       one level multidemic sequence
-===================================== ==================================
-
-.. autofunction:: deap.tools.migRing(populations, n, selection[, replacement, migarray, sel_kargs, repl_kargs])
+.. autofunction:: deap.tools.migRing(populations, n, selection[, replacement, migarray])
 
 Statistics
 ----------

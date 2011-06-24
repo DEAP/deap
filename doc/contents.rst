@@ -8,4 +8,5 @@ DEAP's Master Index
 	api/index
 	tutorials/index
 	examples/index
+	whatsnew
 	bugs
