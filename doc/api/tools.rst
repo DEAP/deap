@@ -20,7 +20,7 @@ Here is a list of the implemented operators in DEAP.
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`   :func:`migRing` 
  :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`     ..             
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`        ..             
- :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutES`                             :func:`selSPEA2`        ..             
+ :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutESLogNormal`                    :func:`selSPEA2`        ..             
  :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`~deap.gp.mutUniform`               :func:`selRandom`       ..             
  :func:`~deap.gp.genRamped`   :func:`cxBlend`                             :func:`~deap.gp.mutTypedUniform`          :func:`selBest`         ..             
  ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedNodeReplacement`  :func:`selWorst`        ..             
@@ -63,7 +63,7 @@ Crossover
 
 .. autofunction:: deap.tools.cxBlend
 
-.. autofunction:: deap.tools.cxESBlend(ind1, ind2, alpha[, minstrategy])
+.. autofunction:: deap.tools.cxESBlend
 
 .. autofunction:: deap.tools.cxESTwoPoints
 
@@ -88,7 +88,7 @@ Mutation
 
 .. autofunction:: deap.tools.mutFlipBit
 
-.. autofunction:: deap.tools.mutES(individual, indpb[, minstrategy])
+.. autofunction:: deap.tools.mutESLogNormal
 
 .. autofunction:: deap.gp.mutUniform
 
