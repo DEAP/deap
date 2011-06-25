@@ -15,13 +15,13 @@ be closer to a bag than a set? Lets make our individuals inherit from the
     creator.create("Individual", set, fitness=creator.FitnessMulti)
 
 That's it. You now have individuals that are in fact sets, they have the usual
-attribute :attr:`fitness` that shall contain an individual. The fitness is a
+attribute :attr:`fitness`. The fitness is a
 minimization of the first objective (the weight of the bag) and a maximization
 of the second objective (the value of the bag). We will now create a
 dictionary of 100 random items to map the values and weights. 
 ::
 
-    # The items' name is an integer, and value is a (weight, value) 2-uple
+    # The items' name is an integer, and value is a (weight, value) 2-tuple
     items = dict([(i, (random.randint(1, 10), random.uniform(0, 100))) for i in xrange(100)])
 
 We now need to initialize a population and the individuals therein. For this
@@ -37,11 +37,6 @@ sets can also be created with an input iterable.
 	# Structure initializers
 	toolbox.register("individual", tools.initRepeat, creator.Individual, n=30)
 	toolbox.register("population", tools.initRepeat, list)
-
-A population of 100 individuals is now initialized with 
-::
-
-    pop = toolbox.population(n=100)
     
 Voilà! The *last* thing to do is to define our evaluation function.
 ::
@@ -99,7 +94,7 @@ algorithm and the SPEA-II selection scheme.
 	toolbox.register("mutate", mutSet)
 	toolbox.register("select", tools.selSPEA2)
 	
-	pop = toolbox.population()
+	pop = toolbox.population(n=MU)
 	hof = tools.ParetoFront()
 	stats = tools.Statistics(lambda ind: ind.fitness.values)
 	stats.register("Avg", tools.mean)
@@ -107,10 +102,10 @@ algorithm and the SPEA-II selection scheme.
 	stats.register("Min", min)
 	stats.register("Max", max)
 	
-	algorithms.eaMuPlusLambda(toolbox, pop, 50, 100, 0.7, 0.2, 50, stats, hof)
+	algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, CXPB, MUTPB, MAXGEN, stats, hof)
 
 Finally, a :class:`~deap.tools.ParetoFront` may be used to retrieve the best
-individuals of the evolution and a :class:`~deap.tools.Statistics` object is
-created for compiling four different statistics over the generations. The
-complete `Knapsack Genetic Algorithm
+non dominated individuals of the evolution and a
+:class:`~deap.tools.Statistics` object is created for compiling four different
+statistics over the generations. The complete `Knapsack Genetic Algorithm
 <http://deap.googlecode.com/hg/examples/ga_knapsack.py>`_ code is available.
