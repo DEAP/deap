@@ -45,6 +45,7 @@ Although those functions are obviously not already built-in in Python, it is ver
     def if_then_else(condition, out1, out2):
         out1() if condition() else out2()
     
+    class AntSimulator(object):
     # [...]
         def if_food_ahead(self, out1, out2):
             return partial(if_then_else, self.sense_food, out1, out2)
