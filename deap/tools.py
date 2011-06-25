@@ -791,10 +791,25 @@ def cxMessyOnePoint(ind1, ind2):
 # ES Crossovers                      #
 ######################################
 
-def cxESBlend(ind1, ind2, alpha, minstrategy=None):
-    """Execute a blend crossover on both, the individual and the strategy.
-    *minstrategy* defaults to None so that if it is not present, the minimal
-    strategy will be minus infinity.
+def cxESBlend(ind1, ind2, alpha):
+    """Execute a blend crossover on both, the individual and the strategy. The
+    individuals must have a :attr:`strategy` attribute. Adjustement of the
+    minimal strategy shall be done after the call to this function using a
+    decorator, for example ::
+    
+        def checkStrategy(minstrategy):
+            def decMinStrategy(func):
+                def wrapMinStrategy(*args, **kargs):
+                    children = func(*args, **kargs)
+                    for child in children:
+                        if child.strategy < minstrategy:
+                            child.strategy = minstrategy
+                    return children
+                return wrapMinStrategy
+            return decMinStrategy
+        
+        toolbox.register("mate", tools.cxEsBlend, alpha=ALPHA)
+        toolbox.decorate("mate", checkStrategy, minstrategy=0.01)
     """
     size = min(len(ind1), len(ind2))
     
@@ -811,10 +826,6 @@ def cxESBlend(ind1, ind2, alpha, minstrategy=None):
         s2 = ind2.strategy[indx]
         ind1.strategy[indx] = (1. - gamma) * s1 + gamma * s2
         ind2.strategy[indx] = gamma * s1 + (1. - gamma) * s2
-        if ind1.strategy[indx] < minstrategy:     # 4 < None = False
-            ind1.strategy[indx] = minstrategy
-        if ind2.strategy[indx] < minstrategy:
-            ind2.strategy[indx] = minstrategy
     
     return ind1, ind2
 
@@ -910,11 +921,20 @@ def mutFlipBit(individual, indpb):
 # ES Mutations                       #
 ######################################
 
-def mutES(individual, c, indpb, minstrategy=None):
+def mutESLogNormal(individual, c, indpb):
     """Mutate an evolution strategy according to its :attr:`strategy`
-    attribute. *minstrategy* defaults to None so that if it is not present,
-    the minimal strategy will be minus infinity. The strategy shall be the
-    same size as the individual. This is subject to change.
+    attribute as described in *Beyer and Schwefel, 2002, Evolution strategies
+    - A Comprehensive Introduction*. The strategy is first mutated using
+    :math:`\\boldsymbol{\sigma}_t = \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[
+    \\sigma_{t-1, 1}\\exp(\\tau \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n}
+    \\exp(\\tau \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
+    \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`.
+    A recommended choice is :math:`c=1` when using a :math:`(10, 100)`
+    evolution strategy.
+    
+    The strategy shall be the same size as the individual. This is subject to
+    change. In order to limit the strategy, use a decorator as shown in the
+    :func:`cxESBlend` function.
     """
     size = len(individual)
     t = c / math.sqrt(2. * math.sqrt(size))
@@ -924,11 +944,8 @@ def mutES(individual, c, indpb, minstrategy=None):
     
     for indx in xrange(size):
         if random.random() < indpb:
-            ni = random.gauss(0, 1)
-            individual.strategy[indx] *= math.exp(t0_n + t * ni)
-            if individual.strategy[indx] < minstrategy:     # 4 < None = False
-                individual.strategy[indx] = minstrategy
-            individual[indx] += individual.strategy[indx] * ni
+            individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
+            individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
     
     return individual,
     
