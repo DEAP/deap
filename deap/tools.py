@@ -930,7 +930,7 @@ def mutESLogNormal(individual, c, indpb):
     \\exp(\\tau \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
     \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`.
     A recommended choice is :math:`c=1` when using a :math:`(10, 100)`
-    evolution strategy.
+    evolution strategy (Beyer and Schwefel, 2002).
     
     The strategy shall be the same size as the individual. This is subject to
     change. In order to limit the strategy, use a decorator as shown in the
