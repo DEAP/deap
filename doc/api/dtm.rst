@@ -92,12 +92,15 @@ The TCP backend includes a launcher which works with SSH in order to start remot
     firstComputer.myNetwork.com slots=4
     otherComputer.myNetwork.com slots=6
     221.32.118.3 slots=4
+
+.. warning::
+    The hostnames / addresses you write in this file must be accessible and translable on every machine used. For instance, putting 'localhost' in this file among other remote hosts **will fail** because each host will try to bind ports for 'localhost' (which will fail, as this is not a network-accessible address).
     
 Then you can launch DTM with this file : ::
     
     python myScript.py --dtmTCPhosts=myHostFile
     
-.. warning::
+.. note::
     Do not forget to explicitly set the communication manager to **deap.dtm.commManagerTCP** : ::
         
         dtm.setOptions(communicationManager="deap.dtm.commManagerTCP")
