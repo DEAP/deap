@@ -27,8 +27,10 @@ import logging
 import sys
 import os
 
+PRETTY_PRINT_SUPPORT = False
 try:
     from lxml import etree
+    PRETTY_PRINT_SUPPORT = True
 except ImportError:
     try:
         import xml.etree.cElementTree as etree
@@ -443,7 +445,8 @@ class DtmControl(object):
         countThreads = sum([1 for th in threading.enumerate() if not th.daemon])
         if countThreads > 1:
             _logger.warning("[%s] There's more than 1 active thread (%i) at the exit.", str(self.workerId), threading.activeCount())
-
+        
+        
         if self.commThread.isRootWorker:
             if self.printExecSummary:
                 msgT = " Tasks execution times summary :\n"
@@ -457,8 +460,15 @@ class DtmControl(object):
         if self.traceMode:
             _logger.info("Writing log to the log files...")
             self.traceLock.acquire()
+            fstat = etree.SubElement(self.traceRoot, "finalStats")
+            for target, times in self.tasksStats.items():
+                etree.SubElement(fstat, "taskinfo", {"target" : str(target), "avg" : repr(times.rAvg * self.refTime), "stddev" : repr(times.rStdDev * self.refTime), "execcount" : str(times.execCount)})
+            
             flog = open(DTM_LOGDIR_DEFAULT_NAME + "/log" + str(self.workerId) + ".xml", 'w')
-            flog.write(etree.tostring(self.traceRoot, pretty_print=True))
+            if PRETTY_PRINT_SUPPORT:
+                flog.write(etree.tostring(self.traceRoot, pretty_print=True))
+            else:
+                flog.write(etree.tostring(self.traceRoot))
             flog.close()
             self.traceLock.release()
             
@@ -761,7 +771,7 @@ class DtmControl(object):
             This function must be called BEFORE ``start()``. It is also the user responsability to ensure that the same option is set on every worker.
 
         Currently, the supported options are :
-            * **communicationManager** : can be *mpi4py* (default), *pympi* (experimental and probably buggy because of the backend itself), or *multiprocTCP* (experimental)
+            * **communicationManager** : can be *deap.dtm.mpi4py* (default) or *deap.dtm.commManagerTCP*.
             * **loadBalancer** : currently only the default *PDB* is available.
             * **printSummary** : if set, DTM will print a task execution summary at the end (mean execution time of each tasks, how many tasks did each worker do, ...)
             * **setTraceMode** : if set, will enable a special DTM tracemode. In this mode, DTM logs all its activity in XML files (one by worker). Mainly for DTM debug purpose, but can also be used for profiling.
@@ -842,6 +852,7 @@ class DtmControl(object):
             self.traceLoadB = etree.SubElement(self.traceRoot, "loadBalancerLog")
             self.traceLock.release()
             self.commThread.setTraceModeOn(self.traceComm)
+            self.loadBalancer.setTraceModeOn(self.traceLoadB)
         
         if self.commThread.isRootWorker:
             
