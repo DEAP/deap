@@ -69,7 +69,7 @@ class DtmCommThread(AbstractDtmCommThread):
             
             b = MPI.COMM_WORLD.Isend([arrayBuf, MPI.CHAR], dest=dest, tag=self.msgSendTag)
             if self.traceMode:
-                etree.SubElement(self.traceTo, "msg", {"direc" : "out", "type" : str(msg.msgType), "otherWorker" : str(dest), "msgtag" : str(self.msgSendTag), "time" : str(time.time())})
+                etree.SubElement(self.traceTo, "msg", {"direc" : "out", "type" : str(msg.msgType), "otherWorker" : str(dest), "msgtag" : str(self.msgSendTag), "time" : repr(time.time())})
             
             self.msgSendTag += 1
             return b, arrayBuf
@@ -124,7 +124,7 @@ class DtmCommThread(AbstractDtmCommThread):
                     countRecv += 1
                     dataS = cPickle.loads(reqTuple[0].tostring())
                     if self.traceMode:
-                        etree.SubElement(self.traceTo, "msg", {"direc" : "in", "type" : str(dataS.msgType), "otherWorker" : str(dataS.senderWid), "msgtag" : str(reqTuple[2]), "time" : str(time.time())})
+                        etree.SubElement(self.traceTo, "msg", {"direc" : "in", "type" : str(dataS.msgType), "otherWorker" : str(dataS.senderWid), "msgtag" : str(reqTuple[2]), "time" : repr(time.time())})
                     self.recvQ.put(dataS)
                     lRecvWaiting[i] = None
                     recvSomething = True

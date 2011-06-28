@@ -22,6 +22,15 @@ import time
 import copy
 import logging
 
+try:
+    from lxml import etree
+except ImportError:
+    try:
+        import xml.etree.cElementTree as etree
+    except ImportError:
+        # Python 2.5
+        import xml.etree.ElementTree as etree
+
 _logger = logging.getLogger("dtm.loadBalancing")
 
 
@@ -64,6 +73,7 @@ class DtmLoadBalancer(object):
         self.dLock = threading.Lock()
         self.tmpRecvJob = False
         self.localRandom = randomizer
+        self.xmlLogger = None
 
         for w in workersIterator:
             self.ws[w] = DtmLoadInfoContainer({'loadCurrentExec' : 0.,
@@ -78,7 +88,10 @@ class DtmLoadBalancer(object):
         self.sendDelayMultiplier = DTM_SEND_TASK_DELAY*float(len(self.ws))**0.5
         self.lastTaskSend = time.time() - self.sendDelayMultiplier
         self.lastQuerySend = time.time()
-        
+    
+    def setTraceModeOn(self, xmlLogger):
+        self.xmlLogger = xmlLogger
+    
     def getNodesDict(self):
         return self.ws
 
@@ -108,13 +121,17 @@ class DtmLoadBalancer(object):
             print("ERROR : Tentative to delete an already received or non-existant ACK!", self.ws[fromWorker].ackWaiting, ackN)
 
     def takeDecision(self):
-    #print("TAKE DECISION CALLED ON WORKER " + str(self.wid) + " with thread " + str(threading.currentThread()))
-
         MAX_PROB = 1.
         MIN_PROB = 0.00
 
         sendTasksList = []
         sendNotifList = []
+        
+        if not self.xmlLogger is None:
+            decisionLog = etree.SubElement(self.xmlLogger, "decision", {"time" : repr(time.time()), 
+                                                                        "selfLoad" : repr(self.ws[self.wid].loadCurrentExec)+","+repr(self.ws[self.wid].loadExecQ)+","+repr(self.ws[self.wid].loadWaitingRestartQ)+","+repr(self.ws[self.wid].loadWaitingQ)})
+            for workerId in self.ws:
+                etree.SubElement(decisionLog, "workerKnownState", {"load" : repr(self.ws[workerId].loadCurrentExec)+","+repr(self.ws[workerId].loadExecQ)+","+repr(self.ws[workerId].loadWaitingRestartQ)+","+repr(self.ws[workerId].loadWaitingQ)})
 
         listLoads = self.ws.values()
         self.totalExecLoad, self.totalEQueueLoad, self.totalWaitingRQueueLoad, self.totalWaitingQueueLoad = 0., 0., 0., 0.
@@ -131,17 +148,19 @@ class DtmLoadBalancer(object):
         selfLoad = self.ws[self.wid].sumRealLoad()
         diffLoad = selfLoad - avgLoad
 
-        #if sum(self.ws[self.wid][:3]) == 0.:
-      #print(sum([len(x[6]) for x in self.ws.values()]))
-        #print(str(time.clock()) + " ["+str(self.wid)+"] has a load of " + str(sum(self.ws[self.wid][:3])) + " (avg : "+str(avgLoad)+")")
 
         listPossibleSendTo = list(filter(lambda d: d[1].infoUpToDate and d[1].sumRealLoad() > avgLoad, self.ws.items()))
         if selfLoad == 0 and len(listPossibleSendTo) > 0 and avgLoad != 0 and self.ws[self.wid].loadWaitingRestartQ < DTM_RESTART_QUEUE_BLOCKING_FROM:
             # Algorithme d'envoi de demandes de taches
             self.lastQuerySend = time.time()
+            txtList = ""
             for worker in listPossibleSendTo:
                 sendNotifList.append(worker[0])
+                txtList +=str(worker[0])+","
                 self.ws[worker[0]].infoUpToDate = False
+                
+            if not self.xmlLogger is None:
+                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendrequest", "destination":txtList})
 
            
         if self.ws[self.wid].loadExecQ > 0 and diffLoad > -stdDevLoad and avgLoad != 0 and stdDevLoad != 0:
@@ -163,6 +182,9 @@ class DtmLoadBalancer(object):
                     continue
                 scores[i] = (worker, scoreFunc(self.ws[worker].sumRealLoad()))
                 i += 1
+            
+            if not self.xmlLogger is None:
+                 etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "checkavail", "destination":str(scores)})
             
             while diffLoad > 0.00000001 and len(scores) > 0 and self.ws[self.wid].loadExecQ > 0.:
                 selectedIndex = self.localRandom.randint(0,len(scores)-1)
@@ -201,6 +223,9 @@ class DtmLoadBalancer(object):
                     sendTasksList.append((widToSend, tasksObj, ackNbr))
 
                 del scores[selectedIndex]       # On s'assure de ne pas reprendre le meme worker
+                        
+            if not self.xmlLogger is None:
+                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendtasks", "destination":str([b[0] for b in sendTasksList]), "tasksinfo" : str([len(b[1]) for b in sendTasksList])})
                 
             self.lastTaskSend = time.time()
         return sendNotifList, sendTasksList

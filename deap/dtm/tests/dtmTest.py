@@ -79,6 +79,6 @@ def main():
     print("\tMain resumed after " + str(time.time()-befTime))
     return 0
 
-
+#dtm.setOptions(setTraceMode=True)
 dtm.start(main)
 
