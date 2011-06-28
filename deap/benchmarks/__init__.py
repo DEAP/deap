@@ -175,6 +175,9 @@ def schwefel(individual):
     
     :math:`f_{\\text{Schwefel}}(\mathbf{x}) = 418.9828872724339\cdot N - \
             \sum_{i=1}^N\,x_i\sin\\left(\sqrt{|x_i|}\\right)`
+            
+    .. plot:: _scripts/schwefel.py
+        :width: 67 %
     """    
     N = len(individual)
     return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
@@ -190,6 +193,30 @@ def himmelblau(individual):
     """
     return (individual[0] * individual[0] + individual[1] - 11)**2 + \
         (individual[0] + individual[1] * individual[1] - 7)**2,
+
+def shekel(individual, a, c):
+    """The Shekel multimodal function can have any number of maxima. The number
+    of maxima is given by the length of any of the arguments *a* or *c*, *a*
+    is a matrix of size :math:`M\\times N`, where *M* is the number of maxima
+    and *N* the number of dimensions and *c* is a :math:`M\\times 1` vector.
+    The matrix :math:`\\mathcal{A}` can be seen as the position of the maxima
+    and the vector :math:`\\mathbf{c}`, the width of the maxima.
+    
+    :math:`f_\\text{Shekel}(\mathbf{x}) = \\sum_{i = 1}^{M} \\frac{1}{c_{i} + 
+    \\sum_{j = 1}^{N} (x_{j} - a_{ij})^2 }`
+    
+    The following figure uses
+    
+    :math:`\\mathcal{A} = \\begin{bmatrix} 0.5 & 0.5 \\\\ 0.25 & 0.25 \\\\ 
+    0.25 & 0.75 \\\\ 0.75 & 0.25 \\\\ 0.75 & 0.75 \\end{bmatrix}` and
+    :math:`\\mathbf{c} = \\begin{bmatrix} 0.002 \\\\ 0.005 \\\\ 0.005
+    \\\\ 0.005 \\\\ 0.005 \\end{bmatrix}`, thus defining 5 maximums in
+    :math:`\\mathbb{R}^2`.
+    
+    .. plot:: _scripts/shekel.py
+        :width: 67 %
+    """
+    return sum((1. / (c[i] + sum((x - a[i][j])**2 for j, x in enumerate(individual)))) for i in range(len(c))),
 
 # Multiobjectives
 def kursawe(individual):
