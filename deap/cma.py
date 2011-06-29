@@ -151,7 +151,7 @@ class CMAStrategy(object):
         
         hsig = float((numpy.linalg.norm(self.ps) / 
                 math.sqrt(1. - (1. - self.cs)**(2. * (self.update_count + 1.)) / self.chiN)
-                < (1.4 + 2. / (self.dim + 1.)))
+                < (1.4 + 2. / (self.dim + 1.))))
 
         self.update_count += 1
                
