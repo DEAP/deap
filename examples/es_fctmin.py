@@ -27,10 +27,10 @@ from deap import creator
 from deap import tools
 
 IND_SIZE = 30
-MIN_VALUE = -3
-MAX_VALUE = 3
+MIN_VALUE = 4
+MAX_VALUE = 5
 MIN_STRATEGY = 0.5
-MAX_STRATEGY = 2
+MAX_STRATEGY = 3
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode="d", fitness=creator.FitnessMin, strategy=None)
@@ -59,7 +59,7 @@ toolbox.register("individual", generateES, creator.Individual, creator.Strategy,
     IND_SIZE, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("mate", tools.cxESBlend, alpha=0.1)
-toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.1)
+toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.03)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", benchmarks.sphere)
 

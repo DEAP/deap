@@ -924,7 +924,10 @@ def mutFlipBit(individual, indpb):
 def mutESLogNormal(individual, c, indpb):
     """Mutate an evolution strategy according to its :attr:`strategy`
     attribute as described in *Beyer and Schwefel, 2002, Evolution strategies
-    - A Comprehensive Introduction*. The strategy is first mutated using
+    - A Comprehensive Introduction*. The individual is first mutated by a
+    normal distribution of mean 0 and standard deviation of
+    :math:`\\boldsymbol{\sigma}_{t-1}` then the strategy is mutated according
+    to an extended log normal rule, 
     :math:`\\boldsymbol{\sigma}_t = \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[
     \\sigma_{t-1, 1}\\exp(\\tau \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n}
     \\exp(\\tau \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
@@ -932,9 +935,10 @@ def mutESLogNormal(individual, c, indpb):
     A recommended choice is :math:`c=1` when using a :math:`(10, 100)`
     evolution strategy (Beyer and Schwefel, 2002).
     
-    The strategy shall be the same size as the individual. This is subject to
-    change. In order to limit the strategy, use a decorator as shown in the
-    :func:`cxESBlend` function.
+    The strategy shall be the same size as the individual. Each index
+    (strategy and attribute) is mutated with probability *indpb*. In order to
+    limit the strategy, use a decorator as shown in the :func:`cxESBlend`
+    function.
     """
     size = len(individual)
     t = c / math.sqrt(2. * math.sqrt(size))
@@ -944,8 +948,8 @@ def mutESLogNormal(individual, c, indpb):
     
     for indx in xrange(size):
         if random.random() < indpb:
-            individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
             individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
+            individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
     
     return individual,
     
@@ -955,8 +959,9 @@ def mutESLogNormal(individual, c, indpb):
 ######################################
 
 def selRandom(individuals, k):
-    """Select *k* individuals at random from the input *individuals*. The
-    list returned contains references to the input *individuals*.
+    """Select *k* individuals at random from the input *individuals* with
+    replacement. The list returned contains references to the input
+    *individuals*.
 
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
