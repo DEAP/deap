@@ -149,10 +149,10 @@ class CMAStrategy(object):
              * numpy.dot(self.B, (1. / self.diagD) \
                           * numpy.dot(self.B.T, c_diff))
         
-        hsig = numpy.linalg.norm(self.ps) \
-               / sqrt(1 - (1 - self.cs)**(2 * self.update_count)) \
-               / self.chiN < 1.4 + 2 / (self.dim + 1)
-               
+        hsig = float((numpy.linalg.norm(self.ps) / 
+                sqrt(1. - (1. - self.cs)**(2. * (self.update_count + 1.)) / self.chiN)
+                < (1.4 + 2. / (self.dim + 1.))))
+
         self.update_count += 1
                
         self.pc = (1 - self.cc) * self.pc + hsig \

@@ -91,7 +91,7 @@ produce respectively initialized individuals and populations.
 Again, looking a little closer shows that their is no magic. The registration
 of tools in the toolbox only associates an *alias* to an already existing
 function and freezes part of its arguments. This allows to call the alias as
-if the majority of the (or every) arguments has already been given. For
+if the majority of the (or every) arguments have already been given. For
 example, the :meth:`attr_bool` generator is made from the
 :func:`~random.randint` that takes two arguments *a* and *b*, with ``a <= n <=
 b``, where *n* is the returned integer. Here, we fix ``a = 0`` and ``b = 1``.
