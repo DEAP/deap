@@ -765,9 +765,9 @@ def cxSimulatedBinary(ind1, ind2, nu):
 ######################################
 
 def cxMessyOnePoint(ind1, ind2):
-    """Execute a one point crossover will mostly change the individuals size.
-    This operation apply on an :class:`Individual` composed of a list of
-    attributes and act as follow ::
+    """Execute a one point crossover that will in most cases change the
+    individuals size. This operation apply on an individual composed
+    of a list of attributes and act as follow ::
 
         >>> ind1 = [A(1), ..., A(i), ..., A(m)] #doctest: +SKIP
         >>> ind2 = [B(1), ..., B(j), ..., B(n)]
@@ -809,7 +809,7 @@ def cxESBlend(ind1, ind2, alpha):
             return decMinStrategy
         
         toolbox.register("mate", tools.cxEsBlend, alpha=ALPHA)
-        toolbox.decorate("mate", checkStrategy, minstrategy=0.01)
+        toolbox.decorate("mate", checkStrategy(minstrategy=0.01))
     """
     size = min(len(ind1), len(ind2))
     
