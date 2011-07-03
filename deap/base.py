@@ -99,9 +99,8 @@ class Fitness(object):
        When comparing fitness values that are **minimized**, ``a > b`` will
        return :data:`True` if *a* is **smaller** than *b*.
     """
-    __metaclass__ = abc.ABCMeta
     
-    weights = abc.abstractproperty()
+    weights = None
     """The weights are used in the fitness comparison. They are shared among
     all fitnesses of the same type. When subclassing ``Fitness``, ``weights``
     must be defined as a tuple where each element is associated to an 
@@ -110,10 +109,10 @@ class Fitness(object):
 
     .. note::
         If weights is not defined during subclassing, the following error will 
-        occur at instantiation of a subclass fitness object : 
+        occur at instantiation of a subclass fitness object: 
         
-        ``TypeError: Can't instantiate abstract class Fitness[...] with abstract 
-        methods weights``
+        ``TypeError: Can't instantiate abstract <class Fitness[...]> with
+        abstract attribute weights.``
     """
     
     wvalues = ()
@@ -126,6 +125,10 @@ class Fitness(object):
     """
     
     def __init__(self, values=()):
+        if self.weights is None:
+            raise TypeError("Can't instantiate abstract %r with abstract "
+                "attribute weights." % (self.__class__))
+        
         if len(values) > 0:
             self.values = values
         
