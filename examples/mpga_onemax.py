@@ -25,39 +25,38 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 from deap import algorithms
 from deap import base
 from deap import creator
-from deap import operators
-from deap import toolbox
+from deap import tools
 
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("attr_bool", random.randint, 0, 1)
+toolbox.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", toolbox.initRepeat, creator.Individual, tools.attr_bool, 100)
-tools.register("population", toolbox.initRepeat, list, tools.individual)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
     return sum(individual),
 
-tools.register("evaluate", evalOneMax)
-tools.register("mate", operators.cxTwoPoints)
-tools.register("mutate", operators.mutFlipBit, indpb=0.05)
-tools.register("select", operators.selTournament, tournsize=3)
+toolbox.register("evaluate", evalOneMax)
+toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("select", tools.selTournament, tournsize=3)
 
 # Process Pool of 4 workers
 pool = multiprocessing.Pool(processes=4)
-tools.register("map", pool.map)
+toolbox.register("map", pool.map)
 
 if __name__ == "__main__":
     random.seed(64)
     
-    pop = tools.population(n=300)
-    hof = operators.HallOfFame(1)
+    pop = toolbox.population(n=300)
+    hof = tools.HallOfFame(1)
     
-    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
