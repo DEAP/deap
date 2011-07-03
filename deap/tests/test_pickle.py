@@ -11,7 +11,7 @@ sys.path.append("..")
 import creator
 import base
 import gp
-import toolbox
+import tools
 
 def func():
     return "True"
@@ -23,7 +23,7 @@ class Pickling(unittest.TestCase):
         creator.create("IndList", list, fitness=creator.FitnessMax)
         creator.create("IndArray", array.array,  typecode='f', fitness=creator.FitnessMax)
         creator.create("IndTree", base.Tree, fitness=creator.FitnessMax)
-        self.toolbox = toolbox.Toolbox()
+        self.toolbox = base.Toolbox()
         self.toolbox.register("func", func)
         self.toolbox.register("lambda_func", lambda: "True")
     
@@ -91,7 +91,7 @@ class Pickling(unittest.TestCase):
         func_l = pickle.loads(func_s)
         
         self.failUnlessEqual(self.toolbox.lambda_func(), func_l())
-    
+
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)
     unittest.TextTestRunner(verbosity=2).run(suite)
