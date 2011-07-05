@@ -11,7 +11,7 @@ Algorithms
 
 .. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
 
-.. autofunction:: deap.algorithms.varMuLambda
+.. autofunction:: deap.algorithms.varLambda
 
 .. autofunction:: deap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame])
 

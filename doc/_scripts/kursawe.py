@@ -24,15 +24,17 @@ for i in xrange(X.shape[0]):
     for j in xrange(X.shape[1]):
         Z1[i,j],  Z2[i,j] = benchmarks.kursawe((X[i,j],Y[i,j]))
         
-fig = plt.figure(figsize=plt.figaspect(0.5))
+fig = plt.figure(figsize=(12,5))
+
 ax = fig.add_subplot(1, 2, 1, projection='3d')
 ax.plot_surface(X, Y, Z1, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
 plt.xlabel("x")
 plt.ylabel("y")
 
-ax = fig.add_subplot(1, 2, 2, projection='3d', elev=60)
+ax = fig.add_subplot(1, 2, 2, projection='3d')
 ax.plot_surface(X, Y, Z2, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
 plt.xlabel("x")
 plt.ylabel("y")
 
+plt.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
 plt.show()
