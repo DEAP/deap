@@ -20,7 +20,6 @@ virtual :class:`~deap.base.Fitness` class used as base class, for the fitness
 member of any individual.
 """
 
-import abc
 import copy
 import operator
 import functools
