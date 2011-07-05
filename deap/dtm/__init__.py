@@ -20,7 +20,7 @@ __author__ = "Marc-Andre Gardner"
 __version__ = "0.2"
 __revision__ = "0.2.1"
 
-from deap.dtm.taskmanager import Control
+from deap.dtm.manager import Control
 
 _dtmObj = Control()
 
