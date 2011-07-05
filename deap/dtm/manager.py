@@ -52,11 +52,10 @@ MSG_NODES_INFOS = 2
 
 DTM_LOGDIR_DEFAULT_NAME = "DtmLog"
             
-
-def erf(x):
-    try:    # math.erf() is implemented only since Python 2.7
-        return math.erf(x)
-    except AttributeError:
+try:
+    from math import erf
+except ImportError:
+    def erf(x):
         # See http://stackoverflow.com/questions/457408/is-there-an-easily-available-implementation-of-erf-for-python
         # save the sign of x
         sign = 1
