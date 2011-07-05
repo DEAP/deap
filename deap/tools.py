@@ -302,14 +302,15 @@ class Statistics(object):
     exists. When created the statistics object receives a *key* argument that
     is used to get the required data, if not provided the *key* argument
     defaults to the identity function. A statistics object can be represented
-    as a 4 dimensional matrix. Along the first axis are independent statistics
-    objects that are used on different collections given this index in the
-    :meth:`update` method. The second axis is the function it-self, each
-    element along the second axis (indexed by their name) will represent a
-    different function. The third axis is the accumulator of statistics. each
-    time the update function is called the new statistics are added using the
-    registered functions at the end of this axis. The fourth axis is used when
-    the entered data is an iterable (for example a multiobjective fitness).
+    as a 4 dimensional matrix. Along the first axis (wich length is given by
+    the *n* argument) are independent statistics objects that are used on
+    different collections given this index in the :meth:`update` method. The
+    second axis is the function it-self, each element along the second axis
+    (indexed by their name) will represent a different function. The third
+    axis is the accumulator of statistics. each time the update function is
+    called the new statistics are added using the registered functions at the
+    end of this axis. The fourth axis is used when the entered data is an
+    iterable (for example a multiobjective fitness).
     
     Data can be retrieved by different means in a statistics object. One can
     use directly the registered function name with an *index* argument that
@@ -342,7 +343,7 @@ class Statistics(object):
         >>> s[1]["Mean"][1]
         [65]
     
-    Finnaly, the fourth dimension is used when stats are needed on lists of
+    Finally, the fourth dimension is used when stats are needed on lists of
     lists. The stats are computed on the matching indices of each list.
     ::
     
