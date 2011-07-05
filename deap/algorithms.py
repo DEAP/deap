@@ -33,9 +33,11 @@ _logger = logging.getLogger("deap.algorithms")
 def varSimple(toolbox, population, cxpb, mutpb):
     """Part of the :func:`~deap.algorithmes.eaSimple` algorithm applying only
     the variation part (crossover followed by mutation). The modified 
-    individuals have their fitness invalidated.
+    individuals have their fitness invalidated. The individuals are not cloned
+    so there can be twice a reference to the same individual.
     
-    This function is not responsible for duplicating the individuals.
+    This function expects :meth:`toolbox.mate` and :meth:`toolbox.mutate`
+    aliases to be registered in the toolbox.
     """
     # Apply crossover and mutation on the offsprings
     for ind1, ind2 in zip(population[::2], population[1::2]):
@@ -75,6 +77,9 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
             evaluate(offsprings)
             population = offsprings
     
+    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
+    registered in the toolbox.
     """
     _logger.info("Start of evolution")
 
@@ -125,14 +130,19 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     _logger.info("End of (successful) evolution")
     return population
 
-def varMuLambda(toolbox, population, lambda_, cxpb, mutpb):
+def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     """Part of the :func:`~deap.algorithms.eaMuPlusLambda` and
     :func:`~deap.algorithms.eaMuCommaLambda` algorithms that produce the 
     lambda new individuals. The modified individuals have their fitness 
-    invalidated.
+    invalidated. The individuals are not cloned so there can be twice a
+    reference to the same individual.
     
-    This function is not responsible for duplicating the individuals.
+    This function expects :meth:`toolbox.mate` and :meth:`toolbox.mutate`
+    aliases to be registered in the toolbox.
     """
+    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
+        "probabilities must be smaller or equal to 1.0.")
+        
     offsprings = []
     nb_offsprings = 0
     while nb_offsprings < lambda_:
@@ -179,13 +189,15 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
             evaluate(offsprings)
             population = select(population + offsprings)
     
+    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
+    registered in the toolbox.
+    
     .. note::
        Both produced individuals from a crossover are put in the offspring
        pool. 
     
     """
-    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
-        "probabilities must be smaller or equal to 1.0.")
     
     _logger.info("Start of evolution")
 
@@ -207,7 +219,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         _logger.info("Evolving generation %i", gen)
         
         # Variate the population
-        offsprings = varMuLambda(toolbox, population, lambda_, cxpb, mutpb)
+        offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
@@ -251,13 +263,15 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
             evaluate(offsprings)
             population = select(offsprings)
     
+    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
+    registered in the toolbox.
+    
     .. note::
        Both produced individuals from the crossover are put in the offspring
        pool.
     """
-    assert lambda_ >= mu, "lambda must be greater or equal to mu." 
-    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
-        "probabilities must be smaller or equal to 1.0.")
+    assert lambda_ >= mu, "lambda must be greater or equal to mu."
         
     _logger.info("Start of evolution")
 
@@ -279,7 +293,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         _logger.info("Evolving generation %i", gen)
         
         # Variate the population
-        offsprings = varMuLambda(toolbox, population, lambda_, cxpb, mutpb)
+        offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
@@ -311,12 +325,15 @@ def varSteadyState(toolbox, population):
     """Part of the :func:`~deap.algorithms.eaSteadyState` algorithm 
     that produce the new individual by crossover of two randomly selected 
     parents and mutation on one randomly selected child. The modified 
-    individual has its fitness invalidated.
+    individual has its fitness invalidated. The individuals are not cloned so
+    there can be twice a reference to the same individual.
     
-    This function is not responsible for duplicating the individuals.
+    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate` and
+    :meth:`toolbox.select` aliases to be
+    registered in the toolbox.
     """
     # Select two individuals for crossover
-    p1, p2 = toolbox.select(population, 2)
+    p1, p2 = random.sample(population, 2)
     p1 = toolbox.clone(p1)
     p2 = toolbox.clone(p2)
     toolbox.mate(p1, p2)
@@ -325,13 +342,17 @@ def varSteadyState(toolbox, population):
     child = random.choice((p1, p2))
     toolbox.mutate(child)
     
-    return child
+    return child,
 
 def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
     """The steady-state evolutionary algorithm. Every generation, a single new
     individual is produced and put in the population producing a population of
     size :math:`lambda+1`, then :math:`lambda` individuals are kept according
     to the selection operator present in the toolbox.
+    
+    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
+    registered in the toolbox.
     """
     _logger.info("Start of evolution")
     
@@ -349,7 +370,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
         _logger.info("Evolving generation %i", gen)
         
         # Variate the population
-        child = varSteadyState(toolbox, population)
+        child, = varSteadyState(toolbox, population)
         
         # Evaluate the produced child
         child.fitness.values = toolbox.evaluate(child)
