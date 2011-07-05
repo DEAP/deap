@@ -22,7 +22,7 @@ except ImportError:
         import xml.etree.ElementTree as etree
 
 from deap.dtm.dtmTypes import *
-from deap.dtm.abstractCommManager import AbstractDtmCommThread
+from deap.dtm.abstractCommManager import AbstractCommThread
 
 _logger = logging.getLogger("dtm.communication")
 
@@ -31,10 +31,10 @@ DTM_MPI_MAX_LATENCY = 0.01
 DTM_CONCURRENT_RECV_LIMIT = 1000
 DTM_CONCURRENT_SEND_LIMIT = 1000
 
-class DtmCommThread(AbstractDtmCommThread):
+class CommThread(AbstractCommThread):
 
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):        
-        AbstractDtmCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
+        AbstractCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
     
     @property
     def poolSize(self):

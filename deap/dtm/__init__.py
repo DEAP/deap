@@ -20,9 +20,9 @@ __author__ = "Marc-Andre Gardner"
 __version__ = "0.2"
 __revision__ = "0.2.1"
 
-from deap.dtm.taskmanager import DtmControl
+from deap.dtm.taskmanager import Control
 
-_dtmObj = DtmControl()
+_dtmObj = Control()
 
 setOptions = _dtmObj.setOptions
 start = _dtmObj.start
@@ -38,5 +38,5 @@ waitForAll = _dtmObj.waitForAll
 testAllAsync = _dtmObj.testAllAsync
 getWorkerId = _dtmObj.getWorkerId
 
-# DtmControl shall not be imported that way
-del DtmControl
+# Control shall not be imported that way
+del Control

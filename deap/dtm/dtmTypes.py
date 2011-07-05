@@ -29,7 +29,7 @@ DTM_WAIT_SOME = 1
 DTM_WAIT_ALL = 2
 DTM_WAIT_ANY = 3
 
-class DtmTaskContainer(object):
+class TaskContainer(object):
     """
     Contains all the information about a task (running or not)
     """
@@ -57,7 +57,7 @@ class DtmTaskContainer(object):
     def __lt__(self, other):
         return self.creationTime < other.creationTime
 
-class DtmResultContainer(object):
+class ResultContainer(object):
     """
     Used to store the result of a task so it can be sent
     """
@@ -78,7 +78,7 @@ class DtmResultContainer(object):
         for t in state:
             self.__setattr__(t, state[t])
 
-class DtmExceptedResultContainer(object):
+class ExceptedResultContainer(object):
     """
     Keep the information of a result waited on the task creator side
     """
@@ -99,7 +99,7 @@ class DtmExceptedResultContainer(object):
         for t in state:
             self.__setattr__(t, state[t])
             
-class DtmWaitInfoContainer(object):
+class WaitInfoContainer(object):
     """
     Keep a track on the pending child tasks of a parent task.
     """
@@ -108,7 +108,7 @@ class DtmWaitInfoContainer(object):
                 'waitBeginningTime', # Time when the thread started waiting (0 if not)
                 'tasksWaitingCount', # How many tasks are we waiting on
                 'waitingMode', # DTM_WAIT_* : waiting mode (None, One, Any, All)
-                'rWaitingDict')     # List of DtmExceptedResultContainer, key : the first task ID
+                'rWaitingDict')     # List of ExceptedResultContainer, key : the first task ID
     def __init__(self, **kwargs):
         self.__setstate__(kwargs)  
     def __getstate__(self):
@@ -120,7 +120,7 @@ class DtmWaitInfoContainer(object):
         for t in state:
             self.__setattr__(t, state[t])
 
-class DtmStatsContainer(object):
+class StatsContainer(object):
     """
     Contains stats about a target
     """
@@ -139,17 +139,17 @@ class DtmStatsContainer(object):
         for t in state:
             self.__setattr__(t, state[t])
 
-class DtmMessageContainer(object):
+class MessageContainer(object):
     """
     Generic message container
     If msgType == DTM_MSG_EXIT:
         msg = (Exit code, exit message)
     If msgType == DTM_MSG_TASK:
-        msg = [DtmTaskContainer, DtmTaskContainer, DtmTaskContainer, ...]
+        msg = [TaskContainer, TaskContainer, TaskContainer, ...]
     If msgType == DTM_MSG_REQUEST_TASK:
         msg = None
     If msgType == DTM_MSG_RESULT:
-        msg = [DtmResultContainer, DtmResultContainer, DtmResultContainer, ...]
+        msg = [ResultContainer, ResultContainer, ResultContainer, ...]
     If msgType == DTM_MSG_ACK_RECEIVED_TASK:
         msg = AckId
     """

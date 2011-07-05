@@ -21,6 +21,7 @@ import random
 import sys
 
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+import random
 
 from deap import algorithms
 from deap import base
