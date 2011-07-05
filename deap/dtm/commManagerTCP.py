@@ -21,7 +21,7 @@ import sys
 import os
 import socket
 import subprocess
-from deap.dtm.abstractCommManager import AbstractDtmCommThread
+from deap.dtm.abstractCommManager import AbstractCommThread
 
 DTM_TCP_MIN_LATENCY = 0.005
 DTM_TCP_MAX_LATENCY = 0.01
@@ -30,10 +30,10 @@ DTM_CONCURRENT_SEND_LIMIT = 1000
 
 BASE_COMM_PORT = 10011
 
-class DtmCommThread(AbstractDtmCommThread):
+class CommThread(AbstractCommThread):
     
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):
-        AbstractDtmCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
+        AbstractCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
 
         self.props = dict(dtmTCPGlobalLaunch = True, 
                         dtmTCPLocalLaunch = False, 

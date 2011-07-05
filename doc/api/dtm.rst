@@ -60,10 +60,10 @@ Functions documentation
 -----------------------
 .. module:: deap.dtm
 
-.. autoclass:: deap.dtm.taskmanager.DtmControl
+.. autoclass:: deap.dtm.taskmanager.Control
     :members:
 
-.. autoclass:: deap.dtm.taskmanager.DtmAsyncResult
+.. autoclass:: deap.dtm.taskmanager.AsyncResult
     :members:
         
         
@@ -174,7 +174,7 @@ Exceptions
 
 When an Python exception occurs during a task execution, DTM catchs it (and try to run another task on this worker). This exception is then raised in the *parent task*. If there is no such task (the task where the exception occurs is the root task), then it is thrown and DTM stops its execution.
 
-The moment when the exception will be raised in the parent tasks depends on the child task type : if it is a synchronous call (like :func:`~deap.dtm.taskmanager.DtmControl.apply` or :func:`~deap.dtm.taskmanager.DtmControl.map`), it is raised when the parent awake (i.e. as if it has been raised by the DTM function itself). If it is an asynchronous call (like :func:`~deap.dtm.taskmanager.DtmControl.apply_async` or :func:`~deap.dtm.taskmanager.DtmControl.map_async`), the exception is raised when the parent task performs a :func:`~deap.dtm.taskmanager.DtmAsyncResult.get` on the :class:`~deap.dtm.taskmanager.DtmAsyncResult` object. Also, the :func:`~deap.dtm.taskmanager.DtmAsyncResult.successful` will return *False* if an exception occured, without raising it.
+The moment when the exception will be raised in the parent tasks depends on the child task type : if it is a synchronous call (like :func:`~deap.dtm.taskmanager.Control.apply` or :func:`~deap.dtm.taskmanager.Control.map`), it is raised when the parent awake (i.e. as if it has been raised by the DTM function itself). If it is an asynchronous call (like :func:`~deap.dtm.taskmanager.Control.apply_async` or :func:`~deap.dtm.taskmanager.Control.map_async`), the exception is raised when the parent task performs a :func:`~deap.dtm.taskmanager.AsyncResult.get` on the :class:`~deap.dtm.taskmanager.AsyncResult` object. Also, the :func:`~deap.dtm.taskmanager.AsyncResult.successful` will return *False* if an exception occured, without raising it.
 
 .. note::
     When DTM catches an exception, it outputs a warning on the standard error output stating the exception type and arguments. This warning does not mean that the exception has been raised in the parent task (actually, in some situations, it may take a lot of time if every workers are busy); it is logged only for information purpose.

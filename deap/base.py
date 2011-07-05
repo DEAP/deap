@@ -157,7 +157,7 @@ class Fitness(object):
         lexically the fitnesses, this method returns :data:`True` if this
         fitness is dominated by the *other* fitness and :data:`False` otherwise.
         The weights are used to compare minimizing and maximizing fitnesses. If
-        there is more fitness values than weights, the las weight get repeated
+        there is more fitness values than weights, the last weight get repeated
         until the end of the comparison.
         """
         not_equal = False

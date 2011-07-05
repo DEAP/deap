@@ -2,7 +2,7 @@ import threading
 
 from abc import ABCMeta, abstractmethod, abstractproperty
 
-class AbstractDtmCommThread(threading.Thread):
+class AbstractCommThread(threading.Thread):
     __metaclass__ = ABCMeta
 
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):

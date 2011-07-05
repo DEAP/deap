@@ -38,7 +38,7 @@ DTM_ASK_FOR_TASK_DELAY = 2.5
 DTM_SEND_TASK_DELAY = 0.001
 DTM_RESTART_QUEUE_BLOCKING_FROM = 1.
 
-class DtmLoadInfoContainer(object):
+class LoadInfoContainer(object):
     """
     Contains load information of a worker
     """
@@ -62,7 +62,7 @@ class DtmLoadInfoContainer(object):
     def sumRealLoad(self):
         return self.loadCurrentExec+self.loadExecQ+self.loadWaitingRestartQ
 
-class DtmLoadBalancer(object):
+class LoadBalancer(object):
     """
     """
     def __init__(self, workersIterator, workerId, execQueue, randomizer):
@@ -76,7 +76,7 @@ class DtmLoadBalancer(object):
         self.xmlLogger = None
 
         for w in workersIterator:
-            self.ws[w] = DtmLoadInfoContainer({'loadCurrentExec' : 0.,
+            self.ws[w] = LoadInfoContainer({'loadCurrentExec' : 0.,
                                             'loadExecQ' : 0.,
                                             'loadWaitingRestartQ' : 0.,
                                             'loadWaitingQ' : 0.,

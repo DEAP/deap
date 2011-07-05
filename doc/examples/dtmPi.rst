@@ -27,7 +27,7 @@ A possible serial Python code reads as follow : ::
         
     piVal = calcPi(1000, 10000)
 
-With DTM, you can now take advantage of the parallelization, and distribute the calls to the function *test()*. There are many ways to do so, but a mere one is to use :func:`~deap.dtm.taskmanager.DtmControl.repeat`, which repeats a function an arbitrary number of times, and returns a results list. In this case, the program may look like this : ::
+With DTM, you can now take advantage of the parallelization, and distribute the calls to the function *test()*. There are many ways to do so, but a mere one is to use :func:`~deap.dtm.taskmanager.Control.repeat`, which repeats a function an arbitrary number of times, and returns a results list. In this case, the program may look like this : ::
     
     from math import hypot
     from random import random

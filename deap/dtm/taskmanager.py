@@ -78,7 +78,7 @@ def erf(x):
         return sign * y # erf(-x) = -erf(x)
 
 
-class DtmTaskIdGenerator(object):
+class TaskIdGenerator(object):
     """
     A thread-safe ID generator.
     A DTM task ID is a tuple looking like (workerId, uniqId)
@@ -100,7 +100,7 @@ class DtmTaskIdGenerator(object):
         return (self.r, newId)
 
 
-class DtmExecInfo(object):
+class ExecInfo(object):
     """
     Contains the information about the current task
     """
@@ -117,16 +117,16 @@ class DtmExecInfo(object):
         if alreadyDone == 0.:
             # If not started yet, return mean
             return mean
-
-        # Sinon, on calcule le centre de masse de la portion de la gaussienne restante
-        # Par exemple, si on a une gaussienne de parametres (mu, sigma) = (3, 4)
-        # et que la tache en est a sa troisieme (3) seconde d'execution
-        # Alors on peut estimer qu'elle devrait terminer vers :
-        # int(x*gaussienne) / int(gaussienne) sur l'intervalle [3, +infini]
-        # ou int est une INTEGRALE
         #
-        # Ce qui donne 6.192 secondes, soit un temps restant de 6.192 - 3 = 3.192 s.
+        # Else compute the mass center of the remaining part of the gaussian
+        # For instance, if we have a gaussian (mu, sigma) = (3, 4)
+        # and that the task is executing for 3 seconds, then we may estimate
+        # that it will probably finished at :
+        # int(x*gaussian) / int(gaussian) over [3, +inf[
+        # (where int is integral)
         #
+        # We get 6.192 seconds, that is an expected remaining time of
+        # 6.192 - 3 = 3.192 seconds
         
         # Evaluate primitive at point 'alreadyDone'
         commonPart = erf(self.sqrt2 * (alreadyDone - mean) / (stdDev * 2))
@@ -168,7 +168,7 @@ class DtmExecInfo(object):
     def getLoad(self):
         try:
             self.tStatsLock.acquire()
-            tInfo = self.tStats.get(self.eCurrent.target, DtmStatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+            tInfo = self.tStats.get(self.eCurrent.target, StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
             val = self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, self.eCurrent.threadObject.timeExec)
             self.tStatsLock.release()
             return val
@@ -177,7 +177,7 @@ class DtmExecInfo(object):
             return 0.
 
 
-class DtmTaskQueue(object):
+class TaskQueue(object):
     """
     """
     def __init__(self, tasksStatsStruct, tasksStatsLock):
@@ -198,7 +198,7 @@ class DtmTaskQueue(object):
             timeDone = task.threadObject.timeExec
 
         self.tStatsLock.acquire()
-        tInfo = self.tStats.get(task.target, DtmStatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+        tInfo = self.tStats.get(task.target, StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
         self.tStatsLock.release()
 
         return self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, timeDone)
@@ -207,15 +207,16 @@ class DtmTaskQueue(object):
         if alreadyDone == 0. or stdDev == 0:
             return mean
 
-        # Sinon, on calcule le centre de masse de la portion de la gaussienne restante
-        # Par exemple, si on a une gaussienne de parametres (mu, sigma) = (3, 4)
-        # et que la tache en est a sa troisieme (3) seconde d'execution
-        # Alors on peut estimer qu'elle devrait terminer vers :
-        # int(x*gaussienne) / int(gaussienne) sur l'intervalle [3, +infini]
-        # ou int est une INTEGRALE
         #
-        # Ce qui donne 6.192 secondes, soit un temps restant de 6.192 - 3 = 3.192 s.
+        # Else compute the mass center of the remaining part of the gaussian
+        # For instance, if we have a gaussian (mu, sigma) = (3, 4)
+        # and that the task is executing for 3 seconds, then we may estimate
+        # that it will probably finished at :
+        # int(x*gaussian) / int(gaussian) over [3, +inf[
+        # (where int is integral)
         #
+        # We get 6.192 seconds, that is an expected remaining time of
+        # 6.192 - 3 = 3.192 seconds
 
         # Evaluate primitive at point 'alreadyDone'
         commonPart = erf(self.sqrt2 * (alreadyDone - mean) / (stdDev * 2))
@@ -300,9 +301,10 @@ class DtmTaskQueue(object):
         return task
 
     def getTaskByExecTime(self, execTimeWanted, maxDiff= -1.):
-        # maxDiff est la difference maximale acceptee.
-        # si aucune tache ne rentre dans le maxDiff, on renvoit None
-        # -1 signifie qu'il n'y a pas de difference maximale permise
+        # maxDiff is the max difference wanted
+        # If there is no task with the execTimeWanted +- maxDiff,
+        # return None
+        # maxDiff = -1 means that there is no max difference
         mostClose = None
         self._actionLock.acquire()
 
@@ -319,8 +321,8 @@ class DtmTaskQueue(object):
             return self.getSpecificTask(mostClose[0])
 
     def getTasksIDsWithExecTime(self, execTimeWanted, maxDiff= -1.):
-        # Retourne une liste contenant des taches dont la duree totale
-        # est approximativement egale a execTimeWanted
+        # Return task list containing tasks which the durations approximately
+        # sum to execTimeWanted
         returnList = []
         totalTime = 0.
         self._actionLock.acquire()
@@ -331,10 +333,9 @@ class DtmTaskQueue(object):
                 returnList.append(tid)
                 totalTime += timeInfo
         #
-        # Pour contourner le bug du demarrage avec peu de jobs tres longues
-        # Pas sur que ce soit la meilleure solution sur le long terme mais bon...
+        # Hack to avoid the starting bug (few jobs but very long)
+        # 
         if len(returnList) == 0 and maxDiff == -1 and len(self._tDict) > 1:
-            # Si on a aucune tache, on en ajoute une au hasard
             it = list(filter(lambda x: self._getTimeInfoAbout(x[1]) != 0, self._tDict.items()))
             if len(it) != 0:
                 returnList.append(it[0][0])
@@ -344,9 +345,9 @@ class DtmTaskQueue(object):
 
 
 
-class DtmControl(object):
+class Control(object):
     """
-    DtmControl is the main DTM class. The dtm object you receive when you use ``from deap import dtm``
+    Control is the main DTM class. The dtm object you receive when you use ``from deap import dtm``
     is a proxy over an instance of this class.
 
     Most of its methods are used by your program, in the execution tasks; however, two of thems (start() and setOptions()) MUST be called
@@ -357,27 +358,27 @@ class DtmControl(object):
     def __init__(self):
         self.sTime = time.time()
         
-        # Key : Target, Value : DtmStatsContainer
+        # Key : Target, Value : StatsContainer
         self.tasksStats = {}
         self.tasksStatsLock = threading.Lock()
 
         # Global execution lock
-        self.dtmExecLock = DtmExecInfo(self.tasksStats, self.tasksStatsLock)
+        self.dtmExecLock = ExecInfo(self.tasksStats, self.tasksStatsLock)
 
-        self.waitingThreadsQueue = DtmTaskQueue(self.tasksStats, self.tasksStatsLock)
+        self.waitingThreadsQueue = TaskQueue(self.tasksStats, self.tasksStatsLock)
         
-        # Key : task ID, Value : DtmWaitInfoContainer
+        # Key : task ID, Value : WaitInfoContainer
         self.waitingThreads = {}
         self.waitingThreadsLock = threading.Lock()
 
 
         self.launchTaskLock = threading.Lock()
 
-        self.waitingForRestartQueue = DtmTaskQueue(self.tasksStats, self.tasksStatsLock)
-        self.execQueue = DtmTaskQueue(self.tasksStats, self.tasksStatsLock)
+        self.waitingForRestartQueue = TaskQueue(self.tasksStats, self.tasksStatsLock)
+        self.execQueue = TaskQueue(self.tasksStats, self.tasksStatsLock)
 
-        self.recvQueue = Queue.Queue()      # Contains DtmMessageContainer
-        self.sendQueue = Queue.Queue()      # Contains DtmMessageContainer
+        self.recvQueue = Queue.Queue()      # Contains MessageContainer
+        self.sendQueue = Queue.Queue()      # Contains MessageContainer
 
         self.exitStatus = threading.Event()
         self.commExitNotification = threading.Event()
@@ -425,7 +426,7 @@ class DtmControl(object):
             for n in self.commThread.iterOverIDs():
                 if n == self.workerId:
                     continue
-                self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_EXIT,
+                self.sendQueue.put(MessageContainer(msgType = DTM_MSG_EXIT,
                                     senderWid = self.workerId,
                                     receiverWid = n,
                                     loadsDict = None,
@@ -480,14 +481,14 @@ class DtmControl(object):
 
 
     def _addTaskStat(self, taskKey, timeExec):
-        # On exprime le temps d'execution d'une tache en reference au temps de calibration
+        # The execution time is based on the calibration ref time
         comparableLoad = timeExec / self.refTime
         # We do not keep up all the execution times, but
         # update the mean and stddev realtime
         
         self.tasksStatsLock.acquire()
         if not taskKey in self.tasksStats:
-            self.tasksStats[taskKey] = DtmStatsContainer(rAvg = timeExec,
+            self.tasksStats[taskKey] = StatsContainer(rAvg = timeExec,
                                                 rStdDev = 0.,
                                                 rSquareSum = timeExec * timeExec,
                                                 execCount = 1)
@@ -543,7 +544,7 @@ class DtmControl(object):
         if idToReturn == self.workerId:
             self._dispatchResults((resultInfo,))
         else:
-            self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_RESULT,
+            self.sendQueue.put(MessageContainer(msgType = DTM_MSG_RESULT,
                                             senderWid = self.workerId,
                                             receiverWid = idToReturn,
                                             loadsDict = self.loadBalancer.getNodesDict(),
@@ -692,8 +693,8 @@ class DtmControl(object):
         timeBegin = time.time()
         while True:
             
-            self.runningFlag.wait()         # ATTENTION, DEADLOCK POSSIBLE
-            self.runningFlag.clear()        # Si un thread fait un set() sur le flag entre ces deux lignes!!
+            self.runningFlag.wait()         # WARNING, may deadlock on very specific conditions
+            self.runningFlag.clear()        # (if the _last_ task do a set() between those 2 lines, nothing will wake up the main thread)
             
             while True:
                 try:
@@ -705,7 +706,7 @@ class DtmControl(object):
                     elif recvMsg.msgType == DTM_MSG_TASK:
                         self.execQueue.putList(recvMsg.msg)
                         self.loadBalancer.updateSelfStatus(self._getLoadTuple())
-                        self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_ACK_RECEIVED_TASK,
+                        self.sendQueue.put(MessageContainer(msgType = DTM_MSG_ACK_RECEIVED_TASK,
                                                         senderWid = self.workerId,
                                                         receiverWid = recvMsg.senderWid,
                                                         loadsDict = self.loadBalancer.getNodesDict(),
@@ -738,7 +739,7 @@ class DtmControl(object):
             sendUpdateList, sendTasksList = self.loadBalancer.takeDecision()
             self.tasksStatsLock.acquire()
             for sendInfo in sendTasksList:
-                self.sendQueue.put(DtmMessageContainer(msgType = DTM_MSG_TASK,
+                self.sendQueue.put(MessageContainer(msgType = DTM_MSG_TASK,
                                             senderWid = self.workerId,
                                             receiverWid = sendInfo[0],
                                             loadsDict = self.loadBalancer.getNodesDict(),
@@ -808,26 +809,26 @@ class DtmControl(object):
         self.isStarted = True
        
         try:
-            tmpImport = __import__(self.commManagerType, globals(), locals(), ['DtmCommThread'], 0)
-            if not hasattr(tmpImport, 'DtmCommThread'):
+            tmpImport = __import__(self.commManagerType, globals(), locals(), ['CommThread'], 0)
+            if not hasattr(tmpImport, 'CommThread'):
                 raise ImportError
-            DtmCommThread = tmpImport.DtmCommThread
+            CommThread = tmpImport.CommThread
         except ImportError:
             _logger.warning("Warning : %s is not a suitable communication manager. Default to commManagerMpi4py.", self.commManagerType)
-            tmpImport = __import__('deap.dtm.commManagerMpi4py', globals(), locals(), ['DtmCommThread'], 0)
-            DtmCommThread = tmpImport.DtmCommThread
+            tmpImport = __import__('deap.dtm.commManagerMpi4py', globals(), locals(), ['CommThread'], 0)
+            CommThread = tmpImport.CommThread
 
         try:
-            tmpImport = __import__(self.loadBalancerType, globals(), locals(), ['DtmLoadBalancer'], 0)
-            if not hasattr(tmpImport, 'DtmLoadBalancer'):
+            tmpImport = __import__(self.loadBalancerType, globals(), locals(), ['LoadBalancer'], 0)
+            if not hasattr(tmpImport, 'LoadBalancer'):
                 raise ImportError
-            DtmLoadBalancer = tmpImport.DtmLoadBalancer
+            LoadBalancer = tmpImport.LoadBalancer
         except ImportError:
             _logger.warning("Warning : %s is not a suitable load balancer. Default to loadBalancerPDB.", self.loadBalancerType)
-            tmpImport = __import__('deap.dtm.loadBalancerPDB', globals(), locals(), ['DtmLoadBalancer'], 0)
-            DtmLoadBalancer = tmpImport.DtmLoadBalancer
+            tmpImport = __import__('deap.dtm.loadBalancerPDB', globals(), locals(), ['LoadBalancer'], 0)
+            LoadBalancer = tmpImport.LoadBalancer
         
-        self.commThread = DtmCommThread(self.recvQueue, self.sendQueue, self.runningFlag, self.commExitNotification, self.commReadyEvent, self.dtmRandom, sys.argv)
+        self.commThread = CommThread(self.recvQueue, self.sendQueue, self.runningFlag, self.commExitNotification, self.commReadyEvent, self.dtmRandom, sys.argv)
 
         self.commThread.start()
         self.refTime = self._calibrateExecTime()
@@ -840,9 +841,9 @@ class DtmControl(object):
         self.poolSize = self.commThread.poolSize
         self.workerId = self.commThread.workerId
 
-        self.idGenerator = DtmTaskIdGenerator(self.workerId)
+        self.idGenerator = TaskIdGenerator(self.workerId)
 
-        self.loadBalancer = DtmLoadBalancer(self.commThread.iterOverIDs(), self.workerId, self.execQueue, self.dtmRandom)
+        self.loadBalancer = LoadBalancer(self.commThread.iterOverIDs(), self.workerId, self.execQueue, self.dtmRandom)
         
         if self.traceMode:
             self.traceLock.acquire()
@@ -867,7 +868,7 @@ class DtmControl(object):
             _logger.info("DTM started with %i workers", self.poolSize)
             _logger.info("DTM load balancer is %s, and communication manager is %s", self.loadBalancerType, self.commManagerType)
             
-            initTask = DtmTaskContainer(tid = self.idGenerator.tid,
+            initTask = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = None,
                                     taskIndex = 0,
@@ -904,7 +905,7 @@ class DtmControl(object):
         listTids = []
         
         for index, elem in enumerate(zipIterable):
-            task = DtmTaskContainer(tid = self.idGenerator.tid,
+            task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = index,
@@ -929,7 +930,7 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()        
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+            self.waitingThreads[currentId] = WaitInfoContainer(threadObject = cThread,
                                                     eventObject = cThread.waitingFlag,
                                                     waitBeginningTime = 0,
                                                     tasksWaitingCount = 0,
@@ -937,7 +938,7 @@ class DtmControl(object):
                                                     rWaitingDict = {})
         
         resultKey = listTids[0]
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = listTids,
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = ExceptedResultContainer(tids = listTids,
                                 waitingOn = True,
                                 finished = False,
                                 success = False,
@@ -973,7 +974,7 @@ class DtmControl(object):
 
     def map_async(self, function, iterable, callback=None):
         """
-        A non-blocking variant of the :func:`~deap.dtm.taskmanager.DtmControl.map` method which returns a :class:`~deap.dtm.taskmanager.DtmAsyncResult` object.
+        A non-blocking variant of the :func:`~deap.dtm.taskmanager.Control.map` method which returns a :class:`~deap.dtm.taskmanager.AsyncResult` object.
         
         .. note::
             As on version 0.2, callback is not implemented.
@@ -987,7 +988,7 @@ class DtmControl(object):
         listTids = []
 
         for index, elem in enumerate(iterable):
-            task = DtmTaskContainer(tid = self.idGenerator.tid,
+            task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = index,
@@ -1013,14 +1014,14 @@ class DtmControl(object):
         self.waitingThreadsLock.acquire()
         
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+            self.waitingThreads[currentId] = WaitInfoContainer(threadObject = cThread,
                                                     eventObject = cThread.waitingFlag,
                                                     waitBeginningTime = 0,
                                                     tasksWaitingCount = 0,
                                                     waitingMode = DTM_WAIT_NONE,
                                                     rWaitingDict = {})
                                                     
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = listTids,
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = ExceptedResultContainer(tids = listTids,
                                 waitingOn = False,
                                 finished = False,
                                 success = False,
@@ -1029,7 +1030,7 @@ class DtmControl(object):
 
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
         
-        asyncRequest = DtmAsyncResult(self, self.waitingThreads[currentId], resultKey)
+        asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey)
         self.waitingThreads[currentId].rWaitingDict[resultKey].callbackFunc = asyncRequest._dtmCallback
         
         self.waitingThreadsLock.release()
@@ -1044,13 +1045,13 @@ class DtmControl(object):
     def apply(self, function, *args, **kwargs):
         """
         Equivalent of the :func:`apply` built-in function. It blocks till the result is ready.
-        Given this blocks, :func:`~deap.dtm.taskmanager.DtmControl.apply_async()` is better suited for performing work in parallel.
+        Given this blocks, :func:`~deap.dtm.taskmanager.Control.apply_async()` is better suited for performing work in parallel.
         Additionally, the passed in function is only executed in one of the workers of the pool.
         """
         cThread = threading.currentThread()
         currentId = cThread.tid
         
-        task = DtmTaskContainer(tid = self.idGenerator.tid,
+        task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = 0,
@@ -1071,7 +1072,7 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+            self.waitingThreads[currentId] = WaitInfoContainer(threadObject = cThread,
                                                     eventObject = cThread.waitingFlag,
                                                     waitBeginningTime = 0,
                                                     tasksWaitingCount = 0,
@@ -1080,7 +1081,7 @@ class DtmControl(object):
         
         resultKey = task.tid
         
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = [task.tid],
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = ExceptedResultContainer(tids = [task.tid],
                                 waitingOn = True,
                                 finished = False,
                                 success = False,
@@ -1114,12 +1115,12 @@ class DtmControl(object):
 
     def apply_async(self, function, *args, **kwargs):
         """
-        A non-blocking variant of the :func:`~deap.dtm.taskmanager.DtmControl.apply` method which returns a :class:`~deap.dtm.taskmanager.DtmAsyncResult` object.
+        A non-blocking variant of the :func:`~deap.dtm.taskmanager.Control.apply` method which returns a :class:`~deap.dtm.taskmanager.AsyncResult` object.
         """
         cThread = threading.currentThread()
         currentId = cThread.tid
         
-        task = DtmTaskContainer(tid = self.idGenerator.tid,
+        task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = 0,
@@ -1140,7 +1141,7 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()        
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+            self.waitingThreads[currentId] = WaitInfoContainer(threadObject = cThread,
                                                     eventObject = cThread.waitingFlag,
                                                     waitBeginningTime = 0,
                                                     tasksWaitingCount = 0,
@@ -1149,7 +1150,7 @@ class DtmControl(object):
         
         resultKey = task.tid
         
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = [task.tid],
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = ExceptedResultContainer(tids = [task.tid],
                                 waitingOn = False,
                                 finished = False,
                                 success = False,
@@ -1158,7 +1159,7 @@ class DtmControl(object):
         
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
         
-        asyncRequest = DtmAsyncResult(self, self.waitingThreads[currentId], resultKey)
+        asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey)
         self.waitingThreads[currentId].rWaitingDict[resultKey].callbackFunc = asyncRequest._dtmCallback
         
         self.waitingThreadsLock.release()
@@ -1217,7 +1218,7 @@ class DtmControl(object):
         listTids = []
         
         for index in range(n):
-            task = DtmTaskContainer(tid = self.idGenerator.tid,
+            task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = index,
@@ -1233,7 +1234,7 @@ class DtmControl(object):
         
         self.waitingThreadsLock.acquire()        
         if currentId not in self.waitingThreads.keys():
-            self.waitingThreads[currentId] = DtmWaitInfoContainer(threadObject = cThread,
+            self.waitingThreads[currentId] = WaitInfoContainer(threadObject = cThread,
                                                     eventObject = cThread.waitingFlag,
                                                     waitBeginningTime = 0,
                                                     tasksWaitingCount = 0,
@@ -1241,7 +1242,7 @@ class DtmControl(object):
                                                     rWaitingDict = {})
         
         resultKey = listTids[0]
-        self.waitingThreads[currentId].rWaitingDict[resultKey] = DtmExceptedResultContainer(tids = listTids,
+        self.waitingThreads[currentId].rWaitingDict[resultKey] = ExceptedResultContainer(tids = listTids,
                                 waitingOn = True,
                                 finished = False,
                                 success = False,
@@ -1335,7 +1336,7 @@ class DtmThread(threading.Thread):
     def __init__(self, structInfo, controlThread, xmlTrace=None):
         threading.Thread.__init__(self)
         
-        self.taskInfo = structInfo      # DtmTaskContainer
+        self.taskInfo = structInfo      # TaskContainer
         
         self.taskInfo.threadObject = self   # Remind that we are the exec thread
         
@@ -1401,7 +1402,7 @@ class DtmThread(threading.Thread):
             self.control.exitStatus.set()
         else:
             # Else, tell the communication thread to return the result
-            resultStruct = DtmResultContainer(tid = self.tid,
+            resultStruct = ResultContainer(tid = self.tid,
                                             parentTid = self.taskInfo.creatorTid,
                                             taskIndex = self.taskInfo.taskIndex,
                                             execTime = self.timeExec,
@@ -1455,9 +1456,9 @@ class DtmThread(threading.Thread):
 
 
 
-class DtmAsyncResult(object):
+class AsyncResult(object):
     """
-    The class of the result returned by :func:`~deap.dtm.taskmanager.DtmControl.map_async()` and :func:`~deap.dtm.taskmanager.DtmControl.apply_async()`.
+    The class of the result returned by :func:`~deap.dtm.taskmanager.Control.map_async()` and :func:`~deap.dtm.taskmanager.Control.apply_async()`.
     """
     def __init__(self, control, waitingInfo, taskKey):
         self.control = control
@@ -1483,7 +1484,7 @@ class DtmAsyncResult(object):
         
         .. note::
             This is a blocking call : caller will wait in this function until the result is ready.
-            To check for the avaibility of the result, use :func:`~deap.dtm.taskmanager.DtmAsyncResult.ready()`.
+            To check for the avaibility of the result, use :func:`~deap.dtm.taskmanager.AsyncResult.ready()`.
         """
         if not self.resultReturned:
             self.wait()
@@ -1526,5 +1527,5 @@ class DtmAsyncResult(object):
         Return whether the task completed without error. Will raise AssertionError if the result is not ready.
         """
         if not self.resultReturned:
-            raise AssertionError("Call DtmAsyncResult.successful() before the results were ready!")
+            raise AssertionError("Call AsyncResult.successful() before the results were ready!")
         return self.resultSuccess
