@@ -80,17 +80,19 @@ class Pickling(unittest.TestCase):
         self.failUnlessEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.failUnlessEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
     
-    def test_pickle_func(self):
-        func_s = pickle.dumps(self.toolbox.func)
-        func_l = pickle.loads(func_s)
+    if not sys.version_info < (2, 7):
+        def test_pickle_partial(self):
+            func_s = pickle.dumps(self.toolbox.func)
+            func_l = pickle.loads(func_s)
 
-        self.failUnlessEqual(self.toolbox.func(), func_l())
-    
-    def test_pickle_lambda(self):
-        func_s = pickle.dumps(self.toolbox.lambda_func)
-        func_l = pickle.loads(func_s)
+            self.failUnlessEqual(self.toolbox.func(), func_l())
         
-        self.failUnlessEqual(self.toolbox.lambda_func(), func_l())
+        @unittest.expectedFailure
+        def test_pickle_lambda(self):
+            func_s = pickle.dumps(self.toolbox.lambda_func)
+            func_l = pickle.loads(func_s)
+        
+            self.failUnlessEqual(self.toolbox.lambda_func(), func_l())
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)
