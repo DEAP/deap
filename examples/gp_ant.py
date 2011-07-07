@@ -1,17 +1,17 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """
 This example is from "John R. Koza. Genetic Programming: On the Programming 
@@ -20,7 +20,7 @@ of Computers by Natural Selection. MIT Press, Cambridge, MA, USA, 1992.".
 The problem is called The Artificial Ant Problem. 
 <http://www.cs.ucl.ac.uk/staff/w.langdon/bloat_csrp-97-29/node2.html>
 
-The goal of this example is to show how to use EAP and its GP framework with
+The goal of this example is to show how to use DEAP and its GP framework with
 with complex system of functions and object. 
 
 Given an AntSimulator ant, this solution should get the 89 pieces of food
@@ -30,7 +30,7 @@ ant.routine = ant.if_food_ahead(ant.move_forward, prog3(ant.turn_left,
                                                         prog2(ant.turn_right, prog2(ant.turn_left, ant.turn_right))),
                                                   prog2(ant.if_food_ahead(ant.move_forward, ant.turn_left), ant.move_forward)))
 
-Best solution found with EAP:
+Best solution found with DEAP:
 prog3(prog3(move_forward, 
             turn_right, 
             if_food_ahead(if_food_ahead(prog3(move_forward,
@@ -50,15 +50,14 @@ import sys
 import logging
 import copy
 import random
-
 from functools import partial
 
-from eap import base
-from eap import creator
-from eap import toolbox
-from eap import gp
-from eap import algorithms
-from eap import halloffame
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import tools
+from deap import gp
+
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
@@ -161,14 +160,14 @@ pset.addTerminal(ant.turn_right)
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("expr_init", gp.generateFull, pset=pset, min_=1, max_=2)
+toolbox.register("expr_init", gp.genFull, pset=pset, min_=1, max_=2)
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.expr_init)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr_init)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code
@@ -177,21 +176,32 @@ def evalArtificialAnt(individual):
     ant.run(routine)
     return ant.eaten,
 
-tools.register("evaluate", evalArtificialAnt)
-tools.register("select", toolbox.selTournament, tournsize=7)
-tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register("mutate", toolbox.mutTreeUniform, expr=tools.expr_mut)
+toolbox.register("evaluate", evalArtificialAnt)
+toolbox.register("select", tools.selTournament, tournsize=7)
+toolbox.register("mate", gp.cxUniformOnePoint)
+toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
+toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
-if __name__ == "__main__":
-    random.seed(101)
+def main():
+    random.seed(69)
 
     trail_file = open("santafe_trail.txt")
     ant.parse_matrix(trail_file)
     
-    pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    pop = toolbox.population(n=300)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
-    algorithms.eaSimple(tools, pop, 0.5, 0.2, 40, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
     
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    
+    return pop, hof, stats
+
+if __name__ == "__main__":
+    main()
+

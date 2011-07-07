@@ -1,26 +1,26 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import random
 
-from eap import base
-from eap import creator
-from eap import toolbox
-from eap import gp
+from deap import base
+from deap import creator
+from deap import gp
+from deap import tools
 
-# gp_symbreg already defines some usefull structures
+# gp_symbreg already defines some useful structures
 import gp_symbreg
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -39,25 +39,36 @@ def evalSymbReg(expr, data):
     diff = sum(map(diff_func, values))
     return diff,
 
-tools_ga = toolbox.Toolbox()
+toolbox_ga = base.Toolbox()
 
-tools_ga.register("float", random.uniform, -1, 1)
-tools_ga.register("individual", creator.IndGA, content_init=tools_ga.float, size_init=10)
-tools_ga.register("population", list, content_init=tools_ga.individual, size_init=200)
+toolbox_ga.register("float", random.uniform, -1, 1)
+toolbox_ga.register("individual", tools.initRepeat, creator.IndGA, toolbox_ga.float, 10)
+toolbox_ga.register("population", tools.initRepeat, list, toolbox_ga.individual)
 
-tools_ga.register("select", toolbox.selTournament, tournsize=3)
-tools_ga.register("mate", toolbox.cxTwoPoints)
-tools_ga.register("mutate", toolbox.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
+toolbox_ga.register("select", tools.selTournament, tournsize=3)
+toolbox_ga.register("mate", tools.cxTwoPoints)
+toolbox_ga.register("mutate", tools.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
-tools_gp = gp_symbreg.tools
+tools_gp = gp_symbreg.toolbox
 
-if __name__ == "__main__":
-
-    pop_ga = tools_ga.population()
-    pop_gp = tools_gp.population()
+def main():
+    pop_ga = toolbox_ga.population(n=200)
+    pop_gp = tools_gp.population(n=200)
     
-    best_ga = toolbox.selRandom(pop_ga, 1)[0]
-    best_gp = toolbox.selRandom(pop_gp, 1)[0]
+    stats_ga = tools.Statistics(lambda ind: ind.fitness.values)
+    stats_ga.register("Avg", tools.mean)
+    stats_ga.register("Std", tools.std)
+    stats_ga.register("Min", min)
+    stats_ga.register("Max", max)
+    
+    stats_gp = tools.Statistics(lambda ind: ind.fitness.values)
+    stats_gp.register("Avg", tools.mean)
+    stats_gp.register("Std", tools.std)
+    stats_gp.register("Min", min)
+    stats_gp.register("Max", max)
+    
+    best_ga = tools.selRandom(pop_ga, 1)[0]
+    best_gp = tools.selRandom(pop_gp, 1)[0]
     
     for ind in pop_gp:
         ind.fitness.values = evalSymbReg(ind, best_ga)  
@@ -72,16 +83,16 @@ if __name__ == "__main__":
         print "-- Generation %i --" % g
     
         # Select and clone the offsprings
-        off_ga = tools_ga.select(pop_ga, n=len(pop_ga))
-        off_gp = tools_gp.select(pop_gp, n=len(pop_gp))
-        off_ga = [tools_ga.clone(ind) for ind in off_ga]        
+        off_ga = toolbox_ga.select(pop_ga, len(pop_ga))
+        off_gp = tools_gp.select(pop_gp, len(pop_gp))
+        off_ga = [toolbox_ga.clone(ind) for ind in off_ga]        
         off_gp = [tools_gp.clone(ind) for ind in off_gp]
     
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(off_ga[::2], off_ga[1::2]):
             if random.random() < CXPB:
-                tools_ga.mate(ind1, ind2)
+                toolbox_ga.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
     
@@ -93,7 +104,7 @@ if __name__ == "__main__":
     
         for ind in off_ga:
             if random.random() < MUTPB:
-                tools_ga.mutate(ind)
+                toolbox_ga.mutate(ind)
                 del ind.fitness.values
     
         for ind in off_gp:
@@ -113,33 +124,22 @@ if __name__ == "__main__":
         # Replace the old population by the offsprings
         pop_ga = off_ga
         pop_gp = off_gp
-                
-        best_ga = toolbox.selBest(pop_ga, 1)[0]
-        best_gp = toolbox.selBest(pop_gp, 1)[0]    
-    
-        # Gather all the fitnesses in one list and print the stats
-        fits = [ind.fitness.values[0] for ind in pop_ga]
-        length = len(pop_ga)
-        mean = sum(fits) / length
-        sum2 = sum(x*x for x in fits)
-        std_dev = abs(sum2 / length - mean**2)**0.5
-            
-        print "--GA Population--"
-        print "  Min %f" % min(fits)
-        print "  Max %f" % max(fits)
-        print "  Avg %f" % (mean)
-        print "  Std %f" % std_dev
         
-        fits = [ind.fitness.values[0] for ind in pop_gp]    
-        print "--GP Population--"
-        print "  Min %f" % min(fits)
-        print "  Max %f" % max(fits)
-        length = len(pop_gp)
-        mean = sum(fits) / length
-        sum2 = sum(x*x for x in fits)
-        std_dev = abs(sum2 / length - mean**2)**0.5
-        print "  Avg %f" % (mean)
-        print "  Std %f" % std_dev
+        stats_ga.update(pop_ga)
+        stats_gp.update(pop_gp)
+        
+        best_ga = tools.selBest(pop_ga, 1)[0]
+        best_gp = tools.selBest(pop_gp, 1)[0]    
+    
+        print "  -- GA statistics --"
+        print stats_ga
+        print "  -- GP statistics --"        
+        print stats_gp          
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
     print "Best individual GP is %s, %s" % (gp.evaluate(best_gp), best_gp.fitness.values)
+
+    return pop_ga, pop_gp, stats_ga, stats_gp, best_ga, best_gp
+
+if __name__ == "__main__":
+    main()

@@ -19,12 +19,11 @@ import math
 import logging
 import random
 
-from eap import base
-from eap import creator
-from eap import toolbox
-from eap import gp
-from eap import algorithms
-from eap import halloffame
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import tools
+from deap import gp
 
 # Define new functions
 def safeDiv(left, right):
@@ -47,16 +46,15 @@ pset.renameArguments({"ARG0" : "x"})
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
 
-tools = toolbox.Toolbox()
-tools.register("expr", gp.generateRamped, pset=pset, min_=1, max_=2)
-tools.register("individual", creator.Individual, content_init=tools.expr)
-
-tools.register("population", list, content_init=tools.individual, size_init=100)
-tools.register("lambdify", gp.lambdify, pset=pset)
+toolbox = base.Toolbox()
+toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
-    func = tools.lambdify(expr=individual)
+    func = toolbox.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
     values = (x/10. for x in xrange(-10,10))
@@ -64,19 +62,29 @@ def evalSymbReg(individual):
     diff = sum(map(diff_func, values))
     return diff,
 
-tools.register("evaluate", evalSymbReg)
-tools.register("select", toolbox.selTournament, tournsize=3)
-tools.register("mate", toolbox.cxTreeUniformOnePoint)
-tools.register("expr_mut", gp.generateFull, min_=0, max_=2)
-tools.register('mutate', toolbox.mutTreeUniform, expr=tools.expr_mut)
+toolbox.register("evaluate", evalSymbReg)
+toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("mate", gp.cxUniformOnePoint)
+toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
+toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut)
 
-if __name__ == "__main__":
+def main():
     random.seed(318)
     
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-    pop = tools.population()
-    hof = halloffame.HallOfFame(1)
+    pop = toolbox.population(n=300)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
-    algorithms.eaSimple(tools, pop, 0.5, 0.1, 40, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, 0.5, 0.1, 40, stats, halloffame=hof)
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    
+    return pop, stats, hof
+
+if __name__ == "__main__":
+    main()

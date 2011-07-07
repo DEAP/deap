@@ -1,0 +1,86 @@
+{% extends "defindex.html" %}
+{% block tables %}
+<p>DEAP (Distributed Evolutionary Algorithms in Python) is a novel 
+evolutionary computation framework for rapid prototyping and testing of 
+ideas. Its design departs from most other existing frameworks in that it 
+seeks to make algorithms explicit and data structures transparent, as 
+opposed to the more common black box type of frameworks. It also 
+incorporates easy parallelism where users need not concern themselves with 
+gory implementation details like synchronization and load balancing, only 
+functional decomposition.</p>
+<p>The five founding hypotheses of DEAP are:</p>
+<ol class="arabic simple">
+<li>The user knows best. Users should be able to understand the internal 
+mechanisms of the framework so that they can extend them easily to better 
+suit their specific needs.</li>
+<li>User needs in terms of algorithms and operators are so vast that it would 
+be unrealistic to think of implementing them all in a single framework. 
+However, it should be possible to build basic tools and generic mechanisms 
+that enable easy user implementation of most any EA variant.</li>
+<li>Speedy prototyping of ideas is often more precious than speedy execution 
+of programs. Moreover, code compactness and clarity is also very precious.</li>
+<li>Even though interpreted, Python is fast enough to execute EAs. Whenever 
+execution time becomes critical, compute intensive components can always 
+be recoded in C. Many efficient numerical libraries are already available 
+through Python APIs.</li>
+<li>Easy parallelism can alleviate slow execution.</li>
+</ol>
+<p>And these hypotheses lead to the following objectives:</p>
+<dl class="docutils">
+<dt><strong>Rapid prototyping</strong></dt>
+<dd>Provide an environment allowing users to quickly implement their own 
+algorithms without compromise.</dd>
+<dt><strong>Parallelization made easy</strong></dt>
+<dd>Allow for straightforward parallelization; users should not be forced to 
+specify more than the granularity level of their functional decomposition.</dd>
+<dt><strong>Adaptive load balancing</strong></dt>
+<dd>The workload should automatically and dynamically be distributed among 
+available compute units; user intervention should be optional and limited 
+to hints of relative loads of tasks.</dd>
+<dt><strong>Preach by examples</strong></dt>
+<dd>Although the aim of the framework is not to provide ready made solutions, 
+it should nevertheless come with a substantial set of real-world examples 
+to guide the apprenticeship of users.</dd>
+</dl>
+
+  <p><strong>Parts of the documentation:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("tutorials/index") }}">Tutorial</a><br/>
+         <span class="linkdescr">start here</span></p>
+      
+      <p class="biglink"><a class="biglink" href="{{ pathto("examples/index") }}">Examples</a><br/>
+         <span class="linkdescr">complete examples using common problems</span></p>
+    </td><td width="50%">
+      	<p class="biglink"><a class="biglink" href="{{ pathto("api/index") }}">Library Reference</a><br/>
+	         <span class="linkdescr">the complete api of the framework</span></p>
+		
+		<p class="biglink"><a class="biglink" href="{{ pathto("whatsnew") }}">What's New?</a><br/>
+	         <span class="linkdescr">list of major changes to the framework</span></p>
+    </td></tr>
+  </table>
+
+  <p><strong>Indices and tables:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("py-modindex") }}">Global Module Index</a><br/>
+         <span class="linkdescr">quick access to all modules</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("genindex") }}">General Index</a><br/>
+         <span class="linkdescr">all functions, classes, terms</span></p>
+      <!--<p class="biglink"><a class="biglink" href="{{ pathto("glossary") }}">Glossary</a><br/>
+         <span class="linkdescr">the most important terms explained</span></p>-->
+    </td><td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("search") }}">Search page</a><br/>
+         <span class="linkdescr">search this documentation</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Complete Table of Contents</a><br/>
+         <span class="linkdescr">lists all sections and subsections</span></p>
+    </td></tr>
+  </table>
+
+  <p><strong>Meta information:</strong></p>
+  <table class="contentstable" align="center"><tr>
+    <td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("bugs") }}">Reporting bugs</a></p>
+    </td></tr>
+  </table>
+{% endblock %}
