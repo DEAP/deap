@@ -25,7 +25,7 @@ Release 0.7
   - Differential evolution (*x2*);
   - Evolution strategy : One fifth rule;
   - *k*-nearest neighbours feature selection;
-  - One Max : Multipopulation and using NumPy;
+  - One Max Multipopulation;
   - Particle Swarm Optimization;
   - Hillis' coevolution of sorting networks;
   - CMA-ES :math:`1+\lambda`.
