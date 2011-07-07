@@ -6,7 +6,6 @@ Here is a (incomplete) log of the changes made to DEAP over time.
 
 Release 0.7
 ===========
-- Added support for deriving individuals from NumPy arrays.
 - Modified structure so that DTM is a module of DEAP.
 - Restructured modules in a more permanent and coherent way.
 	
@@ -20,6 +19,7 @@ Release 0.7
 - Changed the Milestone module name for the more common Checkpoint name.
 - Eliminated the confusing *content_init* and *size_init* keywords in the toolbox.
 - Refactored the whole documentation in a more structured manner.
+- Added a benchmark module containing some of the most classic benchmark functions.
 - Added a lots of examples again :
 	
   - Differential evolution (*x2*);
