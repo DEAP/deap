@@ -1,30 +1,28 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 import random
 import logging
-import copy
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import halloffame
-from eap import toolbox
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import tools
 
 import sortingnetwork as sn
 
@@ -57,48 +55,53 @@ def mutDelWire(individual):
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Gene initializer
-tools.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
+toolbox.register("network", genNetwork, dimension=INPUTS, min_size=9, max_size=12)
 
 # Structure initializers
-tools.register("individual", creator.Individual, content_init=tools.network)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.network)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-tools.register("evaluate", evalEvoSN, dimension=INPUTS)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
-tools.register("addwire", mutAddWire, dimension=INPUTS)
-tools.register("delwire", mutDelWire)
-
-tools.register("select", toolbox.nsga2)
+toolbox.register("evaluate", evalEvoSN, dimension=INPUTS)
+toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
+toolbox.register("addwire", mutAddWire, dimension=INPUTS)
+toolbox.register("delwire", mutDelWire)
+toolbox.register("select", tools.selNSGA2)
 
 def main():
-    #random.seed(64)
+    random.seed(64)
 
-    population = tools.population()
-    hof = halloffame.ParetoFront()
+    population = toolbox.population(n=300)
+    hof = tools.ParetoFront()
+    
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std)
+    stats.register("Min", min)
+    stats.register("Max", max)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = tools.map(tools.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
+    # Evaluate every individuals
+    fitnesses = toolbox.map(toolbox.evaluate, population)
+    for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
     
     hof.update(population)
+    stats.update(population)
     
     # Begin the evolution
     for g in xrange(NGEN):
         print "-- Generation %i --" % g
-        offsprings = [tools.clone(ind) for ind in population]
+        offsprings = [toolbox.clone(ind) for ind in population]
     
         # Apply crossover and mutation
         for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
             if random.random() < CXPB:
-                tools.mate(ind1, ind2)
+                toolbox.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
         
@@ -106,47 +109,34 @@ def main():
         # original algorithm, we use 3 different mutations subsequently.
         for ind in offsprings:
             if random.random() < MUTPB:
-                tools.mutate(ind)
+                toolbox.mutate(ind)
                 del ind.fitness.values
             if random.random() < ADDPB:
-                tools.addwire(ind)
+                toolbox.addwire(ind)
                 del ind.fitness.values
             if random.random() < DELPB:
-                tools.delwire(ind)
+                toolbox.delwire(ind)
                 del ind.fitness.values
                 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-        fitnesses = tools.map(tools.evaluate, invalid_ind)
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
         print "  Evaluated %i individuals" % len(invalid_ind)
         
-        population = tools.select(population+offsprings, n=len(offsprings))
+        population = toolbox.select(population+offsprings, len(offsprings))
         hof.update(population)
-        fits = [ind.fitness.values for ind in population]
-        
-        # Gather all the fitnesses in one list and print the stats
-        fits_t = zip(*fits)             # Transpose fitnesses for analysis
-
-        minimums = map(min, fits_t)
-        maximums = map(max, fits_t)
-        lenght = len(population)
-        sums = map(sum, fits_t)
-        sums2 = [sum(x*x for x in fit) for fit in fits_t]
-        means = [sum_ / lenght for sum_ in sums]
-        std_devs = [abs(sum2 / lenght - mean**2)**0.5 for sum2, mean in zip(sums2, means)]
-        
-        print "  Min %s" % ", ".join(map(str, minimums))
-        print "  Max %s" % ", ".join(map(str, maximums))
-        print "  Avg %s" % ", ".join(map(str, means))
-        print "  Std %s" % ", ".join(map(str, std_devs))
+        stats.update(population)
+        print stats
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
     print best_network.draw()
     print "%i errors, length %i, depth %i" % hof[0].fitness.values
+    
+    return population, stats, hof
 
 if __name__ == "__main__":
     main()

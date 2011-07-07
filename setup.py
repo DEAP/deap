@@ -2,17 +2,17 @@
 
 from distutils.core import setup
 
-import eap
+import deap
 
 setup(name='deap',
-      version=eap.__version__,
+      version=deap.__version__,
       description='Distributed Evolutionary Algorithms in Python',
       long_description=open('README.txt').read(),
       author='deap Development Team',
       author_email='deap-users@googlegroups.com',
       url='http://deap.googlecode.com',
       download_url='http://code.google.com/p/deap/downloads/list',
-      packages=['eap', 'eap.tests'],
+      packages=['deap', 'deap.benchmarks', 'deap.dtm', 'deap.dtm.tests', 'deap.tests'],
       platforms=['any'],
       keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es'],
       license='LGPL',

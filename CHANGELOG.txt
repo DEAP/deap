@@ -1,0 +1,20 @@
+2011-06-01 Reorganized modules in a more permanent API.
+
+2011-05-23 Modified structure of the project so that deap include both dtm and 
+           eap.
+
+2011-04-02 Added support for numpy.ndarray in the creator.
+
+2011-03-20 Renamed the nsga2 and spea2 selections to selNSGA2 and selSPEA2.
+
+2011-03-19 Moved all the operators from the toolbox to a new operators module.
+           Also, this new module contains the other operators that are the
+           History, Hall of Fame, Stats and Milestone.
+
+2011-03-19 Changed version number in eap/__init__.py file.
+
+2011-03-17 Tagged revision 0.7-a1.
+
+2011-03-17 Added the Hillis coevolution example.
+
+2011-03-17 Added the CHANGELOG file to log every change in DEAP from now.

@@ -1,50 +1,42 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import inspect
 import logging
-import math
 import sys
 import random
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import halloffame
-from eap import toolbox
+from deap import algorithms
+from deap import base
+from deap import benchmarks
+from deap import creator
+from deap import tools
 
-creator.create("FitnessMax", base.Fitness, weights=(-1.0, -1.0))
-creator.create("Individual", array.array, fitness=creator.FitnessMax)
-creator.create("Population", list)
+creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("attr_float", random.uniform, -5, 5)
+toolbox.register("attr_float", random.uniform, -5, 5)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "f", content_init=tools.attr_float, size_init=3)
-tools.register("population", creator.Population, content_init=tools.individual, size_init=50)
-
-def evalKursawe(ind):
-    f1 = sum(-10 * math.exp(-0.2 * math.sqrt(x * x + y * y)) for x, y in zip(ind[:-1], ind[1:]))
-    f2 = sum(abs(x)**0.8 + 5 * math.sin(x * x * x) for x in ind)
-    return f1, f2
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, 3)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def checkBounds(min, max):
     def decCheckBounds(func):
@@ -60,32 +52,36 @@ def checkBounds(min, max):
         return wrapCheckBounds
     return decCheckBounds
 
-tools.register("evaluate", evalKursawe)
-tools.register("mate", toolbox.cxBlend, alpha=1.5)
-tools.register("mutate", toolbox.mutGaussian, mu=0, sigma=3, indpb=0.3)
-tools.register("select", toolbox.nsga2)
+toolbox.register("evaluate", benchmarks.kursawe)
+toolbox.register("mate", tools.cxBlend, alpha=1.5)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=3, indpb=0.3)
+toolbox.register("select", tools.selNSGA2)
 
-tools.decorate("mate", checkBounds(-5, 5))
-tools.decorate("mutate", checkBounds(-5, 5)) 
+toolbox.decorate("mate", checkBounds(-5, 5))
+toolbox.decorate("mutate", checkBounds(-5, 5)) 
 
-if __name__ == "__main__":
+def main():
     random.seed(64)
 
-    pop = tools.population()
-    hof = halloffame.ParetoFront()
+    MU, LAMBDA = 50, 100
+    pop = toolbox.population(n=MU)
+    hof = tools.ParetoFront()
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std)
+    stats.register("Min", min)
+    stats.register("Max", max)
     
-    algorithms.eaMuPlusLambda(tools, pop, mu=50, lambda_=100, 
-                              cxpb=0.5, mutpb=0.2, ngen=50, halloffame=hof)
+    algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
+                              cxpb=0.5, mutpb=0.2, ngen=50, 
+                              stats=stats, halloffame=hof)
     
     logging.info("Best individual for measure 1 is %s, %s", 
                  hof[0], hof[0].fitness.values)
     logging.info("Best individual for measure 2 is %s, %s", 
                  hof[-1], hof[-1].fitness.values)
 
-    # You can plot the Hall of Fame if you have matplotlib installed
-    # import matplotlib.pyplot as plt
-    # plt.figure()
-    # fit1 = [ind.fitness.values[0] for ind in hof]
-    # fit2 = [ind.fitness.values[1] for ind in hof]
-    # plt.scatter(fit1, fit2)
-    # plt.show()
+    return pop, stats, hof
+
+if __name__ == "__main__":
+    main()

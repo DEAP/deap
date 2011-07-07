@@ -1,17 +1,17 @@
-#    This file is part of EAP.
+#    This file is part of DEAP.
 #
-#    EAP is free software: you can redistribute it and/or modify
+#    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
 #    the License, or (at your option) any later version.
 #
-#    EAP is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 #    GNU Lesser General Public License for more details.
 #
 #    You should have received a copy of the GNU Lesser General Public
-#    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
 import sys
@@ -20,40 +20,46 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
-from eap import algorithms
-from eap import base
-from eap import creator
-from eap import halloffame
-from eap import toolbox
+from deap import algorithms
+from deap import base
+from deap import creator
+from deap import tools
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, fitness=creator.FitnessMax)
+creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
 
-tools = toolbox.Toolbox()
+toolbox = base.Toolbox()
 
 # Attribute generator
-tools.register("attr_bool", random.randint, 0, 1)
+toolbox.register("attr_bool", random.randint, 0, 1)
 
 # Structure initializers
-tools.register("individual", creator.Individual, "b", content_init=tools.attr_bool, size_init=100)
-tools.register("population", list, content_init=tools.individual, size_init=300)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
     return sum(individual),
 
-tools.register("evaluate", evalOneMax)
-tools.register("mate", toolbox.cxTwoPoints)
-tools.register("mutate", toolbox.mutFlipBit, indpb=0.05)
-tools.register("select", toolbox.selTournament, tournsize=3)
+toolbox.register("evaluate", evalOneMax)
+toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
     random.seed(64)
     
-    pop = tools.population()
-    hof = halloffame.HallOfFame(1)
-
-    algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    pop = toolbox.population(n=300)
+    hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("Avg", tools.mean)
+    stats.register("Std", tools.std)
+    stats.register("Min", min)
+    stats.register("Max", max)
+    
+    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    
+    return pop, stats, hof
 
 if __name__ == "__main__":
     main()

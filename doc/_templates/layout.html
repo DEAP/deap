@@ -1,14 +1,5 @@
 {% extends "!layout.html" %}
 {% block rootrellink %}
-    <li><a href="http://code.google.com/p/deap/">Project Homepage</a> &raquo;</li>
-    {{ super() }}
-{% endblock %}
-
-{% block extrahead %}
-    <link rel="stylesheet" href="{{ pathto('_static/eap.css', 1) }}" type="text/css" />
-{% endblock %}
-
-{% block note %}
-    BLAH
-    {{ super() }}
+    <li><a href="http://code.google.com/p/deap/">Project Homepage</a>{{ reldelim1 }}</li>
+	<li><a href="{{ pathto('index') }}">{{ shorttitle }}</a>{{ reldelim1 }} </li>
 {% endblock %}
