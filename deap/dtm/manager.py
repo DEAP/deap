@@ -596,33 +596,49 @@ class Control(object):
                         self.waitingThreads[result.parentTid].rWaitingDict[taskKey].result[result.taskIndex] = result.result
                 break
             
-            assert not foundKey is None, "Parent task not found for result dispatch!"       # Debug
+            assert not foundKey is None, "Parent task not found for result dispatch!"        # Debug
 
             if len(self.waitingThreads[result.parentTid].rWaitingDict[foundKey].tids) == 0:
-                # All tasks done
+                # All sub-tasks done
+                
                 self.waitingThreads[result.parentTid].rWaitingDict[foundKey].finished = True
                 if isinstance(self.waitingThreads[result.parentTid].rWaitingDict[foundKey].result, list):
                     self.waitingThreads[result.parentTid].rWaitingDict[foundKey].success = True
+                               
+                canRestart = True
                 
-                canRestart = False
-                if self.waitingThreads[result.parentTid].rWaitingDict[foundKey].waitingOn == True or self.waitingThreads[result.parentTid].waitingMode == DTM_WAIT_ALL:
-                    if (self.waitingThreads[result.parentTid].waitingMode == DTM_WAIT_ALL and len(self.waitingThreads[result.parentTid].rWaitingDict) == 1)\
-                      or self.waitingThreads[result.parentTid].waitingMode == DTM_WAIT_ANY:
-                        canRestart = True
-                    elif self.waitingThreads[result.parentTid].waitingMode == DTM_WAIT_SOME:
-                        canRestart = True
-                        
-                        for rKey in self.waitingThreads[result.parentTid].rWaitingDict: 
-                            if self.waitingThreads[result.parentTid].rWaitingDict[rKey].waitingOn and rKey != foundKey:
-                                canRestart = False
-                
-                if not self.waitingThreads[result.parentTid].rWaitingDict[taskKey].callbackFunc is None:
-                    self.waitingThreads[result.parentTid].rWaitingDict[taskKey].callbackFunc()
+                if self.waitingThreads[result.parentTid].waitingMode == DTM_WAIT_ALL:
+                    self.waitingThreads[result.parentTid].rWaitingDict[foundKey].waitingOn = False
+                    for waitingTaskId in self.waitingThreads[result.parentTid].rWaitingDict:
+                        if self.waitingThreads[result.parentTid].rWaitingDict[waitingTaskId].waitingOn:
+                            canRestart = False
+                            break
+                elif self.waitingThreads[result.parentTid].waitingMode == DTM_WAIT_ANY:
+                    if self.waitingThreads[result.parentTid].rWaitingDict[foundKey].waitingOn:
+                        for waitingTaskId in self.waitingThreads[result.parentTid].rWaitingDict:
+                            self.waitingThreads[result.parentTid].rWaitingDict[waitingTaskId].waitingOn = False
+                    else:
+                        canRestart = False
+                else:
+                    # No waiting (asynchronous)
+                    canRestart = False
+
+                taskAsyncObj = self.waitingThreads[result.parentTid].rWaitingDict[foundKey].callbackClass
+                if not taskAsyncObj is None:
+                    taskAsyncObj._dtmCallback()
                 
                 if canRestart:
+                    self.waitingThreads[result.parentTid].waitingMode = DTM_WAIT_NONE
                     wTask = self.waitingThreadsQueue.getSpecificTask(result.parentTid)
-                    assert not wTask is None
+                    assert not wTask is None, "Parent task not present in waitingThreadsQueue!"
+                    
+                    if not taskAsyncObj is None:
+                        wTask.lastSubTaskDone = taskAsyncObj
+                        wTask.threadObject.asyncTasksDoneList.append(foundKey)
                     self.waitingForRestartQueue.put(wTask)
+                else:
+                    self.waitingThreads[result.parentTid].threadObject.taskInfo.lastSubTaskDone = taskAsyncObj
+                    self.waitingThreads[result.parentTid].threadObject.asyncTasksDoneList.append(foundKey)
                 
             self.waitingThreadsLock.release()
             
@@ -877,7 +893,8 @@ class Control(object):
                                     args = args,
                                     kwargs = kwargs,
                                     threadObject = None,
-                                    taskState = DTM_TASK_STATE_IDLE)
+                                    taskState = DTM_TASK_STATE_IDLE,
+                                    lastSubTaskDone = None)
             self.execQueue.put(initTask)
 
         return self._main()
@@ -891,7 +908,7 @@ class Control(object):
         """
         A parallel equivalent of the :func:`map` built-in function. It blocks till the result is ready.
         This method chops the iterables into a number of chunks determined by DTM in order to get the most efficient use of the workers.
-        It takes any number of iterables (though it will shrink all of them to the len of the smallest one), and any others kwargs that will be
+        It takes any number of iterables (though it will shrink all of them to the length of the smallest one), and any others kwargs that will be
         transmitted as is to the *function* target.
         """
         cThread = threading.currentThread()
@@ -914,7 +931,8 @@ class Control(object):
                                     args = elem,
                                     kwargs = kwargs,
                                     threadObject = None,
-                                    taskState = DTM_TASK_STATE_IDLE)
+                                    taskState = DTM_TASK_STATE_IDLE,
+                                    lastSubTaskDone = None)
             listTasks.append(task)
             listTids.append(task.tid)
         
@@ -941,11 +959,11 @@ class Control(object):
                                 waitingOn = True,
                                 finished = False,
                                 success = False,
-                                callbackFunc = None,
+                                callbackClass = None,
                                 result = listResults)
                                 
         self.waitingThreads[currentId].tasksWaitingCount += len(listTasks)
-        self.waitingThreads[currentId].waitingMode = DTM_WAIT_SOME
+        self.waitingThreads[currentId].waitingMode = DTM_WAIT_ALL
         
         
         self.waitingThreadsQueue.put(cThread.taskInfo)
@@ -971,22 +989,27 @@ class Control(object):
             return ret
 
 
-    def map_async(self, function, iterable, callback=None):
+    def map_async(self, function, *iterables, **kwargs):
         """
         A non-blocking variant of the :func:`~deap.dtm.taskmanager.Control.map` method which returns a :class:`~deap.dtm.taskmanager.AsyncResult` object.
+        It takes any number of iterables (though it will shrink all of them to the length of the smallest one), and any others kwargs that will be
+        transmitted as is to the *function* target.
         
         .. note::
-            As on version 0.2, callback is not implemented.
+            A callback argument is not implemented, since it would make DTM
+            unable to dispatch tasks and handle messages while it executes.
         """
         
         cThread = threading.currentThread()
         currentId = cThread.tid
-
-        listResults = [None] * len(iterable)
+        
+        zipIterable = list(zip(*iterables))
+        
+        listResults = [None] * len(zipIterable)
         listTasks = []
         listTids = []
 
-        for index, elem in enumerate(iterable):
+        for index, elem in enumerate(zipIterable):
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
@@ -994,10 +1017,11 @@ class Control(object):
                                     taskRoute = [self.workerId],
                                     creationTime = time.time(),
                                     target = function,
-                                    args = (elem,),
-                                    kwargs = {},
+                                    args = elem,
+                                    kwargs = kwargs,
                                     threadObject = None,
-                                    taskState = DTM_TASK_STATE_IDLE)
+                                    taskState = DTM_TASK_STATE_IDLE,
+                                    lastSubTaskDone = None)
             listTasks.append(task)
             listTids.append(task.tid)
         
@@ -1024,14 +1048,13 @@ class Control(object):
                                 waitingOn = False,
                                 finished = False,
                                 success = False,
-                                callbackFunc = None,
+                                callbackClass = None,
                                 result = listResults)
 
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
         
-        asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey)
-        self.waitingThreads[currentId].rWaitingDict[resultKey].callbackFunc = asyncRequest._dtmCallback
-        
+        asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey, True)
+        self.waitingThreads[currentId].rWaitingDict[resultKey].callbackClass = asyncRequest        
         self.waitingThreadsLock.release()
         
         self.execQueue.putList(listTasks)
@@ -1043,9 +1066,11 @@ class Control(object):
 
     def apply(self, function, *args, **kwargs):
         """
-        Equivalent of the :func:`apply` built-in function. It blocks till the result is ready.
-        Given this blocks, :func:`~deap.dtm.taskmanager.Control.apply_async()` is better suited for performing work in parallel.
-        Additionally, the passed in function is only executed in one of the workers of the pool.
+        Equivalent of the :func:`apply` built-in function. 
+        It blocks till the result is ready. Given this blocks, 
+        :func:`~deap.dtm.taskmanager.Control.apply_async()` is better suited 
+        for performing work in parallel. Additionally, the passed in function 
+        is only executed in one of the workers of the pool.
         """
         cThread = threading.currentThread()
         currentId = cThread.tid
@@ -1060,7 +1085,8 @@ class Control(object):
                                     args = args,
                                     kwargs = kwargs,
                                     threadObject = None,
-                                    taskState = DTM_TASK_STATE_IDLE)
+                                    taskState = DTM_TASK_STATE_IDLE,
+                                    lastSubTaskDone = None)
         
         if self.traceMode:
             newTaskElem = etree.SubElement(cThread.xmlTrace, "event",
@@ -1084,11 +1110,11 @@ class Control(object):
                                 waitingOn = True,
                                 finished = False,
                                 success = False,
-                                callbackFunc = None,
+                                callbackClass = None,
                                 result = [None])
         
         self.waitingThreads[currentId].tasksWaitingCount += 1
-        self.waitingThreads[currentId].waitingMode = DTM_WAIT_SOME
+        self.waitingThreads[currentId].waitingMode = DTM_WAIT_ALL
         
         self.waitingThreadsQueue.put(cThread.taskInfo)
         
@@ -1114,7 +1140,9 @@ class Control(object):
 
     def apply_async(self, function, *args, **kwargs):
         """
-        A non-blocking variant of the :func:`~deap.dtm.taskmanager.Control.apply` method which returns a :class:`~deap.dtm.taskmanager.AsyncResult` object.
+        A non-blocking variant of the 
+        :func:`~deap.dtm.taskmanager.Control.apply` method which returns a 
+        :class:`~deap.dtm.taskmanager.AsyncResult` object.
         """
         cThread = threading.currentThread()
         currentId = cThread.tid
@@ -1129,7 +1157,8 @@ class Control(object):
                                     args = args,
                                     kwargs = kwargs,
                                     threadObject = None,
-                                    taskState = DTM_TASK_STATE_IDLE)
+                                    taskState = DTM_TASK_STATE_IDLE,
+                                    lastSubTaskDone = None)
         
         if self.traceMode:
             newTaskElem = etree.SubElement(cThread.xmlTrace, "event",
@@ -1153,14 +1182,15 @@ class Control(object):
                                 waitingOn = False,
                                 finished = False,
                                 success = False,
-                                callbackFunc = None,
+                                callbackClass = None,
                                 result = [None])
         
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
         
-        asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey)
-        self.waitingThreads[currentId].rWaitingDict[resultKey].callbackFunc = asyncRequest._dtmCallback
+       # print("CALLED with function and args :", function, args, kwargs)
         
+        asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey, False)
+        self.waitingThreads[currentId].rWaitingDict[resultKey].callbackClass = asyncRequest
         self.waitingThreadsLock.release()
         
         self.execQueue.put(task)
@@ -1192,14 +1222,35 @@ class Control(object):
 
     def imap_unordered(self, function, iterable, chunksize=1):
         """
-        Not implemented yet.
+        An equivalent of :func:`itertools.imap`, but returning the results in
+        an arbitrary order. It launchs *chunksize* tasks, and wait for the
+        completion of one the them. It then yields the result of the first
+        completed task : therefore, the return order can be predicted only if
+        you use no more than one worker or if chunksize = 1.
+        
+        In return, as this function manages to have always *chunksize* tasks
+        launched, it may speed up the evaluation when the execution times are
+        very different. In this case, one should put a relatively large value
+        of chunksize.
         """
-        raise NotImplementedError
-
+        currentIndex = 0
+        currentAsyncTasks = []
+        countDataDone = 0
+        
+        while currentIndex < len(iterable) or len(currentAsyncTasks) > 0:
+            while len(currentAsyncTasks) < chunksize and currentIndex < len(iterable):
+                currentAsyncTasks.append(self.apply_async(function, iterable[currentIndex]))
+                currentIndex += 1
+            
+            indexDone = currentAsyncTasks.index(self.waitAny(currentAsyncTasks))
+            dataDone = currentAsyncTasks.pop(indexDone)
+            yield dataDone.get()
+            
 
     def filter(self, function, iterable):
         """
-        Same behavior as the built-in :func:`filter`. The filtering is done localy, but the computation is distributed.
+        Same behavior as the built-in :func:`filter`. The filtering is done
+        localy, but the computation is distributed.
         """
         results = self.map(function, iterable)
         return [item for result, item in zip(results, iterable) if result]
@@ -1227,7 +1278,8 @@ class Control(object):
                                     args = args,
                                     kwargs = kwargs,
                                     threadObject = None,
-                                    taskState = DTM_TASK_STATE_IDLE)
+                                    taskState = DTM_TASK_STATE_IDLE,
+                                    lastSubTaskDone = None)
             listTasks.append(task)
             listTids.append(task.tid)
         
@@ -1245,11 +1297,11 @@ class Control(object):
                                 waitingOn = True,
                                 finished = False,
                                 success = False,
-                                callbackFunc = None,
+                                callbackClass = None,
                                 result = listResults)
                                 
         self.waitingThreads[currentId].tasksWaitingCount += len(listTasks)
-        self.waitingThreads[currentId].waitingMode = DTM_WAIT_SOME
+        self.waitingThreads[currentId].waitingMode = DTM_WAIT_ALL
         
         
         self.waitingThreadsQueue.put(cThread.taskInfo)
@@ -1273,45 +1325,161 @@ class Control(object):
             del self.waitingThreads[currentId].rWaitingDict[resultKey]
             self.waitingThreadsLock.release()
             return ret
-
-    def waitForAll(self):
+    
+    
+    def waitAll(self, reqList = []):
         """
-        Wait for all pending asynchronous results. When this function returns,
-        DTM guarantees that all ready() call on asynchronous tasks will
-        return true.
+        Wait for all pending asynchronous results in list *reqList*. When this
+        function returns, DTM guarantees that all ready() call those
+        asynchronous tasks will return true.
+        
+        .. note::
+            If *reqList* is not specified or an empty list, DTM will wait over
+            all the current asynchronous tasks.
         """
-        threadId = threading.currentThread().tid
+        cThread = threading.currentThread()
+        currentId = cThread.tid
+        
+        idsToBlock = [asyncReq.taskKey for asyncReq in reqList]
         
         self.waitingThreadsLock.acquire()
-        if threadId in self.waitingThreads and len(self.waitingThreads[threadId].rWaitingDict) > 0:
-            self.waitingThreads[threadId].waitingMode = DTM_WAIT_ALL
+        if currentId not in self.waitingThreads.keys() or len(self.waitingThreads[currentId].rWaitingDict) == 0:
+            self.waitingThreadsLock.release()
+            return
+        
+        mustWait = False
+        for wChildTaskKey in self.waitingThreads[currentId].rWaitingDict:
+            if len(idsToBlock) == 0 or wChildTaskKey in idsToBlock:
+                self.waitingThreads[currentId].rWaitingDict[wChildTaskKey].waitingOn = True
+                mustWait = True
+        
+        if mustWait:
+            self.waitingThreads[currentId].waitingMode = DTM_WAIT_ALL
             self.waitingThreadsQueue.put(threading.currentThread().taskInfo)
             self.waitingThreadsLock.release()
-            threading.currentThread().waitForResult()
-            
-            self.waitingThreadsLock.acquire()
-            self.waitingThreads[threadId].waitingMode = DTM_WAIT_NONE           
-            self.waitingThreadsLock.release()
+            cThread.waitForResult()
         else:            
             self.waitingThreadsLock.release()
-            return        
-        return None
-
-    def testAllAsync(self):
+    
+    
+    def waitAny(self, reqList = []):
         """
-        Check whether all pending asynchronous tasks are done.
-        It does not lock if it is not the case, but returns false.
+        Wait for any pending asynchronous tasks in list *reqList*, then
+        return the :class:`~deap.dtm.taskmanager.AsyncResult` object of the
+        last finished asynchronous task (say, the most recent one). If there 
+        is no pending asynchronous tasks, this function will return None.
+        
+        .. note::
+            If *reqList* is not specified or an empty list, DTM will wait over
+            any of the current asynchronous tasks.
+        
+        .. warning::
+            This function only guarantees that at least one of the asynchronous
+            task will be done when it returns, but actually many others may 
+            have been done. In this case, this function returns only the last
+            one, even if called more than once.
         """
-        threadId = threading.currentThread().tid
+        cThread = threading.currentThread()
+        currentId = cThread.tid
+        
+        idsToBlock = [asyncReq.taskKey for asyncReq in reqList]
+        
         self.waitingThreadsLock.acquire()
+        if currentId not in self.waitingThreads.keys() or len(self.waitingThreads[currentId].rWaitingDict) == 0:
+            self.waitingThreadsLock.release()
+            if len(reqList) > 0:
+                return reqList[0]
+            else:
+                return None
+        
+        mustWait = False
+        for wChildTaskKey in self.waitingThreads[currentId].rWaitingDict:
+            if len(idsToBlock) == 0 or wChildTaskKey in idsToBlock:
+                self.waitingThreads[currentId].rWaitingDict[wChildTaskKey].waitingOn = True
+                mustWait = True
+        
+        if mustWait:
+            self.waitingThreads[currentId].waitingMode = DTM_WAIT_ANY
+            self.waitingThreadsQueue.put(threading.currentThread().taskInfo)
+            self.waitingThreadsLock.release()
+            cThread.waitForResult()
+            return cThread.taskInfo.lastSubTaskDone
+        else:            
+            self.waitingThreadsLock.release()
+            if len(reqList) > 0:
+                return reqList[0]
+            else:
+                return None
+    
+    def testAll(self, reqList = []):
+        """
+        Check whether all pending asynchronous tasks in list *reqList* are 
+        done. It does not lock if it is not the case, but returns False.
+        
+        .. note::
+            If *reqList* is not specified or an empty list, DTM will test the
+            completion of all the current asynchronous tasks.
+        """
+        threadId = threading.currentThread().tid       
+        idsToTest = [asyncReq.taskKey for asyncReq in reqList]
+               
+        self.waitingThreadsLock.acquire()
+        
         if threadId in self.waitingThreads:
-            ret = len(self.waitingThreads[threadId].rWaitingDict)
-            self.waitingThreadsLock.release()
-            return False
+            for wChildTaskKey in self.waitingThreads[threadId].rWaitingDict:
+                if len(idsToTest) == 0 or wChildTaskKey in idsToTest:
+                    self.waitingThreadsLock.release()
+                    return False
+            
+        self.waitingThreadsLock.release()
+        return True
+        
+    
+    def testAny(self, reqList = []):
+        """
+        Test the completion of any pending asynchronous task in list *reqList*,
+        then return the :class:`~deap.dtm.taskmanager.AsyncResult` object of 
+        the last finished asynchronous task (say, the most recent one). If 
+        there is no pending asynchronous tasks, this function will return None.
+        
+        .. note::
+            If *reqList* is not specified or an empty list, DTM will test the
+            completion of any of the current asynchronous tasks.
+        
+        .. warning::
+            This function always returns the same task (the last) if called 
+            more than once with the same parameters (e.g. it does not delete
+            the state of a completed task when called, so a second call will 
+            produce the same output). It is the user responsability to
+            provide a *reqList* containing only the tasks which he does not
+            know whether they are completed or not.
+            Similarly, multiple calls without specifing the *reqList* param
+            will always return the last finished asynchronous task.
+        """
+        
+        cThread = threading.currentThread()
+        threadId = threading.currentThread().tid       
+        idsToTest = [asyncReq.taskKey for asyncReq in reqList]
+        
+        allDone = True
+        for idT in idsToTest:
+            if idT not in cThread.asyncTasksDoneList:
+                allDone = False
+                break
+        
+        if allDone and len(reqList) > 0:
+            return reqList[0]
+        
+        if len(idsToTest) == 0:
+            if len(cThread.asyncTasksDoneList) == 0:
+                return None
+            else:
+                return cThread.taskInfo.lastSubTaskDone     # Will be None if no task
         else:
-            self.waitingThreadsLock.release()
-            return True
-
+            for i,idT in enumerate(idsToTest):
+                if idT in cThread.asyncTasksDoneList:
+                    return reqList[i]
+            return None
 
     def getWorkerId(self):
         """
@@ -1345,6 +1513,8 @@ class DtmThread(threading.Thread):
 
         self.waitingFlag = threading.Event()        
         self.waitingFlag.clear()
+        
+        self.asyncTasksDoneList = []        # IDs of async tasks done
         
         self.timeExec = 0
         self.timeBegin = 0
@@ -1459,17 +1629,19 @@ class AsyncResult(object):
     """
     The class of the result returned by :func:`~deap.dtm.taskmanager.Control.map_async()` and :func:`~deap.dtm.taskmanager.Control.apply_async()`.
     """
-    def __init__(self, control, waitingInfo, taskKey):
+    def __init__(self, control, waitingInfo, taskKey, resultIsIterable):
         self.control = control
         self.resultReturned = False
         self.resultSuccess = False
         self.resultVal = None
         self.taskKey = taskKey
         self.dictWaitingInfo = waitingInfo
+        self.isIter = resultIsIterable
         
     
     def _dtmCallback(self):
         # Used by DTM to inform the object that the job is done
+        # Should not be used by users
         self.resultSuccess = self.dictWaitingInfo.rWaitingDict[self.taskKey].success
         self.resultVal = self.dictWaitingInfo.rWaitingDict[self.taskKey].result
         self.resultReturned = True
@@ -1479,7 +1651,9 @@ class AsyncResult(object):
 
     def get(self):
         """
-        Return the result when it arrives.
+        Return the result when it arrives. If an exception has been raised in
+        the child task (and thus catched by DTM), then it will be raised when
+        this method will be called.
         
         .. note::
             This is a blocking call : caller will wait in this function until the result is ready.
@@ -1489,13 +1663,18 @@ class AsyncResult(object):
             self.wait()
         
         if self.resultSuccess:
-            return self.resultVal
+            if self.isIter:
+                return self.resultVal
+            else:
+                return self.resultVal[0]
         else:
             raise self.resultVal
 
     def wait(self):
         """
-        Wait until the result is available
+        Wait until the result is available. When this function returns, DTM
+        guarantees that a call to 
+        :func:`~deap.dtm.taskmanager.AsyncResult.ready()` will return true.
         """
         
         self.control.waitingThreadsLock.acquire()
@@ -1505,10 +1684,8 @@ class AsyncResult(object):
             self.control.waitingThreadsLock.release()
             return
         
-        self.control.waitingThreads[threading.currentThread().tid].waitingMode = DTM_WAIT_SOME
+        self.control.waitingThreads[threading.currentThread().tid].waitingMode = DTM_WAIT_ALL
         self.control.waitingThreads[threading.currentThread().tid].rWaitingDict[self.taskKey].waitingOn = True
-        #self.dictWaitingInfo.waitingMode = DTM_WAIT_SOME
-        #self.dictWaitingInfo.rWaitingDict[self.taskKey].waitingOn = True
         self.control.waitingThreadsQueue.put(threading.currentThread().taskInfo)
         self.control.waitingThreadsLock.release()
 
