@@ -43,7 +43,8 @@ class TaskContainer(object):
                 'args', # Arguments (list)
                 'kwargs', # Key-worded arguments (dictionnary)
                 'threadObject', # Python representation of the thread
-                'taskState')    # State of the task (DTM_TASK_*)
+                'taskState',    # State of the task (DTM_TASK_*)
+                'lastSubTaskDone') # Id of its last child task terminated or None
     def __init__(self, **kwargs):
         self.__setstate__(kwargs)    
     def __getstate__(self):
@@ -86,7 +87,7 @@ class ExceptedResultContainer(object):
                 'waitingOn', # Is the parent task waiting on this result?
                 'finished', # Boolean : is the task finished (i.e. result received)?
                 'success', # Boolean : False if unfinished or if an exception occured
-                'callbackFunc', # Callback function, FOR USE IN DTM, NO ARGUMENTS PASSED, or None
+                'callbackClass', # Match this result with an AsyncResult object, with a callback
                 'result')       # Result, or the exception occured
     def __init__(self, **kwargs):
         self.__setstate__(kwargs)   
