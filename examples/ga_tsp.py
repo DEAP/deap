@@ -14,7 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys;sys.path.append("..")
+import sys
 import logging
 import random
 import json
