@@ -6,12 +6,16 @@ Algorithms
 .. autofunction:: deap.algorithms.eaSimple(toolbox, population, cxpb, mutpb, ngen[, stats, halloffame])
 
 .. autofunction:: deap.algorithms.varSimple
+
+.. autofunction:: deap.algorithms.varAnd
    
 .. autofunction:: deap.algorithms.eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
 
 .. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame])
 
 .. autofunction:: deap.algorithms.varLambda
+
+.. autofunction:: deap.algorithms.varOr
 
 .. autofunction:: deap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame])
 

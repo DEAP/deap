@@ -39,7 +39,7 @@ def varSimple(toolbox, population, cxpb, mutpb):
     This function expects :meth:`toolbox.mate` and :meth:`toolbox.mutate`
     aliases to be registered in the toolbox.
     """
-    # Apply crossover and mutation on the offsprings
+    # Apply crossover and mutation on the offspring
     for ind1, ind2 in zip(population[::2], population[1::2]):
         if random.random() < cxpb:
             toolbox.mate(ind1, ind2)
@@ -52,7 +52,46 @@ def varSimple(toolbox, population, cxpb, mutpb):
     
     return population
 
-def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None):
+def varAnd(toolbox, population, cxpb, mutpb):
+    """Part of an evolutionary algorithm applying only the variation part
+    (crossover **and** mutation). The modified individuals have their
+    fitness invalidated. The individuals are cloned so returned population is
+    independent of the input population.
+    
+    The variator goes as follow. First, the parental population
+    :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
+    and the result is put into the offspring population :math:`P_\mathrm{o}`.
+    A first loop over :math:`P_\mathrm{o}` is executed to mate consecutive
+    individuals. According to the crossover probability *cxpb*, the
+    individuals :math:`\mathbf{x}_i` and :math:`\mathbf{x}_{i+1}` are mated
+    using the :meth:`toolbox.mate` method. The resulting children
+    :math:`\mathbf{y}_i` and :math:`\mathbf{y}_{i+1}` replace their respective
+    parents in :math:`P_\mathrm{o}`. A second loop over the resulting
+    :math:`P_\mathrm{o}` is executed to mutate every individual with a
+    probability *mutpb*. When an individual is mutated it replaces its not
+    mutated version in :math:`P_\mathrm{o}`. The resulting
+    :math:`P_\mathrm{o}` is returned.
+    
+    This variation is named *And* beceause of its propention to apply both
+    crossover and mutation on the individuals. Both probabilities should be in
+    :math:`[0, 1]`.
+    """
+    offspring = [toolbox.clone(ind) for ind in population]
+    
+    # Apply crossover and mutation on the offspring
+    for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+        if random.random() < cxpb:
+            toolbox.mate(ind1, ind2)
+            del ind1.fitness.values, ind2.fitness.values
+    
+    for ind in offspring:
+        if random.random() < mutpb:
+            toolbox.mutate(ind)
+            del ind.fitness.values
+    
+    return offspring
+
+def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of Back, Fogel and Michalewicz,
     "Evolutionary Computation 1 : Basic Algorithms and Operators", 2000.
@@ -71,11 +110,11 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     
         evaluate(population)
         for i in range(ngen):
-            offsprings = select(population)
-            offsprings = mate(offsprings)
-            offsprings = mutate(offsprings)
-            evaluate(offsprings)
-            population = offsprings
+            offspring = select(population)
+            offspring = mate(offspring)
+            offspring = mutate(offspring)
+            evaluate(offspring)
+            population = offspring
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
@@ -130,6 +169,52 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     _logger.info("End of (successful) evolution")
     return population
 
+def varOr(toolbox, population, lambda_, cxpb, mutpb):
+    """Part of an evolutionary algorithm applying only the variation part
+    (crossover, mutation **or** reproduction). The modified individuals have
+    their fitness invalidated. The individuals are cloned so returned
+    population is independent of the input population.
+    
+    The variator goes as follow. On each of the *lambda_* iteration, it
+    selects one of the three operations; crossover, mutation or reproduction.
+    In the case of a crossover, two individuals are selected at random from
+    the parental population :math:`P_\mathrm{p}`, those individuals are cloned
+    using the :meth:`toolbox.clone` method and then mated using the
+    :meth:`toolbox.mate` method. Only the first child is appended to the
+    offspring population :math:`P_\mathrm{o}`, the second child is discarded.
+    In the case of a mutation, one individual is selected at random from
+    :math:`P_\mathrm{p}`, it is cloned and then mutated using using the
+    :meth:`toolbox.mutate` method. The resulting mutant is appended to
+    :math:`P_\mathrm{o}`. In the case of a reproduction, one individual is
+    selected at random from :math:`P_\mathrm{p}`, cloned and appended to
+    :math:`P_\mathrm{o}`.
+    
+    This variation is named *Or* beceause an offspring will never result from
+    both operations crossover and mutation. The sum of both probabilities
+    shall be in :math:`[0, 1]`, the reproduction probability is
+    1 - *cxpb* - *mutpb*.
+    """
+    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
+        "probabilities must be smaller or equal to 1.0.")
+        
+    offsprings = []
+    for _ in xrange(lambda_):
+        op_choice = random.random()
+        if op_choice < cxpb:            # Apply crossover
+            ind1, ind2 = [toolbox.clone(ind) for ind in random.sample(population, 2)]
+            toolbox.mate(ind1, ind2)
+            del ind1.fitness.values
+            offsprings.append(ind1)
+        elif op_choice < cxpb + mutpb:  # Apply mutation
+            ind = toolbox.clone(random.choice(population))
+            toolbox.mutate(ind)
+            del ind.fitness.values
+            offsprings.append(ind)
+        else:                           # Apply reproduction
+            offsprings.append(random.choice(population))
+    
+    return offsprings
+
 def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     """Part of the :func:`~deap.algorithms.eaMuPlusLambda` and
     :func:`~deap.algorithms.eaMuCommaLambda` algorithms that produce the 
@@ -176,18 +261,18 @@ def varLambda(toolbox, population, lambda_, cxpb, mutpb):
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
-    evolutionary loop begins by producing *lambda* offsprings from the
-    population, the offsprings are generated by a crossover, a mutation or a
+    evolutionary loop begins by producing *lambda* offspring from the
+    population, the offspring are generated by a crossover, a mutation or a
     reproduction proportionally to the probabilities *cxpb*, *mutpb* and
-    1 - (cxpb + mutpb). The offsprings are then evaluated and the next
-    generation population is selected from both the offsprings **and** the
+    1 - (cxpb + mutpb). The offspring are then evaluated and the next
+    generation population is selected from both the offspring **and** the
     population. Briefly, the operators are applied as following ::
     
         evaluate(population)
         for i in range(ngen):
-            offsprings = generate_offsprings(population)
-            evaluate(offsprings)
-            population = select(population + offsprings)
+            offspring = generate_offspring(population)
+            evaluate(offspring)
+            population = select(population + offspring)
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
@@ -250,18 +335,18 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
-    evolutionary loop begins by producing *lambda* offsprings from the
-    population, the offsprings are generated by a crossover, a mutation or a
+    evolutionary loop begins by producing *lambda* offspring from the
+    population, the offspring are generated by a crossover, a mutation or a
     reproduction proportionally to the probabilities *cxpb*, *mutpb* and
-    1 - (cxpb + mutpb). The offsprings are then evaluated and the next
-    generation population is selected **only** from the offsprings. Briefly,
+    1 - (cxpb + mutpb). The offspring are then evaluated and the next
+    generation population is selected **only** from the offspring. Briefly,
     the operators are applied as following ::
     
         evaluate(population)
         for i in range(ngen):
-            offsprings = generate_offsprings(population)
-            evaluate(offsprings)
-            population = select(offsprings)
+            offspring = generate_offspring(population)
+            evaluate(offspring)
+            population = select(offspring)
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
