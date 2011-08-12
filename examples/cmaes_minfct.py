@@ -19,7 +19,7 @@ import random
 import logging
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-random.seed(128)     # Random must be seeded before importing cma because it is
+random.seed(128)    # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.
 
@@ -30,7 +30,7 @@ from deap import creator
 from deap import tools
 
 # Problem size
-N=10
+N=30
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
@@ -42,7 +42,7 @@ def main():
     # The CMA-ES algorithm takes a population of one individual as argument
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
     # for more details about the rastrigin and other tests for CMA-ES    
-    strategy = cma.CMAStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=200)
+    strategy = cma.CMAStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
     pop = strategy.generate(creator.Individual)
     hof = tools.HallOfFame(1)
     toolbox.register("update", strategy.update)
@@ -54,19 +54,10 @@ def main():
     stats.register("Max", max)
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(toolbox, pop, ngen=125, halloffame=hof, statistics=stats)
+    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, statistics=stats)
     
     # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]
 
 if __name__ == "__main__":
-    result = []
-    for i in xrange(50):
-        result.append(main())
-    print tools.mean(result)
-    print tools.median(result)
-    print tools.std(result)
-    print max(result)
-    print min(result)
-
-    print sum(1 for i in result if i < 0.1)
+    main()
