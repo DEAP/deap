@@ -81,15 +81,15 @@ if the original individual has to be kept or is a *reference* to an other indivi
 In order to apply a mutation (here a gaussian mutation) on the individual ``ind1``,
 simply apply the desired function. ::
 
-   mutant = toolbox.clone(ind1)
+	mutant = toolbox.clone(ind1)
 	ind2 = tools.mutGaussian(mutant, sigma=0.2, indpb=0.2)
-   del mutant.fitness.values
+	del mutant.fitness.values
 
 The fitness' values are deleted because they not related to the individual anymore. As stated above, the mutation does mutate and only mutate an individual it is not responsible of invalidating the fitness nor anything else. The following shows that ``ind2`` and ``mutant`` are in fact the same individual.
 ::
 
 	print ind2 is mutant    # True
-	print mutant is ind1		# False
+	print mutant is ind1    # False
 
 Crossover
 ---------
