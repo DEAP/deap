@@ -79,6 +79,7 @@ input individual.
             mutant.add(random.choice(items.keys()))
 
 .. note::
+
    The outcome of this mutation is dependent of the python you use. The
    :meth:`set.pop` function is not consistent between versions of python. See
    the sources of the actual example for a version that will be stable but
