@@ -14,11 +14,8 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
 import random
-import logging
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 random.seed(128)    # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.

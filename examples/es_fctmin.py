@@ -14,11 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
 import random
-import logging
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
@@ -80,8 +76,6 @@ def main():
     algorithms.eaMuCommaLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
                                cxpb=0.6, mutpb=0.3, ngen=500, 
                                stats=stats, halloffame=hof)
-    
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
     
     return pop, stats, hof
     

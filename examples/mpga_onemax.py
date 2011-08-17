@@ -15,12 +15,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import logging
 import multiprocessing
-import random
-import sys
-
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 import random
 
 from deap import algorithms
@@ -60,4 +55,3 @@ if __name__ == "__main__":
     hof = tools.HallOfFame(1)
     
     algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)

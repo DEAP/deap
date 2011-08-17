@@ -15,10 +15,7 @@
 
 import array
 import logging
-import sys
 import random
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
@@ -75,11 +72,6 @@ def main():
     algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
                               cxpb=0.5, mutpb=0.2, ngen=50, 
                               stats=stats, halloffame=hof)
-    
-    logging.info("Best individual for measure 1 is %s, %s", 
-                 hof[0], hof[0].fitness.values)
-    logging.info("Best individual for measure 2 is %s, %s", 
-                 hof[-1], hof[-1].fitness.values)
 
     return pop, stats, hof
 

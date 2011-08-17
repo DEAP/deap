@@ -13,19 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import random
 import operator
-import logging
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 from deap import gp
-
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 # Initialize Parity problem input and output matrices
 PARITY_FANIN_M = 6
@@ -88,8 +83,6 @@ def main():
     stats.register("Max", max)
     
     algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
-    
-    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
     
     return pop, stats, hof
 

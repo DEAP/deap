@@ -15,17 +15,13 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import csv
-import logging
 import random
-import sys
 
 import knn
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 # kNN parameters
 import knn
@@ -82,7 +78,6 @@ def main():
     algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA,
                               cxpb=0.5, mutpb=0.2, ngen=40, 
                               stats=stats, halloffame=hof)
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
     
     return pop, stats, hof
 
