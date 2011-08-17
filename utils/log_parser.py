@@ -19,10 +19,6 @@ import optparse
 import re
 import sys
 
-#sys.argv.append("../deap.log")
-#sys.argv.append("-o deap.json")
-#sys.argv.append("-t")
-
 if __name__ == "__main__":
     parser = optparse.OptionParser(usage="%prog [options] logfile")
     parser.add_option("-o", "--output", action="store", type="string",
@@ -42,8 +38,6 @@ if __name__ == "__main__":
         logfile = sys.stdin
     except:
         parser.error()
-    
-    
     
     # First line is the columns' name
     col_names = logfile.readline().split()
