@@ -21,28 +21,35 @@
 Evolution Strategy.
 """
 
-import logging
 from math import sqrt, log, exp
 import numpy
 import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
 import copy
+import time
 
 numpy.random.seed(random.randint(0, sys.maxint))
-
-_logger = logging.getLogger("deap.cma")
     
-def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
+def esCMA(toolbox, population, ngen, halloffame=None, statistics=None, verbose=True):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
     The provided *population* should be a list of one or more individuals.
     """
-    _logger.info("Start of evolution")
+    if verbose:
+        lg_stat_names = tuple()
+        lg_stat_values = tuple()
+        lg_stat_str = ""
+        start_time = time.time()
+    
+        if statistics is not None:
+            lg_stat_names = tuple(name for name in statistics.functions.keys())
+            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
         
-    for g in xrange(ngen):
-        _logger.info("Evolving generation %i", g)
+        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
         
+    for gen in xrange(ngen):
         # Evaluate the individuals
         for ind in population:
             ind.fitness.values = toolbox.evaluate(ind)
@@ -55,9 +62,13 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
         
         if statistics is not None:
             statistics.update(population)
-            _logger.debug(statistics)
-
-    _logger.info("End of (successful) evolution")
+            if verbose:
+                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % statistics[0][key][-1][d] for d in range(len(statistics[0][key][-1]))) for key in lg_stat_names))
+        
+        if verbose:
+            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(population)) +
+                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+            start_time = time.time()
 
 class CMAStrategy(object):
     """
