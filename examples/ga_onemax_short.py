@@ -14,11 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
 import random
-import logging
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
@@ -57,7 +53,6 @@ def main():
     stats.register("Max", max)
     
     algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats, halloffame=hof)
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
     
     return pop, stats, hof
 

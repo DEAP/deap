@@ -14,12 +14,9 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
 import random
-import logging
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-# random.seed(64)     # Random must be seeded before importing cma because it is
+random.seed(64)     # Random must be seeded before importing cma because it is
                     # used to seed numpy.random
                     # This will be fixed in future release.
 
@@ -29,7 +26,7 @@ from deap import cma
 from deap import creator
 from deap import tools
 
-N=5
+N=30
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
@@ -58,8 +55,6 @@ def main():
    
     # The CMA-ES algorithm converge with good probability with those settings
     cma.esCMA(toolbox, pop, ngen=600, halloffame=hof, statistics=stats)
-    
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
 
 if __name__ == "__main__":
     main()

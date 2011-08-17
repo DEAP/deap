@@ -13,18 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import random
-import logging
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 
-IND_SIZE = 30
+IND_INIT_SIZE = 5
 MAX_ITEM = 50
 MAX_WEIGHT = 50
 NBR_ITEMS = 20
@@ -45,7 +41,7 @@ toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
 toolbox.register("individual", tools.initRepeat, creator.Individual, 
-    toolbox.attr_item, IND_SIZE)
+    toolbox.attr_item, IND_INIT_SIZE)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalKnapsack(individual):
@@ -86,11 +82,10 @@ def main():
     MU = 50
     LAMBDA = 100    
     
-
     # Create random items and store them in the items' dictionary.
     for i in xrange(NBR_ITEMS):
         items[i] = (random.randint(1, 10), random.uniform(0, 100))
-
+    
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -100,11 +95,6 @@ def main():
     stats.register("Max", max)
     
     algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, 0.7, 0.2, NGEN, stats, halloffame=hof)
-
-    logging.info("Best individual for measure 1 is %s, %s", 
-                 hof[0], hof[0].fitness.values)
-    logging.info("Best individual for measure 2 is %s, %s", 
-                 hof[-1], hof[-1].fitness.values)
     
     return pop, stats, hof
                  

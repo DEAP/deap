@@ -13,10 +13,8 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import operator
 import math
-import logging
 import random
 
 from deap import algorithms
@@ -70,8 +68,6 @@ toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
     random.seed(318)
-    
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
@@ -82,7 +78,6 @@ def main():
     stats.register("Max", max)
     
     algorithms.eaSimple(toolbox, pop, 0.5, 0.1, 40, stats, halloffame=hof)
-    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
     
     return pop, stats, hof
 
