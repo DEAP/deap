@@ -25,10 +25,9 @@ You are encouraged to write your own algorithms in order to make them do what
 you really want them to do.
 """
 
-import logging
 import random
-
-_logger = logging.getLogger("deap.algorithms")
+import itertools
+import time
 
 def varSimple(toolbox, population, cxpb, mutpb):
     """Part of the :func:`~deap.algorithmes.eaSimple` algorithm applying only
@@ -120,8 +119,12 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
     """
-    _logger.info("Start of evolution")
-
+    if verbose:
+        lg_stat_names = tuple()
+        lg_stat_values = tuple()
+        lg_stat_str = ""
+        start_time = time.time()
+    
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -132,10 +135,23 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
+        if verbose:
+            lg_stat_names = tuple(name for name in stats.functions.keys())
+            # A very ugly string formatting line, it is used so that floats
+            # can be formatted with %g without having the string markers in
+            # the output. (Don't look a this please!)
+            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
+            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
+        
+    if verbose:
+        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
+        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+        start_time = time.time()
 
     # Begin the generational process
     for gen in range(ngen):
-        _logger.info("Evolving generation %i", gen)
         # Select and clone the next generation individuals
         offsprings = toolbox.select(population, len(population))
         offsprings = map(toolbox.clone, offsprings)
@@ -153,20 +169,20 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         if halloffame is not None:
             halloffame.update(offsprings)
             
-        _logger.debug("Evaluated %i individuals", len(invalid_ind))  
-        
         # Replace the current population by the offsprings
         population[:] = offsprings
         
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
+            if verbose:
+                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
         
-        # Log statistics on the current generation
-        if stats is not None:
-            print stats
-
-    _logger.info("End of (successful) evolution")
+        if verbose:
+            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(invalid_ind)) +
+                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+            start_time = time.time()
+        
     return population
 
 def varOr(toolbox, population, lambda_, cxpb, mutpb):
@@ -258,7 +274,7 @@ def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     
     return offsprings
 
-def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None):
+def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
     evolutionary loop begins by producing *lambda* offspring from the
@@ -284,7 +300,11 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
     
     """
     
-    _logger.info("Start of evolution")
+    if verbose:
+        lg_stat_names = tuple()
+        lg_stat_values = tuple()
+        lg_stat_str = ""
+        start_time = time.time()
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -292,17 +312,27 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
 
-    _logger.debug("Evaluated %i individuals", len(invalid_ind))
-
     if halloffame is not None:
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-
+        if verbose:
+            lg_stat_names = tuple(name for name in stats.functions.keys())
+            # A very ugly string formatting line, it is used so that floats
+            # can be formatted with %g without having the string markers in
+            # the output. (Don't look a this please!)
+            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
+            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
+    
+    if verbose:
+        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
+        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+        start_time = time.time()
+        
     # Begin the generational process
     for gen in range(ngen):
-        _logger.info("Evolving generation %i", gen)
-        
         # Variate the population
         offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
         
@@ -311,8 +341,6 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        
-        _logger.debug("Evaluated %i individuals", len(invalid_ind))
         
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -324,15 +352,17 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
+            if verbose:
+                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
         
-        # Log statistics on the current generation
-        if stats is not None:
-            _logger.debug(stats)
-
-    _logger.info("End of (successful) evolution")
+        if verbose:
+            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(invalid_ind)) +
+                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+            start_time = time.time()
+                    
     return population
     
-def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None):
+def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
     evolutionary loop begins by producing *lambda* offspring from the
@@ -358,7 +388,11 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
     """
     assert lambda_ >= mu, "lambda must be greater or equal to mu."
         
-    _logger.info("Start of evolution")
+    if verbose:
+        lg_stat_names = tuple()
+        lg_stat_values = tuple()
+        lg_stat_str = ""
+        start_time = time.time()
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -366,17 +400,26 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
 
-    _logger.debug("Evaluated %i individuals", len(invalid_ind))
-
     if halloffame is not None:
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
+        if verbose:
+            lg_stat_names = tuple(name for name in stats.functions.keys())
+            # A very ugly string formatting line, it is used so that floats
+            # can be formatted with %g without having the string markers in
+            # the output. (Don't look a this please!)
+            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
+            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
+    
+    if verbose:
+        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
+        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
 
     # Begin the generational process
     for gen in range(ngen):
-        _logger.info("Evolving generation %i", gen)
-        
         # Variate the population
         offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
 
@@ -385,8 +428,6 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-
-        _logger.debug("Evaluated %i individuals", len(invalid_ind))
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -398,12 +439,14 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
+            if verbose:
+                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
+        
+        if verbose:
+            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(invalid_ind)) +
+                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+            start_time = time.time()
 
-        # Log statistics on the current generation
-        if stats is not None:
-            _logger.debug(stats)
-
-    _logger.info("End of (successful) evolution")
     return population
 
 def varSteadyState(toolbox, population):
@@ -429,7 +472,7 @@ def varSteadyState(toolbox, population):
     
     return child,
 
-def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
+def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbose=True):
     """The steady-state evolutionary algorithm. Every generation, a single new
     individual is produced and put in the population producing a population of
     size :math:`lambda+1`, then :math:`lambda` individuals are kept according
@@ -439,7 +482,11 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
     """
-    _logger.info("Start of evolution")
+    if verbose:
+        lg_stat_names = tuple()
+        lg_stat_values = tuple()
+        lg_stat_str = ""
+        start_time = time.time()
     
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -449,11 +496,24 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
     
     if halloffame is not None:
         halloffame.update(population)
+    if stats is not None:
+        stats.update(population)
+        if verbose:
+            lg_stat_names = tuple(name for name in stats.functions.keys())
+            # A very ugly string formatting line, it is used so that floats
+            # can be formatted with %g without having the string markers in
+            # the output. (Don't look a this please!)
+            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
+            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
+
+    if verbose:
+        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
+        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
     
     # Begin the generational process
     for gen in range(ngen):
-        _logger.info("Evolving generation %i", gen)
-        
         # Variate the population
         child, = varSteadyState(toolbox, population)
         
@@ -470,10 +530,12 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None):
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
+            if verbose:
+                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % stats[0][key][-1][d] for d in range(len(stats[0][key][-1]))) for key in lg_stat_names))
+        
+        if verbose:
+            print("{0:>5d}".format(gen) + " {0:>5d}".format(1) +
+                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+            start_time = time.time()
 
-        # Log statistics on the current generation
-        if stats is not None:
-            _logger.debug(stats)
-
-    _logger.info("End of (successful) evolution")
     return population
