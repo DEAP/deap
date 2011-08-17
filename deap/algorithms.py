@@ -26,7 +26,6 @@ you really want them to do.
 """
 
 import random
-import itertools
 import time
 
 def varSimple(toolbox, population, cxpb, mutpb):
