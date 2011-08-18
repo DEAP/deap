@@ -41,23 +41,23 @@ replacing classes.
 """
 
 try:
-    import numpy
+    from numpy import array, ndarray
 except ImportError:
     pass
 else:
-    class _numpy_array(numpy.ndarray):
+    class _numpy_array(ndarray):
         def __deepcopy__(self, memo):
             """Overrides the deepcopy from numpy.ndarray that does not copy
             the object's attributes.
             """
-            copy_ = numpy.ndarray.__deepcopy__(self, memo)
+            copy_ = ndarray.__deepcopy__(self, memo)
             copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
             return copy_
 
         @staticmethod
         def __new__(cls, iterable):
             """Creates a new instance of a numpy.ndarray from a function call"""
-            return numpy.array(list(iterable)).view(cls)
+            return array(list(iterable)).view(cls)
 
         def __array_finalize__(self, obj):
             # __init__ will reinitialize every member of the subclass.
@@ -69,7 +69,7 @@ else:
             # This is significantly slower. 
             #if self.__class__ == obj.__class__:
             #    self.__dict__.update(copy.deepcopy(obj.__dict__))
-    class_replacers[numpy.ndarray] = _numpy_array
+    class_replacers[ndarray] = _numpy_array
 
 class _array(array.array):
     @staticmethod
