@@ -42,7 +42,13 @@ replacing classes.
 
 try:
     import numpy
+    (numpy.ndarray, numpy.array)
 except ImportError:
+    # Numpy is not present, skip the definition of the replacement class.
+    pass
+except AttributeError:
+    # Numpy is present, but there is either no ndarray or array in numpy,
+    # also skip the definition of the replacement class.
     pass
 else:
     class _numpy_array(numpy.ndarray):
