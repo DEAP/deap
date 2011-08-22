@@ -89,7 +89,7 @@ def varAnd(toolbox, population, cxpb, mutpb):
     
     return offspring
 
-def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None):
+def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of Back, Fogel and Michalewicz,
     "Evolutionary Computation 1 : Basic Algorithms and Operators", 2000.
