@@ -121,7 +121,7 @@ def create(name, base, **kargs):
     This above line is exactly the same as defining in the :mod:`creator`
     module something like the following. ::
     
-        def Foo(list):
+        class Foo(list):
             spam = 1
             
             def __init__(self):
