@@ -1392,6 +1392,11 @@ def decorate(decorator):
         if not signature:
             raise TypeError("You are decorating a non function: %s" % func)
 
+        # Change function name for lambda function that gets the "<lambda>"
+        # name
+        if func.__name__ == "<lambda>":
+            func.__name__ = "lambda_func"
+
         # From create
         src = ("def %(name)s(%(signature)s):\n"
                "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
