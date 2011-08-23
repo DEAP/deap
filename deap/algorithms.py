@@ -139,7 +139,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
             # A very ugly string formatting line, it is used so that floats
             # can be formatted with %g without having the string markers in
             # the output. (Don't look a this please!)
-            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
             lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
         
     if verbose:
@@ -175,7 +175,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         if stats is not None:
             stats.update(population)
             if verbose:
-                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
         
         if verbose:
             print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
@@ -320,7 +320,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
             # A very ugly string formatting line, it is used so that floats
             # can be formatted with %g without having the string markers in
             # the output. (Don't look a this please!)
-            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
             lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
     
     if verbose:
@@ -352,7 +352,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         if stats is not None:
             stats.update(population)
             if verbose:
-                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
         
         if verbose:
             print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
@@ -408,7 +408,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
             # A very ugly string formatting line, it is used so that floats
             # can be formatted with %g without having the string markers in
             # the output. (Don't look a this please!)
-            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
             lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
     
     if verbose:
@@ -439,7 +439,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         if stats is not None:
             stats.update(population)
             if verbose:
-                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
         
         if verbose:
             print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
@@ -502,7 +502,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
             # A very ugly string formatting line, it is used so that floats
             # can be formatted with %g without having the string markers in
             # the output. (Don't look a this please!)
-            lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
             lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
 
     if verbose:
@@ -530,7 +530,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
         if stats is not None:
             stats.update(population)
             if verbose:
-                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
+                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
         
         if verbose:
             print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(1) +
