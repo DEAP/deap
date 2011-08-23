@@ -145,7 +145,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     if verbose:
         print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
               (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
               (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
         start_time = time.time()
 
@@ -178,7 +178,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
                 lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
         
         if verbose:
-            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(invalid_ind)) +
+            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
                   (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
             start_time = time.time()
         
@@ -326,7 +326,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
     if verbose:
         print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
               (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
               (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
         start_time = time.time()
         
@@ -355,7 +355,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
                 lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
         
         if verbose:
-            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(invalid_ind)) +
+            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
                   (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
             start_time = time.time()
                     
@@ -414,7 +414,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
     if verbose:
         print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
               (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
               (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
 
     # Begin the generational process
@@ -442,7 +442,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
                 lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
         
         if verbose:
-            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(invalid_ind)) +
+            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
                   (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
             start_time = time.time()
 
@@ -508,7 +508,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
     if verbose:
         print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
               (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5s}".format("init.") + " {0:>5d}".format(len(invalid_ind)) +
+        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
               (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
     
     # Begin the generational process
@@ -533,7 +533,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
                 lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names))
         
         if verbose:
-            print("{0:>5d}".format(gen) + " {0:>5d}".format(1) +
+            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(1) +
                   (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
             start_time = time.time()
 
