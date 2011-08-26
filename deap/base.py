@@ -128,6 +128,9 @@ class Fitness(object):
             raise TypeError("Can't instantiate abstract %r with abstract "
                 "attribute weights." % (self.__class__))
         
+        if not hasattr(self.weights, "__iter__"):
+            raise TypeError("Attribute weights of %r must be a sequence." % self.__class__)
+        
         if len(values) > 0:
             self.values = values
         
@@ -135,8 +138,11 @@ class Fitness(object):
         return tuple(map(operator.div, self.wvalues, self.weights))
             
     def setValues(self, values):
-        self.wvalues = tuple(map(operator.mul, values, self.weights))
-            
+        try:
+            self.wvalues = tuple(map(operator.mul, values, self.weights))
+        except TypeError:
+            raise TypeError("Both weights and assigned values must be a "
+            "sequence of numbers when assigning to values of %r." % self.__class__)
     def delValues(self):
         self.wvalues = ()
 
