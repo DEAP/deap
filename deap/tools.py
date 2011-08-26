@@ -30,6 +30,7 @@ from itertools import chain
 from operator import attrgetter, eq
 from collections import defaultdict, Iterable
 from functools import partial
+import time
 
 try:
     import yaml
@@ -419,9 +420,50 @@ class Statistics(object):
 
         for key, func in self.functions.iteritems():
             data[key].append(map(func, values))
-    
+
     def __str__(self):
-        return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.data[-1].iteritems())
+                return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1])))
+                                 for key, stat in self.data[-1].iteritems())
+
+class EvolutionLogger(object):
+
+    def __init__(self, stats):
+        self.lg_stats_names = ()
+        self.lg_stats_values = ()
+        self.lg_stat_str = ""
+        if stats is not None:
+            self.stats = stats
+            self.lg_stat_names = tuple(name for name in stats.functions.keys())
+            # A very ugly string formatting line, it is used so that floats
+            # can be formatted with %g without having the string markers
+            # in the output. (Don't look a this please!)
+            self.lg_stat_str = "".join(tuple(" %12s",) * len(self.lg_stat_names))
+            self.log_gen = self.log_gen_stats
+            print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+                  (self.lg_stat_str % self.lg_stat_names) + 
+                  "{:>8s}".format("Time"))
+        else:
+            print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
+                  "{:>8s}".format("Time"))
+
+    def start(self):
+        self.start_time = time.time()
+
+    def log_gen(self, nbr_eval, gen):
+        print("{0:>5d}".format(gen) + 
+              " {0:>5d}".format(nbr_eval) +
+              " {:>7.4f}".format(time.time() - self.start_time))
+        self.start_time = time.time()
+
+    def log_gen_stats(self, nbr_eval, gen):
+        lg_stat_values = tuple("[%s]" % ", ".join("%.4f" % value for value in
+                                                  self.stats[0][key][-1]) 
+                               for key in self.lg_stat_names)
+        print("{0:>5d}".format(gen) + 
+              " {0:>5d}".format(nbr_eval) +
+              (self.lg_stat_str %  lg_stat_values) + 
+              " {:>7.4f}".format(time.time() - self.start_time))
+        self.start_time = time.time()
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the

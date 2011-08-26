@@ -27,6 +27,7 @@ you really want them to do.
 
 import random
 import time
+import tools
 
 def varSimple(toolbox, population, cxpb, mutpb):
     """Part of the :func:`~deap.algorithmes.eaSimple` algorithm applying only
@@ -119,11 +120,9 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     registered in the toolbox.
     """
     if verbose:
-        lg_stat_names = tuple()
-        lg_stat_values = tuple()
-        lg_stat_str = ""
-        start_time = time.time()
-    
+        logger = tools.EvolutionLogger(stats)
+        logger.start()
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -134,23 +133,11 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-        if verbose:
-            lg_stat_names = tuple(name for name in stats.functions.keys())
-            # A very ugly string formatting line, it is used so that floats
-            # can be formatted with %g without having the string markers in
-            # the output. (Don't look a this please!)
-            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
-        
-    if verbose:
-        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
-              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-        start_time = time.time()
+    if verbose: 
+        logger.log_gen(len(population), 0)
 
     # Begin the generational process
-    for gen in range(ngen):
+    for gen in range(1, ngen+1):
         # Select and clone the next generation individuals
         offsprings = toolbox.select(population, len(population))
         offsprings = map(toolbox.clone, offsprings)
@@ -174,14 +161,10 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-            if verbose:
-                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-        
+
         if verbose:
-            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
-                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-            start_time = time.time()
-        
+            logger.log_gen(len(invalid_ind), gen)
+
     return population
 
 def varOr(toolbox, population, lambda_, cxpb, mutpb):
@@ -300,10 +283,8 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
     """
     
     if verbose:
-        lg_stat_names = tuple()
-        lg_stat_values = tuple()
-        lg_stat_str = ""
-        start_time = time.time()
+        logger = tools.EvolutionLogger(stats)
+        logger.start()
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -315,23 +296,11 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-        if verbose:
-            lg_stat_names = tuple(name for name in stats.functions.keys())
-            # A very ugly string formatting line, it is used so that floats
-            # can be formatted with %g without having the string markers in
-            # the output. (Don't look a this please!)
-            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
-    
     if verbose:
-        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
-              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-        start_time = time.time()
-        
+        logger.log_gen(len(invalid_ind), 0)
+
     # Begin the generational process
-    for gen in range(ngen):
+    for gen in range(1, ngen+1):
         # Variate the population
         offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
         
@@ -351,14 +320,9 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-            if verbose:
-                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-        
         if verbose:
-            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
-                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-            start_time = time.time()
-                    
+           logger.log_gen(len(invalid_ind), gen)
+
     return population
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
@@ -388,10 +352,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
     assert lambda_ >= mu, "lambda must be greater or equal to mu."
         
     if verbose:
-        lg_stat_names = tuple()
-        lg_stat_values = tuple()
-        lg_stat_str = ""
-        start_time = time.time()
+        logger = tools.EvolutionLogger(stats)
+        logger.start()
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -403,22 +365,11 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-        if verbose:
-            lg_stat_names = tuple(name for name in stats.functions.keys())
-            # A very ugly string formatting line, it is used so that floats
-            # can be formatted with %g without having the string markers in
-            # the output. (Don't look a this please!)
-            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
-    
     if verbose:
-        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
-              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
+        logger.log_gen(len(invalid_ind), 0)
 
     # Begin the generational process
-    for gen in range(ngen):
+    for gen in range(1, ngen+1):
         # Variate the population
         offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
 
@@ -438,13 +389,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-            if verbose:
-                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-        
         if verbose:
-            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(len(invalid_ind)) +
-                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-            start_time = time.time()
+            logger.log_gen(len(invalid_ind), gen)
 
     return population
 
