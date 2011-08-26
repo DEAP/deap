@@ -28,7 +28,7 @@ import math
 import random
 from itertools import chain
 from operator import attrgetter, eq
-from collections import defaultdict
+from collections import defaultdict, Iterable
 from functools import partial
 
 try:
@@ -411,9 +411,12 @@ class Statistics(object):
         # Transpose the values
         data = self.data[index]
         try:
+            # seq is a sequence of number sequences.
             values = zip(*(self.key(elem) for elem in seq))
         except TypeError:
-            values = zip(*[(self.key(elem),) for elem in seq])
+            # seq is a sequence of numbers.
+            values = (seq,)
+
         for key, func in self.functions.iteritems():
             data[key].append(map(func, values))
     
