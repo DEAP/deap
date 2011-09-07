@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+from distutils.core import setup, Extension
 
 import deap
 
+eap_ctools = Extension('deap.cTools',
+                    sources = ['deap/cTools.cpp'])
+#sn_cevaluator = Extension('evaluateSN_C',
+                    #sources = ['examples/SNC.cpp'])
+                    
 setup(name='deap',
       version=deap.__version__,
       description='Distributed Evolutionary Algorithms in Python',
@@ -26,4 +31,5 @@ setup(name='deap',
         'Topic :: Scientific/Engineering',
         'Topic :: Software Development',
         ],
+     ext_modules = [eap_ctools]
      )
