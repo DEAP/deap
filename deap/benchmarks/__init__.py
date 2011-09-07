@@ -264,9 +264,9 @@ def zdt1(individual):
         exit()
     return f1, f2
     
-def fonesca(individual):
-    """Fonesca and Fleming's multiobjective function.
-    From: C. M. Fonesca and P. J. Fleming, "Multiobjective optimization and
+def fonseca(individual):
+    """Fonseca and Fleming's multiobjective function.
+    From: C. M. Fonseca and P. J. Fleming, "Multiobjective optimization and
     multiple constraint handling with evolutionary algorithms -- Part II:
     Application example", IEEE Transactions on Systems, Man and Cybernetics,
     1998.
