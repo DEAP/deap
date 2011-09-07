@@ -232,3 +232,19 @@ def kursawe(individual):
     f1 = sum(-10 * exp(-0.2 * sqrt(x * x + y * y)) for x, y in zip(individual[:-1], individual[1:]))
     f2 = sum(abs(x)**0.8 + 5 * sin(x * x * x) for x in individual)
     return f1, f2
+
+def zdt1(individual):
+    """ZDT1 multiobjective function
+
+    :math:`f_{1}(x) = x_1`
+    :math:`f_{2}(x) = g_x[1 - \\sqrt(\\frac{x_1}{g(x)})]`
+    :math:`g(x) = 1 + 9 \\frac{\\sum_{i=2}^n x_i}{n-1}`
+    """
+    f1 = individual[0]
+    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    try:
+        f2 = g * (1 - sqrt(f1/g))
+    except:
+        print f1, g
+        exit()
+    return f1, f2
