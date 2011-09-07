@@ -67,7 +67,7 @@ def rosenbrock(individual):
 def h1(individual):
     """ Simple two-dimensional function containing several local maxima,
     H1 has a unique maximum value of 2.0 at the point (8.6998, 6.7665).
-    From : The Merits of a Parallel Genetic Algorithm in Solving Hard 
+    From: The Merits of a Parallel Genetic Algorithm in Solving Hard 
     Optimization Problems, A. J. Knoek van Soest and L. J. R. Richard 
     Casius, J. Biomech. Eng. 125, 141 (2003)
     
@@ -136,7 +136,7 @@ def rastrigin(individual):
                         cos(2 * pi * gene) for gene in individual),
 
 def rastrigin_scaled(individual):
-    """Scaled Rastrigin test objective function
+    """Scaled Rastrigin test objective function,
     
     :math:`f_{\\text{RastScaled}}(\mathbf{x}) = 10N + \sum_{i=1}^N \
         \left(10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)^2 x_i)^2 - \
@@ -233,12 +233,27 @@ def kursawe(individual):
     f2 = sum(abs(x)**0.8 + 5 * sin(x * x * x) for x in individual)
     return f1, f2
 
+
+def schaffer_mo(individual):
+    """Schaffer's multiobjective function on a one attribute *individual*.
+    From: J. D. Schaffer, "Multiple objective optimization with vector
+    evaluated genetic algorithms", in Proceedings of the First International
+    Conference on Genetic Algorithms, 1987. 
+    
+    :math:`f_{\\text{Schaffer}1}(\\mathbf{x}) = x_1^2`
+    
+    :math:`f_{\\text{Schaffer}2}(\\mathbf{x}) = (x_1-2)^2`
+    """
+    return individual[0] ** 2, (individual[0] - 2) ** 2
+    
 def zdt1(individual):
     """ZDT1 multiobjective function
-
-    :math:`f_{1}(x) = x_1`
-    :math:`f_{2}(x) = g_x[1 - \\sqrt(\\frac{x_1}{g(x)})]`
-    :math:`g(x) = 1 + 9 \\frac{\\sum_{i=2}^n x_i}{n-1}`
+    
+    :math:`g(\\mathbf{x}) = 1 + 9 \\frac{\\sum_{i=2}^n x_i}{n-1}`
+    
+    :math:`f_{\\text{zdt1}1}(\\mathbf{x}) = x_1`
+    
+    :math:`f_{\\text{zdt1}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[1 - \\sqrt{\\frac{x_1}{g(\\mathbf{x})}}\\right]`
     """
     f1 = individual[0]
     g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
@@ -248,3 +263,44 @@ def zdt1(individual):
         print f1, g
         exit()
     return f1, f2
+    
+def fonesca(individual):
+    """Fonesca and Fleming's multiobjective function.
+    From: C. M. Fonesca and P. J. Fleming, "Multiobjective optimization and
+    multiple constraint handling with evolutionary algorithms -- Part II:
+    Application example", IEEE Transactions on Systems, Man and Cybernetics,
+    1998.
+    
+    :math:`f_{\\text{Fonesca}1}(\\mathbf{x}) = 1 - e^{-\\sum_{i=1}^{3}(x_i - \\frac{1}{\\sqrt{3}})^2}`
+    
+    :math:`f_{\\text{Fonesca}2}(\\mathbf{x}) = 1 - e^{-\\sum_{i=1}^{3}(x_i + \\frac{1}{\\sqrt{3}})^2}`
+    """
+    f_1 = 1 - exp(-sum((xi - 1/sqrt(3))**2 for xi in individual[:3]))
+    f_2 = 1 - exp(-sum((xi + 1/sqrt(3))**2 for xi in individual[:3]))
+    return f_1, f_2
+
+def poloni(individual):
+    """Poloni's multiobjective function on a two attribute *individual*. From:
+    C. Poloni, "Hybrid GA for multi objective aerodynamic shape optimization",
+    in Genetic Algorithms in Engineering and Computer Science, 1997.
+    
+    :math:`A_1 = 0.5 \\sin (1) - 2 \\cos (1) + \\sin (2) - 1.5 \\cos (2)`
+
+    :math:`A_2 = 1.5 \\sin (1) - \\cos (1) + 2 \\sin (2) - 0.5 \\cos (2)`
+
+    :math:`B_1 = 0.5 \\sin (x_1) - 2 \\cos (x_1) + \\sin (x_2) - 1.5 \\cos (x_2)`
+
+    :math:`B_2 = 1.5 \\sin (x_1) - cos(x_1) + 2 \\sin (x_2) - 0.5 \\cos (x_2)`
+    
+    :math:`f_{\\text{Poloni}1}(\\mathbf{x}) = 1 + (A_1 - B_1)^2 + (A_2 - B_2)^2`
+    
+    :math:`f_{\\text{Poloni}2}(\\mathbf{x}) = (x_1 + 3)^2 + (x_2 + 1)^2`
+    """
+    x_1 = individual[0]
+    x_2 = individual[1]
+    A_1 = 0.5 * sin(1) - 2 * cos(1) + sin(2) - 1.5 * cos(2)
+    A_2 = 1.5 * sin(1) - cos(1) + 2 * sin(2) - 0.5 * cos(2)
+    B_1 = 0.5 * sin(x_1) - 2 * cos(x_1) + sin(x_2) - 1.5 * cos(x_2)
+    B_2 = 1.5 * sin(x_1) - cos(x_1) + 2 * sin(x_2) - 0.5 * cos(x_2)
+    return 1 + (A_1 - B_1)**2 + (A_2 - B_2)**2, (x_1 + 3)**2 + (x_2 + 1)**2
+
