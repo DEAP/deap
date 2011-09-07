@@ -249,19 +249,77 @@ def schaffer_mo(individual):
 def zdt1(individual):
     """ZDT1 multiobjective function
     
-    :math:`g(\\mathbf{x}) = 1 + 9 \\frac{\\sum_{i=2}^n x_i}{n-1}`
+    :math:`g(\\mathbf{x}) = 1 + \\frac{9}{n-1}\\sum_{i=2}^n x_i`
     
-    :math:`f_{\\text{zdt1}1}(\\mathbf{x}) = x_1`
+    :math:`f_{\\text{ZDT1}1}(\\mathbf{x}) = x_1`
     
-    :math:`f_{\\text{zdt1}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[1 - \\sqrt{\\frac{x_1}{g(\\mathbf{x})}}\\right]`
+    :math:`f_{\\text{ZDT1}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[1 - \\sqrt{\\frac{x_1}{g(\\mathbf{x})}}\\right]`
     """
-    f1 = individual[0]
     g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
-    try:
-        f2 = g * (1 - sqrt(f1/g))
-    except:
-        print f1, g
-        exit()
+    f1 = individual[0]
+    f2 = g * (1 - sqrt(f1/g))
+    return f1, f2
+
+def zdt2(individual):
+    """ZDT2 multiobjective function
+    
+    :math:`g(\\mathbf{x}) = 1 + \\frac{9}{n-1}\\sum_{i=2}^n x_i`
+    
+    :math:`f_{\\text{ZDT2}1}(\\mathbf{x}) = x_1`
+    
+    :math:`f_{\\text{ZDT2}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[1 - \\left(\\frac{x_1}{g(\\mathbf{x})}\\right)^2\\right]`
+    
+    """
+
+    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    f1 = individual[0]
+    f2 = g * (1 - (f1/g)**2)
+    return f1, f2
+    
+def zdt3(individual):
+    """ZDT3 multiobjective function
+
+    :math:`g(\\mathbf{x}) = 1 + \\frac{9}{n-1}\\sum_{i=2}^n x_i`
+
+    :math:`f_{\\text{ZDT3}1}(\\mathbf{x}) = x_1`
+
+    :math:`f_{\\text{ZDT3}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[1 - \\sqrt{\\frac{x_1}{g(\\mathbf{x})}} - \\frac{x_1}{g(\\mathbf{x})}\\sin(10\\pi x_1)\\right]`
+
+    """
+
+    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    f1 = individual[0]
+    f2 = g * (1 - sqrt(f1/g) - f1/g * sin(10*pi*f1))
+    return f1, f2
+
+def zdt4(individual):
+    """ZDT4 multiobjective function
+    
+    :math:`f_{\\text{ZDT4}1}(\\mathbf{x}) = x_1`
+    
+    :math:`f_{\\text{ZDT4}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[ 1 - \\sqrt{x_1/g(\\mathbf{x})} \\right]`
+    
+    :math:`g(\\mathbf{x}) = 1 + 10(n-1) + \\sum_{i=2}^n \\left[ x_i^2 - 10\\cos(4\\pi x_i) \\right]`
+    
+    """
+    g  = 1 + 10*(len(individual)-1) + sum(xi**2 - 10*cos(4*pi*xi) for xi in individual[1:])
+    f1 = individual[0]
+    f2 = g * (1 - sqrt(f1/g))
+    return f1, f2
+    
+def zdt6(individual):
+    """ZDT6 multiobjective function
+    
+    :math:`g(\\mathbf{x}) = 1 + 9 \\left[ \\left(\\sum_{i=2}^n x_i\\right)/(n-1) \\right]^{0.25}`
+    
+    :math:`f_{\\text{ZDT6}1}(\\mathbf{x}) = 1 - \\exp(-4x_1)\\sin^6(6\\pi x_1)`
+    
+    :math:`f_{\\text{ZDT6}2}(\\mathbf{x}) = g(\\mathbf{x}) \left[ 1 - (f_{\\text{ZDT6}1}(\\mathbf{x})/g(\\mathbf{x}))^2 \\right]`
+    
+    """
+    g  = 1 + 9 * (sum(individual[1:]) / (len(individual)-1))**0.25
+    f1 = 1 - exp(-4*individual[0]) * sin(6*pi*individual[0])**6
+    f2 = g * (1 - (f1/g1)**2)
     return f1, f2
     
 def fonseca(individual):
