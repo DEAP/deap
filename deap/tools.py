@@ -28,7 +28,7 @@ import math
 import random
 from itertools import chain
 from operator import attrgetter, itemgetter, eq
-from collections import defaultdict, Iterable
+from collections import defaultdict, Iterable, Sequence
 from functools import partial
 import time
 
@@ -805,6 +805,65 @@ def cxSimulatedBinary(ind1, ind2, nu):
         ind2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
     return ind1, ind2
+
+
+def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
+    """Executes a simulated binary crossover that modify in-place the input
+    individuals. The simulated binary crossover expect individuals formed of
+    a list of floating point numbers.
+
+    :note: This implementation is conformed to the one implemented in the 
+    original NSGA-II C code presented by Deb.
+    
+    """
+    size = min(len(ind1), len(ind2))
+    
+    if not isinstance(low, Sequence):
+        low = [low] * size
+    if not isinstance(up, Sequence):
+        up = [up] * size
+
+    for i in xrange(size):
+        rand = random.random()
+        if rand <= 0.5:
+            # This epsilon should probably be changed for 0 since 
+            # floating point arithmetic in Python is safer
+            if abs(ind1[i] - ind2[i]) > 1e-14:
+                x1 = min(ind1[i], ind2[i])
+                x2 = max(ind1[i], ind2[i])
+                xl = low[i]
+                xu = up[i]
+                rand = random.random()
+
+                beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
+                alpha = 2.0 - beta**-(eta + 1)
+                if rand <= 1.0 / alpha:
+                    beta_q = (rand * alpha)**(1 / (eta + 1))
+                else:
+                    beta_q = (1.0 / (2.0 - rand * alpha))**(1 / (eta + 1))
+
+                c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
+
+                beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
+                alpha = 2.0 - beta**-(eta + 1)
+                if rand <= 1.0 / alpha:
+                    beta_q = (rand * alpha)**(1 / (eta + 1))
+                else:
+                    beta_q = (1.0 / (2.0 - rand * alpha))**(1 / (eta + 1))
+                c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
+
+                c1 = min(max(c1, xl), xu)
+                c2 = min(max(c2, xl), xu)
+
+                if random.random() <= 0.5:
+                    ind1[i] = c2
+                    ind2[i] = c1
+                else:
+                    ind1[i] = c1
+                    ind2[i] = c2
+
+    return ind1, ind2
+
     
 ######################################
 # Messy Crossovers                   #
@@ -924,6 +983,40 @@ def mutGaussian(individual, mu, sigma, indpb):
         if random.random() < indpb:
             individual[i] += random.gauss(mu, sigma)
     
+    return individual,
+
+def mutPolynomialBounded(individual, eta, low, up, indpb):
+    """Polynomial mutation as implemented in original NSGA-II algorithm in
+    C by Deb.
+    """
+    size = len(individual)
+    if not isinstance(low, Sequence):
+        low = [low] * size
+    if not isinstance(up, Sequence):
+        up = [up] * size
+    
+    for i in xrange(size):
+        if random.random() <= indpb:
+            x = individual[i]
+            xl = low
+            xu = up
+            delta_1 = (x - xl) / (xu - xl)
+            delta_2 = (xu - x) / (xu - xl)
+            rand = random.random()
+            mut_pow = 1.0 / (eta + 1.)
+
+            if rand < 0.5:
+                xy = 1.0 - delta_1
+                val = 2.0 * rand + (1.0 - 2.0 * rand) * xy**(eta + 1)
+                delta_q = val**mut_pow - 1.0
+            else:
+                xy = 1.0 - delta_2
+                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy**(eta + 1)
+                delta_q = 1.0 - val**mut_pow
+
+            x = x + delta_q * (xu - xl)
+            x = min(max(x, xl), xu)
+            individual[i] = x
     return individual,
 
 def mutShuffleIndexes(individual, indpb):
@@ -1073,6 +1166,41 @@ def selRoulette(individuals, k):
                 chosen.append(ind)
                 break
     
+    return chosen
+
+
+def selTournamentDCD(individuals, k):
+    """Tournament selection based on dominance (D) and crowding distance (CD).
+    The `individuals` sequence length has to have a length which is 
+    a multiple of 4. Also, this tournament can only be used in 
+    conjunction with an algorithm assigning crowding distance to the
+    individual fitnesses. 
+    """
+    def tourn(ind1, ind2):
+        if ind1.fitness.isDominated(ind2.fitness):
+            return ind2
+        elif ind2.fitness.isDominated(ind1.fitness):
+            return ind1
+
+        if ind1.fitness.crowding_dist < ind2.fitness.crowding_dist:
+            return ind2
+        elif ind1.fitness.crowding_dist > ind2.fitness.crowding_dist:
+            return ind1
+
+        if random.random() <= 0.5:
+            return ind1
+        return ind2
+
+    individuals_1 = random.sample(individuals, len(individuals))
+    individuals_2 = random.sample(individuals, len(individuals))
+
+    chosen = []
+    for i in xrange(0, k, 4):
+        chosen.append(tourn(individuals_1[i],   individuals_1[i+1]))
+        chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
+        chosen.append(tourn(individuals_2[i],   individuals_2[i+1]))
+        chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
+
     return chosen
 
 ######################################
