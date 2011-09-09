@@ -27,7 +27,7 @@ import inspect
 import math
 import random
 from itertools import chain
-from operator import attrgetter, eq
+from operator import attrgetter, itemgetter, eq
 from collections import defaultdict, Iterable
 from functools import partial
 import time
@@ -1149,24 +1149,19 @@ def sortCrowdingDist(individuals, k):
         return []
     
     distances = [0.0] * len(individuals)
-    crowding = [(ind, i) for i, ind in enumerate(individuals)]
+    crowding = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
     
     number_objectives = len(individuals[0].fitness.values)
-    inf = float("inf")      # It is four times faster to compare with a local
-                            # variable than create the float("inf") each time
     for i in xrange(number_objectives):
-        crowding.sort(key=lambda element: element[0].fitness.values[i])
+        crowding.sort(key=lambda element: element[0][i])
         distances[crowding[0][1]] = float("inf")
         distances[crowding[-1][1]] = float("inf")
         for j in xrange(1, len(crowding) - 1):
-            if distances[crowding[j][1]] < inf:
-                distances[crowding[j][1]] += \
-                    crowding[j + 1][0].fitness.values[i] - \
-                    crowding[j - 1][0].fitness.values[i]
+            distances[crowding[j][1]] += crowding[j + 1][0][i] - \
+                                         crowding[j - 1][0][i]
     sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
-                         key=lambda value: value[0], reverse=True)
+                         key=itemgetter(0), reverse=True)
     return (individuals[index] for dist, index in sorted_dist[:k])
-
 
 ######################################
 # Strength Pareto         (SPEA-II)  #
