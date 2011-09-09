@@ -1,6 +1,6 @@
 """Module containing tools that are useful when benchmarking algorithms
 """
-
+from math import sqrt
 
 def diversity(first_front, first, last):
     """Given a Pareto front `first_front` and two extreme point of the 
@@ -35,7 +35,7 @@ def convergence(first_front, optimal_front):
         distances.append(float("inf"))
         for opt_ind in optimal_front:
             dist = 0.
-            for i in range(len(opt_ind)):
+            for i in xrange(len(opt_ind)):
                 dist += (ind.fitness.values[i] - opt_ind[i])**2
             if dist < distances[-1]:
                 distances[-1] = dist
