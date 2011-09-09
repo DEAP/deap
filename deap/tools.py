@@ -998,8 +998,8 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
     for i in xrange(size):
         if random.random() <= indpb:
             x = individual[i]
-            xl = low
-            xu = up
+            xl = low[i]
+            xu = up[i]
             delta_1 = (x - xl) / (xu - xl)
             delta_2 = (xu - x) / (xu - xl)
             rand = random.random()
@@ -1220,13 +1220,17 @@ def selNSGA2(individuals, k):
     multi-objective optimization: NSGA-II", 2002.
     """
     pareto_fronts = sortFastND(individuals, k)
+    for front in pareto_fronts:
+        assignCrowdingDist2(front)
+    
     chosen = list(chain(*pareto_fronts[:-1]))
     k = k - len(chosen)
     if k > 0:
-        chosen.extend(sortCrowdingDist(pareto_fronts[-1], k))
+        sorted_front = sorted(pareto_fronts[-1], key=attrgetter("fitness.crowding_dist"), reverse=True)
+        chosen.extend(sorted_front[:k])
+        
     return chosen
     
-
 def sortFastND(individuals, k, first_front_only=False):
     """Sort the first *k* *individuals* according the the fast non-dominated
     sorting algorithm. 
@@ -1270,11 +1274,10 @@ def sortFastND(individuals, k, first_front_only=False):
     
     return [[individuals[index] for index in front] for front in pareto_fronts]
 
-
-def sortCrowdingDist(individuals, k):
-    """Sort the individuals according to the crowding distance."""
+def assignCrowdingDist(individuals):
+    """Assign the crowding distance to each individual of the list."""
     if len(individuals) == 0:
-        return []
+        return
     
     distances = [0.0] * len(individuals)
     crowding = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
@@ -1287,9 +1290,10 @@ def sortCrowdingDist(individuals, k):
         for j in xrange(1, len(crowding) - 1):
             distances[crowding[j][1]] += crowding[j + 1][0][i] - \
                                          crowding[j - 1][0][i]
-    sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
-                         key=itemgetter(0), reverse=True)
-    return (individuals[index] for dist, index in sorted_dist[:k])
+
+    for i, dist in enumerate(distances):
+        individuals[i].fitness.crowding_dist = dist
+
 
 ######################################
 # Strength Pareto         (SPEA-II)  #
