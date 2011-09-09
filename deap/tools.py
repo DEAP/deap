@@ -1221,7 +1221,7 @@ def selNSGA2(individuals, k):
     """
     pareto_fronts = sortFastND(individuals, k)
     for front in pareto_fronts:
-        assignCrowdingDist2(front)
+        assignCrowdingDist(front)
     
     chosen = list(chain(*pareto_fronts[:-1]))
     k = k - len(chosen)
