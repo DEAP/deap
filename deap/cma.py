@@ -130,7 +130,7 @@ class CMAStrategy(object):
         centroid individual as parent.
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
+        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD)
         return [ind_init(arzi) for arzi in arz]        
         
     def update(self, population):
@@ -181,7 +181,7 @@ class CMAStrategy(object):
         self.BD = self.B * self.diagD
             
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
+        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD)
         for ind, arzi in zip(population, arz):
             del ind[:]
             ind.extend(arzi)
