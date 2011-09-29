@@ -52,20 +52,20 @@ class SortingNetwork(list):
             last_level = self[-1]
         except IndexError:
             # Empty network, create new level and connector
-            self.append({wire1: wire2})
+            self.append([(wire1, wire2)])
             return
         
-        for wires in last_level.iteritems():
+        for wires in last_level:
             if wires[1] >= wire1 and wires[0] <= wire2:
-                self.append({wire1: wire2})
+                self.append([(wire1, wire2)])
                 return
         
-        last_level[wire1] = wire2
+        last_level.append((wire1, wire2))
     
     def sort(self, values):
         """Sort the values in-place based on the connectors in the network."""
         for level in self:
-            for wire1, wire2 in level.iteritems():
+            for wire1, wire2 in level:
                 if values[wire1] > values[wire2]:
                     values[wire1], values[wire2] = values[wire2], values[wire1]
     
@@ -99,7 +99,7 @@ class SortingNetwork(list):
             str_wires[i][1] = " o"
         
         for index, level in enumerate(self):
-            for wire1, wire2 in level.iteritems():
+            for wire1, wire2 in level:
                 str_wires[wire1][(index+1)*6] = "x"
                 str_wires[wire2][(index+1)*6] = "x"
                 for i in xrange(wire1, wire2):
