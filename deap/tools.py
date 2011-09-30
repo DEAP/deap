@@ -441,10 +441,10 @@ class EvolutionLogger(object):
             self.log_gen = self.log_gen_stats
             print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
                   (self.lg_stat_str % self.lg_stat_names) + 
-                  "{:>8s}".format("Time"))
+                  "{0:>8s}".format("Time"))
         else:
             print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-                  "{:>8s}".format("Time"))
+                  "{0:>8s}".format("Time"))
 
     def start(self):
         self.start_time = time.time()
@@ -452,7 +452,7 @@ class EvolutionLogger(object):
     def log_gen(self, nbr_eval, gen):
         print("{0:>5d}".format(gen) + 
               " {0:>5d}".format(nbr_eval) +
-              " {:>7.4f}".format(time.time() - self.start_time))
+              " {0:>7.4f}".format(time.time() - self.start_time))
         self.start_time = time.time()
 
     def log_gen_stats(self, nbr_eval, gen):
@@ -462,7 +462,7 @@ class EvolutionLogger(object):
         print("{0:>5d}".format(gen) + 
               " {0:>5d}".format(nbr_eval) +
               (self.lg_stat_str %  lg_stat_values) + 
-              " {:>7.4f}".format(time.time() - self.start_time))
+              " {0:>7.4f}".format(time.time() - self.start_time))
         self.start_time = time.time()
 
 class HallOfFame(object):
