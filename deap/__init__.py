@@ -66,5 +66,5 @@ And these hypotheses lead to the following objectives:
 """
 
 __author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
-__version__ = "0.7"
-__revision__ = "0.7+"
+__version__ = "0.8"
+__revision__ = "0.8-dev"
