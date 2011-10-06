@@ -13,7 +13,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-import array
 import random
 
 random.seed(128)    # Random must be seeded before importing cma because it is
@@ -30,7 +29,7 @@ from deap import tools
 N=30
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
+creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.rastrigin)
