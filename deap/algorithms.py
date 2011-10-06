@@ -72,7 +72,10 @@ def varAnd(toolbox, population, cxpb, mutpb):
     :math:`P_\mathrm{o}` is returned.
     
     This variation is named *And* beceause of its propention to apply both
-    crossover and mutation on the individuals. Both probabilities should be in
+    crossover and mutation on the individuals. Note that both operators are
+    not applied systematicaly, the resulting individuals can be generated from
+    crossover only, mutation only, crossover and mutation, and reproduction
+    according to the given probabilities. Both probabilities should be in
     :math:`[0, 1]`.
     """
     offspring = [toolbox.clone(ind) for ind in population]
