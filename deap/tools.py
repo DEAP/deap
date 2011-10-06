@@ -250,7 +250,7 @@ class Checkpoint(object):
         cp.update({"randomizer_state" : random.getstate()})
 
         if self.use_yaml:
-            cp_file.write(yaml.dump(ms, Dumper=Dumper))
+            cp_file.write(yaml.dump(cp, Dumper=Dumper))
         else:
             pickle.dump(cp, cp_file)
 
@@ -812,7 +812,7 @@ def cxBlend(ind1, ind2, alpha):
     
     return ind1, ind2
 
-def cxSimulatedBinary(ind1, ind2, nu):
+def cxSimulatedBinary(ind1, ind2, eta):
     """Executes a simulated binary crossover that modify in-place the input
     individuals. The simulated binary crossover expect individuals formed of
     a list of floating point numbers.
@@ -828,7 +828,7 @@ def cxSimulatedBinary(ind1, ind2, nu):
             beta = 2. * rand
         else:
             beta = 1. / (2. * (1. - rand))
-        beta **= 1. / (nu + 1.)
+        beta **= 1. / (eta + 1.)
         x1 = ind1[i]
         x2 = ind2[i]
         ind1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
@@ -842,9 +842,11 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     individuals. The simulated binary crossover expect individuals formed of
     a list of floating point numbers.
 
-    :note: This implementation is conformed to the one implemented in the 
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+
+    :note: This implementation is similar to the one implemented in the 
     original NSGA-II C code presented by Deb.
-    
     """
     size = min(len(ind1), len(ind2))
     
@@ -864,16 +866,16 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                 xl = low[i]
                 xu = up[i]
                 rand = random.random()
-
+                
                 beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
                 alpha = 2.0 - beta**-(eta + 1)
                 if rand <= 1.0 / alpha:
                     beta_q = (rand * alpha)**(1 / (eta + 1))
                 else:
                     beta_q = (1.0 / (2.0 - rand * alpha))**(1 / (eta + 1))
-
+                
                 c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
-
+                
                 beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
                 alpha = 2.0 - beta**-(eta + 1)
                 if rand <= 1.0 / alpha:
@@ -881,20 +883,20 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                 else:
                     beta_q = (1.0 / (2.0 - rand * alpha))**(1 / (eta + 1))
                 c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
-
+                
                 c1 = min(max(c1, xl), xu)
                 c2 = min(max(c2, xl), xu)
-
+                
                 if random.random() <= 0.5:
                     ind1[i] = c2
                     ind2[i] = c1
                 else:
                     ind1[i] = c1
                     ind2[i] = c2
-
-    return ind1, ind2
-
     
+    return ind1, ind2   
+
+
 ######################################
 # Messy Crossovers                   #
 ######################################
@@ -1304,6 +1306,7 @@ def sortFastND(individuals, k, first_front_only=False):
     
     return [[individuals[index] for index in front] for front in pareto_fronts]
 
+
 def assignCrowdingDist(individuals):
     """Assign the crowding distance to each individual of the list."""
     if len(individuals) == 0:
@@ -1313,6 +1316,7 @@ def assignCrowdingDist(individuals):
     crowding = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
     
     number_objectives = len(individuals[0].fitness.values)
+    
     for i in xrange(number_objectives):
         crowding.sort(key=lambda element: element[0][i])
         distances[crowding[0][1]] = float("inf")
@@ -1595,7 +1599,8 @@ def decorate(decorator):
             raise TypeError("You are decorating a non function: %s" % func)
 
         # Change function name for lambda function that gets the "<lambda>"
-        # name
+        # name, which is incompatible with the def <lambda>(signature) : ...
+        # scheme.
         if func.__name__ == "<lambda>":
             func.__name__ = "lambda_func"
 
