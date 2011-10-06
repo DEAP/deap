@@ -1,0 +1,3 @@
+deap
+numpy>=1.5
+matplotlib>=1.0
