@@ -27,6 +27,7 @@ import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
 import copy
 import time
+import tools
 
 numpy.random.seed(random.randint(0, sys.maxint))
     
@@ -37,17 +38,8 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None, verbose=T
     The provided *population* should be a list of one or more individuals.
     """
     if verbose:
-        lg_stat_names = tuple()
-        lg_stat_values = tuple()
-        lg_stat_str = ""
-        start_time = time.time()
-    
-        if statistics is not None:
-            lg_stat_names = tuple(name for name in statistics.functions.keys())
-            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
-        
-        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
+        logger = tools.EvolutionLogger(statistics)
+        logger.start()
         
     for gen in xrange(ngen):
         # Evaluate the individuals
@@ -62,13 +54,9 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None, verbose=T
         
         if statistics is not None:
             statistics.update(population)
-            if verbose:
-                lg_stat_values = tuple(tuple("[%s]" % ", ".join("%g" % statistics[0][key][-1][d] for d in range(len(statistics[0][key][-1]))) for key in lg_stat_names))
         
         if verbose:
-            print("{0:>5d}".format(gen) + " {0:>5d}".format(len(population)) +
-                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-            start_time = time.time()
+            logger.log_gen(len(population), gen)
 
 class CMAStrategy(object):
     """
@@ -127,13 +115,10 @@ class CMAStrategy(object):
         self.C = numpy.identity(self.dim)
         self.diagD = numpy.ones(self.dim)
         self.BD = self.B * self.diagD
-
-        self.cond = 1       
- 
+        
+        self.cond = 1
         self.lambda_ = self.params.get("lambda_", int(4 + 3 * log(self.dim)))
-        
         self.update_count = 0
-        
         self.computeParams(self.params)
         
     def generate(self, ind_init):
@@ -141,10 +126,10 @@ class CMAStrategy(object):
         centroid individual as parent.
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
-        return [ind_init(arzi) for arzi in arz]        
+        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD)
+        return map(ind_init, arz)
         
-    def update(self, population):
+    def update(self, population, ind_init=None):
         """Update the current covariance matrix strategy.
         """
         population.sort(key=lambda ind: ind.fitness, reverse=True)
@@ -163,13 +148,13 @@ class CMAStrategy(object):
         hsig = float((numpy.linalg.norm(self.ps) / 
                 sqrt(1. - (1. - self.cs)**(2. * (self.update_count + 1.))) / self.chiN
                 < (1.4 + 2. / (self.dim + 1.))))
-
+        
         self.update_count += 1
-               
+        
         self.pc = (1 - self.cc) * self.pc + hsig \
                   * sqrt(self.cc * (2 - self.cc) * self.mueff) / self.sigma \
                   * c_diff
-                   
+        
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
         self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) \
@@ -177,25 +162,24 @@ class CMAStrategy(object):
                 + self.ccov1 * numpy.outer(self.pc, self.pc) \
                 + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
                 / self.sigma**2
-                
+        
         
         self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) \
                                 * self.cs / self.damps)
         
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
-
+        
         self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
-
+        
         self.diagD = self.diagD[indx]**0.5
         self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
-            
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
-        for ind, arzi in zip(population, arz):
-            del ind[:]
-            ind.extend(arzi)
+        
+        # Generate the individuals from the computed covariance matrix
+        # and replace the first lambda individuals of the population.
+        for ind, arzi in zip(population, self.generate(ind_init)):
+            ind[:] = arzi   # This line does not allow ind to be of type array
 
     def computeParams(self, params):
         """Those parameters depends on lambda and need to computed again if it 
