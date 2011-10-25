@@ -215,7 +215,10 @@ with a speed vector and a maximizing two objectives fitness attribute.
 
 A Funky One
 +++++++++++
-Supposing your problem have very specific needs. It is also possible to build  custom individuals very easily. The next individual created is a list of alternating integers and floating point numbers, using the :func:`~deap.tools.initCycle` function.
+Supposing your problem have very specific needs. It is also possible to build
+custom individuals very easily. The next individual created is a list of
+alternating integers and floating point numbers, using the
+:func:`~deap.tools.initCycle` function.
 ::
 
 	from deap import base
@@ -238,6 +241,42 @@ Calling :func:`toolbox.individual` will readily return a complete individual
 of the form ``[int float int float ... int float]`` with a maximizing two
 objectives fitness attribute.
 
+From a File
++++++++++++
+Suppose you have a file containing a bunch of lists that are the initial
+guesses to your problem. We will simplify this case by using a :mod:`json`
+file that is a list of lists similar to
+::
+
+	[[0, 0, 0], [0.33, 0.33, 0.33], [0.66, 0.66, 0.66]]
+
+The individual initializer function in this case will simply yield one list at a time
+::
+
+	from deap import base
+	from deap import creator
+	from deap import tools
+	
+	import json
+	import random
+	
+	creator.create("FitnessMax", base.Fitness, weights=(1.0, 1.0))
+	creator.create("Individual", list, fitness=creator.FitnessMax)
+	
+	def initAttributes(icls, filename):
+	    init_list = json.load(open(filename, "r"))
+	    for l in init_list:
+	        yield l
+	
+	def initPopulation(pcls, )
+	
+	toolbox = base.Toolbox()
+	
+	toolbox.register("attr_guess", initAttributes, "my_file.json")
+	toolbox.register("attr_rnd_floats", random.random)
+	toolbox.register("individual_guess", tools.initIterate, toolbox.attr_guess)
+	toolbox.register("individual_guess", tools.initIterate, toolbox.attr_guess)
+	
 Population
 ----------
 Population are much like individuals, instead of being initialized with
@@ -310,3 +349,43 @@ using the *n* argument of the :func:`~deap.tools.initRepeat` function.
 	DEME_SIZES = 10, 50, 100
 	
 	population = [toolbox.deme(n=i) for i in DEME_SIZES]
+
+Seeding a population
+++++++++++++++++++++
+Sometimes, a first guess population can be used to initialize an evolutionary
+algorithm. The key idea to initialize a population with not random individuals
+is to have an individual initializer that takes a content as argument.
+::
+
+	from deap import base
+	from deap import creator
+
+	import json
+
+	creator.create("FitnessMax", base.Fitness, weights=(1.0, 1.0))
+	creator.create("Individual", list, fitness=creator.FitnessMax)
+
+	def initIndividual(icls, content):
+	    return icls(content)
+
+	def initPopulation(pcls, ind_init, filename):
+	    contents = json.load(open(filename, "r"))
+	    return pcls(ind_init(c for c in contents))
+
+	toolbox = base.Toolbox()
+
+	toolbox.register("individual_guess", initIndividual, creator.Individual)
+	toolbox.register("population_guess", initPopulation, list, toolbox.individual_guess, "my_guess.json")
+	
+	population = toolbox.population_guess()
+
+The population will be initialized from the file ``my_guess.json`` that shall
+contain a list of first guess individuals. This initialization can be combined
+with a regular initialization to have part random and part not random
+individuals. Note that the definition of :func:`initIndividual` and the
+registration of :func:`individual_guess` are optional as the default
+constructor of a list is similar. Removing those lines leads to the following.
+::
+
+	toolbox.register("population_guess", initPopulation, list, creator.Individual, "my_guess.json")
+
