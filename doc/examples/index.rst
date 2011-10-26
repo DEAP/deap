@@ -7,7 +7,7 @@ framework. These can be used has ground work for implementing your own flavour
 of evolutionary algorithms.
 
 .. toctree::
-	:maxdepth: 2
+	:maxdepth: 1
 	:numbered:
 
 	onemax
