@@ -350,7 +350,7 @@ using the *n* argument of the :func:`~deap.tools.initRepeat` function.
 	
 	population = [toolbox.deme(n=i) for i in DEME_SIZES]
 
-Seeding a population
+Seeding a Population
 ++++++++++++++++++++
 Sometimes, a first guess population can be used to initialize an evolutionary
 algorithm. The key idea to initialize a population with not random individuals
@@ -370,7 +370,7 @@ is to have an individual initializer that takes a content as argument.
 
 	def initPopulation(pcls, ind_init, filename):
 	    contents = json.load(open(filename, "r"))
-	    return pcls(ind_init(c for c in contents))
+	    return pcls(ind_init(c) for c in contents)
 
 	toolbox = base.Toolbox()
 
