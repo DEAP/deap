@@ -5,7 +5,7 @@ from distutils.core import setup
 import deap
 
 setup(name='deap',
-      version=deap.__version__,
+      version=deap.__revision__,
       description='Distributed Evolutionary Algorithms in Python',
       long_description=open('README.txt').read(),
       author='deap Development Team',
