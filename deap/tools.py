@@ -249,7 +249,7 @@ class Checkpoint(object):
         cp.update({"randomizer_state" : random.getstate()})
 
         if self.use_yaml:
-            cp_file.write(yaml.dump(ms, Dumper=Dumper))
+            cp_file.write(yaml.dump(cp, Dumper=Dumper))
         else:
             pickle.dump(cp, cp_file)
 
