@@ -1,5 +1,29 @@
 {% extends "!layout.html" %}
+
+{%- block extrahead %}
+{{ super() }}
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-15144370-3']);
+  _gaq.push(['_trackPageview']);
+</script>
+{% endblock %}
+
 {% block rootrellink %}
     <li><a href="http://code.google.com/p/deap/">Project Homepage</a>{{ reldelim1 }}</li>
 	<li><a href="{{ pathto('index') }}">{{ shorttitle }}</a>{{ reldelim1 }} </li>
+{% endblock %}
+
+
+{% block footer %}
+{{ super() }}
+<script type="text/javascript">
+  (function() {
+     var ga = document.createElement('script');
+         ga.src = ('https:' == document.location.protocol ?
+                'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    ga.setAttribute('async', 'true');
+    document.documentElement.firstChild.appendChild(ga);
+  })();
+</script>
 {% endblock %}
