@@ -1,3 +1,5 @@
+.. _examples:
+
 Examples
 --------
 This section contains some documented examples of common toy problems often

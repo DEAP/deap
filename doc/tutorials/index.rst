@@ -14,6 +14,7 @@ adding a single line of code will do the job).
 	:maxdepth: 2
 	:numbered:
    
+	start
 	types
 	next_step
 	distribution
