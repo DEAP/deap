@@ -24,6 +24,8 @@ Algorithms
 Covariance Matrix Adaptation Evolution Strategy
 ===============================================
 
+.. automodule:: deap.cma
+
 .. autofunction:: deap.cma.esCMA(toolbox, population, sigma, ngen[, halloffame, **kargs])
 
 .. autoclass:: deap.cma.CMAStrategy(population, sigma[, params])
