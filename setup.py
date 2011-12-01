@@ -6,9 +6,7 @@ import deap
 
 eap_ctools = Extension('deap.cTools',
                     sources = ['deap/cTools.cpp'])
-#sn_cevaluator = Extension('evaluateSN_C',
-                    #sources = ['examples/SNC.cpp'])
-                    
+
 setup(name='deap',
       version=deap.__revision__,
       description='Distributed Evolutionary Algorithms in Python',
