@@ -21,7 +21,7 @@ from a list with a fitness attribute set to the just created fitness.
 ::
 
     from deap import base, creator
-    creator.create("FitnessMax", base.Fitness, weights=(-1.0,))
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
 
 That's it. More on creating types can be found in the :ref:`creating-types`
