@@ -10,3 +10,4 @@ DEAP's Master Index
 	examples/index
 	whatsnew
 	bugs
+        contributing
