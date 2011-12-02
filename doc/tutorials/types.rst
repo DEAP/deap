@@ -8,9 +8,10 @@ Fitness
 -------
 The provided :class:`~deap.base.Fitness` class is an abstract class that needs
 a :attr:`~deap.base.Fitness.weights` attribute in order to be functional. A
-minimizing fitness is built using negatives weights. For example, the
-following line creates, in the :mod:`~deap.creator`, a ready to use single
-objective minimizing fitness named :class:`FitnessMin`. ::
+minimizing fitness is built using negatives weights, while a maximizing
+fitness has positive weights. For example, the following line creates, in the
+:mod:`~deap.creator`, a ready to use single objective minimizing fitness named
+:class:`FitnessMin`. ::
 
    creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
    

@@ -21,7 +21,7 @@ from a list with a fitness attribute set to the just created fitness.
 ::
 
     from deap import base, creator
-    creator.create("FitnessMax", base.Fitness, weights=(-1.0))
+    creator.create("FitnessMax", base.Fitness, weights=(-1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
 
 That's it. More on creating types can be found in the :ref:`creating-types`
@@ -78,7 +78,7 @@ More on this in the :ref:`next-step` tutorial and :ref:`examples`.
 Algorithms
 ----------
 Now that everything is ready, we can start to write our own algorithm. It is
-usually in a done in a main function. For the purpose of completeness we will
+usually done in a main function. For the purpose of completeness we will
 develop the complete generational algorithm.
 ::
 
