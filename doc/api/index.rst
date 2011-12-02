@@ -2,7 +2,7 @@ API
 ---
 The API of DEAP is built around a clean and lean core composed of two simple
 structures: a :mod:`~deap.creator` and :class:`~deap.base.Toolbox`. The former
-allows creation of classes, at run-time, via inheritance and composition and
+allows creation of classes via inheritance and composition and
 the latter contains the tools that are required by the evolutionary algorithm.
 The core functionalities of DEAP are levered by several peripheral modules.
 The :mod:`~deap.tools` module provides a bunch of operator that are commonly

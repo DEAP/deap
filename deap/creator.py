@@ -14,7 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """The :mod:`~deap.creator` module is the heart and soul of DEAP, it allows to
-create, at runtime, classes that will fulfill the needs of your evolutionary
+create classes that will fulfill the needs of your evolutionary
 algorithms. This module follows the meta-factory paradigm by allowing to
 create new classes via both composition and inheritance. Attributes both datas
 and functions are added to existing types in order to create new types
