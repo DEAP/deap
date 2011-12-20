@@ -7,7 +7,7 @@ closed initializers, we enable you to customize them as you wish. Instead of
 suggesting unfit operators, we explicitly ask you to choose them wisely.
 Instead of implementing many sealed algorithms, we allow you to write the one
 that fit all your needs. This tutorial will present a quick overview of what
-DEAP is all about along of with what every DEAP program is made of.
+DEAP is all about along with what every DEAP program is made of.
 
 Types
 -----
@@ -47,7 +47,7 @@ them.
     toolbox.register("attribute", random.random)
     toolbox.register("individual", tools.initRepeat, creator.Individual, 
         toolbox.attribute, n=IND_SIZE)
-    toolbox.register("population", tools.initRepeat, toolbox.individual)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 This creates functions to initialize populations from individuals that are
 themselves initialized with random float numbers. More initialization methods
@@ -120,5 +120,5 @@ develop the complete generational algorithm.
 
         return pop
 
-There is also the possibility to to use one of the five algorithms readily
+There is also the possibility to use one of the five algorithms readily
 available in the :mod:`~deap.algorithms` and :mod:`~deap.cma` modules.
