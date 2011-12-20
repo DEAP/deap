@@ -365,7 +365,7 @@ class Statistics(object):
     def __init__(self, key=lambda x: x, n=1):
         self.key = key
         self.functions = {}
-        self.data = tuple(self.Data() for _ in xrange(n))
+        self.data = list(self.Data() for _ in xrange(n))
     
     def __getitem__(self, index):
         return self.data[index]
@@ -388,7 +388,7 @@ class Statistics(object):
         self.functions[name] = function
         setattr(self, name, partial(self._getFuncValue, name))
     
-    def update(self, seq, index=0):
+    def update(self, seq, index=0, force=False):
         """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
         the data index *index*. 
@@ -409,6 +409,9 @@ class Statistics(object):
             >>> s[0]["Mean"] 
             [[6.0], [2.0]]
         """
+        if force and index == len(self.data):
+            self.data.append(self.Data())
+            
         # Transpose the values
         data = self.data[index]
         try:
@@ -450,7 +453,7 @@ class EvolutionLogger(object):
         self.start_time = time.time()
 
     def log_gen(self, nbr_eval, gen):
-        print("{0:>5d}".format(gen) + 
+        print("{0:>5s}".format(str(gen)) + 
               " {0:>5d}".format(nbr_eval) +
               " {0:>7.4f}".format(time.time() - self.start_time))
         self.start_time = time.time()
@@ -459,7 +462,7 @@ class EvolutionLogger(object):
         lg_stat_values = tuple("[%s]" % ", ".join("%.4f" % value for value in
                                                   self.stats[0][key][-1]) 
                                for key in self.lg_stat_names)
-        print("{0:>5d}".format(gen) + 
+        print("{0:>5s}".format(str(gen)) + 
               " {0:>5d}".format(nbr_eval) +
               (self.lg_stat_str %  lg_stat_values) + 
               " {0:>7.4f}".format(time.time() - self.start_time))
@@ -1084,7 +1087,7 @@ def mutFlipBit(individual, indpb):
     """
     for indx in xrange(len(individual)):
         if random.random() < indpb:
-            individual[indx] = not individual[indx]
+            individual[indx] = type(individual[indx])(not individual[indx])
     
     return individual,
     
