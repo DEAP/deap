@@ -297,6 +297,9 @@ def std(seq):
     """Returns the square root of the variance :math:`\sigma^2` of *seq*.
     """
     return var(seq)**0.5
+    
+def identity(x):
+    return x
 
 class Statistics(object):
     """A statistics object that holds the required data for as long as it
@@ -356,23 +359,20 @@ class Statistics(object):
         >>> s[0]["Mean"][-1][0]
         2.5
     """
-    class Data(defaultdict):
-        def __init__(self):
-            defaultdict.__init__(self, list)
-        def __str__(self):
-            return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.iteritems())
-    
-    def __init__(self, key=lambda x: x, n=1):
+    def __init__(self, key=identity, n=1):
         self.key = key
         self.functions = {}
-        self.data = list(self.Data() for _ in xrange(n))
+        self.data = list(defaultdict(list) for _ in xrange(n))
     
     def __getitem__(self, index):
         return self.data[index]
-        
-    def _getFuncValue(self, name, index=0):
-        return self.data[index][name][-1]
-    
+
+    def __getattr__(self, name):
+        if name in self.__getattribute__("functions"):
+            return [data[name] for data in self.data]
+        else:
+            return self.__getattribute__(name)
+
     def register(self, name, function):
         """Register a function *function* that will be apply on the sequence
         each time :func:`~deap.tools.Statistics.update` is called.
@@ -382,35 +382,36 @@ class Statistics(object):
             >>> s = Statistics()
             >>> s.register("Mean", mean)
             >>> s.update([1,2,3,4,5,6,7])
-            >>> s.Mean()
-            [4.0]
+            >>> s.Mean
+            [[[4.0]]]
         """
         self.functions[name] = function
-        setattr(self, name, partial(self._getFuncValue, name))
     
     def update(self, seq, index=0, force=False):
         """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
-        the data index *index*. 
+        the data index *index*. If *force* is True and the index is
+        greater then the number of data, a new data object is added
+        to the statistics. 
             
             >>> s = Statistics()
             >>> s.register("Mean", mean)
             >>> s.register("Max", max)
             >>> s.update([4,5,6,7,8])
-            >>> s.Max()
-            [8]
-            >>> s.Mean()
-            [6.0]
+            >>> s.Max
+            [[[8]]]
+            >>> s.Mean
+            [[[6.0]]]
             >>> s.update([1,2,3])
-            >>> s.Max()
-            [3]
+            >>> s.Max
+            [[[8], [3]]]
             >>> s[0]["Max"]
             [[8], [3]]
-            >>> s[0]["Mean"] 
+            >>> s[0]["Mean"]
             [[6.0], [2.0]]
         """
         if force and index == len(self.data):
-            self.data.append(self.Data())
+            self.data.append(defaultdict(list))
             
         # Transpose the values
         data = self.data[index]
@@ -423,10 +424,6 @@ class Statistics(object):
 
         for key, func in self.functions.iteritems():
             data[key].append(map(func, values))
-
-    def __str__(self):
-                return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1])))
-                                 for key, stat in self.data[-1].iteritems())
 
 class EvolutionLogger(object):
 
