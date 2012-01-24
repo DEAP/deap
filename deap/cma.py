@@ -44,8 +44,9 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
         _logger.info("Evolving generation %i", g)
         
         # Evaluate the individuals
-        for ind in population:
-            ind.fitness.values = toolbox.evaluate(ind)
+        fits = toolbox.map(toolbox.evaluate, population)
+        for ind, f in zip(population, fits):
+            ind.fitness.values = f
         
         if halloffame is not None:
             halloffame.update(population)
