@@ -1,3 +1,5 @@
+.. _distribution-deap:
+
 Using Multiple Processors
 =========================
 
