@@ -326,9 +326,9 @@ class Statistics(object):
         >>> s.register("Mean", mean)
         >>> s.update([1, 2, 3, 4], index=0)
         >>> s.update([5, 6, 7, 8], index=1)
-        >>> s.Mean(0)
+        >>> s.Mean[0][-1]
         [2.5]
-        >>> s.Mean(1)
+        >>> s.Mean[1][-1]
         [6.5]
     
     An other way to obtain the statistics is to use directly the ``[]``. In
@@ -338,14 +338,14 @@ class Statistics(object):
     
         >>> s.update([10, 20, 30, 40], index=0)
         >>> s.update([50, 60, 70, 80], index=1)
-        >>> s[0]["Mean"][0]
+        >>> s.Mean[0][0]
         [2.5]
-        >>> s[1]["Mean"][0]
+        >>> s.Mean[1][0]
         [6.5]
-        >>> s[0]["Mean"][1]
-        [25]
-        >>> s[1]["Mean"][1]
-        [65]
+        >>> s.Mean[0][1]
+        [25.0]
+        >>> s.Mean[1][1]
+        [65.0]
     
     Finally, the fourth dimension is used when stats are needed on lists of
     lists. The stats are computed on the matching indices of each list.
@@ -354,9 +354,9 @@ class Statistics(object):
         >>> s = Statistics()
         >>> s.register("Mean", mean)
         >>> s.update([[1, 2, 3], [4, 5, 6]])
-        >>> s.Mean()
+        >>> s.Mean[-1][-1]
         [2.5, 3.5, 4.5]
-        >>> s[0]["Mean"][-1][0]
+        >>> s.Mean[0][-1][0]
         2.5
     """
     def __init__(self, key=identity, n=1):
