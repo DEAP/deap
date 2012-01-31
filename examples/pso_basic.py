@@ -77,7 +77,10 @@ def main():
 
         # Gather all the fitnesses in one list and print the stats
         stats.update(pop)
-        print stats
+        print "  Min %s" % stats.Min[0][-1][0]
+        print "  Max %s" % stats.Max[0][-1][0]
+        print "  Avg %s" % stats.Avg[0][-1][0]
+        print "  Std %s" % stats.Std[0][-1][0]
         print "  Best so far: %s - %s" % (best, best.fitness)
     
     return pop, stats, best

@@ -132,9 +132,15 @@ def main():
         best_gp = tools.selBest(pop_gp, 1)[0]    
     
         print "  -- GA statistics --"
-        print stats_ga
+        print "  Min %s" % stats_ga.Min[0][-1][0]
+        print "  Max %s" % stats_ga.Max[0][-1][0]
+        print "  Avg %s" % stats_ga.Avg[0][-1][0]
+        print "  Std %s" % stats_ga.Std[0][-1][0]
         print "  -- GP statistics --"        
-        print stats_gp          
+        print "  Min %s" % stats_gp.Min[0][-1][0]
+        print "  Max %s" % stats_gp.Max[0][-1][0]
+        print "  Avg %s" % stats_gp.Avg[0][-1][0]
+        print "  Std %s" % stats_gp.Std[0][-1][0]
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
     print "Best individual GP is %s, %s" % (gp.evaluate(best_gp), best_gp.fitness.values)

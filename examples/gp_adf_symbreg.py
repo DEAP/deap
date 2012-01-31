@@ -166,7 +166,10 @@ def main():
         pop = offsprings
         hof.update(pop)
         stats.update(pop)
-        print stats
+        print "  Min %s" % stats.Min[0][-1][0]
+        print "  Max %s" % stats.Max[0][-1][0]
+        print "  Avg %s" % stats.Avg[0][-1][0]
+        print "  Std %s" % stats.Std[0][-1][0]
     
     print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
     
