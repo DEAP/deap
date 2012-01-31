@@ -1,7 +1,7 @@
 Speed up the evolution
 =========================
 
-Although pure performance is not one of the most important objectives of DEAP, it may be good to know some ways to speed things up. This section will present various ways to improve performance without loosing too much of the DEAP facilities. To show an approximation of the speedup you can achieve with each technique, an example is provided (despite the fact that every problem is different and will obviously produce different speedups).
+Although pure performance is not one of the most important objectives of DEAP, it may be good to know some ways to speed things up. This section will present various ways to improve performance without loosing too much of the DEAP ease of use. To show an approximation of the speedup you can achieve with each technique, an example is provided (despite the fact that every problem is different and will obviously produce different speedups).
 
 .. note::
     The benchmarks were run on a Linux workstation (Core i7 920, 8 GB), with a standard Python distribution (2.7) and DEAP 0.8.
@@ -9,11 +9,13 @@ Although pure performance is not one of the most important objectives of DEAP, i
 The comparison problem : Sorting Networks
 -----------------------------------------
 
-From Wikipedia : *A sorting network is an abstract mathematical model of a network of wires and comparator modules that is used to sort a sequence of numbers. Each comparator connects two wires and sort the values by outputting the smaller value to one wire, and a larger value to the other.*
+From Wikipedia : *A sorting network is an abstract mathematical model of a network of wires and comparator modules that is used to sort a sequence of numbers. Each comparator connects two wires and sort the values by outputting the smaller value to one wire, and a larger value to the other.* [SORTING_NETWORK]
+
+.. [SORTING_NETWORK] http://en.wikipedia.org/wiki/Sorting_networks
 
 Genetic algorithms are an interesting way to generate arbitrary sorting networks, as the fitness function of a network can easily be defined. Moreover, this problem is a good benchmark for evolutionnary framework : its complexity (and therefore the ressources needed) can be tuned by changing the number of inputs. A 6-inputs problems is fairly simple and will be solved in a few seconds, while a 20-inputs one will take several minutes for each *generation*.
 
-For this benchmark, we used an inputs size of 12, with 500 individuals which are allowed to evolve for 20 generations. Times reported are the total duration of the program, including initialization.
+For this benchmark, we used an input size of 12, with 500 individuals which are allowed to evolve for 20 generations. Times reported are the total duration of the program, including initialization.
 
 Normal run
 ----------
@@ -22,14 +24,14 @@ Normal run
 
 With no optimizations at all, the level of performance reached is not impressive, yet sufficient for most users, especially for prototyping.
 
-Using Pypy
+Using PyPy
 ----------
 
 *Time taken : 36 seconds (4.1x faster)*
 
-Pypy (here in version 1.7) is an alternative Python interpreter which includes a JIT (Just-in-time) compiler to greatly improve performances, especially when facing several rehearsals of the same loop or function. No change at all is needed in the program, and except for external C modules and advanced properties, Pypy is fully compliant with the Python 2.7 API.
+PyPy (here in version 1.7) is an alternative Python interpreter which includes a JIT (Just-in-time) compiler to greatly improve performances, especially when facing several rehearsals of the same loop or function. No change at all is needed in the program, and except for external C modules and advanced properties, PyPy is fully compliant with the Python 2.7 API.
 
-To run your evolution under Pypy, simply `download it <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ and install it, and launch :
+To run your evolution under PyPy, simply `download it <http://pypy.org/>`_ and install it, and launch :
 ::
     
     pypy your_program.py
@@ -42,14 +44,14 @@ Using the C++ version of the NSGA II algorithm
 
 *Time taken : 121 seconds (1.2x faster)*
 
-Starting with DEAP 0.8, a module named *cTools* is provided. This module includes a subset of the deap.tools module, but is implemented in C to improve performances. Only the bottleneck functions (in term of computationnal effort) are provided in *cTools*, with the exact same API and behavior as their pure-Python implementation. The NSGA-II selection algorithm is one of them, and can be used here to improve performances, by changing only two lines (the module inclusion and the registration of the algorithm).
+Starting with DEAP 0.8, a module named *cTools* is provided. This module includes a subset of the deap.tools module, but is implemented in C to improve performances. Only the bottleneck functions (in term of computationnal effort) are provided in *cTools*, with the exact same API and behavior as their pure-Python implementation. The NSGA-II selection algorithm is one of them, and can be used here to improve performances, by only adding one line (the module inclusion) and changing a second (the registration of the selection algorithm).
 ::
     
     from deap import cTools    
     # ...
     toolbox.register("select", cTools.selNSGA2)
 
-As one can see, the speedup reached is somewhat modest, as the main bottleneck remains the evaluation function. However, the improvement remains, and the coding effort needed is minimal; we will also see that it can be combined with other techniques to reach a better speedup.
+As one can see, the speedup reached is somewhat modest, since the main bottleneck remains the evaluation function. However, the improvement remains, and the coding effort needed is minimal; we will also see that it can be combined with other techniques to reach a better speedup.
 
 .. note::
     The cTools module is built at installation time (i.e. when executing the setup.py file). If no compiler is available, or if the building process failed for some reason, the cTools module will not be available.
@@ -60,7 +62,7 @@ Using an home-made C++ evaluation function
 
 *Time taken : 33 seconds (4.5x faster)*
 
-This time, we look at an heavier optimization : replacement of the evaluation function by its C equivalent. CPython provides a C/C++ API to Python objects, and allows the writing of a C extension module relatively easily. However, this is problem specific, and can not be used with an other Python interpreter than CPython (like Pypy).
+This time, we look at an heavier optimization : replacement of the evaluation function by its C equivalent. CPython provides a C/C++ API to Python objects, and allows the writing of a C extension module relatively easily. However, this is problem specific, and can not be used with an other Python interpreter than CPython (like PyPy).
 
 In this case, the extension code has approximately 130 lines of C++ code, from which about 100 are the evaluation function (the other parts are declarations needed by the Python interpreter to build and use the extension). The module is compiled with easy_install, and can thereafter be used as a normal Python module :
 ::
@@ -94,19 +96,19 @@ It should be noted that apart the evaluation function, all the other steps of th
 Method                          Time (s)   Speedup
 =============================== ========== =======
 Pure Python                     147        1.0x
-Pypy 1.7                        36         4.1x
+PyPy 1.7                        36         4.1x
 C++ NSGA II                     121        1.2x
 Custom C++ evaluation function  33         4.5x
 C++ NSGA II + custom eval func  11         13.4x
 =============================== ========== =======
 
-To complete this test, we also ran the problem with an harder parametrization (16 inputs instead of 12). It took *1997 seconds* with standard python interpreter, compared to *469 seconds* with Pypy (4.3x faster) and *124 seconds* when using C++ version for both NSGA II and evaluator, that is a speedup of *16.1x*. In other terms, we reduce the computation time from more than half an hour to a small 2 minutes...
+To complete this test, we also ran the problem with an harder parametrization (16 inputs instead of 12). It took *1997 seconds* with standard python interpreter, compared to *469 seconds* with PyPy (4.3x faster) and *124 seconds* when using C++ version for both NSGA II and evaluator, that is a speedup of *16.1x*. In other terms, we reduced the computation time from more than half an hour to a small 2 minutes...
 
 =============================== ========== =======
 Method                          Time (s)   Speedup
 =============================== ========== =======
 Pure Python                     1997        1.0x
-Pypy 1.7                        469         4.3x
+PyPy 1.7                        469         4.3x
 C++ NSGA II + custom eval func  124         16.1x
 =============================== ========== =======
 
