@@ -125,7 +125,11 @@ def main():
         population = toolbox.select(population+offsprings, len(offsprings))
         hof.update(population)
         stats.update(population)
-        print stats
+
+        print "  Min %s" % stats.Min[0][-1][0]
+        print "  Max %s" % stats.Max[0][-1][0]
+        print "  Avg %s" % stats.Avg[0][-1][0]
+        print "  Std %s" % stats.Std[0][-1][0]
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network

@@ -70,7 +70,7 @@ def main():
     stats.update(demes[0]+demes[1]+demes[2], 3)
     
     gen = 1
-    while gen <= NGEN and stats.Max(3)[0] < 100.0:
+    while gen <= NGEN and stats.Max[3][-1][0] < 100.0:
         print "-- Generation %i --" % gen        
         for idx, deme in enumerate(demes):
             print "-- Deme %i --" % (idx+1)  
@@ -82,12 +82,18 @@ def main():
             
             stats.update(deme, idx)
             hof.update(deme)
-            print stats[idx]
+            print "  Min %s" % stats.Min[idx][-1][0]
+            print "  Max %s" % stats.Max[idx][-1][0]
+            print "  Avg %s" % stats.Avg[idx][-1][0]
+            print "  Std %s" % stats.Std[idx][-1][0]
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)
         stats.update(demes[0]+demes[1]+demes[2], 3)
         print "-- Population --"
-        print stats[3]
+        print "  Min %s" % stats.Min[3][-1][0]
+        print "  Max %s" % stats.Max[3][-1][0]
+        print "  Avg %s" % stats.Avg[3][-1][0]
+        print "  Std %s" % stats.Std[3][-1][0]
         gen += 1
     
     return demes, stats, hof

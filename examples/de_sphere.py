@@ -81,6 +81,7 @@ def main():
     
     for g in range(NGEN):
         children = []
+        evaluations = 0
         for agent in pop:
             # We must clone everything to ensure independance
             a, b, c = [toolbox.clone(ind) for ind in toolbox.select(pop)]
@@ -92,6 +93,7 @@ def main():
             children.append(z)
             
         fitnesses = toolbox.map(toolbox.evaluate, children)
+        evaluations += len(fitnesses)
         for ind, fit, i in zip(children, fitnesses, range(len(fitnesses))):
             ind.fitness.values = fit
             if ind.fitness > pop[i].fitness:
@@ -101,7 +103,11 @@ def main():
         stats.update(pop)
         
         print "-- Generation %i --" % g
-        print stats
+        print "  Evaluated %i individuals" % evaluations
+        print "  Min %s" % stats.Min[0][-1][0]
+        print "  Max %s" % stats.Max[0][-1][0]
+        print "  Avg %s" % stats.Avg[0][-1][0]
+        print "  Std %s" % stats.Std[0][-1][0]
             
     print "Best individual is ", hof[0]
     print "with fitness", hof[0].fitness.values[0]
