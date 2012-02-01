@@ -27,10 +27,8 @@ import inspect
 import math
 import random
 from itertools import chain
-from operator import attrgetter, itemgetter, eq
-from collections import defaultdict, Iterable, Sequence
-from functools import partial
-import time
+from operator import attrgetter, eq
+from collections import defaultdict, Sequence
 from sys import stdout
 
 try:
@@ -1638,7 +1636,6 @@ def decorate(decorator):
     
 if __name__ == "__main__":
     import doctest
-    import random
     
     random.seed(64)
     doctest.run_docstring_examples(initRepeat, globals())
