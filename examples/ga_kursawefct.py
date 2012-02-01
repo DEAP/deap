@@ -68,10 +68,11 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
+    logger = tools.EvolutionLogger(stats.functions.keys())
     
     algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
                               cxpb=0.5, mutpb=0.2, ngen=50, 
-                              stats=stats, halloffame=hof)
+                              stats=stats, halloffame=hof, logger=logger)
 
     return pop, stats, hof
 

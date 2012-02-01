@@ -88,8 +88,10 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
+    logger = tools.EvolutionLogger(stats.functions.keys())
     
-    algorithms.eaSimple(toolbox, pop, 0.8, 0.1, 40, stats, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, 0.8, 0.1, 40, stats, halloffame=hof,
+                        logger=logger)
     
     return pop, stats, hof
 
