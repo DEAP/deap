@@ -43,8 +43,9 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None, verbose=T
         
     for gen in xrange(ngen):
         # Evaluate the individuals
-        for ind in population:
-            ind.fitness.values = toolbox.evaluate(ind)
+        fitnesses = toolbox.map(toolbox.evaluate, population)
+        for ind, fit in zip(population, fitnesses):
+            ind.fitness.values = fit
         
         if halloffame is not None:
             halloffame.update(population)
