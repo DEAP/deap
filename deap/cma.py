@@ -26,11 +26,9 @@ import numpy
 import random   # Only used to seed numpy.random
 import sys      # Used to get maxint
 import copy
-import time
-import tools
 
 numpy.random.seed(random.randint(0, sys.maxint))
-    
+
 def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
           logger=None):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
