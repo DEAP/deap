@@ -37,7 +37,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
     The provided *population* should be a list of one or more individuals.
     """
     if logger is not None:
-        logger.printHeader()
+        logger.logHeader()
     for gen in xrange(ngen):
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)

@@ -133,7 +133,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
     if stats is not None:
         stats.update(population)
     if logger is not None:
-        logger.printHeader()
+        logger.logHeader()
         if stats is not None:
             logger.logStatistics(stats, len(population), 0)
         else:
@@ -299,7 +299,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     if stats is not None:
         stats.update(population)
     if logger is not None:
-        logger.printHeader()
+        logger.logHeader()
         if stats is not None:
             logger.logStatistics(stats, len(invalid_ind), 0)
         else:
@@ -372,7 +372,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     if stats is not None:
         stats.update(population)
     if logger is not None:
-        logger.printHeader()
+        logger.logHeader()
         if stats is not None:
             logger.logStatistics(stats, len(population), 0)
         else:
