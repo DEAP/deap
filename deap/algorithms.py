@@ -431,10 +431,8 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
     registered in the toolbox.
     """
     if verbose:
-        lg_stat_names = tuple()
-        lg_stat_values = tuple()
-        lg_stat_str = ""
-        start_time = time.time()
+        logger = tools.EvolutionLogger(stats)
+        logger.start()
     
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -446,25 +444,14 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-        if verbose:
-            lg_stat_names = tuple(name for name in stats.functions.keys())
-            # A very ugly string formatting line, it is used so that floats
-            # can be formatted with %g without having the string markers in
-            # the output. (Don't look a this please!)
-            lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-            lg_stat_str = "".join(tuple(" %12s",) * len(lg_stat_names))
-
     if verbose:
-        print("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-              (lg_stat_str % lg_stat_names) + " {:>8s}".format("Time"))
-        print("{0:>5d}".format(0) + " {0:>5d}".format(len(invalid_ind)) +
-              (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-    
+        logger.log_gen(len(invalid_ind), 0)
+
     # Begin the generational process
     for gen in range(ngen):
         # Variate the population
         child, = varSteadyState(toolbox, population)
-        
+
         # Evaluate the produced child
         child.fitness.values = toolbox.evaluate(child)
         
@@ -478,12 +465,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-            if verbose:
-                lg_stat_values = tuple("[%s]" % ", ".join("%g" % value for value in stats[0][key][-1]) for key in lg_stat_names)
-        
         if verbose:
-            print("{0:>5d}".format(gen + 1) + " {0:>5d}".format(1) +
-                  (lg_stat_str %  lg_stat_values) + " {:>7.4f}".format(time.time() - start_time))
-            start_time = time.time()
+            logger.log_gen(nbr_eval=1, gen=gen)
 
     return population
