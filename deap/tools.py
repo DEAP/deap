@@ -429,6 +429,11 @@ class Statistics(object):
 class EvolutionLogger(object):
     """
     """
+
+    output = stdout
+    """File object indicating where the log is written. By default log is
+    written in sys.stdout.
+    """
     def __init__(self, col_names=None):
         """
         """
@@ -436,7 +441,6 @@ class EvolutionLogger(object):
         self.lg_stats_values = ()
         self.lg_stat_str = ""
         self.header = ""
-        self.output = stdout
         if col_names is not None:
             self.lg_stat_names = tuple(col_names)
             self.lg_stat_str = "".join(tuple(" %12s",) * len(self.lg_stat_names))
@@ -446,18 +450,22 @@ class EvolutionLogger(object):
             self.header = ("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals"))
 
     def logHeader(self):
-        """
+        """Logs the column titles which are "Gen.", "Evals", and the column
+        names specified during initialization.
         """
         self.output.write(self.header + "\n")
 
     def logGeneration(self, nbr_eval, gen):
-        """
+        """Logs the generation identifier *gen*, which can be a string of any sort, 
+        and the number of evaluations *nbr_eval*, which has to be an integer.
         """
         self.output.write("{0:>5s}".format(str(gen)) + 
                           "{0:>5d}".format(nbr_eval) + "\n")
 
-    def logStatistics(self, stats, nbr_eval, gen, idx=0):
-        """
+    def logStatistics(self, stats, nbr_eval, gen, index=0):
+        """Logs the generation identifier *gen*, the number of evaluations
+        *nbr_eval* and the generation statistics *stats* of with the index
+        *index*. 
         """
         lg_stat_values = tuple("[%s]" % ", ".join("%.4f" % value for value in
                                                   stats[idx][key][-1]) 
