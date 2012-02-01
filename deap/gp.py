@@ -457,8 +457,8 @@ def cxOnePointLeafBiased(ind1, ind2, cxtermpb):
     # directly use lists)
     termsList1 = [termIndex for termIndex in ind1.iter_leaf_idx]
     termsList2 = [termIndex for termIndex in ind2.iter_leaf_idx]
-    primList1 = [i for i in xrange(1,size1) if i not in termsList1]
-    primList2 = [i for i in xrange(1,size2) if i not in termsList2]
+    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
+    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
     if random.random() < cxtermpb or len(primList1) == 0:
         # Choose a terminal from the first parent
@@ -513,8 +513,8 @@ def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
     # directly use lists)
     termsList1 = [termIndex for termIndex in ind1.iter_leaf_idx]
     termsList2 = [termIndex for termIndex in ind2.iter_leaf_idx]
-    primList1 = [i for i in xrange(1,size1) if i not in termsList1]
-    primList2 = [i for i in xrange(1,size2) if i not in termsList2]
+    primList1 = [i for i in xrange(1, size1) if i not in termsList1]
+    primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
     if random.random() < cxtermpb or len(primList1) == 0:
         # Choose a terminal from the first parent
