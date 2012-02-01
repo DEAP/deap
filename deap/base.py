@@ -25,7 +25,7 @@ import operator
 import functools
 from collections import deque
 from itertools import izip, repeat, count
-        
+
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
     At first the toolbox contains two simple methods. The first method
@@ -256,7 +256,7 @@ class Tree(list):
             return self
         
         def __eq__(self, other):
-            return self.obj == other.obj        
+            return self.obj == other.obj
         def __getattr__(self, attr):
             return getattr(self.obj, attr)
         def __call__(self, *args, **kargs):
@@ -307,7 +307,7 @@ class Tree(list):
         """Deepcopy a Tree by first converting it back to a list of list."""
         new = self.__class__(copy.deepcopy(self.getstate()))
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        return new        
+        return new
         
     def __setitem__(self, key, value):
         """Set the item at `key` with the corresponding `value`."""
@@ -473,7 +473,7 @@ class Tree(list):
                 del self[1:]
                 self[0] = subtree
             return
-                
+         
         queue = deque(izip(repeat(self, len(self[1:])), count(1)))
         for i in xrange(index):
             elem = queue.popleft()
