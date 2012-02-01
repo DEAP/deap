@@ -2,7 +2,10 @@ Using Multiple Processors
 =========================
 
 This section of the tutorial shows all the work that is needed to
-paralellize operations in deap.
+distribute operations in deap. Distribution relies on serialization of objects
+and serialization is usually done by pickling, thus all objects that are
+distributed (functions and arguments, e.g. individuals and parameters) must be
+pickleable.
 
 Distributed Task Manager
 ------------------------
@@ -59,6 +62,7 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 
 .. note::
    The pickling of lambda function is not yet available in Python.
+
 
 .. Parallel Evaluation
 .. -------------------
