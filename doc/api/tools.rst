@@ -153,6 +153,16 @@ Hall-Of-Fame
 
    .. automethod:: deap.tools.ParetoFront.update
 
+Evolution Logger
+----------------
+.. autoclass:: deap.tools.EvolutionLogger
+
+   .. automethod:: deap.tools.EvolutionLogger.printHeader
+
+   .. automethod:: deap.tools.EvolutionLogger.logGeneration
+
+   .. automethod:: deap.tools.EvolutionLogger.logStatistics
+
 Checkpoint
 ----------
 .. autoclass:: deap.tools.Checkpoint([yaml,object[, ...]])

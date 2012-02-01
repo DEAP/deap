@@ -429,14 +429,14 @@ class Statistics(object):
 class EvolutionLogger(object):
     """
     """
-    def __init__(self, col_names=None, output=stdout):
+    def __init__(self, col_names=None):
         """
         """
         self.lg_stats_names = ()
         self.lg_stats_values = ()
         self.lg_stat_str = ""
         self.header = ""
-        self.output = output
+        self.output = stdout
         if col_names is not None:
             self.lg_stat_names = tuple(col_names)
             self.lg_stat_str = "".join(tuple(" %12s",) * len(self.lg_stat_names))
@@ -445,7 +445,7 @@ class EvolutionLogger(object):
         else:
             self.header = ("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals"))
 
-    def printHeader(self):
+    def logHeader(self):
         """
         """
         self.output.write(self.header + "\n")
