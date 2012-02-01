@@ -31,16 +31,15 @@ import tools
 
 numpy.random.seed(random.randint(0, sys.maxint))
     
-def esCMA(toolbox, population, ngen, halloffame=None, statistics=None, verbose=True):
+def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
+          logger=None):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
     The provided *population* should be a list of one or more individuals.
     """
-    if verbose:
-        logger = tools.EvolutionLogger(statistics)
-        logger.start()
-        
+    if logger is not None:
+        logger.printHeader()
     for gen in xrange(ngen):
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
@@ -56,8 +55,11 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None, verbose=T
         if statistics is not None:
             statistics.update(population)
         
-        if verbose:
-            logger.log_gen(len(population), gen)
+        if logger is not None:
+            if statistics is not None:
+                logger.logStatistics(statistics, len(population), gen)
+            else:
+                logger.logGeneration(len(population), gen)
 
 class CMAStrategy(object):
     """

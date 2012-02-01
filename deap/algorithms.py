@@ -26,7 +26,6 @@ you really want them to do.
 """
 
 import random
-import time
 import tools
 
 def varSimple(toolbox, population, cxpb, mutpb):
@@ -93,7 +92,8 @@ def varAnd(toolbox, population, cxpb, mutpb):
     
     return offspring
 
-def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
+def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
+             halloffame=None, logger=None):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of Back, Fogel and Michalewicz,
     "Evolutionary Computation 1 : Basic Algorithms and Operators", 2000.
@@ -122,10 +122,6 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
     """
-    if verbose:
-        logger = tools.EvolutionLogger(stats)
-        logger.start()
-
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -136,8 +132,12 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if verbose: 
-        logger.log_gen(len(population), 0)
+    if logger is not None:
+        logger.printHeader()
+        if stats is not None:
+            logger.logStatistics(stats, len(population), 0)
+        else:
+            logger.logGeneration(len(invalid_ind), 0)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -165,8 +165,11 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None, halloffame=None
         if stats is not None:
             stats.update(population)
 
-        if verbose:
-            logger.log_gen(len(invalid_ind), gen)
+        if logger is not None:
+            if stats is not None:
+                logger.logStatistics(stats, len(invalid_ind), gen)
+            else:
+                logger.logGeneration(len(invalid_ind), gen)
 
     return population
 
@@ -259,7 +262,8 @@ def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     
     return offsprings
 
-def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
+def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
+                   stats=None, halloffame=None, logger=None):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
     evolutionary loop begins by producing *lambda* offspring from the
@@ -284,11 +288,6 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
        pool. 
     
     """
-    
-    if verbose:
-        logger = tools.EvolutionLogger(stats)
-        logger.start()
-
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -299,8 +298,12 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if verbose:
-        logger.log_gen(len(invalid_ind), 0)
+    if logger is not None:
+        logger.printHeader()
+        if stats is not None:
+            logger.logStatistics(stats, len(invalid_ind), 0)
+        else:
+            logger.logGeneration(len(invalid_ind), gen)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -323,12 +326,16 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=No
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-        if verbose:
-           logger.log_gen(len(invalid_ind), gen)
+        if logger is not None:
+            if stats is not None:
+                logger.logStatistics(stats, len(invalid_ind), gen)
+            else:
+                logger.logGeneration(len(invalid_ind), gen)
 
     return population
     
-def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=None, halloffame=None, verbose=True):
+def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
+                    stats=None, halloffame=None, logger=None):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
     evolutionary loop begins by producing *lambda* offspring from the
@@ -353,10 +360,6 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
        pool.
     """
     assert lambda_ >= mu, "lambda must be greater or equal to mu."
-        
-    if verbose:
-        logger = tools.EvolutionLogger(stats)
-        logger.start()
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -368,8 +371,13 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if verbose:
-        logger.log_gen(len(invalid_ind), 0)
+    if logger is not None:
+        logger.printHeader()
+        if stats is not None:
+            logger.logStatistics(stats, len(population), 0)
+        else:
+            logger.logGeneration(len(invalid_ind), 0)
+
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -392,8 +400,11 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen, stats=N
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-        if verbose:
-            logger.log_gen(len(invalid_ind), gen)
+        if logger is not None:
+            if stats is not None:
+                logger.logStatistics(stats, len(invalid_ind), gen)
+            else:
+                logger.logGeneration(len(invalid_ind), gen)
 
     return population
 
@@ -420,7 +431,8 @@ def varSteadyState(toolbox, population):
     
     return child,
 
-def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbose=True):
+def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
+                  logger=None):
     """The steady-state evolutionary algorithm. Every generation, a single new
     individual is produced and put in the population producing a population of
     size :math:`lambda+1`, then :math:`lambda` individuals are kept according
@@ -430,10 +442,6 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
     """
-    if verbose:
-        logger = tools.EvolutionLogger(stats)
-        logger.start()
-    
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -444,8 +452,12 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if verbose:
-        logger.log_gen(len(invalid_ind), 0)
+
+    if logger is not None:
+        if stats is not None:
+            logger.logStatistics(stats, len(population), 0)
+        else:
+            logger.logGeneration(len(invalid_ind), 0)
 
     # Begin the generational process
     for gen in range(ngen):
@@ -465,7 +477,11 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None, verbos
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-        if verbose:
-            logger.log_gen(nbr_eval=1, gen=gen)
+        if logger is not None:
+            if stats is not None:
+                logger.logStatistics(stats, len(invalid_ind), gen)
+            else:
+                logger.logGeneration(len(invalid_ind), gen)
+
 
     return population

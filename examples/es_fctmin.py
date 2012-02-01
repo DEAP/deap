@@ -72,10 +72,11 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
+    logger = tools.EvolutionLogger(stats.functions.keys())
     
     algorithms.eaMuCommaLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
                                cxpb=0.6, mutpb=0.3, ngen=500, 
-                               stats=stats, halloffame=hof)
+                               stats=stats, halloffame=hof, logger=logger)
     
     return pop, stats, hof
     

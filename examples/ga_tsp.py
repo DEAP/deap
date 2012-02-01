@@ -62,8 +62,9 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
+    logger = tools.EvolutionLogger(stats.functions.keys())
     
-    algorithms.eaSimple(toolbox, pop, 0.7, 0.2, 40, stats, hof)
+    algorithms.eaSimple(toolbox, pop, 0.7, 0.2, 40, stats, hof, logger)
     
     return pop, stats, hof
 

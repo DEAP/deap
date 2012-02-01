@@ -48,9 +48,11 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
+    logger = tools.EvolutionLogger(stats.functions.keys())
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, statistics=stats)
+    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, statistics=stats,
+              logger=logger)
     
     # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]

@@ -141,8 +141,12 @@ def main():
         
         hof.update(hosts)
         hstats.update(hosts)
-        
-        print hstats
+
+        print "  Evaluated %i individuals" % len(hosts)
+        print "  Min %s" % hstats.Min[0][-1][0]
+        print "  Max %s" % hstats.Max[0][-1][0]
+        print "  Avg %s" % hstats.Avg[0][-1][0]
+        print "  Std %s" % hstats.Std[0][-1][0]
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
