@@ -157,7 +157,9 @@ Evolution Logger
 ----------------
 .. autoclass:: deap.tools.EvolutionLogger
 
-   .. automethod:: deap.tools.EvolutionLogger.printHeader
+   .. autoattribute:: deap.tools.EvolutionLogger.output
+
+   .. automethod:: deap.tools.EvolutionLogger.logHeader
 
    .. automethod:: deap.tools.EvolutionLogger.logGeneration
 
