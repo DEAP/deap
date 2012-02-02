@@ -127,7 +127,7 @@ class CMAStrategy(object):
         centroid individual as parent.
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD)
+        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
         return map(ind_init, arz)
         
     def update(self, population, ind_init=None):
