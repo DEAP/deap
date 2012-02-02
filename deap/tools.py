@@ -26,9 +26,10 @@ import copy
 import inspect
 import math
 import random
+
 from itertools import chain
 from operator import attrgetter, eq
-from collections import defaultdict, Sequence
+from collections import Sequence
 from sys import stdout
 
 try:
@@ -307,20 +308,18 @@ class Statistics(object):
     exists. When created the statistics object receives a *key* argument that
     is used to get the required data, if not provided the *key* argument
     defaults to the identity function. A statistics object can be represented
-    as a 4 dimensional matrix. Along the first axis (wich length is given by
-    the *n* argument) are independent statistics objects that are used on
-    different collections given this index in the :meth:`update` method. The
-    second axis is the function it-self, each element along the second axis
-    (indexed by their name) will represent a different function. The third
-    axis is the accumulator of statistics. each time the update function is
-    called the new statistics are added using the registered functions at the
-    end of this axis. The fourth axis is used when the entered data is an
-    iterable (for example a multiobjective fitness).
+    as multiple 3 dimensional matrix, for each registered function there is
+    a matrix.
+
+    Along the first axis (wich length is given by the *n* argument) are
+    independent statistics on different collections given this index in the 
+    :meth:`update` method. The second is the accumulator of statistics, each 
+    time the update function is called the new statistics are added using the 
+    registered functions at the end of this axis. The third axis is used when 
+    the entered data is an iterable (for example a multiobjective fitness).
     
-    Data can be retrieved by different means in a statistics object. One can
-    use directly the registered function name with an *index* argument that
-    represent the first axis of the matrix. This method returns the last
-    entered data.
+    Data can be retrieved by accessing the statistic function name followed
+    by the indicices of the element we wish to access.
     ::
     
         >>> s = Statistics(n=2)
@@ -331,70 +330,56 @@ class Statistics(object):
         [2.5]
         >>> s.Mean[1][-1]
         [6.5]
-    
-    An other way to obtain the statistics is to use directly the ``[]``. In
-    that case all dimensions must be specified. This is how stats that have
-    been registered earlier in the process can be retrieved.
-    ::
-    
         >>> s.update([10, 20, 30, 40], index=0)
         >>> s.update([50, 60, 70, 80], index=1)
-        >>> s.Mean[0][0]
-        [2.5]
-        >>> s.Mean[1][0]
-        [6.5]
         >>> s.Mean[0][1]
         [25.0]
         >>> s.Mean[1][1]
         [65.0]
-    
-    Finally, the fourth dimension is used when stats are needed on lists of
-    lists. The stats are computed on the matching indices of each list.
-    ::
-    
-        >>> s = Statistics()
-        >>> s.register("Mean", mean)
-        >>> s.update([[1, 2, 3], [4, 5, 6]])
-        >>> s.Mean[-1][-1]
-        [2.5, 3.5, 4.5]
-        >>> s.Mean[0][-1][0]
-        2.5
     """
+    __slots__ = ['key', 'functions', 'dim', 'data']
     def __init__(self, key=identity, n=1):
         self.key = key
+        self.data = {}
         self.functions = {}
-        self.data = list(defaultdict(list) for _ in xrange(n))
-    
-    def __getitem__(self, index):
-        return self.data[index]
+        self.dim = n
 
     def __getattr__(self, name):
-        if name in self.__getattribute__("functions"):
-            return [data[name] for data in self.data]
+        if name in self.__getattribute__("data"):
+            return self.data[name]
         else:
             return self.__getattribute__(name)
+
+    def __getstate__(self):
+        return None, {'key' : self.key, 'functions' : self.functions, 
+                      'dim' : self.dim, 'data' : self.data}
 
     def register(self, name, function):
         """Register a function *function* that will be apply on the sequence
         each time :func:`~deap.tools.Statistics.update` is called.
         The function result will be accessible by using the string given by
         the argument *name* as a function of the statistics object.
-        
+        ::
+
             >>> s = Statistics()
             >>> s.register("Mean", mean)
             >>> s.update([1,2,3,4,5,6,7])
             >>> s.Mean
             [[[4.0]]]
         """
+ 
+        if name in self.__slots__:
+            raise ValueError("Statistics.register: The registered name"
+                             " can't be 'key', 'functions', 'dim' or 'data'.")
         self.functions[name] = function
-    
-    def update(self, seq, index=0, force=False):
+        self.data[name] = [[] * self.dim]
+
+    def update(self, seq, index=0):
         """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
-        the data index *index*. If *force* is True and the index is
-        greater then the number of data, a new data object is added
-        to the statistics. 
-            
+        the data index *index*.
+        ::
+
             >>> s = Statistics()
             >>> s.register("Mean", mean)
             >>> s.register("Max", max)
@@ -406,16 +391,9 @@ class Statistics(object):
             >>> s.update([1,2,3])
             >>> s.Max
             [[[8], [3]]]
-            >>> s[0]["Max"]
-            [[8], [3]]
-            >>> s[0]["Mean"]
-            [[6.0], [2.0]]
         """
-        if force and index == len(self.data):
-            self.data.append(defaultdict(list))
-            
+
         # Transpose the values
-        data = self.data[index]
         try:
             # seq is a sequence of number sequences.
             values = zip(*(self.key(elem) for elem in seq))
@@ -424,7 +402,7 @@ class Statistics(object):
             values = (seq,)
 
         for key, func in self.functions.iteritems():
-            data[key].append(map(func, values))
+            self.data[key][index].append(map(func, values))
 
 class EvolutionLogger(object):
     """
@@ -468,7 +446,7 @@ class EvolutionLogger(object):
         *index*. 
         """
         lg_stat_values = tuple("[%s]" % ", ".join("%.4f" % value for value in
-                                                  stats[idx][key][-1]) 
+                                                  stats.data[key][index][-1]) 
                                for key in self.lg_stat_names)
         self.output.write("{0:>5s}".format(str(gen)) + " {0:>5d}".format(nbr_eval) +
                      (self.lg_stat_str %  lg_stat_values) + "\n")
