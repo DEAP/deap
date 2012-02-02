@@ -53,7 +53,7 @@ def main():
     stats.register("Max", max)
     logger = tools.EvolutionLogger(stats.functions.keys())
     
-    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=None,
+    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
                         halloffame=hof, logger=logger)
     
     return pop, stats, hof
