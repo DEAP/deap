@@ -61,9 +61,9 @@ def main(seed=None):
     stats.register("Min", min)
     stats.register("Max", max)
     
-    logger = tools.EvolutionLogger(stats)
-    logger.start()
-    
+    logger = tools.EvolutionLogger(stats.functions.keys())
+    logger.logHeader()
+
     pop = toolbox.population(n=MU)
 
     # Evaluate the individuals with an invalid fitness
@@ -77,7 +77,7 @@ def main(seed=None):
     pop = toolbox.select(pop, len(pop))
     
     stats.update(pop)
-    logger.log_gen(len(invalid_ind), 0)
+    logger.logStatistics(stats, len(invalid_ind), 0)
 
     # Begin the generational process
     for gen in range(1, NGEN+1):
@@ -102,7 +102,7 @@ def main(seed=None):
         # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
         stats.update(pop)
-        logger.log_gen(len(invalid_ind), gen)
+        logger.logStatistics(stats, len(invalid_ind), gen)
 
     return pop
         
