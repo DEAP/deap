@@ -14,7 +14,9 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import numpy
+import csv
 import operator
+import random
 
 class KNN(object):
     def __init__(self, k):
@@ -44,7 +46,6 @@ class KNN(object):
                 dist[i, :, :] = self.data - d
         else:
             raise ValueError("Cannot process data with dimensionality > 2")
-        
         dist = features * dist
         dist = dist * dist
         dist = numpy.sum(dist, -1)
@@ -66,6 +67,28 @@ class KNN(object):
         
         return labels
 
+# Create a default internal KNN object
+# Read data from file
+FILE="heart_scale.csv"
+N_TRAIN=175
+K=1
+
+data_csv = csv.reader(open(FILE, "rb"))
+trainset = list()
+trainlabels = list()
+rows = [row for row in data_csv]
+random.shuffle(rows)
+for row in rows:
+    trainlabels.append(float(row[0]))
+    trainset.append([float(e) for e in row[1:]])
+
+_knn = KNN(K)
+_knn.train(trainset[:N_TRAIN], trainlabels[:N_TRAIN])
+
+def classification_rate(features):
+    """Returns the classification rate of the default KNN."""
+    labels = _knn.predict(trainset[N_TRAIN:], features)
+    return sum(1 for x, y in zip(labels, trainlabels) if x == y)/float(len(trainlabels))
 
 if __name__ == "__main__":
     trainset = [[1, 0], [1, 1], [1, 2]]
@@ -76,5 +99,3 @@ if __name__ == "__main__":
     print knn.predict([1, 0], [1, 1])
     print "Multiple Data ==========="
     print knn.predict([[1, 3], [1, 0]], [1, 1])
-    
-    
