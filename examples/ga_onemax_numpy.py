@@ -51,7 +51,7 @@ def main():
     logger = tools.EvolutionLogger(stats.functions.keys())
     
     algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
-                        halloffame=hof, logger)
+                        halloffame=hof, logger=logger)
     
     return pop, stats, hof
 
