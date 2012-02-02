@@ -9,9 +9,7 @@ Although pure performance is not one of the most important objectives of DEAP, i
 The comparison problem : Sorting Networks
 -----------------------------------------
 
-From Wikipedia : *A sorting network is an abstract mathematical model of a network of wires and comparator modules that is used to sort a sequence of numbers. Each comparator connects two wires and sort the values by outputting the smaller value to one wire, and a larger value to the other.* [SORTING_NETWORK]
-
-.. [SORTING_NETWORK] http://en.wikipedia.org/wiki/Sorting_networks
+From `Wikipedia <http://en.wikipedia.org/wiki/Sorting_networks>`_ : *A sorting network is an abstract mathematical model of a network of wires and comparator modules that is used to sort a sequence of numbers. Each comparator connects two wires and sort the values by outputting the smaller value to one wire, and a larger value to the other.*
 
 Genetic algorithms are an interesting way to generate arbitrary sorting networks, as the fitness function of a network can easily be defined. Moreover, this problem is a good benchmark for evolutionnary framework : its complexity (and therefore the ressources needed) can be tuned by changing the number of inputs. A 6-inputs problems is fairly simple and will be solved in a few seconds, while a 20-inputs one will take several minutes for each *generation*.
 
