@@ -372,7 +372,7 @@ class Statistics(object):
             raise ValueError("Statistics.register: The registered name"
                              " can't be 'key', 'functions', 'dim' or 'data'.")
         self.functions[name] = function
-        self.data[name] = [[] * self.dim]
+        self.data[name] = [[] for _ in xrange(self.dim)]
 
     def update(self, seq, index=0):
         """Apply to the input sequence *seq* each registered function 
