@@ -52,7 +52,7 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
-    logger = EvolutionLogger(stats.functions.keys())
+    logger = tools.EvolutionLogger(stats.functions.keys())
    
     # The CMA-ES algorithm converge with good probability with those settings
     cma.esCMA(toolbox, pop, ngen=600, halloffame=hof, statistics=stats,
