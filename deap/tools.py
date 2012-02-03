@@ -213,7 +213,6 @@ class Checkpoint(object):
 
     """
     def __init__(self, use_yaml=True, **kargs):
-#        self.zipped = zipped
         self._dict = kargs
         if CHECKPOINT_USE_YAML and use_yaml:
             self.use_yaml = True
@@ -240,14 +239,10 @@ class Checkpoint(object):
     def dump(self, prefix):
         """Dump the current registered objects in a file named *prefix.ecp*.
         """
-#        if not self.zipped:
         cp_file = open(prefix + ".ecp", "w")
-#        else:
-#            file = gzip.open(prefix + ".ems.gz", "w")
-        cp = self._dict.copy()
 
         if self.use_yaml:
-            cp_file.write(yaml.dump(cp, Dumper=Dumper))
+            cp_file.write(yaml.dump(self._dict, Dumper=Dumper))
         else:
             pickle.dump(cp, cp_file)
 
