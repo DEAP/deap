@@ -185,18 +185,18 @@ class Checkpoint(object):
     be dumped by appending keyword arguments to the initializer or using the 
     :meth:`add`. By default the checkpoint tries to use the YAML format which
     is human readable, if PyYAML is not installed, it uses pickling which is
-    not readable. You can force the use of pickling by setting the argument
+    not legible. You can force the use of pickling by setting the argument
     *use_yaml* to :data:`False`. 
 
     In order to use efficiently this module, you must understand properly the
-    assignment principles in Python. This module use the *pointers* you passed
+    assignment principles in Python. This module uses the *pointers* you passed
     to dump the object, for example the following won't work as desired ::
 
         >>> my_object = [1, 2, 3]
         >>> cp = Checkpoint(obj=my_object)
         >>> my_object = [3, 5, 6]
         >>> cp.dump("example")
-        >>> cp.load("example.ems")
+        >>> cp.load("example.ecp")
         >>> cp["obj"]
         [1, 2, 3]
 
@@ -207,13 +207,13 @@ class Checkpoint(object):
         >>> cp = Checkpoint(obj=my_object)
         >>> my_object[:] = [3, 5, 6]
         >>> cp.dump("example")
-        >>> cp.load("example.ems")
+        >>> cp.load("example.ecp")
         >>> cp["obj"]
         [3, 5, 6]
 
     """
     def __init__(self, use_yaml=True, **kargs):
-        self._dict = kargs
+        self.objects = kargs
         if CHECKPOINT_USE_YAML and use_yaml:
             self.use_yaml = True
         else:
@@ -224,17 +224,17 @@ class Checkpoint(object):
         added under the name specified by the argument's name. Keyword
         arguments are mandatory in this function.
         """
-        self._dict.update(kargs)
+        self.objects.update(kargs)
 
     def remove(self, *args):
         """Remove objects with the specified name from the list of objects to
         be dumped.
         """
         for element in args:
-            del self._dict[element]
+            del self.objects[element]
 
     def __getitem__(self, value):
-        return self._dict[value]
+        return self.objects[value]
 
     def dump(self, prefix):
         """Dump the current registered objects in a file named *prefix.ecp*.
@@ -242,7 +242,7 @@ class Checkpoint(object):
         cp_file = open(prefix + ".ecp", "w")
 
         if self.use_yaml:
-            cp_file.write(yaml.dump(self._dict, Dumper=Dumper))
+            cp_file.write(yaml.dump(self.objects, Dumper=Dumper))
         else:
             pickle.dump(cp, cp_file)
 
@@ -255,9 +255,9 @@ class Checkpoint(object):
         values.
         """
         if self.use_yaml:
-            self._dict.update(yaml.load(open(filename, "r"), Loader=Loader))
+            self.objects.update(yaml.load(open(filename, "r"), Loader=Loader))
         else:
-            self._dict.update(pickle.load(open(filename, "r")))
+            self.objects.update(pickle.load(open(filename, "r")))
 
 def mean(seq):
     """Returns the arithmetic mean of the sequence *seq* = 
