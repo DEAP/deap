@@ -238,16 +238,13 @@ class Checkpoint(object):
         return self._dict[value]
 
     def dump(self, prefix):
-        """Dump the current registered objects in a file named *prefix.ecp*,
-        the randomizer state is always added to the file and available under
-        the ``"randomizer_state"`` tag.
+        """Dump the current registered objects in a file named *prefix.ecp*.
         """
 #        if not self.zipped:
         cp_file = open(prefix + ".ecp", "w")
 #        else:
 #            file = gzip.open(prefix + ".ems.gz", "w")
         cp = self._dict.copy()
-        cp.update({"randomizer_state" : random.getstate()})
 
         if self.use_yaml:
             cp_file.write(yaml.dump(cp, Dumper=Dumper))
