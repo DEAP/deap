@@ -225,7 +225,7 @@ class Checkpoint(object):
         added under the name specified by the argument's name. Keyword
         arguments are mandatory in this function.
         """
-        self._dict.update(*kargs)
+        self._dict.update(kargs)
 
     def remove(self, *args):
         """Remove objects with the specified name from the list of objects to
