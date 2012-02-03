@@ -343,7 +343,7 @@ class Statistics(object):
             return self.__getattribute__(name)
 
     def __getstate__(self):
-        return None, {'key' : self.key, 'functions' : self.functions, 
+        return None, {'functions' : self.functions, 
                       'dim' : self.dim, 'data' : self.data}
 
     def register(self, name, function):
