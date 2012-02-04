@@ -244,7 +244,7 @@ class Checkpoint(object):
         if self.use_yaml:
             cp_file.write(yaml.dump(self.objects, Dumper=Dumper))
         else:
-            pickle.dump(cp, cp_file)
+            pickle.dump(self.objects, cp_file)
 
         cp_file.close()
 
@@ -345,6 +345,11 @@ class Statistics(object):
     def __getstate__(self):
         return None, {'functions' : self.functions, 
                       'dim' : self.dim, 'data' : self.data}
+
+    def __setstate__(self, state):
+        self.functions = state[1]['functions']
+        self.dim = state[1]['dim']
+        self.data = state[1]['data']
 
     def register(self, name, function):
         """Register a function *function* that will be apply on the sequence
