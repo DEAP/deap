@@ -183,7 +183,7 @@ class ExecInfo(object):
 class TaskQueue(object):
     """
     """
-    def __init__(self, tasksStatsStruct, tasksStatsLock):
+    def __init__(self, tasksStatsStruct, tasksStatsLock, controlObject):
         self.tStats = tasksStatsStruct
         self.tStatsLock = tasksStatsLock
         self.previousLoad = 0.
@@ -193,6 +193,7 @@ class TaskQueue(object):
         self._tDict = {}
         self._actionLock = threading.Lock()
         self.changed = True
+        self.control = controlObject
 
     def _getTimeInfoAbout(self, task):
         if task.threadObject is None:
@@ -250,7 +251,11 @@ class TaskQueue(object):
     def putList(self, tasksList):
         self._actionLock.acquire()
 
+        logRoute = True if hasattr(tasksList[0],'taskRoute') else False
+
         for taskObject in tasksList:
+            if logRoute:
+                taskObject.taskRoute.append(self.control.workerId)
             self._tDict[taskObject.tid] = taskObject
             self._tQueue.put(taskObject)
 
@@ -372,7 +377,7 @@ class Control(object):
         # Global execution lock
         self.dtmExecLock = ExecInfo(self.tasksStats, self.tasksStatsLock)
 
-        self.waitingThreadsQueue = TaskQueue(self.tasksStats, self.tasksStatsLock)
+        self.waitingThreadsQueue = TaskQueue(self.tasksStats, self.tasksStatsLock, self)
 
         # Key : task ID, Value : WaitInfoContainer
         self.waitingThreads = {}
@@ -381,8 +386,8 @@ class Control(object):
 
         self.launchTaskLock = threading.Lock()
 
-        self.waitingForRestartQueue = TaskQueue(self.tasksStats, self.tasksStatsLock)
-        self.execQueue = TaskQueue(self.tasksStats, self.tasksStatsLock)
+        self.waitingForRestartQueue = TaskQueue(self.tasksStats, self.tasksStatsLock, self)
+        self.execQueue = TaskQueue(self.tasksStats, self.tasksStatsLock, self)
 
         self.recvQueue = Queue.Queue()      # Contains MessageContainer
         self.sendQueue = Queue.Queue()      # Contains MessageContainer
@@ -966,7 +971,7 @@ class Control(object):
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = index,
-                                    taskRoute = [self.workerId],
+                                    taskRoute = [],
                                     creationTime = time.time(),
                                     target = function,
                                     args = elem,
@@ -1055,7 +1060,7 @@ class Control(object):
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = index,
-                                    taskRoute = [self.workerId],
+                                    taskRoute = [],
                                     creationTime = time.time(),
                                     target = function,
                                     args = elem,
@@ -1120,7 +1125,7 @@ class Control(object):
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = 0,
-                                    taskRoute = [self.workerId],
+                                    taskRoute = [],
                                     creationTime = time.time(),
                                     target = function,
                                     args = args,
@@ -1192,7 +1197,7 @@ class Control(object):
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = 0,
-                                    taskRoute = [self.workerId],
+                                    taskRoute = [],
                                     creationTime = time.time(),
                                     target = function,
                                     args = args,
@@ -1313,7 +1318,7 @@ class Control(object):
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
                                     taskIndex = index,
-                                    taskRoute = [self.workerId],
+                                    taskRoute = [],
                                     creationTime = time.time(),
                                     target = function,
                                     args = args,
@@ -1489,7 +1494,7 @@ class Control(object):
 
         .. warning::
             This function always returns the same task (the last) if called
-            more than once with the same parameters (e.g. it does not delete
+            more than once with the same parameters (i.e. it does not delete
             the state of a completed task when called, so a second call will
             produce the same output). It is the user responsability to
             provide a *reqList* containing only the tasks which he does not
