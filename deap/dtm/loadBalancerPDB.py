@@ -131,7 +131,7 @@ class LoadBalancer(object):
             decisionLog = etree.SubElement(self.xmlLogger, "decision", {"time" : repr(time.time()), 
                                                                         "selfLoad" : repr(self.ws[self.wid].loadCurrentExec)+","+repr(self.ws[self.wid].loadExecQ)+","+repr(self.ws[self.wid].loadWaitingRestartQ)+","+repr(self.ws[self.wid].loadWaitingQ)})
             for workerId in self.ws:
-                etree.SubElement(decisionLog, "workerKnownState", {"load" : repr(self.ws[workerId].loadCurrentExec)+","+repr(self.ws[workerId].loadExecQ)+","+repr(self.ws[workerId].loadWaitingRestartQ)+","+repr(self.ws[workerId].loadWaitingQ)})
+                etree.SubElement(decisionLog, "workerKnownState", {"id" : repr(workerId), "load" : repr(self.ws[workerId].loadCurrentExec)+","+repr(self.ws[workerId].loadExecQ)+","+repr(self.ws[workerId].loadWaitingRestartQ)+","+repr(self.ws[workerId].loadWaitingQ)})
 
         listLoads = self.ws.values()
         self.totalExecLoad, self.totalEQueueLoad, self.totalWaitingRQueueLoad, self.totalWaitingQueueLoad = 0., 0., 0., 0.
