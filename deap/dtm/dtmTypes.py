@@ -46,12 +46,12 @@ class TaskContainer(object):
                 'taskState',    # State of the task (DTM_TASK_*)
                 'lastSubTaskDone') # Id of its last child task terminated or None
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)    
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -69,12 +69,12 @@ class ResultContainer(object):
                 'success', # False if an exception occured
                 'result')       # The result; if an exception occured, contains it
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)    
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -90,16 +90,16 @@ class ExceptedResultContainer(object):
                 'callbackClass', # Match this result with an AsyncResult object, with a callback
                 'result')       # Result, or the exception occured
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)   
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
-            
+
 class WaitInfoContainer(object):
     """
     Keep a track on the pending child tasks of a parent task.
@@ -111,12 +111,12 @@ class WaitInfoContainer(object):
                 'waitingMode', # DTM_WAIT_* : waiting mode (None, One, Any, All)
                 'rWaitingDict')     # List of ExceptedResultContainer, key : the first task ID
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)  
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -130,12 +130,12 @@ class StatsContainer(object):
                 'rSquareSum', # Square sum of the RELATIVE exec times
                 'execCount')    # Number of executions
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)    
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -164,13 +164,13 @@ class MessageContainer(object):
                 'ackNbr', # ACK number (optionnal for some operations)
                 'msg')          # Message (varies with msgType)
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)  
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
-            
+
