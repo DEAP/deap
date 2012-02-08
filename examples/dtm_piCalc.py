@@ -24,7 +24,7 @@ from deap import dtm
 
 def test(tries):
     return sum(hypot(random(), random()) < 1 for i in xrange(tries))
-    
+
 def calcPi(n, t):
     expr = dtm.repeat(test, n, t)
     pi_value = 4. * sum(expr) / float(n*t)
