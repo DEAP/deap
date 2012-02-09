@@ -706,7 +706,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
         p2[ind2[i]] = i
     
     for i in xrange(size):
-        if random.random < indpb:
+        if random.random() < indpb:
             # Keep track of the selected values
             temp1 = ind1[i]
             temp2 = ind2[i]
