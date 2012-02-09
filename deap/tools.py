@@ -297,15 +297,6 @@ def std(seq):
     """
     return var(seq)**0.5
 
-class Data(defaultdict):
-    def __init__(self):
-        defaultdict.__init__(self, list)
-    def __str__(self):
-        return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.iteritems())
-
-def _identity(x):
-    return x
-
 class Statistics(object):
     """A statistics object that holds the required data for as long as it
     exists. When created the statistics object receives a *key* argument that
@@ -364,19 +355,19 @@ class Statistics(object):
         >>> s[0]["Mean"][-1][0]
         2.5
     """
-    def __init__(self, key=_identity, n=1):
+    class Data(defaultdict):
+        def __init__(self):
+            defaultdict.__init__(self, list)
+        def __str__(self):
+            return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.iteritems())
+    
+    def __init__(self, key=lambda x: x, n=1):
         self.key = key
         self.functions = {}
-        self.data = tuple(Data() for _ in range(n))
+        self.data = tuple(self.Data() for _ in xrange(n))
     
     def __getitem__(self, index):
         return self.data[index]
-    
-    def __getattr__(self, name):
-        if name in self.functions:
-            return [data[name] for data in self.data]
-        else:
-            return self.__getattribute__(name)
         
     def _getFuncValue(self, name, index=0):
         return self.data[index][name][-1]
@@ -394,7 +385,7 @@ class Statistics(object):
             [4.0]
         """
         self.functions[name] = function
-        # setattr(self, name, partial(self._getFuncValue, name))
+        setattr(self, name, partial(self._getFuncValue, name))
     
     def update(self, seq, index=0):
         """Apply to the input sequence *seq* each registered function 
@@ -712,9 +703,9 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     for i in xrange(size):
         p1[ind1[i]] = i
         p2[ind2[i]] = i
-
+    
     for i in xrange(size):
-        if random.random() < indpb:
+        if random.random < indpb:
             # Keep track of the selected values
             temp1 = ind1[i]
             temp2 = ind2[i]
@@ -1349,87 +1340,87 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
 # All rights reserved.
 # Modified by Francois-Michel De Rainville, 2010
 
-# def decorate(decorator):
-#     """Decorate a function preserving its signature. There is two way of
-#     using this function, first as a decorator passing the decorator to
-#     use as argument, for example ::
-# 
-#         @decorate(a_decorator)
-#         def myFunc(arg1, arg2, arg3="default"):
-#             do_some_work()
-#             return "some_result"
-# 
-#     Or as a decorator ::
-# 
-#         @decorate
-#         def myDecorator(func):
-#             def wrapFunc(*args, **kargs):
-#                 decoration_work()
-#                 return func(*args, **kargs)
-#             return wrapFunc
-# 
-#         @myDecorator
-#         def myFunc(arg1, arg2, arg3="default"):
-#             do_some_work()
-#             return "some_result"
-# 
-#     Using the :mod:`inspect` module, we can retrieve the signature of the
-#     decorated function, what is not possible when not using this method. ::
-# 
-#         print inspect.getargspec(myFunc)
-# 
-#     It shall return something like ::
-# 
-#         (["arg1", "arg2", "arg3"], None, None, ("default",))
-# 
-#     This function is a simpler version of the decorator module (version 3.2.0)
-#     from Michele Simionato available at http://pypi.python.org/pypi/decorator.
-#     """
-#     def wrapDecorate(func):
-#         # From __init__
-#         assert func.__name__
-#         if inspect.isfunction(func):
-#             argspec = inspect.getargspec(func)
-#             defaults = argspec[-1]
-#             signature = inspect.formatargspec(formatvalue=lambda val: "",
-#                                               *argspec)[1:-1]
-#         elif inspect.isclass(func):
-#             argspec = inspect.getargspec(func.__init__)
-#             defaults = argspec[-1]
-#             signature = inspect.formatargspec(formatvalue=lambda val: "",
-#                                               *argspec)[1:-1]
-#         if not signature:
-#             raise TypeError("You are decorating a non function: %s" % func)
-# 
-#         # From create
-#         src = ("def %(name)s(%(signature)s):\n"
-#                "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
-#                                                            signature=signature)
-# 
-#         # From make
-#         evaldict = dict(_call_=decorator(func))
-#         reserved_names = set([func.__name__] + \
-#             [arg.strip(' *') for arg in signature.split(',')])
-#         for name in evaldict.iterkeys():
-#             if name in reserved_names:
-#                 raise NameError("%s is overridden in\n%s" % (name, src))
-#         try:
-#             # This line does all the dirty work of reassigning the signature
-#             code = compile(src, "<string>", "single")
-#             exec code in evaldict
-#         except:
-#             raise RuntimeError("Error in generated code:\n%s" % src)
-#         new_func = evaldict[func.__name__]
-# 
-#         # From update
-#         new_func.__source__ = src
-#         new_func.__name__ = func.__name__
-#         new_func.__doc__ = func.__doc__
-#         new_func.__dict__ = func.__dict__.copy()
-#         new_func.func_defaults = defaults
-#         new_func.__module__ = func.__module__
-#         return new_func
-#     return wrapDecorate
+def decorate(decorator):
+    """Decorate a function preserving its signature. There is two way of
+    using this function, first as a decorator passing the decorator to
+    use as argument, for example ::
+
+        @decorate(a_decorator)
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+
+    Or as a decorator ::
+
+        @decorate
+        def myDecorator(func):
+            def wrapFunc(*args, **kargs):
+                decoration_work()
+                return func(*args, **kargs)
+            return wrapFunc
+
+        @myDecorator
+        def myFunc(arg1, arg2, arg3="default"):
+            do_some_work()
+            return "some_result"
+
+    Using the :mod:`inspect` module, we can retrieve the signature of the
+    decorated function, what is not possible when not using this method. ::
+
+        print inspect.getargspec(myFunc)
+
+    It shall return something like ::
+
+        (["arg1", "arg2", "arg3"], None, None, ("default",))
+
+    This function is a simpler version of the decorator module (version 3.2.0)
+    from Michele Simionato available at http://pypi.python.org/pypi/decorator.
+    """
+    def wrapDecorate(func):
+        # From __init__
+        assert func.__name__
+        if inspect.isfunction(func):
+            argspec = inspect.getargspec(func)
+            defaults = argspec[-1]
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        elif inspect.isclass(func):
+            argspec = inspect.getargspec(func.__init__)
+            defaults = argspec[-1]
+            signature = inspect.formatargspec(formatvalue=lambda val: "",
+                                              *argspec)[1:-1]
+        if not signature:
+            raise TypeError("You are decorating a non function: %s" % func)
+
+        # From create
+        src = ("def %(name)s(%(signature)s):\n"
+               "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
+                                                           signature=signature)
+
+        # From make
+        evaldict = dict(_call_=decorator(func))
+        reserved_names = set([func.__name__] + \
+            [arg.strip(' *') for arg in signature.split(',')])
+        for name in evaldict.iterkeys():
+            if name in reserved_names:
+                raise NameError("%s is overridden in\n%s" % (name, src))
+        try:
+            # This line does all the dirty work of reassigning the signature
+            code = compile(src, "<string>", "single")
+            exec code in evaldict
+        except:
+            raise RuntimeError("Error in generated code:\n%s" % src)
+        new_func = evaldict[func.__name__]
+
+        # From update
+        new_func.__source__ = src
+        new_func.__name__ = func.__name__
+        new_func.__doc__ = func.__doc__
+        new_func.__dict__ = func.__dict__.copy()
+        new_func.func_defaults = defaults
+        new_func.__module__ = func.__module__
+        return new_func
+    return wrapDecorate
     
 if __name__ == "__main__":
     import doctest
