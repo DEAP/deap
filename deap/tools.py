@@ -27,27 +27,15 @@ import inspect
 import math
 import random
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from itertools import chain
 from operator import attrgetter, eq
 from collections import Sequence
 from sys import stdout
-
-try:
-    import yaml
-    CHECKPOINT_USE_YAML = True
-    try:
-        from yaml import CDumper as Dumper  # CLoader and CDumper are much
-        from yaml import CLoader as Loader  # faster than default ones, but 
-    except ImportError:                     # requires LibYAML to be compiled
-        from yaml import Dumper
-        from yaml import Loader
-except ImportError:
-    CHECKPOINT_USE_YAML = False
-                                            # If yaml ain't present, use 
-try:                                        # pickling to dump
-    import cPickle as pickle                # cPickle is much faster than 
-except ImportError:                         # pickle but only present under
-    import pickle                           # CPython
 
 def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
@@ -183,10 +171,7 @@ class Checkpoint(object):
     """A checkpoint is a file containing the state of any object that has been
     hooked. While initializing a checkpoint, add the objects that you want to
     be dumped by appending keyword arguments to the initializer or using the 
-    :meth:`add`. By default the checkpoint tries to use the YAML format which
-    is human readable, if PyYAML is not installed, it uses pickling which is
-    not legible. You can force the use of pickling by setting the argument
-    *use_yaml* to :data:`False`. 
+    :meth:`add`. 
 
     In order to use efficiently this module, you must understand properly the
     assignment principles in Python. This module uses the *pointers* you passed
@@ -212,12 +197,8 @@ class Checkpoint(object):
         [3, 5, 6]
 
     """
-    def __init__(self, use_yaml=True, **kargs):
+    def __init__(self, **kargs):
         self.objects = kargs
-        if CHECKPOINT_USE_YAML and use_yaml:
-            self.use_yaml = True
-        else:
-            self.use_yaml = False
 
     def add(self, **kargs):
         """Add objects to the list of objects to be dumped. The object is
@@ -240,12 +221,7 @@ class Checkpoint(object):
         """Dump the current registered objects in a file named *prefix.ecp*.
         """
         cp_file = open(prefix + ".ecp", "w")
-
-        if self.use_yaml:
-            cp_file.write(yaml.dump(self.objects, Dumper=Dumper))
-        else:
-            pickle.dump(self.objects, cp_file)
-
+        pickle.dump(self.objects, cp_file)
         cp_file.close()
 
     def load(self, filename):
@@ -254,10 +230,7 @@ class Checkpoint(object):
         references as all conflicting names will be updated with the new
         values.
         """
-        if self.use_yaml:
-            self.objects.update(yaml.load(open(filename, "r"), Loader=Loader))
-        else:
-            self.objects.update(pickle.load(open(filename, "r")))
+        self.objects.update(pickle.load(open(filename, "r")))
 
 def mean(seq):
     """Returns the arithmetic mean of the sequence *seq* = 
