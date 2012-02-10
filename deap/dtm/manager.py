@@ -199,6 +199,7 @@ class TaskQueue(object):
         self.tStatsLock.acquire()
         tInfo = self.tStats.get(task.target, StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
         self.tStatsLock.release()
+        
 
         return self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, timeDone)
 
@@ -401,6 +402,7 @@ class Control(object):
         self.traceTasks = None  # XML elements
         self.traceComm = None   # defined if traceMode == True
         self.traceLoadB = None
+        self.traceStats = None
         self.traceLock = threading.Lock()
         
         self.refTime = 1.
@@ -477,7 +479,22 @@ class Control(object):
                 return self.lastRetValue[1]
             else:
                 raise self.lastRetValue[1]
+    
+    def _logTaskStatChange(self):
+        # Assume that we own the tasksStatsLock before calling        
+                
+        self.traceLock.acquire()
+        statsLog = etree.SubElement(self.traceStats, "timeInfo", {"time" : repr(time.time())})
+        for taskTarget, taskInfo in self.tasksStats.items():
+            try:
+                etree.SubElement(statsLog, "target", {"name" : str(taskTarget.__name__), "execCount" : repr(taskInfo.execCount),
+                                                    "avgExecTime" : repr(taskInfo.rAvg), "stdDevExecTime" : repr(taskInfo.rStdDev)})
+            except AttributeError:
+                etree.SubElement(statsLog, "target", {"name" : taskTarget, "execCount" : repr(taskInfo.execCount),
+                                            "avgExecTime" : repr(taskInfo.rAvg), "stdDevExecTime" : repr(taskInfo.rStdDev)})
 
+        self.traceLock.release()
+        
 
     def _addTaskStat(self, taskKey, timeExec):
         # The execution time is based on the calibration ref time
@@ -501,7 +518,10 @@ class Control(object):
             self.tasksStats[taskKey].rSquareSum = oldSum2 + timeExec * timeExec
             self.tasksStats[taskKey].rStdDev = abs(self.tasksStats[taskKey].rSquareSum / (oldExecCount + 1) - self.tasksStats[taskKey].rAvg ** 2) ** 0.5
             self.tasksStats[taskKey].execCount = oldExecCount + 1
-
+        
+        if self.traceMode:
+            self._logTaskStatChange()
+            
         self.tasksStatsLock.release()
 
 
@@ -565,7 +585,10 @@ class Control(object):
         for key, val in msg.targetsStats.items():
             if not key in self.tasksStats or val.execCount > self.tasksStats[key].execCount:
                 self.tasksStats[key] = val
-
+        
+        if self.traceMode:
+            self._logTaskStatChange()
+            
         self.tasksStatsLock.release()
 
 
@@ -846,10 +869,11 @@ class Control(object):
         
         if self.traceMode:
             self.traceLock.acquire()
-            self.traceRoot = etree.Element("dtm", {"version" : str(0.7), "workerId" : str(self.workerId), "timeBegin" : repr(self.sTime)})
+            self.traceRoot = etree.Element("dtm", {"version" : str(0.8), "workerId" : str(self.workerId), "poolSize" : repr(self.poolSize), "timeBegin" : repr(self.sTime), "benchmarkTime" : repr(self.refTime)})
             self.traceTasks = etree.SubElement(self.traceRoot, "tasksLog")
-            self.traceComm = etree.SubElement(self.traceRoot, "commLog")
             self.traceLoadB = etree.SubElement(self.traceRoot, "loadBalancerLog")
+            self.traceStats = etree.SubElement(self.traceRoot, "statsLog")
+            self.traceComm = etree.SubElement(self.traceRoot, "commLog")
             self.traceLock.release()
             self.commThread.setTraceModeOn(self.traceComm)
             self.loadBalancer.setTraceModeOn(self.traceLoadB)
