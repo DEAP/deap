@@ -16,7 +16,14 @@
 
 
 {% block footer %}
-{{ super() }}
+<div class="footer">
+    &copy; Copyright {{ copyright|e }}.
+    <br />
+    Last updated on {{ last_updated|e }}.
+    <a href="{{ pathto('bugs') }}">Found a bug</a>?
+    <br />
+    Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> {{ sphinx_version|e }}.
+</div>
 <script type="text/javascript">
   (function() {
      var ga = document.createElement('script');
