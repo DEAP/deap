@@ -246,7 +246,7 @@ class Checkpoint(object):
         """
         cp_file = open(prefix + ".ecp", "w")
         self.values = dict.fromkeys(self.objects.keys())
-        for name, key in self.keys():
+        for name, key in self.keys.iteritems():
             self.values[name] = key()
         pickle.dump(self.values, cp_file)
         cp_file.close()
