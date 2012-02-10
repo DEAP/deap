@@ -676,8 +676,8 @@ def mutShrink(individual):
     return individual,
 
 def mutTypedInsert(individual):
-    """This operator mutate the GP tree of the *individual* passed and the
-    primitive set *expr*, by inserting a new branch at a random position in a
+    """This operator mutate the GP tree of the *individual* passed by inserting
+    a new branch at a random position in a
     tree, using the original subtree at this position as one argument,
     and if necessary randomly selecting terminal primitives
     to complete the arguments of the inserted node.
@@ -693,16 +693,19 @@ def mutTypedInsert(individual):
     if node.size > 1:     # We do not need to deepcopy the leafs
         node = copy.deepcopy(node)
     
-    new_primitive = random.choice(pset.primitives[node.root.ret])
-
+    new_primitive = None
+    while new_primitive is None or not node.root.ret in new_primitive.args:
+        new_primitive = random.choice(pset.primitives[node.root.ret])
+    
     inserted_list = [new_primitive]
     for i in xrange(0, new_primitive.arity):
-        # Why don't we use expr to create the other subtrees?
-        # Bloat control?
+        # Fill new primitive with random terminals
         new_child = random.choice(pset.terminals[new_primitive.args[i]])
         inserted_list.append(new_child())
-
-    inserted_list[random.randint(1, new_primitive.arity)] = node
+    
+    # Insert the original tree at a random (but valid) position
+    valid_pos = [i for i in xrange(new_primitive.arity) if new_primitive.args[i] == node.root.ret]
+    inserted_list[random.choice(valid_pos)+1] = node    # +1 because index 0 is the parent
 
     individual.setSubtreeDF(index, inserted_list)
     return individual,
