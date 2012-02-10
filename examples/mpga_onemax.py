@@ -20,6 +20,11 @@ import multiprocessing
 import random
 import sys
 
+if sys.version_info < (2, 7):
+    print "mpga_onemax example requires Python >= 2.7"
+    exit(1)
+
+
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 import random
 
@@ -58,6 +63,6 @@ if __name__ == "__main__":
     
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    
+
     algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
