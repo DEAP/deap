@@ -41,7 +41,7 @@ def main():
     parent = tools.initRepeat(creator.Individual, toolbox.attr, N)
     parent.fitness.values = toolbox.evaluate(parent)
     
-    strategy = cma.CMA1pLStrategy(parent, sigma=5.0, lambda_=8)
+    strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=8)
     toolbox.register("update", strategy.update)
     pop = strategy.generate(creator.Individual)
     
