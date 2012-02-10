@@ -32,10 +32,16 @@ try:
 except ImportError:
     import pickle
 
+from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
 from collections import Sequence
 from sys import stdout
+
+def identity(obj):
+    """Returns directly the argument *obj*.
+    """
+    return obj
 
 def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
@@ -178,7 +184,8 @@ class Checkpoint(object):
     to dump the object, for example the following won't work as desired ::
 
         >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint(obj=my_object)
+        >>> cp = Checkpoint()
+        >>> cp.add("my_object", my_object)
         >>> my_object = [3, 5, 6]
         >>> cp.dump("example")
         >>> cp.load("example.ecp")
@@ -189,7 +196,8 @@ class Checkpoint(object):
     internal values directly and not touch the *label*, as in the following ::
 
         >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint(obj=my_object)
+        >>> cp = Checkpoint()
+        >>> cp.add("my_object", my_object)
         >>> my_object[:] = [3, 5, 6]
         >>> cp.dump("example")
         >>> cp.load("example.ecp")
@@ -197,15 +205,29 @@ class Checkpoint(object):
         [3, 5, 6]
 
     """
-    def __init__(self, **kargs):
-        self.objects = kargs
+    def __init__(self):
+        self.objects = {}
+        self.keys = {}
+        self.values = {}
 
-    def add(self, **kargs):
-        """Add objects to the list of objects to be dumped. The object is
-        added under the name specified by the argument's name. Keyword
-        arguments are mandatory in this function.
+    def add(self, name, object, key=identity):
+        """Add an object to the list of objects to be dumped. The object is
+        added under the name specified by the argument *name*, the object
+        added is *object*, and the *key* argument allow to specify a subpart
+        of the object that should be dumped as in the following ::
+
+            >>> from operator import itemgetter
+            >>> my_object = [1, 2, 3]
+            >>> cp = Checkpoint()
+            >>> cp.add("item0", my_object, key=itemgetter(0))
+            >>> cp.dump("example")
+            >>> cp.load("example.ecp")
+            >>> cp["item0"]
+            1
+
         """
-        self.objects.update(kargs)
+        self.objects[name] = object
+        self.keys[name] = partial(key, object)
 
     def remove(self, *args):
         """Remove objects with the specified name from the list of objects to
@@ -213,24 +235,29 @@ class Checkpoint(object):
         """
         for element in args:
             del self.objects[element]
+            del self.keys[element]
+            del self.values[element]
 
     def __getitem__(self, value):
-        return self.objects[value]
+        return self.values.get(value)
 
     def dump(self, prefix):
-        """Dump the current registered objects in a file named *prefix.ecp*.
+        """Dump the current registered object values in a file named *prefix.ecp*.
         """
         cp_file = open(prefix + ".ecp", "w")
-        pickle.dump(self.objects, cp_file)
+        self.values = dict.fromkeys(self.objects.keys())
+        for name, key in self.keys():
+            self.values[name] = key()
+        pickle.dump(self.values, cp_file)
         cp_file.close()
 
     def load(self, filename):
-        """Load a checkpoint file retrieving the dumped objects, it is not
+        """Load a checkpoint file retrieving the dumped object values, it is not
         safe to load a checkpoint file in a checkpoint object that contains
         references as all conflicting names will be updated with the new
         values.
         """
-        self.objects.update(pickle.load(open(filename, "r")))
+        self.values.update(pickle.load(open(filename, "r")))
 
 def mean(seq):
     """Returns the arithmetic mean of the sequence *seq* = 
@@ -263,11 +290,6 @@ def std(seq):
     """
     return var(seq)**0.5
     
-def identity(obj):
-    """Returns directly the argument *obj*.
-    """
-    return obj
-
 class Statistics(object):
     """A statistics object that holds the required data for as long as it
     exists. When created the statistics object receives a *key* argument that
