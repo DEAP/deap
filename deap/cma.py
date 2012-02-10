@@ -55,7 +55,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
             else:
                 logger.logGeneration(len(population), gen)
 
-class CMAStrategy(object):
+class Strategy(object):
     """
     Additional configuration may be passed through the *params* argument as a 
     dictionary,
@@ -210,7 +210,7 @@ class CMAStrategy(object):
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
         
-class CMA1pLStrategy(object):
+class StrategyOnePlusLambda(object):
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
         self.sigma = sigma
