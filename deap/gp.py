@@ -694,9 +694,18 @@ def mutTypedInsert(individual):
         node = copy.deepcopy(node)
     
     new_primitive = None
-    while new_primitive is None or not node.root.ret in new_primitive.args:
+    tries = 0
+    MAX_TRIES = 5
+    while tries < MAX_TRIES:
         new_primitive = random.choice(pset.primitives[node.root.ret])
-    
+        if node.root.ret in new_primitive.args:
+            break
+        tries += 1
+        new_primitive = None
+
+    if new_primitive is None:
+        return individual,
+
     inserted_list = [new_primitive]
     for i in xrange(0, new_primitive.arity):
         # Fill new primitive with random terminals
