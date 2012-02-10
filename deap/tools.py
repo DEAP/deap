@@ -337,7 +337,6 @@ class Statistics(object):
             >>> s.Mean
             [[[4.0]]]
         """
- 
         if name in self.__slots__:
             raise ValueError("Statistics.register: The registered name"
                              " can't be 'key', 'functions', 'dim' or 'data'.")
@@ -362,7 +361,6 @@ class Statistics(object):
             >>> s.Max
             [[[8], [3]]]
         """
-
         # Transpose the values
         try:
             # seq is a sequence of number sequences.
@@ -383,8 +381,6 @@ class EvolutionLogger(object):
     written in sys.stdout.
     """
     def __init__(self, col_names=None):
-        """
-        """
         self.lg_stats_names = ()
         self.lg_stats_values = ()
         self.lg_stat_str = ""
