@@ -20,14 +20,10 @@
 """A module that provides support for the Covariance Matrix Adaptation 
 Evolution Strategy.
 """
-
-from math import sqrt, log, exp
 import numpy
-import random   # Only used to seed numpy.random
-import sys      # Used to get maxint
 import copy
 
-numpy.random.seed(random.randint(0, sys.maxint))
+from math import sqrt, log, exp
 
 def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
           logger=None):
