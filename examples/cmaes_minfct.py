@@ -13,11 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-import random
-
-random.seed(128)    # Random must be seeded before importing cma because it is
-                    # used to seed numpy.random
-                    # This will be fixed in future release.
+import numpy
 
 from deap import base
 from deap import benchmarks
@@ -35,6 +31,8 @@ toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.rastrigin)
 
 def main():
+    numpy.random.seed(128)
+
     # The CMA-ES algorithm takes a population of one individual as argument
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
     # for more details about the rastrigin and other tests for CMA-ES    

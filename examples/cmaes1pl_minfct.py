@@ -14,11 +14,8 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
+import numpy
 import random
-
-random.seed(64)     # Random must be seeded before importing cma because it is
-                    # used to seed numpy.random
-                    # This will be fixed in future release.
 
 from deap import base
 from deap import benchmarks
@@ -34,11 +31,13 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 # for more details about the rastrigin and other tests for CMA-ES
 toolbox = base.Toolbox()
 toolbox.register("attr", random.uniform, -1, 5)
-toolbox.register("evaluate", benchmarks.sphere)
+toolbox.register("evaluate", benchmarks.rastrigin)
 
 def main():
+    random.seed(64)
+    numpy.random.seed(64)
+
     # The CMA-ES algorithm takes a population of one individual as argument
-    
     parent = tools.initRepeat(creator.Individual, toolbox.attr, N)
     parent.fitness.values = toolbox.evaluate(parent)
     
