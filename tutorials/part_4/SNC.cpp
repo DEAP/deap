@@ -20,23 +20,14 @@
  * about five times faster (up to 16x if used in combination with the
  * optimized cTools.nsga2 selection algorithm).
  * 
- * To compile it, you may want to use distutils to simplify the linking, like :
-
-from distutils.core import setup, Extension
-
-module1 = Extension('SNC',
-                    sources = ['SNC.cpp'])
-
-setup (name = 'SNC',
-       version = '1.0',
-       description = 'Sorting network evaluator',
-       ext_modules = [module1]) 
- 
+ * To compile it, you may want to use distutils to simplify the linking, like
+ * the installSN.py script provided with this package. 
  * You may then import it like any other Python module :
 
  import SNC
  SNC.evalNetwork(dimension, individual)
-
+ 
+ * See 4_5_home_made_eval_func.py for a comprehensive example.
  */
 #include <Python.h>
 #include <map>
