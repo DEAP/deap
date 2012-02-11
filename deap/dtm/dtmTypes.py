@@ -36,12 +36,12 @@ class TaskContainer(object):
     __slots__ = ('tid', # Unique ID of the task
                 'creatorWid', # ID of the worker who creates this task
                 'creatorTid', # ID of the task who creates this task (parent)
-                'taskIndex', # Position into the parents task childs list
+                'taskIndex', # LIST OF Position into the parents task childs list
                 'taskRoute', # Worker path followed by the job before begin
                 'creationTime', # Time at the job creation
-                'target', # Target function (or callable object) of the task
-                'args', # Arguments (list)
-                'kwargs', # Key-worded arguments (dictionnary)
+                'target', # LIST OF Target function (or callable object) of the task
+                'args', # LIST OF Arguments (list)
+                'kwargs', # LIST OF Key-worded arguments (dictionnary)
                 'threadObject', # Python representation of the thread
                 'taskState',    # State of the task (DTM_TASK_*)
                 'lastSubTaskDone') # Id of its last child task terminated or None
@@ -64,10 +64,10 @@ class ResultContainer(object):
     """
     __slots__ = ('tid', # ID of the task which produced these results
                 'parentTid', # Parent ID (waiting for these results)
-                'taskIndex', # Position into the parents task childs list
+                'taskIndex', # LIST OF Position into the parents task childs list
                 'execTime', # Total execution time (NOT waiting time)
-                'success', # False if an exception occured
-                'result')       # The result; if an exception occured, contains it
+                'success', # LIST OF False if an exception occured
+                'result')  # LIST OF The result; if an exception occured, contains it
     def __init__(self, **kwargs):
         self.__setstate__(kwargs)
     def __getstate__(self):

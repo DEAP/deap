@@ -116,6 +116,9 @@ class ExecInfo(object):
         if alreadyDone == 0.:
             # If not started yet, return mean
             return mean
+        if stdDev == 0.:
+            # Only one result (or a very very very little variation...)
+            return mean-alreadyDone if mean-alreadyDone > 0 else 1.
         #
         # Else compute the mass center of the remaining part of the gaussian
         # For instance, if we have a gaussian (mu, sigma) = (3, 4)
@@ -165,14 +168,16 @@ class ExecInfo(object):
         self.eLock.release()
 
     def getLoad(self):
+        cumulativeLoad = 0.
         try:
             self.tStatsLock.acquire()
+            # Assuming that every subtasks are the same
             try:
-                tInfo = self.tStats.get(str(self.eCurrent.target.__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+                tInfo = self.tStats.get(str(self.eCurrent.target[0].__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
             except AttributeError:
-                tInfo = self.tStats.get(self.eCurrent.target, StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+                tInfo = self.tStats.get(self.eCurrent.target[0], StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
 
-            val = self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, self.eCurrent.threadObject.timeExec)
+            val = self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, self.eCurrent.threadObject.timeExec) * len(self.eCurrent.target)
             self.tStatsLock.release()
             return val
         except AttributeError:
@@ -202,14 +207,15 @@ class TaskQueue(object):
             timeDone = task.threadObject.timeExec
 
         self.tStatsLock.acquire()
+        # Assuming that every subtasks are the same
         try:
-            tInfo = self.tStats.get(str(task.target.__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+            tInfo = self.tStats.get(str(task.target[0].__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
         except AttributeError:
-            tInfo = self.tStats.get(task.target, StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+            tInfo = self.tStats.get(task.target[0], StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
 
         self.tStatsLock.release()
 
-        return self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, timeDone)
+        return self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, timeDone) * len(task.target)
 
     def _execTimeRemaining(self, mean, stdDev, alreadyDone):
         if alreadyDone == 0. or stdDev == 0:
@@ -624,12 +630,15 @@ class Control(object):
                     continue
 
                 foundKey = taskKey
+                # Check if an exception as previously occurs on the same task (we do not want to erase it)
                 if isinstance(self.waitingThreads[result.parentTid].rWaitingDict[taskKey].result, list):
-                    if not result.success:
-                        # Exception occured
-                        self.waitingThreads[result.parentTid].rWaitingDict[taskKey].result = result.result
-                    else:
-                        self.waitingThreads[result.parentTid].rWaitingDict[taskKey].result[result.taskIndex] = result.result
+                    for taskIndex,success,resultValue in zip(result.taskIndex,result.success,result.result):
+                        if not success:
+                            # Exception occured
+                            self.waitingThreads[result.parentTid].rWaitingDict[taskKey].result = result.result
+                            break
+                        else:
+                            self.waitingThreads[result.parentTid].rWaitingDict[taskKey].result[taskIndex] = resultValue
                 break
 
             assert not foundKey is None, "Parent task not found for result dispatch!"        # Debug
@@ -638,6 +647,8 @@ class Control(object):
                 # All sub-tasks done
 
                 self.waitingThreads[result.parentTid].rWaitingDict[foundKey].finished = True
+                # To be replaced by a better check : here, we actually check if an exception as occurred,
+                # because if not, the result will always be a list... but this is absolutely not clear...
                 if isinstance(self.waitingThreads[result.parentTid].rWaitingDict[foundKey].result, list):
                     self.waitingThreads[result.parentTid].rWaitingDict[foundKey].success = True
 
@@ -710,12 +721,13 @@ class Control(object):
                                                         "creationTime" : repr(newTask.creationTime)})
                         try:
                             newTaskTarget = etree.SubElement(newTaskElem, "target",
-                                                         {"name" : str(newTask.target.__name__)})
+                                                         {"name" : str(newTask.target[0].__name__)})
                         except AttributeError:
                             newTaskTarget = etree.SubElement(newTaskElem, "target",
-                                                         {"name" : str(newTask.target)})
+                                                         {"name" : str(newTask.target[0])})
 
-                        for i, a in enumerate(newTask.args):
+                        # TODO TO BE UPDATED (args and kwargs are list of args...)
+                        for i, a in enumerate(zip(*newTask.args)):
                             newTaskTarget.set("arg" + str(i), str(a))
                         for k in newTask.kwargs:
                             newTaskTarget.set("kwarg_" + str(k), str(newTask.kwargs[k]))
@@ -932,12 +944,12 @@ class Control(object):
             initTask = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = None,
-                                    taskIndex = 0,
+                                    taskIndex = [0],
                                     taskRoute = [self.workerId],
                                     creationTime = time.time(),
-                                    target = initialTarget,
-                                    args = args,
-                                    kwargs = kwargs,
+                                    target = [initialTarget],
+                                    args = [args],
+                                    kwargs = [kwargs],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -970,12 +982,12 @@ class Control(object):
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = index,
+                                    taskIndex = [index],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = function,
-                                    args = elem,
-                                    kwargs = kwargs,
+                                    target = [function],
+                                    args = [elem],
+                                    kwargs = [kwargs],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1059,12 +1071,12 @@ class Control(object):
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = index,
+                                    taskIndex = [index],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = function,
-                                    args = elem,
-                                    kwargs = kwargs,
+                                    target = [function],
+                                    args = [elem],
+                                    kwargs = [kwargs],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1124,12 +1136,12 @@ class Control(object):
         task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = 0,
+                                    taskIndex = [0],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = function,
-                                    args = args,
-                                    kwargs = kwargs,
+                                    target = [function],
+                                    args = [args],
+                                    kwargs = [kwargs],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1196,12 +1208,12 @@ class Control(object):
         task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = 0,
+                                    taskIndex = [0],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = function,
-                                    args = args,
-                                    kwargs = kwargs,
+                                    target = [function],
+                                    args = [args],
+                                    kwargs = [kwargs],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1317,12 +1329,12 @@ class Control(object):
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = index,
+                                    taskIndex = [index],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = function,
-                                    args = args,
-                                    kwargs = kwargs,
+                                    target = [function],
+                                    args = [args],
+                                    kwargs = [kwargs],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1574,45 +1586,52 @@ class DtmThread(threading.Thread):
     def run(self):
         # The lock is already acquired for us
         self.taskInfo.taskState = DTM_TASK_STATE_RUNNING
-        success = True
-        self.timeBegin = time.time()
+        returnedValues = [None for i in range(len(self.taskInfo.target))]
+        success = [True for i in range(len(self.taskInfo.target))]
         if not self.xmlTrace is None:
             # Debug output in xml object
             self.control.traceLock.acquire()
             etree.SubElement(self.xmlTrace, "event", {"type" : "begin", "worker" : str(self.control.workerId), "time" : repr(self.timeBegin)})
             self.control.traceLock.release()
 
-        try:
-            returnedR = self.t(*self.taskInfo.args, **self.taskInfo.kwargs)
-        except Exception as expc:
-            returnedR = expc
-            strWarn = "An exception of type " + str(type(expc)) + " occured on worker " + str(self.control.workerId) + " while processing task " + str(self.tid)
-            _logger.warning(strWarn)
-            _logger.warning("This will be transfered to the parent task.")
-            _logger.warning("Exception details : " + str(expc))
-            success = False
+        totalTime = 0
+        for subtaskIndex in range(len(self.taskInfo.target)):
+            self.timeBegin = time.time()
+            self.timeExec = 0
 
+            try:
+                returnedValues[subtaskIndex] = self.taskInfo.target[subtaskIndex](*(self.taskInfo.args[subtaskIndex]), **(self.taskInfo.kwargs[subtaskIndex]))
+            except Exception as expc:
+                returnedValues = expc
+                strWarn = "An exception of type " + str(type(expc)) + " occured on worker " + str(self.control.workerId) + " while processing task " + str(self.tid)
+                _logger.warning(strWarn)
+                _logger.warning("This will be transfered to the parent task.")
+                _logger.warning("Exception details : " + str(expc))
+                success[subtaskIndex] = False
+                break       # Is it really what do we want? Stop at every exception?
 
-        self.timeExec += time.time() - self.timeBegin
+            self.timeExec += time.time() - self.timeBegin
+            totalTime += self.timeExec
+
+            if success[subtaskIndex]:
+                try:
+                    self.control._addTaskStat(self.taskInfo.target[subtaskIndex].__name__, self.timeExec)
+                except AttributeError:
+                    self.control._addTaskStat(str(self.taskInfo.target[subtaskIndex]), self.timeExec)
 
         self.control.dtmExecLock.release()
+
 
         if not self.xmlTrace is None:
             # Debug output in xml object
             self.control.traceLock.acquire()
-            etree.SubElement(self.xmlTrace, "event", {"type" : "end", "worker" : str(self.control.workerId), "time" : repr(time.time()), "execTime" : repr(self.timeExec), "success" : str(success)})
+            etree.SubElement(self.xmlTrace, "event", {"type" : "end", "worker" : str(self.control.workerId), "time" : repr(time.time()), "execTime" : repr(totalTime), "success" : str(success)})
             self.control.traceLock.release()
-
-        if success:
-            try:
-                self.control._addTaskStat(self.t.__name__, self.timeExec)
-            except AttributeError:
-                self.control._addTaskStat(str(self.t), self.timeExec)
 
 
         if self.isRootTask:
             # Is this task the root task (launch by dtm.start)? If so, we quit
-            self.control.lastRetValue = (success, returnedR)
+            self.control.lastRetValue = (success[0], returnedValues[0])
             self.control.exitSetHere = True
             self.control.exitStatus.set()
         else:
@@ -1620,9 +1639,9 @@ class DtmThread(threading.Thread):
             resultStruct = ResultContainer(tid = self.tid,
                                             parentTid = self.taskInfo.creatorTid,
                                             taskIndex = self.taskInfo.taskIndex,
-                                            execTime = self.timeExec,
+                                            execTime = totalTime,
                                             success = success,
-                                            result = returnedR)
+                                            result = returnedValues)
 
             self.control._returnResult(self.taskInfo.creatorWid, resultStruct)
 
