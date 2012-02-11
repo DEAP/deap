@@ -27,27 +27,21 @@ import inspect
 import math
 import random
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
 from collections import Sequence
 from sys import stdout
 
-try:
-    import yaml
-    CHECKPOINT_USE_YAML = True
-    try:
-        from yaml import CDumper as Dumper  # CLoader and CDumper are much
-        from yaml import CLoader as Loader  # faster than default ones, but 
-    except ImportError:                     # requires LibYAML to be compiled
-        from yaml import Dumper
-        from yaml import Loader
-except ImportError:
-    CHECKPOINT_USE_YAML = False
-                                            # If yaml ain't present, use 
-try:                                        # pickling to dump
-    import cPickle as pickle                # cPickle is much faster than 
-except ImportError:                         # pickle but only present under
-    import pickle                           # CPython
+def identity(obj):
+    """Returns directly the argument *obj*.
+    """
+    return obj
 
 def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
@@ -183,17 +177,15 @@ class Checkpoint(object):
     """A checkpoint is a file containing the state of any object that has been
     hooked. While initializing a checkpoint, add the objects that you want to
     be dumped by appending keyword arguments to the initializer or using the 
-    :meth:`add`. By default the checkpoint tries to use the YAML format which
-    is human readable, if PyYAML is not installed, it uses pickling which is
-    not legible. You can force the use of pickling by setting the argument
-    *use_yaml* to :data:`False`. 
+    :meth:`add`. 
 
     In order to use efficiently this module, you must understand properly the
     assignment principles in Python. This module uses the *pointers* you passed
     to dump the object, for example the following won't work as desired ::
 
         >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint(obj=my_object)
+        >>> cp = Checkpoint()
+        >>> cp.add("my_object", my_object)
         >>> my_object = [3, 5, 6]
         >>> cp.dump("example")
         >>> cp.load("example.ecp")
@@ -204,7 +196,8 @@ class Checkpoint(object):
     internal values directly and not touch the *label*, as in the following ::
 
         >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint(obj=my_object)
+        >>> cp = Checkpoint()
+        >>> cp.add("my_object", my_object)
         >>> my_object[:] = [3, 5, 6]
         >>> cp.dump("example")
         >>> cp.load("example.ecp")
@@ -212,19 +205,29 @@ class Checkpoint(object):
         [3, 5, 6]
 
     """
-    def __init__(self, use_yaml=True, **kargs):
-        self.objects = kargs
-        if CHECKPOINT_USE_YAML and use_yaml:
-            self.use_yaml = True
-        else:
-            self.use_yaml = False
+    def __init__(self):
+        self.objects = {}
+        self.keys = {}
+        self.values = {}
 
-    def add(self, **kargs):
-        """Add objects to the list of objects to be dumped. The object is
-        added under the name specified by the argument's name. Keyword
-        arguments are mandatory in this function.
+    def add(self, name, object, key=identity):
+        """Add an object to the list of objects to be dumped. The object is
+        added under the name specified by the argument *name*, the object
+        added is *object*, and the *key* argument allow to specify a subpart
+        of the object that should be dumped as in the following ::
+
+            >>> from operator import itemgetter
+            >>> my_object = [1, 2, 3]
+            >>> cp = Checkpoint()
+            >>> cp.add("item0", my_object, key=itemgetter(0))
+            >>> cp.dump("example")
+            >>> cp.load("example.ecp")
+            >>> cp["item0"]
+            1
+
         """
-        self.objects.update(kargs)
+        self.objects[name] = object
+        self.keys[name] = partial(key, object)
 
     def remove(self, *args):
         """Remove objects with the specified name from the list of objects to
@@ -232,32 +235,29 @@ class Checkpoint(object):
         """
         for element in args:
             del self.objects[element]
+            del self.keys[element]
+            del self.values[element]
 
     def __getitem__(self, value):
-        return self.objects[value]
+        return self.values.get(value)
 
     def dump(self, prefix):
-        """Dump the current registered objects in a file named *prefix.ecp*.
+        """Dump the current registered object values in a file named *prefix.ecp*.
         """
         cp_file = open(prefix + ".ecp", "w")
-
-        if self.use_yaml:
-            cp_file.write(yaml.dump(self.objects, Dumper=Dumper))
-        else:
-            pickle.dump(self.objects, cp_file)
-
+        self.values = dict.fromkeys(self.objects.keys())
+        for name, key in self.keys.iteritems():
+            self.values[name] = key()
+        pickle.dump(self.values, cp_file)
         cp_file.close()
 
     def load(self, filename):
-        """Load a checkpoint file retrieving the dumped objects, it is not
+        """Load a checkpoint file retrieving the dumped object values, it is not
         safe to load a checkpoint file in a checkpoint object that contains
         references as all conflicting names will be updated with the new
         values.
         """
-        if self.use_yaml:
-            self.objects.update(yaml.load(open(filename, "r"), Loader=Loader))
-        else:
-            self.objects.update(pickle.load(open(filename, "r")))
+        self.values.update(pickle.load(open(filename, "r")))
 
 def mean(seq):
     """Returns the arithmetic mean of the sequence *seq* = 
@@ -290,11 +290,6 @@ def std(seq):
     """
     return var(seq)**0.5
     
-def identity(obj):
-    """Returns directly the argument *obj*.
-    """
-    return obj
-
 class Statistics(object):
     """A statistics object that holds the required data for as long as it
     exists. When created the statistics object receives a *key* argument that
@@ -364,7 +359,6 @@ class Statistics(object):
             >>> s.Mean
             [[[4.0]]]
         """
- 
         if name in self.__slots__:
             raise ValueError("Statistics.register: The registered name"
                              " can't be 'key', 'functions', 'dim' or 'data'.")
@@ -389,7 +383,6 @@ class Statistics(object):
             >>> s.Max
             [[[8], [3]]]
         """
-
         # Transpose the values
         try:
             # seq is a sequence of number sequences.
@@ -410,8 +403,6 @@ class EvolutionLogger(object):
     written in sys.stdout.
     """
     def __init__(self, col_names=None):
-        """
-        """
         self.lg_stats_names = ()
         self.lg_stats_values = ()
         self.lg_stat_str = ""
@@ -733,7 +724,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
         p2[ind2[i]] = i
     
     for i in xrange(size):
-        if random.random < indpb:
+        if random.random() < indpb:
             # Keep track of the selected values
             temp1 = ind1[i]
             temp2 = ind2[i]
