@@ -397,47 +397,43 @@ class Statistics(object):
 class EvolutionLogger(object):
     """
     """
-
     output = stdout
     """File object indicating where the log is written. By default log is
     written in sys.stdout.
     """
-    def __init__(self, col_names=None):
+    def __init__(self, col_names=None, precision=4):
         self.lg_stats_names = ()
         self.lg_stats_values = ()
         self.lg_stat_str = ""
         self.header = ""
+        self.precision = "%%.%if" % precision
+        self.header = "{0:>5s} {1:>5s}".format("Gen.", "Evals")
         if col_names is not None:
             self.lg_stat_names = tuple(col_names)
             self.lg_stat_str = "".join(tuple(" %12s",) * len(self.lg_stat_names))
-            self.header = ("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals") +
-                           (self.lg_stat_str % self.lg_stat_names))
-        else:
-            self.header = ("{0:>5s}".format("Gen.") + " {0:>5s}".format("Evals"))
+            self.header += self.lg_stat_str % self.lg_stat_names
 
     def logHeader(self):
         """Logs the column titles which are "Gen.", "Evals", and the column
         names specified during initialization.
         """
-        self.output.write(self.header + "\n")
+        self.output.write(self.header)
+        self.output.write("\n")
 
-    def logGeneration(self, nbr_eval, gen):
+    def logGeneration(self, nbr_eval, gen, stats=None, index=0):
         """Logs the generation identifier *gen*, which can be a string of any sort, 
-        and the number of evaluations *nbr_eval*, which has to be an integer.
+        and the number of evaluations *nbr_eval*, which has to be an integer, and 
+        the generation statistics *stats* if it exists of with the index *index*.
         """
-        self.output.write("{0:>5s}".format(str(gen)) + 
-                          "{0:>5d}".format(nbr_eval) + "\n")
-
-    def logStatistics(self, stats, nbr_eval, gen, index=0):
-        """Logs the generation identifier *gen*, the number of evaluations
-        *nbr_eval* and the generation statistics *stats* of with the index
-        *index*. 
-        """
-        lg_stat_values = tuple("[%s]" % ", ".join("%.4f" % value for value in
-                                                  stats.data[key][index][-1]) 
-                               for key in self.lg_stat_names)
-        self.output.write("{0:>5s}".format(str(gen)) + " {0:>5d}".format(nbr_eval) +
-                     (self.lg_stat_str %  lg_stat_values) + "\n")
+        self.output.write("{0:>5s} {1:>5d}".format(str(gen), nbr_eval))
+        if stats is not None:
+            lg_stat_values = tuple("[%s]" % ", ".join(self.precision % value 
+                                                      for value in
+                                                      stats.data[key][index][-1]
+                                                     ) 
+                                   for key in self.lg_stat_names)
+            self.output.write(self.lg_stat_str %  lg_stat_values)
+        self.output.write("\n")
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
@@ -518,7 +514,7 @@ class HallOfFame(object):
     def __str__(self):
         return str(self.items) + "\n" + str(self.keys)
 
-        
+
 class ParetoFront(HallOfFame):
     """The Pareto front hall of fame contains all the non-dominated individuals
     that ever lived in the population. That means that the Pareto front hall of
