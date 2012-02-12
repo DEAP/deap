@@ -241,23 +241,21 @@ class Checkpoint(object):
     def __getitem__(self, value):
         return self.values.get(value)
 
-    def dump(self, prefix):
-        """Dump the current registered object values in a file named *prefix.ecp*.
+    def dump(self, file):
+        """Dump the current registered object values in a file *file*.
         """
-        cp_file = open(prefix + ".ecp", "w")
         self.values = dict.fromkeys(self.objects.keys())
         for name, key in self.keys.iteritems():
             self.values[name] = key()
-        pickle.dump(self.values, cp_file)
-        cp_file.close()
+        pickle.dump(self.values, file)
 
-    def load(self, filename):
+    def load(self, file):
         """Load a checkpoint file retrieving the dumped object values, it is not
         safe to load a checkpoint file in a checkpoint object that contains
         references as all conflicting names will be updated with the new
         values.
         """
-        self.values.update(pickle.load(open(filename, "r")))
+        self.values.update(pickle.load(file))
 
 def mean(seq):
     """Returns the arithmetic mean of the sequence *seq* = 
