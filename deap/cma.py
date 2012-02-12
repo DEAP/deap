@@ -50,10 +50,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
             statistics.update(population)
         
         if logger is not None:
-            if statistics is not None:
-                logger.logStatistics(statistics, len(population), gen)
-            else:
-                logger.logGeneration(len(population), gen)
+            logger.logGeneration(len(population), gen, statistics)
 
 class Strategy(object):
     """

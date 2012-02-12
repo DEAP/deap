@@ -134,10 +134,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
         stats.update(population)
     if logger is not None:
         logger.logHeader()
-        if stats is not None:
-            logger.logStatistics(stats, len(population), 0)
-        else:
-            logger.logGeneration(len(invalid_ind), 0)
+        logger.logGeneration(len(population), 0, stats)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -166,10 +163,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
             stats.update(population)
 
         if logger is not None:
-            if stats is not None:
-                logger.logStatistics(stats, len(invalid_ind), gen)
-            else:
-                logger.logGeneration(len(invalid_ind), gen)
+            logger.logGeneration(len(invalid_ind), gen, stats)
 
     return population
 
@@ -300,10 +294,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         stats.update(population)
     if logger is not None:
         logger.logHeader()
-        if stats is not None:
-            logger.logStatistics(stats, len(invalid_ind), 0)
-        else:
-            logger.logGeneration(len(invalid_ind), gen)
+        logger.logGeneration(len(invalid_ind), 0, stats)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -327,10 +318,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         if stats is not None:
             stats.update(population)
         if logger is not None:
-            if stats is not None:
-                logger.logStatistics(stats, len(invalid_ind), gen)
-            else:
-                logger.logGeneration(len(invalid_ind), gen)
+            logger.logGeneration(len(invalid_ind), gen, stats)
 
     return population
     
@@ -373,11 +361,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         stats.update(population)
     if logger is not None:
         logger.logHeader()
-        if stats is not None:
-            logger.logStatistics(stats, len(population), 0)
-        else:
-            logger.logGeneration(len(invalid_ind), 0)
-
+        logger.logGeneration(len(invalid_ind), 0, stats)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -401,10 +385,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         if stats is not None:
             stats.update(population)
         if logger is not None:
-            if stats is not None:
-                logger.logStatistics(stats, len(invalid_ind), gen)
-            else:
-                logger.logGeneration(len(invalid_ind), gen)
+            logger.logGeneration(len(invalid_ind), gen, stats)
 
     return population
 
@@ -454,10 +435,8 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
         stats.update(population)
 
     if logger is not None:
-        if stats is not None:
-            logger.logStatistics(stats, len(population), 0)
-        else:
-            logger.logGeneration(len(invalid_ind), 0)
+        logger.logHeader()
+        logger.logGeneration(len(invalid_ind), 0)
 
     # Begin the generational process
     for gen in range(ngen):
@@ -478,10 +457,6 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
         if stats is not None:
             stats.update(population)
         if logger is not None:
-            if stats is not None:
-                logger.logStatistics(stats, len(invalid_ind), gen)
-            else:
-                logger.logGeneration(len(invalid_ind), gen)
-
+            logger.logGeneration(len(invalid_ind), gen, stats)
 
     return population
