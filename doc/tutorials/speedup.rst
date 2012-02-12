@@ -43,11 +43,13 @@ Using the C++ version of the NSGA II algorithm
 *Time taken : 121 seconds (1.2x faster)*
 
 Starting with DEAP 0.8, a module named *cTools* is provided. This module includes a subset of the deap.tools module, but is implemented in C to improve performances. Only the bottleneck functions (in term of computationnal effort) are provided in *cTools*, with the exact same API and behavior as their pure-Python implementation. The NSGA-II selection algorithm is one of them, and can be used here to improve performances, by only adding one line (the module inclusion) and changing a second (the registration of the selection algorithm).
-::
+
     
-    from deap import cTools    
-    # ...
-    toolbox.register("select", cTools.selNSGA2)
+.. literalinclude:: ../../tutorials/part_4/4_4_Using_Cpp_NSGA.py
+   :lines: 22-22
+
+.. literalinclude:: ../../tutorials/part_4/4_4_Using_Cpp_NSGA.py
+   :lines: 69-69
 
 As one can see, the speedup reached is somewhat modest, since the main bottleneck remains the evaluation function. However, the improvement remains, and the coding effort needed is minimal; we will also see that it can be combined with other techniques to reach a better speedup.
 
@@ -63,16 +65,16 @@ Using an home-made C++ evaluation function
 This time, we look at an heavier optimization : replacement of the evaluation function by its C equivalent. CPython provides a C/C++ API to Python objects, and allows the writing of a C extension module relatively easily. However, this is problem specific, and can not be used with an other Python interpreter than CPython (like PyPy).
 
 In this case, the extension code has approximately 130 lines of C++ code, from which about 100 are the evaluation function (the other parts are declarations needed by the Python interpreter to build and use the extension). The module is compiled with easy_install, and can thereafter be used as a normal Python module :
-::
+
     
-    import SNC      # The name of our C module
-    # ...
-    def quickEvalEvoSN(individual, dimension):
-        misses, depth, length = SNC.evalNetwork(dimension, individual)
-        return misses, length, depth
-    
-    # ...
-    toolbox.register("evaluate", quickEvalEvoSN, dimension=INPUTS)
+.. literalinclude:: ../../tutorials/part_4/4_5_home_made_eval_func.py
+   :lines: 28-28   
+   
+.. literalinclude:: ../../tutorials/part_4/4_5_home_made_eval_func.py
+   :lines: 34-36
+
+.. literalinclude:: ../../tutorials/part_4/4_5_home_made_eval_func.py
+   :lines: 70-70
 
 The speedup obtained is notable, up to 5 times faster. At this point, the part of the computationnal effort taken by the evaluation drop from 80% to 10%. But what makes the other 90%?
 
