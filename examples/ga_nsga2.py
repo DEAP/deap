@@ -77,7 +77,7 @@ def main(seed=None):
     pop = toolbox.select(pop, len(pop))
     
     stats.update(pop)
-    logger.logStatistics(stats, len(invalid_ind), 0)
+    logger.logGeneration(len(invalid_ind), 0, stats)
 
     # Begin the generational process
     for gen in range(1, NGEN+1):
@@ -102,7 +102,7 @@ def main(seed=None):
         # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
         stats.update(pop)
-        logger.logStatistics(stats, len(invalid_ind), gen)
+        logger.logGeneration(len(invalid_ind), gen, stats)
 
     return pop
         
