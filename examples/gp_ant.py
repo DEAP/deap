@@ -196,7 +196,7 @@ def main():
     stats.register("Min", min)
     stats.register("Max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 10, stats, halloffame=hof)
     
     logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
     
