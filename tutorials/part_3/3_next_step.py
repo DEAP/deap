@@ -50,5 +50,8 @@ selected = tools.selBest([child1, child2], 2)
 print child1 in selected                # True
 
 ## 3.5 Note
+LAMBDA = 10
+toolbox.register("select", tools.selRandom)
+population = [ind1, ind2]*10
 selected = toolbox.select(population, LAMBDA)
 offspring = [toolbox.clone(ind) for ind in selected]
