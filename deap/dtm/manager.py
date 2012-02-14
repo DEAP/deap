@@ -1230,7 +1230,7 @@ class Control(object):
 
     def repeat(self, function, n, *args, **kwargs):
         """
-        Repeat the function *function* *n* times, with given args and keyworded args.
+        Repeat the function *function* *n* times, with given args and keyword args.
         Return a list containing the results.
         """
         cThread = threading.currentThread()
