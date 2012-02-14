@@ -275,12 +275,8 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox. 
-    
-    .. note::
-       Both produced individuals from a crossover are put in the offspring
-       pool. 
-    
+    registered in the toolbox. This algorithm uses the :func:`varOr`
+    variation.
     """
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -341,11 +337,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox.
-    
-    .. note::
-       Both produced individuals from the crossover are put in the offspring
-       pool.
+    registered in the toolbox. This algorithm uses the :func:`varOr`
+    variation.
     """
     assert lambda_ >= mu, "lambda must be greater or equal to mu."
 
