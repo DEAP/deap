@@ -155,27 +155,25 @@ Hall-Of-Fame
 
 Evolution Logger
 ----------------
-.. autoclass:: deap.tools.EvolutionLogger
-
-   .. autoattribute:: deap.tools.EvolutionLogger.output
+.. autoclass:: deap.tools.EvolutionLogger([col_names, precision])
 
    .. automethod:: deap.tools.EvolutionLogger.logHeader
 
-   .. automethod:: deap.tools.EvolutionLogger.logGeneration
-
-   .. automethod:: deap.tools.EvolutionLogger.logStatistics
+   .. automethod:: deap.tools.EvolutionLogger.logGeneration(nbr_eval, gen, [stats, index])
+   
+..   .. autoattribute:: deap.tools.EvolutionLogger.output
 
 Checkpoint
 ----------
-.. autoclass:: deap.tools.Checkpoint([yaml,object[, ...]])
+.. autoclass:: deap.tools.Checkpoint()
    
-   .. automethod:: deap.tools.Checkpoint.dump(prefix)
+   .. automethod:: deap.tools.Checkpoint.dump(filestream)
    
-   .. automethod:: deap.tools.Checkpoint.load(filename)
+   .. automethod:: deap.tools.Checkpoint.load(filestream)
    
-   .. automethod:: deap.tools.Checkpoint.add(object[, ...])
+   .. automethod:: deap.tools.Checkpoint.add(name, object[, key])
    
-   .. automethod:: deap.tools.Checkpoint.remove(object[, ...])
+   .. automethod:: deap.tools.Checkpoint.remove(name[, ...])
 
 History
 -------
