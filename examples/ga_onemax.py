@@ -59,32 +59,32 @@ def main():
         print "-- Generation %i --" % g
         
         # Select the next generation individuals
-        offsprings = toolbox.select(pop, len(pop))
+        offspring = toolbox.select(pop, len(pop))
         # Clone the selected individuals
-        offsprings = map(toolbox.clone, offsprings)
+        offspring = map(toolbox.clone, offspring)
     
-        # Apply crossover and mutation on the offsprings
-        for child1, child2 in zip(offsprings[::2], offsprings[1::2]):
+        # Apply crossover and mutation on the offspring
+        for child1, child2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < CXPB:
                 toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
 
-        for mutant in offsprings:
+        for mutant in offspring:
             if random.random() < MUTPB:
                 toolbox.mutate(mutant)
                 del mutant.fitness.values
     
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
         print "  Evaluated %i individuals" % len(invalid_ind)
         
-        # The population is entirely replaced by the offsprings
-        pop[:] = offsprings
+        # The population is entirely replaced by the offspring
+        pop[:] = offspring
         
         # Gather all the fitnesses in one list and print the stats
         fits = [ind.fitness.values[0] for ind in pop]
