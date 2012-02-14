@@ -122,7 +122,7 @@ Usually duplication of the entire population will be made after selection or
 before variation.
 
 .. literalinclude:: ../../tutorials/part_3/3_next_step.py
-   :lines: 53-54	
+   :lines: 56-57
 
 
 Using the Toolbox
