@@ -154,8 +154,7 @@ Using the Tools
 +++++++++++++++
 When building evolutionary algorithms the toolbox is used to contain the
 operators, which are called using their generic name. For example, here is a
-very small sample of what looks like a simple generational evolutionary
-algorithm.
+very small sample of a simple generational evolutionary algorithm.
 
 .. literalinclude:: ../../tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 30-
