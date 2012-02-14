@@ -428,6 +428,11 @@ class Control(object):
 
         self.loadBalancer = None
 
+        self.mapChunkSize = 1
+
+        self.serializeSmallTasks = False
+        self.minGranularity = 0.
+
         self.lastRetValue = None
 
         self.dtmRandom = random.Random()
@@ -542,6 +547,42 @@ class Control(object):
             self._logTaskStatChange()
 
         self.tasksStatsLock.release()
+
+    def _getChunkSize(self, taskTarget):
+        """
+        Get the optimal chunk size for a parallel map/repeat
+        It may have been set by the user with the option mapChunkSize
+        or it may be dynamic (with the option serializeSmallTasks).
+        In any other case, this function returns 1 (1 task by object).
+        Should not be called by user
+        """
+        if self.serializeSmallTasks:
+            try:
+                taskKey = taskTarget.__name__
+            except AttributeError:
+                taskKey = str(taskTarget)
+
+            self.tasksStatsLock.acquire()
+
+            if not taskKey in self.tasksStats:
+                # If we don't know anything about the task, we assume that
+                # we can't make bigger chunks
+                self.tasksStatsLock.release()
+                return self.mapChunkSize
+
+            taskStats = self.tasksStats[taskKey]
+            self.tasksStatsLock.release()
+
+            # Criteria to chunk : avg exec time < 2 * minGranularity
+            #                       std. dev. < avg exec time
+            # Another important criteria would be to check if the task
+            # spawn other sub tasks (not possible at this time, as this
+            # info is not logged)
+            if taskStats.rAvg*2 <= self.minGranularity:
+                # if taskStats.rStdDev < taskStats.rAvg ...
+                return int(self.minGranularity/taskStats.rAvg)
+
+        return self.mapChunkSize
 
 
     def _calibrateExecTime(self, runsN=3):
@@ -861,6 +902,11 @@ class Control(object):
                 self.traceMode = kwargs[opt]
             elif opt == "traceDir":
                 self.traceDir = kwargs[opt]
+            elif opt == "taskGranularity":
+                self.serializeSmallTasks = True
+                self.minGranularity = kwargs[opt]
+            elif opt == "mapChunkSize":
+                self.mapChunkSize = kwargs[opt]
             elif self.commThread.isRootWorker:
                 _logger.warning("Unknown option '%s'", opt)
 
@@ -978,16 +1024,19 @@ class Control(object):
         listTasks = []
         listTids = []
 
-        for index, elem in enumerate(zipIterable):
+        chunkSize = self._getChunkSize(function)
+
+        for indexBegin in xrange(0, len(zipIterable), chunkSize):
+            topBound =  indexBegin+chunkSize if  indexBegin+chunkSize <= len(zipIterable) else len(zipIterable)
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = [index],
+                                    taskIndex = [i for i in xrange(indexBegin, topBound)],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = [function],
-                                    args = [elem],
-                                    kwargs = [kwargs],
+                                    target = [function for i in xrange(indexBegin, topBound)],
+                                    args = [zipIterable[i] for i in xrange(indexBegin, topBound)],
+                                    kwargs = [kwargs for i in xrange(indexBegin, topBound)],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1608,7 +1657,7 @@ class DtmThread(threading.Thread):
                 _logger.warning("This will be transfered to the parent task.")
                 _logger.warning("Exception details : " + str(expc))
                 success[subtaskIndex] = False
-                break       # Is it really what do we want? Stop at every exception?
+                break       # Is it really what do we want? Stop on every exception?
 
             self.timeExec += time.time() - self.timeBegin
             totalTime += self.timeExec
