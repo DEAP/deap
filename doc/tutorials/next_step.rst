@@ -122,7 +122,7 @@ Usually duplication of the entire population will be made after selection.
 ::
 
 	selected = toolbox.select(population, LAMBDA)
-	offsprings = [toolbox.clone(ind) for ind in selected]
+	offspring = [toolbox.clone(ind) for ind in selected]
 
 
 Using the Toolbox

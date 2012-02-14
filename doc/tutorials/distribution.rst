@@ -99,10 +99,10 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 ..     parents1 = list()
 ..     parents2 = list()
 ..     to_replace = list()
-..     for i in range(1, len(offsprings), 2):
+..     for i in range(1, len(offspring), 2):
 ..         if random.random() < cxpb:
-..             parents1.append(offsprings[i - 1])
-..             parents2.append(offsprings[i])
+..             parents1.append(offspring[i - 1])
+..             parents2.append(offspring[i])
 ..             to_replace.append(i - 1)
 ..             to_replace.append(i)
 ..     
@@ -110,7 +110,7 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 ..     
 ..     for i, child in zip(to_replace, children):
 ..         del child.fitness.values
-..         offsprings[i] = child
+..         offspring[i] = child
 .. 
 .. Since the multiprocessing map does take a single iterable we must
 .. bundle/unbundle the parents, respectively by creating a tuple in the

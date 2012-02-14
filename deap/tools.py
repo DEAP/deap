@@ -187,9 +187,9 @@ class Checkpoint(object):
         >>> cp = Checkpoint()
         >>> cp.add("my_object", my_object)
         >>> my_object = [3, 5, 6]
-        >>> cp.dump("example")
-        >>> cp.load("example.ecp")
-        >>> cp["obj"]
+        >>> cp.dump(open("example.ecp", "w"))
+        >>> cp.load(open("example.ecp", "r"))
+        >>> cp["my_object"]
         [1, 2, 3]
 
     In order to dump the new value of ``my_object`` it is needed to change its
@@ -199,9 +199,9 @@ class Checkpoint(object):
         >>> cp = Checkpoint()
         >>> cp.add("my_object", my_object)
         >>> my_object[:] = [3, 5, 6]
-        >>> cp.dump("example")
-        >>> cp.load("example.ecp")
-        >>> cp["obj"]
+        >>> cp.dump(open("example.ecp", "w"))
+        >>> cp.load(open("example.ecp", "r"))
+        >>> cp["my_object"]
         [3, 5, 6]
 
     """
@@ -214,14 +214,17 @@ class Checkpoint(object):
         """Add an object to the list of objects to be dumped. The object is
         added under the name specified by the argument *name*, the object
         added is *object*, and the *key* argument allow to specify a subpart
-        of the object that should be dumped as in the following ::
+        of the object that should be dumped (*key* defaults to an identity key
+        that dumps the entire object). The following illustrates how to use the
+        key.
+        ::
 
             >>> from operator import itemgetter
             >>> my_object = [1, 2, 3]
             >>> cp = Checkpoint()
             >>> cp.add("item0", my_object, key=itemgetter(0))
-            >>> cp.dump("example")
-            >>> cp.load("example.ecp")
+            >>> cp.dump(open("example.ecp", "w"))
+            >>> cp.load(open("example.ecp", "r"))
             >>> cp["item0"]
             1
 
@@ -242,7 +245,8 @@ class Checkpoint(object):
         return self.values.get(value)
 
     def dump(self, file):
-        """Dump the current registered object values in a file *file*.
+        """Dump the current registered object values in the provided
+        filestream.
         """
         self.values = dict.fromkeys(self.objects.keys())
         for name, key in self.keys.iteritems():
@@ -250,10 +254,10 @@ class Checkpoint(object):
         pickle.dump(self.values, file)
 
     def load(self, file):
-        """Load a checkpoint file retrieving the dumped object values, it is not
-        safe to load a checkpoint file in a checkpoint object that contains
-        references as all conflicting names will be updated with the new
-        values.
+        """Load a checkpoint from the provided filestream retrieving the
+        dumped object values, it is not safe to load a checkpoint file in a
+        checkpoint object that contains references as all conflicting names
+        will be updated with the new values.
         """
         self.values.update(pickle.load(file))
 
@@ -393,7 +397,14 @@ class Statistics(object):
             self.data[key][index].append(map(func, values))
 
 class EvolutionLogger(object):
-    """
+    """The evolution logger logs data about the evolution to either the stdout
+    or a file. To change the destination of the logger simply change its
+    attribute :attr:`output` to an filestream. The *col_names* argument
+    provides the data column to log when using statistics, the names should be
+    identical to what is registered in the statistics object (it default to
+    None wich will log the generation number and the number of evaluated
+    individuals). The *precision* indicates the precision to use when logging
+    statistics.
     """
     output = stdout
     """File object indicating where the log is written. By default log is
@@ -420,8 +431,24 @@ class EvolutionLogger(object):
 
     def logGeneration(self, nbr_eval, gen, stats=None, index=0):
         """Logs the generation identifier *gen*, which can be a string of any sort, 
-        and the number of evaluations *nbr_eval*, which has to be an integer, and 
-        the generation statistics *stats* if it exists of with the index *index*.
+        and the number of evaluations *nbr_eval*, which has to be an integer.
+        If provided, log the last entry of the data under provided column names
+        at *index* in the *stats* object (*index* defaults to 0).
+        
+        Here is an example on how to use the logger with a statistics object
+        ::
+            
+            >>> s = Statistics(n=2)
+            >>> s.register("Mean", mean)
+            >>> s.update([1, 2, 3, 4], index=0)
+            >>> s.update([5, 6, 7, 8], index=1)
+            >>> l = EvolutionLogger(col_names=["Mean"])
+            >>> l.logHeader()
+             Gen. Evals         Mean
+            >>> l.logGeneration(gen="0_1", nbr_eval=4, stats=s, index=0)
+              0_1     4     [2.5000]
+            >>> l.logGeneration(gen="0_2", nbr_eval=4, stats=s, index=1)
+              0_2     4     [6.5000]
         """
         self.output.write("{0:>5s} {1:>5d}".format(str(gen), nbr_eval))
         if stats is not None:
@@ -1604,6 +1631,7 @@ def decorate(decorator):
     
 if __name__ == "__main__":
     import doctest
+    import os
     
     random.seed(64)
     doctest.run_docstring_examples(initRepeat, globals())
@@ -1615,4 +1643,6 @@ if __name__ == "__main__":
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.update, globals())
     
+    doctest.run_docstring_examples(Checkpoint, globals())
+    doctest.run_docstring_examples(Checkpoint.add, globals())
     

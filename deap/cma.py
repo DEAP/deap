@@ -30,7 +30,9 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
-    The provided *population* should be a list of one or more individuals.
+    The *population* should have been generated from a strategy, while the
+    toolbox should contain a reference to the update method of the chosen
+    strategy.
     """
     if logger is not None:
         logger.logHeader()
@@ -54,8 +56,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
 
 class Strategy(object):
     """
-    Additional configuration may be passed through the *params* argument as a 
-    dictionary,
+    Additional configuration may be passed through keyworded arguments,
     
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
