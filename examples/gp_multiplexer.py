@@ -70,7 +70,7 @@ toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalMultiplexer(individual):
     func = toolbox.lambdify(expr=individual)
-    good = sum((func(*(inputs[i])) == outputs[i] for i in range(2 ** MUX_TOTAL_LINES)))
+    good = sum((func(*(inputs[i])) == outputs[i] for i in xrange(2 ** MUX_TOTAL_LINES)))
     return good,
 
 toolbox.register("evaluate", evalMultiplexer)
@@ -80,8 +80,8 @@ toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
-    random.seed()
-    pop = toolbox.population(n=500)
+    random.seed(10)
+    pop = toolbox.population(n=40)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)

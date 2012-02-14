@@ -436,7 +436,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
 
     if logger is not None:
         logger.logHeader()
-        logger.logGeneration(len(invalid_ind), 0)
+        logger.logGeneration(len(invalid_ind), 0, stats)
 
     # Begin the generational process
     for gen in range(ngen):
