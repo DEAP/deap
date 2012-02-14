@@ -56,7 +56,7 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
 
 class Strategy(object):
     """
-    Additional configuration may be passed through keyworded arguments,
+    Additional configuration may be passed through keyword arguments,
     
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
