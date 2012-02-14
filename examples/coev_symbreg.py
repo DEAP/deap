@@ -82,7 +82,7 @@ def main():
     for g in range(NGEN):
         print "-- Generation %i --" % g
     
-        # Select and clone the offsprings
+        # Select and clone the offspring
         off_ga = toolbox_ga.select(pop_ga, len(pop_ga))
         off_gp = tools_gp.select(pop_gp, len(pop_gp))
         off_ga = [toolbox_ga.clone(ind) for ind in off_ga]        
@@ -121,7 +121,7 @@ def main():
             if not ind.fitness.valid:
                 ind.fitness.values = evalSymbReg(ind, best_ga)
                 
-        # Replace the old population by the offsprings
+        # Replace the old population by the offspring
         pop_ga = off_ga
         pop_gp = off_gp
         

@@ -38,14 +38,14 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 def checkBounds(min, max):
     def decCheckBounds(func):
         def wrapCheckBounds(*args, **kargs):
-            offsprings = func(*args, **kargs)
-            for child in offsprings:
+            offspring = func(*args, **kargs)
+            for child in offspring:
                 for i in xrange(len(child)):
                     if child[i] > max:
                         child[i] = max
                     elif child[i] < min:
                         child[i] = min
-            return offsprings
+            return offspring
         return wrapCheckBounds
     return decCheckBounds
 

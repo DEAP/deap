@@ -138,32 +138,32 @@ def main():
     for g in range(NGEN):
         print "-- Generation %i --" % g
     
-        # Select the offsprings
-        offsprings = toolbox.select(pop, len(pop))
-        # Clone the offsprings
-        offsprings = [toolbox.clone(ind) for ind in offsprings]
+        # Select the offspring
+        offspring = toolbox.select(pop, len(pop))
+        # Clone the offspring
+        offspring = [toolbox.clone(ind) for ind in offspring]
     
         # Apply crossover and mutation
-        for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
+        for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
             for tree1, tree2 in zip(ind1, ind2):
                 if random.random() < CXPB:
                     toolbox.mate(tree1, tree2)
                     del ind1.fitness.values
                     del ind2.fitness.values
 
-        for ind in offsprings:
+        for ind in offspring:
             for tree in ind:
                 if random.random() < MUTPB:
                     toolbox.mutate(tree)
                     del ind.fitness.values
                             
         # Evaluate the individuals with an invalid fitness
-        invalids = [ind for ind in offsprings if not ind.fitness.valid]
+        invalids = [ind for ind in offspring if not ind.fitness.valid]
         for ind in invalids:
             ind.fitness.values = toolbox.evaluate(ind)
                 
         # Replacement of the population by the offspring
-        pop = offsprings
+        pop = offspring
         hof.update(pop)
         stats.update(pop)
         print "  Min %s" % stats.Min[0][-1][0]

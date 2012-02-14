@@ -92,10 +92,10 @@ def main():
     # Begin the evolution
     for g in xrange(NGEN):
         print "-- Generation %i --" % g
-        offsprings = [toolbox.clone(ind) for ind in population]
+        offspring = [toolbox.clone(ind) for ind in population]
     
         # Apply crossover and mutation
-        for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
+        for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < CXPB:
                 toolbox.mate(ind1, ind2)
                 del ind1.fitness.values
@@ -103,7 +103,7 @@ def main():
         
         # Note here that we have a different sheme of mutation than in the
         # original algorithm, we use 3 different mutations subsequently.
-        for ind in offsprings:
+        for ind in offspring:
             if random.random() < MUTPB:
                 toolbox.mutate(ind)
                 del ind.fitness.values
@@ -115,14 +115,14 @@ def main():
                 del ind.fitness.values
                 
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
         print "  Evaluated %i individuals" % len(invalid_ind)
         
-        population = toolbox.select(population+offsprings, len(offsprings))
+        population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
         stats.update(population)
 

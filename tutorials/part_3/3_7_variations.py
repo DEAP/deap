@@ -36,7 +36,7 @@ for g in range(NGEN):
     # Select and clone the next generation individuals
     offspring = map(toolbox.clone, toolbox.select(pop, len(pop)))
 
-    # Apply crossover and mutation on the offsprings
+    # Apply crossover and mutation on the offspring
     offspring = algorithms.varSimple(toolbox, offspring, CXPB, MUTPB)
 
     # Evaluate the individuals with an invalid fitness
@@ -45,5 +45,5 @@ for g in range(NGEN):
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
 
-    # The population is entirely replaced by the offsprings
+    # The population is entirely replaced by the offspring
     pop[:] = offspring

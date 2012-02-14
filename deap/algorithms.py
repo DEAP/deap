@@ -139,24 +139,24 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
     # Begin the generational process
     for gen in range(1, ngen+1):
         # Select and clone the next generation individuals
-        offsprings = toolbox.select(population, len(population))
-        offsprings = map(toolbox.clone, offsprings)
+        offspring = toolbox.select(population, len(population))
+        offspring = map(toolbox.clone, offspring)
         
         # Variate the pool of individuals
-        offsprings = varSimple(toolbox, offsprings, cxpb, mutpb)
+        offspring = varSimple(toolbox, offspring, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
-            halloffame.update(offsprings)
+            halloffame.update(offspring)
             
-        # Replace the current population by the offsprings
-        population[:] = offsprings
+        # Replace the current population by the offspring
+        population[:] = offspring
         
         # Update the statistics with the new population
         if stats is not None:
@@ -195,23 +195,23 @@ def varOr(toolbox, population, lambda_, cxpb, mutpb):
     assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
         "probabilities must be smaller or equal to 1.0.")
         
-    offsprings = []
+    offspring = []
     for _ in xrange(lambda_):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = [toolbox.clone(ind) for ind in random.sample(population, 2)]
             toolbox.mate(ind1, ind2)
             del ind1.fitness.values
-            offsprings.append(ind1)
+            offspring.append(ind1)
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
             toolbox.mutate(ind)
             del ind.fitness.values
-            offsprings.append(ind)
+            offspring.append(ind)
         else:                           # Apply reproduction
-            offsprings.append(random.choice(population))
+            offspring.append(random.choice(population))
     
-    return offsprings
+    return offspring
 
 def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     """Part of the :func:`~deap.algorithms.eaMuPlusLambda` and
@@ -226,9 +226,9 @@ def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
         "probabilities must be smaller or equal to 1.0.")
         
-    offsprings = []
-    nb_offsprings = 0
-    while nb_offsprings < lambda_:
+    offspring = []
+    nb_offspring = 0
+    while nb_offspring < lambda_:
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = random.sample(population, 2)
@@ -236,25 +236,25 @@ def varLambda(toolbox, population, lambda_, cxpb, mutpb):
             ind2 = toolbox.clone(ind2)
             toolbox.mate(ind1, ind2)
             del ind1.fitness.values, ind2.fitness.values
-            offsprings.append(ind1)
-            offsprings.append(ind2)
-            nb_offsprings += 2
+            offspring.append(ind1)
+            offspring.append(ind2)
+            nb_offspring += 2
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = random.choice(population) # select
             ind = toolbox.clone(ind) # clone
             toolbox.mutate(ind)
             del ind.fitness.values
-            offsprings.append(ind)
-            nb_offsprings += 1
+            offspring.append(ind)
+            nb_offspring += 1
         else:                           # Apply reproduction
-            offsprings.append(random.choice(population))
-            nb_offsprings += 1
+            offspring.append(random.choice(population))
+            nb_offspring += 1
     
-    # Remove the exedant of offsprings
-    if nb_offsprings > lambda_:
-        del offsprings[lambda_:]
+    # Remove the exedant of offspring
+    if nb_offspring > lambda_:
+        del offspring[lambda_:]
     
-    return offsprings
+    return offspring
 
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, logger=None):
@@ -275,7 +275,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox.
+    registered in the toolbox. 
     
     .. note::
        Both produced individuals from a crossover are put in the offspring
@@ -302,17 +302,17 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
-            halloffame.update(offsprings)
+            halloffame.update(offspring)
 
         # Select the next generation population
-        population[:] = toolbox.select(population + offsprings, mu)
+        population[:] = toolbox.select(population + offspring, mu)
 
         # Update the statistics with the new population
         if stats is not None:
@@ -366,20 +366,20 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     # Begin the generational process
     for gen in range(1, ngen+1):
         # Variate the population
-        offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
+        offspring = varOr(toolbox, population, lambda_, cxpb, mutpb)
 
         # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
-            halloffame.update(offsprings)
+            halloffame.update(offspring)
 
         # Select the next generation population
-        population[:] = toolbox.select(offsprings, mu)
+        population[:] = toolbox.select(offspring, mu)
 
         # Update the statistics with the new population
         if stats is not None:
@@ -406,7 +406,7 @@ def varSteadyState(toolbox, population):
     p2 = toolbox.clone(p2)
     toolbox.mate(p1, p2)
     
-    # Randomly choose amongst the offsprings the returned child and mutate it
+    # Randomly choose amongst the offspring the returned child and mutate it
     child = random.choice((p1, p2))
     toolbox.mutate(child)
     
