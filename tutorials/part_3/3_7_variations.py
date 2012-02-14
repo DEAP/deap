@@ -37,7 +37,7 @@ for g in range(NGEN):
     offspring = map(toolbox.clone, toolbox.select(pop, len(pop)))
 
     # Apply crossover and mutation on the offspring
-    offspring = algorithms.varSimple(toolbox, offspring, CXPB, MUTPB)
+    offspring = algorithms.varAnd(toolbox, offspring, CXPB, MUTPB)
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in offspring if not ind.fitness.valid]

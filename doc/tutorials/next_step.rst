@@ -118,11 +118,11 @@ selected individuals. The selection is made as follow.
    the other will also be modified. Only a reference to the individual is 
    copied. Just like every other operator it selects and only selects.
 
-Usually duplication of the entire population will be made after selection.
-::
+Usually duplication of the entire population will be made after selection or 
+before variation.
 
-	selected = toolbox.select(population, LAMBDA)
-	offspring = [toolbox.clone(ind) for ind in selected]
+.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+   :lines: 53-54	
 
 
 Using the Toolbox
@@ -137,8 +137,9 @@ from the toolbox. A shown :ref:`earlier <creating-types>` for initialization.
 This part of the tutorial will focus on registration of the evolutionary tools
 in the toolbox rather than the initialization tools. The usual names for the
 evolutionary tools are :func:`~deap.mate`, :func:`~deap.mutate`,
-:func:`~deap.evaluate` and :func:`~deap.select`. Here is how they are
-registered in the toolbox.
+:func:`~deap.evaluate` and :func:`~deap.select`, however, any name can be
+registered as long as it is unique. Here is how they are registered in the
+toolbox.
 
 .. literalinclude:: ../../tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 2-8,10-15
@@ -151,7 +152,10 @@ easy to locate and change any tool in the toolbox if needed.
 
 Using the Tools
 +++++++++++++++
-When building evolutionary algorithms the toolbox is used to contain the operators, which are called using their generic name. For example, here is a very small sample of what looks like a simple generational evolutionary algorithm.
+When building evolutionary algorithms the toolbox is used to contain the
+operators, which are called using their generic name. For example, here is a
+very small sample of what looks like a simple generational evolutionary
+algorithm.
 
 .. literalinclude:: ../../tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 30-
@@ -195,7 +199,7 @@ Variations
 Variations allows to build simple algorithms using predefined small parts. In
 order to use a variation, the toolbox must be setuped to contain the required
 operators. For example in the lastly presented complete algorithm, the
-crossover and mutation are regrouped in the :func:`~deap.algorithms.varSimple`
+crossover and mutation are regrouped in the :func:`~deap.algorithms.varAnd`
 function, this function requires the toolbox to contain a :func:`~deap.mate`
 and a :func:`~deap.mutate` functions. The variations can be used to simplify
 the writing of an algorithm as follow.

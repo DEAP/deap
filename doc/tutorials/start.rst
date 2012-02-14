@@ -15,8 +15,8 @@ The first thing to do is to think of the appropriate type for your problem.
 As we said above, DEAP enables you to build your own types, this is done with
 the :mod:`~deap.creator` module. Creating an appropriate type might seems
 overwhelming but the creator makes it very easy. In fact, this is usually done
-in a single line. For example, the following creates a :class:`fitness` class
-for a minimization problem and an :class:`individual` class that is derived
+in a single line. For example, the following creates a :class:`FitnessMin` class
+for a minimization problem and an :class:`Individual` class that is derived
 from a list with a fitness attribute set to the just created fitness.
 
 .. literalinclude:: ../../tutorials/part_1/1_where_to_start.py
