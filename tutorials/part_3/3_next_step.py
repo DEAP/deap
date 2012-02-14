@@ -49,3 +49,6 @@ del child2.fitness.values
 selected = tools.selBest([child1, child2], 2)
 print child1 in selected                # True
 
+## 3.5 Note
+selected = toolbox.select(population, LAMBDA)
+offspring = [toolbox.clone(ind) for ind in selected]

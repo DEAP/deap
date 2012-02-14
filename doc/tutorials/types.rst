@@ -23,7 +23,7 @@ objective and single objective fitnesses can be treated the same way. A
 .. literalinclude:: ../../tutorials/part_2/2_1_fitness.py
    :lines: 9
 
-rendering a fitness that maximize the first objective and minimize the
+rendering a fitness that minimize the first objective and maximize the
 second one. The weights can also be used to variate the importance of each
 objective one against another. This means that the weights can be any real
 number and only the sign is used to determine if a maximization of
@@ -170,7 +170,12 @@ function.
 
 Calling :func:`toolbox.population` will readily return a complete population
 in a list providing a number of times the repeat helper must be repeated as an
-argument of the population function.
+argument of the population function, for example, ::
+
+.. literalinclude:: ../../tutorials/part_2/2_3_1_bag.py
+   :lines: 19
+
+will produce a 100-individual population.
 
 Grid
 ++++
@@ -201,8 +206,8 @@ fitness to a :attr:`gbestfit` attribute.
    :lines: 11,23
 
 Calling :func:`toolbox.population` will readily return a complete swarm. After
-each evaluation the :attr:`gbest` and :attr:`gbestfit` are set to reflect the
-best found position and fitness.
+each evaluation the :attr:`gbest` and :attr:`gbestfit` should be set by the
+algorithm to reflect the best found position and fitness.
 
 Demes
 +++++
