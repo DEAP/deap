@@ -129,7 +129,7 @@ def main():
         countFailed += 1
     
     
-    imapObj = dtm.imap(mapFunc1, list1, 50)
+    imapObj = dtm.imap(mapFunc1, list1)
     list3r = [i for i in imapObj]
     
     if list3r == list1t:
@@ -211,7 +211,7 @@ def main():
         
     
     try:
-        applyExceptTestr = dtm.apply(applyFunc3, 0)
+        applyExceptTestr = dtm.map(applyFunc3, [-2,-1,0])
     except ZeroDivisionError:
         _logger.info("[%s] DTM exception catch test successful", time.time()-beginTime)
     else:

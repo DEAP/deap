@@ -648,7 +648,7 @@ class Control(object):
             if key == "spawnSubtasks" and (self.tasksStats[key] or val.spawnSubtasks):
                 self.tasksStats[key] = True
                 continue    # We do not want to change the confirmation that the task spawns others
-                
+
             if not key in self.tasksStats or val.execCount > self.tasksStats[key].execCount:
                 self.tasksStats[key] = val
 
@@ -696,6 +696,8 @@ class Control(object):
                 self.waitingThreads[result.parentTid].rWaitingDict[foundKey].finished = True
                 # To be replaced by a better check : here, we actually check if an exception as occurred,
                 # because if not, the result will always be a list... but this is absolutely not clear...
+                # We cannot use 'if not issubclass(..., Exception)' because issubclass can not work with
+                # other objects than classes...
                 if isinstance(self.waitingThreads[result.parentTid].rWaitingDict[foundKey].result, list):
                     self.waitingThreads[result.parentTid].rWaitingDict[foundKey].success = True
 
@@ -1124,19 +1126,23 @@ class Control(object):
         listTasks = []
         listTids = []
 
-        for index, elem in enumerate(zipIterable):
+        chunkSize = self._getChunkSize(function)
+
+        for indexBegin in xrange(0, len(zipIterable), chunkSize):
+            topBound =  indexBegin+chunkSize if  indexBegin+chunkSize <= len(zipIterable) else len(zipIterable)
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = [index],
+                                    taskIndex = [i for i in xrange(indexBegin, topBound)],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = [function],
-                                    args = [elem],
-                                    kwargs = [kwargs],
+                                    target = [function for i in xrange(indexBegin, topBound)],
+                                    args = [zipIterable[i] for i in xrange(indexBegin, topBound)],
+                                    kwargs = [kwargs for i in xrange(indexBegin, topBound)],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
+
             listTasks.append(task)
             listTids.append(task.tid)
 
@@ -1311,26 +1317,24 @@ class Control(object):
         self.runningFlag.set()
         return asyncRequest
 
-    def imap(self, function, iterable, chunksize=1):
+    def imap(self, function, *iterables):
         """
         An equivalent of :func:`itertools.imap`.
 
-        The chunksize argument can be used to tell DTM how many elements should be computed at the same time.
-        For very long iterables using a large value for chunksize can make make the job complete much faster than using the default value of 1.
+        This function creates an iterator which return results of the map
+        operation, in order. One of the main benefits of this function against
+        the traditionnal map function is that the first result may be yielded
+        even if the computation of the others is not finished.
         """
         currentIndex = 0
 
-        while currentIndex < len(iterable):
-            maxIndex = currentIndex + chunksize if currentIndex + chunksize < len(iterable) else len(iterable)
-            asyncResults = [None] * (maxIndex - currentIndex)
-            for i in range(currentIndex, maxIndex):
-                asyncResults[i % chunksize] = self.apply_async(function, iterable[i])
+        zipIterable = list(zip(*iterables))
 
-            for result in asyncResults:
-                ret = result.get()
-                yield ret
+        asyncResults = [self.apply_async(function, *zipIterable[i]) for i in xrange(len(zipIterable))]
 
-            currentIndex = maxIndex
+        for result in asyncResults:
+            yield result.get()
+
 
 
     def imap_unordered(self, function, iterable, chunksize=1):
@@ -1379,7 +1383,7 @@ class Control(object):
         listResults = [None] * n
         listTasks = []
         listTids = []
-        
+
         chunkSize = self._getChunkSize(function)
 
         for indexBegin in xrange(0, n, chunkSize):
@@ -1626,7 +1630,7 @@ class DtmThread(threading.Thread):
         self.tid = structInfo.tid
         self.t = structInfo.target
         self.control = controlThread
-        
+
         self.spawnedTasks = False
 
         self.waitingFlag = threading.Event()
@@ -1646,8 +1650,8 @@ class DtmThread(threading.Thread):
     def run(self):
         # The lock is already acquired for us
         self.taskInfo.taskState = DTM_TASK_STATE_RUNNING
-        returnedValues = [None for i in range(len(self.taskInfo.target))]
-        success = [True for i in range(len(self.taskInfo.target))]
+        returnedValues = [None for i in xrange(len(self.taskInfo.target))]
+        success = [True for i in xrange(len(self.taskInfo.target))]
         if not self.xmlTrace is None:
             # Debug output in xml object
             self.control.traceLock.acquire()
@@ -1655,7 +1659,7 @@ class DtmThread(threading.Thread):
             self.control.traceLock.release()
 
         totalTime = 0
-        for subtaskIndex in range(len(self.taskInfo.target)):
+        for subtaskIndex in xrange(len(self.taskInfo.target)):
             self.timeBegin = time.time()
             self.timeExec = 0
 
@@ -1676,7 +1680,7 @@ class DtmThread(threading.Thread):
                     # An error in DTM itself?
                     for l in traceExcep:
                         print(l)
-                
+
                 success[subtaskIndex] = False
                 break       # Is it really what do we want? Stop on every exception?
 
@@ -1776,8 +1780,10 @@ class AsyncResult(object):
 
 
     def _dtmCallback(self):
-        # Used by DTM to inform the object that the job is done
-        # Should not be used by users
+        """
+        Used by DTM to inform the object that the job is done
+        Should not be called by users
+        """
         self.resultSuccess = self.dictWaitingInfo.rWaitingDict[self.taskKey].success
         self.resultVal = self.dictWaitingInfo.rWaitingDict[self.taskKey].result
         self.resultReturned = True
