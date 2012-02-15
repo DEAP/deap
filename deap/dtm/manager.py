@@ -26,6 +26,7 @@ import pickle
 import logging
 import sys
 import os
+import traceback
 
 PRETTY_PRINT_SUPPORT = False
 try:
@@ -173,9 +174,9 @@ class ExecInfo(object):
             self.tStatsLock.acquire()
             # Assuming that every subtasks are the same
             try:
-                tInfo = self.tStats.get(str(self.eCurrent.target[0].__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+                tInfo = self.tStats.get(str(self.eCurrent.target[0].__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., spawnSubtasks=False, execCount=0))
             except AttributeError:
-                tInfo = self.tStats.get(self.eCurrent.target[0], StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+                tInfo = self.tStats.get(self.eCurrent.target[0], StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., spawnSubtasks=False, execCount=0))
 
             val = self._execTimeRemaining(tInfo.rAvg, tInfo.rStdDev, self.eCurrent.threadObject.timeExec) * len(self.eCurrent.target)
             self.tStatsLock.release()
@@ -209,9 +210,9 @@ class TaskQueue(object):
         self.tStatsLock.acquire()
         # Assuming that every subtasks are the same
         try:
-            tInfo = self.tStats.get(str(task.target[0].__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+            tInfo = self.tStats.get(str(task.target[0].__name__), StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., spawnSubtasks=False, execCount=0))
         except AttributeError:
-            tInfo = self.tStats.get(task.target[0], StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., execCount=0))
+            tInfo = self.tStats.get(task.target[0], StatsContainer(rAvg=1., rStdDev=1., rSquareSum=0., spawnSubtasks=False, execCount=0))
 
         self.tStatsLock.release()
 
@@ -520,7 +521,7 @@ class Control(object):
 
         self.traceLock.release()
 
-    def _addTaskStat(self, taskKey, timeExec):
+    def _addTaskStat(self, taskKey, timeExec, spawnedTasks):
         # The execution time is based on the calibration ref time
         comparableLoad = timeExec / self.refTime
         # We do not keep up all the execution times, but
@@ -531,17 +532,20 @@ class Control(object):
             self.tasksStats[taskKey] = StatsContainer(rAvg = timeExec,
                                                 rStdDev = 0.,
                                                 rSquareSum = timeExec * timeExec,
+                                                spawnSubtasks=spawnedTasks,
                                                 execCount = 1)
         else:
             oldAvg = self.tasksStats[taskKey].rAvg
             oldStdDev = self.tasksStats[taskKey].rStdDev
             oldSum2 = self.tasksStats[taskKey].rSquareSum
             oldExecCount = self.tasksStats[taskKey].execCount
+            oldSpawSubtasks = self.tasksStats[taskKey].spawnSubtasks
 
             self.tasksStats[taskKey].rAvg = (timeExec + oldAvg * oldExecCount) / (oldExecCount + 1)
             self.tasksStats[taskKey].rSquareSum = oldSum2 + timeExec * timeExec
             self.tasksStats[taskKey].rStdDev = abs(self.tasksStats[taskKey].rSquareSum / (oldExecCount + 1) - self.tasksStats[taskKey].rAvg ** 2) ** 0.5
             self.tasksStats[taskKey].execCount = oldExecCount + 1
+            self.tasksStats[taskKey].spawnSubtasks = True if oldSpawSubtasks or spawnedTasks else False
 
         if self.traceMode:
             self._logTaskStatChange()
@@ -574,11 +578,9 @@ class Control(object):
             self.tasksStatsLock.release()
 
             # Criteria to chunk : avg exec time < 2 * minGranularity
-            #                       std. dev. < avg exec time
-            # Another important criteria would be to check if the task
-            # spawn other sub tasks (not possible at this time, as this
-            # info is not logged)
-            if taskStats.rAvg*2 <= self.minGranularity:
+            # Another important criteria is to check if the task
+            # spawn other sub tasks
+            if not taskStats.spawnSubtasks and taskStats.rAvg*2 <= self.minGranularity:
                 # if taskStats.rStdDev < taskStats.rAvg ...
                 return int(self.minGranularity/taskStats.rAvg)
 
@@ -643,6 +645,10 @@ class Control(object):
         self.tasksStatsLock.acquire()
 
         for key, val in msg.targetsStats.items():
+            if key == "spawnSubtasks" and (self.tasksStats[key] or val.spawnSubtasks):
+                self.tasksStats[key] = True
+                continue    # We do not want to change the confirmation that the task spawns others
+                
             if not key in self.tasksStats or val.execCount > self.tasksStats[key].execCount:
                 self.tasksStats[key] = val
 
@@ -883,6 +889,8 @@ class Control(object):
             * **loadBalancer** : currently only the default *PDB* is available.
             * **printSummary** : if set, DTM will print a task execution summary at the end (mean execution time of each tasks, how many tasks did each worker do, ...)
             * **setTraceMode** : if set, will enable a special DTM tracemode. In this mode, DTM logs all its activity in XML files (one by worker). Mainly for DTM debug purpose, but can also be used for profiling.
+            * **traceDir** : only available when setTraceMode is True. Path to the directory where DTM should save its log.
+            * **taskGranularity** : set the granularity of the parallelism. It is specified in seconds, and represents the minimum amount of time to make a "task". If a task duration is smaller than this minimum, then DTM will try to combine two or more of those tasks to reach the wanted level of granularity. This can be very useful and may greatly reduce distribution overhead if some of your tasks are very small, or if you are working on a low-performance network. As on DTM 0.3, this only applies to synchronous calls (map, repeat, filter).
 
         This function can be called more than once. Any unknown parameter will have no effect.
         """
@@ -1294,8 +1302,6 @@ class Control(object):
 
         self.waitingThreads[currentId].waitingMode = DTM_WAIT_NONE
 
-       # print("CALLED with function and args :", function, args, kwargs)
-
         asyncRequest = AsyncResult(self, self.waitingThreads[currentId], resultKey, False)
         self.waitingThreads[currentId].rWaitingDict[resultKey].callbackClass = asyncRequest
         self.waitingThreadsLock.release()
@@ -1373,17 +1379,20 @@ class Control(object):
         listResults = [None] * n
         listTasks = []
         listTids = []
+        
+        chunkSize = self._getChunkSize(function)
 
-        for index in range(n):
+        for indexBegin in xrange(0, n, chunkSize):
+            topBound =  indexBegin+chunkSize if  indexBegin+chunkSize <= n else n
             task = TaskContainer(tid = self.idGenerator.tid,
                                     creatorWid = self.workerId,
                                     creatorTid = currentId,
-                                    taskIndex = [index],
+                                    taskIndex = [i for i in xrange(indexBegin, topBound)],
                                     taskRoute = [],
                                     creationTime = time.time(),
-                                    target = [function],
-                                    args = [args],
-                                    kwargs = [kwargs],
+                                    target = [function for i in xrange(indexBegin, topBound)],
+                                    args = [args for i in xrange(indexBegin, topBound)],
+                                    kwargs = [kwargs for i in xrange(indexBegin, topBound)],
                                     threadObject = None,
                                     taskState = DTM_TASK_STATE_IDLE,
                                     lastSubTaskDone = None)
@@ -1617,6 +1626,8 @@ class DtmThread(threading.Thread):
         self.tid = structInfo.tid
         self.t = structInfo.target
         self.control = controlThread
+        
+        self.spawnedTasks = False
 
         self.waitingFlag = threading.Event()
         self.waitingFlag.clear()
@@ -1655,7 +1666,17 @@ class DtmThread(threading.Thread):
                 strWarn = "An exception of type " + str(type(expc)) + " occured on worker " + str(self.control.workerId) + " while processing task " + str(self.tid)
                 _logger.warning(strWarn)
                 _logger.warning("This will be transfered to the parent task.")
-                _logger.warning("Exception details : " + str(expc))
+                _logger.warning("Exception traceback (most recent call last) :\n")
+                traceExcep = traceback.format_exc().split("\n")
+                if len(traceExcep) > 3:
+                    # We do not want to see the DTM call to the target in the trace
+                    for l in traceExcep[3:]:
+                        print(l)
+                else:
+                    # An error in DTM itself?
+                    for l in traceExcep:
+                        print(l)
+                
                 success[subtaskIndex] = False
                 break       # Is it really what do we want? Stop on every exception?
 
@@ -1663,10 +1684,11 @@ class DtmThread(threading.Thread):
             totalTime += self.timeExec
 
             if success[subtaskIndex]:
+                spawnedBool = self.spawnedTasks or len(self.asyncTasksDoneList) > 0
                 try:
-                    self.control._addTaskStat(self.taskInfo.target[subtaskIndex].__name__, self.timeExec)
+                    self.control._addTaskStat(self.taskInfo.target[subtaskIndex].__name__, self.timeExec, spawnedBool)
                 except AttributeError:
-                    self.control._addTaskStat(str(self.taskInfo.target[subtaskIndex]), self.timeExec)
+                    self.control._addTaskStat(str(self.taskInfo.target[subtaskIndex]), self.timeExec, spawnedBool)
 
         self.control.dtmExecLock.release()
 
@@ -1712,7 +1734,7 @@ class DtmThread(threading.Thread):
         beginTimeWait = time.time()
         self.timeExec += beginTimeWait - self.timeBegin
         self.control.dtmExecLock.release()
-
+        self.spawnedTasks = True
         self.taskInfo.taskState = DTM_TASK_STATE_WAITING
 
         if not self.xmlTrace is None:
