@@ -32,16 +32,19 @@ DTM_WAIT_ANY = 3
 class TaskContainer(object):
     """
     Contains all the information about a task (running or not)
+    Some of the fields are iterable, because DTM may combine
+    two or more tasks together if their durations are smaller than
+    a granularity parameter.
     """
     __slots__ = ('tid', # Unique ID of the task
                 'creatorWid', # ID of the worker who creates this task
                 'creatorTid', # ID of the task who creates this task (parent)
-                'taskIndex', # LIST OF Position into the parents task childs list
+                'taskIndex', # List of position into the parents task childs list
                 'taskRoute', # Worker path followed by the job before begin
                 'creationTime', # Time at the job creation
-                'target', # LIST OF Target function (or callable object) of the task
-                'args', # LIST OF Arguments (list)
-                'kwargs', # LIST OF Key-worded arguments (dictionnary)
+                'target', # List of target function (or callable object) of the task
+                'args', # List of arguments (list)
+                'kwargs', # List of key-worded arguments (dictionnary)
                 'threadObject', # Python representation of the thread
                 'taskState',    # State of the task (DTM_TASK_*)
                 'lastSubTaskDone') # Id of its last child task terminated or None
@@ -64,10 +67,10 @@ class ResultContainer(object):
     """
     __slots__ = ('tid', # ID of the task which produced these results
                 'parentTid', # Parent ID (waiting for these results)
-                'taskIndex', # LIST OF Position into the parents task childs list
+                'taskIndex', # List of position into the parents task childs list
                 'execTime', # Total execution time (NOT waiting time)
-                'success', # LIST OF False if an exception occured
-                'result')  # LIST OF The result; if an exception occured, contains it
+                'success', # List of booleans : False if an exception occured
+                'result')  # List of results; if an exception occured, contains it
     def __init__(self, **kwargs):
         self.__setstate__(kwargs)
     def __getstate__(self):
@@ -128,6 +131,7 @@ class StatsContainer(object):
     __slots__ = ('rAvg', # RELATIVE average execution time
                 'rStdDev', # RELATIVE standard deviation of the exec time
                 'rSquareSum', # Square sum of the RELATIVE exec times
+                'spawnSubtasks',    # True if the task has spawned others
                 'execCount')    # Number of executions
     def __init__(self, **kwargs):
         self.__setstate__(kwargs)
