@@ -501,7 +501,7 @@ class Control(object):
 
         if self.exitSetHere:
             if self.lastRetValue[0]:
-                return self.lastRetValue[1]
+                return self.lastRetValue[1][0]
             else:
                 raise self.lastRetValue[1]
 
@@ -778,8 +778,8 @@ class Control(object):
                         # TODO TO BE UPDATED (args and kwargs are list of args...)
                         for i, a in enumerate(zip(*newTask.args)):
                             newTaskTarget.set("arg" + str(i), str(a))
-                        for k in newTask.kwargs:
-                            newTaskTarget.set("kwarg_" + str(k), str(newTask.kwargs[k]))
+                        for k in newTask.kwargs[0]:
+                            newTaskTarget.set("kwarg_" + str(k), str([newTask.kwargs[i][k] for i in xrange(len(newTask.kwargs))]))
 
                         newTaskPath = etree.SubElement(newTaskElem, "path", {"data" : str(newTask.taskRoute)})
                         self.traceLock.release()
@@ -1706,7 +1706,7 @@ class DtmThread(threading.Thread):
 
         if self.isRootTask:
             # Is this task the root task (launch by dtm.start)? If so, we quit
-            self.control.lastRetValue = (success[0], returnedValues[0])
+            self.control.lastRetValue = (success[0], returnedValues)
             self.control.exitSetHere = True
             self.control.exitStatus.set()
         else:
