@@ -31,5 +31,4 @@ def calcPi(n, t):
     print("pi = " + str(pi_value))
     return pi_value
 
-dtm.setOptions(setTraceMode=True, traceDir="DtmPi")
-dtm.start(calcPi, 3000, 5000)
+dataPi = dtm.start(calcPi, 3000, 5000)
