@@ -917,7 +917,7 @@ class Control(object):
                 self.minGranularity = kwargs[opt]
             elif opt == "mapChunkSize":
                 self.mapChunkSize = kwargs[opt]
-            elif self.commThread.isRootWorker:
+            else:
                 _logger.warning("Unknown option '%s'", opt)
 
 
