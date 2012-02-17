@@ -20,6 +20,7 @@ virtual :class:`~deap.base.Fitness` class used as base class, for the fitness
 member of any individual.
 """
 
+import sys
 import copy
 import operator
 import functools
@@ -141,8 +142,11 @@ class Fitness(object):
         try:
             self.wvalues = tuple(map(operator.mul, values, self.weights))
         except TypeError:
-            raise TypeError("Both weights and assigned values must be a "
-            "sequence of numbers when assigning to values of %r." % self.__class__)
+            _, _, traceback = sys.exc_info()
+            raise TypeError, ("Both weights and assigned values must be a "
+            "sequence of numbers when assigning to values of "
+            "%r." % self.__class__, ), traceback
+            
     def delValues(self):
         self.wvalues = ()
 

@@ -23,6 +23,7 @@ This module support both strongly and loosely typed GP.
 
 import copy
 import random
+import sys
 
 import base
 
@@ -48,11 +49,12 @@ def evaluate(expr, pset=None):
         try:
             return eval(_stringify(expr), pset.func_dict)
         except MemoryError:
-            raise MemoryError,("DEAP : Error in tree evaluation :"
+            _, _, traceback = sys.exc_info()
+            raise MemoryError, ("DEAP : Error in tree evaluation :"
             " Python cannot evaluate a tree with a height bigger than 90. "
             "To avoid this problem, you should use bloat control on your "
             "operators. See the DEAP documentation for more information. "
-            "DEAP will now abort.")
+            "DEAP will now abort."), traceback
     else:
         return _stringify(expr)
 
@@ -81,11 +83,12 @@ def lambdify(pset, expr):
     try:
         return eval(lstr, dict(pset.func_dict))
     except MemoryError:
-        raise MemoryError,("DEAP : Error in tree evaluation :"
+        _, _, traceback = sys.exc_info()
+        raise MemoryError, ("DEAP : Error in tree evaluation :"
         " Python cannot evaluate a tree with a height bigger than 90. "
         "To avoid this problem, you should use bloat control on your "
         "operators. See the DEAP documentation for more information. "
-        "DEAP will now abort.")
+        "DEAP will now abort."), traceback
 
 def lambdifyList(expr):
     """Return a lambda function created from a list of trees. The first 
