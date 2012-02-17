@@ -74,10 +74,13 @@ def main():
     hof = tools.ParetoFront()
     
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
@@ -89,9 +92,10 @@ def main():
     hof.update(population)
     stats.update(population)
     
+    logger.logGeneration(gen=0, evals=len(population), stats=stats)
+    
     # Begin the evolution
-    for g in xrange(NGEN):
-        print "-- Generation %i --" % g
+    for g in xrange(1, NGEN):
         offspring = [toolbox.clone(ind) for ind in population]
     
         # Apply crossover and mutation
@@ -120,16 +124,11 @@ def main():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
-        print "  Evaluated %i individuals" % len(invalid_ind)
-        
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
         stats.update(population)
-
-        print "  Min %s" % stats.Min[0][-1][0]
-        print "  Max %s" % stats.Max[0][-1][0]
-        print "  Avg %s" % stats.Avg[0][-1][0]
-        print "  Std %s" % stats.Std[0][-1][0]
+        
+        logger.logGeneration(gen=g, evals=len(population), stats=stats)
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network

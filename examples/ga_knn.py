@@ -70,15 +70,14 @@ def main():
     pop = toolbox.population(n=MU)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
-    logger = tools.EvolutionLogger(stats.functions.keys())
-
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
     algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA,
                               cxpb=0.5, mutpb=0.2, ngen=40, 
-                              stats=stats, halloffame=hof, logger=logger)
+                              stats=stats, halloffame=hof)
     
     return pop, stats, hof
 

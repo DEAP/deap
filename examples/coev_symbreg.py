@@ -56,16 +56,19 @@ def main():
     pop_gp = tools_gp.population(n=200)
     
     stats_ga = tools.Statistics(lambda ind: ind.fitness.values)
-    stats_ga.register("Avg", tools.mean)
-    stats_ga.register("Std", tools.std)
-    stats_ga.register("Min", min)
-    stats_ga.register("Max", max)
+    stats_ga.register("avg", tools.mean)
+    stats_ga.register("std", tools.std)
+    stats_ga.register("min", min)
+    stats_ga.register("max", max)
     
     stats_gp = tools.Statistics(lambda ind: ind.fitness.values)
-    stats_gp.register("Avg", tools.mean)
-    stats_gp.register("Std", tools.std)
-    stats_gp.register("Min", min)
-    stats_gp.register("Max", max)
+    stats_gp.register("avg", tools.mean)
+    stats_gp.register("std", tools.std)
+    stats_gp.register("min", min)
+    stats_gp.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats_ga.functions.keys())
+    logger.logHeader()
     
     best_ga = tools.selRandom(pop_ga, 1)[0]
     best_gp = tools.selRandom(pop_gp, 1)[0]
@@ -76,12 +79,16 @@ def main():
     for ind in pop_ga:
         ind.fitness.values = evalSymbReg(best_gp, ind)
     
+    stats_ga.update(pop_ga)
+    stats_gp.update(pop_gp)
+    
+    logger.logGeneration(gen="0-ga", evals=len(pop_ga), stats=stats_ga)
+    logger.logGeneration(gen="0-gp", evals=len(pop_gp), stats=stats_gp)
+    
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
     
     # Begin the evolution
-    for g in range(NGEN):
-        print "-- Generation %i --" % g
-    
+    for g in range(1, NGEN):
         # Select and clone the offspring
         off_ga = toolbox_ga.select(pop_ga, len(pop_ga))
         off_gp = tools_gp.select(pop_gp, len(pop_gp))
@@ -131,16 +138,8 @@ def main():
         best_ga = tools.selBest(pop_ga, 1)[0]
         best_gp = tools.selBest(pop_gp, 1)[0]    
     
-        print "  -- GA statistics --"
-        print "  Min %s" % stats_ga.Min[0][-1][0]
-        print "  Max %s" % stats_ga.Max[0][-1][0]
-        print "  Avg %s" % stats_ga.Avg[0][-1][0]
-        print "  Std %s" % stats_ga.Std[0][-1][0]
-        print "  -- GP statistics --"        
-        print "  Min %s" % stats_gp.Min[0][-1][0]
-        print "  Max %s" % stats_gp.Max[0][-1][0]
-        print "  Avg %s" % stats_gp.Avg[0][-1][0]
-        print "  Std %s" % stats_gp.Std[0][-1][0]
+        logger.logGeneration(gen="%d (ga)" % g, evals=len(off_ga), stats=stats_ga)
+        logger.logGeneration(gen="%d (gp)" % g, evals=len(off_gp), stats=stats_gp)
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
     print "Best individual GP is %s, %s" % (gp.evaluate(best_gp), best_gp.fitness.values)

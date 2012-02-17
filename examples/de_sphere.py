@@ -69,19 +69,25 @@ def main():
     pop = toolbox.population(n=MU);
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
     
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    for g in range(NGEN):
+    stats.update(pop)
+    
+    logger.logGeneration(gen=0, evals=len(pop), stats=stats)
+    
+    for g in range(1, NGEN):
         children = []
-        evaluations = 0
         for agent in pop:
             # We must clone everything to ensure independance
             a, b, c = [toolbox.clone(ind) for ind in toolbox.select(pop)]
@@ -93,7 +99,6 @@ def main():
             children.append(z)
             
         fitnesses = toolbox.map(toolbox.evaluate, children)
-        evaluations += len(fitnesses)
         for ind, fit, i in zip(children, fitnesses, range(len(fitnesses))):
             ind.fitness.values = fit
             if ind.fitness > pop[i].fitness:
@@ -102,12 +107,7 @@ def main():
         hof.update(pop)
         stats.update(pop)
         
-        print "-- Generation %i --" % g
-        print "  Evaluated %i individuals" % evaluations
-        print "  Min %s" % stats.Min[0][-1][0]
-        print "  Max %s" % stats.Max[0][-1][0]
-        print "  Avg %s" % stats.Avg[0][-1][0]
-        print "  Std %s" % stats.Std[0][-1][0]
+        logger.logGeneration(gen=g, evals=len(pop), stats=stats)
             
     print "Best individual is ", hof[0]
     print "with fitness", hof[0].fitness.values[0]

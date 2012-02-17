@@ -58,5 +58,11 @@ if __name__ == "__main__":
     
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, 
+                        stats=stats, halloffame=hof)

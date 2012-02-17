@@ -56,12 +56,12 @@ def main(seed=None):
     VARPB = 0.9
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    logger = tools.EvolutionLogger(stats.functions.keys())
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
     logger.logHeader()
 
     pop = toolbox.population(n=MU)
@@ -77,7 +77,7 @@ def main(seed=None):
     pop = toolbox.select(pop, len(pop))
     
     stats.update(pop)
-    logger.logGeneration(len(invalid_ind), 0, stats)
+    logger.logGeneration(evals=len(invalid_ind), gen=0, stats=stats)
 
     # Begin the generational process
     for gen in range(1, NGEN+1):
@@ -102,7 +102,7 @@ def main(seed=None):
         # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
         stats.update(pop)
-        logger.logGeneration(len(invalid_ind), gen, stats)
+        logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return pop
         

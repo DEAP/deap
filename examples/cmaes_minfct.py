@@ -31,6 +31,7 @@ toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.rastrigin)
 
 def main():
+    # The cma module uses the numpy random number generator
     numpy.random.seed(128)
 
     # The CMA-ES algorithm takes a population of one individual as argument
@@ -42,15 +43,14 @@ def main():
     toolbox.register("update", strategy.update)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
-    logger = tools.EvolutionLogger(stats.functions.keys())
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    #logger = tools.EvolutionLogger(stats.functions.keys())
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, statistics=stats,
-              logger=logger)
+    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, stats=stats)
     
     # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]

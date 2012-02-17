@@ -22,11 +22,12 @@ Evolution Strategy.
 """
 import numpy
 import copy
-
 from math import sqrt, log, exp
 
-def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
-          logger=None):
+import tools
+
+def esCMA(toolbox, population, ngen, halloffame=None, stats=None,
+          verbose=True):
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
@@ -34,8 +35,13 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
     toolbox should contain a reference to the update method of the chosen
     strategy.
     """
-    if logger is not None:
+    if verbose:
+        if stats is not None:
+            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+        else:
+            tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
+        
     for gen in xrange(ngen):
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
@@ -48,11 +54,11 @@ def esCMA(toolbox, population, ngen, halloffame=None, statistics=None,
         # Update the Strategy with the evaluated individuals
         toolbox.update(population)
         
-        if statistics is not None:
-            statistics.update(population)
+        if stats is not None:
+            stats.update(population)
         
-        if logger is not None:
-            logger.logGeneration(len(population), gen, statistics)
+        if verbose:
+            logger.logGeneration(evals=len(population), gen=gen, stats=stats)
 
 class Strategy(object):
     """

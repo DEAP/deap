@@ -15,7 +15,6 @@
 
 import array
 import numpy
-import random
 
 from deap import base
 from deap import benchmarks
@@ -23,39 +22,34 @@ from deap import cma
 from deap import creator
 from deap import tools
 
-N=30
+N=5
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
-# The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
-# for more details about the rastrigin and other tests for CMA-ES
+# See http://www.lri.fr/~hansen/cmaes_inmatlab.html for more details about
+# the rastrigin and other tests for CMA-ES
 toolbox = base.Toolbox()
-toolbox.register("attr", random.uniform, -1, 5)
 toolbox.register("evaluate", benchmarks.rastrigin)
 
 def main():
-    random.seed(64)
-    numpy.random.seed(64)
+    numpy.random.seed()
 
-    # The CMA-ES algorithm takes a population of one individual as argument
-    parent = tools.initRepeat(creator.Individual, toolbox.attr, N)
+    # The CMA-ES One Plus Lambda algorithm takes a initialized parent as argument
+    parent = creator.Individual((numpy.random.rand() * 5) - 1 for _ in range(N))
     parent.fitness.values = toolbox.evaluate(parent)
     
-    strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=8)
+    strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=1)
     toolbox.register("update", strategy.update)
     pop = strategy.generate(creator.Individual)
     
     hof = tools.HallOfFame(1)    
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
-    logger = tools.EvolutionLogger(stats.functions.keys())
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
    
-    # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(toolbox, pop, ngen=600, halloffame=hof, statistics=stats,
-              logger=logger)
+    cma.esCMA(toolbox, pop, ngen=2000, halloffame=hof, stats=stats)
 
 if __name__ == "__main__":
     main()
