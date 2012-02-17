@@ -93,7 +93,7 @@ def varAnd(toolbox, population, cxpb, mutpb):
     return offspring
 
 def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, logger=None):
+             halloffame=None, verbose=True):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of Back, Fogel and Michalewicz,
     "Evolutionary Computation 1 : Basic Algorithms and Operators", 2000.
@@ -132,9 +132,13 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if logger is not None:
+    if verbose:
+        if stats is not None:
+            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+        else:
+            tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
-        logger.logGeneration(len(population), 0, stats)
+        logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -163,7 +167,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
             stats.update(population)
 
         if logger is not None:
-            logger.logGeneration(len(invalid_ind), gen, stats)
+            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
 
@@ -257,7 +261,7 @@ def varLambda(toolbox, population, lambda_, cxpb, mutpb):
     return offspring
 
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
-                   stats=None, halloffame=None, logger=None):
+                   stats=None, halloffame=None, verbose=True):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
     evolutionary loop begins by producing *lambda* offspring from the
@@ -288,14 +292,18 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if logger is not None:
+    if verbose:
+        if stats is not None:
+            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+        else:
+            tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
-        logger.logGeneration(len(invalid_ind), 0, stats)
+        logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
         # Variate the population
-        offsprings = varLambda(toolbox, population, lambda_, cxpb, mutpb)
+        offspring = varOr(toolbox, population, lambda_, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -314,12 +322,12 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         if stats is not None:
             stats.update(population)
         if logger is not None:
-            logger.logGeneration(len(invalid_ind), gen, stats)
+            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
-                    stats=None, halloffame=None, logger=None):
+                    stats=None, halloffame=None, verbose=True):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm. First, 
     the individuals having an invalid fitness are evaluated. Then, the
     evolutionary loop begins by producing *lambda* offspring from the
@@ -352,9 +360,13 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         halloffame.update(population)
     if stats is not None:
         stats.update(population)
-    if logger is not None:
+    if verbose:
+        if stats is not None:
+            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+        else:
+            tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
-        logger.logGeneration(len(invalid_ind), 0, stats)
+        logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -378,7 +390,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         if stats is not None:
             stats.update(population)
         if logger is not None:
-            logger.logGeneration(len(invalid_ind), gen, stats)
+            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
 
@@ -406,7 +418,7 @@ def varSteadyState(toolbox, population):
     return child,
 
 def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
-                  logger=None):
+                  verbose=True):
     """The steady-state evolutionary algorithm. Every generation, a single new
     individual is produced and put in the population producing a population of
     size :math:`lambda+1`, then :math:`lambda` individuals are kept according
@@ -427,9 +439,13 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
     if stats is not None:
         stats.update(population)
 
-    if logger is not None:
+    if verbose:
+        if stats is not None:
+            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+        else:
+            tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
-        logger.logGeneration(len(invalid_ind), 0, stats)
+        logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
     # Begin the generational process
     for gen in range(ngen):
@@ -450,6 +466,6 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
         if stats is not None:
             stats.update(population)
         if logger is not None:
-            logger.logGeneration(len(invalid_ind), gen, stats)
+            logger.logGeneration(evals=1, gen=gen, stats=stats)
 
     return population

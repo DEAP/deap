@@ -399,65 +399,61 @@ class Statistics(object):
 class EvolutionLogger(object):
     """The evolution logger logs data about the evolution to either the stdout
     or a file. To change the destination of the logger simply change its
-    attribute :attr:`output` to an filestream. The *col_names* argument
-    provides the data column to log when using statistics, the names should be
+    attribute :attr:`output` to an filestream. The *columns* argument provides
+    the data column to log when using statistics, the names should be
     identical to what is registered in the statistics object (it default to
-    None wich will log the generation number and the number of evaluated
-    individuals). The *precision* indicates the precision to use when logging
-    statistics.
+    `["gen", "evals"]` wich will log the generation number and the number of
+    evaluated individuals). When logging with function :func:`logGeneration`, 
+    the provided columns must be given either as arguments or in the
+    statistics object. The *precision* indicates the precision to use when
+    logging statistics.
     """
     output = stdout
     """File object indicating where the log is written. By default log is
     written in sys.stdout.
     """
-    def __init__(self, col_names=None, precision=4):
-        self.lg_stats_names = ()
-        self.lg_stats_values = ()
-        self.lg_stat_str = ""
-        self.header = ""
+    def __init__(self, columns=["gen", "evals"], precision=4):
+        self.columns = tuple(columns)
         self.precision = "%%.%if" % precision
-        self.header = "{0:>5s} {1:>5s}".format("Gen.", "Evals")
-        if col_names is not None:
-            self.lg_stat_names = tuple(col_names)
-            self.lg_stat_str = "".join(tuple(" %12s",) * len(self.lg_stat_names))
-            self.header += self.lg_stat_str % self.lg_stat_names
-
+    
     def logHeader(self):
-        """Logs the column titles which are "Gen.", "Evals", and the column
-        names specified during initialization.
+        """Logs the column titles specified during initialization.
         """
-        self.output.write(self.header)
+        self.output.write("".join(tuple("{:<8s} ",) * len(self.columns)).format(*self.columns))
         self.output.write("\n")
 
-    def logGeneration(self, nbr_eval, gen, stats=None, index=0):
-        """Logs the generation identifier *gen*, which can be a string of any sort, 
-        and the number of evaluations *nbr_eval*, which has to be an integer.
-        If provided, log the last entry of the data under provided column names
-        at *index* in the *stats* object (*index* defaults to 0).
+    def logGeneration(self, stats=None, index=0, **kargs):
+        """Logs the registered generation identifiers given a columns on
+        initialization. Each element of the columns must be provided either in
+        the *stats* object or as keyword argument. When loggin through the
+        stats object, the last entry of the data under the column names at
+        *index* is logged (*index* defaults to 0).
         
         Here is an example on how to use the logger with a statistics object
         ::
             
             >>> s = Statistics(n=2)
-            >>> s.register("Mean", mean)
+            >>> s.register("mean", mean)
+            >>> s.register("max", max)
             >>> s.update([1, 2, 3, 4], index=0)
             >>> s.update([5, 6, 7, 8], index=1)
-            >>> l = EvolutionLogger(col_names=["Mean"])
+            >>> l = EvolutionLogger(columns=["gen", "evals", "mean", "max"])
             >>> l.logHeader()
-             Gen. Evals         Mean
-            >>> l.logGeneration(gen="0_1", nbr_eval=4, stats=s, index=0)
-              0_1     4     [2.5000]
-            >>> l.logGeneration(gen="0_2", nbr_eval=4, stats=s, index=1)
-              0_2     4     [6.5000]
+            gen      evals    mean     max
+            >>> l.logGeneration(gen="0_1", evals=4, stats=s, index=0)
+            0_1      4        [2.5000] [4.0000]
+            >>> l.logGeneration(gen="0_2", evals=4, stats=s, index=1)
+            0_2      4        [6.5000] [8.0000]
         """
-        self.output.write("{0:>5s} {1:>5d}".format(str(gen), nbr_eval))
-        if stats is not None:
-            lg_stat_values = tuple("[%s]" % ", ".join(self.precision % value 
-                                                      for value in
-                                                      stats.data[key][index][-1]
-                                                     ) 
-                                   for key in self.lg_stat_names)
-            self.output.write(self.lg_stat_str %  lg_stat_values)
+        if stats is None:
+            stats = dict()
+        for name in self.columns:
+            try:
+                lg_str = "[%s]" % ", ".join(self.precision % value for value in
+                                                       stats.data[name][index][-1])
+                self.output.write("{0:<8s} ".format(lg_str))
+            except KeyError:
+                self.output.write("{0:<8s} ".format(str(kargs[name])))
         self.output.write("\n")
 
 class HallOfFame(object):

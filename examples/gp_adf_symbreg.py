@@ -121,10 +121,13 @@ def main():
     pop = toolbox.population(n=100)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
@@ -133,11 +136,11 @@ def main():
     	ind.fitness.values = toolbox.evaluate(ind)
 
     hof.update(pop)
-    stats.update(pop)    
+    stats.update(pop)
     
-    for g in range(NGEN):
-        print "-- Generation %i --" % g
+    logger.logGeneration(gen=0, evals=len(pop), stats=stats)    
     
+    for g in range(1, NGEN):
         # Select the offspring
         offspring = toolbox.select(pop, len(pop))
         # Clone the offspring
@@ -166,10 +169,8 @@ def main():
         pop = offspring
         hof.update(pop)
         stats.update(pop)
-        print "  Min %s" % stats.Min[0][-1][0]
-        print "  Max %s" % stats.Max[0][-1][0]
-        print "  Avg %s" % stats.Avg[0][-1][0]
-        print "  Std %s" % stats.Std[0][-1][0]
+        
+        logger.logGeneration(gen=g, evals=len(invalids), stats=stats)
     
     print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
     

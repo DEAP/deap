@@ -58,13 +58,13 @@ def main():
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
-    logger = tools.EvolutionLogger(stats.functions.keys())
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.7, 0.2, 40, stats, hof, logger)
+    algorithms.eaSimple(toolbox, pop, 0.7, 0.2, 40, stats=stats, 
+                        halloffame=hof)
     
     return pop, stats, hof
 
