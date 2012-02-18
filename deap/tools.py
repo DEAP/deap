@@ -419,7 +419,8 @@ class EvolutionLogger(object):
     def logHeader(self):
         """Logs the column titles specified during initialization.
         """
-        self.output.write("".join(tuple("{:<8s} ",) * len(self.columns)).format(*self.columns))
+        header = "".join("{%d:<8s} " % i for i in range(len(self.columns)))
+        self.output.write(header.format(*self.columns))
         self.output.write("\n")
 
     def logGeneration(self, stats=None, index=0, **kargs):
