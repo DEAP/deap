@@ -136,7 +136,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
         if stats is not None:
             logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
         else:
-            tools.EvolutionLogger(["gen", "evals"])
+            logger = tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -296,7 +296,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         if stats is not None:
             logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
         else:
-            tools.EvolutionLogger(["gen", "evals"])
+            logger = tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -364,7 +364,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         if stats is not None:
             logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
         else:
-            tools.EvolutionLogger(["gen", "evals"])
+            logger = tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -443,7 +443,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
         if stats is not None:
             logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
         else:
-            tools.EvolutionLogger(["gen", "evals"])
+            logger = tools.EvolutionLogger(["gen", "evals"])
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
