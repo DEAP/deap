@@ -1,4 +1,9 @@
 #include <Python.h>
+
+#if PY_MAJOR_VERSION >= 3
+#define PY3K
+#endif
+
 #include <map>
 #include <vector>
 #include <iostream>
@@ -40,7 +45,11 @@ static PyObject* selNSGA2(PyObject *self, PyObject *args){
      * Return : k selected individuals from input individual list
      */
     PyObject *lListIndv = PyTuple_GetItem(args, 0);
+#ifdef PY3K
+    unsigned long k = (unsigned long)PyLong_AS_LONG(PyTuple_GetItem(args, 1));
+#else
     unsigned int k = (unsigned int)PyInt_AS_LONG(PyTuple_GetItem(args, 1));
+#endif
     
     PyObject *lListSelect = PyList_New(0);
     
@@ -171,9 +180,35 @@ static PyMethodDef cToolsMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel (?!?) */
 };
 
+#ifdef PY3K
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "cTools",     /* m_name */
+    "C version of the tools.",  /* m_doc */
+    -1,                  /* m_size */
+    cToolsMethods,       /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
+#endif
+
 // Needed by Python to initialize the C_nsga2 module
 PyMODINIT_FUNC
+#ifdef PY3K
+PyInit_cTools(void)
+#else
 initcTools(void)
+#endif
 {
+#ifdef PY3K
+    PyObject *lModule = PyModule_Create(&moduledef);
+    if(lModule == NULL)
+        return NULL;
+    
+    return lModule;
+#else    
     (void) Py_InitModule("cTools", cToolsMethods);
+#endif
 }
