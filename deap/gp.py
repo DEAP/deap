@@ -47,7 +47,7 @@ def evaluate(expr, pset=None):
             return str(expr)
     if not pset is None:
         try:
-            return eval(_stringify(expr), pset.func_dict)
+            return eval(_stringify(expr), pset.functions)
         except MemoryError:
             _, _, traceback = sys.exc_info()
             raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -67,7 +67,7 @@ def evaluateADF(seq):
         func = lambdify(expr.pset, expr)
         adfdict.update({expr.pset.__name__ : func})
         for expr2 in reversed(seq[1:i+1]):
-            expr2.pset.func_dict.update(adfdict)
+            expr2.pset.functions.update(adfdict)
     return adfdict
 
 def lambdify(pset, expr):
@@ -81,7 +81,7 @@ def lambdify(pset, expr):
     args = ",".join(a for a in pset.arguments)
     lstr = "lambda %s: %s" % (args, expr)
     try:
-        return eval(lstr, dict(pset.func_dict))
+        return eval(lstr, dict(pset.functions))
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -97,7 +97,7 @@ def lambdifyList(expr):
     tree.
     """
     adfdict = evaluateADF(expr)
-    expr[0].pset.func_dict.update(adfdict)   
+    expr[0].pset.functions.update(adfdict)   
     return lambdify(expr[0].pset, expr[0])
 
 ## Loosely + Strongly Typed GP 
@@ -117,7 +117,7 @@ class Primitive(object):
         self.arity = len(args)           
         self.args = args
         self.ret = ret
-        args = ", ".join(repeat("%s", self.arity))
+        args = ", ".join(("%s",) * self.arity)
         self.seq = "%s(%s)" % (self.name, args)  
     def __call__(self, *args):
         return self.seq % args  
@@ -197,7 +197,7 @@ class PrimitiveSetTyped(object):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
         self.arguments = []
-        self.func_dict = dict()
+        self.functions = dict()
         self.terms_count = 0
         self.prims_count = 0
         self.adfs_count = 0
@@ -213,12 +213,11 @@ class PrimitiveSetTyped(object):
         """Rename function arguments with new arguments name *new_args*.
         """
         for i, argument in enumerate(self.arguments):
-            if new_args.has_key(argument):
+            if argument in new_args:
                 self.arguments[i] = new_args[argument]
         for terminals in self.terminals.values():
             for terminal in terminals:
-                if ( isinstance(terminal, Terminal) and 
-                     new_args.has_key(terminal.value) ):
+                if isinstance(terminal, Terminal) and terminal.value in new_args:
                     terminal.value = new_args[terminal.value]
 
     def addPrimitive(self, primitive, in_types, ret_type):
@@ -233,7 +232,7 @@ class PrimitiveSetTyped(object):
         except (KeyError, ValueError):
             prim = Primitive(primitive, in_types, ret_type)
         self.primitives[ret_type].append(prim)
-        self.func_dict[primitive.__name__] = primitive
+        self.functions[primitive.__name__] = primitive
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type):
@@ -243,7 +242,7 @@ class PrimitiveSetTyped(object):
         *ret_type* is the type of the terminal.
         """
         if callable(terminal):
-            self.func_dict[terminal.__name__] = terminal
+            self.functions[terminal.__name__] = terminal
         prim = Terminal(terminal, ret_type)
         self.terminals[ret_type].append(prim)
         self.terms_count += 1
