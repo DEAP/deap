@@ -15,6 +15,7 @@
 
 import operator
 import random
+from itertools import imap
 
 from deap import base
 from deap import benchmarks
@@ -35,9 +36,9 @@ def generate(size, pmin, pmax, smin, smax):
 def updateParticle(part, best, phi1, phi2):
     u1 = (random.uniform(0, phi1) for _ in range(len(part)))
     u2 = (random.uniform(0, phi2) for _ in range(len(part)))
-    v_u1 = map(operator.mul, u1, map(operator.sub, part.best, part))
-    v_u2 = map(operator.mul, u2, map(operator.sub, best, part))
-    part.speed = map(operator.add, part.speed, map(operator.add, v_u1, v_u2))
+    v_u1 = imap(operator.mul, u1, imap(operator.sub, part.best, part))
+    v_u2 = imap(operator.mul, u2, imap(operator.sub, best, part))
+    part.speed = map(operator.add, part.speed, imap(operator.add, v_u1, v_u2))
     for i, speed in enumerate(part.speed):
         if speed < part.smin:
             part.speed[i] = part.smin
