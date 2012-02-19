@@ -26,6 +26,7 @@ you really want them to do.
 """
 
 import random
+
 import tools
 
 def varSimple(toolbox, population, cxpb, mutpb):
@@ -142,12 +143,11 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
 
     # Begin the generational process
     for gen in range(1, ngen+1):
-        # Select and clone the next generation individuals
+        # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
-        offspring = map(toolbox.clone, offspring)
         
         # Variate the pool of individuals
-        offspring = varSimple(toolbox, offspring, cxpb, mutpb)
+        offspring = varAnd(toolbox, offspring, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
