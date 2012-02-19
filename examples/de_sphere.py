@@ -99,7 +99,7 @@ def main():
             children.append(z)
             
         fitnesses = toolbox.map(toolbox.evaluate, children)
-        for ind, fit, i in zip(children, fitnesses, range(len(fitnesses))):
+        for (i, ind), fit in zip(enumerate(children), fitnesses):
             ind.fitness.values = fit
             if ind.fitness > pop[i].fitness:
                 pop[i] = ind
