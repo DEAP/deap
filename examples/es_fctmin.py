@@ -44,8 +44,8 @@ def checkStrategy(minstrategy):
             children = func(*args, **kargs)
             for child in children:
                 for i, s in enumerate(child.strategy):
-                    if child.strategy < minstrategy:
-                        child.strategy = minstrategy
+                    if s < minstrategy:
+                        child.strategy[i] = minstrategy
             return children
         return wrapMinStrategy
     return decMinStrategy
