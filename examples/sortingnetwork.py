@@ -75,7 +75,7 @@ class SortingNetwork(list):
         the network dimensionality.
         """
         if cases is None:
-            cases = product(range(2), repeat=self.dimension)
+            cases = product(xrange(2), repeat=self.dimension)
         
         misses = 0
         ordered = [[0]*(self.dimension-i) + [1]*i for i in range(self.dimension+1)]
