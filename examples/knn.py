@@ -73,7 +73,7 @@ FILE="heart_scale.csv"
 N_TRAIN=175
 K=1
 
-data_csv = csv.reader(open(FILE, "rb"))
+data_csv = csv.reader(open(FILE, "r"))
 trainset = list()
 trainlabels = list()
 rows = [row for row in data_csv]
