@@ -68,14 +68,14 @@ class CMAStrategy(object):
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
     +================+===========================+============================+
-    | ``lambda_``    | ``floor(4 + 3 * log(N))`` | Number of children to      |
+    | ``lambda_``    | ``int(4 + 3 * log(N))``   | Number of children to      |
     |                |                           | produce at each generation,|
     |                |                           | ``N`` is the individual's  |
-    |                |                           | size.                      |
+    |                |                           | size (integer).            |
     +----------------+---------------------------+----------------------------+
-    | ``mu``         | ``floor(lambda_ / 2)``    | The number of parents to   | 
+    | ``mu``         | ``int(lambda_ / 2)``      | The number of parents to   | 
     |                |                           | keep from the              |
-    |                |                           | lambda children.           |
+    |                |                           | lambda children (integer). |
     +----------------+---------------------------+----------------------------+
     | ``weights``    | ``"superlinear"``         | Decrease speed, can be     |
     |                |                           | ``"superlinear"``,         |
@@ -191,7 +191,7 @@ class CMAStrategy(object):
         """Those parameters depends on lambda and need to computed again if it 
         changes during evolution.
         """
-        self.mu = params.get("mu", self.lambda_ / 2)
+        self.mu = params.get("mu", int(self.lambda_ / 2))
         rweights = params.get("weights", "superlinear")
         if rweights == "superlinear":
             self.weights = log(self.mu + 0.5) - \
