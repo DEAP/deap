@@ -136,7 +136,7 @@ class Fitness(object):
             self.values = values
         
     def getValues(self):
-        return tuple(map(operator.div, self.wvalues, self.weights))
+        return tuple(map(operator.truediv, self.wvalues, self.weights))
             
     def setValues(self, values):
         try:
