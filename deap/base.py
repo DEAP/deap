@@ -27,6 +27,8 @@ import functools
 from collections import deque
 from itertools import izip, repeat, count
 
+from tools import decorate
+
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
     At first the toolbox contains two simple methods. The first method
@@ -73,7 +75,6 @@ class Toolbox(object):
         the signature preserving decoration function
         :func:`~deap.tools.decorate`.
         """
-        from tools import decorate
         partial_func = getattr(self, alias)
         method = partial_func.func
         args = partial_func.args
