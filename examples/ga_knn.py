@@ -30,7 +30,7 @@ N_TRAIN=175
 K=1
 
 # Read data from file
-data = csv.reader(open(FILE, "rb"))
+data = csv.reader(open(FILE, "r"))
 trainset = list()
 trainlabels = list()
 rows = [row for row in data]
