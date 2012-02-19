@@ -248,7 +248,7 @@ class Checkpoint(object):
         """Dump the current registered object values in the provided
         filestream.
         """
-        self.values = dict.fromkeys(self.objects.keys())
+        self.values = dict.fromkeys(self.objects.iterkeys())
         for name, key in self.keys.iteritems():
             self.values[name] = key()
         pickle.dump(self.values, file)
@@ -487,8 +487,7 @@ class HallOfFame(object):
             self.items = [copy.deepcopy(item) for item in self.items]
             # The keys are the fitnesses in reverse order to allow the use
             # of the bisection algorithm 
-            self.keys = map(attrgetter("fitness"),
-                            reversed(self.items))
+            self.keys = map(attrgetter("fitness"), reversed(self.items))
         else:
             for ind in population: 
                 if ind.fitness > self[-1].fitness:
