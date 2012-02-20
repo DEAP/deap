@@ -130,7 +130,7 @@ class Strategy(object):
         arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
         return map(ind_init, arz)
         
-    def update(self, population, ind_init=None):
+    def update(self, population, ind_init=tools.identity):
         """Update the current covariance matrix strategy.
         """
         population.sort(key=lambda ind: ind.fitness, reverse=True)
