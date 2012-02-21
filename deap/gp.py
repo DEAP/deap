@@ -215,7 +215,7 @@ class PrimitiveSetTyped(object):
         for i, argument in enumerate(self.arguments):
             if argument in new_args:
                 self.arguments[i] = new_args[argument]
-        for terminals in self.terminals.values():
+        for terminals in self.terminals.itervalues():
             for terminal in terminals:
                 if isinstance(terminal, Terminal) and terminal.value in new_args:
                     terminal.value = new_args[terminal.value]
