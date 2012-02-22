@@ -33,9 +33,9 @@ DTM_CONCURRENT_SEND_LIMIT = 1000
 
 class CommThread(AbstractCommThread):
 
-    def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):        
+    def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):
         AbstractCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
-    
+
     @property
     def poolSize(self):
         return self.pSize
@@ -47,11 +47,11 @@ class CommThread(AbstractCommThread):
     @property
     def isRootWorker(self):
         return self.currentId == 0
-    
+
     @property
     def isLaunchProcess(self):
         return False
-    
+
     def setTraceModeOn(self, xmlLogger):
         self.traceMode = True
         self.traceTo = xmlLogger
@@ -61,26 +61,28 @@ class CommThread(AbstractCommThread):
 
     def run(self):
         from mpi4py import MPI
-        
+
         def mpiSend(msg, dest):
             # Pickle and send over MPI
             arrayBuf = array.array('b')
             arrayBuf.fromstring(cPickle.dumps(msg, cPickle.HIGHEST_PROTOCOL))
-            
+
             b = MPI.COMM_WORLD.Isend([arrayBuf, MPI.CHAR], dest=dest, tag=self.msgSendTag)
             if self.traceMode:
                 etree.SubElement(self.traceTo, "msg", {"direc" : "out", "type" : str(msg.msgType), "otherWorker" : str(dest), "msgtag" : str(self.msgSendTag), "time" : repr(time.time())})
-            
+
             self.msgSendTag += 1
             return b, arrayBuf
-        
+
         assert MPI.Is_initialized(), "Error in MPI Init!"
-        
+
         self.pSize = MPI.COMM_WORLD.Get_size()
         self.currentId = MPI.COMM_WORLD.Get_rank()
-        
+
+        MPI.COMM_WORLD.Barrier()
+
         self.commReadyEvent.set()   # Notify the main thread that we are ready
-        
+
         if self.currentId == 0 and MPI.Query_thread() > 0:
             # Warn only once
             _logger.warning("MPI was initialized with a thread level of %i, which is higher than MPI_THREAD_SINGLE."
@@ -88,14 +90,14 @@ class CommThread(AbstractCommThread):
             " As DTM was designed to work with the base, safe mode (MPI_THREAD_SINGLE), it is strongly suggested to change"
             " the 'thread_level' variable or your mpi4py settings in 'site-packages/mpi4py/rc.py', unless you have strong"
             " motivations to keep that setting. This may bring both stability and performance improvements.", MPI.Query_thread())
-        
+
         lRecvWaiting = []
         lSendWaiting = []
         countSend = 0
         countRecv = 0
         lMessageStatus = MPI.Status()
         working = True
-        
+
         countRecvNotTransmit = 0
         countRecvTimeInit = time.time()
 
@@ -112,13 +114,13 @@ class CommThread(AbstractCommThread):
                 # We received something
                 lBuf = array.array('b', (0,))
                 lBuf = lBuf * lMessageStatus.Get_elements(MPI.CHAR)
-                
+
                 lRecvWaiting.append((lBuf, MPI.COMM_WORLD.Irecv([lBuf, MPI.CHAR], source=lMessageStatus.Get_source(), tag=lMessageStatus.Get_tag()), lMessageStatus.Get_tag()))
 
                 lMessageStatus = MPI.Status()
                 recvSomething = True
 
-            
+
             for i, reqTuple in enumerate(lRecvWaiting):
                 if reqTuple[1].Test():
                     countRecv += 1
@@ -131,13 +133,13 @@ class CommThread(AbstractCommThread):
                     # Wake up the main thread if there's a sufficient number
                     # of pending receives
                     countRecvNotTransmit += 1
-                    
-                    
+
+
             if countRecvNotTransmit > 50 or (time.time() - countRecvTimeInit > 0.1 and countRecvNotTransmit > 0):
                 countRecvNotTransmit = 0
                 countRecvTimeInit = time.time()
-                self.wakeUpMainThread.set()        
-                    
+                self.wakeUpMainThread.set()
+
             lRecvWaiting = filter(lambda d: not d is None, lRecvWaiting)
             if not isinstance(lRecvWaiting, list):
                 lRecvWaiting = list(lRecvWaiting)
@@ -154,21 +156,20 @@ class CommThread(AbstractCommThread):
                     sendSomething = True
                 except Queue.Empty:
                     break
-            
+
             lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
             if not isinstance(lSendWaiting, list):  # Python 3
                 lSendWaiting = list(lSendWaiting)
-            
+
             if not recvSomething:
                 time.sleep(self.random.uniform(DTM_MPI_MIN_LATENCY, DTM_MPI_MAX_LATENCY))
-                
+
         while len(lSendWaiting) > 0:
             # Send the lasts messages before shutdown
             lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
             if not isinstance(lSendWaiting, list):  # Python 3
                 lSendWaiting = list(lSendWaiting)
             time.sleep(self.random.uniform(DTM_MPI_MIN_LATENCY, DTM_MPI_MAX_LATENCY))
-            
+
         del lSendWaiting
         del lRecvWaiting
-        
