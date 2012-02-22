@@ -141,8 +141,6 @@ class CommThread(AbstractCommThread):
                 self.wakeUpMainThread.set()
 
             lRecvWaiting = filter(lambda d: not d is None, lRecvWaiting)
-            if not isinstance(lRecvWaiting, list):
-                lRecvWaiting = list(lRecvWaiting)
 
             while len(lSendWaiting) < DTM_CONCURRENT_SEND_LIMIT:
                 # Send all pending sends, under the limit of
@@ -158,8 +156,6 @@ class CommThread(AbstractCommThread):
                     break
 
             lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
-            if not isinstance(lSendWaiting, list):  # Python 3
-                lSendWaiting = list(lSendWaiting)
 
             if not recvSomething:
                 time.sleep(self.random.uniform(DTM_MPI_MIN_LATENCY, DTM_MPI_MAX_LATENCY))
@@ -167,8 +163,6 @@ class CommThread(AbstractCommThread):
         while len(lSendWaiting) > 0:
             # Send the lasts messages before shutdown
             lSendWaiting = filter(lambda d: not d[0].Test(), lSendWaiting)
-            if not isinstance(lSendWaiting, list):  # Python 3
-                lSendWaiting = list(lSendWaiting)
             time.sleep(self.random.uniform(DTM_MPI_MIN_LATENCY, DTM_MPI_MAX_LATENCY))
 
         del lSendWaiting

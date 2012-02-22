@@ -355,7 +355,7 @@ class TaskQueue(object):
         # Hack to avoid the starting bug (few jobs but very long)
         #
         if len(returnList) == 0 and maxDiff == -1 and len(self._tDict) > 1:
-            it = list(filter(lambda x: self._getTimeInfoAbout(x[1]) != 0, self._tDict.items()))
+            it = filter(lambda x: self._getTimeInfoAbout(x[1]) != 0, self._tDict.items())
             if len(it) != 0:
                 returnList.append(it[0][0])
                 totalTime += self._getTimeInfoAbout(it[0][1])
@@ -1028,7 +1028,7 @@ class Control(object):
         cThread = threading.currentThread()
         currentId = cThread.tid
 
-        zipIterable = list(zip(*iterables))
+        zipIterable = zip(*iterables)
 
         listResults = [None] * len(zipIterable)
         listTasks = []
@@ -1120,7 +1120,7 @@ class Control(object):
         cThread = threading.currentThread()
         currentId = cThread.tid
 
-        zipIterable = list(zip(*iterables))
+        zipIterable = zip(*iterables)
 
         listResults = [None] * len(zipIterable)
         listTasks = []
@@ -1328,7 +1328,7 @@ class Control(object):
         """
         currentIndex = 0
 
-        zipIterable = list(zip(*iterables))
+        zipIterable = zip(*iterables)
 
         asyncResults = [self.apply_async(function, *zipIterable[i]) for i in xrange(len(zipIterable))]
 
