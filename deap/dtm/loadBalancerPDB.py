@@ -144,7 +144,11 @@ class LoadBalancer(object):
             totalSum2 += (r.loadCurrentExec+r.loadExecQ+r.loadWaitingRestartQ)**2
 
         avgLoad = (self.totalExecLoad + self.totalEQueueLoad + self.totalWaitingRQueueLoad) / float(len(self.ws))
-        stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
+        try:
+            stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
+        except ValueError:
+            # Some weird cases with floating point precision, where avgLoad**2 might be an epsilon greater than totalSum2/len(self.ws)
+            stdDevLoad = 0.
         selfLoad = self.ws[self.wid].sumRealLoad()
         diffLoad = selfLoad - avgLoad
 
