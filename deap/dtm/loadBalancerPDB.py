@@ -153,7 +153,7 @@ class LoadBalancer(object):
         diffLoad = selfLoad - avgLoad
 
 
-        listPossibleSendTo = list(filter(lambda d: d[1].infoUpToDate and d[1].sumRealLoad() > avgLoad, self.ws.items()))
+        listPossibleSendTo = filter(lambda d: d[1].infoUpToDate and d[1].sumRealLoad() > avgLoad, self.ws.items())
         if selfLoad == 0 and len(listPossibleSendTo) > 0 and avgLoad != 0 and self.ws[self.wid].loadWaitingRestartQ < DTM_RESTART_QUEUE_BLOCKING_FROM:
             # Algorithme d'envoi de demandes de taches
             self.lastQuerySend = time.time()

@@ -52,7 +52,7 @@ def main():
     
     _logger.info("[%s] Testing synchronous calls...", time.time()-beginTime)
     list1r = dtm.map(mapFunc1, list1)
-    list1t = map(mapFunc1, list1)
+    list1t = list(map(mapFunc1, list1))
     
     if list1r != list1t:
         _logger.warning("[%s] DTM synchronous map test FAILED!", time.time()-beginTime)
@@ -80,7 +80,7 @@ def main():
         
     
     filterTestr = dtm.filter(filterFunc1, list1)
-    filterTestt = filter(filterFunc1, list1)
+    filterTestt = list(filter(filterFunc1, list1))
     
     if filterTestr != filterTestt:
         _logger.warning("[%s] DTM synchronous filter test FAILED!", time.time()-beginTime)
@@ -141,7 +141,7 @@ def main():
     
     imapNotOrderedObj = dtm.imap_unordered(mapFunc1, list1, 50)
     list4r = [i for i in imapNotOrderedObj]
-    list4r_sorted = sorted(list4r)
+    list4r_sorted = list(sorted(list4r))
     
     if list4r != list4r_sorted and list4r_sorted == list1t:
         _logger.info("[%s] DTM asynchronous imap_unordered test successful", time.time()-beginTime)
