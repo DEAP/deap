@@ -229,7 +229,7 @@ class LoadBalancer(object):
                 del scores[selectedIndex]       # On s'assure de ne pas reprendre le meme worker
                         
             if not self.xmlLogger is None:
-                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendtasks", "destination":str([b[0] for b in sendTasksList]), "tasksinfo" : str([len(b[1]) for b in sendTasksList])})
+                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendtasks", "destination":str([b[0] for b in sendTasksList])[1:-1], "tasksinfo" : str([len(b[1]) for b in sendTasksList])[1:-1]})
                 
             self.lastTaskSend = time.time()
         return sendNotifList, sendTasksList

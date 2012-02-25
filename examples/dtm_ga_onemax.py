@@ -52,10 +52,16 @@ toolbox.register("map", dtm.map)
 def main():
     random.seed(64)
 
-    pop = toolbox.population(n=500)
+    pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-
-    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
+                        halloffame=hof, verbose=True)
     logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
 
 if __name__ == "__main__":

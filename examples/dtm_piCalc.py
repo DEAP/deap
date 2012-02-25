@@ -31,4 +31,5 @@ def calcPi(n, t):
     print("pi = " + str(pi_value))
     return pi_value
 
+dtm.setOptions(setTraceMode=True, taskGranularity=0.01)
 dataPi = dtm.start(calcPi, 3000, 5000)
