@@ -766,7 +766,7 @@ class Control(object):
                                                        {"id" : str(newTask.tid),
                                                         "creatorTid" : str(newTask.creatorTid),
                                                         "creatorWid" : str(newTask.creatorWid),
-                                                        "taskIndex" : str(newTask.taskIndex),
+                                                        "taskIndex" : str(newTask.taskIndex)[1:-1],
                                                         "creationTime" : repr(newTask.creationTime)})
                         try:
                             newTaskTarget = etree.SubElement(newTaskElem, "target",
@@ -777,11 +777,11 @@ class Control(object):
 
                         # TODO TO BE UPDATED (args and kwargs are list of args...)
                         for i, a in enumerate(zip(*newTask.args)):
-                            newTaskTarget.set("arg" + str(i), str(a))
+                            newTaskTarget.set("arg" + str(i), str(a)[1:-1])
                         for k in newTask.kwargs[0]:
                             newTaskTarget.set("kwarg_" + str(k), str([newTask.kwargs[i][k] for i in xrange(len(newTask.kwargs))]))
 
-                        newTaskPath = etree.SubElement(newTaskElem, "path", {"data" : str(newTask.taskRoute)})
+                        newTaskPath = etree.SubElement(newTaskElem, "path", {"data" : str(newTask.taskRoute)[1:-1]})
                         self.traceLock.release()
 
                         newThread = DtmThread(newTask, self, newTaskElem)
@@ -1059,7 +1059,7 @@ class Control(object):
                                            {"type" : "map",
                                             "time" : repr(time.time()),
                                             "target" : str(function.__name__),
-                                            "childTasks" : str(listTids)})
+                                            "childTasks" : str(listTids)[1:-1]})
             self.traceLock.release()
 
         self.waitingThreadsLock.acquire()
@@ -1153,7 +1153,7 @@ class Control(object):
                                            {"type" : "map_async",
                                             "time" : repr(time.time()),
                                             "target" : str(function.__name__),
-                                            "childTasks" : str(listTids)})
+                                            "childTasks" : str(listTids)[1:-1]})
 
         self.waitingThreadsLock.acquire()
 
@@ -1214,7 +1214,7 @@ class Control(object):
                                            {"type" : "apply",
                                             "time" : repr(time.time()),
                                             "target" : str(function.__name__),
-                                            "childTasks" : str([task.tid])})
+                                            "childTasks" : str([task.tid])[1:-1]})
 
         self.waitingThreadsLock.acquire()
         if currentId not in self.waitingThreads.keys():
@@ -1286,7 +1286,7 @@ class Control(object):
                                            {"type" : "apply_async",
                                             "time" : repr(time.time()),
                                             "target" : str(function.__name__),
-                                            "childTasks" : str([task.tid])})
+                                            "childTasks" : str([task.tid])[1:-1]})
 
         self.waitingThreadsLock.acquire()
         if currentId not in self.waitingThreads.keys():
@@ -1655,7 +1655,7 @@ class DtmThread(threading.Thread):
         if not self.xmlTrace is None:
             # Debug output in xml object
             self.control.traceLock.acquire()
-            etree.SubElement(self.xmlTrace, "event", {"type" : "begin", "worker" : str(self.control.workerId), "time" : repr(self.timeBegin)})
+            etree.SubElement(self.xmlTrace, "event", {"type" : "begin", "worker" : str(self.control.workerId), "time" : repr(time.time())})
             self.control.traceLock.release()
 
         totalTime = 0
@@ -1700,7 +1700,7 @@ class DtmThread(threading.Thread):
         if not self.xmlTrace is None:
             # Debug output in xml object
             self.control.traceLock.acquire()
-            etree.SubElement(self.xmlTrace, "event", {"type" : "end", "worker" : str(self.control.workerId), "time" : repr(time.time()), "execTime" : repr(totalTime), "success" : str(success)})
+            etree.SubElement(self.xmlTrace, "event", {"type" : "end", "worker" : str(self.control.workerId), "time" : repr(time.time()), "execTime" : repr(totalTime), "success" : str(success)[1:-1]})
             self.control.traceLock.release()
 
 
