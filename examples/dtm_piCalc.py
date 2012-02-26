@@ -24,11 +24,12 @@ from deap import dtm
 
 def test(tries):
     return sum(hypot(random(), random()) < 1 for i in xrange(tries))
-    
+
 def calcPi(n, t):
     expr = dtm.repeat(test, n, t)
     pi_value = 4. * sum(expr) / float(n*t)
     print("pi = " + str(pi_value))
     return pi_value
 
-dtm.start(calcPi, 2000, 5000)
+dtm.setOptions(setTraceMode=True, taskGranularity=0.01)
+dataPi = dtm.start(calcPi, 3000, 5000)

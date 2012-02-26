@@ -32,25 +32,29 @@ DTM_WAIT_ANY = 3
 class TaskContainer(object):
     """
     Contains all the information about a task (running or not)
+    Some of the fields are iterable, because DTM may combine
+    two or more tasks together if their durations are smaller than
+    a granularity parameter.
     """
     __slots__ = ('tid', # Unique ID of the task
                 'creatorWid', # ID of the worker who creates this task
                 'creatorTid', # ID of the task who creates this task (parent)
-                'taskIndex', # Position into the parents task childs list
+                'taskIndex', # List of position into the parents task childs list
                 'taskRoute', # Worker path followed by the job before begin
                 'creationTime', # Time at the job creation
-                'target', # Target function (or callable object) of the task
-                'args', # Arguments (list)
-                'kwargs', # Key-worded arguments (dictionnary)
+                'target', # List of target function (or callable object) of the task
+                'args', # List of arguments (list)
+                'kwargs', # List of key-worded arguments (dictionnary)
                 'threadObject', # Python representation of the thread
-                'taskState')    # State of the task (DTM_TASK_*)
+                'taskState',    # State of the task (DTM_TASK_*)
+                'lastSubTaskDone') # Id of its last child task terminated or None
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)    
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -63,17 +67,17 @@ class ResultContainer(object):
     """
     __slots__ = ('tid', # ID of the task which produced these results
                 'parentTid', # Parent ID (waiting for these results)
-                'taskIndex', # Position into the parents task childs list
+                'taskIndex', # List of position into the parents task childs list
                 'execTime', # Total execution time (NOT waiting time)
-                'success', # False if an exception occured
-                'result')       # The result; if an exception occured, contains it
+                'success', # List of booleans : False if an exception occured
+                'result')  # List of results; if an exception occured, contains it
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)    
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -86,19 +90,19 @@ class ExceptedResultContainer(object):
                 'waitingOn', # Is the parent task waiting on this result?
                 'finished', # Boolean : is the task finished (i.e. result received)?
                 'success', # Boolean : False if unfinished or if an exception occured
-                'callbackFunc', # Callback function, FOR USE IN DTM, NO ARGUMENTS PASSED, or None
+                'callbackClass', # Match this result with an AsyncResult object, with a callback
                 'result')       # Result, or the exception occured
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)   
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
-            
+
 class WaitInfoContainer(object):
     """
     Keep a track on the pending child tasks of a parent task.
@@ -110,12 +114,12 @@ class WaitInfoContainer(object):
                 'waitingMode', # DTM_WAIT_* : waiting mode (None, One, Any, All)
                 'rWaitingDict')     # List of ExceptedResultContainer, key : the first task ID
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)  
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -127,14 +131,15 @@ class StatsContainer(object):
     __slots__ = ('rAvg', # RELATIVE average execution time
                 'rStdDev', # RELATIVE standard deviation of the exec time
                 'rSquareSum', # Square sum of the RELATIVE exec times
+                'spawnSubtasks',    # True if the task has spawned others
                 'execCount')    # Number of executions
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)    
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
@@ -163,13 +168,13 @@ class MessageContainer(object):
                 'ackNbr', # ACK number (optionnal for some operations)
                 'msg')          # Message (varies with msgType)
     def __init__(self, **kwargs):
-        self.__setstate__(kwargs)  
+        self.__setstate__(kwargs)
     def __getstate__(self):
         d = {}
         for a in self.__slots__:
             d[a] = self.__getattribute__(a)
-        return d    
+        return d
     def __setstate__(self, state):
         for t in state:
             self.__setattr__(t, state[t])
-            
+
