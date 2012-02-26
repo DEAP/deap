@@ -134,10 +134,10 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
     if stats is not None:
         stats.update(population)
     if verbose:
+        column_names = ["gen", "evals"]
         if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            logger = tools.EvolutionLogger(["gen", "evals"])
+            column_names += stats.functions.keys()
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -166,7 +166,7 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
         if stats is not None:
             stats.update(population)
 
-        if logger is not None:
+        if verbose:
             logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
@@ -293,10 +293,10 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     if stats is not None:
         stats.update(population)
     if verbose:
+        column_names = ["gen", "evals"]
         if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            logger = tools.EvolutionLogger(["gen", "evals"])
+            column_names += stats.functions.keys()
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -321,7 +321,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-        if logger is not None:
+        if verbose:
             logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
@@ -361,10 +361,10 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     if stats is not None:
         stats.update(population)
     if verbose:
+        column_names = ["gen", "evals"]
         if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            logger = tools.EvolutionLogger(["gen", "evals"])
+            column_names += stats.functions.keys()
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -389,7 +389,7 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-        if logger is not None:
+        if verbose:
             logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
@@ -440,10 +440,10 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
         stats.update(population)
 
     if verbose:
+        column_names = ["gen", "evals"]
         if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            logger = tools.EvolutionLogger(["gen", "evals"])
+            column_names += stats.functions.keys()
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
         logger.logGeneration(evals=len(population), gen=0, stats=stats)
 
@@ -465,7 +465,7 @@ def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
         # Update the statistics with the new population
         if stats is not None:
             stats.update(population)
-        if logger is not None:
+        if verbose:
             logger.logGeneration(evals=1, gen=gen, stats=stats)
 
     return population
