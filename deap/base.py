@@ -209,10 +209,9 @@ class Fitness(object):
         immutable and the fitness does not contain any other object 
         than :attr:`values` and :attr:`weights`.
         """
-        if len(self.wvalues) > 0:
-            return self.__class__(self.values)
-        else:
-            return self.__class__()
+        copy = self.__class__()
+        copy.wvalues = self.wvalues
+        return copy
 
     def __str__(self):
         """Return the values of the Fitness object."""
