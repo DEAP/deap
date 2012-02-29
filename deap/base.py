@@ -148,7 +148,7 @@ class Fitness(object):
     
     @property 
     def valid(self):
-        """Asses if a fitness is valid or not."""
+        """Assess if a fitness is valid or not."""
         return len(self.wvalues) != 0
 
     def isDominated(self, other):
