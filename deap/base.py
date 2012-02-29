@@ -63,6 +63,7 @@ class Toolbox(object):
         """
         pfunc = functools.partial(method, *args, **kargs)
         pfunc.__name__ = alias
+        pfunc.__doc__ = method.__doc__
         setattr(self, alias, pfunc)
 
     def unregister(self, alias):
