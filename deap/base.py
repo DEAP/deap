@@ -27,8 +27,6 @@ import functools
 from collections import deque
 from itertools import izip, repeat, count
 
-from tools import decorate
-
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
     At first the toolbox contains two simple methods. The first method
