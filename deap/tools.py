@@ -35,7 +35,7 @@ except ImportError:
 from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
-from collections import Sequence
+from collections import Sequence, defaultdict
 from sys import stdout
 
 def identity(obj):
@@ -1253,49 +1253,73 @@ def selNSGA2(individuals, k):
         chosen.extend(sorted_front[:k])
         
     return chosen
-    
+
+def isDominated(wvalues1, wvalues2):
+    not_equal = False
+    for self_wvalue, other_wvalue in zip(wvalues1, wvalues2):
+        if self_wvalue > other_wvalue:
+            return False
+        elif self_wvalue < other_wvalue:
+            not_equal = True
+    return not_equal
+
 def sortFastND(individuals, k, first_front_only=False):
     """Sort the first *k* *individuals* according the the fast non-dominated
     sorting algorithm. 
     """
-    N = len(individuals)
-    pareto_fronts = []
-    
     if k == 0:
-        return pareto_fronts
+        return []
+
+    unique_fits = defaultdict(list)
+    for ind in individuals:
+        unique_fits[ind.fitness.wvalues].append(ind)
+    fits = unique_fits.keys()
+
+    N = len(fits)
+    pareto_fronts = []
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = [0] * N
-    dominated_inds = [list() for i in xrange(N)]
+    dominating_fits = [0] * N
+    dominated_fits = [list() for i in xrange(N)]
     
     # Rank first Pareto front
     for i in xrange(N):
         for j in xrange(i+1, N):
-            if individuals[j].fitness.isDominated(individuals[i].fitness):
-                dominating_inds[j] += 1
-                dominated_inds[i].append(j)
-            elif individuals[i].fitness.isDominated(individuals[j].fitness):
-                dominating_inds[i] += 1
-                dominated_inds[j].append(i)
-        if dominating_inds[i] == 0:
+            if isDominated(fits[i], fits[j]):
+                dominating_fits[i] += 1
+                dominated_fits[j].append(i)
+            elif isDominated(fits[j], fits[i]):
+                dominating_fits[j] += 1
+                dominated_fits[i].append(j)
+        if dominating_fits[i] == 0:
             pareto_fronts[-1].append(i)
             pareto_sorted += 1
     
-    if not first_front_only:
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
+    if not first_front_only:
         N = min(N, k)
         while pareto_sorted < N:
             pareto_fronts.append([])
             for indice_p in pareto_fronts[-2]:
-                for indice_d in dominated_inds[indice_p]:
-                    dominating_inds[indice_d] -= 1
-                    if dominating_inds[indice_d] == 0:
+                for indice_d in dominated_fits[indice_p]:
+                    dominating_fits[indice_d] -= 1
+                    if dominating_fits[indice_d] == 0:
                         pareto_fronts[-1].append(indice_d)
                         pareto_sorted += 1
     
-    return [[individuals[index] for index in front] for front in pareto_fronts]
+    total = min(len(individuals), k)
+    fronts = list()
+    for front in pareto_fronts:
+        fronts.append([])       
+        for index in front:
+            fronts[-1].extend(unique_fits[fits[index]])
+        total -= len(fronts[-1])
+        if total <= 0:
+            break        
+
+    return fronts
 
 
 def assignCrowdingDist(individuals):
