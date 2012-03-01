@@ -59,11 +59,23 @@ class Toolbox(object):
             >>> tools.register("myFunc", func, 2, c=4)
             >>> tools.myFunc(3)
             2 3 4
-
+        
+        The registered function will be given the attributes :attr:`__name__`
+        set to the alias and :attr:`__doc__` set to the original function's
+        documentation. The :attr:`__dict__` attribute will also be updated
+        with the original function's instance dictionnary if any.
         """
         pfunc = functools.partial(method, *args, **kargs)
         pfunc.__name__ = alias
         pfunc.__doc__ = method.__doc__
+        
+        try:
+            # Some methods don't have any dictionary, in these cases simply 
+            # don't copy it.
+            pfunc.__dict__.update(method.__dict__.copy())
+        except AttributeError:
+            pass
+        
         setattr(self, alias, pfunc)
 
     def unregister(self, alias):
@@ -72,17 +84,16 @@ class Toolbox(object):
 
     def decorate(self, alias, *decorators):
         """Decorate *alias* with the specified *decorators*, *alias*
-        has to be a registered function in the current toolbox. Decorate uses
-        the signature preserving decoration function
-        :func:`~deap.tools.decorate`.
+        has to be a registered function in the current toolbox.
+        
+        .. versionchanged:: 0.8
+           Decoration is not signature preserving anymore.
         """
-        partial_func = getattr(self, alias)
-        method = partial_func.func
-        args = partial_func.args
-        kargs = partial_func.keywords
+        pfunc = getattr(self, alias)
+        method, args, kargs = pfunc.func, pfunc.args, pfunc.keywords
         for decorator in decorators:
-            method = decorate(decorator)(method)
-        setattr(self, alias, functools.partial(method, *args, **kargs))
+            method = decorator(method)
+        self.register(alias, method, *args, **kargs)
 
 class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
