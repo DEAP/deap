@@ -14,3 +14,4 @@ MANIFEST
 *.pyo
 *.orig
 .DS_Store
+*.so
