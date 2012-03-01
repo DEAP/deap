@@ -28,7 +28,7 @@ if __name__ == "__main__":
         "in the list of a statistic is a tuple containing all objectives for "
         "the iteration. When transposed, the list will instead contain "
         "N lists, where N is the number of objectives, and those lists "
-        "will be containt the value for each iteration."))
+        "will contain the value for each iteration."))
     
     options, args = parser.parse_args(sys.argv)
     
