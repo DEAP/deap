@@ -5,6 +5,7 @@ Here is a (incomplete) log of the changes made to DEAP over time.
 
 Upcomming in 0.8
 ================
+- Added forward compatibility to Python 3.2
 - Replaced :func:`~deap.algorithms.varSimple` and
   :func:`~deap.algorithms.varLambda` variation operators for the more specific
   :func:`~deap.algorithms.varAnd` and :func:`~deap.algorithms.varOr`
@@ -15,7 +16,8 @@ Upcomming in 0.8
 - Introduced the exact NSGA-II algorithm as described in *Deb et al., 2002, A
   Fast Elitist Multiobjective Genetic Algorithm: NSGA-II*.
 - Added a C++ version of the NSGA-II selection algorithm.
-- Added some new benchmarks (mostly multiobjective).
+- Added some new benchmarks (multiobjective, binary and moving peaks).
+- Added translation, rotation, scaling and noise decorators to enhance benchmarks.
 
 Release 0.7
 ===========
