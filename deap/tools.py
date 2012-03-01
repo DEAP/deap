@@ -1284,12 +1284,12 @@ def sortFastND(individuals, k, first_front_only=False):
     dominated_fits = [list() for i in xrange(N)]
     
     # Rank first Pareto front
-    for i in xrange(N):
-        for j in xrange(i+1, N):
-            if isDominated(fits[i], fits[j]):
+    for i, fit_i in enumerate(fits):
+        for j, fit_j in enumerate(fits[i+1:], i+1):
+            if isDominated(fit_i, fit_j):
                 dominating_fits[i] += 1
                 dominated_fits[j].append(i)
-            elif isDominated(fits[j], fits[i]):
+            elif isDominated(fit_j, fit_i):
                 dominating_fits[j] += 1
                 dominated_fits[i].append(j)
         if dominating_fits[i] == 0:
@@ -1317,10 +1317,9 @@ def sortFastND(individuals, k, first_front_only=False):
             fronts[-1].extend(unique_fits[fits[index]])
         total -= len(fronts[-1])
         if total <= 0:
-            break        
+            break
 
     return fronts
-
 
 def assignCrowdingDist(individuals):
     """Assign the crowding distance to each individual of the list."""
