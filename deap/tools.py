@@ -128,7 +128,7 @@ class History(object):
         
         graph = networkx.DiGraph(history.genealogy_tree)
         networkx.draw(graph)
-        pylab.show()
+        plt.show()
     
     Using NetworkX in combination with pygraphviz (dot layout) this amazing
     genealogy tree can be obtained from the OneMax example with a population
