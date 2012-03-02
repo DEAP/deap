@@ -260,8 +260,8 @@ bounds will be check on the resulting individuals.
 	toolbox.register("mate", tools.cxBlend, alpha=0.2)
 	toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=2)
 	
-	toolbox.decorate("mate", checkbound(MIN, MAX))
-	toolbox.decorate("mutate", checkbound(MIN, MAX))
+	toolbox.decorate("mate", checkBounds(MIN, MAX))
+	toolbox.decorate("mutate", checkBounds(MIN, MAX))
 
 This will work on crossover and mutation because both return a tuple of
 individuals. The mutation is often considered to return a single individual
