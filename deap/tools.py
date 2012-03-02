@@ -104,17 +104,34 @@ class History(object):
     <http://networkx.lanl.gov/index.html>`_, here is how to plot the genealogy
     tree ::
     
-        hist = History()
+        history = History()
         
-        # Do some evolution and fill the history
+        # Decorate the variation operators
+        toolbox.decorate("mate", history.decorator)
+        toolbox.decorate("mutate", history.decorator)
+        
+        # Create the population and populate the history
+        population = toolbox.population(n=POPSIZE)
+        history.populate(population)
+        
+        # Do the evolution, the decorators will take care of updating the
+        # history
+        # [...]
         
         import matplotlib.pyplot as plt
-        import networkx as nx
+        import networkx
         
-        g = nx.DiGraph(hist.genealogy_tree)
-        nx.draw_springs(g)
-        plt.show()
+        graph = networkx.DiGraph(history.genealogy_tree)
+        networkx.draw(graph)
+        pylab.show()
     
+    Using NetworkX in combination with pygraphviz (dot layout) this amazing
+    genealogy tree can be obtained from the OneMax example with a population
+    size of 20 and 5 generations.
+    
+    .. image:: /_images/genealogy.png
+       :width: 67%
+     
     .. note::
        The genealogy tree might get very big if your population and/or the 
        number of generation is large.
