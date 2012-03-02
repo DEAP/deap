@@ -167,15 +167,13 @@ function.
 .. literalinclude:: ../../tutorials/part_2/2_3_1_bag.py
    :lines: 17
 
-
 Calling :func:`toolbox.population` will readily return a complete population
 in a list providing a number of times the repeat helper must be repeated as an
-argument of the population function, for example, ::
+argument of the population function. The following example produces a 
+population with 100 individuals.
 
 .. literalinclude:: ../../tutorials/part_2/2_3_1_bag.py
    :lines: 19
-
-will produce a 100-individual population.
 
 Grid
 ++++
