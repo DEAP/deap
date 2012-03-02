@@ -87,7 +87,7 @@ def h1(individual):
 def ackley(individual):
     """Ackley test objective function.
     
-    :math:`f_{\\text{Ackley}}(\\mathbf{x}) = 20 - 20\cdot\exp\left(-0.2\sqrt{\\frac{1}{N} \
+    :math:`f_{\\text{Ackley}}(\\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\\frac{1}{N} \
                             \sum_{i=1}^N x_i^2} \\right)\
                             + e - \
                             \exp\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i) \
