@@ -3,7 +3,75 @@ Benckmarks
 ==========
 
 .. automodule:: deap.benchmarks
-   :members:
+
+Continuous Optimization
+=======================
+
+.. autofunction:: deap.benchmarks.cigar
+
+.. autofunction:: deap.benchmarks.plane
+
+.. autofunction:: deap.benchmarks.sphere
+
+.. autofunction:: deap.benchmarks.ackley
+
+.. autofunction:: deap.benchmarks.bohachevsky
+
+.. autofunction:: deap.benchmarks.griewank
+
+.. autofunction:: deap.benchmarks.h1
+
+.. autofunction:: deap.benchmarks.himmelblau
+
+.. autofunction:: deap.benchmarks.rastrigin
+
+.. autofunction:: deap.benchmarks.rastrigin_scaled
+
+.. autofunction:: deap.benchmarks.rastrigin_skew
+
+.. autofunction:: deap.benchmarks.rosenbrock
+
+.. autofunction:: deap.benchmarks.schaffer
+
+.. autofunction:: deap.benchmarks.schwefel
+
+.. autofunction:: deap.benchmarks.shekel
+
+Multi-objective
+---------------
+
+.. autofunction:: deap.benchmarks.fonseca
+
+.. autofunction:: deap.benchmarks.kursawe
+
+.. autofunction:: deap.benchmarks.schaffer_mo
+
+.. autofunction:: deap.benchmarks.zdt1
+
+.. autofunction:: deap.benchmarks.zdt2
+
+.. autofunction:: deap.benchmarks.zdt3
+
+.. autofunction:: deap.benchmarks.zdt4
+
+.. autofunction:: deap.benchmarks.zdt6
+
+Binary Optimization
+===================
+
+.. automodule:: deap.benchmarks.binary
+
+.. autofunction:: deap.benchmarks.binary.chuang_f1
+
+.. autofunction:: deap.benchmarks.binary.chuang_f2
+
+.. autofunction:: deap.benchmarks.binary.chuang_f3
+
+.. autofunction:: deap.benchmarks.binary.royal_road1
+
+.. autofunction:: deap.benchmarks.binary.royal_road2
+
+.. autofunction:: deap.benchmarks.binary.bin2float
 
 Moving Peaks Benchmark
 ======================
