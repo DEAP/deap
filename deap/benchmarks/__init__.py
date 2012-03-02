@@ -166,6 +166,9 @@ def schaffer(individual):
     :math:`f_{\\text{Schaffer}}(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \
                         \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \
                         \\right]`
+
+    .. plot:: _scripts/schaffer.py
+        :width: 67 %
     """
     return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0) 
                 for x, x1 in zip(individual[:-1], individual[1:])),
@@ -295,11 +298,11 @@ def zdt3(individual):
 def zdt4(individual):
     """ZDT4 multiobjective function
     
+    :math:`g(\\mathbf{x}) = 1 + 10(n-1) + \\sum_{i=2}^n \\left[ x_i^2 - 10\\cos(4\\pi x_i) \\right]`
+
     :math:`f_{\\text{ZDT4}1}(\\mathbf{x}) = x_1`
     
     :math:`f_{\\text{ZDT4}2}(\\mathbf{x}) = g(\\mathbf{x})\\left[ 1 - \\sqrt{x_1/g(\\mathbf{x})} \\right]`
-    
-    :math:`g(\\mathbf{x}) = 1 + 10(n-1) + \\sum_{i=2}^n \\left[ x_i^2 - 10\\cos(4\\pi x_i) \\right]`
     
     """
     g  = 1 + 10*(len(individual)-1) + sum(xi**2 - 10*cos(4*pi*xi) for xi in individual[1:])
