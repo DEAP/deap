@@ -109,7 +109,8 @@ def chuang_f3(individual):
 
 # Royal Road Functions
 def royal_road1(individual, order):
-    """Royal Road Function 1
+    """Royal Road Function R1 as presented by Melanie Mitchell in : 
+    "An introduction to Genetic Algorithms".
     """
     nelem = len(individual) / order
     max_value = int(2**order - 1)
@@ -120,8 +121,9 @@ def royal_road1(individual, order):
     return total,
 
 def royal_road2(individual, order):
-    """Royal Road Function 2
-    """    
+    """Royal Road Function R2 as presented by Melanie Mitchell in : 
+    "An introduction to Genetic Algorithms".
+    """
     total = 0
     norder = order
     while norder < order**2:
