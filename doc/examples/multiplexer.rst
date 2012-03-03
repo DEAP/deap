@@ -62,7 +62,7 @@ After that, the evaluation function is trivial, as we have both inputs and outpu
 Complete Example
 ================
 
-.. literalinclude:: ../../examples/gp_multiplexer.py
+.. literalinclude:: /code/examples/gp_multiplexer.py
     :lines: 20-
 
 .. note:: The import of the Python standard library modules are not shown.
