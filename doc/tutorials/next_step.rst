@@ -14,17 +14,17 @@ A First Individual
 
 First import the required modules and register the different fonctions required to create individuals that are a list of floats with a minimizing  two objectives fitness.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 2-16
 
 The first individual can now be built by adding the appropriate line to the script.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 18
 
 Printing the individual ``ind1`` and checking if its fitness is valid will give something like this
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 20-21
 
 The individual is printed as its base class representation (here a list) and the fitness is invalid because it contains no values.
@@ -40,7 +40,7 @@ property :attr:`valid` to know if this individual shall be re-evaluated. The
 fitness is set by setting the :attr:`~deap.base.Fitness.values` to the
 associated :class:`tuple`. For example, the following evaluates the previously created individual ``ind1`` and assign its fitness to the corresponding values.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 23-31
 
 Dealing with single objective fitness is not different, the evaluation function **must** return a tuple because single-objective is treated as a special case of multi-objective.
@@ -60,12 +60,12 @@ if the original individual has to be kept or is a *reference* to an other indivi
 In order to apply a mutation (here a gaussian mutation) on the individual ``ind1``,
 simply apply the desired function.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 35-37
 
 The fitness' values are deleted because they not related to the individual anymore. As stated above, the mutation does mutate and only mutate an individual it is not responsible of invalidating the fitness nor anything else. The following shows that ``ind2`` and ``mutant`` are in fact the same individual.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 39-40
 
 Crossover
@@ -84,7 +84,7 @@ individuals (see the selection operator).
 
 Lets apply a crossover operation to produce the two children that are cloned beforehand.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 43-46
 
 .. note::
@@ -109,7 +109,7 @@ takes as first argument an iterable container of individuals and the number of
 individuals to select. It returns a list containing the references to the
 selected individuals. The selection is made as follow.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 49-50
 
 .. warning:: It is **very** important here to note that the selection
@@ -121,7 +121,7 @@ selected individuals. The selection is made as follow.
 Usually duplication of the entire population will be made after selection or 
 before variation.
 
-.. literalinclude:: ../../tutorials/part_3/3_next_step.py
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 56-57
 
 
@@ -141,7 +141,7 @@ evolutionary tools are :func:`~deap.mate`, :func:`~deap.mutate`,
 registered as long as it is unique. Here is how they are registered in the
 toolbox.
 
-.. literalinclude:: ../../tutorials/part_3/3_6_using_the_toolbox.py
+.. literalinclude:: /code/tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 2-8,10-15
 
 Using the toolbox for registering tools helps keeping the rest of the
@@ -156,7 +156,7 @@ When building evolutionary algorithms the toolbox is used to contain the
 operators, which are called using their generic name. For example, here is a
 very small sample of a simple generational evolutionary algorithm.
 
-.. literalinclude:: ../../tutorials/part_3/3_6_using_the_toolbox.py
+.. literalinclude:: /code/tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 30-
 
 This is a complete algorithm. It is generic enough to accept any kind of
@@ -179,7 +179,7 @@ case. The decorator is defined using three functions in order to receive the
 *min* and *max* arguments. Whenever the mutation or crossover is called,
 bounds will be check on the resulting individuals.
 
-.. literalinclude:: ../../tutorials/part_3/3_6_2_tool_decoration.py
+.. literalinclude:: /code/tutorials/part_3/3_6_2_tool_decoration.py
    :lines: 8-
 
 This will work on crossover and mutation because both return a tuple of
@@ -203,7 +203,7 @@ function, this function requires the toolbox to contain a :func:`~deap.mate`
 and a :func:`~deap.mutate` functions. The variations can be used to simplify
 the writing of an algorithm as follow.
 
-.. literalinclude:: ../../tutorials/part_3/3_7_variations.py
+.. literalinclude:: /code/tutorials/part_3/3_7_variations.py
    :lines: 33-
 
 This last example shows that using the variations makes it straight forward to
@@ -223,7 +223,7 @@ launch the algorithm. The simple evolutionary algorithm takes 5 arguments, a
 generation (*cxpb*), a propability of mutating each individual at each
 generation (*mutpb*) and a max number of generations (*ngen*).
 
-.. literalinclude:: ../../tutorials/part_3/3_8_algorithms.py
+.. literalinclude:: /code/tutorials/part_3/3_8_algorithms.py
    :lines: 33-
 
 The best way to understand what the simple evolutionary algorithm does, it to

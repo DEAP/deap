@@ -13,14 +13,14 @@ fitness has positive weights. For example, the following line creates, in the
 :mod:`~deap.creator`, a ready to use single objective minimizing fitness named
 :class:`FitnessMin`. 
 
-.. literalinclude:: ../../tutorials/part_2/2_1_fitness.py
+.. literalinclude:: /code/tutorials/part_2/2_1_fitness.py
    :lines: 6
 
 The :attr:`~deap.base.Fitness.weights` argument must be a tuple so that multi
 objective and single objective fitnesses can be treated the same way. A
 :class:`FitnessMulti` would be created the same way but using
 
-.. literalinclude:: ../../tutorials/part_2/2_1_fitness.py
+.. literalinclude:: /code/tutorials/part_2/2_1_fitness.py
    :lines: 9
 
 rendering a fitness that minimize the first objective and maximize the
@@ -50,7 +50,7 @@ under the :func:`attr_float` alias of the toolbox. Note that the
 :func:`attr_float` is a direct reference to the :func:`~random.random`
 function.
 
-.. literalinclude:: ../../tutorials/part_2/2_2_1_list_of_floats.py
+.. literalinclude:: /code/tutorials/part_2/2_2_1_list_of_floats.py
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete individual
@@ -73,7 +73,7 @@ initialized with the :func:`~deap.tools.initIterate` function which gives to
 the individual an iterable of what is produced by the call to the indices
 function.
 
-.. literalinclude:: ../../tutorials/part_2/2_2_2_permutation.py
+.. literalinclude:: /code/tutorials/part_2/2_2_2_permutation.py
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete individual
@@ -96,7 +96,7 @@ on a ramped procedure. Once again, the individual is initialised using the
 :func:`~deap.tools.initIterate` function to give the complete generated
 iterable to the individual class.
 
-.. literalinclude:: ../../tutorials/part_2/2_2_3_arithmetic_expression.py
+.. literalinclude:: /code/tutorials/part_2/2_2_3_arithmetic_expression.py
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete individual
@@ -114,7 +114,7 @@ object we must define this function our-self. The :func:`initES` function
 receives two classes and instantiate them generating itself the random numbers
 in the intervals provided for individuals of a given size.
 
-.. literalinclude:: ../../tutorials/part_2/2_2_4_evolution_strategy.py
+.. literalinclude:: /code/tutorials/part_2/2_2_4_evolution_strategy.py
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete evolution
@@ -131,7 +131,7 @@ initialization function :func:`initParticle` is also registered to produce the
 individual receiving the particle class, size, domain, and speed limits as
 arguments.
 
-.. literalinclude:: ../../tutorials/part_2/2_2_5_particle.py
+.. literalinclude:: /code/tutorials/part_2/2_2_5_particle.py
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete particle
@@ -144,7 +144,7 @@ custom individuals very easily. The next individual created is a list of
 alternating integers and floating point numbers, using the
 :func:`~deap.tools.initCycle` function.
 
-.. literalinclude:: ../../tutorials/part_2/2_2_6_funky_one.py
+.. literalinclude:: /code/tutorials/part_2/2_2_6_funky_one.py
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete individual
@@ -164,7 +164,7 @@ particular attribute it does not need any special class. The population is
 initialized using directly the toolbox and the :func:`~deap.tools.initRepeat`
 function.
 
-.. literalinclude:: ../../tutorials/part_2/2_3_1_bag.py
+.. literalinclude:: /code/tutorials/part_2/2_3_1_bag.py
    :lines: 17
 
 Calling :func:`toolbox.population` will readily return a complete population
@@ -172,7 +172,7 @@ in a list providing a number of times the repeat helper must be repeated as an
 argument of the population function. The following example produces a 
 population with 100 individuals.
 
-.. literalinclude:: ../../tutorials/part_2/2_3_1_bag.py
+.. literalinclude:: /code/tutorials/part_2/2_3_1_bag.py
    :lines: 19
 
 Grid
@@ -183,7 +183,7 @@ are distributed in grid where each cell contains a single individual. (Sadly?)
 It is no different than the list implementation of the bag population other
 that it is composed of lists of individuals.
 
-.. literalinclude:: ../../tutorials/part_2/2_3_2_grid.py
+.. literalinclude:: /code/tutorials/part_2/2_3_2_grid.py
    :lines: 20-21
 
 Calling :func:`toolbox.population` will readily return a complete population
@@ -200,7 +200,7 @@ been visited by any other particle. This is generally implemented by copying
 that global best position to a :attr:`gbest` attribute and the global best
 fitness to a :attr:`gbestfit` attribute.
 
-.. literalinclude:: ../../tutorials/part_2/2_3_3_swarm.py
+.. literalinclude:: /code/tutorials/part_2/2_3_3_swarm.py
    :lines: 11,23
 
 Calling :func:`toolbox.population` will readily return a complete swarm. After
@@ -215,7 +215,7 @@ no different than population other than by their names. Here we create a
 population containing 3 demes each having a different number of individuals
 using the *n* argument of the :func:`~deap.tools.initRepeat` function.
 
-.. literalinclude:: ../../tutorials/part_2/2_3_4_demes.py
+.. literalinclude:: /code/tutorials/part_2/2_3_4_demes.py
    :lines: 17-20
 
 Seeding a Population
@@ -224,7 +224,7 @@ Sometimes, a first guess population can be used to initialize an evolutionary
 algorithm. The key idea to initialize a population with not random individuals
 is to have an individual initializer that takes a content as argument.
 
-.. literalinclude:: ../../tutorials/part_2/2_3_5_seeding_a_population.py
+.. literalinclude:: /code/tutorials/part_2/2_3_5_seeding_a_population.py
    :lines: 2-
 
 The population will be initialized from the file ``my_guess.json`` that shall

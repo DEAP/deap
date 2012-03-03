@@ -19,7 +19,7 @@ in a single line. For example, the following creates a :class:`FitnessMin` class
 for a minimization problem and an :class:`Individual` class that is derived
 from a list with a fitness attribute set to the just created fitness.
 
-.. literalinclude:: ../../tutorials/part_1/1_where_to_start.py
+.. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 2-4
 
 That's it. More on creating types can be found in the :ref:`creating-types`
@@ -35,7 +35,7 @@ on the last lines of code to create the initializers for individuals
 containing random floating point numbers and for a population that contains
 them.
 
-.. literalinclude:: ../../tutorials/part_1/1_where_to_start.py
+.. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 7-16
 
 This creates functions to initialize populations from individuals that are
@@ -50,7 +50,7 @@ implemented in the :mod:`~deap.tools` module. Once you've chose the perfect
 ones simply register them in the toolbox. In addition you must create your
 evaluation function. This is how it is done in DEAP.
 
-.. literalinclude:: ../../tutorials/part_1/1_where_to_start.py
+.. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 19-25
 
 The registered functions are renamed by the toolbox to allows genericity so
@@ -64,7 +64,7 @@ Now that everything is ready, we can start to write our own algorithm. It is
 usually done in a main function. For the purpose of completeness we will
 develop the complete generational algorithm.
 
-.. literalinclude:: ../../tutorials/part_1/1_where_to_start.py
+.. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 28-64
 
 There is also the possibility to use one of the five algorithms readily

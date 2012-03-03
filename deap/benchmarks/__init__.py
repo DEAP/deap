@@ -58,7 +58,7 @@ def rosenbrock(individual):
     
     :math:`f_{\\text{Rosenbrock}}(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 100 (x_{i+1} - x_i^2 )^2`
     
-    .. plot:: _scripts/rosenbrock.py
+    .. plot:: code/benchmarks/rosenbrock.py
        :width: 67 %
     """
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
@@ -75,7 +75,7 @@ def h1(individual):
             \\sin(x_2 + \\frac{x_1}{8})^2}{\\sqrt{(x_1 - 8.6998)^2 + \
             (x_2 - 6.7665)^2} + 1}`
     
-    .. plot:: _scripts/h1.py
+    .. plot:: code/benchmarks/h1.py
        :width: 67 %
     """
     num = (sin(individual[0] - individual[1] / 8))**2 + (sin(individual[1] + individual[0] / 8))**2
@@ -93,7 +93,7 @@ def ackley(individual):
                             \exp\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i) \
                             \\right)`
                             
-    .. plot:: _scripts/ackley.py
+    .. plot:: code/benchmarks/ackley.py
        :width: 67 %
     """
     N = len(individual)
@@ -106,7 +106,7 @@ def bohachevsky(individual):
     :math:`f_{\\text{Bohachevsky}}(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - \
                         0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
     
-    .. plot:: _scripts/bohachevsky.py
+    .. plot:: code/benchmarks/bohachevsky.py
        :width: 67 %
     """
     return sum(x**2 + 2*x1**2 - 0.3*cos(3*pi*x) - 0.4*cos(4*pi*x1) + 0.7 
@@ -118,7 +118,7 @@ def griewank(individual):
     :math:`f_{\\text{Griewank}}(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \
                         \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
     
-    .. plot:: _scripts/griewank.py
+    .. plot:: code/benchmarks/griewank.py
        :width: 67 %
     """
     return 1.0/4000.0 * sum(x**2 for x in individual) - \
@@ -129,7 +129,7 @@ def rastrigin(individual):
     
     :math:`f_{\\text{Rastrigin}}(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
     
-    .. plot:: _scripts/rastrigin.py
+    .. plot:: code/benchmarks/rastrigin.py
        :width: 67 %
     """     
     return 10 * len(individual) + sum(gene * gene - 10 * \
@@ -167,7 +167,7 @@ def schaffer(individual):
                         \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \
                         \\right]`
 
-    .. plot:: _scripts/schaffer.py
+    .. plot:: code/benchmarks/schaffer.py
         :width: 67 %
     """
     return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0) 
@@ -179,7 +179,7 @@ def schwefel(individual):
     :math:`f_{\\text{Schwefel}}(\mathbf{x}) = 418.9828872724339\cdot N - \
             \sum_{i=1}^N\,x_i\sin\\left(\sqrt{|x_i|}\\right)`
             
-    .. plot:: _scripts/schwefel.py
+    .. plot:: code/benchmarks/schwefel.py
         :width: 67 %
     """    
     N = len(individual)
@@ -191,7 +191,7 @@ def himmelblau(individual):
     
     :math:`f_{\\text{Himmelblau}}(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
     
-    .. plot:: _scripts/himmelblau.py
+    .. plot:: code/benchmarks/himmelblau.py
         :width: 67 %
     """
     return (individual[0] * individual[0] + individual[1] - 11)**2 + \
@@ -216,7 +216,7 @@ def shekel(individual, a, c):
     \\\\ 0.005 \\\\ 0.005 \\end{bmatrix}`, thus defining 5 maximums in
     :math:`\\mathbb{R}^2`.
     
-    .. plot:: _scripts/shekel.py
+    .. plot:: code/benchmarks/shekel.py
         :width: 67 %
     """
     return sum((1. / (c[i] + sum((x - a[i][j])**2 for j, x in enumerate(individual)))) for i in range(len(c))),
@@ -229,7 +229,7 @@ def kursawe(individual):
     
     :math:`f_{\\text{Kursawe}2}(\\mathbf{x}) = \\sum_{i=1}^{N} |x_i|^{0.8} + 5 \\sin(x_i^3)`
 
-    .. plot:: _scripts/kursawe.py
+    .. plot:: code/benchmarks/kursawe.py
        :width: 100 %
     """
     f1 = sum(-10 * exp(-0.2 * sqrt(x * x + y * y)) for x, y in zip(individual[:-1], individual[1:]))
