@@ -45,7 +45,7 @@ Complete example
 
 The other parts of the program are greatly the same as the :ref:`Symbolic Regression algorithm <symbreg>` :
     
-.. literalinclude:: ../../examples/gp_parity.py
+.. literalinclude:: /code/examples/gp_parity.py
     :lines: 20-
 
 .. note:: The import of the Python standard library modules are not shown.
