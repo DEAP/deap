@@ -51,9 +51,9 @@ Initialization
 Crossover
 +++++++++
 
-.. autofunction:: deap.tools.cxTwoPoints
-
 .. autofunction:: deap.tools.cxOnePoint
+
+.. autofunction:: deap.tools.cxTwoPoints
 
 .. autofunction:: deap.tools.cxUniform
 
