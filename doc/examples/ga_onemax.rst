@@ -1,11 +1,11 @@
 .. _ga-onemax:
 
-=========================
-One Max Genetic Algorithm
-=========================
+===============
+One Max Problem
+===============
 
-This is the first complete program built with DEAP. It will help new users to
-overview some of the possibilities in DEAP. The problem is very simple, we
+This is the first complete example built with DEAP. It will help new users to
+overview some of the framework possibilities. The problem is very simple, we
 search for a :data:`1` filled list individual. This problem is widely used in
 the evolutionary computation community since it is very simple and it
 illustrates well the potential of evolutionary algorithms.
