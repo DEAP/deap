@@ -187,11 +187,9 @@ individuals. The mutation is often considered to return a single individual
 but again like for the evaluation, the single individual case is a special
 case of the multiple individual case.
 
-Note that their are various ways of defining decorator that are not presented
-here. `Here <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ is a
-very good tutorial on decorators by Bruce Eckel and `here
-<http://wiki.python.org/moin/PythonDecoratorLibrary>`_ is a list of proposed
-decorators for various purposes.
+|more| For more information on decorator, see 
+`Introduction to Decorator <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ 
+and `Python Decorator Libary <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
 
 Variations
 ----------
@@ -232,3 +230,8 @@ take a look at the documentation or the source code
 Now that you built your own evolutionary algorithm in python, you are welcome
 to gives us feedback and appreciation. We would also really like to hear about
 your project and success stories with DEAP.
+
+.. |more| image:: /_images/more.png
+          :align: middle
+          :alt: more info
+
