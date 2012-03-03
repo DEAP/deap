@@ -262,6 +262,6 @@ lines print the min, max, mean and standard deviation of the population.
 
 A :class:`~deap.tools.Statistics` object has been defined to facilitate how
 statistics are gathered. It is not presented here so that we can focus on the
-core and not the gravitating helper objects of DEAP. The complete `One Max
-Genetic Algorithm <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ code
-is available. It may be a little different but it does the overall same thing.
+core and not the gravitating helper objects of DEAP.
+
+The complete example : [`source code <code/ga_onemax.py>`_].
