@@ -12,13 +12,13 @@ of evolutionary algorithms.
 	:maxdepth: 1
 	:numbered:
 
-	onemax
-	short_onemax
-	knapsack
-	symbreg
-	parity
-	multiplexer
-	artificial_ant
-	spambase
-	dtmPi
-	dtm_onemax
+	ga_onemax
+	ga_onemax_short
+	ga_knapsack
+	gp_symbreg
+	gp_parity
+	gp_multiplexer
+	gp_ant
+	gp_spambase
+	dtm_pi
+	dtm_ga_onemax
