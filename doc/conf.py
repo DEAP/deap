@@ -108,6 +108,22 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 # Reload the cached values every 5 days
 intersphinx_cache_limit = 5
 
+# -- Options for pyplot extension ----------------------------------------------
+
+# Default value for the include-source option
+plot_include_source = False
+
+# Code that should be executed before each plot.
+#plot_pre_code
+
+# Base directory, to which ``plot::`` file names are relative
+# to.  (If None or empty, file names are relative to the 
+# directory where the file containing the directive is.)
+#plot_basedir
+
+#  Whether to show links to the files in HTML.
+plot_html_show_formats = True
+
 # -- Options for HTML output ---------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
