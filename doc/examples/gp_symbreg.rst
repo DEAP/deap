@@ -1,8 +1,8 @@
 .. _symbreg:
     
-========================================================
-A Genetic Programming Introduction : Symbolic Regression
-========================================================
+===============================================
+Symbolic Regression Problem: Introduction to GP
+===============================================
 
 Symbolic regression is one of the best known problems in GP (see :ref:`refPapersSymbreg`). It is commonly used as a tuning problem for new algorithms, but is also widely used with real-life distributions, where other regression methods may not work. It is conceptually a simple problem, and therefore makes a good introductory example for the GP framework in DEAP.
 

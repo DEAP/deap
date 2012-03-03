@@ -10,8 +10,8 @@ From Wikipedia definition of PSO
     The movements of the particles are guided by the best found positions in the search-space which 
     are updated as better positions are found by the particles.`
 
-Setup Modules
-=============
+Modules
+=======
 
 Before writing functions and algorithms, we need to import some module from the standard library and from DEAP.
 
@@ -82,7 +82,7 @@ particle ever found (it known as gbest in the original algorithm).
 Conclusion
 ==========
 
-The full PSO basic example can be found here_.
+The full PSO basic example can be found 
 
 This is a video of the algorithm in action, plotted with matplotlib_. 
 The red dot represents the best solution found so far.
@@ -109,7 +109,6 @@ References
 ==========
 
 .. [Poli2007] Ricardo Poli, James Kennedy and Tim Blackwell, "Particle swarm optimization an overview". Swarm Intelligence. 2007; 1: 33–57
-
 .. [Knoek2003] Arthur J. Knoek van Soest and L. J. R. Richard Casius, "The merits of a parallel genetic algorithm in solving hard optimization problems". Journal of Biomechanical Engineering. 2003; 125: 141–146
 
 

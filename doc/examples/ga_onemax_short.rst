@@ -1,7 +1,7 @@
 .. _short-ga-onemax:
 
 ===============================
-Short One Max Genetic Algorithm
+One Max Problem: Short Version
 ===============================
 
 The short one max genetic algorithm example is very similar to one max

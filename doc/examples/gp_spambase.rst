@@ -1,8 +1,8 @@
 .. _spambase:
     
-=======================
-STGP example : Spambase
-=======================
+===================================
+Spambase Problem: Strongly Typed GP
+===================================
 
 This problem is a classification example using STGP (Strongly Typed Genetic Programming). The evolved programs work on floating-point values AND Booleans values. The programs must return a Boolean value which must be true if e-mail is spam, and false otherwise. It uses a base of emails (saved in *spambase.csv*, see :ref:`refPapersSpam`), from which it randomly chooses 400 emails to evaluate each individual.
 

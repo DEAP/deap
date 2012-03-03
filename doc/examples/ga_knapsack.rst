@@ -1,6 +1,6 @@
-==============================
-Individual Inheriting from Set
-==============================
+=====================================
+Knapsack Problem: Inheriting from Set
+=====================================
 
 Again for this example we will use a very simple problem, the 0-1 Knapsack.
 The purpose of this example is to show the simplicity of DEAP and the ease to

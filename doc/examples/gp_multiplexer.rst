@@ -1,8 +1,8 @@
 .. _mux:
     
-==========================
-GP Multiplexer 3-8 problem
-==========================
+=======================
+Multiplexer 3-8 Problem
+=======================
 
 The multiplexer problem is another extensively used GP problem. Basically, it trains a program to reproduce the behavior of an electronic `multiplexer <http://en.wikipedia.org/wiki/Multiplexer>`_ (mux). Usually, a 3-8 multiplexer is used (3 address entries, from A0 to A2, and 8 data entries, from D0 to D7), but virtually any size of multiplexer can be used.
 

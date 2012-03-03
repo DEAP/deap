@@ -1,8 +1,8 @@
 .. _parity:
     
-======================
-GP Even-Parity problem
-======================
+===================
+Even-Parity Problem
+===================
 
 Parity is one of the classical GP problems. The goal is to find a program that produces the value of the Boolean even parity given n independent Boolean inputs. Usually, 6 Boolean inputs are used (Parity-6), and the goal is to match the good parity bit value for each of the :math:`2^6 = 64` possible entries. The problem can be made harder by increasing the number of inputs (in the DEAP implementation, this number can easily be tuned, as it is fixed by a constant named PARITY_FANIN_M).
 

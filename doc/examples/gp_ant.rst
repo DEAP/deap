@@ -1,8 +1,8 @@
 .. _artificial-ant:
     
-=========================
-GP Artificial Ant Problem
-=========================
+======================
+Artificial Ant Problem
+======================
 
 The Artificial Ant problem is a more sophisticated yet classical GP problem, in which the evolved individuals have to control an artificial ant so that it can eat all the food located in a given environment.
 This example shows how DEAP can easily deal with more complex problems, including an intricate system of functions and resources (including a small simulator).
