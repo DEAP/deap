@@ -3,7 +3,7 @@ What's New?
 ===========
 Here is a (incomplete) log of the changes made to DEAP over time. 
 
-Upcomming in 0.8
+Upcoming in 0.8
 ================
 - Added forward compatibility to Python 3.2
 - Replaced :func:`~deap.algorithms.varSimple` and
@@ -15,7 +15,9 @@ Upcomming in 0.8
   Python dictionary.
 - Introduced the exact NSGA-II algorithm as described in *Deb et al., 2002, A
   Fast Elitist Multiobjective Genetic Algorithm: NSGA-II*.
-- Added a C++ version of the NSGA-II selection algorithm.
+- NSGA-II selection algorithm revisited :
+  - Added a C++ version;
+  - Speed up of the Python version (up to 5x when the objectives are discrete).
 - Added some new benchmarks (multiobjective, binary and moving peaks).
 - Added translation, rotation, scaling and noise decorators to enhance benchmarks.
 
