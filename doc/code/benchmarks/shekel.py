@@ -20,9 +20,6 @@ from deap import benchmarks
 A = [[0.5, 0.5], [0.25, 0.25], [0.25, 0.75], [0.75, 0.25], [0.75, 0.75]]
 C = [0.002, 0.005, 0.005, 0.005, 0.005]
 
-print A
-print C
-
 def shekel_arg0(sol):
     return benchmarks.shekel(sol, A, C)[0]
 

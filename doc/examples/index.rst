@@ -20,5 +20,6 @@ of evolutionary algorithms.
 	gp_multiplexer
 	gp_ant
 	gp_spambase
+	pso_basic
 	dtm_pi
 	dtm_ga_onemax
