@@ -12,43 +12,23 @@ For more information about this problem, see :ref:`refPapersAnt`.
 Primitives set used
 ===================
 
-We use the standard primitives set for the Artificial Ant problem : ::
+We use the standard primitives set for the Artificial Ant problem :
     
-    pset = gp.PrimitiveSet("MAIN", 0)
-    pset.addPrimitive(ant.if_food_ahead, 2)
-    pset.addPrimitive(prog2, 2)
-    pset.addPrimitive(prog3, 3)
-    pset.addTerminal(ant.move_forward)
-    pset.addTerminal(ant.turn_left)
-    pset.addTerminal(ant.turn_right)
+.. literalinclude:: /code/examples/gp_ant.py
+   :lines: 147-153
 
-- if_food_ahead is a primitive which executes its first argument if there is food in front of the ant; else, it executes its second argument.
-- prog2 and prog3 are the equivalent of the lisp PROGN2 and PROGN3 functions. They execute their children in order, from the first to the last. For instance, prog2 will first execute its first argument, then its second.
-- move_forward makes the artificial ant move one front. This is a terminal.
-- turn_right and turn_left makes the artificial ant turning clockwise and counter-clockwise, without changing its position. Those are also terminals.
+- ``if_food_ahead`` is a primitive which executes its first argument if there is food in front of the ant; else, it executes its second argument.
+- :func:`prog2` and :func:`prog3` are the equivalent of the lisp PROGN2 and PROGN3 functions. They execute their children in order, from the first to the last. For instance, prog2 will first execute its first argument, then its second.
+- :func:`move_forward` makes the artificial ant move one front. This is a terminal.
+- :func:`turn_right` and :func:`turn_left` makes the artificial ant turning clockwise and counter-clockwise, without changing its position. Those are also terminals.
 
 .. note::
     There is no external input as in symbolic regression or parity.
 
-Although those functions are obviously not already built-in in Python, it is very easy to define them : ::
+Although those functions are obviously not already built-in in Python, it is very easy to define them : 
 
-    def progn(*args):
-        for arg in args:
-            arg()
-
-    def prog2(out1, out2): 
-        return partial(progn,out1,out2)
-
-    def prog3(out1, out2, out3):     
-        return partial(progn,out1,out2,out3)  
-
-    def if_then_else(condition, out1, out2):
-        out1() if condition() else out2()
-    
-    class AntSimulator(object):
-    # [...]
-        def if_food_ahead(self, out1, out2):
-            return partial(if_then_else, self.sense_food, out1, out2)
+.. literalinclude:: /code/examples/gp_ant.py
+   :lines: 59-72, 119-120
 
 Partial functions are a powerful feature of Python which allow to create functions on the fly. For more detailed information, please refer to the Python documentation of :func:`functools.partial`.
 
@@ -73,6 +53,8 @@ Except for the simulator code (about 75 lines), the code does not fundamentally 
     :lines: 54-
 
 .. note:: The import of the Python standard library modules are not shown.
+
+[`source code <code/gp_ant.py>`_]
 
 .. _refPapersAnt:
 

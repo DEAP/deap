@@ -48,7 +48,7 @@ for i in range(2 ** MUX_TOTAL_LINES):
     # Determine the corresponding output
     indexOutput = MUX_SELECT_LINES
     for j, k in enumerate(inputs[i][:MUX_SELECT_LINES]):
-        if k:   indexOutput += 2 ** j
+        indexOutput += k * 2**j
     outputs[i] = inputs[i][indexOutput]
 
 pset = gp.PrimitiveSet("MAIN", MUX_TOTAL_LINES, "IN")
@@ -70,8 +70,7 @@ toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalMultiplexer(individual):
     func = toolbox.lambdify(expr=individual)
-    good = sum((func(*(inputs[i])) == outputs[i] for i in xrange(2 ** MUX_TOTAL_LINES)))
-    return good,
+    return sum(func(*in_) == out for in_, out in zip(inputs, outputs)),
 
 toolbox.register("evaluate", evalMultiplexer)
 toolbox.register("select", tools.selTournament, tournsize=7)

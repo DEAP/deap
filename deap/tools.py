@@ -1237,6 +1237,7 @@ def selTournament(individuals, k, tournsize):
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
+    :param tournsize: The number of individuals participating in each tournament.
     :returns: A list of selected individuals.
     
     This function uses the :func:`~random.choice` function from the python base
