@@ -11,24 +11,25 @@ algorithms. The initialization are the same so we will skip this phase. The
 algorithms impemented use specific functions from the toolbox, in this case
 :func:`evaluate`, :func:`mate`, :func:`mutate` and :func:`~deap.Toolbox.select`
 must be registered. 
-::
 
-    toolbox.register("evaluate", evalOneMax)
-    toolbox.register("mate", tools.cxTwoPoints)
-    toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
-    toolbox.register("select", tools.selTournament, tournsize=3)
+.. literalinclude:: /code/examples/ga_onemax_short.py
+   :lines: 39-42
 
 The toolbox is then passed to the algorithm and the algorithm uses the
 registered function. 
-::
 
-    pop = toolbox.population()
-    hof = tools.HallOfFame(1)
-
-    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, halloffame=hof)
+.. literalinclude:: /code/examples/ga_onemax_short.py
+   :lines: 44, 47-56
 
 The short GA One max example makes use of a
 :class:`~deap.tools.HallOfFame` in order to keep track of the best
 individual to appear in the evolution (it keeps it even in the case it
-extinguishes). All algorithms from the :mod:`~deap.algorithms` module do take
-a *halloffame* argument that gets updated after every evaluation section.
+extinguishes), and a :class:`~deap.tools.Statistics` object to compile
+the population statistics during the evolution.
+
+Every algorithms from the :mod:`~deap.algorithms` module can take
+these objects. Finally, the *verbose* keyword indicate wheter we
+want the algorithm to output the results after each generation or
+not.
+
+The complete example : [`source code <code/ga_onemax_short.py>`_]
