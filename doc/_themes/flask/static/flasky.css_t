@@ -80,6 +80,14 @@ div.sphinxsidebar a:hover {
 }
  
 div.sphinxsidebar {
+    {%- if theme_stickysidebar|tobool %}
+    top: 30px;
+    bottom: 0;
+    margin: 0;
+    position: fixed;
+    overflow: auto;
+    height: auto;
+    {%- endif %}
     font-size: 14px;
     line-height: 1.5;
 }
