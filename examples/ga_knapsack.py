@@ -25,11 +25,16 @@ MAX_ITEM = 50
 MAX_WEIGHT = 50
 NBR_ITEMS = 20
 
-# Create the item dictionary, items' name is an integer, and value is 
-# a (weight, value) 2-uple. The items will be created during the runtime
-# to enable reproducibility. It must be available in the global space
-# because of the evaluation
+# To assure reproductibility, the RNG seed is set prior to the items
+# dict initialization. It is also seeded in main().
+random.seed(64)
+
+# Create the item dictionary: item name is an integer, and value is 
+# a (weight, value) 2-uple.
 items = {}
+# Create random items and store them in the items' dictionary.
+for i in xrange(NBR_ITEMS):
+    items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
 creator.create("Individual", set, fitness=creator.Fitness)
@@ -80,11 +85,9 @@ def main():
     random.seed(64)
     NGEN = 50
     MU = 50
-    LAMBDA = 100    
-    
-    # Create random items and store them in the items' dictionary.
-    for i in xrange(NBR_ITEMS):
-        items[i] = (random.randint(1, 10), random.uniform(0, 100))
+    LAMBDA = 100
+    CXPB = 0.7
+    MUTPB = 0.2
     
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
@@ -94,7 +97,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, 0.7, 0.2, NGEN, stats,
+    algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
                               halloffame=hof)
     
     return pop, stats, hof
