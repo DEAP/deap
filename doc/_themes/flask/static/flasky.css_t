@@ -54,7 +54,7 @@ img.floatingflask {
 }
  
 div.footer {
-    margin: 20px 0px 30px 220px;
+    margin: 20px 0px 30px 20px;
     font-size: 14px;
     color: #888;
     text-align: center;
