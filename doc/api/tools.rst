@@ -22,11 +22,13 @@ Here is a list of the implemented operators in DEAP.
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`        ..             
  :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutESLogNormal`                    :func:`selSPEA2`        ..             
  :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`~deap.gp.mutUniform`               :func:`selRandom`       ..             
- :func:`~deap.gp.genRamped`   :func:`cxBlend`                             :func:`~deap.gp.mutTypedUniform`          :func:`selBest`         ..             
- ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedNodeReplacement`  :func:`selWorst`        ..             
- ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
- ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutShrink`                ..                      ..             
- ..                           :func:`cxMessyOnePoint`                     :func:`~deap.gp.mutTypedInsert`           ..                      ..             
+ :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`~deap.gp.mutTypedUniform`          :func:`selBest`         ..             
+ ..                           :func:`cxBlend`                             :func:`~deap.gp.mutTypedNodeReplacement`  :func:`selWorst`        ..             
+ ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
+ ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutShrink`                ..                      ..             
+ ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutTypedInsert`           ..                      ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                      ..             
+ ..                           :func:`cxMessyOnePoint`                     ..                                        ..                      ..             
  ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                      ..             
  ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                      ..             
  ..                           :func:`~deap.gp.cxOnePointLeafBiased`       ..                                        ..                      ..             
@@ -61,6 +63,8 @@ Crossover
 
 .. autofunction:: deap.tools.cxUniformPartialyMatched
 
+.. autofunction:: deap.tools.cxOrdered
+
 .. autofunction:: deap.tools.cxBlend
 
 .. autofunction:: deap.tools.cxESBlend
@@ -69,15 +73,17 @@ Crossover
 
 .. autofunction:: deap.tools.cxSimulatedBinary
 
+.. autofunction:: deap.tools.cxSimulatedBinaryBounded
+
 .. autofunction:: deap.tools.cxMessyOnePoint
 
 .. autofunction:: deap.gp.cxUniformOnePoint
 
 .. autofunction:: deap.gp.cxTypedOnePoint
 
-.. autofunction:: deap.gp.cxOnePointLeafBiased(ind1, ind2, cxtermpb)
+.. autofunction:: deap.gp.cxOnePointLeafBiased
 
-.. autofunction:: deap.gp.cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb)
+.. autofunction:: deap.gp.cxTypedOnePointLeafBiased
 
 Mutation
 ++++++++

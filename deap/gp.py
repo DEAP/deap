@@ -328,6 +328,13 @@ class PrimitiveTree(base.Tree):
 def genFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
+    
+    :param pset: A primitive set from wich to select primitives of the trees.
+    :param min_: Minimum height of the produced trees.
+    :param max_: Maximum Height of the produced trees.
+    :param type_: The type that should return the tree when called, when
+                  :obj:`None` (default) no return type is enforced.
+    :returns: A full tree with all leaves at the same depth.
     """
     def condition(max_depth):
         """Expression generation stops when the depth is zero."""
@@ -337,6 +344,13 @@ def genFull(pset, min_, max_, type_=__type__):
 def genGrow(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
     between *min* and *max*.
+    
+    :param pset: A primitive set from wich to select primitives of the trees.
+    :param min_: Minimum height of the produced trees.
+    :param max_: Maximum Height of the produced trees.
+    :param type_: The type that should return the tree when called, when
+                  :obj:`None` (default) no return type is enforced.
+    :returns: A grown tree with leaves at possibly different depths.
     """
     def condition(max_depth):
         """Expression generation stops when the depth is zero or when
@@ -349,6 +363,13 @@ def genRamped(pset, min_, max_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
     the other half, the expression is generated with :func:`~deap.gp.genFull`.
+    
+    :param pset: A primitive set from wich to select primitives of the trees.
+    :param min_: Minimum height of the produced trees.
+    :param max_: Maximum Height of the produced trees.
+    :param type_: The type that should return the tree when called, when
+                  :obj:`None` (default) no return type is enforced.
+    :returns: Either, a full or a grown tree.
     """
     method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
@@ -378,6 +399,10 @@ def _generate(pset, min_, max_, condition, type_=__type__):
 def cxUniformOnePoint(ind1, ind2):
     """Randomly select in each individual and exchange each subtree with the
     point as root between each individual.
+    
+    :param ind1: First tree participating in the crossover.
+    :param ind2: Second tree participating in the crossover.
+    :returns: A tuple of two trees.
     """    
     try:
         index1 = random.randint(1, ind1.size-1)
@@ -400,6 +425,10 @@ def cxTypedOnePoint(ind1, ind2):
     of the first node. If it doesn't, it randomly selects another point in the
     second individual and try again. It tries up to *5* times before
     giving up on the crossover.
+    
+    :param ind1: First typed tree participating in the crossover.
+    :param ind2: Second typed tree participating in the crossover.
+    :returns: A tuple of two typed trees.
     
     .. note::
        This crossover is subject to change for a more effective method 
@@ -438,14 +467,19 @@ def cxTypedOnePoint(ind1, ind2):
     return ind1, ind2
 
 
-def cxOnePointLeafBiased(ind1, ind2, cxtermpb):
+def cxOnePointLeafBiased(ind1, ind2, termpb):
     """Randomly select crossover point in each individual and exchange each
     subtree with the point as root between each individual.
     
-    This operator takes another parameter *cxtermpb*, which set the probability
+    :param ind1: First tree participating in the crossover.
+    :param ind2: Second tree participating in the crossover.
+    :param termpb: The probability of chosing a terminal node (leaf).
+    :returns: A tuple of two trees.
+    
+    This operator takes another parameter *termpb*, which set the probability
     to choose between a terminal or non-terminal crossover point.
     For instance, as defined by Koza, non-terminal primitives are selected for 
-    90% of the crossover points, and terminals for 10%, so *cxtermpb* should be
+    90% of the crossover points, and terminals for 10%, so *termpb* should be
     set to 0.1.
     """
     size1, size2 = ind1.size, ind2.size
@@ -462,7 +496,7 @@ def cxOnePointLeafBiased(ind1, ind2, cxtermpb):
     primList1 = [i for i in xrange(1, size1) if i not in termsList1]
     primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
-    if random.random() < cxtermpb or len(primList1) == 0:
+    if random.random() < termpbpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
         subtree1 = ind1.searchSubtreeDF(index1)
@@ -471,7 +505,7 @@ def cxOnePointLeafBiased(ind1, ind2, cxtermpb):
         index1 = random.choice(primList1)
         subtree1 = ind1.searchSubtreeDF(index1)
 
-    if random.random() < cxtermpb or len(primList2) == 0:
+    if random.random() < termpb or len(primList2) == 0:
         # Choose a terminal from the second parent
         index2 = random.choice(termsList2)
         subtree2 = ind2.searchSubtreeDF(index2)
@@ -486,19 +520,25 @@ def cxOnePointLeafBiased(ind1, ind2, cxtermpb):
     return ind1, ind2
 
 ## Strongly Typed GP crossovers
-def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
+def cxTypedOnePointLeafBiased(ind1, ind2, termpb):
     """Randomly select crossover point in each individual and exchange each
-    subtree with the point as root between each individual. Since the node are 
-    strongly typed, the operator then make sure the type of second node 
-    correspond to the type of the first node. If it doesn't, it randomly 
-    selects another point in the second individual and try again. It tries up
-    to *5* times before giving up on the crossover.
+    subtree with the point as root between each individual. 
     
-    This operator takes another parameter *cxtermpb*, which set the probability
-    to choose between a terminal or non-terminal crossover point.
-    For instance, as defined by Koza, non-terminal primitives are selected for 
-    90% of the crossover points, and terminals for 10%, so *cxtermpb* should be
-    set to 0.1.
+    :param ind1: First typed tree participating in the crossover.
+    :param ind2: Second typed tree participating in the crossover.
+    :param termpb: The probability of chosing a terminal node (leaf).
+    :returns: A tuple of two typed trees.
+    
+    Since the node are strongly typed, the operator then make sure the type of
+    second node correspond to the type of the first node. If it doesn't, it
+    randomly selects another point in the second individual and try again. It
+    tries up to *5* times before giving up on the crossover.
+    
+    This operator takes another parameter *termpb*, which set the probability
+    to choose between a terminal or non-terminal crossover point. For
+    instance, as defined by Koza, non-terminal primitives are selected for 90%
+    of the crossover points, and terminals for 10%, so *termpb* should be set
+    to 0.1.
     
     .. note::
        This crossover is subject to change for a more effective method
@@ -518,7 +558,7 @@ def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
     primList1 = [i for i in xrange(1, size1) if i not in termsList1]
     primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
-    if random.random() < cxtermpb or len(primList1) == 0:
+    if random.random() < termpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
         subtree1 = ind1.searchSubtreeDF(index1)
@@ -527,7 +567,7 @@ def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
         index1 = random.choice(primList1)
         subtree1 = ind1.searchSubtreeDF(index1)
 
-    if random.random() < cxtermpb or len(primList2) == 0:
+    if random.random() < termpb or len(primList2) == 0:
         # Choose a terminal from the second parent
         index2 = random.choice(termsList2)
         subtree2 = ind2.searchSubtreeDF(index2)
@@ -545,7 +585,7 @@ def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
     tries = 0
     MAX_CX_TRY = 5
     while not (type1 is type2) and tries != MAX_CX_TRY:
-        if random.random() < cxtermpb or len(primList2) == 0:
+        if random.random() < termpb or len(primList2) == 0:
             index2 = random.choice(termsList2)
             subtree2 = ind2.searchSubtreeDF(index2)
         else:
@@ -567,9 +607,14 @@ def cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb):
 # GP Mutations                       #
 ######################################
 def mutUniform(individual, expr):
-    """Randomly select a point in the Tree, then replace the subtree with
-    the point as a root by a randomly generated expression. The expression
-    is generated using the method `expr`.
+    """Randomly select a point in the tree *individual*, then replace the
+    subtree at that point as a root by the expression generated using method
+    :func:`expr`.
+    
+    :param individual: The tree to be mutated.
+    :param expr: A function object that can generate an expression when
+                 called.
+    :returns: A tuple of one tree.
     """
     index = random.randint(0, individual.size-1)
     individual.setSubtreeDF(index, expr(pset=individual.pset))
@@ -580,9 +625,14 @@ def mutUniform(individual, expr):
 def mutTypedUniform(individual, expr):
     """The mutation of strongly typed GP expression is pretty easy. First,
     it finds a subtree. Second, it has to identify the return type of the root
-    of  this subtree. Third, it generates a new subtree with a root's type
-    corresponding to the original subtree root's type. Finally, the old
+    of  this subtree. Third, it generates a new subtree with a root returning
+    the required type using function :func:`expr`. Finally, the old
     subtree is replaced by the new subtree.
+    
+    :param individual: The typed tree to be mutated.
+    :param expr: A function object that can generate an expression when
+                 called.
+    :returns: A tuple of one typed tree.
     """
     index = random.randint(0, individual.size-1)
     subtree = individual.searchSubtreeDF(index)  
@@ -593,12 +643,14 @@ def mutTypedUniform(individual, expr):
 
 
 def mutTypedNodeReplacement(individual):
-    """This operator mutates the individual *individual* that are subjected to
-    it. The operator randomly chooses a primitive in the individual
-    and replaces it with a randomly selected primitive in *pset* that takes
-    the same number of arguments.
-
-    This operator works on strongly typed trees as on normal GP trees.
+    """Replaces a randomly chosen primitive from *individual* by a randomly
+    chosen primitive with the same number of arguments from the :attr:`pset`
+    attribute of the individual.
+    
+    :param individual: The normal or typed tree to be mutated.
+    :returns: A tuple of one normal/typed tree.
+    
+    This operator works on either normal and strongly typed trees.
     """
     if individual.size < 2:
         return individual,
@@ -627,13 +679,17 @@ def mutTypedNodeReplacement(individual):
     return individual,
 
 def mutTypedEphemeral(individual, mode):
-    """This operator works on the constants of the tree *ind*.
-    In  *mode* ``"one"``, it will change the value of **one**
-    of the individual ephemeral constants by calling its generator function.
-    In  *mode* ``"all"``, it will change the value of **all**
-    the ephemeral constants.
-
-    This operator works on strongly typed trees as on normal GP trees.
+    """This operator works on the constants of the tree *individual*. In
+    *mode* ``"one"``, it will change the value of one of the individual
+    ephemeral constants by calling its generator function. In *mode*
+    ``"all"``, it will change the value of **all** the ephemeral constants.
+    
+    :param individual: The normal or typed tree to be mutated.
+    :param mode: A string to indicate to change ``"one"`` or ``"all"``
+                 ephemeral constants.
+    :returns: A tuple of one normal/typed tree.
+    
+    This operator works on either normal and strongly typed trees.
     """
     if mode not in ["one", "all"]:
         raise ValueError("Mode must be one of \"one\" or \"all\"")
@@ -655,11 +711,13 @@ def mutTypedEphemeral(individual, mode):
     return individual,
 
 def mutShrink(individual):
-    """This operator shrinks the individual *individual* that are subjected to
-    it. The operator randomly chooses a branch in the individual and replaces
-    it with one of the branch's arguments (also randomly chosen).
-
-    This operator is not usable with STGP.
+    """This operator shrinks the *individual* by chosing randomly a branch and
+    replacing it with one of the branch's arguments (also randomly chosen).
+    
+    :param individual: The tree to be shrinked.
+    :returns: A tuple of one tree.
+    
+    This operator is not suitable for typed tree.
     """
     if individual.size < 3 or individual.height <= 2:
         return individual,       # We don't want to "shrink" the root
@@ -678,16 +736,17 @@ def mutShrink(individual):
     return individual,
 
 def mutTypedInsert(individual):
-    """This operator mutate the GP tree of the *individual* passed by inserting
-    a new branch at a random position in a
-    tree, using the original subtree at this position as one argument,
-    and if necessary randomly selecting terminal primitives
-    to complete the arguments of the inserted node.
-    Note that the original subtree will become one of the children of the new
-    primitive inserted, but not perforce the first (its position is
-    randomly selected if the new primitive has more than one child)
-
-    This operator works on strongly typed trees as on normal GP trees.
+    """Inserts a new branch at a random position in *individual*. The subtree
+    at the chosen position is used as child node of the created subtree, in
+    that way, it is really an insertion rather than a replacement. Note that
+    the original subtree will become one of the children of the new primitive
+    inserted, but not perforce the first (its position is randomly selected if
+    the new primitive has more than one child).
+    
+    :param individual: The normal or typed tree to be mutated.
+    :returns: A tuple of one normal/typed tree.
+    
+    This operator works on either normal and strongly typed trees.
     """
     pset = individual.pset
     index = random.randint(0, individual.size-1)

@@ -47,6 +47,12 @@ def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the function *func*.
     
+    :param container: The type to put in the data from func.
+    :param func: The function that will be called n times to fill the
+                 container.
+    :param n: The number of times to repeat func.
+    :returns: An instance of the container filled with data from func.
+    
     This helper function can can be used in conjunction with a Toolbox 
     to register a generator of filled containers, as individuals or 
     population.
@@ -63,6 +69,11 @@ def initIterate(container, generator):
     its only argument. The iterable must be returned by 
     the method or the object *generator*.
     
+    :param container: The type to put in the data from func.
+    :param generator: A function returning an iterable (list, tuple, ...),
+                      the content of this iterable will fill the container.
+    :returns: An instance of the container filled with data from the
+              generator.
     
     This helper function can can be used in conjunction with a Toolbox 
     to register a generator of filled containers, as individuals or 
@@ -81,12 +92,19 @@ def initCycle(container, seq_func, n=1):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the functions present in *seq_func*.
     
+    :param container: The type to put in the data from func.
+    :param seq_func: A list of function objects to be called in order to
+                     fill the container.
+    :param n: Number of times to iterate through the list of functions.
+    :returns: An instance of the container filled with data from the
+              returned by the functions.
+    
     This helper function can can be used in conjunction with a Toolbox 
     to register a generator of filled containers, as individuals or 
     population.
     
         >>> func_seq = [lambda:1 , lambda:'a', lambda:3]
-        >>> initCycle(list, func_seq, 2)
+        >>> initCycle(list, func_seq, n=2)
         [1, 'a', 3, 1, 'a', 3]
 
     """
@@ -157,11 +175,12 @@ class History(object):
             self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = list()
         
-    def update(self, *individuals):
-        """Update the history with the new *individuals*. The index present
-        in their :attr:`history_index` attribute will be used to locate their
+    def update(self, individuals):
+        """Update the history with the new *individuals*. The index present in
+        their :attr:`history_index` attribute will be used to locate their
         parents and modified to a unique one to keep track of those new
-        individuals.
+        individuals. This method is called on each individual after each
+        variation.
         """
         parent_indices = [ind.history_index for ind in individuals]
         
@@ -176,15 +195,15 @@ class History(object):
         """Property that returns an appropriate decorator to enhance the
         operators of the toolbox. The returned decorator assumes that the
         individuals are returned by the operator. First the decorator calls
-        the underlying operation and then calls the update function with what
-        has been returned by the operator as argument. Finally, it returns 
-        the individuals with their history parameters modified according to
-        the update function.
+        the underlying operation and then calls the :func:`update` function
+        with what has been returned by the operator. Finally, it returns the
+        individuals with their history parameters modified according to the
+        update function.
         """
         def decFunc(func):
             def wrapFunc(*args, **kargs):
                 individuals = func(*args, **kargs)
-                self.update(*individuals)
+                self.update(individuals)
                 return individuals
             return wrapFunc
         return decFunc
@@ -603,17 +622,11 @@ class ParetoFront(HallOfFame):
 
 def cxTwoPoints(ind1, ind2):
     """Execute a two points crossover on the input individuals. The two 
-    individuals are modified in place. This operation apply on an individual
-    composed of a list of attributes and act as follow ::
+    individuals are modified in place and both keep their original length. 
     
-        >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)] #doctest: +SKIP
-        >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
-        >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
-        >>> cxTwoPoints(ind1, ind2)
-        >>> print ind1, len(ind1)
-        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)], m
-        >>> print ind2, len(ind2)
-        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)], k
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -633,18 +646,12 @@ def cxTwoPoints(ind1, ind2):
 
 def cxOnePoint(ind1, ind2):
     """Execute a one point crossover on the input individuals.
-    The two individuals are modified in place. This operation apply on an
-    individual composed of a list of attributes
-    and act as follow ::
-
-        >>> ind1 = [A(1), ..., A(n), ..., A(m)] #doctest: +SKIP
-        >>> ind2 = [B(1), ..., B(n), ..., B(k)]
-        >>> # Crossover with mating point i, 1 < i <= min(m, k)
-        >>> cxOnePoint(ind1, ind2)
-        >>> print ind1, len(ind1)
-        [A(1), ..., B(i), ..., B(k)], k
-        >>> print ind2, len(ind2)
-        [B(1), ..., A(i), ..., A(m)], m
+    The two individuals are modified in place. The resulting individuals will
+    respectively have the length of the other.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     This function use the :func:`~random.randint` function from the
     python base :mod:`random` module.
@@ -657,7 +664,12 @@ def cxOnePoint(ind1, ind2):
 
 def cxUniform(ind1, ind2, indpb):
     """Execute a uniform crossover that modify in place the two individuals.
-    The genes are swapped according to the *indpb* probability.
+    The attributes are swapped according to the *indpb* probability.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param indpb: Independent probabily for each attribute to be exchanged.
+    :returns: A tuple of two individuals.
     
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
@@ -674,25 +686,20 @@ def cxPartialyMatched(ind1, ind2):
     The two individuals are modified in place. This crossover expect iterable
     individuals of indices, the result for any other type of individuals is
     unpredictable.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values in a certain range of the two parents and swapping the values
-    of those indexes. For more details see Goldberg and Lingel, "Alleles,
-    loci, and the traveling salesman problem", 1985.
-
-    For example, the following parents will produce the two following children
-    when mated with crossover points ``a = 2`` and ``b = 4``. ::
-
-        >>> ind1 = [0, 1, 2, 3, 4]
-        >>> ind2 = [1, 2, 3, 4, 0]
-        >>> cxPartialyMatched(ind1, ind2)
-        >>> print ind1
-        [0, 2, 3, 1, 4]
-        >>> print ind2
-        [2, 3, 1, 4, 0]
+    of those indexes. For more details see [Goldberg1985]_.
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
+    
+    .. [Goldberg1985] Goldberg and Lingel, "Alleles, loci, and the traveling
+       salesman problem", 1985.
     """
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
@@ -728,26 +735,21 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     individuals. The two individuals are modified in place. This crossover
     expect iterable individuals of indices, the result for any other type of
     individuals is unpredictable.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
     parents and swapping the values of those indexes. For more details see
-    Cicirello and Smith, "Modeling GA performance for control parameter
-    optimization", 2000.
-
-    For example, the following parents will produce the two following children
-    when mated with the chosen points ``[0, 1, 0, 0, 1]``. ::
-
-        >>> ind1 = [0, 1, 2, 3, 4] #doctest: +SKIP
-        >>> ind2 = [1, 2, 3, 4, 0]
-        >>> cxUniformPartialyMatched(ind1, ind2)
-        >>> print ind1
-        [4, 2, 1, 3, 0]
-        >>> print ind2
-        [2, 1, 3, 0, 4]
+    [Cicirello2000]_.
 
     This function use the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
+    
+    .. [Cicirello2000] Cicirello and Smith, "Modeling GA performance for
+       control parameter optimization", 2000.
     """
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
@@ -772,11 +774,33 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     return ind1, ind2
 
 def cxOrdered(ind1, ind2):
+    """Execute an ordered crossover (OX) on the input
+    individuals. The two individuals are modified in place. This crossover
+    expect iterable individuals of indices, the result for any other type of
+    individuals is unpredictable.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
+
+    Moreover, this crossover consists of generating holes in the input
+    individuals. A hole is created when an attribute of an individual is
+    between the two crossover points of the other individual. Then it rotates
+    the element so that all holes are between the crossover points and fills
+    them with the removed elements in order. For more details see
+    [Goldberg1989]_.
+    
+    This function use the :func:`~random.sample` function from the python base
+    :mod:`random` module.
+    
+    .. [Goldberg1989] Goldberg. Genetic algorithms in search, 
+       optimization and machine learning. Addison Wesley, 1989
+    """
     size = min(len(ind1), len(ind2))
     a, b = random.sample(xrange(size), 2)
     if a > b:
         a, b = b, a
-    
+    print a, b
     holes1, holes2 = [True]*size, [True]*size
     for i in range(size):
         if i < a or i > b:
@@ -806,6 +830,12 @@ def cxBlend(ind1, ind2, alpha):
     The blend crossover expect individuals formed of a list of floating point
     numbers.
     
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param alpha: Extent of the interval in which the new values can be drawn
+                  for each attribute on both side of the parents' attributes.
+    :returns: A tuple of two individuals.
+    
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
@@ -824,6 +854,13 @@ def cxSimulatedBinary(ind1, ind2, eta):
     """Executes a simulated binary crossover that modify in-place the input
     individuals. The simulated binary crossover expect individuals formed of
     a list of floating point numbers.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param eta: Crowding degree of the crossover. A high eta will produce
+                children resembling to their parents, while a small eta will
+                produce solutions much more different.
+    :returns: A tuple of two individuals.
     
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
@@ -849,12 +886,24 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     """Executes a simulated binary crossover that modify in-place the input
     individuals. The simulated binary crossover expect individuals formed of
     a list of floating point numbers.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param eta: Crowding degree of the crossover. A high eta will produce
+                children resembling to their parents, while a small eta will
+                produce solutions much more different.
+    :param low: A value or a sequence of values that is the lower bound of the
+                search space.
+    :param up: A value or a sequence of values that is the upper bound of the
+               search space.
+    :returns: A tuple of two individuals.
 
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
 
-    :note: This implementation is similar to the one implemented in the 
-    original NSGA-II C code presented by Deb.
+    .. note::
+       This implementation is similar to the one implemented in the 
+       original NSGA-II C code presented by Deb.
     """
     size = min(len(ind1), len(ind2))
     
@@ -911,17 +960,11 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
 
 def cxMessyOnePoint(ind1, ind2):
     """Execute a one point crossover that will in most cases change the
-    individuals size. This operation apply on an individual composed
-    of a list of attributes and act as follow ::
-
-        >>> ind1 = [A(1), ..., A(i), ..., A(m)] #doctest: +SKIP
-        >>> ind2 = [B(1), ..., B(j), ..., B(n)]
-        >>> # Crossover with mating points i, j, 1 <= i <= m, 1 <= j <= n
-        >>> cxMessyOnePoint(ind1, ind2)
-        >>> print ind1, len(ind1)
-        [A(1), ..., A(i - 1), B(j), ..., B(n)], n + j - i
-        >>> print ind2, len(ind2)
-        [B(1), ..., B(j - 1), A(i), ..., A(m)], m + i - j
+    individuals size. The two individuals are modified in place.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
     
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.        
@@ -939,22 +982,14 @@ def cxMessyOnePoint(ind1, ind2):
 def cxESBlend(ind1, ind2, alpha):
     """Execute a blend crossover on both, the individual and the strategy. The
     individuals must have a :attr:`strategy` attribute. Adjustement of the
-    minimal strategy shall be done after the call to this function using a
-    decorator, for example ::
+    minimal strategy shall be done after the call to this function, consider
+    using a decorator.
     
-        def checkStrategy(minstrategy):
-            def decMinStrategy(func):
-                def wrapMinStrategy(*args, **kargs):
-                    children = func(*args, **kargs)
-                    for child in children:
-                        if child.strategy < minstrategy:
-                            child.strategy = minstrategy
-                    return children
-                return wrapMinStrategy
-            return decMinStrategy
-        
-        toolbox.register("mate", tools.cxEsBlend, alpha=ALPHA)
-        toolbox.decorate("mate", checkStrategy(minstrategy=0.01))
+    :param ind1: The first evolution strategy participating in the crossover.
+    :param ind2: The second evolution strategy participating in the crossover.
+    :param alpha: Extent of the interval in which the new values can be drawn
+                  for each attribute on both side of the parents' attributes.
+    :returns: A tuple of two evolution strategies.
     """
     size = min(len(ind1), len(ind2))
     
@@ -975,9 +1010,13 @@ def cxESBlend(ind1, ind2, alpha):
     return ind1, ind2
 
 def cxESTwoPoints(ind1, ind2):
-    """Execute a classical two points crossover on both the individual and
-    its strategy. The crossover points for the individual and the strategy
-    are the same.
+    """Execute a classical two points crossover on both the individual and its
+    strategy. The individuals must have a :attr:`strategy` attribute.The
+    crossover points for the individual and the strategy are the same.
+    
+    :param ind1: The first evolution strategy participating in the crossover.
+    :param ind2: The second evolution strategy participating in the crossover.
+    :returns: A tuple of two evolution strategies.
     """
     size = min(len(ind1), len(ind2))
     
@@ -1000,22 +1039,16 @@ def cxESTwoPoints(ind1, ind2):
 
 def mutGaussian(individual, mu, sigma, indpb):
     """This function applies a gaussian mutation of mean *mu* and standard
-    deviation *sigma*  on the input individual and
-    returns the mutant. The *individual* is left intact and the mutant is an
-    independant copy. This mutation expects an iterable individual composed of
-    real valued attributes. The *mutIndxPb* argument is the probability of each
-    attribute to be mutated.
-
-    .. note::
-       The mutation is not responsible for constraints checking, because
-       there is too many possibilities for
-       resetting the values. Which way is closer to the representation used
-       is up to you.
-       
-       One easy way to add constraint checking to an operator is to 
-       use the function decoration in the toolbox. See the multi-objective
-       example (moga_kursawefct.py) for an explicit example.
-
+    deviation *sigma* on the input individual. This mutation expects an
+    iterable individual composed of real valued attributes. The *indpb*
+    argument is the probability of each attribute to be mutated.
+    
+    :param individual: Individual to be mutated.
+    :param mu: Mean around the individual of the mutation.
+    :param sigma: Standard deviation of the mutation.
+    :param indpb: Probability for each attribute to be mutated.
+    :returns: A tuple of one individual.
+    
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
     """        
@@ -1028,6 +1061,16 @@ def mutGaussian(individual, mu, sigma, indpb):
 def mutPolynomialBounded(individual, eta, low, up, indpb):
     """Polynomial mutation as implemented in original NSGA-II algorithm in
     C by Deb.
+    
+    :param individual: Individual to be mutated.
+    :param eta: Crowding degree of the mutation. A high eta will produce
+                a mutant resembling its parent, while a small eta will
+                produce a solution much more different.
+    :param low: A value or a sequence of values that is the lower bound of the
+                search space.
+    :param up: A value or a sequence of values that is the upper bound of the
+               search space.
+    :returns: A tuple of one individual.
     """
     size = len(individual)
     if not isinstance(low, Sequence):
@@ -1061,10 +1104,15 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
-    The *individual* is left intact and the mutant is an independent copy. The
-    *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
-    probability of each attribute to be moved.
-
+    The *individual* is expected to be iterable. The *indpb* argument is the
+    probability of each attribute to be moved. Usually this mutation is applied on 
+    vector of indices.
+    
+    :param individual: Individual to be mutated.
+    :param indpb: Probability for each attribute to be exchanged to another
+                  position.
+    :returns: A tuple of one individual.
+    
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
@@ -1081,12 +1129,15 @@ def mutShuffleIndexes(individual, indpb):
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
-    mutant. The *individual* is left intact and the mutant is an independent
-    copy. The *individual* is expected to be iterable and the values of the
+    mutant. The *individual* is expected to be iterable and the values of the
     attributes shall stay valid after the ``not`` operator is called on them.
-    The *flipIndxPb* argument is the probability of each attribute to be
-    flipped.
-
+    The *indpb* argument is the probability of each attribute to be
+    flipped. This mutation is usually applied on boolean individuals.
+    
+    :param individual: Individual to be mutated.
+    :param indpb: Probability for each attribute to be flipped.
+    :returns: A tuple of one individual.
+    
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
@@ -1102,22 +1153,27 @@ def mutFlipBit(individual, indpb):
 
 def mutESLogNormal(individual, c, indpb):
     """Mutate an evolution strategy according to its :attr:`strategy`
-    attribute as described in *Beyer and Schwefel, 2002, Evolution strategies
-    - A Comprehensive Introduction*. The individual is first mutated by a
-    normal distribution of mean 0 and standard deviation of
-    :math:`\\boldsymbol{\sigma}_{t-1}` then the strategy is mutated according
-    to an extended log normal rule, 
+    attribute as described in [Beyer2002]_. The individual is first mutated by
+    a normal distribution of mean 0 and standard deviation of
+    :math:`\\boldsymbol{\sigma}_{t-1}` (its current strategy) then the
+    strategy is mutated according to an extended log normal rule,
     :math:`\\boldsymbol{\sigma}_t = \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[
     \\sigma_{t-1, 1}\\exp(\\tau \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n}
     \\exp(\\tau \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
     \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`.
-    A recommended choice is :math:`c=1` when using a :math:`(10, 100)`
-    evolution strategy (Beyer and Schwefel, 2002).
+    A recommended choice is ``c=1`` when using a :math:`(10, 100)` evolution
+    strategy [Beyer2002]_ [Schwefel1995]_.
     
-    The strategy shall be the same size as the individual. Each index
-    (strategy and attribute) is mutated with probability *indpb*. In order to
-    limit the strategy, use a decorator as shown in the :func:`cxESBlend`
-    function.
+    :param individual: Individual to be mutated.
+    :param c: The learning parameter.
+    :param indpb: Probability for each attribute to be flipped.
+    :returns: A tuple of one individual.
+    
+    .. [Beyer2002] Beyer and Schwefel, 2002, Evolution strategies - A
+       Comprehensive Introduction
+       
+    .. [Schwefel1995] Schwefel, 1995, Evolution and Optimum Seeking.
+       Wiley, New York, NY
     """
     size = len(individual)
     t = c / math.sqrt(2. * math.sqrt(size))
@@ -1141,7 +1197,11 @@ def selRandom(individuals, k):
     """Select *k* individuals at random from the input *individuals* with
     replacement. The list returned contains references to the input
     *individuals*.
-
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     """
@@ -1151,6 +1211,10 @@ def selRandom(individuals, k):
 def selBest(individuals, k):
     """Select the *k* best individuals among the input *individuals*. The
     list returned contains references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list containing the k best individuals.
     """
     return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:k]
 
@@ -1158,14 +1222,22 @@ def selBest(individuals, k):
 def selWorst(individuals, k):
     """Select the *k* worst individuals among the input *individuals*. The
     list returned contains references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list containing the k worst individuals.
     """
     return sorted(individuals, key=attrgetter("fitness"))[:k]
 
 
 def selTournament(individuals, k, tournsize):
     """Select *k* individuals from the input *individuals* using *k*
-    tournaments of *tournSize* individuals. The list returned contains
+    tournaments of *tournsize* individuals. The list returned contains
     references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
     
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
@@ -1185,6 +1257,10 @@ def selRoulette(individuals, k):
     spins of a roulette. The selection is made by looking only at the first
     objective of each individual. The list returned contains references to
     the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
     
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
@@ -1211,10 +1287,14 @@ def selRoulette(individuals, k):
 
 def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) and crowding distance (CD).
-    The `individuals` sequence length has to have a length which is 
+    The *individuals* sequence length has to have a length which is 
     a multiple of 4. Also, this tournament can only be used in 
     conjunction with an algorithm assigning crowding distance to the
-    individual fitnesses. 
+    individual fitnesses.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
     """
     def tourn(ind1, ind2):
         if ind1.fitness.isDominated(ind2.fitness):
@@ -1248,16 +1328,21 @@ def selTournamentDCD(individuals, k):
 ######################################
 
 def selNSGA2(individuals, k):
-    """Apply NSGA-II selection operator on the *individuals*. Usually,
-    the size of *individuals* will be larger than *k* because any individual
+    """Apply NSGA-II selection operator on the *individuals*. Usually, the
+    size of *individuals* will be larger than *k* because any individual
     present in *individuals* will appear in the returned list at most once.
-    Having the size of *individuals* equals to *n* will have no effect other
+    Having the size of *individuals* equals to *k* will have no effect other
     than sorting the population according to a non-domination scheme. The list
-    returned contains references to the input *individuals*.
+    returned contains references to the input *individuals*. For more details
+    on the NSGA-II operator see [Deb2002]_
     
-    For more details on the NSGA-II operator see Deb, Pratab, Agarwal,
-    and Meyarivan, "A fast elitist non-dominated sorting genetic algorithm for
-    multi-objective optimization: NSGA-II", 2002.
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    
+    .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
+       non-dominated sorting genetic algorithm for multi-objective
+       optimization: NSGA-II", 2002.
     """
     pareto_fronts = sortFastND(individuals, k)
     for front in pareto_fronts:
@@ -1272,6 +1357,13 @@ def selNSGA2(individuals, k):
     return chosen
 
 def isDominated(wvalues1, wvalues2):
+    """Returns wheter or not *wvalues1* dominates *wvalues2*.
+    
+    :param wvalues1: The weighted fitness values that would be dominated.
+    :param wvalues2: The weighted fitness values of the dominant.
+    :returns: :obj:`True` if wvalues2 dominates wvalues1, :obj:`False`
+              otherwise.
+    """
     not_equal = False
     for self_wvalue, other_wvalue in zip(wvalues1, wvalues2):
         if self_wvalue > other_wvalue:
@@ -1282,7 +1374,12 @@ def isDominated(wvalues1, wvalues2):
 
 def sortFastND(individuals, k, first_front_only=False):
     """Sort the first *k* *individuals* according the the fast non-dominated
-    sorting algorithm. 
+    sorting algorithm.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of Pareto fronts (lists), with the first list being the
+    true Pareto front.
     """
     if k == 0:
         return []
@@ -1365,15 +1462,20 @@ def assignCrowdingDist(individuals):
 ######################################
 
 def selSPEA2(individuals, k):
-    """Apply SPEA-II selection operator on the *individuals*. Usually,
-    the size of *individuals* will be larger than *n* because any individual
+    """Apply SPEA-II selection operator on the *individuals*. Usually, the
+    size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a strength Pareto scheme. The list
-    returned contains references to the input *individuals*.
+    than sorting the population according to a strength Pareto scheme. The
+    list returned contains references to the input *individuals*. For more
+    details on the SPEA-II operator see [Zitzler2001]_.
     
-    For more details on the SPEA-II operator see Zitzler, Laumanns and Thiele,
-    "SPEA 2: Improving the strength Pareto evolutionary algorithm", 2001.
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    
+    .. [Zitzler2001] Zitzler, Laumanns and Thiele, "SPEA 2: Improving the
+       strength Pareto evolutionary algorithm", 2001.
     """
     N = len(individuals)
     L = len(individuals[0].fitness.values)
@@ -1537,6 +1639,17 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     **different** individuals. For example, using a traditional tournament for
     replacement strategy will thus give undesirable effects, two individuals
     will most likely try to enter the same slot.
+    
+    :param populations: A list of (sub-)populations on which to operate
+                        migration.
+    :param k: The number of individuals to migrate.
+    :param selection: The function to use for selection.
+    :param replacement: The function to use to select which individuals will
+                        be replaced. If :obj:`None` (default) the individuals
+                        that leave the population are directly replaced.
+    :param migarray: A list of indices indicating where the individuals from 
+                     a particular position in the list goes. This defaults
+                     to a ring migration.
     """
     if migarray is None:
         migarray = range(1, len(populations)) + [0]
@@ -1565,6 +1678,7 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     for i, immigrant in enumerate(immigrants[to_deme]):
         indx = populations[to_deme].index(immigrant)
         populations[to_deme][indx] = mig_buf[i]
+    
     
 if __name__ == "__main__":
     import doctest
