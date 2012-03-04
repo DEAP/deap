@@ -33,6 +33,16 @@ Genetic Programming (GP)
 	gp_ant
 	gp_spambase
 
+Evolution Strategy (ES)
+-----------------------
+
+.. toctree::
+	:maxdepth: 1
+
+	es_fctmin
+	es_onefifth
+	cmaes
+
 Particle Swarm Optimization (PSO)
 ---------------------------------
 
