@@ -15,7 +15,6 @@ Creator
 
 .. autodata:: deap.creator.class_replacers
 
-
 Toolbox
 -------
 The :class:`Toolbox` is a container for the tools that are selected by the
@@ -28,7 +27,7 @@ aliases instead of direct function names.
 
 .. autoclass:: deap.base.Toolbox
 	
-	.. automethod:: deap.base.Toolbox.register(alias, function[, argument[, ...]])
+	.. automethod:: deap.base.Toolbox.register(alias, method[, argument[, ...]])
 	
 	.. automethod:: deap.base.Toolbox.unregister(alias)
 	

@@ -47,8 +47,17 @@ class Toolbox(object):
         """Register a *method* in the toolbox under the name *alias*. You 
         may provide default arguments that will be passed automatically when 
         calling the registered method. Fixed arguments can then be overriden 
-        at function call time. The following code block is a example of how
-        the toolbox is used. ::
+        at function call time.
+        
+        :param alias: The name the operator will take in the toolbox. If the
+                      alias already exist it will overwrite the the operator
+                      already present.
+        :param method: The function to which refer the alias.
+        :param argument: One or more argument (and keyword argument) to pass
+                         automatically to the registered function when called,
+                         optional.
+        
+        The following code block is an example of how the toolbox is used. ::
 
             >>> def func(a, b, c=3):
             ...     print a, b, c
@@ -61,7 +70,7 @@ class Toolbox(object):
         The registered function will be given the attributes :attr:`__name__`
         set to the alias and :attr:`__doc__` set to the original function's
         documentation. The :attr:`__dict__` attribute will also be updated
-        with the original function's instance dictionnary if any.
+        with the original function's instance dictionnary, if any.
         """
         pfunc = functools.partial(method, *args, **kargs)
         pfunc.__name__ = alias
@@ -77,12 +86,20 @@ class Toolbox(object):
         setattr(self, alias, pfunc)
 
     def unregister(self, alias):
-        """Unregister *alias* from the toolbox."""
+        """Unregister *alias* from the toolbox.
+        
+        :param alias: The name of the operator to remove from the toolbox.
+        """
         delattr(self, alias)
 
     def decorate(self, alias, *decorators):
         """Decorate *alias* with the specified *decorators*, *alias*
         has to be a registered function in the current toolbox.
+        
+        :param alias: The name of the operator to decorate.
+        :param decorator: One or more function decorator. If multiple
+                          decorators are provided they will be applied in
+                          order, with the last decorator docarating all other.
         
         .. versionchanged:: 0.8
            Decoration is not signature preserving anymore.
@@ -97,6 +114,8 @@ class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
     provided as a tuple, the fitness is initalized using those values,
     otherwise it is empty (or invalid).
+    
+    :param values: The initial values of the fitness as a tuple, optional.
 
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
     ``!=``. The comparison of those operators is made lexicographically.
@@ -113,10 +132,10 @@ class Fitness(object):
     
     weights = None
     """The weights are used in the fitness comparison. They are shared among
-    all fitnesses of the same type. When subclassing ``Fitness``, ``weights``
-    must be defined as a tuple where each element is associated to an 
-    objective. A negative weight element corresponds to the minimization of the
-    associated objective and positive weight to the maximization.
+    all fitnesses of the same type. When subclassing :class:`Fitness`, the
+    weights must be defined as a tuple where each element is associated to an
+    objective. A negative weight element corresponds to the minimization of
+    the associated objective and positive weight to the maximization.
 
     .. note::
         If weights is not defined during subclassing, the following error will 
@@ -131,7 +150,7 @@ class Fitness(object):
     weights is made when the values are set via the property :attr:`values`.
     Multiplication is made on setting of the values for efficiency.
     
-    Generally it is unnecessary to manipulate *wvalues* as it is an internal
+    Generally it is unnecessary to manipulate wvalues as it is an internal
     attribute of the fitness used in the comparison operators.
     """
     

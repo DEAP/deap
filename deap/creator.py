@@ -112,6 +112,11 @@ def create(name, base, **kargs):
     Otherwise, if the argument is not a class, (for example an :class:`int`),
     it is added as a "static" attribute of the class.
     
+    :param name: The name of the class to create.
+    :param base: A base class from which to inherit.
+    :param attribute: One or more attributes to add on instanciation of this
+                      class, optional.
+    
     The following is used to create a class :class:`Foo` inheriting from the
     standard :class:`list` and having an attribute :attr:`bar` being an empty
     dictionary and a static attribute :attr:`spam` initialized to 1. ::
