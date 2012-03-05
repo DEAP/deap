@@ -14,7 +14,7 @@
 /* -- page layout ----------------------------------------------------------- */
  
 body {
-    font-family: 'Palatino', serif;
+    font-family: 'Palatino', 'DejaVu Serif', serif;
     font-size: 17px;
     background-color: #FFF;
     color: #000;
@@ -106,7 +106,7 @@ div.sphinxsidebarwrapper p.logo {
  
 div.sphinxsidebar h3,
 div.sphinxsidebar h4 {
-    font-family: 'Palatino', serif;
+    font-family: 'Palatino', 'DejaVu Serif', serif;
     color: #444;
     font-size: 24px;
     font-weight: normal;
@@ -142,7 +142,7 @@ div.sphinxsidebar ul {
  
 div.sphinxsidebar input {
     border: 1px solid #ccc;
-    font-family: 'Palatino', serif;
+    font-family: 'Palatino', 'DejaVu Serif', serif;
     font-size: 1em;
 }
  
@@ -163,7 +163,7 @@ div.body h3,
 div.body h4,
 div.body h5,
 div.body h6 {
-    font-family: 'Palatino', serif;
+    font-family: 'Palatino', 'DejaVu Serif', serif;
     font-weight: normal;
     margin: 30px 0px 10px 0px;
     padding: 0;
@@ -217,7 +217,7 @@ dd div.admonition {
 }
 
 div.admonition p.admonition-title {
-    font-family: 'Palatino', serif;
+    font-family: 'Palatino', 'DejaVu Serif', serif;
     font-weight: normal;
     font-size: 24px;
     margin: 0 0 10px 0;
