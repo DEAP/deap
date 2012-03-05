@@ -14,13 +14,13 @@ maintain stats of the evolution, an initialized
 the population, and/or an initialized :class:`~deap.tools.EvolutionLogger` to
 log what is happening during the evolution.
 
-.. autofunction:: deap.algorithms.eaSimple(toolbox, population, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaSimple(toolbox, population, cxpb, mutpb, ngen[, stats, halloffame, verbose])
 
-.. autofunction:: deap.algorithms.eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, verbose])
 
-.. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, verbose])
 
-.. autofunction:: deap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame, verbose])
 
    .. deprecated:: 0.8
       Use :func:`~deap.algorithms.eaMuPlusLambda` algorithm with :math:`\lambda=1`.
@@ -54,9 +54,9 @@ Covariance Matrix Adaptation Evolution Strategy
 
 .. automodule:: deap.cma
 
-.. autofunction:: deap.cma.esCMA(toolbox, population, sigma, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.cma.esCMA(toolbox, population, sigma, ngen[, stats, halloffame, verbose])
 
-.. autoclass:: deap.cma.Strategy(centroid, sigma[, **kargs])
+.. autoclass:: deap.cma.Strategy(centroid, sigma[, parameter[, ...]])
    :members:
 
 .. .. autoclass:: deap.cma.StrategyOnePlusLambda(parent, sigma[, **kargs])

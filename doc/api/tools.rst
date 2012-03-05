@@ -161,11 +161,11 @@ Hall-Of-Fame
 
 Evolution Logger
 ----------------
-.. autoclass:: deap.tools.EvolutionLogger([col_names, precision])
+.. autoclass:: deap.tools.EvolutionLogger([col_names][, precision])
 
    .. automethod:: deap.tools.EvolutionLogger.logHeader
 
-   .. automethod:: deap.tools.EvolutionLogger.logGeneration(nbr_eval, gen, [stats, index])
+   .. automethod:: deap.tools.EvolutionLogger.logGeneration([stats[, index]][, data[, ...]])
    
 ..   .. autoattribute:: deap.tools.EvolutionLogger.output
 
@@ -185,8 +185,6 @@ History
 -------
 .. autoclass:: deap.tools.History
    
-   .. automethod:: deap.tools.History.populate
-   
-   .. automethod:: deap.tools.History.update(individual[, ...])
+   .. automethod:: deap.tools.History.update
    
    .. autoattribute:: deap.tools.History.decorator
