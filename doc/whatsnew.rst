@@ -16,8 +16,10 @@ Upcoming in 0.8
 - Introduced the exact NSGA-II algorithm as described in *Deb et al., 2002, A
   Fast Elitist Multiobjective Genetic Algorithm: NSGA-II*.
 - NSGA-II selection algorithm revisited :
+
   - Added a C++ version;
   - Speed up of the Python version (up to 5x when the objectives are discrete).
+
 - Added some new benchmarks (multiobjective, binary and moving peaks).
 - Added translation, rotation, scaling and noise decorators to enhance benchmarks.
 

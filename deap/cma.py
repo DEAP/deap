@@ -31,6 +31,16 @@ def esCMA(toolbox, population, ngen, halloffame=None, stats=None,
     """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
     Evolution Strategy: A Comparing Rewiew.*
     
+    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
+                    operators.
+    :param population: A list of individuals generated from the strategy.
+    :param ngen: The number of generation.
+    :param stats: A :class:`~deap.tools.Statistics` object that is updated
+                  inplace, optional.
+    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
+                       contain the best individuals, optional.
+    :param verbose: Whether or not to log the statistics.
+    
     The *population* should have been generated from a strategy, while the
     toolbox should contain a reference to the update method of the chosen
     strategy.
@@ -62,7 +72,15 @@ def esCMA(toolbox, population, ngen, halloffame=None, stats=None,
 
 class Strategy(object):
     """
-    Additional configuration may be passed through keyword arguments,
+    A strategy that will keep track of the basic parameters of the CMA-ES
+    algorithm.
+    
+    :param centroid: An iterable object that indicates where to start the
+                     evolution.
+    :param sigma: The list of initial standard deviations of the distribution,
+                  it shall be the same length than the centroid.
+    :param parameter: One or more parameter to pass to the strategy as
+                      described in the following table, optional.
     
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
@@ -125,13 +143,21 @@ class Strategy(object):
     def generate(self, ind_init):
         """Generate a population from the current strategy using the 
         centroid individual as parent.
+        
+        :param ind_init: A function object that is able to initialize an
+                         individual from a list.
+        :returns: A list of individuals.
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
         return map(ind_init, arz)
         
-    def update(self, population, ind_init=tools.identity):
-        """Update the current covariance matrix strategy.
+    def update(self, population):
+        """Update the current covariance matrix strategy and *population*.
+        
+        :param population: A list of individuals from which to update the
+                           parameters and where the new population will be
+                           placed.
         """
         population.sort(key=lambda ind: ind.fitness, reverse=True)
         
@@ -179,12 +205,14 @@ class Strategy(object):
         
         # Generate the individuals from the computed covariance matrix
         # and replace the first lambda individuals of the population.
-        for ind, arzi in zip(population, self.generate(ind_init)):
+        for ind, arzi in zip(population, self.generate(tools.identity)):
             ind[:] = arzi   # This line does not allow ind to be of type array
 
     def computeParams(self, params):
-        """Those parameters depends on lambda and need to computed again if it 
-        changes during evolution.
+        """Computes the parameters depending on *lambda_*. It needs to be
+        called again if *lambda_* changes during evolution.
+        
+        :param params: A dictionary of the manually set parameters.
         """
         self.mu = params.get("mu", int(self.lambda_ / 2))
         rweights = params.get("weights", "superlinear")
@@ -196,7 +224,7 @@ class Strategy(object):
         elif rweights == "equal":
             self.weights = numpy.ones(self.mu)
         else:
-            pass    # Print some warning ?
+            raise RuntimeError("Unknown weights : %s" % rweights)
         
         self.weights /= sum(self.weights)
         self.mueff = 1. / sum(self.weights**2)
