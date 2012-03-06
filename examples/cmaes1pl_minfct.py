@@ -16,6 +16,7 @@
 import array
 import numpy
 
+from deap import algorithms
 from deap import base
 from deap import benchmarks
 from deap import cma
@@ -29,7 +30,7 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 # See http://www.lri.fr/~hansen/cmaes_inmatlab.html for more details about
 # the rastrigin and other tests for CMA-ES
 toolbox = base.Toolbox()
-toolbox.register("evaluate", benchmarks.rastrigin)
+toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
     numpy.random.seed()
@@ -38,10 +39,10 @@ def main():
     parent = creator.Individual((numpy.random.rand() * 5) - 1 for _ in range(N))
     parent.fitness.values = toolbox.evaluate(parent)
     
-    strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=1)
+    strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=10)
+    toolbox.register("generate", strategy.generate, ind_init=creator.Individual)
     toolbox.register("update", strategy.update)
-    pop = strategy.generate(creator.Individual)
-    
+
     hof = tools.HallOfFame(1)    
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", tools.mean)
@@ -49,7 +50,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
    
-    cma.esCMA(toolbox, pop, ngen=2000, halloffame=hof, stats=stats)
+    algorithms.eaGenerateUpdate(toolbox, ngen=200, halloffame=hof, stats=stats)
 
 if __name__ == "__main__":
     main()

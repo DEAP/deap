@@ -15,6 +15,7 @@
 
 import numpy
 
+from deap import algorithms
 from deap import base
 from deap import benchmarks
 from deap import cma
@@ -38,10 +39,10 @@ def main():
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
     # for more details about the rastrigin and other tests for CMA-ES    
     strategy = cma.Strategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
-    pop = strategy.generate(creator.Individual)
-    hof = tools.HallOfFame(1)
+    toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
+    hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", tools.mean)
     stats.register("std", tools.std)
@@ -50,7 +51,7 @@ def main():
     #logger = tools.EvolutionLogger(stats.functions.keys())
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, stats=stats)
+    algorithms.eaGenerateUpdate(toolbox, ngen=250, stats=stats, halloffame=hof)
     
     # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]
