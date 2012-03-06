@@ -64,28 +64,36 @@ class MovingPeaks:
     parameters listed in the table below are required to setup the benchmark,
     default parameters are based on scenario 1 of this benchmark.
     
-    =================== ========== =================================================================================================================
-    Parameter           Default        Details
-    =================== ========== =================================================================================================================
-    ``min_coord``       0.0        Minimum coordinate for the centre of the peaks.
-    ``max_coord``       100.0      Maximum coordinate for the centre of the peaks.
-    ``min_height``      30.0       Minimum height of the peaks.
-    ``max_height``      70.0       Maximum height of the peaks.
-    ``uniform_height``  50.0       Starting height for all peaks, if ``uniform_height <= 0`` the initial height is set randomly for each peak.
-    ``min_width``       0.0001     Minimum width of the peaks.
-    ``max_width``       0.2        Maximum width of the peaks
-    ``uniform_width``   0.1        Starting width for all peaks, if ``uniform_width <= 0`` the initial width is set randomly for each peak.
-    ``lambda_``         0.0        Correlation between changes.
-    ``move_severity``   1.0        The distance a single peak moves when peaks change.
-    ``height_severity`` 7.0        The standard deviation of the change made to the height of a peak when peaks change.
-    ``width_severity``  0.01       The standard deviation of the change made to the width of a peak when peaks change.
-    =================== ========== =================================================================================================================
+    =================== ================= =================================================================================================================
+    Parameter           Default               Details
+    =================== ================= =================================================================================================================
+    ``pfunc``           :func:`function1` The peak function.
+    ``npeaks``          5                 Number of peaks.
+    ``min_coord``       0.0               Minimum coordinate for the centre of the peaks.
+    ``max_coord``       100.0             Maximum coordinate for the centre of the peaks.
+    ``min_height``      30.0              Minimum height of the peaks.
+    ``max_height``      70.0              Maximum height of the peaks.
+    ``uniform_height``  50.0              Starting height for all peaks, if ``uniform_height <= 0`` the initial height is set randomly for each peak.
+    ``min_width``       0.0001            Minimum width of the peaks.
+    ``max_width``       0.2               Maximum width of the peaks
+    ``uniform_width``   0.1               Starting width for all peaks, if ``uniform_width <= 0`` the initial width is set randomly for each peak.
+    ``lambda_``         0.0               Correlation between changes.
+    ``move_severity``   1.0               The distance a single peak moves when peaks change.
+    ``height_severity`` 7.0               The standard deviation of the change made to the height of a peak when peaks change.
+    ``width_severity``  0.01              The standard deviation of the change made to the width of a peak when peaks change.
+    =================== ================= =================================================================================================================
     
     Dictionnaries :data:`SCENARIO_1`, :data:`SCENARIO_2` and
     :data:`SCENARIO_3` of this module define the defaults for these
     parameters. For scenario 1, use :func:`function1` while for scenario 2 and
     3, use :func:`cone`. The scenario 3 requires a constant basis function
     which can be given as a lambda function ``lambda x: constant``.
+    
+    The following shows an example of scenario 1 with non uniform heights and
+    widths.
+    
+    .. plot:: code/benchmarks/movingsc1.py
+       :width: 67 %
     """
     def __init__(self, pfunc, npeaks, dim, bfunc=None, random=random, **kargs):
         try:
@@ -226,7 +234,9 @@ class MovingPeaks:
             else:
                 self.peaks_width[i] = new_value
 
-SCENARIO_1 = {"min_coord": 0.0,
+SCENARIO_1 = {"pfunc" : function1,
+              "npeaks" : 5,
+              "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
               "max_height": 70.0,
@@ -239,7 +249,9 @@ SCENARIO_1 = {"min_coord": 0.0,
               "height_severity": 7.0,
               "width_severity": 0.01}
 
-SCENARIO_2 = {"min_coord": 0.0,
+SCENARIO_2 = {"pfunc" : cone,
+              "npeaks" : 10,
+              "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
               "max_height": 70.0,
@@ -252,7 +264,9 @@ SCENARIO_2 = {"min_coord": 0.0,
               "height_severity": 7.0,
               "width_severity": 1.0}
 
-SCENARIO_3 = {"min_coord": 0.0,
+SCENARIO_3 = {"pfunc" : cone,
+              "npeaks" : 50,
+              "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
               "max_height": 70.0,
