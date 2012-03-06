@@ -29,28 +29,6 @@ import random
 
 import tools
 
-def varSimple(toolbox, population, cxpb, mutpb):
-    """Part of the :func:`~deap.algorithmes.eaSimple` algorithm applying only
-    the variation part (crossover followed by mutation). The modified 
-    individuals have their fitness invalidated. The individuals are not cloned
-    so there can be twice a reference to the same individual.
-    
-    This function expects :meth:`toolbox.mate` and :meth:`toolbox.mutate`
-    aliases to be registered in the toolbox.
-    """
-    # Apply crossover and mutation on the offspring
-    for ind1, ind2 in zip(population[::2], population[1::2]):
-        if random.random() < cxpb:
-            toolbox.mate(ind1, ind2)
-            del ind1.fitness.values, ind2.fitness.values
-
-    for ind in population:
-        if random.random() < mutpb:
-            toolbox.mutate(ind)
-            del ind.fitness.values
-    
-    return population
-
 def varAnd(toolbox, population, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover **and** mutation). The modified individuals have their
@@ -217,49 +195,6 @@ def varOr(toolbox, population, lambda_, cxpb, mutpb):
     
     return offspring
 
-def varLambda(toolbox, population, lambda_, cxpb, mutpb):
-    """Part of the :func:`~deap.algorithms.eaMuPlusLambda` and
-    :func:`~deap.algorithms.eaMuCommaLambda` algorithms that produce the 
-    lambda new individuals. The modified individuals have their fitness 
-    invalidated. The individuals are not cloned so there can be twice a
-    reference to the same individual.
-    
-    This function expects :meth:`toolbox.mate` and :meth:`toolbox.mutate`
-    aliases to be registered in the toolbox.
-    """
-    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
-        "probabilities must be smaller or equal to 1.0.")
-        
-    offspring = []
-    nb_offspring = 0
-    while nb_offspring < lambda_:
-        op_choice = random.random()
-        if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = random.sample(population, 2)
-            ind1 = toolbox.clone(ind1)
-            ind2 = toolbox.clone(ind2)
-            toolbox.mate(ind1, ind2)
-            del ind1.fitness.values, ind2.fitness.values
-            offspring.append(ind1)
-            offspring.append(ind2)
-            nb_offspring += 2
-        elif op_choice < cxpb + mutpb:  # Apply mutation
-            ind = random.choice(population) # select
-            ind = toolbox.clone(ind) # clone
-            toolbox.mutate(ind)
-            del ind.fitness.values
-            offspring.append(ind)
-            nb_offspring += 1
-        else:                           # Apply reproduction
-            offspring.append(random.choice(population))
-            nb_offspring += 1
-    
-    # Remove the exedant of offspring
-    if nb_offspring > lambda_:
-        del offspring[lambda_:]
-    
-    return offspring
-
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, verbose=True):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm. First, 
@@ -391,81 +326,5 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
             stats.update(population)
         if verbose:
             logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
-
-    return population
-
-def varSteadyState(toolbox, population):
-    """Part of the :func:`~deap.algorithms.eaSteadyState` algorithm 
-    that produce the new individual by crossover of two randomly selected 
-    parents and mutation on one randomly selected child. The modified 
-    individual has its fitness invalidated. The individuals are not cloned so
-    there can be twice a reference to the same individual.
-    
-    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate` and
-    :meth:`toolbox.select` aliases to be
-    registered in the toolbox.
-    """
-    # Select two individuals for crossover
-    p1, p2 = random.sample(population, 2)
-    p1 = toolbox.clone(p1)
-    p2 = toolbox.clone(p2)
-    toolbox.mate(p1, p2)
-    
-    # Randomly choose amongst the offspring the returned child and mutate it
-    child = random.choice((p1, p2))
-    toolbox.mutate(child)
-    
-    return child,
-
-def eaSteadyState(toolbox, population, ngen, stats=None, halloffame=None,
-                  verbose=True):
-    """The steady-state evolutionary algorithm. Every generation, a single new
-    individual is produced and put in the population producing a population of
-    size :math:`lambda+1`, then :math:`lambda` individuals are kept according
-    to the selection operator present in the toolbox.
-    
-    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
-    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox.
-    """
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
-    
-    if halloffame is not None:
-        halloffame.update(population)
-    if stats is not None:
-        stats.update(population)
-
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
-
-    # Begin the generational process
-    for gen in range(ngen):
-        # Variate the population
-        child, = varSteadyState(toolbox, population)
-
-        # Evaluate the produced child
-        child.fitness.values = toolbox.evaluate(child)
-        
-        # Update the hall of fame
-        if halloffame is not None:
-            halloffame.update((child,))
-        
-        # Select the next generation population
-        population[:] = toolbox.select(population + [child], len(population))
-        
-        # Update the statistics with the new population
-        if stats is not None:
-            stats.update(population)
-        if verbose:
-            logger.logGeneration(evals=1, gen=gen, stats=stats)
 
     return population

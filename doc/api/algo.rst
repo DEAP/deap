@@ -20,11 +20,6 @@ log what is happening during the evolution.
 
 .. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
 
-.. autofunction:: deap.algorithms.eaSteadyState(toolbox, population, ngen[, stats, halloffame, logger])
-
-   .. deprecated:: 0.8
-      Use :func:`~deap.algorithms.eaMuPlusLambda` algorithm with :math:`\lambda=1`.
-
 Variations
 ----------
 Variations are smaller parts of the algorithms that can be used separately to
@@ -33,21 +28,6 @@ build more complex algorithms.
 .. autofunction:: deap.algorithms.varAnd
 
 .. autofunction:: deap.algorithms.varOr
-
-.. autofunction:: deap.algorithms.varSimple
-
-   .. deprecated:: 0.8
-      Use function :func:`~deap.algorithms.varAnd` instead.
-
-.. autofunction:: deap.algorithms.varLambda
-
-   .. deprecated:: 0.8
-      Use function :func:`~deap.algorithms.varOr` instead.
-
-.. autofunction:: deap.algorithms.varSteadyState
-
-   .. deprecated:: 0.8
-      Use function :func:`~deap.algorithms.varOr` instead.
 
 Covariance Matrix Adaptation Evolution Strategy
 ===============================================
