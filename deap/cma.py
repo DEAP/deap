@@ -24,52 +24,6 @@ import numpy
 import copy
 from math import sqrt, log, exp
 
-import tools
-
-def esCMA(toolbox, population, ngen, halloffame=None, stats=None,
-          verbose=True):
-    """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
-    Evolution Strategy: A Comparing Rewiew.*
-    
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param population: A list of individuals generated from the strategy.
-    :param ngen: The number of generation.
-    :param stats: A :class:`~deap.tools.Statistics` object that is updated
-                  inplace, optional.
-    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
-                       contain the best individuals, optional.
-    :param verbose: Whether or not to log the statistics.
-    
-    The *population* should have been generated from a strategy, while the
-    toolbox should contain a reference to the update method of the chosen
-    strategy.
-    """
-    if verbose:
-        if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            tools.EvolutionLogger(["gen", "evals"])
-        logger.logHeader()
-        
-    for gen in xrange(ngen):
-        # Evaluate the individuals
-        fitnesses = toolbox.map(toolbox.evaluate, population)
-        for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
-        
-        if halloffame is not None:
-            halloffame.update(population)
-        
-        # Update the Strategy with the evaluated individuals
-        toolbox.update(population)
-        
-        if stats is not None:
-            stats.update(population)
-        
-        if verbose:
-            logger.logGeneration(evals=len(population), gen=gen, stats=stats)
-
 class Strategy(object):
     """
     A strategy that will keep track of the basic parameters of the CMA-ES
@@ -202,11 +156,6 @@ class Strategy(object):
         self.diagD = self.diagD[indx]**0.5
         self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
-        
-        # Generate the individuals from the computed covariance matrix
-        # and replace the first lambda individuals of the population.
-        for ind, arzi in zip(population, self.generate(tools.identity)):
-            ind[:] = arzi   # This line does not allow ind to be of type array
 
     def computeParams(self, params):
         """Computes the parameters depending on *lambda_*. It needs to be
@@ -274,7 +223,7 @@ class StrategyOnePlusLambda(object):
         # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)        
-        return [ind_init(arzi) for arzi in arz]
+        return map(ind_init, arz)
     
     def update(self, population):
         population.sort(key=lambda ind: ind.fitness, reverse=True)
@@ -305,10 +254,4 @@ class StrategyOnePlusLambda(object):
         # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
         self.A = numpy.linalg.cholesky(self.C)
-        
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)
-        for ind, arzi in zip(population, arz):
-            del ind[:]
-            ind.extend(arzi)
         

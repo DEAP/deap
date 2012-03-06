@@ -20,6 +20,8 @@ log what is happening during the evolution.
 
 .. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
 
+.. autofunction:: deap.algorithms.eaGenerateUpdate(toolbox, ngen[, stats, halloffame, logger])
+
 Variations
 ----------
 Variations are smaller parts of the algorithms that can be used separately to
@@ -33,8 +35,6 @@ Covariance Matrix Adaptation Evolution Strategy
 ===============================================
 
 .. automodule:: deap.cma
-
-.. autofunction:: deap.cma.esCMA(toolbox, population, sigma, ngen[, stats, halloffame, logger])
 
 .. autoclass:: deap.cma.Strategy(centroid, sigma[, **kargs])
    :members:

@@ -393,3 +393,57 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
             logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
+
+def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, verbose=True):
+    """This is algorithm implements the ask-tell model proposed in [Colette2010]_,
+    where ask is called `generate` and tell is called `update`.
+    
+    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
+                    operators.
+    :param ngen: The number of generation.
+    :param stats: A :class:`~deap.tools.Statistics` object that is updated
+                  inplace, optional.
+    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
+                       contain the best individuals, optional.
+    :param verbose: Whether or not to log the statistics.
+
+    :returns: The final population.
+    
+    The toolbox should contain a reference to the generate and the update method 
+    of the chosen strategy.
+
+    .. [Colette2010] : Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and R. Le Riche (2010). 
+    On Object-Oriented Programming of Optimizers - Examples in Scilab. 
+    In P. Breitkopf and R. F. Coelho, eds.: Multidisciplinary Design Optimization in 
+    Computational Mechanics, Wiley, pp. 527-565;
+
+    """
+    if verbose:
+        if stats is not None:
+            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+        else:
+            tools.EvolutionLogger(["gen", "evals"])
+        logger.logHeader()
+    
+    for gen in xrange(ngen):
+        # Generate a new population
+        population = toolbox.generate()
+        # Evaluate the individuals
+        fitnesses = toolbox.map(toolbox.evaluate, population)
+        for ind, fit in zip(population, fitnesses):
+            ind.fitness.values = fit
+        
+        if halloffame is not None:
+            halloffame.update(population)
+        
+        # Update the strategy with the evaluated individuals
+        toolbox.update(population)
+        
+        if stats is not None:
+            stats.update(population)
+        
+        if verbose:
+            logger.logGeneration(evals=len(population), gen=gen, stats=stats)
+
+    return population
+
