@@ -78,7 +78,7 @@ Moving Peaks Benchmark
 
 .. automodule:: deap.benchmarks.movingpeaks
 
-.. autoclass:: deap.benchmarks.movingpeaks.MovingPeaks(self, pfunc, npeaks, dim[, bfunc][, random][, ...])
+.. autoclass:: deap.benchmarks.movingpeaks.MovingPeaks(self, dim[, pfunc][, npeaks][, bfunc][, random][, ...])
    :members:
 
 .. autofunction:: deap.benchmarks.movingpeaks.cone

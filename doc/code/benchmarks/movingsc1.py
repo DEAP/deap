@@ -19,7 +19,7 @@ sc = movingpeaks.SCENARIO_1
 sc["uniform_height"] = 0
 sc["uniform_width"] = 0
 
-mp = movingpeaks.MovingPeaks(random=rnd, dim=2, **sc)
+mp = movingpeaks.MovingPeaks(dim=2, random=rnd, **sc)
 
 fig = plt.figure()
 ax = Axes3D(fig)
@@ -33,7 +33,7 @@ for i in xrange(X.shape[0]):
         Z[i,j] = mp((X[i,j],Y[i,j]))[0]
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
- 
+
 plt.xlabel("x")
 plt.ylabel("y")
 
