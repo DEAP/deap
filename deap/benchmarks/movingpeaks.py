@@ -14,7 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Re-implementation of the `Moving Peak Benchmark 
+Re-implementation of the `Moving Peaks Benchmark 
 <http://people.aifb.kit.edu/jbr/MovPeaks/>`_ by Jurgen Branke.
 """
 
@@ -54,39 +54,40 @@ class MovingPeaks:
     """The Moving Peaks Benchmark is a fitness function changing over time. It
     consists of a number of peaks, changing in height, width and location. The
     peaks function is given by *pfunc*, wich is either a function object or a
-    list of function objects. The number of peaks is determined by *npeaks*,
-    while the dimensionality of the search domain is *dim*. A basis function
-    *bfunc* can also be given to act as static landscape (the default is no
-    basis function). The argument *random* serves to grant an independent
-    random number generator to the moving peaks so that the evolution is not
+    list of function objects (the default is :func:`function1`). The number of
+    peaks is determined by *npeaks* (which defaults to 5), while the
+    dimensionality of the search domain is *dim*. A basis function *bfunc* can
+    also be given to act as static landscape (the default is no basis
+    function). The argument *random* serves to grant an independent random
+    number generator to the moving peaks so that the evolution is not
     influenced by number drawn by this object (the default uses random
     functions from the Python module :mod:`random`). Various other keyword
     parameters listed in the table below are required to setup the benchmark,
     default parameters are based on scenario 1 of this benchmark.
     
-    =================== ================= =================================================================================================================
-    Parameter           Default               Details
-    =================== ================= =================================================================================================================
-    ``pfunc``           :func:`function1` The peak function.
-    ``npeaks``          5                 Number of peaks.
-    ``min_coord``       0.0               Minimum coordinate for the centre of the peaks.
-    ``max_coord``       100.0             Maximum coordinate for the centre of the peaks.
-    ``min_height``      30.0              Minimum height of the peaks.
-    ``max_height``      70.0              Maximum height of the peaks.
-    ``uniform_height``  50.0              Starting height for all peaks, if ``uniform_height <= 0`` the initial height is set randomly for each peak.
-    ``min_width``       0.0001            Minimum width of the peaks.
-    ``max_width``       0.2               Maximum width of the peaks
-    ``uniform_width``   0.1               Starting width for all peaks, if ``uniform_width <= 0`` the initial width is set randomly for each peak.
-    ``lambda_``         0.0               Correlation between changes.
-    ``move_severity``   1.0               The distance a single peak moves when peaks change.
-    ``height_severity`` 7.0               The standard deviation of the change made to the height of a peak when peaks change.
-    ``width_severity``  0.01              The standard deviation of the change made to the width of a peak when peaks change.
-    =================== ================= =================================================================================================================
+    =================== ============================= =================== =================== =================================================================================================================
+    Parameter           :data:`SCENARIO_1` (Default)  :data:`SCENARIO_2`  :data:`SCENARIO_3`    Details
+    =================== ============================= =================== =================== =================================================================================================================
+    ``pfunc``           :func:`function1`             :func:`cone`        :func:`cone`        The peak function or a list of peak function.
+    ``npeaks``          5                             10                  50                  Number of peaks.
+    ``bfunc``           :obj:`None`                   :obj:`None`         ``lambda x: 10``    Basis static function.
+    ``min_coord``       0.0                           0.0                 0.0                 Minimum coordinate for the centre of the peaks.
+    ``max_coord``       100.0                         100.0               100.0               Maximum coordinate for the centre of the peaks.
+    ``min_height``      30.0                          30.0                30.0                Minimum height of the peaks.
+    ``max_height``      70.0                          70.0                70.0                Maximum height of the peaks.
+    ``uniform_height``  50.0                          50.0                0                   Starting height for all peaks, if ``uniform_height <= 0`` the initial height is set randomly for each peak.
+    ``min_width``       0.0001                        1.0                 1.0                 Minimum width of the peaks.
+    ``max_width``       0.2                           12.0                12.0                Maximum width of the peaks
+    ``uniform_width``   0.1                           0                   0                   Starting width for all peaks, if ``uniform_width <= 0`` the initial width is set randomly for each peak.
+    ``lambda_``         0.0                           0.5                 0.5                 Correlation between changes.
+    ``move_severity``   1.0                           1.5                 1.0                 The distance a single peak moves when peaks change.
+    ``height_severity`` 7.0                           7.0                 1.0                 The standard deviation of the change made to the height of a peak when peaks change.
+    ``width_severity``  0.01                          1.0                 0.5                 The standard deviation of the change made to the width of a peak when peaks change.
+    =================== ============================= =================== =================== =================================================================================================================
     
     Dictionnaries :data:`SCENARIO_1`, :data:`SCENARIO_2` and
     :data:`SCENARIO_3` of this module define the defaults for these
-    parameters. For scenario 1, use :func:`function1` while for scenario 2 and
-    3, use :func:`cone`. The scenario 3 requires a constant basis function
+    parameters. The scenario 3 requires a constant basis function
     which can be given as a lambda function ``lambda x: constant``.
     
     The following shows an example of scenario 1 with non uniform heights and
@@ -95,33 +96,38 @@ class MovingPeaks:
     .. plot:: code/benchmarks/movingsc1.py
        :width: 67 %
     """
-    def __init__(self, pfunc, npeaks, dim, bfunc=None, random=random, **kargs):
+    def __init__(self, dim, random=random, **kargs):
+        # Scenario 1 is the default
+        sc = SCENARIO_1.copy()
+        sc.update(kargs)
+        
+        pfunc = sc.get("pfunc")
+        npeaks = sc.get("npeaks")
         try:
-            assert len(pfunc) == npeaks, ("Iterable pfunc must contain npeaks peaks.")
+            assert len(pfunc) == npeaks, ("Iterable pfunc must contain "
+                "npeaks (%d) peaks." % npeaks)
             self.peaks_function = pfunc
         except TypeError:
-            self.peaks_function = [f for f in itertools.repeat(pfunc, npeaks)]
+            self.peaks_function = list(itertools.repeat(pfunc, npeaks))
         
         self.random = random
-        self.basis_function = bfunc
+        self.basis_function = sc.get("bfunc")
         
-        # The following default values are based on Scenario #1 as proposed
-        # by Branke in its original implementation
-        self.min_coord = kargs.get("min_coord", 0.0)
-        self.max_coord = kargs.get("max_coord", 100.0)
+        self.min_coord = sc.get("min_coord")
+        self.max_coord = sc.get("max_coord")
         
-        self.min_height = kargs.get("min_height", 30.0)
-        self.max_height = kargs.get("max_height", 70.0)
-        uniform_height = kargs.get("uniform_height", 50.0)
+        self.min_height = sc.get("min_height")
+        self.max_height = sc.get("max_height")
+        uniform_height = sc.get("uniform_height")
         
-        self.min_width = kargs.get("min_width", 0.0001)
-        self.max_width = kargs.get("max_width", 0.2)
-        uniform_width = kargs.get("uniform_width", 0.1)
+        self.min_width = sc.get("min_width")
+        self.max_width = sc.get("max_width")
+        uniform_width = sc.get("uniform_width")
         
-        self.lambda_ = kargs.get("lambda_", 0.0)
-        self.move_severity = kargs.get("move_severity", 1.0)
-        self.height_severity = kargs.get("height_severity", 7.0)
-        self.width_severity = kargs.get("width_severity", 0.01)
+        self.lambda_ = sc.get("lambda_")
+        self.move_severity = sc.get("move_severity")
+        self.height_severity = sc.get("height_severity")
+        self.width_severity = sc.get("width_severity")
         
         #def randUniform(min, max):
         #    return self.random.random()*(max - min) + min
@@ -236,6 +242,7 @@ class MovingPeaks:
 
 SCENARIO_1 = {"pfunc" : function1,
               "npeaks" : 5,
+              "bfunc": None,
               "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
@@ -251,6 +258,7 @@ SCENARIO_1 = {"pfunc" : function1,
 
 SCENARIO_2 = {"pfunc" : cone,
               "npeaks" : 10,
+              "bfunc" : None,
               "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
@@ -266,6 +274,7 @@ SCENARIO_2 = {"pfunc" : cone,
 
 SCENARIO_3 = {"pfunc" : cone,
               "npeaks" : 50,
+              "bfunc" : lambda x: 10,
               "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
