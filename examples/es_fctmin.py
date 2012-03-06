@@ -39,18 +39,17 @@ def generateES(icls, scls, size, imin, imax, smin, smax):
     return ind
 
 def checkStrategy(minstrategy):
-    def decMinStrategy(func):
-        def wrapMinStrategy(*args, **kargs):
+    def decorator(func):
+        def wrappper(*args, **kargs):
             children = func(*args, **kargs)
             for child in children:
                 for i, s in enumerate(child.strategy):
                     if s < minstrategy:
                         child.strategy[i] = minstrategy
             return children
-        return wrapMinStrategy
-    return decMinStrategy
+        return wrappper
+    return decorator
 
-# Structure initializers
 toolbox = base.Toolbox()
 toolbox.register("individual", generateES, creator.Individual, creator.Strategy,
     IND_SIZE, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
@@ -60,8 +59,8 @@ toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.03)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", benchmarks.sphere)
 
-toolbox.decorate("mate", checkStrategy(0.5))
-toolbox.decorate("mutate", checkStrategy(0.5))
+toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
+toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
 
 def main():
     random.seed()

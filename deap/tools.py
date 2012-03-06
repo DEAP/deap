@@ -130,7 +130,7 @@ class History(object):
         
         # Create the population and populate the history
         population = toolbox.population(n=POPSIZE)
-        history.populate(population)
+        history.update(population)
         
         # Do the evolution, the decorators will take care of updating the
         # history
@@ -159,30 +159,30 @@ class History(object):
         self.genealogy_index = 0
         self.genealogy_history = dict()
         self.genealogy_tree = dict()
-    
-    def populate(self, individuals):
-        """Populate the history with the initial *individuals*. An attribute
-        :attr:`history_index` is added to every individual, this index will
-        help to track the parents and the children through evolution. This
-        index will be modified by the :meth:`update` method when a child is
-        produced. Modifying the internal :attr:`genealogy_index` of the
-        history or the :attr:`history_index` of an individual may lead to
-        unpredictable results and corruption of the history.
-        """
-        for ind in individuals:
-            self.genealogy_index += 1
-            ind.history_index = self.genealogy_index
-            self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
-            self.genealogy_tree[self.genealogy_index] = list()
         
     def update(self, individuals):
         """Update the history with the new *individuals*. The index present in
         their :attr:`history_index` attribute will be used to locate their
-        parents and modified to a unique one to keep track of those new
-        individuals. This method is called on each individual after each
-        variation.
+        parents, it is then modified to a unique one to keep track of those
+        new individuals. This method should be called on the individuals after
+        each variation.
+        
+        :param individuals: The list of modified individuals that shall be
+                            inserted in the history.
+        
+        If the *individuals* do not have a :attr:`history_index` attribute, 
+        the attribute is added and this individual is considered as having no
+        parent. This method should be called with the initial population to
+        initialize the history.
+        
+        Modifying the internal :attr:`genealogy_index` of the history or the
+        :attr:`history_index` of an individual may lead to unpredictable
+        results and corruption of the history.
         """
-        parent_indices = [ind.history_index for ind in individuals]
+        try:
+            parent_indices = tuple(ind.history_index for ind in individuals)
+        except AttributeError:
+            parent_indices = tuple()
         
         for ind in individuals:
             self.genealogy_index += 1
@@ -335,6 +335,11 @@ class Statistics(object):
     defaults to the identity function. A statistics object can be represented
     as multiple 3 dimensional matrix, for each registered function there is
     a matrix.
+    
+    :param key: A function to access the data on which to compute the
+                statistics, optional.
+    :param n: The number of independent statistics to maintain in this
+              statistics object.
 
     Along the first axis (wich length is given by the *n* argument) are
     independent statistics on different collections given this index in the 
@@ -387,6 +392,12 @@ class Statistics(object):
     def register(self, name, function):
         """Register a function *function* that will be apply on the sequence
         each time :func:`~deap.tools.Statistics.update` is called.
+        
+        :param name: The name of the statistics function as it would appear
+                     in the dictionnary of the statistics object.
+        :param function: A function that will compute the desired statistics
+                         on the data as preprocessed by the key.
+        
         The function result will be accessible by using the string given by
         the argument *name* as a function of the statistics object.
         ::
@@ -407,6 +418,12 @@ class Statistics(object):
         """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
         the data index *index*.
+        
+        :param seq: A sequence on which the key will be applied to get the
+                    data.
+        :param index: The index of the independent statistics object in which
+                      to add the computed statistics, optional.
+        
         ::
 
             >>> s = Statistics()
@@ -443,6 +460,10 @@ class EvolutionLogger(object):
     the provided columns must be given either as arguments or in the
     statistics object. The *precision* indicates the precision to use when
     logging statistics.
+    
+    :param columns: A list of strings of the name of the data as it will 
+                    appear in the statistics object, optional.
+    :param precision: Number of decimal digits to log, optional.
     """
     output = stdout
     """File object indicating where the log is written. By default log is
@@ -465,6 +486,11 @@ class EvolutionLogger(object):
         the *stats* object or as keyword argument. When loggin through the
         stats object, the last entry of the data under the column names at
         *index* is logged (*index* defaults to 0).
+        
+        :param stats: A statistics object containing the data to log, optional.
+        :param index: The index in the statistics, optional.
+        :param data: Kerword arguments of the data that is not in the
+                     statistics object, optional.
         
         Here is an example on how to use the logger with a statistics object
         ::
@@ -500,6 +526,9 @@ class HallOfFame(object):
     first fitness value ever seen, according to the weights provided to the
     fitness at creation time.
     
+    :param maxsize: The maximum number of individual to keep in the hall of
+                    fame.
+    
     The class :class:`HallOfFame` provides an interface similar to a list
     (without being one completely). It is possible to retrieve its length, to
     iterate on it forward and backward and to get an item or a slice from it.
@@ -514,6 +543,9 @@ class HallOfFame(object):
         worst individuals in it by the best individuals present in
         *population* (if they are better). The size of the hall of fame is
         kept constant.
+        
+        :param population: A list of individual with a fitness attribute to
+                           update the hall of fame with.
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
@@ -540,6 +572,9 @@ class HallOfFame(object):
         This method **does not** check for the size of the hall of fame, in a
         way that inserting a new individual in a full hall of fame will not
         remove the worst individual to maintain a constant size.
+        
+        :param item: The individual with a fitness attribute to insert in the
+                     hall of fame.
         """
         item = copy.deepcopy(item)
         i = bisect.bisect_right(self.keys, item.fitness)
@@ -547,7 +582,10 @@ class HallOfFame(object):
         self.keys.insert(i, item.fitness)
     
     def remove(self, index):
-        """Remove the specified *index* from the hall of fame."""
+        """Remove the specified *index* from the hall of fame.
+        
+        :param index: An integer giving which item to remove.
+        """
         del self.keys[len(self) - (index % len(self) + 1)]
         del self.items[index]
     
@@ -577,6 +615,9 @@ class ParetoFront(HallOfFame):
     that ever lived in the population. That means that the Pareto front hall of
     fame can contain an infinity of different individuals.
     
+    :param similar: A function that tels the Pareto front whether or not two
+                    individuals are similar, optional.
+    
     The size of the front may become very large if it is used for example on
     a continuous function with a continuous domain. In order to limit the number
     of individuals, it is possible to specify a similarity function that will
@@ -596,6 +637,9 @@ class ParetoFront(HallOfFame):
         the individuals from the population that are not dominated by the hall
         of fame. If any individual in the hall of fame is dominated it is
         removed.
+        
+        :param population: A list of individual with a fitness attribute to
+                           update the hall of fame with.
         """
         for ind in population:
             is_dominated = False
@@ -1379,6 +1423,8 @@ def sortFastND(individuals, k, first_front_only=False):
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
+    :param first_front_only: If :obj:`True` sort only the first front and
+                             exit.
     :returns: A list of Pareto fronts (lists), with the first list being the
     true Pareto front.
     """
