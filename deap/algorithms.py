@@ -412,17 +412,18 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, verbose=True):
     The toolbox should contain a reference to the generate and the update method 
     of the chosen strategy.
 
-    .. [Colette2010] : Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and R. Le Riche (2010). 
-    On Object-Oriented Programming of Optimizers - Examples in Scilab. 
-    In P. Breitkopf and R. F. Coelho, eds.: Multidisciplinary Design Optimization in 
-    Computational Mechanics, Wiley, pp. 527-565;
+    .. [Colette2010] Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and
+       R. Le Riche (2010). On Object-Oriented Programming of Optimizers -
+       Examples in Scilab. In P. Breitkopf and R. F. Coelho, eds.:
+       Multidisciplinary Design Optimization in Computational Mechanics,
+       Wiley, pp. 527-565;
 
     """
     if verbose:
+        column_names = ["gen", "evals"]
         if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            tools.EvolutionLogger(["gen", "evals"])
+            column_names += stats.functions.keys()
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
     for gen in xrange(ngen):
