@@ -80,7 +80,7 @@ def varAnd(toolbox, population, cxpb, mutpb):
     return offspring
 
 def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=True):
+             halloffame=None, verbose=__debug__):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
     
@@ -229,7 +229,7 @@ def varOr(toolbox, population, lambda_, cxpb, mutpb):
     return offspring
 
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
-                   stats=None, halloffame=None, verbose=True):
+                   stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm.
     
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
@@ -311,7 +311,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     return population
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
-                    stats=None, halloffame=None, verbose=True):
+                    stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
     
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
@@ -394,7 +394,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
 
     return population
 
-def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, verbose=True):
+def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
+                     verbose=__debug__):
     """This is algorithm implements the ask-tell model proposed in [Colette2010]_,
     where ask is called `generate` and tell is called `update`.
     
