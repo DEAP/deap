@@ -23,7 +23,6 @@ also contains utility tools to enhance the basic algorithms with
 from __future__ import division
 import bisect
 import copy
-import inspect
 import math
 import random
 
@@ -1729,7 +1728,6 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     
 if __name__ == "__main__":
     import doctest
-    import os
     
     random.seed(64)
     doctest.run_docstring_examples(initRepeat, globals())
