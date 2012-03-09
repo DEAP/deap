@@ -882,15 +882,11 @@ def cxBlend(ind1, ind2, alpha):
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    size = min(len(ind1), len(ind2))
-    
-    for i in xrange(size):
+    for i, (x1, x2) in enumerate(zip(ind1, ind2)):
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        x1 = ind1[i]
-        x2 = ind2[i]
         ind1[i] = (1. - gamma) * x1 + gamma * x2
         ind2[i] = gamma * x1 + (1. - gamma) * x2
-    
+
     return ind1, ind2
 
 def cxSimulatedBinary(ind1, ind2, eta):
