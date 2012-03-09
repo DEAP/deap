@@ -322,7 +322,7 @@ def zdt6(individual):
     """
     g  = 1 + 9 * (sum(individual[1:]) / (len(individual)-1))**0.25
     f1 = 1 - exp(-4*individual[0]) * sin(6*pi*individual[0])**6
-    f2 = g * (1 - (f1/g1)**2)
+    f2 = g * (1 - (f1/g)**2)
     return f1, f2
     
 def fonseca(individual):
