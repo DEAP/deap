@@ -1,6 +1,6 @@
 """Module containing tools that are useful when benchmarking algorithms
 """
-from math import sqrt
+from math import hypot, sqrt
 from functools import wraps
 from itertools import repeat
 try:
@@ -204,19 +204,17 @@ def diversity(first_front, first, last):
     of the front as explained in the original NSGA-II article by K. Deb.
     The smaller is the value, the better is the front.
     """
-    n = len(first_front)
+    df = hypot(first_front[0].fitness.values[0] - first[0],
+               first_front[0].fitness.values[1] - first[1])
+    dl = hypot(first_front[-1].fitness.values[0] - last[0],
+               first_front[-1].fitness.values[1] - last[1])
+    dt = [hypot(first.fitness.values[0] - second.fitness.values[0],
+                first.fitness.values[1] - second.fitness.values[1])
+          for first, second in zip(first_front[:-1], first_front[1:])]
 
-    df = sqrt((first_front[0].fitness.values[0] - first[0])**2 +
-              (first_front[0].fitness.values[1] - first[1])**2)
-    dl = sqrt((first_front[-1].fitness.values[0] - last[0])**2 +
-              (first_front[-1].fitness.values[1] - last[1])**2)
-    d = [0.0] * (n-1)
-    for i in xrange(len(d)):
-       d[i] = sqrt((first_front[i].fitness.values[0] - first_front[i+1].fitness.values[0])**2 +
-                   (first_front[i].fitness.values[1] - first_front[i+1].fitness.values[1])**2)
-    dm = sum(d)/len(d)
-    di = sum(abs(d_i - dm) for d_i in d)
-    delta = (df + dl + di)/(df + dl + len(d) * dm )
+    dm = sum(dt)/len(dt)
+    di = sum(abs(d_i - dm) for d_i in dt)
+    delta = (df + dl + di)/(df + dl + len(dt) * dm )
     return delta
 
 def convergence(first_front, optimal_front):
