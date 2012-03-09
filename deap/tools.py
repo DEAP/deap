@@ -904,17 +904,13 @@ def cxSimulatedBinary(ind1, ind2, eta):
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    size = min(len(ind1), len(ind2))
-    
-    for i in xrange(size):
+    for i, (x1, x2) in enumerate(zip(ind1, ind2)):
         rand = random.random()
         if rand <= 0.5:
             beta = 2. * rand
         else:
             beta = 1. / (2. * (1. - rand))
         beta **= 1. / (eta + 1.)
-        x1 = ind1[i]
-        x2 = ind2[i]
         ind1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
         ind2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
