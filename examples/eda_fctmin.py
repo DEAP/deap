@@ -26,7 +26,7 @@ from deap import tools
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", numpy.ndarray, fitness=creator.FitnessMin)
 
-class EDA:
+class EDA(object):
     def __init__(self, centroid, sigma, mu, lambda_):
         self.dim = len(centroid)
         self.loc = numpy.array(centroid)
