@@ -29,6 +29,8 @@ import random
 
 import tools
 
+import numpy
+
 def varAnd(toolbox, population, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover **and** mutation). The modified individuals have their
@@ -209,24 +211,22 @@ def varOr(toolbox, population, lambda_, cxpb, mutpb):
     """
     assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
         "probabilities must be smaller or equal to 1.0.")
-        
-    offspring = []
-    for _ in xrange(lambda_):
-        op_choice = random.random()
-        if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = [toolbox.clone(ind) for ind in random.sample(population, 2)]
-            toolbox.mate(ind1, ind2)
-            del ind1.fitness.values
-            offspring.append(ind1)
-        elif op_choice < cxpb + mutpb:  # Apply mutation
-            ind = toolbox.clone(random.choice(population))
-            toolbox.mutate(ind)
-            del ind.fitness.values
-            offspring.append(ind)
-        else:                           # Apply reproduction
-            offspring.append(random.choice(population))
     
-    return offspring
+    ncx, nmut, nrep = numpy.random.multinomial(lambda_, (cxpb, mutpb, 1-cxpb-mutpb))
+    offcx = map(toolbox.clone, tools.selRandom(population, 2*ncx))
+    offmut = map(toolbox.clone, tools.selRandom(population, nmut))
+    offrep = map(toolbox.clone, tools.selRandom(population, nmut))
+
+    for ind1, ind2 in offcx:
+        toolbox.mate(ind1, ind2)
+        del ind1.fitness.values, ind2.fitness.values
+    offcx = offcx[::2]
+
+    for ind in offmut:
+        toolbox.mutate(ind)
+        del ind.fitness.values
+    
+    return random.shuffle(offcx + offmut + offrep)
 
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, verbose=True):

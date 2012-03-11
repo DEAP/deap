@@ -1026,21 +1026,16 @@ def cxESBlend(ind1, ind2, alpha):
                   for each attribute on both side of the parents' attributes.
     :returns: A tuple of two evolution strategies.
     """
-    size = min(len(ind1), len(ind2))
-    
-    for indx in xrange(size):
+    for i, (x1, s1, x2, s2) in enumerate(zip(ind1, ind1.strategy, 
+                                             ind2, ind2.strategy)):
         # Blend the values
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        x1 = ind1[indx]
-        x2 = ind2[indx]
-        ind1[indx] = (1. - gamma) * x1 + gamma * x2
-        ind2[indx] = gamma * x1 + (1. - gamma) * x2
+        ind1[i] = (1. - gamma) * x1 + gamma * x2
+        ind2[i] = gamma * x1 + (1. - gamma) * x2
         # Blend the strategies
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        s1 = ind1.strategy[indx]
-        s2 = ind2.strategy[indx]
-        ind1.strategy[indx] = (1. - gamma) * s1 + gamma * s2
-        ind2.strategy[indx] = gamma * s1 + (1. - gamma) * s2
+        ind1.strategy[i] = (1. - gamma) * s1 + gamma * s2
+        ind2.strategy[i] = gamma * s1 + (1. - gamma) * s2
     
     return ind1, ind2
 
