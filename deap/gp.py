@@ -25,10 +25,9 @@ import copy
 import random
 import sys
 
-import base
-
-from itertools import repeat
 from collections import defaultdict
+
+import base
 
 # Define the name of type for any types.
 __type__ = None
