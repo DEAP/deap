@@ -56,7 +56,7 @@ to the :func:`main` function). The single line that is related to the provided
 algorithm in the call to the :func:`main` function.
 
 .. literalinclude:: /code/examples/bbob.py
-   :lines: 89-135
+   :lines: 26,27,28,89-135
 
 Once these experiments are done, the data contained in the :dir:`ouput`
 directory can be used to build the results document. See the `BBOB
