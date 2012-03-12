@@ -48,11 +48,13 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 
 	import multiprocessing
 	
-	pool = multiprocessing.pool()
+	pool = multiprocessing.Pool()
 	toolbox.register("map", pool.map)
 	
 	# Continue on with the evolutionary algorithm
-
+   
+   # Under Windows, the pool must be closed or bad things happen
+   pool.close()
 
 .. note::
    While Python 2.6 is required for the multiprocessing module, the pickling
