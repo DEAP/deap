@@ -1081,7 +1081,7 @@ def mutGaussian(individual, mu, sigma, indpb):
     
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
-    """        
+    """
     for i in xrange(len(individual)):
         if random.random() < indpb:
             individual[i] += random.gauss(mu, sigma)
