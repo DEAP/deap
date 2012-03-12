@@ -55,7 +55,7 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 
 .. warning::
    As stated in the :mod:`multiprocessing` guidelines, under Windows, a
-   process pool must be protected in a ``if __name__ == "__mains__"`` section
+   process pool must be protected in a ``if __name__ == "__main__"`` section
    because of the way processes are initialized.
 
 .. note::
