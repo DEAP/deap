@@ -52,9 +52,11 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 	toolbox.register("map", pool.map)
 	
 	# Continue on with the evolutionary algorithm
-   
-   # Under Windows, the pool must be closed or bad things happen
-   pool.close()
+
+.. warning::
+   As stated in the :mod:`multiprocessing` guidelines, under Windows, a
+   process pool must be protected in a ``if __name__ == "__mains__"`` section
+   because of the way processes are initialized.
 
 .. note::
    While Python 2.6 is required for the multiprocessing module, the pickling
