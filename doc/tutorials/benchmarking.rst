@@ -45,7 +45,7 @@ Running the Benchmark
 
 Now that the algorithm is ready, it is time to run it under the BBOB. The
 following code is taken from the BBOB example with added comments. The
-:mod:`cocoexp` module provides a :class:`Logger`, which take care of
+:mod:`fgeneric` module provides a :class:`LoggingFunction`, which take care of
 outputting all necessary data to compare the tested algorithm with the other
 ones published and to be published.
 
@@ -58,7 +58,7 @@ algorithm in the call to the :func:`main` function.
 .. literalinclude:: /code/examples/bbob.py
    :lines: 26,27,28,89-135
 
-Once these experiments are done, the data contained in the :dir:`ouput`
+Once these experiments are done, the data contained in the :file:`ouput`
 directory can be used to build the results document. See the `BBOB
 <http://coco.gforge.inria.fr/>`_ web site on how to build the document.
 

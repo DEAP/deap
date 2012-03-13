@@ -23,7 +23,7 @@ from deap import base
 from deap import creator
 from deap import benchmarks
 
-import cocoexp
+import fgeneric
 import bbobbenchmarks as bn
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     
     # Create a COCO experiment that will log the results under the
     # ./output directory
-    e = cocoexp.Logger("output")
+    e = fgeneric.LoggingFunction("output")
     
     # Iterate over all desired test dimensions
     for dim in (2, 3, 5, 10, 20, 40):
