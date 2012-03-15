@@ -82,7 +82,7 @@ def varAnd(toolbox, population, cxpb, mutpb):
     return offspring
 
 def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=True):
+             halloffame=None, verbose=__debug__):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
     
@@ -229,7 +229,7 @@ def varOr(toolbox, population, lambda_, cxpb, mutpb):
     return random.shuffle(offcx + offmut + offrep)
 
 def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
-                   stats=None, halloffame=None, verbose=True):
+                   stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm.
     
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
@@ -311,7 +311,7 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
     return population
     
 def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
-                    stats=None, halloffame=None, verbose=True):
+                    stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
     
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
@@ -394,7 +394,8 @@ def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
 
     return population
 
-def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, verbose=True):
+def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
+                     verbose=__debug__):
     """This is algorithm implements the ask-tell model proposed in [Colette2010]_,
     where ask is called `generate` and tell is called `update`.
     
@@ -412,17 +413,18 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, verbose=True):
     The toolbox should contain a reference to the generate and the update method 
     of the chosen strategy.
 
-    .. [Colette2010] : Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and R. Le Riche (2010). 
-    On Object-Oriented Programming of Optimizers - Examples in Scilab. 
-    In P. Breitkopf and R. F. Coelho, eds.: Multidisciplinary Design Optimization in 
-    Computational Mechanics, Wiley, pp. 527-565;
+    .. [Colette2010] Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and
+       R. Le Riche (2010). On Object-Oriented Programming of Optimizers -
+       Examples in Scilab. In P. Breitkopf and R. F. Coelho, eds.:
+       Multidisciplinary Design Optimization in Computational Mechanics,
+       Wiley, pp. 527-565;
 
     """
     if verbose:
+        column_names = ["gen", "evals"]
         if stats is not None:
-            logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
-        else:
-            tools.EvolutionLogger(["gen", "evals"])
+            column_names += stats.functions.keys()
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
     for gen in xrange(ngen):

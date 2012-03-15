@@ -11,15 +11,10 @@ For more information about this problem, see :ref:`refPapersParity`.
 Primitives set used
 ===================
 
-Parity uses standard Boolean operators as primitives, available in the Python operator module : ::
+Parity uses standard Boolean operators as primitives, available in the Python operator module :
     
-    pset = gp.PrimitiveSet("MAIN", PARITY_FANIN_M, "IN")
-    pset.addPrimitive(operator.and_, 2)
-    pset.addPrimitive(operator.or_, 2)
-    pset.addPrimitive(operator.xor, 2)
-    pset.addPrimitive(operator.not_, 1)
-    pset.addTerminal(1)
-    pset.addTerminal(0)
+.. literalinclude:: /code/examples/gp_parity.py
+   :lines: 47-53
     
 In addition to the *n* inputs, we add two constant terminals, one at 0, one at 1.
 
@@ -30,26 +25,20 @@ In addition to the *n* inputs, we add two constant terminals, one at 0, one at 1
 Evaluation function
 ===================
 
-In this implementation, the fitness of a Parity individual is simply the number of successful cases. Thus, the fitness is maximized, and the maximum value is 64 in the case of a 6 inputs problems. ::
+In this implementation, the fitness of a Parity individual is simply the number of successful cases. Thus, the fitness is maximized, and the maximum value is 64 in the case of a 6 inputs problems.
     
-    def evalParity(individual):
-        func = toolbox.lambdify(expr=individual)
-        good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
-        return good,
+.. literalinclude:: /code/examples/gp_parity.py
+   :pyobject: evalParity
 
 `inputs` and `outputs` are two pre-generated lists, to speedup the evaluation, mapping a given input vector to the good output bit. The Python :func:`sum` function works  on booleans (false is interpreted as 0 and true as 1), so the evaluation function boils down to sum the number of successful tests : the higher this sum, the better the individual.
 
 
-Complete example
-================
+Conclusion
+==========
 
-The other parts of the program are greatly the same as the :ref:`Symbolic Regression algorithm <symbreg>` :
-    
-.. literalinclude:: /code/examples/gp_parity.py
-    :lines: 20-
+The other parts of the program are mostly the same as the :ref:`Symbolic Regression algorithm <symbreg>`.
 
-.. note:: The import of the Python standard library modules are not shown.
-
+The complete example: [`source code <code/gp_parity.py>`_]
 
 .. _refPapersParity:
 

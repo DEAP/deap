@@ -51,6 +51,14 @@ Particle Swarm Optimization (PSO)
 
 	pso_basic
 
+Estimation of Distribution Algorithms (EDA)
+-------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+   
+   eda
+
 Distributed Task Manager (DTM)
 ------------------------------
 .. toctree::

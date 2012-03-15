@@ -133,12 +133,10 @@ def main():
     for g in range(1, MAXGEN):
         
         hosts = htoolbox.select(hosts, len(hosts))
-        hosts = [htoolbox.clone(ind) for ind in hosts]
         parasites = ptoolbox.select(parasites, len(parasites))
-        parasites = [ptoolbox.clone(ind) for ind in parasites]
         
-        hosts = algorithms.varSimple(htoolbox, hosts, H_CXPB, H_MUTPB)
-        parasites = algorithms.varSimple(ptoolbox, parasites, P_CXPB, P_MUTPB)
+        hosts = algorithms.varAnd(htoolbox, hosts, H_CXPB, H_MUTPB)
+        parasites = algorithms.varAnd(ptoolbox, parasites, P_CXPB, P_MUTPB)
         
         fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
         for host, parasite, fit in zip(hosts, parasites, fits):

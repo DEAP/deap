@@ -63,8 +63,7 @@ toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalParity(individual):
     func = toolbox.lambdify(expr=individual)
-    good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
-    return good,
+    return sum(func(*in_) == out for in_, out in zip(inputs, outputs)),
 
 toolbox.register("evaluate", evalParity)
 toolbox.register("select", tools.selTournament, tournsize=3)

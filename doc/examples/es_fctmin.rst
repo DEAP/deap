@@ -19,7 +19,7 @@ function, which gives the following classes creation.
 
 The initialization function for an evolution strategy is not defined by DEAP.
 The following generation function takes as argument the class of individual
-to instanciate, *icls*. It also takes the class of strategy to use as
+to instantiate, *icls*. It also takes the class of strategy to use as
 strategy, *scls*. The next arguments are the minimum and maximum values for
 the individual and strategy attributes. The strategy is added in the
 :attr:`strategy` member of the returned individual.
