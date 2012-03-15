@@ -30,7 +30,6 @@ toolbox.register("individual", tools.initRepeat, creator.Individual,
     toolbox.attr_bool, 100)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-@toolbox.register("evaluate")
 def evalOneMax(individual):
     return sum(individual),
 
