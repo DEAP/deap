@@ -48,11 +48,15 @@ Using the :mod:`multiprocessing` module is exactly similar to using the distribu
 
 	import multiprocessing
 	
-	pool = multiprocessing.pool()
+	pool = multiprocessing.Pool()
 	toolbox.register("map", pool.map)
 	
 	# Continue on with the evolutionary algorithm
 
+.. warning::
+   As stated in the :mod:`multiprocessing` guidelines, under Windows, a
+   process pool must be protected in a ``if __name__ == "__main__"`` section
+   because of the way processes are initialized.
 
 .. note::
    While Python 2.6 is required for the multiprocessing module, the pickling

@@ -250,8 +250,14 @@ class Checkpoint(object):
         added under the name specified by the argument *name*, the object
         added is *object*, and the *key* argument allow to specify a subpart
         of the object that should be dumped (*key* defaults to an identity key
-        that dumps the entire object). The following illustrates how to use the
-        key.
+        that dumps the entire object).
+        
+        :param name: The name under which the object will be dumped.
+        :param object: The object to register for dumping.
+        :param key: A function access the subcomponent of the object to dump,
+                    optional.
+        
+        The following illustrates how to use the key.
         ::
 
             >>> from operator import itemgetter
@@ -270,6 +276,9 @@ class Checkpoint(object):
     def remove(self, *args):
         """Remove objects with the specified name from the list of objects to
         be dumped.
+        
+        :param name: The name of one or more object to remove from dumping.
+        
         """
         for element in args:
             del self.objects[element]
@@ -281,7 +290,9 @@ class Checkpoint(object):
 
     def dump(self, file):
         """Dump the current registered object values in the provided
-        filestream.
+        *filestream*.
+        
+        :param filestream: A stream in which write the data.
         """
         self.values = dict.fromkeys(self.objects.iterkeys())
         for name, key in self.keys.iteritems():
@@ -289,10 +300,12 @@ class Checkpoint(object):
         pickle.dump(self.values, file)
 
     def load(self, file):
-        """Load a checkpoint from the provided filestream retrieving the
+        """Load a checkpoint from the provided *filestream* retrieving the
         dumped object values, it is not safe to load a checkpoint file in a
         checkpoint object that contains references as all conflicting names
         will be updated with the new values.
+        
+        :param filestream: A stream from which to read a checkpoint.
         """
         self.values.update(pickle.load(file))
 
@@ -1183,16 +1196,16 @@ def mutFlipBit(individual, indpb):
 
 def mutESLogNormal(individual, c, indpb):
     """Mutate an evolution strategy according to its :attr:`strategy`
-    attribute as described in [Beyer2002]_. The individual is first mutated by
-    a normal distribution of mean 0 and standard deviation of
-    :math:`\\boldsymbol{\sigma}_{t-1}` (its current strategy) then the
-    strategy is mutated according to an extended log normal rule,
-    :math:`\\boldsymbol{\sigma}_t = \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[
-    \\sigma_{t-1, 1}\\exp(\\tau \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n}
-    \\exp(\\tau \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
-    \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`.
-    A recommended choice is ``c=1`` when using a :math:`(10, 100)` evolution
-    strategy [Beyer2002]_ [Schwefel1995]_.
+    attribute as described in [Beyer2002]_. First the strategy is mutated
+    according to an extended log normal rule, :math:`\\boldsymbol{\sigma}_t =
+    \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[ \\sigma_{t-1, 1}\\exp(\\tau
+    \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n} \\exp(\\tau
+    \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
+    \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`,
+    the the individual is mutated by a normal distribution of mean 0 and
+    standard deviation of :math:`\\boldsymbol{\sigma}_{t}` (its current
+    strategy) then . A recommended choice is ``c=1`` when using a :math:`(10,
+    100)` evolution strategy [Beyer2002]_ [Schwefel1995]_.
     
     :param individual: Individual to be mutated.
     :param c: The learning parameter.
@@ -1213,8 +1226,8 @@ def mutESLogNormal(individual, c, indpb):
     
     for indx in xrange(size):
         if random.random() < indpb:
-            individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
             individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
+            individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
     
     return individual,
     

@@ -49,12 +49,12 @@ toolbox.register("mate", tools.cxTwoPoints)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-# Process Pool of 4 workers
-pool = multiprocessing.Pool(processes=4)
-toolbox.register("map", pool.map)
-
 if __name__ == "__main__":
     random.seed(64)
+    
+    # Process Pool of 4 workers
+    pool = multiprocessing.Pool(processes=4)
+    toolbox.register("map", pool.map)
     
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
@@ -63,6 +63,8 @@ if __name__ == "__main__":
     stats.register("std", tools.std)
     stats.register("min", min)
     stats.register("max", max)
-    
+
     algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, 
                         stats=stats, halloffame=hof)
+
+    pool.close()
