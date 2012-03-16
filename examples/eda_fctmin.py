@@ -24,7 +24,7 @@ from deap import creator
 from deap import tools
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", numpy.ndarray, fitness=creator.FitnessMin)
+creator.create("Individual", numpy.ndarray, fitness=creator.FitnessMin) 
 
 class EDA(object):
     def __init__(self, centroid, sigma, mu, lambda_):
@@ -36,7 +36,7 @@ class EDA(object):
     
     def generate(self, ind_init):
         # Generate lambda_ individuals and put them into the provided class
-        arz = numpy.random.normal(self.loc, self.sigma, (self.lambda_, self.dim))
+        arz = self.sigma * numpy.random.randn(self.lambda_, self.dim) + self.loc
         return map(ind_init, arz)
     
     def update(self, population):
@@ -45,15 +45,15 @@ class EDA(object):
         
         # Compute the average of the mu best individuals
         z = sorted_pop[:self.mu] - self.loc
-        avg = numpy.sum(z, axis=0) / self.mu
+        avg = numpy.mean(z, axis=0)
         
-        # Adjust variance of the distribution
-        self.sigma = numpy.sqrt(numpy.linalg.norm(z - avg)**2 / (self.mu * self.dim))
+        # Adjust variances of the distribution
+        self.sigma = numpy.sqrt(numpy.sum((z - avg)**2, axis=0) / (self.mu - 1.0))
         self.loc = self.loc + avg
 
 def main():
     N, LAMBDA = 30, 1000
-    strategy = EDA(centroid=[5.0]*N, sigma=5.0, mu=LAMBDA/4, lambda_=LAMBDA)
+    strategy = EDA(centroid=[5.0]*N, sigma=[5.0]*N, mu=LAMBDA/4, lambda_=LAMBDA)
     
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.rastrigin)
