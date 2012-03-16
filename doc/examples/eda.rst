@@ -21,8 +21,8 @@ is adapted from the population. The following :class:`EDA` class do just that.
    :pyobject: EDA
 
 A normal random number generator is initialized with a certain mean
-(*centroid*) and standard deviation (*sigma*), which is uniform in all
-dimension [1]_. The :meth:`generate` method uses numpy to generate *lambda_*
+(*centroid*) and standard deviation (*sigma*) for each 
+dimension. The :meth:`generate` method uses numpy to generate *lambda_*
 sequences in *dim* dimensions, then the sequences are used to initialize
 individuals of class given in the *ind_init* argument. Finally, the
 :meth:`update` computes the average (centre) of the `mu` best individuals and
@@ -52,7 +52,4 @@ method, we set the class that the individuals are transferred in to our
 .. literalinclude:: /code/examples/eda_fctmin.py
    :pyobject: main
 
-The complete example : [`source code <code/eda_fctmin.py>`_].
-
-.. [1] More complex estimation of distribution algorithms estimate
-   problem distribution with other distributions.  
+The complete example : [`source code <code/eda_fctmin.py>`_]. 
