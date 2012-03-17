@@ -12,7 +12,7 @@ other tools.
 A First Individual
 ------------------
 
-First import the required modules and register the different fonctions required to create individuals that are a list of floats with a minimizing  two objectives fitness.
+First import the required modules and register the different functions required to create individuals that are a list of floats with a minimizing  two objectives fitness.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 2-16
@@ -36,12 +36,12 @@ The evaluation is the most personal part of an evolutionary algorithm, it is
 the only part of the library that you must write your-self. A typical
 evaluation function takes one individual as argument and return its fitness as
 a :class:`tuple`. As shown in the in the :ref:`core` section, a fitness is a list of floating point values and has a
-property :attr:`valid` to know if this individual shall be re-evaluated. The
+property :attr:`~deap.base.Fitness.valid` to know if this individual shall be re-evaluated. The
 fitness is set by setting the :attr:`~deap.base.Fitness.values` to the
 associated :class:`tuple`. For example, the following evaluates the previously created individual ``ind1`` and assign its fitness to the corresponding values.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
-   :lines: 23-31
+   :lines: 24-32
 
 Dealing with single objective fitness is not different, the evaluation function **must** return a tuple because single-objective is treated as a special case of multi-objective.
 
@@ -133,7 +133,8 @@ initializers to the evaluation operator. It allows easy configuration of each
 algorithms. The toolbox has basically two methods,
 :meth:`~deap.toolbox.Toolbox.register` and
 :meth:`~deap.toolbox.Toolbox.unregister`, that are used to add or remove tools
-from the toolbox. A shown :ref:`earlier <creating-types>` for initialization.
+from the toolbox.
+
 This part of the tutorial will focus on registration of the evolutionary tools
 in the toolbox rather than the initialization tools. The usual names for the
 evolutionary tools are :func:`~deap.mate`, :func:`~deap.mutate`,
@@ -154,7 +155,7 @@ Using the Tools
 +++++++++++++++
 When building evolutionary algorithms the toolbox is used to contain the
 operators, which are called using their generic name. For example, here is a
-very small sample of a simple generational evolutionary algorithm.
+very simple generational evolutionary algorithm.
 
 .. literalinclude:: /code/tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 30-
@@ -187,18 +188,18 @@ individuals. The mutation is often considered to return a single individual
 but again like for the evaluation, the single individual case is a special
 case of the multiple individual case.
 
-|more| For more information on decorator, see 
-`Introduction to Decorator <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ 
+|more| For more information on decorators, see 
+`Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ 
 and `Python Decorator Libary <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
 
 Variations
 ----------
-Variations allows to build simple algorithms using predefined small parts. In
-order to use a variation, the toolbox must be setuped to contain the required
+Variations allows to build simple algorithms using predefined small building blocks. In
+order to use a variation, the toolbox must be set to contain the required
 operators. For example in the lastly presented complete algorithm, the
 crossover and mutation are regrouped in the :func:`~deap.algorithms.varAnd`
-function, this function requires the toolbox to contain a :func:`~deap.mate`
-and a :func:`~deap.mutate` functions. The variations can be used to simplify
+function, this function requires the toolbox to contain the :func:`~deap.mate`
+and :func:`~deap.mutate` functions. The variations can be used to simplify
 the writing of an algorithm as follow.
 
 .. literalinclude:: /code/tutorials/part_3/3_7_variations.py
@@ -209,17 +210,17 @@ build algorithms that are very close to the pseudo-code.
 
 Algorithms
 ----------
-There is several algorithms implemented in a couple modules and examples, but
-principally in the :mod:`~deap.algorithms` module. They are very simple and
+There is several algorithms implemented in the :mod:`~deap.algorithms` module.
+They are very simple and
 reflect the basic types of evolutionary algorithms present in the literature.
 The algorithms use a :class:`~deap.base.Toolbox` as defined in the last
 sections. In order to setup a toolbox for an algorithm, you must register the
 desired operators under a specified names, refer to the documentation of the
 selected algorithm for more details. Once the toolbox is ready, it is time to
 launch the algorithm. The simple evolutionary algorithm takes 5 arguments, a
-*toolbox*, a *population*, a propability of mating each individual at each
-generation (*cxpb*), a propability of mutating each individual at each
-generation (*mutpb*) and a max number of generations (*ngen*).
+*toolbox*, a *population*, a probability of mating each individual at each
+generation (*cxpb*), a probability of mutating each individual at each
+generation (*mutpb*) and a number of generations to accomplish (*ngen*).
 
 .. literalinclude:: /code/tutorials/part_3/3_8_algorithms.py
    :lines: 33-

@@ -12,7 +12,8 @@ DEAP is all about along with what every DEAP program is made of.
 Types
 -----
 The first thing to do is to think of the appropriate type for your problem.
-As we said above, DEAP enables you to build your own types, this is done with
+Then, instead of looking in the list of available types, DEAP enables you to
+build your own. This is done with
 the :mod:`~deap.creator` module. Creating an appropriate type might seems
 overwhelming but the creator makes it very easy. In fact, this is usually done
 in a single line. For example, the following creates a :class:`FitnessMin` class
@@ -39,7 +40,11 @@ them.
    :lines: 7-16
 
 This creates functions to initialize populations from individuals that are
-themselves initialized with random float numbers. More initialization methods
+themselves initialized with random float numbers. The functions are registered
+in the toolbox with there default arguments under the given name. For example,
+it will be possible to call the function :func:`toolbox.population` to
+instantly create a population.
+More initialization methods
 are found in the :ref:`creating-types` tutorial and the various 
 :ref:`examples`.
 
@@ -67,5 +72,6 @@ develop the complete generational algorithm.
 .. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 28-64
 
-There is also the possibility to use one of the five algorithms readily
-available in the :mod:`~deap.algorithms` and :mod:`~deap.cma` modules.
+It is also possible to use one of the four algorithms readily
+available in the :mod:`~deap.algorithms` module, or build from some building
+blocks called variations also available in this module.
