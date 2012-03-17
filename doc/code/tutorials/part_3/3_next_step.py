@@ -21,13 +21,13 @@ print ind1               # [0.86..., 0.27..., 0.70..., 0.03..., 0.87...]
 print ind1.fitness.valid # False
 
 ## 3.2 Evaluation
-def eval(individual):
+def evaluate(individual):
     # Do some hard computing on the individual
     a = sum(individual)
     b = len(individual)
     return a, 1. / b
 
-ind1.fitness.values = eval(ind1)
+ind1.fitness.values = evaluate(ind1)
 print ind1.fitness.valid    # True
 print ind1.fitness          # (2.73, 0.2)
 

@@ -7,7 +7,10 @@ This section of the tutorial shows all the work that is needed to
 distribute operations in deap. Distribution relies on serialization of objects
 and serialization is usually done by pickling, thus all objects that are
 distributed (functions and arguments, e.g. individuals and parameters) must be
-pickleable.
+pickleable. This means modifications made to an object on a distant processing
+unit will not be made available to the other processing units (including the
+master one) if it is not explicitly communicated through function arguments
+and return values.
 
 Distributed Task Manager
 ------------------------
@@ -15,8 +18,8 @@ Distributing tasks on multiple computers is taken care of by the distributed
 task manager module :mod:`~deap.dtm`. Its API similar to the multiprocessing
 module allows it to be very easy to use. In the :ref:`last section
 <using-tools>` a complete algorithm was exposed with the :func:`toolbox.map`
-left to the default :func:`map`. In order to parallelize the evaluation the
-operation to do is to replace this map with the one provided by the dtm module
+left to the default :func:`map`. In order to distribute the evaluation,
+simply replace this map with the one provided by the dtm module
 and tell to dtm which function is the main program here it is the :func:`main`
 function.
 ::
@@ -32,7 +35,7 @@ function.
 	if __name__ == "__main__":
 	    dtm.start(main)
 
-That's it. The map operation contained in the toolbox will now be parallel.
+That's it. The map operation contained in the toolbox will now be distributed.
 The next time you run the algorithm, it will run on the number of cores
 specified to the ``mpirun`` command used to run the python script. The usual
 bash command to use dtm will be :
@@ -43,7 +46,9 @@ bash command to use dtm will be :
 
 Multiprocessing Module
 ----------------------
-Using the :mod:`multiprocessing` module is exactly similar to using the distributed task manager. The only operation to do is to replace in the toolbox the appropriate function by the parallel one.
+Using the :mod:`multiprocessing` module is exactly similar to using the
+distributed task manager. Again in the
+toolbox, replace the appropriate function by the distributed one.
 ::
 
 	import multiprocessing

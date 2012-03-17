@@ -14,26 +14,25 @@ Preparing the Algorithm
 
 The BBOB makes use of many continuous functions on which will be tested the
 algorithm. These function are given as argument to the algorithm, thus the
-toolbox shall register the evaluation in the main function. The evaluation
-functions provided by BBOB return a fitness as a single value. The first step
-is then to tranform them in a single element tuple, we will use a decorator
+toolbox shall register the evaluation in the main function.
+
+The evaluation
+functions provided by BBOB returns a fitness as a single value. The first step
+is then to transform them in a single element tuple as required by DEAP
+philosophy on single objective optimization. We will use a decorator
 for this.
 
 .. literalinclude:: /code/examples/bbob.py
    :pyobject: tupleize
 
-Then we define an update function according to how individuals are updated
-using the one-fifth rule.
-
-.. literalinclude:: /code/examples/bbob.py
-   :pyobject: update
-
-Finally, the algorithm is encapsulated in a main function that receives four
+The algorithm is encapsulated in a main function that receives four
 arguments, the evaluation function, the dimensionality of the problem, the
 maximum number of evaluations and the target value to reach. As stated
-earlier, the toolbox is initialized in the main function with the update
-function and the evaluation function received, which is decorated by our
-tuple-izer. Then, the target is encapsulated in a :class:`FitnessMin` object
+earlier, the toolbox is initialized in the main function with the :func:`update`
+function (described in the example) and the evaluation function received, which is decorated by our
+tuple-izer.
+
+Then, the target fitness value is encapsulated in a :class:`FitnessMin` object
 so that we can easily compare the individuals with it. Following is simply the
 algorithm, which is explained in the :ref:`one-fifth` example.
 

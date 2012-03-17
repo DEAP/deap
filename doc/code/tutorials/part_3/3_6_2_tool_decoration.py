@@ -6,8 +6,8 @@ toolbox = base.Toolbox()
 MIN, MAX = -5, 5
 
 def checkBounds(min, max):
-    def decCheckBounds(func):
-        def wrapCheckBounds(*args, **kargs):
+    def decorator(func):
+        def wrapper(*args, **kargs):
             offspring = func(*args, **kargs)
             for child in offspring:
                 for i in xrange(len(child)):
@@ -16,8 +16,8 @@ def checkBounds(min, max):
                     elif child[i] < min:
                         child[i] = min
             return offspring
-        return wrapCheckBounds
-    return decCheckBounds
+        return wrapper
+    return decorator
 
 toolbox.register("mate", tools.cxBlend, alpha=0.2)
 toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=2)

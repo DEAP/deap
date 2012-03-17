@@ -26,7 +26,7 @@ objective and single objective fitnesses can be treated the same way. A
 rendering a fitness that minimize the first objective and maximize the
 second one. The weights can also be used to variate the importance of each
 objective one against another. This means that the weights can be any real
-number and only the sign is used to determine if a maximization of
+number and only the sign is used to determine if a maximization or
 minimization is done. An example of where the weights can be useful is in the
 crowding distance sort made in the NSGA-II selection algorithm.
 
@@ -34,7 +34,9 @@ Individual
 ----------
 Simply by thinking of the different flavours of evolutionary algorithms (GA,
 GP, ES, PSO, DE, ...), we notice that an extremely large variety of
-individuals are possible. Here is a guide on how to create some of those
+individuals are possible reinforcing the assumption that all types
+cannot be made available by developers.
+Here is a guide on how to create some of those
 individuals using the :mod:`~deap.creator` and initializing them using a
 :class:`~deap.base.Toolbox`.
 
@@ -51,11 +53,20 @@ under the :func:`attr_float` alias of the toolbox. Note that the
 function.
 
 .. literalinclude:: /code/tutorials/part_2/2_2_1_list_of_floats.py
-   :lines: 2-
+   :lines: 2,5-18
 
 Calling :func:`toolbox.individual` will readily return a complete individual
 composed of ``IND_SIZE`` floating point numbers with a maximizing single
 objective fitness attribute.
+
+Variations of this type are possible by inheriting from :class:`array.array`
+or :class:`numpy.ndarray` as following.
+
+.. literalinclude:: /code/tutorials/part_2/2_2_1_list_of_floats.py
+   :lines: 20,21
+
+The type inheriting from array needs a *typecode* on initialization just as
+the original class.
 
 Permutation
 +++++++++++
