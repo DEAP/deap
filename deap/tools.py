@@ -521,14 +521,14 @@ class EvolutionLogger(object):
             0_2      4        [6.5000] [8.0000]
         """
         if stats is None:
-            stats = dict()
-        for name in self.columns:
-            try:
-                lg_str = "[%s]" % ", ".join(self.precision % value for value in
-                                                       stats.data[name][index][-1])
-                self.output.write("{0:<8s} ".format(lg_str))
-            except KeyError:
+            for name in self.columns:
                 self.output.write("{0:<8s} ".format(str(kargs[name])))
+        else:
+            for name in self.columns:
+                lg_str = "[%s]" % ", ".join(self.precision % value for value in
+                                                stats.data[name][index][-1])
+                self.output.write("{0:<8s} ".format(lg_str))
+                
         self.output.write("\n")
 
 class HallOfFame(object):
