@@ -99,7 +99,8 @@ class Toolbox(object):
         :param alias: The name of the operator to decorate.
         :param decorator: One or more function decorator. If multiple
                           decorators are provided they will be applied in
-                          order, with the last decorator docarating all other.
+                          order, with the last decorator decorating all the
+                          others.
         
         .. versionchanged:: 0.8
            Decoration is not signature preserving anymore.
