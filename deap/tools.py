@@ -1189,7 +1189,15 @@ def mutFlipBit(individual, indpb):
             individual[indx] = type(individual[indx])(not individual[indx])
     
     return individual,
+
+def mutUniformInt(individual, min, max, indpb):
+    for indx in xrange(len(individual)):
+        if random.random() < indpb:
+            individual[indx] = random.randint(min, max)
     
+    return individual,
+
+
 ######################################
 # ES Mutations                       #
 ######################################
