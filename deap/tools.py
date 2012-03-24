@@ -426,7 +426,7 @@ class Statistics(object):
         self.functions[name] = function
         self.data[name] = [[] for _ in xrange(self.dim)]
 
-    def update(self, seq, index=0):
+    def update(self, seq, index=0, add=False):
         """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
         the data index *index*.
@@ -434,7 +434,12 @@ class Statistics(object):
         :param seq: A sequence on which the key will be applied to get the
                     data.
         :param index: The index of the independent statistics object in which
-                      to add the computed statistics, optional.
+                      to add the computed statistics, optional (defaults to 0).
+        :param add: A boolean to force adding depth to the statistics
+                    object when the index is out of range. If the given index
+                    is not yet registered, it adds it to the statistics only
+                    if it is one greater than the larger index, optional
+                    (defaults to False).
         
         ::
 
@@ -459,7 +464,13 @@ class Statistics(object):
             values = (seq,)
 
         for key, func in self.functions.iteritems():
-            self.data[key][index].append(map(func, values))
+            try:
+                self.data[key][index].append(map(func, values))
+            except IndexError:
+                if add and index == len(self.data[key]):
+                    self.data[key].append([map(func, values)])
+                else:
+                    raise
 
 class EvolutionLogger(object):
     """The evolution logger logs data about the evolution to either the stdout
