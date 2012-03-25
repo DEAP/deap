@@ -536,9 +536,12 @@ class EvolutionLogger(object):
                 self.output.write("{0:<8s} ".format(str(kargs[name])))
         else:
             for name in self.columns:
-                lg_str = "[%s]" % ", ".join(self.precision % value for value in
-                                                stats.data[name][index][-1])
-                self.output.write("{0:<8s} ".format(lg_str))
+                try:
+                    lg_str = "[%s]" % ", ".join(self.precision % value for value in
+                                                    stats.data[name][index][-1])
+                    self.output.write("{0:<8s} ".format(lg_str))
+                except KeyError:
+                    self.output.write("{0:<8s} ".format(str(kargs[name])))
                 
         self.output.write("\n")
 
