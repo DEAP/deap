@@ -1204,10 +1204,20 @@ def mutFlipBit(individual, indpb):
     
     return individual,
 
-def mutUniformInt(individual, min, max, indpb):
+def mutUniformInt(individual, low, up, indpb):
+    """Mutate an individual by replacing attributes, with probability *indpb*,
+    by a integer uniformly drawn between *low* and *up* inclusively.
+    
+    :param low: The lower bound of the range from wich to draw the new
+                integer.
+    :param up: The upper bound of the range from wich to draw the new
+                integer.
+    :param indpb: Probability for each attribute to be mutated.
+    :returns: A tuple of one individual.
+    """
     for indx in xrange(len(individual)):
         if random.random() < indpb:
-            individual[indx] = random.randint(min, max)
+            individual[indx] = random.randint(low, up)
     
     return individual,
 
