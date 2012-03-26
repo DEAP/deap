@@ -20,14 +20,14 @@ Here is a list of the implemented operators in DEAP.
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`   :func:`migRing` 
  :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`     ..             
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`        ..             
- :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutESLogNormal`                    :func:`selSPEA2`        ..             
- :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`~deap.gp.mutUniform`               :func:`selRandom`       ..             
- :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`~deap.gp.mutTypedUniform`          :func:`selBest`         ..             
- ..                           :func:`cxBlend`                             :func:`~deap.gp.mutTypedNodeReplacement`  :func:`selWorst`        ..             
- ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
- ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutShrink`                ..                      ..             
- ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutTypedInsert`           ..                      ..             
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                      ..             
+ :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutUniformInt`                     :func:`selSPEA2`        ..             
+ :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`mutESLogNormal`                    :func:`selRandom`       ..             
+ :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`~deap.gp.mutUniform`               :func:`selBest`         ..             
+ ..                           :func:`cxBlend`                             :func:`~deap.gp.mutTypedUniform`          :func:`selWorst`        ..             
+ ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedNodeReplacement`  ..                      ..             
+ ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
+ ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutShrink`                ..                      ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            :func:`~deap.gp.mutTypedInsert`           ..                      ..             
  ..                           :func:`cxMessyOnePoint`                     ..                                        ..                      ..             
  ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                      ..             
  ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                      ..             
@@ -93,6 +93,8 @@ Mutation
 .. autofunction:: deap.tools.mutShuffleIndexes
 
 .. autofunction:: deap.tools.mutFlipBit
+
+.. autofunction:: deap.tools.mutUniformInt
 
 .. autofunction:: deap.tools.mutESLogNormal
 
