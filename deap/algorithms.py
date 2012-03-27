@@ -149,7 +149,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         offspring = toolbox.select(population, len(population))
         
         # Variate the pool of individuals
-        offspring = varAnd(toolbox, offspring, cxpb, mutpb)
+        offspring = varAnd(offspring, toolbox, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -257,7 +257,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     
         evaluate(population)
         for i in range(ngen):
-            offspring = varOr(toolbox, population, lambda_, cxpb, mutpb)
+            offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
             evaluate(offspring)
             population = select(population + offspring, mu)
     
@@ -287,7 +287,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     # Begin the generational process
     for gen in range(1, ngen+1):
         # Variate the population
-        offspring = varOr(toolbox, population, lambda_, cxpb, mutpb)
+        offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -339,7 +339,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     
         evaluate(population)
         for i in range(ngen):
-            offspring = varOr(toolbox, population, lambda_, cxpb, mutpb)
+            offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
             evaluate(offspring)
             population = select(offspring, mu)
     
@@ -371,7 +371,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     # Begin the generational process
     for gen in range(1, ngen+1):
         # Variate the population
-        offspring = varOr(toolbox, population, lambda_, cxpb, mutpb)
+        offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
