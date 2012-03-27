@@ -29,15 +29,15 @@ import random
 
 import tools
 
-def varAnd(toolbox, population, cxpb, mutpb):
+def varAnd(population, toolbox, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover **and** mutation). The modified individuals have their
     fitness invalidated. The individuals are cloned so returned population is
     independent of the input population.
     
+    :param population: A list of individuals to variate.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
-    :param population: A list of individuals to variate.
     :param cxpb: The probability of mating two individuals.
     :param mutpb: The probability of mutating an individual.
     :returns: A list of varied individuals that are independent of their
@@ -79,14 +79,14 @@ def varAnd(toolbox, population, cxpb, mutpb):
     
     return offspring
 
-def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
+def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
              halloffame=None, verbose=__debug__):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
     
+    :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
-    :param population: A list of individuals.
     :param cxpb: The probability of mating two individuals.
     :param mutpb: The probability of mutating an individual.
     :param ngen: The number of generation.
@@ -173,15 +173,15 @@ def eaSimple(toolbox, population, cxpb, mutpb, ngen, stats=None,
 
     return population
 
-def varOr(toolbox, population, lambda_, cxpb, mutpb):
+def varOr(population, toolbox, lambda_, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover, mutation **or** reproduction). The modified individuals have
     their fitness invalidated. The individuals are cloned so returned
     population is independent of the input population.
     
+    :param population: A list of individuals to variate.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
-    :param population: A list of individuals to variate.
     :param lambda\_: The number of children to produce
     :param cxpb: The probability of mating two individuals.
     :param mutpb: The probability of mutating an individual.
@@ -228,13 +228,13 @@ def varOr(toolbox, population, lambda_, cxpb, mutpb):
     
     return offspring
 
-def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
+def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm.
     
+    :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
-    :param population: A list of individuals.
     :param mu: The number of individuals to select for the next generation.
     :param lambda\_: The number of children to produce at each generation.
     :param cxpb: The probability that an offspring is produced by crossover.
@@ -310,13 +310,13 @@ def eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
 
     return population
     
-def eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen,
+def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                     stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
     
+    :param population: A list of individuals.    
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
-    :param population: A list of individuals.
     :param mu: The number of individuals to select for the next generation.
     :param lambda\_: The number of children to produce at each generation.
     :param cxpb: The probability that an offspring is produced by crossover.

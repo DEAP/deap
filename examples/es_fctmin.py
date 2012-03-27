@@ -73,7 +73,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaMuCommaLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
+    algorithms.eaMuCommaLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
                                cxpb=0.6, mutpb=0.3, ngen=500, 
                                stats=stats, halloffame=hof)
     

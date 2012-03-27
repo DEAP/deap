@@ -69,7 +69,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
+    algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
                               cxpb=0.5, mutpb=0.2, ngen=50, 
                               stats=stats, halloffame=hof)
 
