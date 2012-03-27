@@ -78,7 +78,7 @@ def main():
     gen = 1
     while gen <= NGEN and stats.max[3][-1][0] < 100.0:
         for idx, deme in enumerate(demes):
-            algorithms.varAnd(toolbox, deme, cxpb=CXPB, mutpb=MUTPB)
+            algorithms.varAnd(deme, toolbox, cxpb=CXPB, mutpb=MUTPB)
             
             for ind in deme:
                 ind.fitness.values = toolbox.evaluate(ind)

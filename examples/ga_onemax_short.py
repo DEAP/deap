@@ -52,7 +52,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
+    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
                         halloffame=hof, verbose=True)
     
     return pop, stats, hof

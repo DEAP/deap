@@ -39,7 +39,7 @@ for fit, ind in zip(fits, population):
     ind.fitness.values = fit
 
 for gen in range(50):
-    offspring = algorithms.varOr(toolbox, population, lambda_=100, cxpb=0.5,mutpb=0.1)
+    offspring = algorithms.varOr(population, toolbox, lambda_=100, cxpb=0.5,mutpb=0.1)
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit

@@ -72,7 +72,7 @@ def main(extended=True, verbose=True):
         next_repr = [None] * len(species)
         for i, s in enumerate(species):
             # Variate the species individuals
-            s = algorithms.varAnd(toolbox, s, 0.6, 1.0)
+            s = algorithms.varAnd(s, toolbox, 0.6, 1.0)
             
             # Get the representatives excluding the current species
             r = representatives[:i] + representatives[i+1:]
