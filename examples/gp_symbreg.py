@@ -77,7 +77,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.5, 0.1, 40, stats, halloffame=hof)
+    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats, halloffame=hof)
     
     return pop, stats, hof
 
