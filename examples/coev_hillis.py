@@ -135,8 +135,8 @@ def main():
         hosts = htoolbox.select(hosts, len(hosts))
         parasites = ptoolbox.select(parasites, len(parasites))
         
-        hosts = algorithms.varAnd(htoolbox, hosts, H_CXPB, H_MUTPB)
-        parasites = algorithms.varAnd(ptoolbox, parasites, P_CXPB, P_MUTPB)
+        hosts = algorithms.varAnd(hosts, htoolbox, H_CXPB, H_MUTPB)
+        parasites = algorithms.varAnd(parasites, ptoolbox, P_CXPB, P_MUTPB)
         
         fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
         for host, parasite, fit in zip(hosts, parasites, fits):

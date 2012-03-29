@@ -207,6 +207,31 @@ class History(object):
             return wrapFunc
         return decFunc
 
+    def getGenealogy(self, individual, max_depth):
+        """Provide the genealogy tree of an individual. The individual must have
+        an attribute :attr:`history_index` as defined by 
+        :func:`~deap.tools.History.update` in order to retrieve its associated 
+        genealogy tree.
+
+        :param individual: The individual at the root of the genealogy tree.
+        :param max_depth: The approximate maximum distance between the root and the leaves.
+        :returns: A dictionary where each key is an individual index, the values are a tuple 
+                  corresponding to the index of the parent.
+        """
+        gtree = {}
+        def genealogy(index, depth):
+            if index not in self.genealogy_tree:
+                return             
+            depth += 1
+            if depth > max_depth:
+                return
+            parent_indices = self.genealogy_tree[index]
+            gtree[index] = parent_indices
+            for ind in parent_indices:
+                genealogy(ind, depth)
+        genealogy(individual.history_index, 0)
+        return gtree
+
 
 class Checkpoint(object):
     """A checkpoint is a file containing the state of any object that has been

@@ -186,7 +186,10 @@ Checkpoint
 History
 -------
 .. autoclass:: deap.tools.History
-   
+
    .. automethod:: deap.tools.History.update
-   
+
    .. autoattribute:: deap.tools.History.decorator
+
+   .. automethod:: deap.tools.History.getGenealogy
+

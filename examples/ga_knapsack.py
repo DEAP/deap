@@ -97,7 +97,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
+    algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
                               halloffame=hof)
     
     return pop, stats, hof
