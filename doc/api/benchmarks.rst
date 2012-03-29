@@ -46,6 +46,8 @@ Multi-objective
 
 .. autofunction:: deap.benchmarks.schaffer_mo
 
+.. autofunction:: deap.benchmarks.dtlz1
+
 .. autofunction:: deap.benchmarks.zdt1
 
 .. autofunction:: deap.benchmarks.zdt2
