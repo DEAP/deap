@@ -324,6 +324,25 @@ def zdt6(individual):
     f1 = 1 - exp(-4*individual[0]) * sin(6*pi*individual[0])**6
     f2 = g * (1 - (f1/g)**2)
     return f1, f2
+
+def dtlz1(individual, obj):
+    """DTLZ1 mutliobjective function. It returns a tuple of *obj* values. 
+    The individual must have at least *obj* element.
+    From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
+    Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
+
+    .. math::
+    
+        f_{\\text{DTLZ1}1}(\\mathbf{x}) &=& 0.5 x_1 \\dots x_{m-1}(1 + g(\\mathbf{x}_m)) \\\\
+        f_{\\text{DTLZ1}2)(\\mathbf{x}) &=& 0.5 x_1 \\dots x_{m-i}(1 + g(\\mathbf{x}_m)) \\\\
+        f_{\\text{DTLZ1}m}(\\mathbf{x}) &=& 0.5 (1 - x_1)(1 + g(\\mathbf{x}_m)) \\\\
+        g(\\mathbf{x}_m) &=& 100\\left(|\\mathbf{x}_m| + \sum_{x_i \in \\mathbf{x}_m\\left((x_i - 0.5)^2 - \cos(20\pi(x_i - 0.5))\\right)\\right)
+
+    """
+    g = 100 * (len(individual[obj-1:]) + sum((xi-0.5)**2 - cos(20*pi*(xi-0.5)) for xi in individual[obj-1:]))
+    f = [0.5 * reduce(mul, individual[:obj-1], 1) * (1 + g)]
+    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(xrange(obj-1)))
+    return f
     
 def fonseca(individual):
     """Fonseca and Fleming's multiobjective function.
