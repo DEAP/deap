@@ -344,6 +344,29 @@ def dtlz1(individual, obj):
     f = [0.5 * reduce(mul, individual[:obj-1], 1) * (1 + g)]
     f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(xrange(obj-1)))
     return f
+
+def dtlz2(individual, obj):
+    """DTLZ2 mutliobjective function. It returns a tuple of *obj* values. 
+    The individual must have at least *obj* element.
+    From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
+    Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
+
+    :math:`g(\\mathbf{x}_m) = \\sum_{x_i \in \\mathbf{x}_m} (x_i - 0.5)^2`
+
+    :math:`f_{\\text{DTLZ2}1}(\\mathbf{x}) = (1 + g(\\mathbf{x}_m)) \\prod_{i=1}^{m-1} \\cos(0.5x_i\pi)`
+
+    :math:`f_{\\text{DTLZ2}2}(\\mathbf{x}) = (1 + g(\\mathbf{x}_m)) \\sin(0.5x_{m-1}\pi ) \\prod_{i=1}^{m-2} \\cos(0.5x_i\pi)`
+
+    :math:`f_{\\text{DTLZ2}m}(\\mathbf{x}) = (1 + g(\\mathbf{x}_m)) \\sin(0.5x_{1}\pi )`
+
+    """
+    xc = individual[:obj-1]
+    xm = individual[obj-1:]
+    g = sum((xi-0.5)**2 for xi in xm)
+    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi*pi) for xi in xc), 1.0)]
+    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi*pi) for xi in xc[:m-1]), 1) * sin(0.5*xc[m]*pi) for m in reversed(xrange(obj-1)))
+    return f
+
     
 def fonseca(individual):
     """Fonseca and Fleming's multiobjective function.
