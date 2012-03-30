@@ -52,6 +52,8 @@ Multi-objective
 
 .. autofunction:: deap.benchmarks.dtlz3
 
+.. autofunction:: deap.benchmarks.dtlz4
+
 .. autofunction:: deap.benchmarks.zdt1
 
 .. autofunction:: deap.benchmarks.zdt2
