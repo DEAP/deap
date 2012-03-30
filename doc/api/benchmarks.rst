@@ -4,6 +4,26 @@ Benckmarks
 
 .. automodule:: deap.benchmarks
 
+============================= ============================= ====================
+Single Objective Continuous   Multi Objective Continuous    Binary              
+============================= ============================= ====================
+:func:`cigar`                 :func:`fonseca`               :func:`~binary.chuang_f1`
+:func:`plane`                 :func:`kursawe`               :func:`~binary.chuang_f2`
+:func:`sphere`                :func:`schaffer_mo`           :func:`~binary.chuang_f3`
+:func:`ackley`                :func:`dtlz1`                 :func:`~binary.royal_road1`
+:func:`bohachevsky`           :func:`dtlz2`                 :func:`~binary.royal_road2`
+:func:`griewank`              :func:`dtlz3`                 ..
+:func:`h1`                    :func:`dtlz4`                 ..
+:func:`himmelblau`            :func:`zdt1`                  ..
+:func:`rastrigin`             :func:`zdt2`                  ..
+:func:`rastrigin_scaled`      :func:`zdt3`                  ..
+:func:`rastrigin_skew`        :func:`zdt4`                  ..
+:func:`rosenbrock`            :func:`zdt6`                  ..
+:func:`schaffer`              ..                            ..
+:func:`schwefel`              ..                            ..
+:func:`shekel`                ..                            ..
+============================= ============================= ====================
+
 Continuous Optimization
 =======================
 
