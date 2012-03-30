@@ -327,7 +327,7 @@ def zdt6(individual):
 
 def dtlz1(individual, obj):
     """DTLZ1 mutliobjective function. It returns a tuple of *obj* values. 
-    The individual must have at least *obj* element.
+    The individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
 
@@ -355,7 +355,7 @@ def dtlz1(individual, obj):
 
 def dtlz2(individual, obj):
     """DTLZ2 mutliobjective function. It returns a tuple of *obj* values. 
-    The individual must have at least *obj* element.
+    The individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
     
@@ -382,7 +382,7 @@ def dtlz2(individual, obj):
 
 def dtlz3(individual, obj):
     """DTLZ3 mutliobjective function. It returns a tuple of *obj* values. 
-    The individual must have at least *obj* element.
+    The individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
     
@@ -408,8 +408,10 @@ def dtlz3(individual, obj):
     return f
 
 def dtlz4(individual, obj, alpha):
-    """DTLZ4 mutliobjective function. It returns a tuple of *obj* values. 
-    The individual must have at least *obj* element.
+    """DTLZ4 mutliobjective function. It returns a tuple of *obj* values. The
+    individual must have at least *obj* elements. The *alpha* parameter allows
+    for a meta-variable mapping in :func:`dtlz2` :math:`x_i \\rightarrow
+    x_i^\\alpha`, the authors suggest :math:`\\alpha = 100`.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
     
