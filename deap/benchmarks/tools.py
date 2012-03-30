@@ -199,10 +199,10 @@ class scale(object):
         self.factor = tuple(1.0/f for f in factor)
         
 def diversity(first_front, first, last):
-    """Given a Pareto front `first_front` and two extreme point of the 
-    optimal Pareto front, this function return a metric of the diversity 
+    """Given a Pareto front `first_front` and the two extreme points of the 
+    optimal Pareto front, this function returns a metric of the diversity 
     of the front as explained in the original NSGA-II article by K. Deb.
-    The smaller is the value, the better is the front.
+    The smaller the value is, the better the front is.
     """
     df = hypot(first_front[0].fitness.values[0] - first[0],
                first_front[0].fitness.values[1] - first[1])
@@ -219,9 +219,9 @@ def diversity(first_front, first, last):
 
 def convergence(first_front, optimal_front):
     """Given a Pareto front `first_front` and the optimal Pareto front, 
-    this function return a metric of convergence
+    this function returns a metric of convergence
     of the front as explained in the original NSGA-II article by K. Deb.
-    The smaller is the value, the closer the front is to the optimal one.
+    The smaller the value is, the closer the front is to the optimal one.
     """
     distances = []
     
