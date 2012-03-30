@@ -191,5 +191,5 @@ History
 
    .. autoattribute:: deap.tools.History.decorator
 
-   .. automethod:: deap.tools.History.getGenealogy
+   .. automethod:: deap.tools.History.getGenealogy(individual[, max_depth])
 
