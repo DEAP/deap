@@ -1435,7 +1435,7 @@ def selNSGA2(individuals, k):
     Having the size of *individuals* equals to *k* will have no effect other
     than sorting the population according to a non-domination scheme. The list
     returned contains references to the input *individuals*. For more details
-    on the NSGA-II operator see [Deb2002]_
+    on the NSGA-II operator see [Deb2002]_.
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
