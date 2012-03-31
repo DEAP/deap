@@ -130,7 +130,7 @@ Selection
 Migration
 +++++++++
 
-.. autofunction:: deap.tools.migRing(populations, n, selection[, replacement, migarray])
+.. autofunction:: deap.tools.migRing(populations, k, selection[, replacement, migarray])
 
 Statistics
 ----------
