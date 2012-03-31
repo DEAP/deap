@@ -519,13 +519,13 @@ class EvolutionLogger(object):
     """
     def __init__(self, columns=["gen", "evals"], precision=4):
         self.columns = tuple(columns)
-        self.precision = "%%.%if" % precision
+        self.line = " ".join("{%s:<8}" % name for name in self.columns)        
+        self.precision = "{0:.%if}" % precision
     
     def logHeader(self):
         """Logs the column titles specified during initialization.
         """
-        header = "".join("{%d:<8s} " % i for i in range(len(self.columns)))
-        self.output.write(header.format(*self.columns))
+        self.output.write(" ".join(map("{0:<8s}".format, self.columns)))
         self.output.write("\n")
 
     def logGeneration(self, stats=None, index=0, **kargs):
@@ -556,18 +556,10 @@ class EvolutionLogger(object):
             >>> l.logGeneration(gen="0_2", evals=4, stats=s, index=1)
             0_2      4        [6.5000] [8.0000]
         """
-        if stats is None:
-            for name in self.columns:
-                self.output.write("{0:<8s} ".format(str(kargs[name])))
-        else:
-            for name in self.columns:
-                try:
-                    lg_str = "[%s]" % ", ".join(self.precision % value for value in
-                                                    stats.data[name][index][-1])
-                    self.output.write("{0:<8s} ".format(lg_str))
-                except KeyError:
-                    self.output.write("{0:<8s} ".format(str(kargs[name])))
-                
+        if stats:
+            for name in stats.functions:
+                kargs[name] = "[%s]" % ", ".join(map(self.precision.format, stats.data[name][index][-1]))
+        self.output.write(self.line.format(**kargs))
         self.output.write("\n")
 
 class HallOfFame(object):
