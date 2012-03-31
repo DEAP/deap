@@ -139,12 +139,16 @@ class History(object):
         import networkx
         
         graph = networkx.DiGraph(history.genealogy_tree)
-        networkx.draw(graph)
+        graph = graph.reverse()     # Make the grah top-down
+        colors = [toolbox.evaluate(history.genealogy_history[i])[0] for i in graph]
+        networkx.draw(graph, node_color=colors)
         plt.show()
     
-    Using NetworkX in combination with pygraphviz (dot layout) this amazing
+    Using NetworkX in combination with `pygraphviz
+    <http://networkx.lanl.gov/pygraphviz/>`_ (dot layout) this amazing
     genealogy tree can be obtained from the OneMax example with a population
-    size of 20 and 5 generations.
+    size of 20 and 5 generations, where the color of the nodes indicate there
+    fitness, blue is low and red is high.
     
     .. image:: /_images/genealogy.png
        :width: 67%
@@ -207,18 +211,22 @@ class History(object):
             return wrapFunc
         return decFunc
 
-    def getGenealogy(self, individual, max_depth):
-        """Provide the genealogy tree of an individual. The individual must have
-        an attribute :attr:`history_index` as defined by 
-        :func:`~deap.tools.History.update` in order to retrieve its associated 
-        genealogy tree.
+    def getGenealogy(self, individual, max_depth=float("inf")):
+        """Provide the genealogy tree of an *individual*. The individual must
+        have an attribute :attr:`history_index` as defined by
+        :func:`~deap.tools.History.update` in order to retrieve its associated
+        genealogy tree. The returned graph contains the parents up to
+        *max_depth* variations before this individual. If not provided
+        the maximum depth is up to the begining of the evolution.
 
         :param individual: The individual at the root of the genealogy tree.
-        :param max_depth: The approximate maximum distance between the root and the leaves.
-        :returns: A dictionary where each key is an individual index, the values are a tuple 
-                  corresponding to the index of the parent.
+        :param max_depth: The approximate maximum distance between the root
+                          (individual) and the leaves (parents), optional.
+        :returns: A dictionary where each key is an individual index and the
+                  values are a tuple corresponding to the index of the parents.
         """
         gtree = {}
+        visited = set()     # Adds memory to the breadth first search
         def genealogy(index, depth):
             if index not in self.genealogy_tree:
                 return             
@@ -228,7 +236,9 @@ class History(object):
             parent_indices = self.genealogy_tree[index]
             gtree[index] = parent_indices
             for ind in parent_indices:
-                genealogy(ind, depth)
+                if ind not in visited:
+                    genealogy(ind, depth)
+                visited.add(ind)
         genealogy(individual.history_index, 0)
         return gtree
 

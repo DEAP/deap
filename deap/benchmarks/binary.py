@@ -20,8 +20,9 @@ def bin2float(min_, max_, nbits):
     float is composed of *nbits* and is between *min_* and *max_*
     and return the result of the decorated function.
 
-    notes: This decorator requires the first argument of
-    the evaluation function to be named *individual*.
+    .. note::
+        This decorator requires the first argument of
+        the evaluation function to be named *individual*.
     """
     def wrap(function):
         def wrapped_function(individual, *args, **kargs):
