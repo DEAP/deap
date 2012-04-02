@@ -51,7 +51,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'DEAP'
-copyright = u'2009-%s, François-Michel De Rainville, Félix-Antoine Fortin and Marc-André Gardner' % time.strftime('%Y')
+copyright = u'2009-%s, DEAP Project' % time.strftime('%Y')
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -132,12 +132,12 @@ html_theme_path = ["_themes"]
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'flask'
+html_theme = 'pydoctheme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {'collapsiblesidebar': True}
+html_theme_options = {'collapsiblesidebar': True}
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
