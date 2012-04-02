@@ -7,6 +7,7 @@
   _gaq.push(['_setAccount', 'UA-15144370-3']);
   _gaq.push(['_trackPageview']);
 </script>
+{% if not embedded %}<script type="text/javascript" src="{{ pathto('_static/copybutton.js', 1) }}"></script>{% endif %}
 {% endblock %}
 
 {% block rootrellink %}
