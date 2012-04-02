@@ -1002,8 +1002,7 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
         up = [up] * size
 
     for i in xrange(size):
-        rand = random.random()
-        if rand <= 0.5:
+        if random.random() <= 0.5:
             # This epsilon should probably be changed for 0 since 
             # floating point arithmetic in Python is safer
             if abs(ind1[i] - ind2[i]) > 1e-14:
@@ -1016,18 +1015,18 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                 beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
                 alpha = 2.0 - beta**-(eta + 1)
                 if rand <= 1.0 / alpha:
-                    beta_q = (rand * alpha)**(1 / (eta + 1))
+                    beta_q = (rand * alpha)**(1.0 / (eta + 1))
                 else:
-                    beta_q = (1.0 / (2.0 - rand * alpha))**(1 / (eta + 1))
+                    beta_q = (1.0 / (2.0 - rand * alpha))**(1.0 / (eta + 1))
                 
                 c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
                 
                 beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
                 alpha = 2.0 - beta**-(eta + 1)
                 if rand <= 1.0 / alpha:
-                    beta_q = (rand * alpha)**(1 / (eta + 1))
+                    beta_q = (rand * alpha)**(1.0 / (eta + 1))
                 else:
-                    beta_q = (1.0 / (2.0 - rand * alpha))**(1 / (eta + 1))
+                    beta_q = (1.0 / (2.0 - rand * alpha))**(1.0 / (eta + 1))
                 c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
                 
                 c1 = min(max(c1, xl), xu)

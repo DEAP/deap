@@ -36,8 +36,8 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.att
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def checkBounds(min, max):
-    def decCheckBounds(func):
-        def wrapCheckBounds(*args, **kargs):
+    def decorator(func):
+        def wrappper(*args, **kargs):
             offspring = func(*args, **kargs)
             for child in offspring:
                 for i in xrange(len(child)):
@@ -46,8 +46,8 @@ def checkBounds(min, max):
                     elif child[i] < min:
                         child[i] = min
             return offspring
-        return wrapCheckBounds
-    return decCheckBounds
+        return wrappper
+    return decorator
 
 toolbox.register("evaluate", benchmarks.kursawe)
 toolbox.register("mate", tools.cxBlend, alpha=1.5)
@@ -70,10 +70,19 @@ def main():
     stats.register("max", max)
     
     algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
-                              cxpb=0.5, mutpb=0.2, ngen=50, 
+                              cxpb=0.5, mutpb=0.2, ngen=150, 
                               stats=stats, halloffame=hof)
 
     return pop, stats, hof
 
 if __name__ == "__main__":
-    main()
+    pop, stats, hof = main()
+    
+    # import matplotlib.pyplot as plt
+    # import numpy
+    # 
+    # front = numpy.array([ind.fitness.values for ind in pop])
+    # print front.shape
+    # plt.scatter(front[:,0], front[:,1], c="b")
+    # plt.axis("tight")
+    # plt.show()
