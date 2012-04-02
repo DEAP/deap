@@ -16,7 +16,6 @@
 import array
 import random
 import json
-
 from math import sqrt
 
 from deap import algorithms
@@ -32,18 +31,26 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 toolbox = base.Toolbox()
 
 # Problem definition
+# Functions zdt1, zdt2, zdt3, zdt6 have bounds [0, 1]
 BOUND_LOW, BOUND_UP = 0.0, 1.0
+
+# Functions zdt4 has bounds x1 = [0, 1], xn = [-5, 5], with n = 2, ..., 10
+# BOUND_LOW, BOUND_UP = [0.0] + [-5.0]*9, [1.0] + [5.0]*9
+
+# Functions zdt1, zdt2, zdt3 have 30 dimensions, zdt4 and zdt6 have 10
 NDIM = 30
-toolbox.register("evaluate", benchmarks.zdt1)
 
-# Attribute generator
-toolbox.register("attr_float", random.uniform, BOUND_LOW, BOUND_UP)
+def uniform(low, up, size=None):
+    try:
+        return [random.uniform(a, b) for a, b in zip(low, up)]
+    except TypeError:
+        return [random.uniform(a, b) for a, b in zip([low] * size, [up] * size)]
 
-# Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual,
-                 toolbox.attr_float, NDIM)
+toolbox.register("attr_float", uniform, BOUND_LOW, BOUND_UP, NDIM)
+toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr_float)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+toolbox.register("evaluate", benchmarks.zdt1)
 toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
 toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
 toolbox.register("select", tools.selNSGA2)
@@ -53,7 +60,7 @@ def main(seed=None):
 
     NGEN = 250
     MU = 100
-    VARPB = 0.9
+    CXPB = 0.9
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", tools.mean)
@@ -80,13 +87,13 @@ def main(seed=None):
     logger.logGeneration(evals=len(invalid_ind), gen=0, stats=stats)
 
     # Begin the generational process
-    for gen in range(1, NGEN+1):
+    for gen in range(1, NGEN):
         # Variate the population
         offspring = tools.selTournamentDCD(pop, len(pop))
         offspring = [toolbox.clone(ind) for ind in offspring]
         
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() <= VARPB:
+            if random.random() <= CXPB:
                 toolbox.mate(ind1, ind2)
             
             toolbox.mutate(ind1)
@@ -108,15 +115,21 @@ def main(seed=None):
         
 if __name__ == "__main__":
     optimal_front = json.load(open("zdt1_front.json"))
-    optimal_front = [optimal_front[i] for i in range(0, len(optimal_front), 2)]
-
-    first_point_opt = optimal_front[0]
-    last_point_opt = optimal_front[-1]
-
+    # Use 500 of the 1000 points in the json file
+    optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
+    
     pop = main()
-    first_front = tools.sortFastND(pop, len(pop), True)[0]
-    first_front.sort(key=lambda x: x.fitness.values)
-    print "Diversity : ", diversity(first_front, first_point_opt, last_point_opt)
-    print "Convergence : ", convergence(first_front, optimal_front)
-
-
+    pop.sort(key=lambda x: x.fitness.values)
+    
+    print "Convergence: ", convergence(pop, optimal_front)
+    print "Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1])
+    
+    # import matplotlib.pyplot as plt
+    # import numpy
+    # 
+    # front = numpy.array([ind.fitness.values for ind in pop])
+    # optimal_front = numpy.array(optimal_front)
+    # plt.scatter(optimal_front[:,0], optimal_front[:,1], c="r")
+    # plt.scatter(front[:,0], front[:,1], c="b")
+    # plt.axis("tight")
+    # plt.show()
