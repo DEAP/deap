@@ -1,7 +1,6 @@
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
-import sys
 
 try:
     import numpy as np
@@ -12,7 +11,6 @@ import random
 rnd = random.Random()
 rnd.seed(128)
 
-sys.path.append("../../..")
 from deap.benchmarks import movingpeaks
 
 sc = movingpeaks.SCENARIO_1
