@@ -46,7 +46,7 @@ div.sphinxsidebar a:hover {
 }
 
 div.sphinxsidebar input {
-    font-family: 'Lucida Grande',Arial,sans-serif;
+    font-family: 'Lucida Grande','Lucida Sans','DejaVu Sans',Arial,sans-serif;
     border: 1px solid #999999;
     font-size: smaller;
     border-radius: 3px;
