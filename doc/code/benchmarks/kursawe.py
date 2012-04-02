@@ -1,18 +1,13 @@
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
-from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import sys
 
 try:
     import numpy as np
 except:
     exit()
 
-
-sys.path.append("../..")
 from deap import benchmarks
-
 
 X = np.arange(-5, 5, 0.1)
 Y = np.arange(-5, 5, 0.1)
@@ -27,12 +22,12 @@ for i in xrange(X.shape[0]):
 fig = plt.figure(figsize=(12,5))
 
 ax = fig.add_subplot(1, 2, 1, projection='3d')
-ax.plot_surface(X, Y, Z1, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
+ax.plot_surface(X, Y, Z1, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
 plt.xlabel("x")
 plt.ylabel("y")
 
 ax = fig.add_subplot(1, 2, 2, projection='3d')
-ax.plot_surface(X, Y, Z2, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
+ax.plot_surface(X, Y, Z2, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
 plt.xlabel("x")
 plt.ylabel("y")
 

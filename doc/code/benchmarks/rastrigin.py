@@ -1,18 +1,13 @@
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
-from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import sys
 
 try:
     import numpy as np
 except:
     exit()
 
-
-sys.path.append("../..")
 from deap import benchmarks
-
 
 def rastrigin_arg0(sol):
     return benchmarks.rastrigin(sol)[0]
@@ -28,7 +23,7 @@ for i in xrange(X.shape[0]):
     for j in xrange(X.shape[1]):
         Z[i,j] = rastrigin_arg0((X[i,j],Y[i,j]))
 
-ax.plot_surface(X, Y, Z, rstride = 1, cstride = 1, cmap = cm.jet, linewidth=0.2, )
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
  
 plt.xlabel("x")
 plt.ylabel("y")
