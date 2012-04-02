@@ -9,31 +9,31 @@ individuals. This means, for example, that providing two individuals to the
 crossover will transform those individuals in-place. The responsibility of
 making offspring(s) independent of their parent(s) and invalidating the
 fitness is left to the user and is generally fulfilled in the algorithms by
-calling :func:`toolbox.clone` on an individuals to duplicate it and ``del`` on
-the :attr:`values` attribute of the individual's fitness to invalidate to invalidate this last one.
+calling :func:`toolbox.clone` on an individual to duplicate it and ``del`` on
+the :attr:`values` attribute of the individual's fitness to invalidate it.
 
 Here is a list of the implemented operators in DEAP.
 
-============================ =========================================== ========================================= ======================= ================
- Initialization               Crossover                                   Mutation                                  Selection               Migration 
-============================ =========================================== ========================================= ======================= ================
- :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`   :func:`migRing` 
- :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`     ..             
- :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`        ..             
- :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutUniformInt`                     :func:`selSPEA2`        ..             
- :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`mutESLogNormal`                    :func:`selRandom`       ..             
- :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`~deap.gp.mutUniform`               :func:`selBest`         ..             
- ..                           :func:`cxBlend`                             :func:`~deap.gp.mutTypedUniform`          :func:`selWorst`        ..             
- ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedNodeReplacement`  ..                      ..             
- ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
- ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutShrink`                ..                      ..             
- ..                           :func:`cxSimulatedBinaryBounded`            :func:`~deap.gp.mutTypedInsert`           ..                      ..             
- ..                           :func:`cxMessyOnePoint`                     ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxOnePointLeafBiased`       ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxTypedOnePointLeafBiased`  ..                                        ..                      ..             
-============================ =========================================== ========================================= ======================= ================
+============================ =========================================== ========================================= ========================= ================
+ Initialization               Crossover                                   Mutation                                  Selection                 Migration 
+============================ =========================================== ========================================= ========================= ================
+ :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`     :func:`migRing`
+ :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`       ..             
+ :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`          ..             
+ :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`          ..             
+ :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`         ..             
+ :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`           ..             
+ ..                           :func:`cxBlend`                             :func:`~deap.gp.mutUniform`               :func:`selWorst`          ..             
+ ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedUniform`          :func:`selTournamentDCD`  ..             
+ ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedNodeReplacement`  ..                        ..             
+ ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutTypedEphemeral`        ..                        ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            :func:`~deap.gp.mutShrink`                ..                        ..             
+ ..                           :func:`cxMessyOnePoint`                     :func:`~deap.gp.mutTypedInsert`           ..                        ..             
+ ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                        ..             
+ ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                        ..             
+ ..                           :func:`~deap.gp.cxOnePointLeafBiased`       ..                                        ..                        ..             
+ ..                           :func:`~deap.gp.cxTypedOnePointLeafBiased`  ..                                        ..                        ..             
+============================ =========================================== ========================================= ========================= ================
 
 Initialization
 ++++++++++++++
@@ -96,6 +96,8 @@ Mutation
 
 .. autofunction:: deap.tools.mutUniformInt
 
+.. autofunction:: deap.tools.mutPolynomialBounded
+
 .. autofunction:: deap.tools.mutESLogNormal
 
 .. autofunction:: deap.gp.mutUniform
@@ -126,6 +128,12 @@ Selection
 .. autofunction:: deap.tools.selBest
 
 .. autofunction:: deap.tools.selWorst
+
+.. autofunction:: deap.tools.selTournamentDCD
+
+.. autofunction:: sortFastND
+
+.. autofunction:: assignCrowdingDist
 
 Migration
 +++++++++

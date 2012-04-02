@@ -1388,11 +1388,16 @@ def selRoulette(individuals, k):
 
 
 def selTournamentDCD(individuals, k):
-    """Tournament selection based on dominance (D) and crowding distance (CD).
-    The *individuals* sequence length has to have a length which is 
-    a multiple of 4. Also, this tournament can only be used in 
-    conjunction with an algorithm assigning crowding distance to the
-    individual fitnesses.
+    """Tournament selection based on dominance (D) between two individuals, if
+    the two individuals do not interdominate the selection is made
+    based on crowding distance (CD). The *individuals* sequence length has to
+    be a multiple of 4. Starting from the beginning of the selected
+    individuals, two consecutive individuals will be different (assuming all
+    individuals in the input list are unique). Each individual from the input
+    list won't be selected more than twice.
+    
+    This selection requires the individuals to have a :attr:`crowding_dist`
+    attribute, which can be set by the :func:`assignCrowdingDist` function.
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
@@ -1483,7 +1488,7 @@ def sortFastND(individuals, k, first_front_only=False):
     :param first_front_only: If :obj:`True` sort only the first front and
                              exit.
     :returns: A list of Pareto fronts (lists), with the first list being the
-    true Pareto front.
+              true Pareto front.
     """
     if k == 0:
         return []
@@ -1540,7 +1545,10 @@ def sortFastND(individuals, k, first_front_only=False):
     return fronts
 
 def assignCrowdingDist(individuals):
-    """Assign the crowding distance to each individual of the list."""
+    """Assign a crowding distance to each individual of the list. The 
+    crowding distance is set to the :attr:`crowding_dist` attribute of
+    each individual.
+    """
     if len(individuals) == 0:
         return
     
