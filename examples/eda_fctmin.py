@@ -53,7 +53,8 @@ class EDA(object):
 
 def main():
     N, LAMBDA = 30, 1000
-    strategy = EDA(centroid=[5.0]*N, sigma=[5.0]*N, mu=LAMBDA/4, lambda_=LAMBDA)
+    MU = int(LAMBDA/4)
+    strategy = EDA(centroid=[5.0]*N, sigma=[5.0]*N, mu=MU, lambda_=LAMBDA)
     
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.rastrigin)
