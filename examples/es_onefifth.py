@@ -19,7 +19,6 @@ import random
 
 from deap import base
 from deap import creator
-
 from deap import benchmarks
 
 IND_SIZE = 10

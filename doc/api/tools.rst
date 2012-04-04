@@ -9,29 +9,31 @@ individuals. This means, for example, that providing two individuals to the
 crossover will transform those individuals in-place. The responsibility of
 making offspring(s) independent of their parent(s) and invalidating the
 fitness is left to the user and is generally fulfilled in the algorithms by
-calling :func:`toolbox.clone` on an individuals to duplicate it and ``del`` on
-the :attr:`values` attribute of the individual's fitness to invalidate to invalidate this last one.
+calling :func:`toolbox.clone` on an individual to duplicate it and ``del`` on
+the :attr:`values` attribute of the individual's fitness to invalidate it.
 
 Here is a list of the implemented operators in DEAP.
 
-============================ =========================================== ========================================= ======================= ================
- Initialization               Crossover                                   Mutation                                  Selection               Migration 
-============================ =========================================== ========================================= ======================= ================
- :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`   :func:`migRing` 
- :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`     ..             
- :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`        ..             
- :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutESLogNormal`                    :func:`selSPEA2`        ..             
- :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`~deap.gp.mutUniform`               :func:`selRandom`       ..             
- :func:`~deap.gp.genRamped`   :func:`cxBlend`                             :func:`~deap.gp.mutTypedUniform`          :func:`selBest`         ..             
- ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedNodeReplacement`  :func:`selWorst`        ..             
- ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedEphemeral`        ..                      ..             
- ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutShrink`                ..                      ..             
- ..                           :func:`cxMessyOnePoint`                     :func:`~deap.gp.mutTypedInsert`           ..                      ..             
- ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxOnePointLeafBiased`       ..                                        ..                      ..             
- ..                           :func:`~deap.gp.cxTypedOnePointLeafBiased`  ..                                        ..                      ..             
-============================ =========================================== ========================================= ======================= ================
+============================ =========================================== ========================================= ========================= ================
+ Initialization               Crossover                                   Mutation                                  Selection                 Migration 
+============================ =========================================== ========================================= ========================= ================
+ :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`     :func:`migRing`
+ :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`       ..             
+ :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`          ..             
+ :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`          ..             
+ :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`         ..             
+ :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`           ..             
+ ..                           :func:`cxBlend`                             :func:`~deap.gp.mutUniform`               :func:`selWorst`          ..             
+ ..                           :func:`cxESBlend`                           :func:`~deap.gp.mutTypedUniform`          :func:`selTournamentDCD`  ..             
+ ..                           :func:`cxESTwoPoints`                       :func:`~deap.gp.mutTypedNodeReplacement`  ..                        ..             
+ ..                           :func:`cxSimulatedBinary`                   :func:`~deap.gp.mutTypedEphemeral`        ..                        ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            :func:`~deap.gp.mutShrink`                ..                        ..             
+ ..                           :func:`cxMessyOnePoint`                     :func:`~deap.gp.mutTypedInsert`           ..                        ..             
+ ..                           :func:`~deap.gp.cxUniformOnePoint`          ..                                        ..                        ..             
+ ..                           :func:`~deap.gp.cxTypedOnePoint`            ..                                        ..                        ..             
+ ..                           :func:`~deap.gp.cxOnePointLeafBiased`       ..                                        ..                        ..             
+ ..                           :func:`~deap.gp.cxTypedOnePointLeafBiased`  ..                                        ..                        ..             
+============================ =========================================== ========================================= ========================= ================
 
 Initialization
 ++++++++++++++
@@ -51,15 +53,17 @@ Initialization
 Crossover
 +++++++++
 
-.. autofunction:: deap.tools.cxTwoPoints
-
 .. autofunction:: deap.tools.cxOnePoint
+
+.. autofunction:: deap.tools.cxTwoPoints
 
 .. autofunction:: deap.tools.cxUniform
 
 .. autofunction:: deap.tools.cxPartialyMatched
 
 .. autofunction:: deap.tools.cxUniformPartialyMatched
+
+.. autofunction:: deap.tools.cxOrdered
 
 .. autofunction:: deap.tools.cxBlend
 
@@ -69,15 +73,17 @@ Crossover
 
 .. autofunction:: deap.tools.cxSimulatedBinary
 
+.. autofunction:: deap.tools.cxSimulatedBinaryBounded
+
 .. autofunction:: deap.tools.cxMessyOnePoint
 
 .. autofunction:: deap.gp.cxUniformOnePoint
 
 .. autofunction:: deap.gp.cxTypedOnePoint
 
-.. autofunction:: deap.gp.cxOnePointLeafBiased(ind1, ind2, cxtermpb)
+.. autofunction:: deap.gp.cxOnePointLeafBiased
 
-.. autofunction:: deap.gp.cxTypedOnePointLeafBiased(ind1, ind2, cxtermpb)
+.. autofunction:: deap.gp.cxTypedOnePointLeafBiased
 
 Mutation
 ++++++++
@@ -87,6 +93,10 @@ Mutation
 .. autofunction:: deap.tools.mutShuffleIndexes
 
 .. autofunction:: deap.tools.mutFlipBit
+
+.. autofunction:: deap.tools.mutUniformInt
+
+.. autofunction:: deap.tools.mutPolynomialBounded
 
 .. autofunction:: deap.tools.mutESLogNormal
 
@@ -119,10 +129,16 @@ Selection
 
 .. autofunction:: deap.tools.selWorst
 
+.. autofunction:: deap.tools.selTournamentDCD
+
+.. autofunction:: sortFastND
+
+.. autofunction:: assignCrowdingDist
+
 Migration
 +++++++++
 
-.. autofunction:: deap.tools.migRing(populations, n, selection[, replacement, migarray])
+.. autofunction:: deap.tools.migRing(populations, k, selection[, replacement, migarray])
 
 Statistics
 ----------
@@ -153,28 +169,35 @@ Hall-Of-Fame
 
    .. automethod:: deap.tools.ParetoFront.update
 
+Evolution Logger
+----------------
+.. autoclass:: deap.tools.EvolutionLogger([col_names][, precision])
+
+   .. automethod:: deap.tools.EvolutionLogger.logHeader
+
+   .. automethod:: deap.tools.EvolutionLogger.logGeneration([stats[, index]][, data[, ...]])
+   
+..   .. autoattribute:: deap.tools.EvolutionLogger.output
+
 Checkpoint
 ----------
-.. autoclass:: deap.tools.Checkpoint([yaml,object[, ...]])
+.. autoclass:: deap.tools.Checkpoint()
    
-   .. automethod:: deap.tools.Checkpoint.dump(prefix)
+   .. automethod:: deap.tools.Checkpoint.dump(filestream)
    
-   .. automethod:: deap.tools.Checkpoint.load(filename)
+   .. automethod:: deap.tools.Checkpoint.load(filestream)
    
-   .. automethod:: deap.tools.Checkpoint.add(object[, ...])
+   .. automethod:: deap.tools.Checkpoint.add(name, object[, key])
    
-   .. automethod:: deap.tools.Checkpoint.remove(object[, ...])
+   .. automethod:: deap.tools.Checkpoint.remove(name[, ...])
 
 History
 -------
 .. autoclass:: deap.tools.History
-   
-   .. automethod:: deap.tools.History.populate
-   
-   .. automethod:: deap.tools.History.update(individual[, ...])
-   
+
+   .. automethod:: deap.tools.History.update
+
    .. autoattribute:: deap.tools.History.decorator
 
-Other
------
-.. autofunction:: deap.tools.decorate
+   .. automethod:: deap.tools.History.getGenealogy(individual[, max_depth])
+

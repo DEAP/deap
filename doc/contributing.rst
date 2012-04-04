@@ -19,7 +19,7 @@ You can check the latest sources with the command::
 If you want to use the development version, you have to update the repository
 to the developing branch with the command::
 
-    hg update 0.8-dev
+    hg update dev
 
 Contributing code
 -----------------

@@ -53,14 +53,14 @@ class KNN(object):
         nns = numpy.argsort(dist)
         
         if data.ndim == 1:
-            classes = {cls : 0 for cls in self.classes}
+            classes = dict((cls, 0) for cls in self.classes)
             for n in nns[:self.k]:
                 classes[self.labels[n]] += 1
             labels = sorted(classes.iteritems(), key=operator.itemgetter(1))[-1][0]
         elif data.ndim == 2:
             labels = list()
             for i, d in enumerate(data):
-                classes = {cls : 0 for cls in self.classes}
+                classes = dict((cls, 0) for cls in self.classes)
                 for n in nns[i, :self.k]:
                     classes[self.labels[n]] += 1
                 labels.append(sorted(classes.iteritems(), key=operator.itemgetter(1))[-1][0])

@@ -131,7 +131,7 @@ class LoadBalancer(object):
             decisionLog = etree.SubElement(self.xmlLogger, "decision", {"time" : repr(time.time()), 
                                                                         "selfLoad" : repr(self.ws[self.wid].loadCurrentExec)+","+repr(self.ws[self.wid].loadExecQ)+","+repr(self.ws[self.wid].loadWaitingRestartQ)+","+repr(self.ws[self.wid].loadWaitingQ)})
             for workerId in self.ws:
-                etree.SubElement(decisionLog, "workerKnownState", {"load" : repr(self.ws[workerId].loadCurrentExec)+","+repr(self.ws[workerId].loadExecQ)+","+repr(self.ws[workerId].loadWaitingRestartQ)+","+repr(self.ws[workerId].loadWaitingQ)})
+                etree.SubElement(decisionLog, "workerKnownState", {"id" : repr(workerId), "load" : repr(self.ws[workerId].loadCurrentExec)+","+repr(self.ws[workerId].loadExecQ)+","+repr(self.ws[workerId].loadWaitingRestartQ)+","+repr(self.ws[workerId].loadWaitingQ)})
 
         listLoads = self.ws.values()
         self.totalExecLoad, self.totalEQueueLoad, self.totalWaitingRQueueLoad, self.totalWaitingQueueLoad = 0., 0., 0., 0.
@@ -144,12 +144,16 @@ class LoadBalancer(object):
             totalSum2 += (r.loadCurrentExec+r.loadExecQ+r.loadWaitingRestartQ)**2
 
         avgLoad = (self.totalExecLoad + self.totalEQueueLoad + self.totalWaitingRQueueLoad) / float(len(self.ws))
-        stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
+        try:
+            stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
+        except ValueError:
+            # Some weird cases with floating point precision, where avgLoad**2 might be an epsilon greater than totalSum2/len(self.ws)
+            stdDevLoad = 0.
         selfLoad = self.ws[self.wid].sumRealLoad()
         diffLoad = selfLoad - avgLoad
 
 
-        listPossibleSendTo = list(filter(lambda d: d[1].infoUpToDate and d[1].sumRealLoad() > avgLoad, self.ws.items()))
+        listPossibleSendTo = filter(lambda d: d[1].infoUpToDate and d[1].sumRealLoad() > avgLoad, self.ws.items())
         if selfLoad == 0 and len(listPossibleSendTo) > 0 and avgLoad != 0 and self.ws[self.wid].loadWaitingRestartQ < DTM_RESTART_QUEUE_BLOCKING_FROM:
             # Algorithme d'envoi de demandes de taches
             self.lastQuerySend = time.time()
@@ -225,7 +229,7 @@ class LoadBalancer(object):
                 del scores[selectedIndex]       # On s'assure de ne pas reprendre le meme worker
                         
             if not self.xmlLogger is None:
-                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendtasks", "destination":str([b[0] for b in sendTasksList]), "tasksinfo" : str([len(b[1]) for b in sendTasksList])})
+                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendtasks", "destination":str([b[0] for b in sendTasksList])[1:-1], "tasksinfo" : str([len(b[1]) for b in sendTasksList])[1:-1]})
                 
             self.lastTaskSend = time.time()
         return sendNotifList, sendTasksList

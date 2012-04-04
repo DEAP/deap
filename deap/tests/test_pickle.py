@@ -80,6 +80,16 @@ class Pickling(unittest.TestCase):
         self.failUnlessEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.failUnlessEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
     
+    def test_pickle_statistics(self):
+        stats = tools.Statistics()
+        stats.register("Mean", tools.mean)
+        stats.update([1,2,3,4,5,6,8,9,10])
+        stats_s = pickle.dumps(stats)
+        stats_r = pickle.loads(stats_s)
+
+        self.failUnlessEqual(stats.Mean, stats_r.Mean, "Unpickled statistics != pickled statistics")
+
+
     if not sys.version_info < (2, 7):
         def test_pickle_partial(self):
             func_s = pickle.dumps(self.toolbox.func)

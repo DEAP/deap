@@ -34,8 +34,10 @@ imap = _dtmObj.imap
 imap_unordered = _dtmObj.imap_unordered
 filter = _dtmObj.filter
 repeat = _dtmObj.repeat
-waitForAll = _dtmObj.waitForAll
-testAllAsync = _dtmObj.testAllAsync
+waitAll = _dtmObj.waitAll
+waitAny = _dtmObj.waitAny
+testAll = _dtmObj.testAll
+testAny = _dtmObj.testAny
 getWorkerId = _dtmObj.getWorkerId
 
 # Control shall not be imported that way

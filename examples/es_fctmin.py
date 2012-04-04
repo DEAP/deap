@@ -14,11 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
 import random
-import logging
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
@@ -43,18 +39,17 @@ def generateES(icls, scls, size, imin, imax, smin, smax):
     return ind
 
 def checkStrategy(minstrategy):
-    def decMinStrategy(func):
-        def wrapMinStrategy(*args, **kargs):
+    def decorator(func):
+        def wrappper(*args, **kargs):
             children = func(*args, **kargs)
             for child in children:
                 for i, s in enumerate(child.strategy):
                     if s < minstrategy:
                         child.strategy[i] = minstrategy
             return children
-        return wrapMinStrategy
-    return decMinStrategy
+        return wrappper
+    return decorator
 
-# Structure initializers
 toolbox = base.Toolbox()
 toolbox.register("individual", generateES, creator.Individual, creator.Strategy,
     IND_SIZE, MIN_VALUE, MAX_VALUE, MIN_STRATEGY, MAX_STRATEGY)
@@ -64,8 +59,8 @@ toolbox.register("mutate", tools.mutESLogNormal, c=1.0, indpb=0.03)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", benchmarks.sphere)
 
-toolbox.decorate("mate", checkStrategy(0.5))
-toolbox.decorate("mutate", checkStrategy(0.5))
+toolbox.decorate("mate", checkStrategy(MIN_STRATEGY))
+toolbox.decorate("mutate", checkStrategy(MIN_STRATEGY))
 
 def main():
     random.seed()
@@ -73,16 +68,14 @@ def main():
     pop = toolbox.population(n=MU)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaMuCommaLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
+    algorithms.eaMuCommaLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
                                cxpb=0.6, mutpb=0.3, ngen=500, 
                                stats=stats, halloffame=hof)
-    
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
     
     return pop, stats, hof
     

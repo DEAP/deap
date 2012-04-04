@@ -121,10 +121,13 @@ def main():
     pop = toolbox.population(n=100)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
@@ -133,40 +136,41 @@ def main():
     	ind.fitness.values = toolbox.evaluate(ind)
 
     hof.update(pop)
-    stats.update(pop)    
+    stats.update(pop)
     
-    for g in range(NGEN):
-        print "-- Generation %i --" % g
+    logger.logGeneration(gen=0, evals=len(pop), stats=stats)    
     
-        # Select the offsprings
-        offsprings = toolbox.select(pop, len(pop))
-        # Clone the offsprings
-        offsprings = [toolbox.clone(ind) for ind in offsprings]
+    for g in range(1, NGEN):
+        # Select the offspring
+        offspring = toolbox.select(pop, len(pop))
+        # Clone the offspring
+        offspring = [toolbox.clone(ind) for ind in offspring]
     
         # Apply crossover and mutation
-        for ind1, ind2 in zip(offsprings[::2], offsprings[1::2]):
+        for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
             for tree1, tree2 in zip(ind1, ind2):
                 if random.random() < CXPB:
                     toolbox.mate(tree1, tree2)
                     del ind1.fitness.values
                     del ind2.fitness.values
 
-        for ind in offsprings:
+        for ind in offspring:
             for tree in ind:
                 if random.random() < MUTPB:
                     toolbox.mutate(tree)
                     del ind.fitness.values
                             
         # Evaluate the individuals with an invalid fitness
-        invalids = [ind for ind in offsprings if not ind.fitness.valid]
+        invalids = [ind for ind in offspring if not ind.fitness.valid]
         for ind in invalids:
             ind.fitness.values = toolbox.evaluate(ind)
                 
         # Replacement of the population by the offspring
-        pop = offsprings
+        pop = offspring
         hof.update(pop)
         stats.update(pop)
-        print stats
+        
+        logger.logGeneration(gen=g, evals=len(invalids), stats=stats)
     
     print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
     

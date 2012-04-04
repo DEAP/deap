@@ -13,16 +13,9 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-import array
-import sys
-import random
-import logging
+import numpy
 
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-random.seed(128)    # Random must be seeded before importing cma because it is
-                    # used to seed numpy.random
-                    # This will be fixed in future release.
-
+from deap import algorithms
 from deap import base
 from deap import benchmarks
 from deap import cma
@@ -33,28 +26,32 @@ from deap import tools
 N=30
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
+creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.rastrigin)
 
 def main():
+    # The cma module uses the numpy random number generator
+    numpy.random.seed(128)
+
     # The CMA-ES algorithm takes a population of one individual as argument
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
     # for more details about the rastrigin and other tests for CMA-ES    
-    strategy = cma.CMAStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
-    pop = strategy.generate(creator.Individual)
-    hof = tools.HallOfFame(1)
+    strategy = cma.Strategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
+    toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
+    hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    #logger = tools.EvolutionLogger(stats.functions.keys())
    
     # The CMA-ES algorithm converge with good probability with those settings
-    cma.esCMA(toolbox, pop, ngen=250, halloffame=hof, statistics=stats)
+    algorithms.eaGenerateUpdate(toolbox, ngen=250, stats=stats, halloffame=hof)
     
     # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]

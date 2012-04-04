@@ -46,8 +46,6 @@ prog3(prog3(move_forward,
 fitness = (89,)
 """
 
-import sys
-import logging
 import copy
 import random
 from functools import partial
@@ -57,9 +55,6 @@ from deap import base
 from deap import creator
 from deap import tools
 from deap import gp
-
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 def progn(*args):
     for arg in args:
@@ -191,14 +186,12 @@ def main():
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
-    
-    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof)
     
     return pop, hof, stats
 

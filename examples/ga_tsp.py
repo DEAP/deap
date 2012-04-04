@@ -14,12 +14,8 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
-import sys
-import logging
 import random
 import json
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
@@ -62,14 +58,13 @@ def main():
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.7, 0.2, 40, stats, hof)
-    
-    logging.info("Best individual is %s, %s", hof[0], hof[0].fitness.values)
+    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats, 
+                        halloffame=hof)
     
     return pop, stats, hof
 

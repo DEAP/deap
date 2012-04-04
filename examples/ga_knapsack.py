@@ -13,27 +13,28 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import random
-import logging
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 
-IND_SIZE = 30
+IND_INIT_SIZE = 5
 MAX_ITEM = 50
 MAX_WEIGHT = 50
 NBR_ITEMS = 20
 
-# Create the item dictionary, items' name is an integer, and value is 
-# a (weight, value) 2-uple. The items will be created during the runtime
-# to enable reproducibility. It must be available in the global space
-# because of the evaluation
+# To assure reproductibility, the RNG seed is set prior to the items
+# dict initialization. It is also seeded in main().
+random.seed(64)
+
+# Create the item dictionary: item name is an integer, and value is 
+# a (weight, value) 2-uple.
 items = {}
+# Create random items and store them in the items' dictionary.
+for i in xrange(NBR_ITEMS):
+    items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))
 creator.create("Individual", set, fitness=creator.Fitness)
@@ -45,7 +46,7 @@ toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
 toolbox.register("individual", tools.initRepeat, creator.Individual, 
-    toolbox.attr_item, IND_SIZE)
+    toolbox.attr_item, IND_INIT_SIZE)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalKnapsack(individual):
@@ -84,27 +85,20 @@ def main():
     random.seed(64)
     NGEN = 50
     MU = 50
-    LAMBDA = 100    
+    LAMBDA = 100
+    CXPB = 0.7
+    MUTPB = 0.2
     
-
-    # Create random items and store them in the items' dictionary.
-    for i in xrange(NBR_ITEMS):
-        items[i] = (random.randint(1, 10), random.uniform(0, 100))
-
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaMuPlusLambda(toolbox, pop, MU, LAMBDA, 0.7, 0.2, NGEN, stats, halloffame=hof)
-
-    logging.info("Best individual for measure 1 is %s, %s", 
-                 hof[0], hof[0].fitness.values)
-    logging.info("Best individual for measure 2 is %s, %s", 
-                 hof[-1], hof[-1].fitness.values)
+    algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
+                              halloffame=hof)
     
     return pop, stats, hof
                  
