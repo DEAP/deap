@@ -82,7 +82,6 @@ if __name__ == "__main__":
     # import numpy
     # 
     # front = numpy.array([ind.fitness.values for ind in pop])
-    # print front.shape
     # plt.scatter(front[:,0], front[:,1], c="b")
     # plt.axis("tight")
     # plt.show()
