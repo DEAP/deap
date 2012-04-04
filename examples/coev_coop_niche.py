@@ -36,8 +36,8 @@ def nicheSchematas(type, size):
     """Produce the desired schemata based on the type required, 2 for half
     length, 4 for quarter length and 8 for eight length.
     """
-    return ["#" * (i*size/type) + "1" * (size/type) + 
-        "#" * ((type-i-1)*size/type) for i in range(type)]
+    rept = int(size/type)
+    return ["#" * (i*rept) + "1" * rept + "#" * ((type-i-1)*rept) for i in range(type)]
 
 toolbox = coev_coop_base.toolbox
 
@@ -61,7 +61,8 @@ def main(extended=True, verbose=True):
     
     schematas = nicheSchematas(TARGET_TYPE, IND_SIZE)
     for i in range(TARGET_TYPE):
-        target_set.extend(toolbox.target_set(schematas[i], TARGET_SIZE/TARGET_TYPE))
+        size = int(TARGET_SIZE/TARGET_TYPE)
+        target_set.extend(toolbox.target_set(schematas[i], size))
         species.append(toolbox.species())
     
     # Init with a random representative for each species

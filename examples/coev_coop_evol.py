@@ -66,7 +66,8 @@ def main(extended=True, verbose=True):
     g = 0
     
     for i in range(len(schematas)):
-        target_set.extend(toolbox.target_set(schematas[i], TARGET_SIZE/len(schematas)))
+        size = int(TARGET_SIZE/len(schematas))
+        target_set.extend(toolbox.target_set(schematas[i], size))
     
     species = [toolbox.species() for _ in range(NUM_SPECIES)]
     species_index = range(NUM_SPECIES)
