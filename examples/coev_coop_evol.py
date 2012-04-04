@@ -45,8 +45,7 @@ schematas = ("1##1###1###11111##1##1111#1##1###1#1111##111111##1#11#1#11######",
              "0##0###0###00000##0##0000#0##0###0#0000##001111##1#11#1#11######")
 
 toolbox = coev_coop_base.toolbox
-if pylab:
-    toolbox.register("evaluateContribution", coev_coop_base.matchSetContribution)
+toolbox.register("evaluateContribution", coev_coop_base.matchSetContribution)
 
 def main(extended=True, verbose=True):
     target_set = []
