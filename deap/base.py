@@ -191,22 +191,6 @@ class Fitness(object):
     def valid(self):
         """Assess if a fitness is valid or not."""
         return len(self.wvalues) != 0
-
-    def isDominated(self, other):
-        """In addition to the comparison operators that are used to sort
-        lexically the fitnesses, this method returns :data:`True` if this
-        fitness is dominated by the *other* fitness and :data:`False` otherwise.
-        The weights are used to compare minimizing and maximizing fitnesses. If
-        there is more fitness values than weights, the last weight get repeated
-        until the end of the comparison.
-        """
-        not_equal = False
-        for self_wvalue, other_wvalue in izip(self.wvalues, other.wvalues):
-            if self_wvalue > other_wvalue:
-                return False
-            elif self_wvalue < other_wvalue:
-                not_equal = True
-        return not_equal
         
     def __gt__(self, other):
         return not self.__le__(other)

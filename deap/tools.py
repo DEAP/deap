@@ -699,10 +699,10 @@ class ParetoFront(HallOfFame):
             has_twin = False
             to_remove = []
             for i, hofer in enumerate(self):    # hofer = hall of famer
-                if ind.fitness.isDominated(hofer.fitness):
+                if isDominated(ind.fitness.wvalues, hofer.fitness.wvalues):
                     is_dominated = True
                     break
-                elif hofer.fitness.isDominated(ind.fitness):
+                elif isDominated(hofer.fitness.wvalues, ind.fitness.wvalues):
                     to_remove.append(i)
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
@@ -1404,9 +1404,9 @@ def selTournamentDCD(individuals, k):
     :returns: A list of selected individuals.
     """
     def tourn(ind1, ind2):
-        if ind1.fitness.isDominated(ind2.fitness):
+        if isDominated(ind1.fitness.wvalues, ind2.fitness.wvalues):
             return ind2
-        elif ind2.fitness.isDominated(ind1.fitness):
+        elif isDominated(ind2.fitness.wvalues, ind1.fitness.wvalues):
             return ind1
 
         if ind1.fitness.crowding_dist < ind2.fitness.crowding_dist:
@@ -1598,10 +1598,10 @@ def selSPEA2(individuals, k):
     
     for i in xrange(N):
         for j in xrange(i + 1, N):
-            if individuals[i].fitness.isDominated(individuals[j].fitness):
+            if isDominated(individuals[i].fitness.wvalues, individuals[j].fitness.wvalues):
                 strength_fits[j] += 1
                 dominating_inds[i].append(j)
-            elif individuals[j].fitness.isDominated(individuals[i].fitness):
+            elif isDominated(individuals[j].fitness.wvalues, individuals[i].fitness.wvalues):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
     
