@@ -109,10 +109,13 @@ def main():
     parasites = ptoolbox.population(n=300)
     hof = tools.HallOfFame(1)
     hstats = tools.Statistics(lambda ind: ind.fitness.values)
-    hstats.register("Avg", tools.mean)
-    hstats.register("Std", tools.std)
-    hstats.register("Min", min)
-    hstats.register("Max", max)
+    hstats.register("avg", tools.mean)
+    hstats.register("std", tools.std)
+    hstats.register("min", min)
+    hstats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + hstats.functions.keys())
+    logger.logHeader()
     
     MAXGEN = 50
     H_CXPB, H_MUTPB = 0.5, 0.3
@@ -125,15 +128,15 @@ def main():
     hof.update(hosts)
     hstats.update(hosts)
     
-    for g in range(MAXGEN):
-        print "-- Generation %i --" % g
-        hosts = htoolbox.select(hosts, len(hosts))
-        hosts = [htoolbox.clone(ind) for ind in hosts]
-        parasites = ptoolbox.select(parasites, len(parasites))
-        parasites = [ptoolbox.clone(ind) for ind in parasites]
+    logger.logGeneration(gen=0, evals=len(hosts), stats=hstats)
+    
+    for g in range(1, MAXGEN):
         
-        hosts = algorithms.varSimple(htoolbox, hosts, H_CXPB, H_MUTPB)
-        parasites = algorithms.varSimple(ptoolbox, parasites, P_CXPB, P_MUTPB)
+        hosts = htoolbox.select(hosts, len(hosts))
+        parasites = ptoolbox.select(parasites, len(parasites))
+        
+        hosts = algorithms.varAnd(hosts, htoolbox, H_CXPB, H_MUTPB)
+        parasites = algorithms.varAnd(parasites, ptoolbox, P_CXPB, P_MUTPB)
         
         fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
         for host, parasite, fit in zip(hosts, parasites, fits):
@@ -141,8 +144,7 @@ def main():
         
         hof.update(hosts)
         hstats.update(hosts)
-        
-        print hstats
+        logger.logGeneration(gen=g, evals=len(hosts), stats=hstats)
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network

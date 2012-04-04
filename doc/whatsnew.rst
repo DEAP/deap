@@ -3,6 +3,25 @@ What's New?
 ===========
 Here is a (incomplete) log of the changes made to DEAP over time. 
 
+Upcoming in 0.8
+================
+- Added forward compatibility to Python 3.2
+- Replaced :func:`~deap.algorithms.varSimple` and
+  :func:`~deap.algorithms.varLambda` variation operators for the more specific
+  :func:`~deap.algorithms.varAnd` and :func:`~deap.algorithms.varOr`
+  operators.
+- Added a logging facility (:class:`~deap.tools.EvolutionLogger`) that produce
+  easier to read console logging and a utility to transform that output into a
+  Python dictionary.
+- Introduced the exact NSGA-II algorithm as described in *Deb et al., 2002, A
+  Fast Elitist Multiobjective Genetic Algorithm: NSGA-II*.
+- NSGA-II selection algorithm revisited :
+
+  - Added a C++ version;
+  - Speed up of the Python version (up to 5x when the objectives are discrete).
+
+- Added some new benchmarks (multiobjective, binary and moving peaks).
+- Added translation, rotation, scaling and noise decorators to enhance benchmarks.
 
 Release 0.7
 ===========
@@ -20,7 +39,7 @@ Release 0.7
 - Eliminated the confusing *content_init* and *size_init* keywords in the toolbox.
 - Refactored the whole documentation in a more structured manner.
 - Added a benchmark module containing some of the most classic benchmark functions.
-- Added a lots of examples again :
+- Added a lot of examples again :
 	
   - Differential evolution (*x2*);
   - Evolution strategy : One fifth rule;

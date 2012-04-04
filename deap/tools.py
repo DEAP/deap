@@ -23,34 +23,34 @@ also contains utility tools to enhance the basic algorithms with
 from __future__ import division
 import bisect
 import copy
-import inspect
 import math
 import random
-from itertools import chain
-from operator import attrgetter, eq
-from collections import defaultdict
-from functools import partial
 
 try:
-    import yaml
-    CHECKPOINT_USE_YAML = True
-    try:
-        from yaml import CDumper as Dumper  # CLoader and CDumper are much
-        from yaml import CLoader as Loader  # faster than default ones, but 
-    except ImportError:                     # requires LibYAML to be compiled
-        from yaml import Dumper
-        from yaml import Loader
+    import cPickle as pickle
 except ImportError:
-    CHECKPOINT_USE_YAML = False
-                                            # If yaml ain't present, use 
-try:                                        # pickling to dump
-    import cPickle as pickle                # cPickle is much faster than 
-except ImportError:                         # pickle but only present under
-    import pickle                           # CPython
+    import pickle
+
+from functools import partial
+from itertools import chain
+from operator import attrgetter, eq
+from collections import Sequence, defaultdict
+from sys import stdout
+
+def identity(obj):
+    """Returns directly the argument *obj*.
+    """
+    return obj
 
 def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the function *func*.
+    
+    :param container: The type to put in the data from func.
+    :param func: The function that will be called n times to fill the
+                 container.
+    :param n: The number of times to repeat func.
+    :returns: An instance of the container filled with data from func.
     
     This helper function can can be used in conjunction with a Toolbox 
     to register a generator of filled containers, as individuals or 
@@ -68,6 +68,11 @@ def initIterate(container, generator):
     its only argument. The iterable must be returned by 
     the method or the object *generator*.
     
+    :param container: The type to put in the data from func.
+    :param generator: A function returning an iterable (list, tuple, ...),
+                      the content of this iterable will fill the container.
+    :returns: An instance of the container filled with data from the
+              generator.
     
     This helper function can can be used in conjunction with a Toolbox 
     to register a generator of filled containers, as individuals or 
@@ -86,12 +91,19 @@ def initCycle(container, seq_func, n=1):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the functions present in *seq_func*.
     
+    :param container: The type to put in the data from func.
+    :param seq_func: A list of function objects to be called in order to
+                     fill the container.
+    :param n: Number of times to iterate through the list of functions.
+    :returns: An instance of the container filled with data from the
+              returned by the functions.
+    
     This helper function can can be used in conjunction with a Toolbox 
     to register a generator of filled containers, as individuals or 
     population.
     
         >>> func_seq = [lambda:1 , lambda:'a', lambda:3]
-        >>> initCycle(list, func_seq, 2)
+        >>> initCycle(list, func_seq, n=2)
         [1, 'a', 3, 1, 'a', 3]
 
     """
@@ -117,7 +129,7 @@ class History(object):
         
         # Create the population and populate the history
         population = toolbox.population(n=POPSIZE)
-        history.populate(population)
+        history.update(population)
         
         # Do the evolution, the decorators will take care of updating the
         # history
@@ -127,12 +139,16 @@ class History(object):
         import networkx
         
         graph = networkx.DiGraph(history.genealogy_tree)
-        networkx.draw(graph)
+        graph = graph.reverse()     # Make the grah top-down
+        colors = [toolbox.evaluate(history.genealogy_history[i])[0] for i in graph]
+        networkx.draw(graph, node_color=colors)
         plt.show()
     
-    Using NetworkX in combination with pygraphviz (dot layout) this amazing
+    Using NetworkX in combination with `pygraphviz
+    <http://networkx.lanl.gov/pygraphviz/>`_ (dot layout) this amazing
     genealogy tree can be obtained from the OneMax example with a population
-    size of 20 and 5 generations.
+    size of 20 and 5 generations, where the color of the nodes indicate there
+    fitness, blue is low and red is high.
     
     .. image:: /_images/genealogy.png
        :width: 67%
@@ -146,29 +162,30 @@ class History(object):
         self.genealogy_index = 0
         self.genealogy_history = dict()
         self.genealogy_tree = dict()
-    
-    def populate(self, individuals):
-        """Populate the history with the initial *individuals*. An attribute
-        :attr:`history_index` is added to every individual, this index will
-        help to track the parents and the children through evolution. This
-        index will be modified by the :meth:`update` method when a child is
-        produced. Modifying the internal :attr:`genealogy_index` of the
-        history or the :attr:`history_index` of an individual may lead to
-        unpredictable results and corruption of the history.
-        """
-        for ind in individuals:
-            self.genealogy_index += 1
-            ind.history_index = self.genealogy_index
-            self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
-            self.genealogy_tree[self.genealogy_index] = list()
         
-    def update(self, *individuals):
-        """Update the history with the new *individuals*. The index present
-        in their :attr:`history_index` attribute will be used to locate their
-        parents and modified to a unique one to keep track of those new
-        individuals.
+    def update(self, individuals):
+        """Update the history with the new *individuals*. The index present in
+        their :attr:`history_index` attribute will be used to locate their
+        parents, it is then modified to a unique one to keep track of those
+        new individuals. This method should be called on the individuals after
+        each variation.
+        
+        :param individuals: The list of modified individuals that shall be
+                            inserted in the history.
+        
+        If the *individuals* do not have a :attr:`history_index` attribute, 
+        the attribute is added and this individual is considered as having no
+        parent. This method should be called with the initial population to
+        initialize the history.
+        
+        Modifying the internal :attr:`genealogy_index` of the history or the
+        :attr:`history_index` of an individual may lead to unpredictable
+        results and corruption of the history.
         """
-        parent_indices = [ind.history_index for ind in individuals]
+        try:
+            parent_indices = tuple(ind.history_index for ind in individuals)
+        except AttributeError:
+            parent_indices = tuple()
         
         for ind in individuals:
             self.genealogy_index += 1
@@ -181,107 +198,151 @@ class History(object):
         """Property that returns an appropriate decorator to enhance the
         operators of the toolbox. The returned decorator assumes that the
         individuals are returned by the operator. First the decorator calls
-        the underlying operation and then calls the update function with what
-        has been returned by the operator as argument. Finally, it returns 
-        the individuals with their history parameters modified according to
-        the update function.
+        the underlying operation and then calls the :func:`update` function
+        with what has been returned by the operator. Finally, it returns the
+        individuals with their history parameters modified according to the
+        update function.
         """
         def decFunc(func):
             def wrapFunc(*args, **kargs):
                 individuals = func(*args, **kargs)
-                self.update(*individuals)
+                self.update(individuals)
                 return individuals
             return wrapFunc
         return decFunc
+
+    def getGenealogy(self, individual, max_depth=float("inf")):
+        """Provide the genealogy tree of an *individual*. The individual must
+        have an attribute :attr:`history_index` as defined by
+        :func:`~deap.tools.History.update` in order to retrieve its associated
+        genealogy tree. The returned graph contains the parents up to
+        *max_depth* variations before this individual. If not provided
+        the maximum depth is up to the begining of the evolution.
+
+        :param individual: The individual at the root of the genealogy tree.
+        :param max_depth: The approximate maximum distance between the root
+                          (individual) and the leaves (parents), optional.
+        :returns: A dictionary where each key is an individual index and the
+                  values are a tuple corresponding to the index of the parents.
+        """
+        gtree = {}
+        visited = set()     # Adds memory to the breadth first search
+        def genealogy(index, depth):
+            if index not in self.genealogy_tree:
+                return             
+            depth += 1
+            if depth > max_depth:
+                return
+            parent_indices = self.genealogy_tree[index]
+            gtree[index] = parent_indices
+            for ind in parent_indices:
+                if ind not in visited:
+                    genealogy(ind, depth)
+                visited.add(ind)
+        genealogy(individual.history_index, 0)
+        return gtree
 
 
 class Checkpoint(object):
     """A checkpoint is a file containing the state of any object that has been
     hooked. While initializing a checkpoint, add the objects that you want to
     be dumped by appending keyword arguments to the initializer or using the 
-    :meth:`add`. By default the checkpoint tries to use the YAML format which
-    is human readable, if PyYAML is not installed, it uses pickling which is
-    not readable. You can force the use of pickling by setting the argument
-    *yaml* to :data:`False`. 
+    :meth:`add`. 
 
     In order to use efficiently this module, you must understand properly the
-    assignment principles in Python. This module use the *pointers* you passed
+    assignment principles in Python. This module uses the *pointers* you passed
     to dump the object, for example the following won't work as desired ::
 
         >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint(obj=my_object)
+        >>> cp = Checkpoint()
+        >>> cp.add("my_object", my_object)
         >>> my_object = [3, 5, 6]
-        >>> cp.dump("example")
-        >>> cp.load("example.ems")
-        >>> cp["obj"]
+        >>> cp.dump(open("example.ecp", "w"))
+        >>> cp.load(open("example.ecp", "r"))
+        >>> cp["my_object"]
         [1, 2, 3]
 
     In order to dump the new value of ``my_object`` it is needed to change its
     internal values directly and not touch the *label*, as in the following ::
 
         >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint(obj=my_object)
+        >>> cp = Checkpoint()
+        >>> cp.add("my_object", my_object)
         >>> my_object[:] = [3, 5, 6]
-        >>> cp.dump("example")
-        >>> cp.load("example.ems")
-        >>> cp["obj"]
+        >>> cp.dump(open("example.ecp", "w"))
+        >>> cp.load(open("example.ecp", "r"))
+        >>> cp["my_object"]
         [3, 5, 6]
 
     """
-    def __init__(self, yaml=True, **kargs):
-#        self.zipped = zipped
-        self._dict = kargs
-        if CHECKPOINT_USE_YAML and yaml:
-            self.use_yaml = True
-        else:
-            self.use_yaml = False
+    def __init__(self):
+        self.objects = {}
+        self.keys = {}
+        self.values = {}
 
-    def add(self, **kargs):
-        """Add objects to the list of objects to be dumped. The object is
-        added under the name specified by the argument's name. Keyword
-        arguments are mandatory in this function.
+    def add(self, name, object, key=identity):
+        """Add an object to the list of objects to be dumped. The object is
+        added under the name specified by the argument *name*, the object
+        added is *object*, and the *key* argument allow to specify a subpart
+        of the object that should be dumped (*key* defaults to an identity key
+        that dumps the entire object).
+        
+        :param name: The name under which the object will be dumped.
+        :param object: The object to register for dumping.
+        :param key: A function access the subcomponent of the object to dump,
+                    optional.
+        
+        The following illustrates how to use the key.
+        ::
+
+            >>> from operator import itemgetter
+            >>> my_object = [1, 2, 3]
+            >>> cp = Checkpoint()
+            >>> cp.add("item0", my_object, key=itemgetter(0))
+            >>> cp.dump(open("example.ecp", "w"))
+            >>> cp.load(open("example.ecp", "r"))
+            >>> cp["item0"]
+            1
+
         """
-        self._dict.update(*kargs)
+        self.objects[name] = object
+        self.keys[name] = partial(key, object)
 
     def remove(self, *args):
         """Remove objects with the specified name from the list of objects to
         be dumped.
+        
+        :param name: The name of one or more object to remove from dumping.
+        
         """
         for element in args:
-            del self._dict[element]
+            del self.objects[element]
+            del self.keys[element]
+            del self.values[element]
 
     def __getitem__(self, value):
-        return self._dict[value]
+        return self.values.get(value)
 
-    def dump(self, prefix):
-        """Dump the current registered objects in a file named *prefix.ecp*,
-        the randomizer state is always added to the file and available under
-        the ``"randomizer_state"`` tag.
+    def dump(self, file):
+        """Dump the current registered object values in the provided
+        *filestream*.
+        
+        :param filestream: A stream in which write the data.
         """
-#        if not self.zipped:
-        cp_file = open(prefix + ".ecp", "w")
-#        else:
-#            file = gzip.open(prefix + ".ems.gz", "w")
-        cp = self._dict.copy()
-        cp.update({"randomizer_state" : random.getstate()})
+        self.values = dict.fromkeys(self.objects.iterkeys())
+        for name, key in self.keys.iteritems():
+            self.values[name] = key()
+        pickle.dump(self.values, file)
 
-        if self.use_yaml:
-            cp_file.write(yaml.dump(cp, Dumper=Dumper))
-        else:
-            pickle.dump(cp, cp_file)
-
-        cp_file.close()
-
-    def load(self, filename):
-        """Load a checkpoint file retrieving the dumped objects, it is not
-        safe to load a checkpoint file in a checkpoint object that contains
-        references as all conflicting names will be updated with the new
-        values.
+    def load(self, file):
+        """Load a checkpoint from the provided *filestream* retrieving the
+        dumped object values, it is not safe to load a checkpoint file in a
+        checkpoint object that contains references as all conflicting names
+        will be updated with the new values.
+        
+        :param filestream: A stream from which to read a checkpoint.
         """
-        if self.use_yaml:
-            self._dict.update(yaml.load(open(filename, "r"), Loader=Loader))
-        else:
-            self._dict.update(pickle.load(open(filename, "r")))
+        self.values.update(pickle.load(file))
 
 def mean(seq):
     """Returns the arithmetic mean of the sequence *seq* = 
@@ -313,129 +374,203 @@ def std(seq):
     """Returns the square root of the variance :math:`\sigma^2` of *seq*.
     """
     return var(seq)**0.5
-
+    
 class Statistics(object):
     """A statistics object that holds the required data for as long as it
     exists. When created the statistics object receives a *key* argument that
     is used to get the required data, if not provided the *key* argument
     defaults to the identity function. A statistics object can be represented
-    as a 4 dimensional matrix. Along the first axis (wich length is given by
-    the *n* argument) are independent statistics objects that are used on
-    different collections given this index in the :meth:`update` method. The
-    second axis is the function it-self, each element along the second axis
-    (indexed by their name) will represent a different function. The third
-    axis is the accumulator of statistics. each time the update function is
-    called the new statistics are added using the registered functions at the
-    end of this axis. The fourth axis is used when the entered data is an
-    iterable (for example a multiobjective fitness).
+    as multiple 3 dimensional matrix, for each registered function there is
+    a matrix.
     
-    Data can be retrieved by different means in a statistics object. One can
-    use directly the registered function name with an *index* argument that
-    represent the first axis of the matrix. This method returns the last
-    entered data.
+    :param key: A function to access the data on which to compute the
+                statistics, optional.
+    :param n: The number of independent statistics to maintain in this
+              statistics object.
+
+    Along the first axis (wich length is given by the *n* argument) are
+    independent statistics on different collections given this index in the 
+    :meth:`update` method. The second is the accumulator of statistics, each 
+    time the update function is called the new statistics are added using the 
+    registered functions at the end of this axis. The third axis is used when 
+    the entered data is an iterable (for example a multiobjective fitness).
+    
+    Data can be retrieved by accessing the statistic function name followed
+    by the indicices of the element we wish to access.
     ::
     
         >>> s = Statistics(n=2)
         >>> s.register("Mean", mean)
         >>> s.update([1, 2, 3, 4], index=0)
         >>> s.update([5, 6, 7, 8], index=1)
-        >>> s.Mean(0)
+        >>> s.Mean[0][-1]
         [2.5]
-        >>> s.Mean(1)
+        >>> s.Mean[1][-1]
         [6.5]
-    
-    An other way to obtain the statistics is to use directly the ``[]``. In
-    that case all dimensions must be specified. This is how stats that have
-    been registered earlier in the process can be retrieved.
-    ::
-    
         >>> s.update([10, 20, 30, 40], index=0)
         >>> s.update([50, 60, 70, 80], index=1)
-        >>> s[0]["Mean"][0]
-        [2.5]
-        >>> s[1]["Mean"][0]
-        [6.5]
-        >>> s[0]["Mean"][1]
-        [25]
-        >>> s[1]["Mean"][1]
-        [65]
-    
-    Finally, the fourth dimension is used when stats are needed on lists of
-    lists. The stats are computed on the matching indices of each list.
-    ::
-    
-        >>> s = Statistics()
-        >>> s.register("Mean", mean)
-        >>> s.update([[1, 2, 3], [4, 5, 6]])
-        >>> s.Mean()
-        [2.5, 3.5, 4.5]
-        >>> s[0]["Mean"][-1][0]
-        2.5
+        >>> s.Mean[0][1]
+        [25.0]
+        >>> s.Mean[1][1]
+        [65.0]
     """
-    class Data(defaultdict):
-        def __init__(self):
-            defaultdict.__init__(self, list)
-        def __str__(self):
-            return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.iteritems())
-    
-    def __init__(self, key=lambda x: x, n=1):
+    __slots__ = ['key', 'functions', 'dim', 'data']
+    def __init__(self, key=identity, n=1):
         self.key = key
+        self.data = {}
         self.functions = {}
-        self.data = tuple(self.Data() for _ in xrange(n))
-    
-    def __getitem__(self, index):
-        return self.data[index]
-        
-    def _getFuncValue(self, name, index=0):
-        return self.data[index][name][-1]
-    
+        self.dim = n
+
+    def __getattr__(self, name):
+        if name in self.__getattribute__("data"):
+            return self.data[name]
+        else:
+            return self.__getattribute__(name)
+
+    def __getstate__(self):
+        return None, {'functions' : self.functions, 
+                      'dim' : self.dim, 'data' : self.data}
+
+    def __setstate__(self, state):
+        self.functions = state[1]['functions']
+        self.dim = state[1]['dim']
+        self.data = state[1]['data']
+
     def register(self, name, function):
         """Register a function *function* that will be apply on the sequence
         each time :func:`~deap.tools.Statistics.update` is called.
+        
+        :param name: The name of the statistics function as it would appear
+                     in the dictionnary of the statistics object.
+        :param function: A function that will compute the desired statistics
+                         on the data as preprocessed by the key.
+        
         The function result will be accessible by using the string given by
         the argument *name* as a function of the statistics object.
-        
+        ::
+
             >>> s = Statistics()
             >>> s.register("Mean", mean)
             >>> s.update([1,2,3,4,5,6,7])
-            >>> s.Mean()
-            [4.0]
+            >>> s.Mean
+            [[[4.0]]]
         """
+        if name in self.__slots__:
+            raise ValueError("Statistics.register: The registered name"
+                             " can't be 'key', 'functions', 'dim' or 'data'.")
         self.functions[name] = function
-        setattr(self, name, partial(self._getFuncValue, name))
-    
-    def update(self, seq, index=0):
+        self.data[name] = [[] for _ in xrange(self.dim)]
+
+    def update(self, seq, index=0, add=False):
         """Apply to the input sequence *seq* each registered function 
         and store each result in a list specific to the function and 
-        the data index *index*. 
-            
+        the data index *index*.
+        
+        :param seq: A sequence on which the key will be applied to get the
+                    data.
+        :param index: The index of the independent statistics object in which
+                      to add the computed statistics, optional (defaults to 0).
+        :param add: A boolean to force adding depth to the statistics
+                    object when the index is out of range. If the given index
+                    is not yet registered, it adds it to the statistics only
+                    if it is one greater than the larger index, optional
+                    (defaults to False).
+        
+        ::
+
             >>> s = Statistics()
             >>> s.register("Mean", mean)
             >>> s.register("Max", max)
             >>> s.update([4,5,6,7,8])
-            >>> s.Max()
-            [8]
-            >>> s.Mean()
-            [6.0]
+            >>> s.Max
+            [[[8]]]
+            >>> s.Mean
+            [[[6.0]]]
             >>> s.update([1,2,3])
-            >>> s.Max()
-            [3]
-            >>> s[0]["Max"]
-            [[8], [3]]
-            >>> s[0]["Mean"] 
-            [[6.0], [2.0]]
+            >>> s.Max
+            [[[8], [3]]]
         """
         # Transpose the values
-        data = self.data[index]
         try:
+            # seq is a sequence of number sequences.
             values = zip(*(self.key(elem) for elem in seq))
         except TypeError:
-            values = zip(*[(self.key(elem),) for elem in seq])
+            # seq is a sequence of numbers.
+            values = (seq,)
+
         for key, func in self.functions.iteritems():
-            data[key].append(map(func, values))
+            try:
+                self.data[key][index].append(map(func, values))
+            except IndexError:
+                if add and index == len(self.data[key]):
+                    self.data[key].append([map(func, values)])
+                else:
+                    raise
+
+class EvolutionLogger(object):
+    """The evolution logger logs data about the evolution to either the stdout
+    or a file. To change the destination of the logger simply change its
+    attribute :attr:`output` to an filestream. The *columns* argument provides
+    the data column to log when using statistics, the names should be
+    identical to what is registered in the statistics object (it default to
+    `["gen", "evals"]` wich will log the generation number and the number of
+    evaluated individuals). When logging with function :func:`logGeneration`, 
+    the provided columns must be given either as arguments or in the
+    statistics object. The *precision* indicates the precision to use when
+    logging statistics.
     
-    def __str__(self):
-        return "\n".join("%s %s" % (key, ", ".join(map(str, stat[-1]))) for key, stat in self.data[-1].iteritems())
+    :param columns: A list of strings of the name of the data as it will 
+                    appear in the statistics object, optional.
+    :param precision: Number of decimal digits to log, optional.
+    """
+    output = stdout
+    """File object indicating where the log is written. By default log is
+    written in sys.stdout.
+    """
+    def __init__(self, columns=["gen", "evals"], precision=4):
+        self.columns = tuple(columns)
+        self.line = " ".join("{%s:<8}" % name for name in self.columns)        
+        self.precision = "{0:.%if}" % precision
+    
+    def logHeader(self):
+        """Logs the column titles specified during initialization.
+        """
+        self.output.write(" ".join(map("{0:<8s}".format, self.columns)))
+        self.output.write("\n")
+
+    def logGeneration(self, stats=None, index=0, **kargs):
+        """Logs the registered generation identifiers given a columns on
+        initialization. Each element of the columns must be provided either in
+        the *stats* object or as keyword argument. When loggin through the
+        stats object, the last entry of the data under the column names at
+        *index* is logged (*index* defaults to 0).
+        
+        :param stats: A statistics object containing the data to log, optional.
+        :param index: The index in the statistics, optional.
+        :param data: Kerword arguments of the data that is not in the
+                     statistics object, optional.
+        
+        Here is an example on how to use the logger with a statistics object
+        ::
+            
+            >>> s = Statistics(n=2)
+            >>> s.register("mean", mean)
+            >>> s.register("max", max)
+            >>> s.update([1, 2, 3, 4], index=0)
+            >>> s.update([5, 6, 7, 8], index=1)
+            >>> l = EvolutionLogger(columns=["gen", "evals", "mean", "max"])
+            >>> l.logHeader()
+            gen      evals    mean     max
+            >>> l.logGeneration(gen="0_1", evals=4, stats=s, index=0)
+            0_1      4        [2.5000] [4.0000]
+            >>> l.logGeneration(gen="0_2", evals=4, stats=s, index=1)
+            0_2      4        [6.5000] [8.0000]
+        """
+        if stats:
+            for name in stats.functions:
+                kargs[name] = "[%s]" % ", ".join(map(self.precision.format, stats.data[name][index][-1]))
+        self.output.write(self.line.format(**kargs))
+        self.output.write("\n")
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
@@ -443,6 +578,9 @@ class HallOfFame(object):
     first element of the hall of fame is the individual that has the best
     first fitness value ever seen, according to the weights provided to the
     fitness at creation time.
+    
+    :param maxsize: The maximum number of individual to keep in the hall of
+                    fame.
     
     The class :class:`HallOfFame` provides an interface similar to a list
     (without being one completely). It is possible to retrieve its length, to
@@ -458,6 +596,9 @@ class HallOfFame(object):
         worst individuals in it by the best individuals present in
         *population* (if they are better). The size of the hall of fame is
         kept constant.
+        
+        :param population: A list of individual with a fitness attribute to
+                           update the hall of fame with.
         """
         if len(self) < self.maxsize:
             # Items are sorted with the best fitness first
@@ -467,8 +608,7 @@ class HallOfFame(object):
             self.items = [copy.deepcopy(item) for item in self.items]
             # The keys are the fitnesses in reverse order to allow the use
             # of the bisection algorithm 
-            self.keys = map(attrgetter("fitness"),
-                            reversed(self.items))
+            self.keys = map(attrgetter("fitness"), reversed(self.items))
         else:
             for ind in population: 
                 if ind.fitness > self[-1].fitness:
@@ -485,6 +625,9 @@ class HallOfFame(object):
         This method **does not** check for the size of the hall of fame, in a
         way that inserting a new individual in a full hall of fame will not
         remove the worst individual to maintain a constant size.
+        
+        :param item: The individual with a fitness attribute to insert in the
+                     hall of fame.
         """
         item = copy.deepcopy(item)
         i = bisect.bisect_right(self.keys, item.fitness)
@@ -492,7 +635,10 @@ class HallOfFame(object):
         self.keys.insert(i, item.fitness)
     
     def remove(self, index):
-        """Remove the specified *index* from the hall of fame."""
+        """Remove the specified *index* from the hall of fame.
+        
+        :param index: An integer giving which item to remove.
+        """
         del self.keys[len(self) - (index % len(self) + 1)]
         del self.items[index]
     
@@ -516,11 +662,14 @@ class HallOfFame(object):
     def __str__(self):
         return str(self.items) + "\n" + str(self.keys)
 
-        
+
 class ParetoFront(HallOfFame):
     """The Pareto front hall of fame contains all the non-dominated individuals
     that ever lived in the population. That means that the Pareto front hall of
     fame can contain an infinity of different individuals.
+    
+    :param similar: A function that tels the Pareto front whether or not two
+                    individuals are similar, optional.
     
     The size of the front may become very large if it is used for example on
     a continuous function with a continuous domain. In order to limit the number
@@ -541,16 +690,19 @@ class ParetoFront(HallOfFame):
         the individuals from the population that are not dominated by the hall
         of fame. If any individual in the hall of fame is dominated it is
         removed.
+        
+        :param population: A list of individual with a fitness attribute to
+                           update the hall of fame with.
         """
         for ind in population:
             is_dominated = False
             has_twin = False
             to_remove = []
             for i, hofer in enumerate(self):    # hofer = hall of famer
-                if ind.fitness.isDominated(hofer.fitness):
+                if isDominated(ind.fitness.wvalues, hofer.fitness.wvalues):
                     is_dominated = True
                     break
-                elif hofer.fitness.isDominated(ind.fitness):
+                elif isDominated(hofer.fitness.wvalues, ind.fitness.wvalues):
                     to_remove.append(i)
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
@@ -567,17 +719,11 @@ class ParetoFront(HallOfFame):
 
 def cxTwoPoints(ind1, ind2):
     """Execute a two points crossover on the input individuals. The two 
-    individuals are modified in place. This operation apply on an individual
-    composed of a list of attributes and act as follow ::
+    individuals are modified in place and both keep their original length. 
     
-        >>> ind1 = [A(1), ..., A(i), ..., A(j), ..., A(m)] #doctest: +SKIP
-        >>> ind2 = [B(1), ..., B(i), ..., B(j), ..., B(k)]
-        >>> # Crossover with mating points 1 < i < j <= min(m, k) + 1
-        >>> cxTwoPoints(ind1, ind2)
-        >>> print ind1, len(ind1)
-        [A(1), ..., B(i), ..., B(j-1), A(j), ..., A(m)], m
-        >>> print ind2, len(ind2)
-        [B(1), ..., A(i), ..., A(j-1), B(j), ..., B(k)], k
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
@@ -597,18 +743,12 @@ def cxTwoPoints(ind1, ind2):
 
 def cxOnePoint(ind1, ind2):
     """Execute a one point crossover on the input individuals.
-    The two individuals are modified in place. This operation apply on an
-    individual composed of a list of attributes
-    and act as follow ::
-
-        >>> ind1 = [A(1), ..., A(n), ..., A(m)] #doctest: +SKIP
-        >>> ind2 = [B(1), ..., B(n), ..., B(k)]
-        >>> # Crossover with mating point i, 1 < i <= min(m, k)
-        >>> cxOnePoint(ind1, ind2)
-        >>> print ind1, len(ind1)
-        [A(1), ..., B(i), ..., B(k)], k
-        >>> print ind2, len(ind2)
-        [B(1), ..., A(i), ..., A(m)], m
+    The two individuals are modified in place. The resulting individuals will
+    respectively have the length of the other.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     This function use the :func:`~random.randint` function from the
     python base :mod:`random` module.
@@ -621,7 +761,12 @@ def cxOnePoint(ind1, ind2):
 
 def cxUniform(ind1, ind2, indpb):
     """Execute a uniform crossover that modify in place the two individuals.
-    The genes are swapped according to the *indpb* probability.
+    The attributes are swapped according to the *indpb* probability.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param indpb: Independent probabily for each attribute to be exchanged.
+    :returns: A tuple of two individuals.
     
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
@@ -638,25 +783,20 @@ def cxPartialyMatched(ind1, ind2):
     The two individuals are modified in place. This crossover expect iterable
     individuals of indices, the result for any other type of individuals is
     unpredictable.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values in a certain range of the two parents and swapping the values
-    of those indexes. For more details see Goldberg and Lingel, "Alleles,
-    loci, and the traveling salesman problem", 1985.
-
-    For example, the following parents will produce the two following children
-    when mated with crossover points ``a = 2`` and ``b = 4``. ::
-
-        >>> ind1 = [0, 1, 2, 3, 4]
-        >>> ind2 = [1, 2, 3, 4, 0]
-        >>> cxPartialyMatched(ind1, ind2)
-        >>> print ind1
-        [0, 2, 3, 1, 4]
-        >>> print ind2
-        [2, 3, 1, 4, 0]
+    of those indexes. For more details see [Goldberg1985]_.
 
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.
+    
+    .. [Goldberg1985] Goldberg and Lingel, "Alleles, loci, and the traveling
+       salesman problem", 1985.
     """
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
@@ -692,26 +832,21 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     individuals. The two individuals are modified in place. This crossover
     expect iterable individuals of indices, the result for any other type of
     individuals is unpredictable.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
 
     Moreover, this crossover consists of generating two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
     parents and swapping the values of those indexes. For more details see
-    Cicirello and Smith, "Modeling GA performance for control parameter
-    optimization", 2000.
-
-    For example, the following parents will produce the two following children
-    when mated with the chosen points ``[0, 1, 0, 0, 1]``. ::
-
-        >>> ind1 = [0, 1, 2, 3, 4] #doctest: +SKIP
-        >>> ind2 = [1, 2, 3, 4, 0]
-        >>> cxUniformPartialyMatched(ind1, ind2)
-        >>> print ind1
-        [4, 2, 1, 3, 0]
-        >>> print ind2
-        [2, 1, 3, 0, 4]
+    [Cicirello2000]_.
 
     This function use the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
+    
+    .. [Cicirello2000] Cicirello and Smith, "Modeling GA performance for
+       control parameter optimization", 2000.
     """
     size = min(len(ind1), len(ind2))
     p1, p2 = [0]*size, [0]*size
@@ -735,66 +870,189 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     
     return ind1, ind2
 
+def cxOrdered(ind1, ind2):
+    """Execute an ordered crossover (OX) on the input
+    individuals. The two individuals are modified in place. This crossover
+    expect iterable individuals of indices, the result for any other type of
+    individuals is unpredictable.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
+
+    Moreover, this crossover consists of generating holes in the input
+    individuals. A hole is created when an attribute of an individual is
+    between the two crossover points of the other individual. Then it rotates
+    the element so that all holes are between the crossover points and fills
+    them with the removed elements in order. For more details see
+    [Goldberg1989]_.
+    
+    This function use the :func:`~random.sample` function from the python base
+    :mod:`random` module.
+    
+    .. [Goldberg1989] Goldberg. Genetic algorithms in search, 
+       optimization and machine learning. Addison Wesley, 1989
+    """
+    size = min(len(ind1), len(ind2))
+    a, b = random.sample(xrange(size), 2)
+    if a > b:
+        a, b = b, a
+    print a, b
+    holes1, holes2 = [True]*size, [True]*size
+    for i in range(size):
+        if i < a or i > b:
+            holes1[ind2[i]] = False
+            holes2[ind1[i]] = False
+    
+    # We must keep the original values somewhere before scrambling everything
+    temp1, temp2 = ind1, ind2
+    k1 , k2 = b + 1, b + 1
+    for i in range(size):
+        if not holes1[temp1[(i + b + 1) % size]]:
+            ind1[k1 % size] = temp1[(i + b + 1) % size]
+            k1 += 1
+        
+        if not holes2[temp2[(i + b + 1) % size]]:
+            ind2[k2 % size] = temp2[(i + b + 1) % size]
+            k2 += 1
+    
+    # Swap the content between a and b (included)
+    for i in range(a, b + 1):
+        ind1[i], ind2[i] = ind2[i], ind1[i]
+    
+    return ind1, ind2
+
 def cxBlend(ind1, ind2, alpha):
     """Executes a blend crossover that modify in-place the input individuals.
     The blend crossover expect individuals formed of a list of floating point
     numbers.
     
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param alpha: Extent of the interval in which the new values can be drawn
+                  for each attribute on both side of the parents' attributes.
+    :returns: A tuple of two individuals.
+    
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    size = min(len(ind1), len(ind2))
-    
-    for i in xrange(size):
+    for i, (x1, x2) in enumerate(zip(ind1, ind2)):
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        x1 = ind1[i]
-        x2 = ind2[i]
         ind1[i] = (1. - gamma) * x1 + gamma * x2
         ind2[i] = gamma * x1 + (1. - gamma) * x2
-    
+
     return ind1, ind2
 
-def cxSimulatedBinary(ind1, ind2, nu):
+def cxSimulatedBinary(ind1, ind2, eta):
     """Executes a simulated binary crossover that modify in-place the input
     individuals. The simulated binary crossover expect individuals formed of
     a list of floating point numbers.
     
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param eta: Crowding degree of the crossover. A high eta will produce
+                children resembling to their parents, while a small eta will
+                produce solutions much more different.
+    :returns: A tuple of two individuals.
+    
     This function use the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    size = min(len(ind1), len(ind2))
-    
-    for i in xrange(size):
+    for i, (x1, x2) in enumerate(zip(ind1, ind2)):
         rand = random.random()
         if rand <= 0.5:
             beta = 2. * rand
         else:
             beta = 1. / (2. * (1. - rand))
-        beta **= 1. / (nu + 1.)
-        x1 = ind1[i]
-        x2 = ind2[i]
+        beta **= 1. / (eta + 1.)
         ind1[i] = 0.5 * (((1 + beta) * x1) + ((1 - beta) * x2))
         ind2[i] = 0.5 * (((1 - beta) * x1) + ((1 + beta) * x2))
     
     return ind1, ind2
+
+
+def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
+    """Executes a simulated binary crossover that modify in-place the input
+    individuals. The simulated binary crossover expect individuals formed of
+    a list of floating point numbers.
     
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param eta: Crowding degree of the crossover. A high eta will produce
+                children resembling to their parents, while a small eta will
+                produce solutions much more different.
+    :param low: A value or a sequence of values that is the lower bound of the
+                search space.
+    :param up: A value or a sequence of values that is the upper bound of the
+               search space.
+    :returns: A tuple of two individuals.
+
+    This function use the :func:`~random.random` function from the python base
+    :mod:`random` module.
+
+    .. note::
+       This implementation is similar to the one implemented in the 
+       original NSGA-II C code presented by Deb.
+    """
+    size = min(len(ind1), len(ind2))
+    
+    if not isinstance(low, Sequence):
+        low = [low] * size
+    if not isinstance(up, Sequence):
+        up = [up] * size
+
+    for i in xrange(size):
+        if random.random() <= 0.5:
+            # This epsilon should probably be changed for 0 since 
+            # floating point arithmetic in Python is safer
+            if abs(ind1[i] - ind2[i]) > 1e-14:
+                x1 = min(ind1[i], ind2[i])
+                x2 = max(ind1[i], ind2[i])
+                xl = low[i]
+                xu = up[i]
+                rand = random.random()
+                
+                beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
+                alpha = 2.0 - beta**-(eta + 1)
+                if rand <= 1.0 / alpha:
+                    beta_q = (rand * alpha)**(1.0 / (eta + 1))
+                else:
+                    beta_q = (1.0 / (2.0 - rand * alpha))**(1.0 / (eta + 1))
+                
+                c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
+                
+                beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
+                alpha = 2.0 - beta**-(eta + 1)
+                if rand <= 1.0 / alpha:
+                    beta_q = (rand * alpha)**(1.0 / (eta + 1))
+                else:
+                    beta_q = (1.0 / (2.0 - rand * alpha))**(1.0 / (eta + 1))
+                c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
+                
+                c1 = min(max(c1, xl), xu)
+                c2 = min(max(c2, xl), xu)
+                
+                if random.random() <= 0.5:
+                    ind1[i] = c2
+                    ind2[i] = c1
+                else:
+                    ind1[i] = c1
+                    ind2[i] = c2
+    
+    return ind1, ind2   
+
+
 ######################################
 # Messy Crossovers                   #
 ######################################
 
 def cxMessyOnePoint(ind1, ind2):
     """Execute a one point crossover that will in most cases change the
-    individuals size. This operation apply on an individual composed
-    of a list of attributes and act as follow ::
-
-        >>> ind1 = [A(1), ..., A(i), ..., A(m)] #doctest: +SKIP
-        >>> ind2 = [B(1), ..., B(j), ..., B(n)]
-        >>> # Crossover with mating points i, j, 1 <= i <= m, 1 <= j <= n
-        >>> cxMessyOnePoint(ind1, ind2)
-        >>> print ind1, len(ind1)
-        [A(1), ..., A(i - 1), B(j), ..., B(n)], n + j - i
-        >>> print ind2, len(ind2)
-        [B(1), ..., B(j - 1), A(i), ..., A(m)], m + i - j
+    individuals size. The two individuals are modified in place.
+    
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :returns: A tuple of two individuals.
     
     This function use the :func:`~random.randint` function from the python base
     :mod:`random` module.        
@@ -812,45 +1070,36 @@ def cxMessyOnePoint(ind1, ind2):
 def cxESBlend(ind1, ind2, alpha):
     """Execute a blend crossover on both, the individual and the strategy. The
     individuals must have a :attr:`strategy` attribute. Adjustement of the
-    minimal strategy shall be done after the call to this function using a
-    decorator, for example ::
+    minimal strategy shall be done after the call to this function, consider
+    using a decorator.
     
-        def checkStrategy(minstrategy):
-            def decMinStrategy(func):
-                def wrapMinStrategy(*args, **kargs):
-                    children = func(*args, **kargs)
-                    for child in children:
-                        if child.strategy < minstrategy:
-                            child.strategy = minstrategy
-                    return children
-                return wrapMinStrategy
-            return decMinStrategy
-        
-        toolbox.register("mate", tools.cxEsBlend, alpha=ALPHA)
-        toolbox.decorate("mate", checkStrategy(minstrategy=0.01))
+    :param ind1: The first evolution strategy participating in the crossover.
+    :param ind2: The second evolution strategy participating in the crossover.
+    :param alpha: Extent of the interval in which the new values can be drawn
+                  for each attribute on both side of the parents' attributes.
+    :returns: A tuple of two evolution strategies.
     """
-    size = min(len(ind1), len(ind2))
-    
-    for indx in xrange(size):
+    for i, (x1, s1, x2, s2) in enumerate(zip(ind1, ind1.strategy, 
+                                             ind2, ind2.strategy)):
         # Blend the values
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        x1 = ind1[indx]
-        x2 = ind2[indx]
-        ind1[indx] = (1. - gamma) * x1 + gamma * x2
-        ind2[indx] = gamma * x1 + (1. - gamma) * x2
+        ind1[i] = (1. - gamma) * x1 + gamma * x2
+        ind2[i] = gamma * x1 + (1. - gamma) * x2
         # Blend the strategies
         gamma = (1. + 2. * alpha) * random.random() - alpha
-        s1 = ind1.strategy[indx]
-        s2 = ind2.strategy[indx]
-        ind1.strategy[indx] = (1. - gamma) * s1 + gamma * s2
-        ind2.strategy[indx] = gamma * s1 + (1. - gamma) * s2
+        ind1.strategy[i] = (1. - gamma) * s1 + gamma * s2
+        ind2.strategy[i] = gamma * s1 + (1. - gamma) * s2
     
     return ind1, ind2
 
 def cxESTwoPoints(ind1, ind2):
-    """Execute a classical two points crossover on both the individual and
-    its strategy. The crossover points for the individual and the strategy
-    are the same.
+    """Execute a classical two points crossover on both the individual and its
+    strategy. The individuals must have a :attr:`strategy` attribute.The
+    crossover points for the individual and the strategy are the same.
+    
+    :param ind1: The first evolution strategy participating in the crossover.
+    :param ind2: The second evolution strategy participating in the crossover.
+    :returns: A tuple of two evolution strategies.
     """
     size = min(len(ind1), len(ind2))
     
@@ -873,37 +1122,80 @@ def cxESTwoPoints(ind1, ind2):
 
 def mutGaussian(individual, mu, sigma, indpb):
     """This function applies a gaussian mutation of mean *mu* and standard
-    deviation *sigma*  on the input individual and
-    returns the mutant. The *individual* is left intact and the mutant is an
-    independant copy. This mutation expects an iterable individual composed of
-    real valued attributes. The *mutIndxPb* argument is the probability of each
-    attribute to be mutated.
-
-    .. note::
-       The mutation is not responsible for constraints checking, because
-       there is too many possibilities for
-       resetting the values. Which way is closer to the representation used
-       is up to you.
-       
-       One easy way to add constraint checking to an operator is to 
-       use the function decoration in the toolbox. See the multi-objective
-       example (moga_kursawefct.py) for an explicit example.
-
+    deviation *sigma* on the input individual. This mutation expects an
+    iterable individual composed of real valued attributes. The *indpb*
+    argument is the probability of each attribute to be mutated.
+    
+    :param individual: Individual to be mutated.
+    :param mu: Mean around the individual of the mutation.
+    :param sigma: Standard deviation of the mutation.
+    :param indpb: Probability for each attribute to be mutated.
+    :returns: A tuple of one individual.
+    
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
-    """        
+    """
     for i in xrange(len(individual)):
         if random.random() < indpb:
             individual[i] += random.gauss(mu, sigma)
     
     return individual,
 
+def mutPolynomialBounded(individual, eta, low, up, indpb):
+    """Polynomial mutation as implemented in original NSGA-II algorithm in
+    C by Deb.
+    
+    :param individual: Individual to be mutated.
+    :param eta: Crowding degree of the mutation. A high eta will produce
+                a mutant resembling its parent, while a small eta will
+                produce a solution much more different.
+    :param low: A value or a sequence of values that is the lower bound of the
+                search space.
+    :param up: A value or a sequence of values that is the upper bound of the
+               search space.
+    :returns: A tuple of one individual.
+    """
+    size = len(individual)
+    if not isinstance(low, Sequence):
+        low = [low] * size
+    if not isinstance(up, Sequence):
+        up = [up] * size
+    
+    for i in xrange(size):
+        if random.random() <= indpb:
+            x = individual[i]
+            xl = low[i]
+            xu = up[i]
+            delta_1 = (x - xl) / (xu - xl)
+            delta_2 = (xu - x) / (xu - xl)
+            rand = random.random()
+            mut_pow = 1.0 / (eta + 1.)
+
+            if rand < 0.5:
+                xy = 1.0 - delta_1
+                val = 2.0 * rand + (1.0 - 2.0 * rand) * xy**(eta + 1)
+                delta_q = val**mut_pow - 1.0
+            else:
+                xy = 1.0 - delta_2
+                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy**(eta + 1)
+                delta_q = 1.0 - val**mut_pow
+
+            x = x + delta_q * (xu - xl)
+            x = min(max(x, xl), xu)
+            individual[i] = x
+    return individual,
+
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
-    The *individual* is left intact and the mutant is an independent copy. The
-    *individual* is expected to be iterable. The *shuffleIndxPb* argument is the
-    probability of each attribute to be moved.
-
+    The *individual* is expected to be iterable. The *indpb* argument is the
+    probability of each attribute to be moved. Usually this mutation is applied on 
+    vector of indices.
+    
+    :param individual: Individual to be mutated.
+    :param indpb: Probability for each attribute to be exchanged to another
+                  position.
+    :returns: A tuple of one individual.
+    
     This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     """
@@ -920,43 +1212,69 @@ def mutShuffleIndexes(individual, indpb):
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
-    mutant. The *individual* is left intact and the mutant is an independent
-    copy. The *individual* is expected to be iterable and the values of the
+    mutant. The *individual* is expected to be iterable and the values of the
     attributes shall stay valid after the ``not`` operator is called on them.
-    The *flipIndxPb* argument is the probability of each attribute to be
-    flipped.
-
+    The *indpb* argument is the probability of each attribute to be
+    flipped. This mutation is usually applied on boolean individuals.
+    
+    :param individual: Individual to be mutated.
+    :param indpb: Probability for each attribute to be flipped.
+    :returns: A tuple of one individual.
+    
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
     for indx in xrange(len(individual)):
         if random.random() < indpb:
-            individual[indx] = not individual[indx]
+            individual[indx] = type(individual[indx])(not individual[indx])
     
     return individual,
+
+def mutUniformInt(individual, low, up, indpb):
+    """Mutate an individual by replacing attributes, with probability *indpb*,
+    by a integer uniformly drawn between *low* and *up* inclusively.
     
+    :param low: The lower bound of the range from wich to draw the new
+                integer.
+    :param up: The upper bound of the range from wich to draw the new
+                integer.
+    :param indpb: Probability for each attribute to be mutated.
+    :returns: A tuple of one individual.
+    """
+    for indx in xrange(len(individual)):
+        if random.random() < indpb:
+            individual[indx] = random.randint(low, up)
+    
+    return individual,
+
+
 ######################################
 # ES Mutations                       #
 ######################################
 
 def mutESLogNormal(individual, c, indpb):
     """Mutate an evolution strategy according to its :attr:`strategy`
-    attribute as described in *Beyer and Schwefel, 2002, Evolution strategies
-    - A Comprehensive Introduction*. The individual is first mutated by a
-    normal distribution of mean 0 and standard deviation of
-    :math:`\\boldsymbol{\sigma}_{t-1}` then the strategy is mutated according
-    to an extended log normal rule, 
-    :math:`\\boldsymbol{\sigma}_t = \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[
-    \\sigma_{t-1, 1}\\exp(\\tau \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n}
-    \\exp(\\tau \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
-    \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`.
-    A recommended choice is :math:`c=1` when using a :math:`(10, 100)`
-    evolution strategy (Beyer and Schwefel, 2002).
+    attribute as described in [Beyer2002]_. First the strategy is mutated
+    according to an extended log normal rule, :math:`\\boldsymbol{\sigma}_t =
+    \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[ \\sigma_{t-1, 1}\\exp(\\tau
+    \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n} \\exp(\\tau
+    \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
+    \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`,
+    the the individual is mutated by a normal distribution of mean 0 and
+    standard deviation of :math:`\\boldsymbol{\sigma}_{t}` (its current
+    strategy) then . A recommended choice is ``c=1`` when using a :math:`(10,
+    100)` evolution strategy [Beyer2002]_ [Schwefel1995]_.
     
-    The strategy shall be the same size as the individual. Each index
-    (strategy and attribute) is mutated with probability *indpb*. In order to
-    limit the strategy, use a decorator as shown in the :func:`cxESBlend`
-    function.
+    :param individual: Individual to be mutated.
+    :param c: The learning parameter.
+    :param indpb: Probability for each attribute to be flipped.
+    :returns: A tuple of one individual.
+    
+    .. [Beyer2002] Beyer and Schwefel, 2002, Evolution strategies - A
+       Comprehensive Introduction
+       
+    .. [Schwefel1995] Schwefel, 1995, Evolution and Optimum Seeking.
+       Wiley, New York, NY
     """
     size = len(individual)
     t = c / math.sqrt(2. * math.sqrt(size))
@@ -966,8 +1284,8 @@ def mutESLogNormal(individual, c, indpb):
     
     for indx in xrange(size):
         if random.random() < indpb:
-            individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
             individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
+            individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
     
     return individual,
     
@@ -980,7 +1298,11 @@ def selRandom(individuals, k):
     """Select *k* individuals at random from the input *individuals* with
     replacement. The list returned contains references to the input
     *individuals*.
-
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     """
@@ -990,6 +1312,10 @@ def selRandom(individuals, k):
 def selBest(individuals, k):
     """Select the *k* best individuals among the input *individuals*. The
     list returned contains references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list containing the k best individuals.
     """
     return sorted(individuals, key=attrgetter("fitness"), reverse=True)[:k]
 
@@ -997,14 +1323,23 @@ def selBest(individuals, k):
 def selWorst(individuals, k):
     """Select the *k* worst individuals among the input *individuals*. The
     list returned contains references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list containing the k worst individuals.
     """
     return sorted(individuals, key=attrgetter("fitness"))[:k]
 
 
 def selTournament(individuals, k, tournsize):
     """Select *k* individuals from the input *individuals* using *k*
-    tournaments of *tournSize* individuals. The list returned contains
+    tournaments of *tournsize* individuals. The list returned contains
     references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param tournsize: The number of individuals participating in each tournament.
+    :returns: A list of selected individuals.
     
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
@@ -1024,6 +1359,10 @@ def selRoulette(individuals, k):
     spins of a roulette. The selection is made by looking only at the first
     objective of each individual. The list returned contains references to
     the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
     
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
@@ -1047,97 +1386,187 @@ def selRoulette(individuals, k):
     
     return chosen
 
+
+def selTournamentDCD(individuals, k):
+    """Tournament selection based on dominance (D) between two individuals, if
+    the two individuals do not interdominate the selection is made
+    based on crowding distance (CD). The *individuals* sequence length has to
+    be a multiple of 4. Starting from the beginning of the selected
+    individuals, two consecutive individuals will be different (assuming all
+    individuals in the input list are unique). Each individual from the input
+    list won't be selected more than twice.
+    
+    This selection requires the individuals to have a :attr:`crowding_dist`
+    attribute, which can be set by the :func:`assignCrowdingDist` function.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    """
+    def tourn(ind1, ind2):
+        if isDominated(ind1.fitness.wvalues, ind2.fitness.wvalues):
+            return ind2
+        elif isDominated(ind2.fitness.wvalues, ind1.fitness.wvalues):
+            return ind1
+
+        if ind1.fitness.crowding_dist < ind2.fitness.crowding_dist:
+            return ind2
+        elif ind1.fitness.crowding_dist > ind2.fitness.crowding_dist:
+            return ind1
+
+        if random.random() <= 0.5:
+            return ind1
+        return ind2
+
+    individuals_1 = random.sample(individuals, len(individuals))
+    individuals_2 = random.sample(individuals, len(individuals))
+
+    chosen = []
+    for i in xrange(0, k, 4):
+        chosen.append(tourn(individuals_1[i],   individuals_1[i+1]))
+        chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
+        chosen.append(tourn(individuals_2[i],   individuals_2[i+1]))
+        chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
+
+    return chosen
+
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
 def selNSGA2(individuals, k):
-    """Apply NSGA-II selection operator on the *individuals*. Usually,
-    the size of *individuals* will be larger than *k* because any individual
+    """Apply NSGA-II selection operator on the *individuals*. Usually, the
+    size of *individuals* will be larger than *k* because any individual
     present in *individuals* will appear in the returned list at most once.
-    Having the size of *individuals* equals to *n* will have no effect other
+    Having the size of *individuals* equals to *k* will have no effect other
     than sorting the population according to a non-domination scheme. The list
-    returned contains references to the input *individuals*.
+    returned contains references to the input *individuals*. For more details
+    on the NSGA-II operator see [Deb2002]_.
     
-    For more details on the NSGA-II operator see Deb, Pratab, Agarwal,
-    and Meyarivan, "A fast elitist non-dominated sorting genetic algorithm for
-    multi-objective optimization: NSGA-II", 2002.
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    
+    .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
+       non-dominated sorting genetic algorithm for multi-objective
+       optimization: NSGA-II", 2002.
     """
     pareto_fronts = sortFastND(individuals, k)
+    for front in pareto_fronts:
+        assignCrowdingDist(front)
+    
     chosen = list(chain(*pareto_fronts[:-1]))
     k = k - len(chosen)
     if k > 0:
-        chosen.extend(sortCrowdingDist(pareto_fronts[-1], k))
+        sorted_front = sorted(pareto_fronts[-1], key=attrgetter("fitness.crowding_dist"), reverse=True)
+        chosen.extend(sorted_front[:k])
+        
     return chosen
+
+def isDominated(wvalues1, wvalues2):
+    """Returns wheter or not *wvalues1* dominates *wvalues2*.
     
+    :param wvalues1: The weighted fitness values that would be dominated.
+    :param wvalues2: The weighted fitness values of the dominant.
+    :returns: :obj:`True` if wvalues2 dominates wvalues1, :obj:`False`
+              otherwise.
+    """
+    not_equal = False
+    for self_wvalue, other_wvalue in zip(wvalues1, wvalues2):
+        if self_wvalue > other_wvalue:
+            return False
+        elif self_wvalue < other_wvalue:
+            not_equal = True
+    return not_equal
 
 def sortFastND(individuals, k, first_front_only=False):
     """Sort the first *k* *individuals* according the the fast non-dominated
-    sorting algorithm. 
-    """
-    N = len(individuals)
-    pareto_fronts = []
+    sorting algorithm.
     
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param first_front_only: If :obj:`True` sort only the first front and
+                             exit.
+    :returns: A list of Pareto fronts (lists), with the first list being the
+              true Pareto front.
+    """
     if k == 0:
-        return pareto_fronts
+        return []
+
+    unique_fits = defaultdict(list)
+    for ind in individuals:
+        unique_fits[ind.fitness.wvalues].append(ind)
+    fits = unique_fits.keys()
+
+    N = len(fits)
+    pareto_fronts = []
     
     pareto_fronts.append([])
     pareto_sorted = 0
-    dominating_inds = [0] * N
-    dominated_inds = [list() for i in xrange(N)]
+    dominating_fits = [0] * N
+    dominated_fits = [list() for i in xrange(N)]
     
     # Rank first Pareto front
-    for i in xrange(N):
-        for j in xrange(i+1, N):
-            if individuals[j].fitness.isDominated(individuals[i].fitness):
-                dominating_inds[j] += 1
-                dominated_inds[i].append(j)
-            elif individuals[i].fitness.isDominated(individuals[j].fitness):
-                dominating_inds[i] += 1
-                dominated_inds[j].append(i)
-        if dominating_inds[i] == 0:
+    for i, fit_i in enumerate(fits):
+        for j, fit_j in enumerate(fits[i+1:], i+1):
+            if isDominated(fit_i, fit_j):
+                dominating_fits[i] += 1
+                dominated_fits[j].append(i)
+            elif isDominated(fit_j, fit_i):
+                dominating_fits[j] += 1
+                dominated_fits[i].append(j)
+        if dominating_fits[i] == 0:
             pareto_fronts[-1].append(i)
             pareto_sorted += 1
     
-    if not first_front_only:
     # Rank the next front until all individuals are sorted or the given
     # number of individual are sorted
+    if not first_front_only:
         N = min(N, k)
         while pareto_sorted < N:
             pareto_fronts.append([])
             for indice_p in pareto_fronts[-2]:
-                for indice_d in dominated_inds[indice_p]:
-                    dominating_inds[indice_d] -= 1
-                    if dominating_inds[indice_d] == 0:
+                for indice_d in dominated_fits[indice_p]:
+                    dominating_fits[indice_d] -= 1
+                    if dominating_fits[indice_d] == 0:
                         pareto_fronts[-1].append(indice_d)
                         pareto_sorted += 1
     
-    return [[individuals[index] for index in front] for front in pareto_fronts]
+    total = min(len(individuals), k)
+    fronts = list()
+    for front in pareto_fronts:
+        fronts.append([])       
+        for index in front:
+            fronts[-1].extend(unique_fits[fits[index]])
+        total -= len(fronts[-1])
+        if total <= 0:
+            break
 
+    return fronts
 
-def sortCrowdingDist(individuals, k):
-    """Sort the individuals according to the crowding distance."""
+def assignCrowdingDist(individuals):
+    """Assign a crowding distance to each individual of the list. The 
+    crowding distance is set to the :attr:`crowding_dist` attribute of
+    each individual.
+    """
     if len(individuals) == 0:
-        return []
+        return
     
     distances = [0.0] * len(individuals)
-    crowding = [(ind, i) for i, ind in enumerate(individuals)]
+    crowding = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
     
     number_objectives = len(individuals[0].fitness.values)
-    inf = float("inf")      # It is four times faster to compare with a local
-                            # variable than create the float("inf") each time
+    
     for i in xrange(number_objectives):
-        crowding.sort(key=lambda element: element[0].fitness.values[i])
+        crowding.sort(key=lambda element: element[0][i])
         distances[crowding[0][1]] = float("inf")
         distances[crowding[-1][1]] = float("inf")
         for j in xrange(1, len(crowding) - 1):
-            if distances[crowding[j][1]] < inf:
-                distances[crowding[j][1]] += \
-                    crowding[j + 1][0].fitness.values[i] - \
-                    crowding[j - 1][0].fitness.values[i]
-    sorted_dist = sorted([(dist, i) for i, dist in enumerate(distances)],
-                         key=lambda value: value[0], reverse=True)
-    return (individuals[index] for dist, index in sorted_dist[:k])
+            distances[crowding[j][1]] += crowding[j + 1][0][i] - \
+                                         crowding[j - 1][0][i]
+
+    for i, dist in enumerate(distances):
+        individuals[i].fitness.crowding_dist = dist
 
 
 ######################################
@@ -1145,15 +1574,20 @@ def sortCrowdingDist(individuals, k):
 ######################################
 
 def selSPEA2(individuals, k):
-    """Apply SPEA-II selection operator on the *individuals*. Usually,
-    the size of *individuals* will be larger than *n* because any individual
+    """Apply SPEA-II selection operator on the *individuals*. Usually, the
+    size of *individuals* will be larger than *n* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *n* will have no effect other
-    than sorting the population according to a strength Pareto scheme. The list
-    returned contains references to the input *individuals*.
+    than sorting the population according to a strength Pareto scheme. The
+    list returned contains references to the input *individuals*. For more
+    details on the SPEA-II operator see [Zitzler2001]_.
     
-    For more details on the SPEA-II operator see Zitzler, Laumanns and Thiele,
-    "SPEA 2: Improving the strength Pareto evolutionary algorithm", 2001.
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :returns: A list of selected individuals.
+    
+    .. [Zitzler2001] Zitzler, Laumanns and Thiele, "SPEA 2: Improving the
+       strength Pareto evolutionary algorithm", 2001.
     """
     N = len(individuals)
     L = len(individuals[0].fitness.values)
@@ -1164,10 +1598,10 @@ def selSPEA2(individuals, k):
     
     for i in xrange(N):
         for j in xrange(i + 1, N):
-            if individuals[i].fitness.isDominated(individuals[j].fitness):
+            if isDominated(individuals[i].fitness.wvalues, individuals[j].fitness.wvalues):
                 strength_fits[j] += 1
                 dominating_inds[i].append(j)
-            elif individuals[j].fitness.isDominated(individuals[i].fitness):
+            elif isDominated(individuals[j].fitness.wvalues, individuals[i].fitness.wvalues):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
     
@@ -1317,6 +1751,17 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     **different** individuals. For example, using a traditional tournament for
     replacement strategy will thus give undesirable effects, two individuals
     will most likely try to enter the same slot.
+    
+    :param populations: A list of (sub-)populations on which to operate
+                        migration.
+    :param k: The number of individuals to migrate.
+    :param selection: The function to use for selection.
+    :param replacement: The function to use to select which individuals will
+                        be replaced. If :obj:`None` (default) the individuals
+                        that leave the population are directly replaced.
+    :param migarray: A list of indices indicating where the individuals from 
+                     a particular position in the list goes. This defaults
+                     to a ring migration.
     """
     if migarray is None:
         migarray = range(1, len(populations)) + [0]
@@ -1345,103 +1790,10 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     for i, immigrant in enumerate(immigrants[to_deme]):
         indx = populations[to_deme].index(immigrant)
         populations[to_deme][indx] = mig_buf[i]
-
-
-######################################
-# Decoration tool                    #
-######################################
-
-# This function is a simpler version of the decorator module (version 3.2.0)
-# from Michele Simionato available at http://pypi.python.org/pypi/decorator.
-# Copyright (c) 2005, Michele Simionato
-# All rights reserved.
-# Modified by Francois-Michel De Rainville, 2010
-
-def decorate(decorator):
-    """Decorate a function preserving its signature. There is two way of
-    using this function, first as a decorator passing the decorator to
-    use as argument, for example ::
-
-        @decorate(a_decorator)
-        def myFunc(arg1, arg2, arg3="default"):
-            do_some_work()
-            return "some_result"
-
-    Or as a decorator ::
-
-        @decorate
-        def myDecorator(func):
-            def wrapFunc(*args, **kargs):
-                decoration_work()
-                return func(*args, **kargs)
-            return wrapFunc
-
-        @myDecorator
-        def myFunc(arg1, arg2, arg3="default"):
-            do_some_work()
-            return "some_result"
-
-    Using the :mod:`inspect` module, we can retrieve the signature of the
-    decorated function, what is not possible when not using this method. ::
-
-        print inspect.getargspec(myFunc)
-
-    It shall return something like ::
-
-        (["arg1", "arg2", "arg3"], None, None, ("default",))
-
-    This function is a simpler version of the decorator module (version 3.2.0)
-    from Michele Simionato available at http://pypi.python.org/pypi/decorator.
-    """
-    def wrapDecorate(func):
-        # From __init__
-        assert func.__name__
-        if inspect.isfunction(func):
-            argspec = inspect.getargspec(func)
-            defaults = argspec[-1]
-            signature = inspect.formatargspec(formatvalue=lambda val: "",
-                                              *argspec)[1:-1]
-        elif inspect.isclass(func):
-            argspec = inspect.getargspec(func.__init__)
-            defaults = argspec[-1]
-            signature = inspect.formatargspec(formatvalue=lambda val: "",
-                                              *argspec)[1:-1]
-        if not signature:
-            raise TypeError("You are decorating a non function: %s" % func)
-
-        # From create
-        src = ("def %(name)s(%(signature)s):\n"
-               "    return _call_(%(signature)s)\n") % dict(name=func.__name__,
-                                                           signature=signature)
-
-        # From make
-        evaldict = dict(_call_=decorator(func))
-        reserved_names = set([func.__name__] + \
-            [arg.strip(' *') for arg in signature.split(',')])
-        for name in evaldict.iterkeys():
-            if name in reserved_names:
-                raise NameError("%s is overridden in\n%s" % (name, src))
-        try:
-            # This line does all the dirty work of reassigning the signature
-            code = compile(src, "<string>", "single")
-            exec code in evaldict
-        except:
-            raise RuntimeError("Error in generated code:\n%s" % src)
-        new_func = evaldict[func.__name__]
-
-        # From update
-        new_func.__source__ = src
-        new_func.__name__ = func.__name__
-        new_func.__doc__ = func.__doc__
-        new_func.__dict__ = func.__dict__.copy()
-        new_func.func_defaults = defaults
-        new_func.__module__ = func.__module__
-        return new_func
-    return wrapDecorate
+    
     
 if __name__ == "__main__":
     import doctest
-    import random
     
     random.seed(64)
     doctest.run_docstring_examples(initRepeat, globals())
@@ -1453,4 +1805,6 @@ if __name__ == "__main__":
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.update, globals())
     
+    doctest.run_docstring_examples(Checkpoint, globals())
+    doctest.run_docstring_examples(Checkpoint.add, globals())
     

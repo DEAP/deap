@@ -13,18 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import random
 import operator
-import logging
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 from deap import gp
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 def if_then_else(condition, out1, out2):
     return out1 if condition else out2
@@ -52,7 +48,7 @@ for i in range(2 ** MUX_TOTAL_LINES):
     # Determine the corresponding output
     indexOutput = MUX_SELECT_LINES
     for j, k in enumerate(inputs[i][:MUX_SELECT_LINES]):
-        if k:   indexOutput += 2 ** j
+        indexOutput += k * 2**j
     outputs[i] = inputs[i][indexOutput]
 
 pset = gp.PrimitiveSet("MAIN", MUX_TOTAL_LINES, "IN")
@@ -74,8 +70,7 @@ toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalMultiplexer(individual):
     func = toolbox.lambdify(expr=individual)
-    good = sum((func(*(inputs[i])) == outputs[i] for i in range(2 ** MUX_TOTAL_LINES)))
-    return good,
+    return sum(func(*in_) == out for in_, out in zip(inputs, outputs)),
 
 toolbox.register("evaluate", evalMultiplexer)
 toolbox.register("select", tools.selTournament, tournsize=7)
@@ -84,18 +79,16 @@ toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
-    random.seed()
-    pop = toolbox.population(n=500)
+    random.seed(10)
+    pop = toolbox.population(n=40)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.8, 0.1, 40, stats, halloffame=hof)
-    
-    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    algorithms.eaSimple(pop, toolbox, 0.8, 0.1, 40, stats, halloffame=hof)
     
     return pop, stats, hof
 

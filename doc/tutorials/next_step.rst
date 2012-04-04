@@ -12,35 +12,20 @@ other tools.
 A First Individual
 ------------------
 
-First import the required modules and register the different fonctions required to create individuals that are a list of floats with a minimizing  two objectives fitness.
-::
+First import the required modules and register the different functions required to create individuals that are a list of floats with a minimizing  two objectives fitness.
 
-	from deap import base
-	from deap import creator
-	from deap import tools
-	
-	import random
-	
-	IND_SIZE = 5
-	
-	creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
-	creator.create("Individual", list, fitness=creator.FitnessMin)
-	
-	toolbox = base.Toolbox()
-	toolbox.register("attr_float", random.random)
-	toolbox.register("individual", tools.initRepeat, creator.Individual,
-	    toolbox.attr_float, n=IND_SIZE)
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 2-16
 
 The first individual can now be built by adding the appropriate line to the script.
-::
 
-	ind1 = creator.individual()
-	
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 18
+
 Printing the individual ``ind1`` and checking if its fitness is valid will give something like this
-::
 
-	print ind1                 # [0.86..., 0.27..., 0.70..., 0.03..., 0.87...]
-	print in1.fitness.valid    # False
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 20-21
 
 The individual is printed as its base class representation (here a list) and the fitness is invalid because it contains no values.
 
@@ -51,20 +36,12 @@ The evaluation is the most personal part of an evolutionary algorithm, it is
 the only part of the library that you must write your-self. A typical
 evaluation function takes one individual as argument and return its fitness as
 a :class:`tuple`. As shown in the in the :ref:`core` section, a fitness is a list of floating point values and has a
-property :attr:`valid` to know if this individual shall be re-evaluated. The
+property :attr:`~deap.base.Fitness.valid` to know if this individual shall be re-evaluated. The
 fitness is set by setting the :attr:`~deap.base.Fitness.values` to the
 associated :class:`tuple`. For example, the following evaluates the previously created individual ``ind1`` and assign its fitness to the corresponding values.
-::
 
-	def eval(individual):
-		# Do some hard computing on the individual
-		a = sum(individual)
-		b = len(individual)
-		return a, 1. / b
-	
-	ind1.fitness.values = eval(ind1)
-	print ind1.fitness.valid    # True
-	print ind1.fitness          # (2.73, 0.2)
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 24-32
 
 Dealing with single objective fitness is not different, the evaluation function **must** return a tuple because single-objective is treated as a special case of multi-objective.
 
@@ -81,17 +58,15 @@ means that an independent copy must be made prior to mutating the individual
 if the original individual has to be kept or is a *reference* to an other individual (see the selection operator).
 
 In order to apply a mutation (here a gaussian mutation) on the individual ``ind1``,
-simply apply the desired function. ::
+simply apply the desired function.
 
-	mutant = toolbox.clone(ind1)
-	ind2, = tools.mutGaussian(mutant, mu=0.0, sigma=0.2, indpb=0.2)
-	del mutant.fitness.values
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 35-37
 
 The fitness' values are deleted because they not related to the individual anymore. As stated above, the mutation does mutate and only mutate an individual it is not responsible of invalidating the fitness nor anything else. The following shows that ``ind2`` and ``mutant`` are in fact the same individual.
-::
 
-	print ind2 is mutant    # True
-	print mutant is ind1    # False
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 39-40
 
 Crossover
 ---------
@@ -107,12 +82,10 @@ means that an independent copies must be made prior to mating the individuals
 if the original individuals have to be kept or is are *references* to other
 individuals (see the selection operator).
 
-Lets apply a crossover operation to produce the two children that are cloned beforehand. ::
-	
-	child1, child2 = [toolbox.clone(ind) for ind in (ind1, ind2)]
-	tools.cxBlend(child1, child2, 0.5)
-	del child1.fitness.values
-	del child2.fitness.values
+Lets apply a crossover operation to produce the two children that are cloned beforehand.
+
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 43-46
 
 .. note::
 
@@ -135,10 +108,9 @@ available in the :mod:`deap.operators` module. The selection operator usually
 takes as first argument an iterable container of individuals and the number of
 individuals to select. It returns a list containing the references to the
 selected individuals. The selection is made as follow.
-::
 
-	selected = tools.selBest([child1, child2], 2)
-	print child1 in selected		# True
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 49-50
 
 .. warning:: It is **very** important here to note that the selection
    operators does not duplicate any individual during the selection process. 
@@ -146,11 +118,11 @@ selected individuals. The selection is made as follow.
    the other will also be modified. Only a reference to the individual is 
    copied. Just like every other operator it selects and only selects.
 
-Usually duplication of the entire population will be made after selection.
-::
+Usually duplication of the entire population will be made after selection or 
+before variation.
 
-	selected = toolbox.select(population, LAMBDA)
-	offsprings = [toolbox.clone(ind) for ind in selected]
+.. literalinclude:: /code/tutorials/part_3/3_next_step.py
+   :lines: 56-57
 
 
 Using the Toolbox
@@ -161,27 +133,17 @@ initializers to the evaluation operator. It allows easy configuration of each
 algorithms. The toolbox has basically two methods,
 :meth:`~deap.toolbox.Toolbox.register` and
 :meth:`~deap.toolbox.Toolbox.unregister`, that are used to add or remove tools
-from the toolbox. A shown :ref:`earlier <creating-types>` for initialization.
+from the toolbox.
+
 This part of the tutorial will focus on registration of the evolutionary tools
 in the toolbox rather than the initialization tools. The usual names for the
 evolutionary tools are :func:`~deap.mate`, :func:`~deap.mutate`,
-:func:`~deap.evaluate` and :func:`~deap.select`. Here is how they are
-registered in the toolbox.
-::
+:func:`~deap.evaluate` and :func:`~deap.select`, however, any name can be
+registered as long as it is unique. Here is how they are registered in the
+toolbox.
 
-	from deap import base
-	from deap import tools
-	
-	toolbox = base.Toolbox()
-	
-	def evaluateInd(individual):
-	    # Do some computation
-	    return result,
-	
-	toolbox.register("mate", tools.cxTwoPoints)
-	toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
-	toolbox.register("select", tools.selTournament, tournsize=3)
-	toolbox.register("evaluate", evaluateInd)
+.. literalinclude:: /code/tutorials/part_3/3_6_using_the_toolbox.py
+   :lines: 2-8,10-15
 
 Using the toolbox for registering tools helps keeping the rest of the
 algorithms independent from the operator set. Using this scheme makes it very
@@ -191,36 +153,12 @@ easy to locate and change any tool in the toolbox if needed.
 
 Using the Tools
 +++++++++++++++
-When building evolutionary algorithms the toolbox is used to contain the operators, which are called using their generic name. For example, here is a very small sample of what looks like a simple generational evolutionary algorithm.
-::
+When building evolutionary algorithms the toolbox is used to contain the
+operators, which are called using their generic name. For example, here is a
+very simple generational evolutionary algorithm.
 
-	for g in range(NGEN):
-	    # Select the next generation individuals
-	    offsprings = toolbox.select(pop, len(pop))
-	    # Clone the selected individuals
-	    offsprings = map(toolbox.clone, offsprings)
-	
-	    # Apply crossover on the offsprings
-	    for child1, child2 in zip(offsprings[::2], offsprings[1::2]):
-	        if random.random() < CXPB:
-	            toolbox.mate(child1, child2)
-	            del child1.fitness.values
-	            del child2.fitness.values
-	
-	    # Apply mutation on the offsprings
-	    for mutant in offsprings:
-	        if random.random() < MUTPB:
-	            toolbox.mutate(mutant)
-	            del mutant.fitness.values
-	
-	    # Evaluate the individuals with an invalid fitness
-	    invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-	    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-	    for ind, fit in zip(invalid_ind, fitnesses):
-	        ind.fitness.values = fit
-	
-	    # The population is entirely replaced by the offsprings
-	    pop[:] = offsprings
+.. literalinclude:: /code/tutorials/part_3/3_6_using_the_toolbox.py
+   :lines: 30-
 
 This is a complete algorithm. It is generic enough to accept any kind of
 individual and any operator, as long as the operators are suitable for the
@@ -241,93 +179,60 @@ checks if any attribute in the list is out-of-bound and clips it if it is the
 case. The decorator is defined using three functions in order to receive the
 *min* and *max* arguments. Whenever the mutation or crossover is called,
 bounds will be check on the resulting individuals.
-::
 
-	def checkBounds(min, max):
-	    def decCheckBounds(func):
-	        def wrapCheckBounds(*args, **kargs):
-	            offsprings = func(*args, **kargs)
-	            for child in offsprings:
-	                for i in xrange(len(child)):
-	                    if child[i] > max:
-	                        child[i] = max
-	                    elif child[i] < min:
-	                        child[i] = min
-	            return offsprings
-	        return wrapCheckBounds
-	    return decCheckBounds
-	
-	toolbox.register("mate", tools.cxBlend, alpha=0.2)
-	toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=2)
-	
-	toolbox.decorate("mate", checkBounds(MIN, MAX))
-	toolbox.decorate("mutate", checkBounds(MIN, MAX))
+.. literalinclude:: /code/tutorials/part_3/3_6_2_tool_decoration.py
+   :lines: 8-
 
 This will work on crossover and mutation because both return a tuple of
 individuals. The mutation is often considered to return a single individual
 but again like for the evaluation, the single individual case is a special
 case of the multiple individual case.
 
-Note that their are various ways of defining decorator that are not presented
-here. `Here <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ is a
-very good tutorial on decorators by Bruce Eckel and `here
-<http://wiki.python.org/moin/PythonDecoratorLibrary>`_ is a list of proposed
-decorators for various purposes.
+|more| For more information on decorators, see 
+`Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ 
+and `Python Decorator Libary <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
 
 Variations
 ----------
-Variations allows to build simple algorithms using predefined small parts. In
-order to use a variation, the toolbox must be setuped to contain the required
+Variations allows to build simple algorithms using predefined small building blocks. In
+order to use a variation, the toolbox must be set to contain the required
 operators. For example in the lastly presented complete algorithm, the
-crossover and mutation are regrouped in the :func:`~deap.algorithms.varSimple`
-function, this function requires the toolbox to contain a :func:`~deap.mate`
-and a :func:`~deap.mutate` functions. The variations can be used to simplify
+crossover and mutation are regrouped in the :func:`~deap.algorithms.varAnd`
+function, this function requires the toolbox to contain the :func:`~deap.mate`
+and :func:`~deap.mutate` functions. The variations can be used to simplify
 the writing of an algorithm as follow.
-::
 
-	from deap import algorithms
-	
-	for g in range(NGEN):
-	    # Select and clone the next generation individuals
-	    offsprings = map(toolbox.clone, toolbox.select(pop, len(pop)))
-	
-	    # Apply crossover and mutation on the offsprings
-	    offsprings = algorithms.varSimple(offsprings, CXPB, MUTPB)
-	
-	    # Evaluate the individuals with an invalid fitness
-	    invalid_ind = [ind for ind in offsprings if not ind.fitness.valid]
-	    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-	    for ind, fit in zip(invalid_ind, fitnesses):
-	        ind.fitness.values = fit
-	
-	    # The population is entirely replaced by the offsprings
-	    pop[:] = offsprings
+.. literalinclude:: /code/tutorials/part_3/3_7_variations.py
+   :lines: 33-
 
 This last example shows that using the variations makes it straight forward to
 build algorithms that are very close to the pseudo-code.
 
 Algorithms
 ----------
-There is several algorithms implemented in a couple modules and examples, but
-principally in the :mod:`~deap.algorithms` module. They are very simple and
+There is several algorithms implemented in the :mod:`~deap.algorithms` module.
+They are very simple and
 reflect the basic types of evolutionary algorithms present in the literature.
 The algorithms use a :class:`~deap.base.Toolbox` as defined in the last
 sections. In order to setup a toolbox for an algorithm, you must register the
 desired operators under a specified names, refer to the documentation of the
 selected algorithm for more details. Once the toolbox is ready, it is time to
 launch the algorithm. The simple evolutionary algorithm takes 5 arguments, a
-*toolbox*, a *population*, a propability of mating each individual at each
-generation (*cxpb*), a propability of mutating each individual at each
-generation (*mutpb*) and a max number of generations (*ngen*).
-::
+*toolbox*, a *population*, a probability of mating each individual at each
+generation (*cxpb*), a probability of mutating each individual at each
+generation (*mutpb*) and a number of generations to accomplish (*ngen*).
 
-	from deap import algorithms
-	
-	algorithms.eaSimple(tools, pop, cxpb=0.5, mutpb=0.2, ngen=50)
-    
+.. literalinclude:: /code/tutorials/part_3/3_8_algorithms.py
+   :lines: 33-
+
 The best way to understand what the simple evolutionary algorithm does, it to
 take a look at the documentation or the source code
 
 Now that you built your own evolutionary algorithm in python, you are welcome
 to gives us feedback and appreciation. We would also really like to hear about
 your project and success stories with DEAP.
+
+.. |more| image:: /_images/more.png
+          :align: middle
+          :alt: more info
+

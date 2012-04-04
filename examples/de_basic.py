@@ -44,17 +44,24 @@ def main():
     pop = toolbox.population(n=MU);
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
     
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    for g in range(NGEN):
+    stats.update(pop)
+    
+    logger.logGeneration(gen=0, evals=len(pop), stats=stats)
+    
+    for g in range(1, NGEN):
         for k, agent in enumerate(pop):
             a,b,c = toolbox.select(pop)
             y = toolbox.clone(agent)
@@ -68,10 +75,10 @@ def main():
         hof.update(pop)
         stats.update(pop)
         
-        print "-- Generation %i --" % g
-        print stats
-            
+        logger.logGeneration(gen=g, evals=len(pop), stats=stats)
+
+
     print "Best individual is ", hof[0], hof[0].fitness.values[0]
-            
+    
 if __name__ == "__main__":
     main()

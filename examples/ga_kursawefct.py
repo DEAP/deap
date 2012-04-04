@@ -15,10 +15,7 @@
 
 import array
 import logging
-import sys
 import random
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 from deap import algorithms
 from deap import base
@@ -39,18 +36,18 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.att
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def checkBounds(min, max):
-    def decCheckBounds(func):
-        def wrapCheckBounds(*args, **kargs):
-            offsprings = func(*args, **kargs)
-            for child in offsprings:
+    def decorator(func):
+        def wrappper(*args, **kargs):
+            offspring = func(*args, **kargs)
+            for child in offspring:
                 for i in xrange(len(child)):
                     if child[i] > max:
                         child[i] = max
                     elif child[i] < min:
                         child[i] = min
-            return offsprings
-        return wrapCheckBounds
-    return decCheckBounds
+            return offspring
+        return wrappper
+    return decorator
 
 toolbox.register("evaluate", benchmarks.kursawe)
 toolbox.register("mate", tools.cxBlend, alpha=1.5)
@@ -67,21 +64,24 @@ def main():
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaMuPlusLambda(toolbox, pop, mu=MU, lambda_=LAMBDA, 
-                              cxpb=0.5, mutpb=0.2, ngen=50, 
+    algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
+                              cxpb=0.5, mutpb=0.2, ngen=150, 
                               stats=stats, halloffame=hof)
-    
-    logging.info("Best individual for measure 1 is %s, %s", 
-                 hof[0], hof[0].fitness.values)
-    logging.info("Best individual for measure 2 is %s, %s", 
-                 hof[-1], hof[-1].fitness.values)
 
     return pop, stats, hof
 
 if __name__ == "__main__":
-    main()
+    pop, stats, hof = main()
+    
+    # import matplotlib.pyplot as plt
+    # import numpy
+    # 
+    # front = numpy.array([ind.fitness.values for ind in pop])
+    # plt.scatter(front[:,0], front[:,1], c="b")
+    # plt.axis("tight")
+    # plt.show()

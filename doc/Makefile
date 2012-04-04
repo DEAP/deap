@@ -31,8 +31,10 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html	
 	@echo
+	mkdir -p $(BUILDDIR)/html/examples/code 
+	cp code/examples/*.py $(BUILDDIR)/html/examples/code
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 dirhtml:

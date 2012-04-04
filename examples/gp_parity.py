@@ -13,19 +13,14 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with EAP. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import random
 import operator
-import logging
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
 from deap import gp
-
-
-logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
 
 # Initialize Parity problem input and output matrices
 PARITY_FANIN_M = 6
@@ -68,8 +63,7 @@ toolbox.register("lambdify", gp.lambdify, pset=pset)
 
 def evalParity(individual):
     func = toolbox.lambdify(expr=individual)
-    good = sum(func(*inputs[i]) == outputs[i] for i in xrange(PARITY_SIZE_M))
-    return good,
+    return sum(func(*in_) == out for in_, out in zip(inputs, outputs)),
 
 toolbox.register("evaluate", evalParity)
 toolbox.register("select", tools.selTournament, tournsize=3)
@@ -82,14 +76,12 @@ def main():
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
-    algorithms.eaSimple(toolbox, pop, 0.5, 0.2, 40, stats, halloffame=hof)
-    
-    logging.info("Best individual is %s, %s", gp.evaluate(hof[0]), hof[0].fitness)
+    algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof)
     
     return pop, stats, hof
 

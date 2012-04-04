@@ -15,6 +15,7 @@
 
 import operator
 import random
+from itertools import imap
 
 from deap import base
 from deap import benchmarks
@@ -35,9 +36,9 @@ def generate(size, pmin, pmax, smin, smax):
 def updateParticle(part, best, phi1, phi2):
     u1 = (random.uniform(0, phi1) for _ in range(len(part)))
     u2 = (random.uniform(0, phi2) for _ in range(len(part)))
-    v_u1 = map(operator.mul, u1, map(operator.sub, part.best, part))
-    v_u2 = map(operator.mul, u2, map(operator.sub, best, part))
-    part.speed = map(operator.add, part.speed, map(operator.add, v_u1, v_u2))
+    v_u1 = imap(operator.mul, u1, imap(operator.sub, part.best, part))
+    v_u2 = imap(operator.mul, u2, imap(operator.sub, best, part))
+    part.speed = map(operator.add, part.speed, imap(operator.add, v_u1, v_u2))
     for i, speed in enumerate(part.speed):
         if speed < part.smin:
             part.speed[i] = part.smin
@@ -58,12 +59,14 @@ def main():
     stats.register("Std", tools.std)
     stats.register("Min", min)
     stats.register("Max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
 
     GEN = 1000
     best = None
 
     for g in xrange(GEN):
-        print "-- Generation %i --" % g
         for part in pop:
             part.fitness.values = toolbox.evaluate(part)
             if not part.best or part.best.fitness < part.fitness:
@@ -77,8 +80,7 @@ def main():
 
         # Gather all the fitnesses in one list and print the stats
         stats.update(pop)
-        print stats
-        print "  Best so far: %s - %s" % (best, best.fitness)
+        logger.logGeneration(gen=g, evals=len(pop), stats=stats)
     
     return pop, stats, best
 

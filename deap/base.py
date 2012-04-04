@@ -20,12 +20,13 @@ virtual :class:`~deap.base.Fitness` class used as base class, for the fitness
 member of any individual.
 """
 
+import sys
 import copy
 import operator
 import functools
 from collections import deque
 from itertools import izip, repeat, count
-        
+
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
     At first the toolbox contains two simple methods. The first method
@@ -46,8 +47,17 @@ class Toolbox(object):
         """Register a *method* in the toolbox under the name *alias*. You 
         may provide default arguments that will be passed automatically when 
         calling the registered method. Fixed arguments can then be overriden 
-        at function call time. The following code block is a example of how
-        the toolbox is used. ::
+        at function call time.
+        
+        :param alias: The name the operator will take in the toolbox. If the
+                      alias already exist it will overwrite the the operator
+                      already present.
+        :param method: The function to which refer the alias.
+        :param argument: One or more argument (and keyword argument) to pass
+                         automatically to the registered function when called,
+                         optional.
+        
+        The following code block is an example of how the toolbox is used. ::
 
             >>> def func(a, b, c=3):
             ...     print a, b, c
@@ -56,35 +66,57 @@ class Toolbox(object):
             >>> tools.register("myFunc", func, 2, c=4)
             >>> tools.myFunc(3)
             2 3 4
-
+        
+        The registered function will be given the attributes :attr:`__name__`
+        set to the alias and :attr:`__doc__` set to the original function's
+        documentation. The :attr:`__dict__` attribute will also be updated
+        with the original function's instance dictionnary, if any.
         """
         pfunc = functools.partial(method, *args, **kargs)
         pfunc.__name__ = alias
+        pfunc.__doc__ = method.__doc__
+        
+        try:
+            # Some methods don't have any dictionary, in these cases simply 
+            # don't copy it.
+            pfunc.__dict__.update(method.__dict__.copy())
+        except AttributeError:
+            pass
+        
         setattr(self, alias, pfunc)
 
     def unregister(self, alias):
-        """Unregister *alias* from the toolbox."""
+        """Unregister *alias* from the toolbox.
+        
+        :param alias: The name of the operator to remove from the toolbox.
+        """
         delattr(self, alias)
 
     def decorate(self, alias, *decorators):
         """Decorate *alias* with the specified *decorators*, *alias*
-        has to be a registered function in the current toolbox. Decorate uses
-        the signature preserving decoration function
-        :func:`~deap.tools.decorate`.
+        has to be a registered function in the current toolbox.
+        
+        :param alias: The name of the operator to decorate.
+        :param decorator: One or more function decorator. If multiple
+                          decorators are provided they will be applied in
+                          order, with the last decorator decorating all the
+                          others.
+        
+        .. versionchanged:: 0.8
+           Decoration is not signature preserving anymore.
         """
-        from tools import decorate
-        partial_func = getattr(self, alias)
-        method = partial_func.func
-        args = partial_func.args
-        kargs = partial_func.keywords
+        pfunc = getattr(self, alias)
+        method, args, kargs = pfunc.func, pfunc.args, pfunc.keywords
         for decorator in decorators:
-            method = decorate(decorator)(method)
-        setattr(self, alias, functools.partial(method, *args, **kargs))
+            method = decorator(method)
+        self.register(alias, method, *args, **kargs)
 
 class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
     provided as a tuple, the fitness is initalized using those values,
     otherwise it is empty (or invalid).
+    
+    :param values: The initial values of the fitness as a tuple, optional.
 
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
     ``!=``. The comparison of those operators is made lexicographically.
@@ -101,10 +133,10 @@ class Fitness(object):
     
     weights = None
     """The weights are used in the fitness comparison. They are shared among
-    all fitnesses of the same type. When subclassing ``Fitness``, ``weights``
-    must be defined as a tuple where each element is associated to an 
-    objective. A negative weight element corresponds to the minimization of the
-    associated objective and positive weight to the maximization.
+    all fitnesses of the same type. When subclassing :class:`Fitness`, the
+    weights must be defined as a tuple where each element is associated to an
+    objective. A negative weight element corresponds to the minimization of
+    the associated objective and positive weight to the maximization.
 
     .. note::
         If weights is not defined during subclassing, the following error will 
@@ -119,7 +151,7 @@ class Fitness(object):
     weights is made when the values are set via the property :attr:`values`.
     Multiplication is made on setting of the values for efficiency.
     
-    Generally it is unnecessary to manipulate *wvalues* as it is an internal
+    Generally it is unnecessary to manipulate wvalues as it is an internal
     attribute of the fitness used in the comparison operators.
     """
     
@@ -128,6 +160,9 @@ class Fitness(object):
             raise TypeError("Can't instantiate abstract %r with abstract "
                 "attribute weights." % (self.__class__))
         
+        if not hasattr(self.weights, "__iter__"):
+            raise TypeError("Attribute weights of %r must be a sequence." % self.__class__)
+        
         if len(values) > 0:
             self.values = values
         
@@ -135,7 +170,13 @@ class Fitness(object):
         return tuple(map(operator.truediv, self.wvalues, self.weights))
             
     def setValues(self, values):
-        self.wvalues = tuple(map(operator.mul, values, self.weights))
+        try:
+            self.wvalues = tuple(map(operator.mul, values, self.weights))
+        except TypeError:
+            _, _, traceback = sys.exc_info()
+            raise TypeError, ("Both weights and assigned values must be a "
+            "sequence of numbers when assigning to values of "
+            "%r." % self.__class__, ), traceback
             
     def delValues(self):
         self.wvalues = ()
@@ -150,22 +191,6 @@ class Fitness(object):
     def valid(self):
         """Assess if a fitness is valid or not."""
         return len(self.wvalues) != 0
-
-    def isDominated(self, other):
-        """In addition to the comparison operators that are used to sort
-        lexically the fitnesses, this method returns :data:`True` if this
-        fitness is dominated by the *other* fitness and :data:`False` otherwise.
-        The weights are used to compare minimizing and maximizing fitnesses. If
-        there is more fitness values than weights, the last weight get repeated
-        until the end of the comparison.
-        """
-        not_equal = False
-        for self_wvalue, other_wvalue in izip(self.wvalues, other.wvalues):
-            if self_wvalue > other_wvalue:
-                return False
-            elif self_wvalue < other_wvalue:
-                not_equal = True
-        return not_equal
         
     def __gt__(self, other):
         return not self.__le__(other)
@@ -198,10 +223,9 @@ class Fitness(object):
         immutable and the fitness does not contain any other object 
         than :attr:`values` and :attr:`weights`.
         """
-        if len(self.wvalues) > 0:
-            return self.__class__(self.values)
-        else:
-            return self.__class__()
+        copy = self.__class__()
+        copy.wvalues = self.wvalues
+        return copy
 
     def __str__(self):
         """Return the values of the Fitness object."""
@@ -250,7 +274,7 @@ class Tree(list):
             return self
         
         def __eq__(self, other):
-            return self.obj == other.obj        
+            return self.obj == other.obj
         def __getattr__(self, attr):
             return getattr(self.obj, attr)
         def __call__(self, *args, **kargs):
@@ -301,7 +325,7 @@ class Tree(list):
         """Deepcopy a Tree by first converting it back to a list of list."""
         new = self.__class__(copy.deepcopy(self.getstate()))
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        return new        
+        return new
         
     def __setitem__(self, key, value):
         """Set the item at `key` with the corresponding `value`."""
@@ -467,7 +491,7 @@ class Tree(list):
                 del self[1:]
                 self[0] = subtree
             return
-                
+         
         queue = deque(izip(repeat(self, len(self[1:])), count(1)))
         for i in xrange(index):
             elem = queue.popleft()

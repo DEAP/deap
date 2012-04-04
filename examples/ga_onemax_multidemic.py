@@ -57,37 +57,40 @@ def main():
     demes = [toolbox.population(n=MU) for _ in xrange(NBR_DEMES)]
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values, 4)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)    
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
+    
+    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger.logHeader()
     
     for idx, deme in enumerate(demes):
         for ind in deme:
             ind.fitness.values = toolbox.evaluate(ind)
         stats.update(deme, idx)
         hof.update(deme)
+        logger.logGeneration(gen="0.%d" % idx, evals=len(deme), stats=stats, index=idx)
+    
     stats.update(demes[0]+demes[1]+demes[2], 3)
+    logger.logGeneration(gen=0, evals="-", stats=stats, index=3)
     
     gen = 1
-    while gen <= NGEN and stats.Max(3)[0] < 100.0:
-        print "-- Generation %i --" % gen        
+    while gen <= NGEN and stats.max[3][-1][0] < 100.0:
         for idx, deme in enumerate(demes):
-            print "-- Deme %i --" % (idx+1)  
-            deme[:] = [toolbox.clone(ind) for ind in toolbox.select(deme, len(deme))]
-            algorithms.varSimple(toolbox, deme, cxpb=CXPB, mutpb=MUTPB)
+            algorithms.varAnd(deme, toolbox, cxpb=CXPB, mutpb=MUTPB)
             
             for ind in deme:
                 ind.fitness.values = toolbox.evaluate(ind)
             
             stats.update(deme, idx)
             hof.update(deme)
-            print stats[idx]
+            logger.logGeneration(gen="%d.%d" % (gen, idx), evals=len(deme), stats=stats, index=idx)
+            
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)
         stats.update(demes[0]+demes[1]+demes[2], 3)
-        print "-- Population --"
-        print stats[3]
+        logger.logGeneration(gen="%d" % gen, evals="-", stats=stats, index=3)
         gen += 1
     
     return demes, stats, hof

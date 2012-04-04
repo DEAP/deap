@@ -20,50 +20,21 @@
 """A module that provides support for the Covariance Matrix Adaptation 
 Evolution Strategy.
 """
-
-import logging
-from math import sqrt, log, exp
 import numpy
-import random   # Only used to seed numpy.random
-import sys      # Used to get maxint
 import copy
+from math import sqrt, log, exp
 
-numpy.random.seed(random.randint(0, sys.maxint))
-
-_logger = logging.getLogger("deap.cma")
-    
-def esCMA(toolbox, population, ngen, halloffame=None, statistics=None):
-    """The CMA-ES algorithm as described in Hansen, N. (2006). *The CMA
-    Evolution Strategy: A Comparing Rewiew.*
-    
-    The provided *population* should be a list of one or more individuals.
+class Strategy(object):
     """
-    _logger.info("Start of evolution")
-        
-    for g in xrange(ngen):
-        _logger.info("Evolving generation %i", g)
-        
-        # Evaluate the individuals
-        fits = toolbox.map(toolbox.evaluate, population)
-        for ind, f in zip(population, fits):
-            ind.fitness.values = f
-        
-        if halloffame is not None:
-            halloffame.update(population)
-        
-        # Update the Strategy with the evaluated individuals
-        toolbox.update(population)
-        
-        if statistics is not None:
-            statistics.update(population)
-            _logger.debug(statistics)
-
-    _logger.info("End of (successful) evolution")
-
-class CMAStrategy(object):
-    """
-    Additional configuration may be passed through the *params* argument as a 
-    dictionary,
+    A strategy that will keep track of the basic parameters of the CMA-ES
+    algorithm.
+    
+    :param centroid: An iterable object that indicates where to start the
+                     evolution.
+    :param sigma: The list of initial standard deviations of the distribution,
+                  it shall be the same length than the centroid.
+    :param parameter: One or more parameter to pass to the strategy as
+                      described in the following table, optional.
     
     +----------------+---------------------------+----------------------------+
     | Parameter      | Default                   | Details                    |
@@ -117,25 +88,30 @@ class CMAStrategy(object):
         self.C = numpy.identity(self.dim)
         self.diagD = numpy.ones(self.dim)
         self.BD = self.B * self.diagD
-
-        self.cond = 1       
- 
+        
+        self.cond = 1
         self.lambda_ = self.params.get("lambda_", int(4 + 3 * log(self.dim)))
-        
         self.update_count = 0
-        
         self.computeParams(self.params)
         
     def generate(self, ind_init):
         """Generate a population from the current strategy using the 
         centroid individual as parent.
+        
+        :param ind_init: A function object that is able to initialize an
+                         individual from a list.
+        :returns: A list of individuals.
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
-        return [ind_init(arzi) for arzi in arz]        
+        return map(ind_init, arz)
         
     def update(self, population):
-        """Update the current covariance matrix strategy.
+        """Update the current covariance matrix strategy and *population*.
+        
+        :param population: A list of individuals from which to update the
+                           parameters and where the new population will be
+                           placed.
         """
         population.sort(key=lambda ind: ind.fitness, reverse=True)
         
@@ -153,13 +129,13 @@ class CMAStrategy(object):
         hsig = float((numpy.linalg.norm(self.ps) / 
                 sqrt(1. - (1. - self.cs)**(2. * (self.update_count + 1.))) / self.chiN
                 < (1.4 + 2. / (self.dim + 1.))))
-
+        
         self.update_count += 1
-               
+        
         self.pc = (1 - self.cc) * self.pc + hsig \
                   * sqrt(self.cc * (2 - self.cc) * self.mueff) / self.sigma \
                   * c_diff
-                   
+        
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
         self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) \
@@ -167,29 +143,25 @@ class CMAStrategy(object):
                 + self.ccov1 * numpy.outer(self.pc, self.pc) \
                 + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
                 / self.sigma**2
-                
+        
         
         self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) \
                                 * self.cs / self.damps)
         
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
-
+        
         self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
-
+        
         self.diagD = self.diagD[indx]**0.5
         self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
-            
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
-        for ind, arzi in zip(population, arz):
-            del ind[:]
-            ind.extend(arzi)
 
     def computeParams(self, params):
-        """Those parameters depends on lambda and need to computed again if it 
-        changes during evolution.
+        """Computes the parameters depending on *lambda_*. It needs to be
+        called again if *lambda_* changes during evolution.
+        
+        :param params: A dictionary of the manually set parameters.
         """
         self.mu = params.get("mu", int(self.lambda_ / 2))
         rweights = params.get("weights", "superlinear")
@@ -201,7 +173,7 @@ class CMAStrategy(object):
         elif rweights == "equal":
             self.weights = numpy.ones(self.mu)
         else:
-            pass    # Print some warning ?
+            raise RuntimeError("Unknown weights : %s" % rweights)
         
         self.weights /= sum(self.weights)
         self.mueff = 1. / sum(self.weights**2)
@@ -219,7 +191,7 @@ class CMAStrategy(object):
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
         
-class CMA1pLStrategy(object):
+class StrategyOnePlusLambda(object):
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
         self.sigma = sigma
@@ -251,7 +223,7 @@ class CMA1pLStrategy(object):
         # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)        
-        return [ind_init(arzi) for arzi in arz]
+        return map(ind_init, arz)
     
     def update(self, population):
         population.sort(key=lambda ind: ind.fitness, reverse=True)
@@ -282,10 +254,4 @@ class CMA1pLStrategy(object):
         # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
         self.A = numpy.linalg.cholesky(self.C)
-        
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)
-        for ind, arzi in zip(population, arz):
-            del ind[:]
-            ind.extend(arzi)
         

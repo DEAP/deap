@@ -17,4 +17,6 @@ adding a single line of code will do the job).
 	start
 	types
 	next_step
+	speedup
 	distribution
+	benchmarking

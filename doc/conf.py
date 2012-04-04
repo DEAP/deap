@@ -51,7 +51,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'DEAP'
-copyright = u'2009-%s, François-Michel De Rainville, Félix-Antoine Fortin and Marc-André Gardner' % time.strftime('%Y')
+copyright = u'2009-%s, DEAP Project' % time.strftime('%Y')
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -103,24 +103,41 @@ pygments_style = 'default'
 todo_include_todos = True
 
 # Search in python documentation
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {'http://docs.python.org/': None,
+                       'http://docs.scipy.org/doc/numpy' : None}
 
 # Reload the cached values every 5 days
 intersphinx_cache_limit = 5
 
+# -- Options for pyplot extension ----------------------------------------------
+
+# Default value for the include-source option
+plot_include_source = False
+
+# Code that should be executed before each plot.
+#plot_pre_code
+
+# Base directory, to which ``plot::`` file names are relative
+# to.  (If None or empty, file names are relative to the 
+# directory where the file containing the directive is.)
+#plot_basedir
+
+#  Whether to show links to the files in HTML.
+plot_html_show_formats = True
+
 # -- Options for HTML output ---------------------------------------------------
+
+# Add any paths that contain custom themes here, relative to this directory.
+html_theme_path = ["_themes"]
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
+html_theme = 'pydoctheme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {'collapsiblesidebar': True}
-
-# Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -131,7 +148,7 @@ html_theme_options = {'collapsiblesidebar': True}
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+#html_logo = ""
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -141,11 +158,11 @@ html_theme_options = {'collapsiblesidebar': True}
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['_static']
+html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -210,7 +227,7 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = '\usepackage{amsmath,amssymb}'
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
