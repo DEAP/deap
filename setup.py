@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 from distutils.core import setup, Extension
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
@@ -7,7 +8,10 @@ except ImportError:
 
 import deap
 
-deap_ctools = Extension('deap.cTools', ['deap/cTools.cpp'])
+ext_modules = []
+if "--with-ctools" in sys.argv:
+    ext_modules.append(Extension('deap.cTools', ['deap/cTools.cpp']))
+    sys.argv.remove("--with-ctools")
 
 setup(name='deap',
       version=deap.__revision__,
@@ -31,6 +35,6 @@ setup(name='deap',
         'Topic :: Scientific/Engineering',
         'Topic :: Software Development',
         ],
-     ext_modules = [deap_ctools],
+     ext_modules = ext_modules,
      cmdclass = {'build_py': build_py}
 )
