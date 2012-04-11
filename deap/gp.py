@@ -495,7 +495,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
     primList1 = [i for i in xrange(1, size1) if i not in termsList1]
     primList2 = [i for i in xrange(1, size2) if i not in termsList2]
 
-    if random.random() < termpbpb or len(primList1) == 0:
+    if random.random() < termpb or len(primList1) == 0:
         # Choose a terminal from the first parent
         index1 = random.choice(termsList1)
         subtree1 = ind1.searchSubtreeDF(index1)
