@@ -17,6 +17,7 @@ import array
 from collections import deque
 from multiprocessing import Event, Pipe, Process
 import random
+import sys
 
 if sys.version_info < (2, 7):
     print "ga_onemax_island example requires Python >= 2.7."
