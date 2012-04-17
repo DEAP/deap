@@ -86,7 +86,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
     toolbox.register("migrate", migPipe, k=5, pipein=pipein, pipeout=pipeout,
         selection=tools.selBest, replacement=random.sample)
 
-    MU = 75
+    MU = 300
     NGEN = 40
     CXPB = 0.5
     MUTPB = 0.2
@@ -100,8 +100,9 @@ def main(procid, pipein, pipeout, sync, seed=None):
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger = tools.EvolutionLogger(["gen", "deme", "evals"] + stats.functions.keys())
     if procid == 0:
+        # Synchronization needed to log header on top and only once
         logger.logHeader()
         sync.set()
     else:
@@ -111,18 +112,19 @@ def main(procid, pipein, pipeout, sync, seed=None):
         ind.fitness.values = toolbox.evaluate(ind)
     stats.update(deme)
     hof.update(deme)
-    logger.logGeneration(gen="0.%d" % procid, evals=len(deme), stats=stats)
+    logger.logGeneration(gen="0", deme=procid, evals=len(deme), stats=stats)
     
     for gen in range(1, NGEN):
         deme = toolbox.select(deme, len(deme))
         deme = algorithms.varAnd(deme, toolbox, cxpb=CXPB, mutpb=MUTPB)
         
-        for ind in deme:
+        invalid_ind = [ind for ind in deme if not ind.fitness.valid]
+        for ind in invalid_ind:
             ind.fitness.values = toolbox.evaluate(ind)
         
         stats.update(deme)
         hof.update(deme)
-        logger.logGeneration(gen="%d.%d" % (gen, procid), evals=len(deme), stats=stats)
+        logger.logGeneration(gen="%d" % gen, deme=procid, evals=len(invalid_ind), stats=stats)
             
         if gen % MIG_RATE == 0 and gen > 0:
             toolbox.migrate(deme)
@@ -130,7 +132,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
 if __name__ == "__main__":
     random.seed(64)
     
-    NBR_DEMES = 4
+    NBR_DEMES = 3
     
     pipes = [Pipe(False) for _ in range(NBR_DEMES)]
     pipes_in = deque(p[0] for p in pipes)
