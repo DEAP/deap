@@ -62,7 +62,7 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    logger = tools.EvolutionLogger(["gen", "deme", "evals"] + stats.functions.keys())
     logger.logHeader()
     
     for idx, deme in enumerate(demes):
@@ -70,28 +70,29 @@ def main():
             ind.fitness.values = toolbox.evaluate(ind)
         stats.update(deme, idx)
         hof.update(deme)
-        logger.logGeneration(gen="0.%d" % idx, evals=len(deme), stats=stats, index=idx)
+        logger.logGeneration(gen="0", deme=idx, evals=len(deme), stats=stats, index=idx)
     
     stats.update(demes[0]+demes[1]+demes[2], 3)
-    logger.logGeneration(gen=0, evals="-", stats=stats, index=3)
+    logger.logGeneration(gen=0, deme=idx, evals="-", stats=stats, index=3)
     
     gen = 1
     while gen <= NGEN and stats.max[3][-1][0] < 100.0:
         for idx, deme in enumerate(demes):
-            deme[:] = toolbox.select(demes[idx], len(demes[idx]))
+            deme[:] = toolbox.select(deme, len(deme))
             deme[:] = algorithms.varAnd(deme, toolbox, cxpb=CXPB, mutpb=MUTPB)
             
-            for ind in deme:
+            invalid_ind = [ind for ind in deme if not ind.fitness.valid]
+            for ind in invalid_ind:
                 ind.fitness.values = toolbox.evaluate(ind)
             
             stats.update(deme, idx)
             hof.update(deme)
-            logger.logGeneration(gen="%d.%d" % (gen, idx), evals=len(deme), stats=stats, index=idx)
+            logger.logGeneration(gen="%d" %gen, deme=idx, evals=len(invalid_ind), stats=stats, index=idx)
             
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)
         stats.update(demes[0]+demes[1]+demes[2], 3)
-        logger.logGeneration(gen="%d" % gen, evals="-", stats=stats, index=3)
+        logger.logGeneration(gen="%d" % gen, deme="-", evals="-", stats=stats, index=3)
         gen += 1
     
     return demes, stats, hof
