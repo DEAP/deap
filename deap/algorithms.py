@@ -16,8 +16,8 @@
 """The :mod:`algorithms` module is intended to contain some specific algorithms
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
-evolutionary algorithm may vary infinitely. Most of the algorithms in this module
-use operators registered in the toolbox. Generaly, the keyword used are
+evolutionary algorithm may vary infinitely. Most of the algorithms in this 
+module use operators registered in the toolbox. Generaly, the keyword used are
 :meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~deap.select`
 for selection and :meth:`evaluate` for evaluation.
 
@@ -214,7 +214,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     for _ in xrange(lambda_):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = [toolbox.clone(ind) for ind in random.sample(population, 2)]
+            ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
             toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             offspring.append(ind1)
@@ -396,8 +396,8 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
                      verbose=__debug__):
-    """This is algorithm implements the ask-tell model proposed in [Colette2010]_,
-    where ask is called `generate` and tell is called `update`.
+    """This is algorithm implements the ask-tell model proposed in 
+    [Colette2010]_, where ask is called `generate` and tell is called `update`.
     
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
