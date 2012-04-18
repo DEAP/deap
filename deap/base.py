@@ -24,7 +24,8 @@ import sys
 import copy
 import operator
 import functools
-from collections import deque
+
+from collections import deque, Sequence
 from itertools import izip, repeat, count
 
 class Toolbox(object):
@@ -160,7 +161,7 @@ class Fitness(object):
             raise TypeError("Can't instantiate abstract %r with abstract "
                 "attribute weights." % (self.__class__))
         
-        if not hasattr(self.weights, "__iter__"):
+        if not isinstance(self.weights, Sequence):
             raise TypeError("Attribute weights of %r must be a sequence." 
                 % self.__class__)
         
