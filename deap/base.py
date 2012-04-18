@@ -161,7 +161,8 @@ class Fitness(object):
                 "attribute weights." % (self.__class__))
         
         if not hasattr(self.weights, "__iter__"):
-            raise TypeError("Attribute weights of %r must be a sequence." % self.__class__)
+            raise TypeError("Attribute weights of %r must be a sequence." 
+                % self.__class__)
         
         if len(values) > 0:
             self.values = values
@@ -223,9 +224,9 @@ class Fitness(object):
         immutable and the fitness does not contain any other object 
         than :attr:`values` and :attr:`weights`.
         """
-        copy = self.__class__()
-        copy.wvalues = self.wvalues
-        return copy
+        copy_ = self.__class__()
+        copy_.wvalues = self.wvalues
+        return copy_
 
     def __str__(self):
         """Return the values of the Fitness object."""
@@ -246,6 +247,10 @@ class Tree(list):
     """
     
     class NodeProxy(object):
+        """Encapsulate object put in a tree. Once encapsulated each object
+        of a tree provides its own interface to which are added basic 
+        methods of a Tree : size, height and root.
+        """
         __slots__ = ['obj']
         def __new__(cls, obj, *args, **kargs):
             if isinstance(obj, cls):
@@ -306,8 +311,7 @@ class Tree(list):
         following elements are the nodes. A node could be a list, then
         representing a subtree.
         """
-        for elem in content:
-            self.append(self.convertNode(elem))
+        list.__init__(self, (self.convertNode(elem) for elem in content))
         
     def getstate(self):
         """Return the state of the Tree as a list of arbitrary elements.
@@ -414,20 +418,20 @@ class Tree(list):
         indices of the tree in linear time using depth first 
         algorithm.
         
-            >>>  t = Tree([1,2,3,[4,[5,6,7],[8,9]],[10,11]]);
+            >>> t = Tree([1,2,3,[4,[5,6,7],[8,9]],[10,11]])
             >>> [i for i in t.iter_leaf_idx]
             [1, 2, 5, 6, 8, 10]
         """
-        def leaf_idx(tree, total):
-            total[0] += 1
-            for elem in tree[1:]:
-                if isinstance(elem, Tree):
-                    for elem2 in leaf_idx(elem, total):
-                        yield total[0]
-                else:
-                    yield total[0]
-                    total[0] += 1
-        return leaf_idx(self, [0])
+        total = 0
+        for elem in self[1:]:
+            total += 1                
+            if isinstance(elem, Tree):
+                total2 = 0
+                for total2 in elem.iter_leaf_idx:
+                    yield total + total2
+                total += total2
+            else:
+                yield total
 
     def searchSubtreeDF(self, index):
         """Search the subtree with the corresponding index based on a 
@@ -474,7 +478,7 @@ class Tree(list):
         if index == 0:
             return self
         queue = deque(self[1:])
-        for i in xrange(index):
+        for _ in xrange(index):
             subtree = queue.popleft()
             if isinstance(subtree, Tree):
                 queue.extend(subtree[1:])
@@ -493,7 +497,7 @@ class Tree(list):
             return
          
         queue = deque(izip(repeat(self, len(self[1:])), count(1)))
-        for i in xrange(index):
+        for _ in xrange(index):
             elem = queue.popleft()
             parent = elem[0]
             child  = elem[1]
