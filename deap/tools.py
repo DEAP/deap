@@ -1596,12 +1596,12 @@ def selSPEA2(individuals, k):
     fits = [0] * N
     dominating_inds = [list() for i in xrange(N)]
     
-    for i in xrange(N):
-        for j in xrange(i + 1, N):
-            if isDominated(individuals[i].fitness.wvalues, individuals[j].fitness.wvalues):
+    for i, ind_i in enumerate(individuals):
+        for j, ind_j in enumerate(individuals[i+1:], i+1):
+            if isDominated(ind_i.fitness.wvalues, ind_j.fitness.wvalues):
                 strength_fits[j] += 1
                 dominating_inds[i].append(j)
-            elif isDominated(individuals[j].fitness.wvalues, individuals[i].fitness.wvalues):
+            elif isDominated(ind_j.fitness.wvalues, ind_i.fitness.wvalues):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
     
@@ -1626,8 +1626,8 @@ def selSPEA2(individuals, k):
             density = 1.0 / (kth_dist + 2.0)
             fits[i] += density
             
-        next_indices = [(fits[i], i) for i in xrange(N) \
-                                                if not i in chosen_indices]
+        next_indices = [(fits[i], i) for i in xrange(N)
+                        if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
         chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
