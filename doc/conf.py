@@ -215,7 +215,7 @@ htmlhelp_basename = 'DEAP-doc'
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('contents', 'DEAP.tex', u'DEAP Documentation',
-   u'François-Michel De Rainville, Félix-Antoine Fortin', 'manual'),
+   u'DEAP Project', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

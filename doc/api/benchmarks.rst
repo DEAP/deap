@@ -1,5 +1,5 @@
 ==========
-Benckmarks
+Benchmarks
 ==========
 
 .. automodule:: deap.benchmarks
