@@ -65,6 +65,6 @@ And these hypotheses lead to the following objectives:
     to guide the apprenticeship of users.
 """
 
-__author__ = "Francois-Michel De Rainville and Felix-Antoine Fortin"
+__author__ = "DEAP Team"
 __version__ = "0.8"
 __revision__ = "0.8.1"
