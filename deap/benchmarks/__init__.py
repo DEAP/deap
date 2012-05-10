@@ -12,8 +12,6 @@
 #
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
-
-
 """
 Regroup typical EC benchmarks functions to import easily and benchmark
 examples.
@@ -27,36 +25,91 @@ from functools import reduce
 # Unimodal
 def rand(individual):
     """Random test objective function.
-    
-    :math:`f_{\\text{Rand}}(\mathbf{x}) = \\text{\\texttt{random}}(0,1)`
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization or maximization
+       * - Range
+         - none
+       * - Global optima
+         - none
+       * - Function
+         - :math:`f(\mathbf{x}) = \\text{\\texttt{random}}(0,1)`
     """
     return random.random(),
     
 def plane(individual):
     """Plane test objective function.
-    
-    :math:`f_{\\text{Plane}}(\mathbf{x}) = x_0`
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - none
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\mathbf{x}) = x_0`
     """
     return individual[0],
 
 def sphere(individual):
     """Sphere test objective function.
-    
-    :math:`f_{\\text{Sphere}}(\mathbf{x}) = \sum_{i=1}^Nx_i^2`
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - none
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\mathbf{x}) = \sum_{i=1}^Nx_i^2`
     """
     return sum(gene * gene for gene in individual),
 
 def cigar(individual):
     """Cigar test objective function.
     
-    :math:`f_{\\text{Cigar}}(\mathbf{x}) = x_0^2 + 10^6\\sum_{i=1}^N\,x_i^2`
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - none
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\mathbf{x}) = x_0^2 + 10^6\\sum_{i=1}^N\,x_i^2`
     """
     return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual),
 
 def rosenbrock(individual):  
     """Rosenbrock test objective function.
-    
-    :math:`f_{\\text{Rosenbrock}}(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 100 (x_{i+1} - x_i^2 )^2`
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - none
+       * - Global optima
+         - :math:`x_i = 1, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\\mathbf{x}) = \\sum_{i=1}^{N-1} (1-x_i)^2 + 100 (x_{i+1} - x_i^2 )^2`
     
     .. plot:: code/benchmarks/rosenbrock.py
        :width: 67 %
@@ -65,16 +118,26 @@ def rosenbrock(individual):
                    for x, y in zip(individual[:-1], individual[1:])),
 
 def h1(individual):
-    """ Simple two-dimensional function containing several local maxima,
-    H1 has a unique maximum value of 2.0 at the point (8.6998, 6.7665).
+    """ Simple two-dimensional function containing several local maxima.
     From: The Merits of a Parallel Genetic Algorithm in Solving Hard 
     Optimization Problems, A. J. Knoek van Soest and L. J. R. Richard 
     Casius, J. Biomech. Eng. 125, 141 (2003)
-    
-    :math:`f_{\\text{H1}}(x_1, x_2) = \\frac{\sin(x_1 - \\frac{x_2}{8})^2 + \
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - maximization
+       * - Range
+         - :math:`x_i \in [-100, 100]`
+       * - Global optima
+         - :math:`\mathbf{x} = (8.6998, 6.7665)`, :math:`f(\mathbf{x}) = 2`\n
+       * - Function
+         - :math:`f(\mathbf{x}) = \\frac{\sin(x_1 - \\frac{x_2}{8})^2 + \
             \\sin(x_2 + \\frac{x_1}{8})^2}{\\sqrt{(x_1 - 8.6998)^2 + \
             (x_2 - 6.7665)^2} + 1}`
-    
+
     .. plot:: code/benchmarks/h1.py
        :width: 67 %
     """
@@ -86,13 +149,21 @@ def h1(individual):
 # Multimodal
 def ackley(individual):
     """Ackley test objective function.
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-15, 30]`
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\\frac{1}{N} \
+            \\sum_{i=1}^N x_i^2} \\right) + e - \\exp\\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i) \\right)`
     
-    :math:`f_{\\text{Ackley}}(\\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\\frac{1}{N} \
-                            \sum_{i=1}^N x_i^2} \\right)\
-                            + e - \
-                            \exp\left(\\frac{1}{N}\sum_{i=1}^N \\cos(2\pi x_i) \
-                            \\right)`
-                            
     .. plot:: code/benchmarks/ackley.py
        :width: 67 %
     """
@@ -101,10 +172,21 @@ def ackley(individual):
             + e - exp(1.0/N * sum(cos(2*pi*x) for x in individual)),
             
 def bohachevsky(individual):
-    """Bohachevsky test objective function
-    
-    :math:`f_{\\text{Bohachevsky}}(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - \
-                        0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
+    """Bohachevsky test objective function.
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-100, 100]`
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         -  :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - \
+                   0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
     
     .. plot:: code/benchmarks/bohachevsky.py
        :width: 67 %
@@ -113,11 +195,22 @@ def bohachevsky(individual):
                 for x, x1 in zip(individual[:-1], individual[1:])),
 
 def griewank(individual):
-    """Griewank test objective function
+    """Griewank test objective function.
     
-    :math:`f_{\\text{Griewank}}(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \
-                        \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
-    
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-600, 600]`
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\\mathbf{x}) = \\frac{1}{4000}\\sum_{i=1}^N\,x_i^2 - \
+                  \prod_{i=1}^N\\cos\\left(\\frac{x_i}{\sqrt{i}}\\right) + 1`
+
     .. plot:: code/benchmarks/griewank.py
        :width: 67 %
     """
@@ -126,9 +219,20 @@ def griewank(individual):
             
 def rastrigin(individual):
     """Rastrigin test objective function.
-    
-    :math:`f_{\\text{Rastrigin}}(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
-    
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-5.12, 5.12]`
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
+
     .. plot:: code/benchmarks/rastrigin.py
        :width: 67 %
     """     
@@ -136,7 +240,7 @@ def rastrigin(individual):
                         cos(2 * pi * gene) for gene in individual),
 
 def rastrigin_scaled(individual):
-    """Scaled Rastrigin test objective function,
+    """Scaled Rastrigin test objective function.
     
     :math:`f_{\\text{RastScaled}}(\mathbf{x}) = 10N + \sum_{i=1}^N \
         \left(10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)^2 x_i)^2 - \
@@ -147,7 +251,7 @@ def rastrigin_scaled(individual):
                       10*cos(2*pi*10**(i/(N-1))*x) for i, x in enumerate(individual)),
 
 def rastrigin_skew(individual):
-    """Skewed Rastrigin test objective function
+    """Skewed Rastrigin test objective function.
     
      :math:`f_{\\text{RastSkew}}(\mathbf{x}) = 10N \sum_{i=1}^N \left(y_i^2 - 10 \\cos(2\\pi x_i)\\right)`
         
@@ -163,9 +267,20 @@ def rastrigin_skew(individual):
 def schaffer(individual):
     """Schaffer test objective function.
     
-    :math:`f_{\\text{Schaffer}}(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \
-                        \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \
-                        \\right]`
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-100, 100]`
+       * - Global optima
+         - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         -  :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \
+                  \\left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \
+                  \\right]`
 
     .. plot:: code/benchmarks/schaffer.py
         :width: 67 %
@@ -175,10 +290,22 @@ def schaffer(individual):
 
 def schwefel(individual):
     """Schwefel test objective function.
-    
-    :math:`f_{\\text{Schwefel}}(\mathbf{x}) = 418.9828872724339\cdot N - \
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-500, 500]`
+       * - Global optima
+         - :math:`x_i = 420.96874636, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
+       * - Function
+         - :math:`f(\mathbf{x}) = 418.9828872724339\cdot N - \
             \sum_{i=1}^N\,x_i\sin\\left(\sqrt{|x_i|}\\right)`
-            
+
+
     .. plot:: code/benchmarks/schwefel.py
         :width: 67 %
     """    
@@ -188,9 +315,23 @@ def schwefel(individual):
 def himmelblau(individual):
     """The Himmelblau's function is multimodal with 4 defined minimums in 
     :math:`[-6, 6]^2`.
-    
-    :math:`f_{\\text{Himmelblau}}(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
-    
+
+    .. list-table:: 
+       :widths: 10 50
+       :stub-columns: 1
+
+       * - Type
+         - minimization
+       * - Range
+         - :math:`x_i \in [-6, 6]`
+       * - Global optima
+         - :math:`\mathbf{x}_1 = (3.0, 2.0)`, :math:`f(\mathbf{x}_1) = 0`\n
+           :math:`\mathbf{x}_2 = (-2.805118, 3.131312)`, :math:`f(\mathbf{x}_2) = 0`\n
+           :math:`\mathbf{x}_3 = (-3.779310, -3.283186)`, :math:`f(\mathbf{x}_3) = 0`\n
+           :math:`\mathbf{x}_4 = (3.584428, -1.848126)`, :math:`f(\mathbf{x}_4) = 0`\n
+       * - Function
+         - :math:`f(x_1, x_2) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 -7)^2`
+
     .. plot:: code/benchmarks/himmelblau.py
         :width: 67 %
     """
@@ -250,7 +391,7 @@ def schaffer_mo(individual):
     return individual[0] ** 2, (individual[0] - 2) ** 2
     
 def zdt1(individual):
-    """ZDT1 multiobjective function
+    """ZDT1 multiobjective function.
     
     :math:`g(\\mathbf{x}) = 1 + \\frac{9}{n-1}\\sum_{i=2}^n x_i`
     
@@ -264,7 +405,7 @@ def zdt1(individual):
     return f1, f2
 
 def zdt2(individual):
-    """ZDT2 multiobjective function
+    """ZDT2 multiobjective function.
     
     :math:`g(\\mathbf{x}) = 1 + \\frac{9}{n-1}\\sum_{i=2}^n x_i`
     
@@ -280,7 +421,7 @@ def zdt2(individual):
     return f1, f2
     
 def zdt3(individual):
-    """ZDT3 multiobjective function
+    """ZDT3 multiobjective function.
 
     :math:`g(\\mathbf{x}) = 1 + \\frac{9}{n-1}\\sum_{i=2}^n x_i`
 
@@ -296,7 +437,7 @@ def zdt3(individual):
     return f1, f2
 
 def zdt4(individual):
-    """ZDT4 multiobjective function
+    """ZDT4 multiobjective function.
     
     :math:`g(\\mathbf{x}) = 1 + 10(n-1) + \\sum_{i=2}^n \\left[ x_i^2 - 10\\cos(4\\pi x_i) \\right]`
 
@@ -311,7 +452,7 @@ def zdt4(individual):
     return f1, f2
     
 def zdt6(individual):
-    """ZDT6 multiobjective function
+    """ZDT6 multiobjective function.
     
     :math:`g(\\mathbf{x}) = 1 + 9 \\left[ \\left(\\sum_{i=2}^n x_i\\right)/(n-1) \\right]^{0.25}`
     
