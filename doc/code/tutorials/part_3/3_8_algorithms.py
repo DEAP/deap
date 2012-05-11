@@ -32,4 +32,4 @@ for ind, fit in zip(pop, fitnesses):
 
 from deap import algorithms
 
-algorithms.eaSimple(toolbox, pop, cxpb=0.5, mutpb=0.2, ngen=50)
+algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=50)
