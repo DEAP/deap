@@ -218,7 +218,7 @@ sections. In order to setup a toolbox for an algorithm, you must register the
 desired operators under a specified names, refer to the documentation of the
 selected algorithm for more details. Once the toolbox is ready, it is time to
 launch the algorithm. The simple evolutionary algorithm takes 5 arguments, a
-*toolbox*, a *population*, a probability of mating each individual at each
+*population*, a *toolbox*, a probability of mating each individual at each
 generation (*cxpb*), a probability of mutating each individual at each
 generation (*mutpb*) and a number of generations to accomplish (*ngen*).
 
