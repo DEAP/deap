@@ -128,7 +128,7 @@ def main():
         hof.update(population)
         stats.update(population)
         
-        logger.logGeneration(gen=g, evals=len(population), stats=stats)
+        logger.logGeneration(gen=g, evals=len(invalid_ind), stats=stats)
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
