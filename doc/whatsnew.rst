@@ -3,8 +3,8 @@ What's New?
 ===========
 Here is a (incomplete) log of the changes made to DEAP over time. 
 
-Upcoming in 0.8
-================
+Release 0.8
+===========
 - Added forward compatibility to Python 3.2
 - Replaced :func:`~deap.algorithms.varSimple` and
   :func:`~deap.algorithms.varLambda` variation operators for the more specific
