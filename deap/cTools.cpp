@@ -22,6 +22,53 @@ public:
     unsigned int mCompIndex;
 };
 
+static PyObject* selTournament(PyObject *self, PyObject *args, PyObject *kwargs){
+    /* Args[0] / kwArgs['individuals'] : Individual list
+     * Args[1] / kwArgs['k'] : Number of individuals wanted in output
+     * Args[2] / kwArgs['tournsize'] : Tournament size
+     * Return : k selected individuals from input individual list
+     */
+    
+    //std::cout << "Boum 1" << std::endl;
+    
+    PyObject *lListIndv;
+    unsigned int k, lTournSize;
+    static char *lKwlist[] = {"individuals", "k", "tournsize", NULL};
+    PyArg_ParseTupleAndKeywords(args, kwargs, "Oii", lKwlist, &lListIndv, &k, &lTournSize);
+    
+    PyObject *lRandomModule = PyImport_ImportModule("random");
+    //std::cout << "Boum 3" << std::endl;
+    PyObject *lRandomChoiceFunc = PyObject_GetAttrString(lRandomModule, "choice");
+    //std::cout << "Boum 4" << std::endl;    
+    PyObject *lListSelect = PyList_New(0);
+    
+    PyObject *lCandidate, *lChallenger, *lCandidateFit, *lChallengerFit, *lTupleArgs;
+    lTupleArgs = Py_BuildValue("(O)", lListIndv);
+    for(unsigned int i=0; i < k; i++){
+        lCandidate = PyObject_Call(lRandomChoiceFunc, lTupleArgs, NULL);
+        //std::cout << "Boum 5" << std::endl;    
+        lCandidateFit = PyObject_GetAttrString(lCandidate, "fitness");
+        //std::cout << "Boum 6" << std::endl;    
+        for(unsigned int j=0; j < lTournSize-1; j++){
+            lChallenger = PyObject_Call(lRandomChoiceFunc, lTupleArgs, NULL);
+            //std::cout << "Boum 7" << std::endl;    
+            lChallengerFit = PyObject_GetAttrString(lChallenger, "fitness");
+            //std::cout << "Boum 8" << std::endl;    
+            if(PyObject_RichCompareBool(lChallengerFit, lCandidateFit, Py_GT)){
+                lCandidate = lChallenger;
+                lCandidateFit = lChallengerFit;
+            }
+            //std::cout << "Boum 9" << std::endl;    
+        }
+        PyList_Append(lListSelect, lCandidate);         
+        //std::cout << "Boum 10" << std::endl;    
+    }
+    
+    
+    
+    return lListSelect;
+}
+
 static bool crowdDistComp(std::pair<double, unsigned int> a, std::pair<double, unsigned int> b){
     return a.first < b.first;
 }
@@ -177,6 +224,8 @@ static PyObject* selNSGA2(PyObject *self, PyObject *args){
 static PyMethodDef cToolsMethods[] = {
     {"selNSGA2", selNSGA2, METH_VARARGS,
      "Select using NSGA II."},
+    {"selTournament", (PyCFunction)selTournament, METH_VARARGS | METH_KEYWORDS,
+     "Select using tournament."},
     {NULL, NULL, 0, NULL}        /* Sentinel (?!?) */
 };
 
