@@ -690,12 +690,10 @@ def mutTypedEphemeral(individual, mode):
     """
     if mode not in ["one", "all"]:
         raise ValueError("Mode must be one of \"one\" or \"all\"")
-    index = 0
     ephemerals_idx = []
-    for node in individual.iter:
+    for index,node in enumerate(individual.iter):
         if isinstance(node.root.obj, Ephemeral):
             ephemerals_idx.append(index)
-        index += 1
     
     if len(ephemerals_idx) > 0:
         if mode == "one":
