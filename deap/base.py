@@ -276,7 +276,7 @@ class Tree(list):
             return self
         
         def __eq__(self, other):
-            if isistance(other, self.__class__):
+            if isinstance(other, self.__class__):
                 return self.obj == other.obj
             else:
                 return False
