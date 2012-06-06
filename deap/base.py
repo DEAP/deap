@@ -276,7 +276,11 @@ class Tree(list):
             return self
         
         def __eq__(self, other):
-            return self.obj == other.obj
+            if isistance(other, self.__class__):
+                return self.obj == other.obj
+            else:
+                return False
+
         def __getattr__(self, attr):
             return getattr(self.obj, attr)
         def __call__(self, *args, **kargs):
