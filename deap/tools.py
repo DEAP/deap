@@ -1763,13 +1763,14 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
                      a particular position in the list goes. This defaults
                      to a ring migration.
     """
+    nbr_demes = len(populations)
     if migarray is None:
-        migarray = range(1, len(populations)) + [0]
+        migarray = range(1, nbr_demes) + [0]
     
-    immigrants = [[] for i in xrange(len(migarray))]
-    emigrants = [[] for i in xrange(len(migarray))]
+    immigrants = [[] for i in xrange(nbr_demes)]
+    emigrants = [[] for i in xrange(nbr_demes)]
 
-    for from_deme in xrange(len(migarray)):
+    for from_deme in xrange(nbr_demes):
         emigrants[from_deme].extend(selection(populations[from_deme], k))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
@@ -1778,19 +1779,11 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
             # Else select those who will be replaced
             immigrants[from_deme].extend(replacement(populations[from_deme], k))
 
-    mig_buf = emigrants[0]
-    for from_deme, to_deme in enumerate(migarray[1:]):
-        from_deme += 1  # Enumerate starts at 0
-
+    for from_deme, to_deme in enumerate(migarray):
         for i, immigrant in enumerate(immigrants[to_deme]):
             indx = populations[to_deme].index(immigrant)
             populations[to_deme][indx] = emigrants[from_deme][i]
-
-    to_deme = migarray[0]
-    for i, immigrant in enumerate(immigrants[to_deme]):
-        indx = populations[to_deme].index(immigrant)
-        populations[to_deme][indx] = mig_buf[i]
-    
+            
     
 if __name__ == "__main__":
     import doctest
