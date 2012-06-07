@@ -336,15 +336,27 @@ def genFull(pset, min_, max_, type_=__type__):
     def condition(max_depth):
         """Expression generation stops when the depth is zero."""
         return max_depth == 0
-    return _generate(pset, min_, max_, condition, type_)
+    return _generate(pset, min_, max_, condition, False, type_)
 
-def genGrow(pset, min_, max_, type_=__type__):
+def genGrow(pset, min_, max_, use_koza_grow_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
     between *min* and *max*.
     
     :param pset: A primitive set from wich to select primitives of the trees.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
+    :param use_koza_grow_: Flag for whether the 'grow' method works as defined
+                            by Koza in GPI (and as used in GPII, GPIII, and 
+                            probably GPIV---although it is not made entirely
+                            clear). If this flag is set to true then 
+                            individuals are grown with a minimum depth of 2.
+                            If not, then the minimum depth will be 1 (as
+                            an individual can be only a terminal). Irrespective
+                            of this flag, maximum depth of individuals will 
+                            range according to the values of :param min_: 
+                            and :param max_:. Note that if you wish to entirely
+                            replicate Koza's method then mindepth and maxdepth
+                            should be set to the same value.
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) no return type is enforced.
     :returns: A grown tree with leaves at possibly different depths.
@@ -354,9 +366,9 @@ def genGrow(pset, min_, max_, type_=__type__):
         it is randomly determined that a a node should be a terminal.
         """
         return max_depth == 0 or random.random() < pset.terminalRatio
-    return _generate(pset, min_, max_, condition, type_)
+    return _generate(pset, min_, max_, condition, use_koza_grow_, type_)
     
-def genRamped(pset, min_, max_, type_=__type__):
+def genRamped(pset, min_, max_, use_koza_grow_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
     the other half, the expression is generated with :func:`~deap.gp.genFull`.
@@ -364,16 +376,30 @@ def genRamped(pset, min_, max_, type_=__type__):
     :param pset: A primitive set from wich to select primitives of the trees.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
+    :param use_koza_grow_: Flag for whether the 'grow' method works as defined
+                            by Koza in GPI (and as used in GPII, GPIII, and 
+                            probably GPIV---although it is not made entirely
+                            clear). If this flag is set to true then 
+                            individuals are grown with a minimum depth of 2.
+                            If not, then the minimum depth will be 1 (as
+                            an individual can be only a terminal). Irrespective
+                            of this flag, maximum depth of individuals will 
+                            range according to the values of :param min_: 
+                            and :param max_:. Note that if you wish to entirely
+                            replicate Koza's method then mindepth and maxdepth
+                            should be set to the same value.
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) no return type is enforced.
     :returns: Either, a full or a grown tree.
     """
-    method = random.choice((genGrow, genFull))
-    return method(pset, min_, max_, type_)
+    if random.random() < 0.5:   # Random uniform choice between grow and full
+        return genGrow(pset, min_, max_, use_koza_grow_, type_)
+    else:
+        return genFull(pset, min_, max_, type_)
 
-def _generate(pset, min_, max_, condition, type_=__type__):
-    def genExpr(max_depth, type_):
-        if condition(max_depth):
+def _generate(pset, min_, max_, condition, use_koza_grow, type_=__type__):
+    def genExpr(max_depth, type_, do_not_choose_term = False):
+        if not do_not_choose_term and condition(max_depth):
             term = random.choice(pset.terminals[type_])
             expr = term()
         else:
@@ -383,7 +409,7 @@ def _generate(pset, min_, max_, condition, type_=__type__):
             expr.extend(args)
         return expr
     max_depth = random.randint(min_, max_)
-    expr = genExpr(max_depth, type_)
+    expr = genExpr(max_depth, type_, use_koza_grow)
     if not isinstance(expr, list):
         expr = [expr]
     return expr
