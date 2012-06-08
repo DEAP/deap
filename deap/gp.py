@@ -321,7 +321,6 @@ class PrimitiveTree(base.Tree):
         return new
 
 # Expression generation functions
-
 def genFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
@@ -333,10 +332,10 @@ def genFull(pset, min_, max_, type_=__type__):
                   :obj:`None` (default) no return type is enforced.
     :returns: A full tree with all leaves at the same depth.
     """
-    def condition(max_depth):
-        """Expression generation stops when the depth is zero."""
-        return max_depth == 0
-    return _generate(pset, min_, max_, condition, type_)
+    def condition(height, depth):
+        """Expression generation stops when the depth is equal to height."""
+        return depth == height
+    return generate(pset, min_, max_, condition, type_)
 
 def genGrow(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
@@ -349,12 +348,13 @@ def genGrow(pset, min_, max_, type_=__type__):
                   :obj:`None` (default) no return type is enforced.
     :returns: A grown tree with leaves at possibly different depths.
     """
-    def condition(max_depth):
-        """Expression generation stops when the depth is zero or when
-        it is randomly determined that a a node should be a terminal.
+    def condition(height, depth):
+        """Expression generation stops when the depth is equal to height 
+        or when it is randomly determined that a a node should be a terminal.
         """
-        return max_depth == 0 or random.random() < pset.terminalRatio
-    return _generate(pset, min_, max_, condition, type_)
+        return depth == height or \
+               (depth >= min_ and random.random() < pset.terminalRatio)
+    return generate(pset, min_, max_, condition, type_)
     
 def genRamped(pset, min_, max_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
@@ -371,19 +371,34 @@ def genRamped(pset, min_, max_, type_=__type__):
     method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
 
-def _generate(pset, min_, max_, condition, type_=__type__):
-    def genExpr(max_depth, type_):
-        if condition(max_depth):
+def generate(pset, min_, max_, condition, type_=__type__):
+    """Generate a Tree as a list of list. The tree is build
+    from the root to the leaves, and it stop growing when the
+    condition is fulfilled. 
+
+    :param pset: A primitive set from wich to select primitives of the trees.
+    :param min_: Minimum height of the produced trees.
+    :param max_: Maximum Height of the produced trees.
+    :param condition: The condition is a function that kes two arguments, 
+                      the height of the tree to build and the current 
+                      depth in the tree.
+    :param type_: The type that should return the tree when called, when
+                  :obj:`None` (default) no return type is enforced.
+    :returns: A grown tree with leaves at possibly different depths 
+              dependending on the condition function.
+    """
+    def genExpr(height, depth, type_):
+        if condition(height, depth):
             term = random.choice(pset.terminals[type_])
             expr = term()
         else:
             prim = random.choice(pset.primitives[type_])
             expr = [prim]
-            args = (genExpr(max_depth-1, arg) for arg in prim.args)
+            args = (genExpr(height, depth+1, arg) for arg in prim.args)
             expr.extend(args)
         return expr
-    max_depth = random.randint(min_, max_)
-    expr = genExpr(max_depth, type_)
+    height = random.randint(min_, max_)
+    expr = genExpr(height, 0, type_)
     if not isinstance(expr, list):
         expr = [expr]
     return expr
