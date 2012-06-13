@@ -315,7 +315,7 @@ def evaluate(expr, pset=None):
                      
     if not pset is None:
         try:
-            return eval(exprStr, pset.functions)
+            return eval(exprStr, dict(pset.functions))
         except MemoryError:
             _, _, traceback = sys.exc_info()
             raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -332,10 +332,10 @@ def evaluateADF(seq):
     """
     adfdict = {}
     for i, expr in enumerate(reversed(seq[1:])):
+        expr.pset.functions.update(adfdict)
         func = lambdify(expr.pset, expr)
         adfdict.update({expr.pset.__name__ : func})
-        for expr2 in reversed(seq[1:i+1]):
-            expr2.pset.functions.update(adfdict)
+        
     return adfdict
 
 def lambdify(pset, expr):
@@ -349,7 +349,7 @@ def lambdify(pset, expr):
     args = ",".join(arg for arg in pset.arguments)
     lstr = "lambda %s: %s" % (args, expr)
     try:
-        return eval(lstr, pset.functions)
+        return eval(lstr, dict(pset.functions))
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -358,7 +358,7 @@ def lambdify(pset, expr):
         "operators. See the DEAP documentation for more information. "
         "DEAP will now abort."), traceback
 
-def lambdifyList(expr):
+def lambdifyADF(expr):
     """Return a lambda function created from a list of trees. The first 
     element of the list is the main tree, and the following elements are
     automatically defined functions (ADF) that can be called by the first
