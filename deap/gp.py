@@ -24,6 +24,8 @@ import copy
 import random
 import sys
 
+from functools import partial
+from operator import eq,lt
 from collections import defaultdict
 
 ######################################
@@ -544,18 +546,17 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
         if arity_op2(node.arity):
             types2[node.ret].append(idx)
 
-    common_types = set(types1.keys()) - set(types2.keys())
+    common_types = set(types1.keys()).intersection(set(types2.keys()))
     
     if len(common_types) > 0:
-        type_ = random.choice(common_types)
-        
+        # Set does not support indexing
+        type_ = random.sample(common_types, 1)[0]
         index1 = random.choice(types1[type_])
         index2 = random.choice(types2[type_])
 
-        sub1 = ind1.searchSubtreeDF(index1)
-        sub2 = ind2.searchSubtreeDF(index2)
-        ind1.setSubtreeDF(index1, sub2)
-        ind2.setSubtreeDF(index2, sub1)
+        slice1 = ind1.searchSubtree(index1)
+        slice2 = ind2.searchSubtree(index2)
+        ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
 
     return ind1, ind2
 
