@@ -17,6 +17,9 @@ import random
 import operator
 import math
 
+import gc
+gc.disable()
+
 from deap import base
 from deap import creator
 from deap import gp
@@ -99,7 +102,7 @@ toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
-    func = toolbox.lambdify(expr=individual)
+    func = toolbox.lambdify(individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
     values = (x/10. for x in xrange(-10, 10))
@@ -107,7 +110,7 @@ def evalSymbReg(individual):
     diff = sum(map(diff_func, values))
     return diff,
 
-toolbox.register('lambdify', gp.lambdifyList)
+toolbox.register('lambdify', gp.lambdifyADF)
 toolbox.register('evaluate', evalSymbReg)
 toolbox.register('select', tools.selTournament, tournsize=3)
 toolbox.register('mate', gp.cxOnePoint)
