@@ -110,7 +110,7 @@ def evalSymbReg(individual):
 toolbox.register('lambdify', gp.lambdifyList)
 toolbox.register('evaluate', evalSymbReg)
 toolbox.register('select', tools.selTournament, tournsize=3)
-toolbox.register('mate', gp.cxUniformOnePoint)
+toolbox.register('mate', gp.cxOnePoint)
 toolbox.register('expr', gp.genFull, min_=1, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr)
 

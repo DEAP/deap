@@ -85,11 +85,12 @@ def evalSpambase(individual):
     
 toolbox.register("evaluate", evalSpambase)
 toolbox.register("select", tools.selTournament, tournsize=3)
-toolbox.register("mate", gp.cxTypedOnePoint)
+toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
-toolbox.register("mutate", gp.mutTypedUniform, expr=toolbox.expr_mut)
+toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
+    random.seed(10)
     pop = toolbox.population(n=100)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
