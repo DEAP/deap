@@ -17,9 +17,6 @@ import random
 import operator
 import math
 
-import gc
-gc.disable()
-
 from deap import base
 from deap import creator
 from deap import gp
