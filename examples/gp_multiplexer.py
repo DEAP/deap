@@ -74,12 +74,12 @@ def evalMultiplexer(individual):
 
 toolbox.register("evaluate", evalMultiplexer)
 toolbox.register("select", tools.selTournament, tournsize=7)
-toolbox.register("mate", gp.cxUniformOnePoint)
+toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
 
 def main():
-    random.seed(10)
+#    random.seed(10)
     pop = toolbox.population(n=40)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
