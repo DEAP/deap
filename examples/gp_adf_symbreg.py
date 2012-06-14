@@ -172,7 +172,7 @@ def main():
         
         logger.logGeneration(gen=g, evals=len(invalids), stats=stats)
     
-    print 'Best individual : ', gp.evaluate(hof[0][0]), hof[0].fitness
+    print 'Best individual : ', gp.stringify(hof[0][0]), hof[0].fitness
     
     return pop, stats, hof
     
