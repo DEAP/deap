@@ -26,7 +26,5 @@ Genetic Programming
 
 .. autofunction:: deap.gp.lambdify
 
-.. autofunction:: deap.gp.lambdifyList
-
 .. autoclass:: deap.gp.PrimitiveSetTyped
 	:members:
