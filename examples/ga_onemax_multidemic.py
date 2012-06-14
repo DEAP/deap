@@ -42,7 +42,7 @@ toolbox.register("mate", tools.cxTwoPoints)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("migrate", tools.migRing, k=5, selection=tools.selBest,
-    replacement=tools.selRandom)
+    replacement=random.sample)
 
 def main():
     random.seed(64)

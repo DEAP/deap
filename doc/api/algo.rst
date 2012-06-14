@@ -14,11 +14,11 @@ maintain stats of the evolution, an initialized
 the population, and/or an initialized :class:`~deap.tools.EvolutionLogger` to
 log what is happening during the evolution.
 
-.. autofunction:: deap.algorithms.eaSimple(toolbox, population, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaSimple(population, toolbox, cxpb, mutpb, ngen[, stats, halloffame, logger])
 
-.. autofunction:: deap.algorithms.eaMuPlusLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
 
-.. autofunction:: deap.algorithms.eaMuCommaLambda(toolbox, population, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
 
 .. autofunction:: deap.algorithms.eaGenerateUpdate(toolbox, ngen[, stats, halloffame, logger])
 
