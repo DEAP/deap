@@ -161,6 +161,7 @@ class Ephemeral(Terminal):
     """
     def __init__(self, func, ret = __type__):
         self.func = func
+        self.arity = 0
         Terminal.__init__(self, self.func(), ret)
         
 class EphemeralGenerator(object):
@@ -291,9 +292,8 @@ class PrimitiveSet(PrimitiveSetTyped):
 ######################################
 # GP Tree evaluation functions       #
 ######################################
-def evaluate(expr, pset=None):
-    """Evaluate the expression *expr* into a string if *pset* is None
-    or into Python code if *pset* is not None.
+def stringify(expr):
+    """Evaluate the expression *expr* into a string.
     """
     expr_str = ""
     stack = []
@@ -306,41 +306,32 @@ def evaluate(expr, pset=None):
                 break   # If stack is empty, all nodes should have been seen
             stack[-1][1].append(expr_str)
 
-    if not pset is None:
-        try:
-            return eval(expr_str, dict(pset.functions))
-        except MemoryError:
-            _, _, traceback = sys.exc_info()
-            raise MemoryError, ("DEAP : Error in tree evaluation :"
-            " Python cannot evaluate a tree with a height bigger than 90. "
-            "To avoid this problem, you should use bloat control on your "
-            "operators. See the DEAP documentation for more information. "
-            "DEAP will now abort."), traceback
-    else:
-        return expr_str
+    return expr_str
 
-def evaluateADF(seq):
-    """Evaluate a list of ADF and return a dict mapping the ADF name with its
-    lambda function.
+def evaluate(expr, pset):
+    """Evaluate the expression *expr* into Python code object.
     """
-    adfdict = {}
-    for i, expr in enumerate(reversed(seq[1:])):
-        expr.pset.functions.update(adfdict)
-        func = lambdify(expr.pset, expr)
-        adfdict.update({expr.pset.__name__ : func})
-        
-    return adfdict
+    expr_str = stringify(expr)
+    try:
+        return eval(expr_str, dict(pset.functions))
+    except MemoryError:
+        _, _, traceback = sys.exc_info()
+        raise MemoryError, ("DEAP : Error in tree evaluation :"
+        " Python cannot evaluate a tree with a height bigger than 90. "
+        "To avoid this problem, you should use bloat control on your "
+        "operators. See the DEAP documentation for more information. "
+        "DEAP will now abort."), traceback
 
-def lambdify(pset, expr):
+def lambdify(expr, pset):
     """Return a lambda function of the expression *expr*.
 
     .. note::
        This function is a stripped version of the lambdify
        function of sympy0.6.6.
     """
-    expr = evaluate(expr)
+    expr_str = stringify(expr)
     args = ",".join(arg for arg in pset.arguments)
-    lstr = "lambda %s: %s" % (args, expr)
+    lstr = "lambda %s: %s" % (args, expr_str)
     try:
         return eval(lstr, dict(pset.functions))
     except MemoryError:
@@ -357,10 +348,12 @@ def lambdifyADF(expr):
     automatically defined functions (ADF) that can be called by the first
     tree.
     """
-    adfdict = evaluateADF(expr)
-    expr[0].pset.functions.update(adfdict)   
-    return lambdify(expr[0].pset, expr[0])
-
+    adfdict = {}
+    for subexpr in reversed(expr):
+        subexpr.pset.functions.update(adfdict)
+        func = lambdify(subexpr, subexpr.pset)
+        adfdict.update({subexpr.pset.__name__ : func})
+    return func
 
 ######################################
 # GP Program generation functions    #
