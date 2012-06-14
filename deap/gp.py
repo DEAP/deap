@@ -509,21 +509,15 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
     :param termpb: The probability of chosing a terminal node (leaf).
     :returns: A tuple of two typed trees.
     
-    Since the node are strongly typed, the operator then make sure the type of
-    second node correspond to the type of the first node. If it doesn't, it
-    randomly selects another point in the second individual and try again. It
-    tries up to *5* times before giving up on the crossover.
+    When the nodes are strongly typed, the operator makes sure the
+    second node type corresponds to the first node type.
     
-    This operator takes another parameter *termpb*, which set the probability
-    to choose between a terminal or non-terminal crossover point. For
-    instance, as defined by Koza, non-terminal primitives are selected for 90%
-    of the crossover points, and terminals for 10%, so *termpb* should be set
-    to 0.1.
-    
-    .. note::
-       This crossover is subject to change for a more effective method
-       of selecting the crossover points.
+    The parameter *termpb* sets the probability to choose between a terminal
+    or non-terminal crossover point. For instance, as defined by Koza, non-
+    terminal primitives are selected for 90% of the crossover points, and
+    terminals for 10%, so *termpb* should be set to 0.1.
     """
+
     if len(ind1) < 2 or len(ind2) < 2:
         # No crossover on single node tree
         return ind1, ind2
@@ -587,9 +581,7 @@ def mutNodeReplacement(individual):
     attribute of the individual.
     
     :param individual: The normal or typed tree to be mutated.
-    :returns: A tuple of one normal/typed tree.
-    
-    This operator works on either normal and strongly typed trees.
+    :returns: A tuple of one tree.
     """
     if len(individual) < 2:
         return individual,
@@ -614,9 +606,7 @@ def mutEphemeral(individual, mode):
     :param individual: The normal or typed tree to be mutated.
     :param mode: A string to indicate to change ``"one"`` or ``"all"``
                  ephemeral constants.
-    :returns: A tuple of one normal/typed tree.
-    
-    This operator works on either normal and strongly typed trees.
+    :returns: A tuple of one tree.
     """
     if mode not in ["one", "all"]:
         raise ValueError("Mode must be one of \"one\" or \"all\"")
@@ -643,9 +633,7 @@ def mutInsert(individual):
     the new primitive has more than one child).
     
     :param individual: The normal or typed tree to be mutated.
-    :returns: A tuple of one normal/typed tree.
-    
-    This operator works on either normal or strongly typed trees.
+    :returns: A tuple of one tree.
     """
     pset = individual.pset
     index = random.randrange(len(individual))
@@ -678,8 +666,6 @@ def mutShrink(individual):
     
     :param individual: The tree to be shrinked.
     :returns: A tuple of one tree.
-    
-    This operator is not suitable for typed tree.
     """
     if individual.size < 3 or individual.height <= 2:
         return individual,       # We don't want to "shrink" the root
@@ -687,13 +673,13 @@ def mutShrink(individual):
     index = random.randint(1, individual.size-2)
     
     # Shrinking a terminal is useless
-    while individual.searchSubtreeDF(index).size == 1:
+    while individual.searchSubtree(index).size == 1:
         index = random.randint(1, individual.size-2)
 
-    deleted_node = individual.searchSubtreeDF(index)
+    deleted_node = individual.searchSubtree(index)
     repl_subtree_index = random.randint(1, len(deleted_node)-1)
 
-    individual.setSubtreeDF(index, deleted_node[repl_subtree_index])
+    individual.setSubtree(index, deleted_node[repl_subtree_index])
 
     return individual,
 
