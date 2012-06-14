@@ -660,29 +660,6 @@ def mutInsert(individual):
     return individual,
 
 
-def mutShrink(individual):
-    """This operator shrinks the *individual* by chosing randomly a branch and
-    replacing it with one of the branch's arguments (also randomly chosen).
-    
-    :param individual: The tree to be shrinked.
-    :returns: A tuple of one tree.
-    """
-    if individual.size < 3 or individual.height <= 2:
-        return individual,       # We don't want to "shrink" the root
-
-    index = random.randint(1, individual.size-2)
-    
-    # Shrinking a terminal is useless
-    while individual.searchSubtree(index).size == 1:
-        index = random.randint(1, individual.size-2)
-
-    deleted_node = individual.searchSubtree(index)
-    repl_subtree_index = random.randint(1, len(deleted_node)-1)
-
-    individual.setSubtree(index, deleted_node[repl_subtree_index])
-
-    return individual,
-
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
