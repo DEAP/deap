@@ -27,7 +27,7 @@ from deap import gp
 
 # Define new functions
 def safeDiv(left, right):
-    with numpy.errstate(divide='ignore'):
+    with numpy.errstate(divide='ignore',invalid='ignore'):
         x = numpy.divide(left, right)
         if isinstance(x, numpy.ndarray):
             x[numpy.isinf(x)] = 0
