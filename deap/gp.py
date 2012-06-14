@@ -103,6 +103,9 @@ class Primitive(object):
 
     def __call__(self, *args):
         return self.seq % args
+    
+    def toString(self, *args):
+        return self.seq % args
 
     def __repr__(self):
         return self.name
@@ -144,6 +147,9 @@ class Terminal(object):
     
     def __call__(self):
         return self
+    
+    def toString(self):
+        return str(self.value)
     
     def __repr__(self):
         return str(self.value)
@@ -289,35 +295,20 @@ def evaluate(expr, pset=None):
     """Evaluate the expression *expr* into a string if *pset* is None
     or into Python code if *pset* is not None.
     """
-    exprStr = ""
-    stackArgsCount = []
+    expr_str = ""
+    stack = []
     for node in expr:
-        exprStr += str(node)
-        if node.arity == 0:
-            # Terminal
-            try:
-                stackArgsCount[-1] -= 1
-                if stackArgsCount[-1] > 0:
-                    exprStr += ", " 
-            except IndexError:
-                # If we only have a terminal
-                break
-            while stackArgsCount[-1] == 0:
-                exprStr += ")"
-                stackArgsCount.pop()
-                if len(stackArgsCount) == 0:
-                    break
-                stackArgsCount[-1] -= 1
-                if stackArgsCount[-1] > 0:
-                    exprStr += ", "
-        else:
-            # Primitive
-            exprStr += "("
-            stackArgsCount.append(node.arity)
-                     
+        stack.append((node, []))
+        while len(stack[-1][1]) == stack[-1][0].arity:
+            expr_str = stack[-1][0].toString(*(stack[-1][1]))
+            stack.pop()
+            if len(stack) == 0:
+                break   # If stack is empty, all nodes should have been seen
+            stack[-1][1].append(expr_str)
+
     if not pset is None:
         try:
-            return eval(exprStr, dict(pset.functions))
+            return eval(expr_str, dict(pset.functions))
         except MemoryError:
             _, _, traceback = sys.exc_info()
             raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -326,7 +317,7 @@ def evaluate(expr, pset=None):
             "operators. See the DEAP documentation for more information. "
             "DEAP will now abort."), traceback
     else:
-        return exprStr
+        return expr_str
 
 def evaluateADF(seq):
     """Evaluate a list of ADF and return a dict mapping the ADF name with its
