@@ -89,7 +89,7 @@ class Primitive(object):
         
         >>> import operator
         >>> pr = Primitive(operator.mul, (int, int), int)
-        >>> pr("1", "2")
+        >>> pr.toString("1", "2")
         'mul(1, 2)'
     """    
         
@@ -100,9 +100,6 @@ class Primitive(object):
         self.ret = ret
         args = ", ".join(("%s",) * self.arity)
         self.seq = "%s(%s)" % (self.name, args)
-
-    def __call__(self, *args):
-        return self.seq % args
     
     def toString(self, *args):
         return self.seq % args
@@ -117,11 +114,11 @@ class Operator(Primitive):
     arguments, it returns an operator and its operands.
         
         >>> import operator
-        >>> op = Operator(operator.mul, '*' (int, int), int)
-        >>> op("1", "2")
+        >>> op = Operator(operator.mul, '*', (int, int), int)
+        >>> op.toString("1", "2")
         '(1 * 2)'
         >>> op2 = Operator(operator.neg, '-', (int,), int)
-        >>> op2(1)
+        >>> op2.toString(1)
         '-(1)'
     """
     def __init__(self, operator, symbol, args, ret = __type__):
@@ -144,9 +141,6 @@ class Terminal(object):
             self.value = terminal.__name__
         except AttributeError:
             self.value = terminal
-    
-    def __call__(self):
-        return self
     
     def toString(self):
         return str(self.value)
@@ -295,25 +289,25 @@ class PrimitiveSet(PrimitiveSetTyped):
 def stringify(expr):
     """Evaluate the expression *expr* into a string.
     """
-    expr_str = ""
+    string = ""
     stack = []
     for node in expr:
         stack.append((node, []))
         while len(stack[-1][1]) == stack[-1][0].arity:
-            expr_str = stack[-1][0].toString(*(stack[-1][1]))
-            stack.pop()
+            prim, args = stack.pop()
+            string = prim.toString(*args)
             if len(stack) == 0:
                 break   # If stack is empty, all nodes should have been seen
-            stack[-1][1].append(expr_str)
+            stack[-1][1].append(string)
 
-    return expr_str
+    return string
 
 def evaluate(expr, pset):
     """Evaluate the expression *expr* into Python code object.
     """
-    expr_str = stringify(expr)
+    string = stringify(expr)
     try:
-        return eval(expr_str, dict(pset.functions))
+        return eval(string, dict(pset.functions))
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -329,9 +323,9 @@ def lambdify(expr, pset):
        This function is a stripped version of the lambdify
        function of sympy0.6.6.
     """
-    expr_str = stringify(expr)
+    string = stringify(expr)
     args = ",".join(arg for arg in pset.arguments)
-    lstr = "lambda %s: %s" % (args, expr_str)
+    lstr = "lambda %s: %s" % (args, string)
     try:
         return eval(lstr, dict(pset.functions))
     except MemoryError:
@@ -417,12 +411,12 @@ def generate(pset, min_, max_, condition, type_=__type__):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param condition: The condition is a function that takes two arguments,
-    the height of the tree to build and the current
-    depth in the tree.
+                      the height of the tree to build and the current
+                      depth in the tree.
     :param type_: The type that should return the tree when called, when
-    :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) no return type is enforced.
     :returns: A grown tree with leaves at possibly different depths
-    dependending on the condition function.
+              dependending on the condition function.
     """
     expr = []
     height = random.randint(min_, max_)
@@ -431,7 +425,9 @@ def generate(pset, min_, max_, condition, type_=__type__):
         depth, type_ = stack.pop()
         if condition(height, depth):
             term = random.choice(pset.terminals[type_])
-            expr.append(term())
+            if isinstance(term, EphemeralGenerator):
+                term = term()
+            expr.append(term)
         else:
             prim = random.choice(pset.primitives[type_])
             expr.append(prim)
