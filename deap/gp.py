@@ -342,6 +342,7 @@ def lambdifyADF(expr):
     tree.
     """
     adfdict = {}
+    func = None
     for subexpr in reversed(expr):
         subexpr.pset.functions.update(adfdict)
         func = lambdify(subexpr, subexpr.pset)
@@ -593,7 +594,7 @@ def mutEphemeral(individual, mode):
     if mode not in ["one", "all"]:
         raise ValueError("Mode must be one of \"one\" or \"all\"")
     ephemerals_idx = []
-    for index,node in enumerate(individual):
+    for index, node in enumerate(individual):
         if isinstance(node, Ephemeral):
             ephemerals_idx.append(index)
     
