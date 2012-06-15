@@ -63,10 +63,8 @@ def evalSymbReg(individual):
 toolbox.register("evaluate", evalSymbReg)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", gp.cxOnePoint)
-#toolbox.decorate("mate", gp.staticDepthLimit(4))
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut)
-toolbox.decorate("mutate", gp.staticDepthLimit(5))
 
 def main():
     random.seed(318)
