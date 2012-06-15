@@ -155,7 +155,6 @@ class Ephemeral(Terminal):
     """
     def __init__(self, func, ret = __type__):
         self.func = func
-        self.arity = 0
         Terminal.__init__(self, self.func(), ret)
         
 class EphemeralGenerator(object):
