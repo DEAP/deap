@@ -568,16 +568,16 @@ def mutNodeReplacement(individual):
 
     index = random.randrange(1, len(individual))
     node = individual[index]
-    
+
     if node.arity == 0: # Terminal
-	term = random.choice(individual.pset.terminals[node.ret])
-	if isinstance(term, EphemeralGenerator):
-	    term = term()
+        term = random.choice(individual.pset.terminals[node.ret])
+        if isinstance(term, EphemeralGenerator):
+            term = term()
         individual[index] = term 
     else:   # Primitive
         listPrim = [p for p in individual.pset.primitives[node.ret] if p.args == node.args]
         individual[index] = random.choice(listPrim)
-    
+
     return individual,
 
 def mutEphemeral(individual, mode):
