@@ -133,7 +133,7 @@ def main():
     
     # Evaluate the entire population
     for ind in pop:
-    	ind.fitness.values = toolbox.evaluate(ind)
+        ind.fitness.values = toolbox.evaluate(ind)
 
     hof.update(pop)
     stats.update(pop)
