@@ -310,7 +310,7 @@ def evaluate(expr, pset):
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
-        " Python cannot evaluate a tree with a height bigger than 90. "
+        " Python cannot evaluate a tree higher than 90. "
         "To avoid this problem, you should use bloat control on your "
         "operators. See the DEAP documentation for more information. "
         "DEAP will now abort."), traceback
@@ -330,7 +330,7 @@ def lambdify(expr, pset):
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
-        " Python cannot evaluate a tree with a height bigger than 90. "
+        " Python cannot evaluate a tree higher than 90. "
         "To avoid this problem, you should use bloat control on your "
         "operators. See the DEAP documentation for more information. "
         "DEAP will now abort."), traceback
@@ -643,6 +643,67 @@ def mutInsert(individual):
     individual[slice_] = subtree
     return individual,
 
+
+######################################
+# GP bloat control decorators        #
+######################################   
+
+def staticDepthLimit(max_depth):
+    """Implement a static limit on the depth of a GP tree, as defined by Koza
+    in [Koza1989]. It may be used to decorate both crossover and mutation
+    operators. When an invalid (too high) child is generated, it is simply
+    replaced by one of its parents.
+    
+    This operator can be used to avoid memory errors occuring when the tree
+    gets higher than 90-95 levels (as Python puts a limit on the call stack
+    depth), because it ensures that no tree higher than *max_depth* will ever
+    be accepted in the population (except if it was generated at initialization
+    time).
+    
+    .. note::
+       If you want to reproduce the exact behavior intended by Koza, set
+       the *max_depth* param to 17.
+       
+    :param max_depth: The maximum depth allowed for an individual
+    :returns: A decorator that can be applied to a GP operator using 
+    :method:`~deap.tools.Toolbox.decorate`
+    
+    .. [Koza1989] J.R. Koza, Genetic Programming - On the Programming of 
+        Computers by Means of Natural Selection (MIT Press, 
+        Cambridge, MA, 1992)
+
+    """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            keep_inds = [copy.deepcopy(ind) for ind in args]
+            new_inds = func(*args, **kwargs)
+            for ind in new_inds:
+                if ind.height > max_depth:
+                    ind = random.choice(keep_inds)
+            return new_inds
+        return wrapper
+    return decorator
+    
+def staticSizeLimit(max_size):
+    """Implement a static limit on the size of a GP tree. It may be used to
+    decorate both crossover and mutation operators. When an invalid (too big)
+    child is generated, it is simply replaced by one of its parents.
+    
+    :param max_size: The maximum size (number of nodes) allowed for an 
+    individual
+    :returns: A decorator that can be applied to a GP operator using 
+    :method:`~deap.tools.Toolbox.decorate`
+    """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            keep_inds = [copy.deepcopy(ind) for ind in args]
+            new_inds = func(*args, **kwargs)
+            for ind in new_inds:
+                if len(ind) > max_size:
+                    ind = random.choice(keep_inds)
+            return new_inds
+        return wrapper
+    return decorator
 
 if __name__ == "__main__":
     import doctest
