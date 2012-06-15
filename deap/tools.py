@@ -1351,7 +1351,6 @@ def selTournament(individuals, k, tournsize):
             aspirant = random.choice(individuals)
             if aspirant.fitness > chosen[i].fitness:
                 chosen[i] = aspirant
-                
     return chosen
 
 def selRoulette(individuals, k):
@@ -1429,6 +1428,91 @@ def selTournamentDCD(individuals, k):
         chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
 
     return chosen
+    
+
+def selDoubleTournament(individuals, k, fit_tourn_size, size_tourn_size, do_fit_first):
+    """Tournament selection which use the size of the individuals in order
+    to discriminate good solutions. This kind of tournament is obviously
+    useless with fixed-length representation, but has been shown to
+    significantly reduce excessive growth of individuals, especially in GP,
+    where it can be used as a bloat control technique (see 
+    [Luke2002fighting]_). This selection operator implements the double 
+    tournament technique presented in this paper.
+    
+    The core principle is to use a normal tournament selection, but using a
+    special sample function to select aspirants, which is another tournament
+    based on the size of the individuals. To ensure that the selection
+    pressure is not too high, the size of the size tournament (the number
+    of candidates evaluated) can be a real number between 1 and 2. In this
+    case, the smaller individual among two will be selected with a probability
+    *size_tourn_size*/2. For instance, if *size_tourn_size* is set to 1.4,
+    then the smaller individual will have a 0.7 probability to be selected.
+    
+    .. note::
+        In GP, it has been shown that this operator produces better results
+        when it is combined with some kind of a depth limit.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param fit_tourn_size: The number of individuals participating in each
+    fitness tournament
+    :param size_tourn_size: The number of individuals participating in each
+    size tournament. This value can be interpreted the same way as a normal
+    tournament size (thus should be > 2), but can also be a real number 
+    in the range [1,2[, see above for details.
+    :param do_fit_first: Set this to True if the first tournament done should
+    be the fitness one (i.e. the fitness tournament producing aspirants for
+    the size tournament). Setting it to False will behaves as the opposite
+    (size tournament feeding fitness tournaments with candidates). It has been
+    shown that this parameter does not have a significant effect in most cases
+    (see [Luke2002fighting]_).
+    :returns: A list of selected individuals.
+    
+    .. [Luke2002fighting] Luke and Panait, 2002, Fighting bloat with 
+        nonparametric parsimony pressure
+    """
+    def _sizeTournament(pop, k, selectfunc):
+        chosen = []
+        while len(chosen) < k:
+            if size_tourn_size < 2:
+                # Select two individuals from the population
+                prob = size_tourn_size / 2.
+                ind1, ind2 = selectfunc(pop)[0], selectfunc(pop)[0]
+                s1, s2 = len(ind1), len(ind2)
+
+                # If size1 < size2 then ind1 is selected 
+                # with a probability of size_tourn_size/2
+                if s1 < s2:
+                    chosen.append(ind1 if random.random() < prob else ind2)
+                elif s1 > s2:
+                    chosen.append(ind2 if random.random() < prob else ind1)
+                else:
+                    chosen.append(random.choice((ind1, ind2)))
+            else:
+                chosen.append(selectfunc(pop)[0])
+                for j in xrange(size_tourn_size - 1):
+                    aspirant = selectfunc(pop)[0]
+                    if len(aspirant) > len(chosen[-1]):
+                        chosen[-1] = aspirant
+        return chosen
+    
+    def _fitTournament(pop, k, selectfunc):
+        chosen = []
+        for i in xrange(k):
+            chosen.append(selectfunc(pop)[0])
+            for j in xrange(fit_tourn_size - 1):
+                aspirant = selectfunc(pop)[0]
+                if aspirant.fitness > chosen[i].fitness:
+                    chosen[i] = aspirant                
+        return chosen
+    
+    randlist = lambda d: (random.choice(d),)
+    if do_fit_first:
+        tfit = partial(_fitTournament, k=1, selectfunc=randlist)
+        return _sizeTournament(individuals, k, tfit)
+    else: # do_size_first
+        tsize = partial(_sizeTournament, k=1, selectfunc=randlist)
+        return _fitTournament(individuals, k, tsize)
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
