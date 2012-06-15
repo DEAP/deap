@@ -146,7 +146,7 @@ def main():
         logger.logGeneration(gen="%d (gp)" % g, evals=eval_gp, stats=stats_gp)
 
     print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
-    print "Best individual GP is %s, %s" % (gp.evaluate(best_gp), best_gp.fitness.values)
+    print "Best individual GP is %s, %s" % (gp.stringify(best_gp), best_gp.fitness.values)
 
     return pop_ga, pop_gp, stats_ga, stats_gp, best_ga, best_gp
 
