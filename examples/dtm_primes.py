@@ -39,5 +39,5 @@ def main(upTo):
     
     print("Found " + str(len(listPrimes)) + " prime numbers between 3 and " + str(upTo))
     print("Computation time : " + str(time.time()-beginTime))
-	
+
 dtm.start(main, 45003)

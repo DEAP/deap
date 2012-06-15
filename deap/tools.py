@@ -733,7 +733,7 @@ def cxTwoPoints(ind1, ind2):
     cxpoint2 = random.randint(1, size - 1)
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
-    else:			# Swap the two cx points
+    else: # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
    
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
@@ -810,7 +810,7 @@ def cxPartialyMatched(ind1, ind2):
     cxpoint2 = random.randint(0, size - 1)
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
-    else:			# Swap the two cx points
+    else: # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
     
     # Apply crossover between cx points
@@ -1107,7 +1107,7 @@ def cxESTwoPoints(ind1, ind2):
     pt2 = random.randint(1, size - 1)
     if pt2 >= pt1:
         pt2 += 1
-    else:			# Swap the two cx points
+    else: # Swap the two cx points
         pt1, pt2 = pt2, pt1
    
     ind1[pt1:pt2], ind2[pt1:pt2] = ind2[pt1:pt2], ind1[pt1:pt2]     
