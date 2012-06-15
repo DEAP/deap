@@ -21,12 +21,11 @@ member of any individual.
 """
 
 import sys
-import copy
-import operator
-import functools
 
-from collections import deque, Sequence
-from itertools import izip, repeat, count
+from collections import Sequence
+from copy import deepcopy
+from functools import partial 
+from operator import mul, truediv
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
@@ -41,7 +40,7 @@ class Toolbox(object):
     """
 
     def __init__(self):
-        self.register("clone", copy.deepcopy)
+        self.register("clone", deepcopy)
         self.register("map", map)
 
     def register(self, alias, method, *args, **kargs):
@@ -73,7 +72,7 @@ class Toolbox(object):
         documentation. The :attr:`__dict__` attribute will also be updated
         with the original function's instance dictionnary, if any.
         """
-        pfunc = functools.partial(method, *args, **kargs)
+        pfunc = partial(method, *args, **kargs)
         pfunc.__name__ = alias
         pfunc.__doc__ = method.__doc__
         
@@ -170,11 +169,11 @@ class Fitness(object):
             self.values = values
         
     def getValues(self):
-        return tuple(map(operator.truediv, self.wvalues, self.weights))
+        return tuple(map(truediv, self.wvalues, self.weights))
             
     def setValues(self, values):
         try:
-            self.wvalues = tuple(map(operator.mul, values, self.weights))
+            self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
             _, _, traceback = sys.exc_info()
             raise TypeError, ("Both weights and assigned values must be a "
@@ -202,18 +201,12 @@ class Fitness(object):
         return not self.__lt__(other)
 
     def __le__(self, other):
-        if not other:                   # Protection against yamling
-            return False
         return self.wvalues <= other.wvalues
 
     def __lt__(self, other):
-        if not other:                   # Protection against yamling
-            return False
         return self.wvalues < other.wvalues
 
     def __eq__(self, other):
-        if not other:                   # Protection against yamling
-            return False
         return self.wvalues == other.wvalues
     
     def __ne__(self, other):
