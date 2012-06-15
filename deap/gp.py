@@ -24,9 +24,9 @@ import copy
 import random
 import sys
 
-from functools import partial
-from operator import eq,lt
 from collections import defaultdict
+from functools import partial
+from operator import eq, lt
 
 ######################################
 # GP Data structure                  #
@@ -569,7 +569,10 @@ def mutNodeReplacement(individual):
     node = individual[index]
     
     if node.arity == 0: # Terminal
-        individual[index] = random.choice(individual.pset.terminals[node.ret])()
+	term = random.choice(individual.pset.terminals[node.ret])
+	if isinstance(term, EphemeralGenerator):
+	    term = term()
+        individual[index] = term 
     else:   # Primitive
         listPrim = [p for p in individual.pset.primitives[node.ret] if p.args == node.args]
         individual[index] = random.choice(listPrim)
@@ -599,6 +602,7 @@ def mutEphemeral(individual, mode):
             ephemerals_idx = (random.choice(ephemerals_idx),)
 
         for i in ephemerals_idx:
+	    eph = individual[i]
             individual[i] =  Ephemeral(eph.func, eph.ret)
             
     return individual,
