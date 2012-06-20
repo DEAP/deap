@@ -14,11 +14,14 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import random
+import sys
 
 from deap import algorithms
 from deap import base
 from deap import creator
 from deap import tools
+
+sys.path.append("../ga")
 
 import sortingnetwork as sn
 INPUTS = 12

@@ -20,11 +20,13 @@ Genetic Programming
 .. autoclass:: deap.gp.Ephemeral
 	:members:
 
+.. autofunction:: deap.gp.stringify
+
 .. autofunction:: deap.gp.evaluate
 
-.. autofunction:: deap.gp.evaluateADF
-
 .. autofunction:: deap.gp.lambdify
+
+.. autofunction:: deap.gp.lambdifyADF
 
 .. autoclass:: deap.gp.PrimitiveSetTyped
 	:members:

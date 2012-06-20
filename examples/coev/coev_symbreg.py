@@ -14,11 +14,14 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import random
+import sys
 
 from deap import base
 from deap import creator
 from deap import gp
 from deap import tools
+
+sys.path.append("../gp")
 
 # gp_symbreg already defines some useful structures
 import gp_symbreg

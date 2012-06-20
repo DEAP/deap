@@ -114,7 +114,7 @@ def main(seed=None):
     return pop
         
 if __name__ == "__main__":
-    optimal_front = json.load(open("zdt1_front.json"))
+    optimal_front = json.load(open("pareto_front/zdt1_front.json"))
     # Use 500 of the 1000 points in the json file
     optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
     
