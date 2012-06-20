@@ -46,13 +46,13 @@ def main(extended=True, verbose=True):
     species = []
     
     stats = tools.Statistics(lambda ind: ind.fitness.values, n=TARGET_TYPE)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
     if verbose:
-        column_names = ["gen", "evals"] + stats.functions.keys()
+        column_names = ["gen", "species", "evals"] + stats.functions.keys()
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -83,7 +83,7 @@ def main(extended=True, verbose=True):
             stats.update(s, index=i)
             
             if verbose: 
-                logger.logGeneration(gen="%d.%d" % (g, i), evals=len(s), stats=stats, index=i)
+                logger.logGeneration(gen=g, species=i, evals=len(s), stats=stats, index=i)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
