@@ -20,9 +20,9 @@ Subcomponents.* section 4.2.3. A species is added each 100 generations.
 
 import random
 try:
-    import pylab
+    import matplotlib.pyplot as plt
 except ImportError:
-    pylab = False
+    plt = False
 
 from deap import algorithms
 from deap import tools
@@ -40,20 +40,20 @@ schematas = ("1##1###1###11111##1##1111#1##1###1#1111##111111##1#11#1#11######",
              "0##0###0###00000##0##0000#0##0###0#0000##001111##1#11#1#11######")
 
 toolbox = coev_coop_base.toolbox
-if pylab:
+if plt:
     toolbox.register("evaluate_nonoise", coev_coop_base.matchSetStrengthNoNoise)
 
 def main(extended=True, verbose=True):
     target_set = []
     
     stats = tools.Statistics(lambda ind: ind.fitness.values, n=NUM_SPECIES)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
     if verbose:
-        column_names = ["gen", "evals"] + stats.functions.keys()
+        column_names = ["gen", "species", "evals"] + stats.functions.keys()
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -70,7 +70,7 @@ def main(extended=True, verbose=True):
     # Init with random a representative for each species
     representatives = [random.choice(s) for s in species]
     
-    if pylab and extended:
+    if plt and extended:
         # We must save the match strength to plot them
         t1, t2, t3 = list(), list(), list()
     
@@ -88,7 +88,7 @@ def main(extended=True, verbose=True):
             stats.update(s, index=i, add=True)
             
             if verbose: 
-                logger.logGeneration(gen="%d.%d" % (g, i), evals=len(s), stats=stats, index=i)
+                logger.logGeneration(gen=g, species=i, evals=len(s), stats=stats, index=i)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
@@ -96,7 +96,7 @@ def main(extended=True, verbose=True):
             
             g += 1
         
-            if pylab and extended:
+            if plt and extended:
                 # Compute the match strength without noise for the
                 # representatives on the three schematas
                 t1.append(toolbox.evaluate_nonoise(representatives,
@@ -119,19 +119,19 @@ def main(extended=True, verbose=True):
             # print individuals without noise
             print "".join(str(x) for x, y in zip(r, noise) if y == "*")
     
-    if pylab and extended:
+    if plt and extended:
         # Do the final plotting
-        pylab.plot(t1, '-', color="k", label="Target 1")
-        pylab.plot(t2, '--', color="k", label="Target 2")
-        pylab.plot(t3, ':', color="k", label="Target 3")
+        plt.plot(t1, '-', color="k", label="Target 1")
+        plt.plot(t2, '--', color="k", label="Target 2")
+        plt.plot(t3, ':', color="k", label="Target 3")
         max_t = max(max(t1), max(t2), max(t3))
         for n in add_next:
-            pylab.plot([n, n], [0, max_t + 1], "--", color="k")
-        pylab.legend(loc="lower right")
-        pylab.axis([0, ngen, 0, max_t + 1])
-        pylab.xlabel("Generations")
-        pylab.ylabel("Number of matched bits")
-        pylab.show()
+            plt.plot([n, n], [0, max_t + 1], "--", color="k")
+        plt.legend(loc="lower right")
+        plt.axis([0, ngen, 0, max_t + 1])
+        plt.xlabel("Generations")
+        plt.ylabel("Number of matched bits")
+        plt.show()
     
 if __name__ == "__main__":
     main()

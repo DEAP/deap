@@ -21,9 +21,9 @@ removing species as stagnation occurs.
 
 import random
 try:
-    import pylab
+    import matplotlib.pyplot as plt
 except ImportError:
-    pylab = False
+    plt = False
 
 from deap import algorithms
 from deap import tools
@@ -52,13 +52,13 @@ def main(extended=True, verbose=True):
     species = []
     
     stats = tools.Statistics(lambda ind: ind.fitness.values, n=NUM_SPECIES)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", tools.mean)
+    stats.register("std", tools.std)
+    stats.register("min", min)
+    stats.register("max", max)
     
     if verbose:
-        column_names = ["gen", "evals"] + stats.functions.keys()
+        column_names = ["gen", "species", "evals"] + stats.functions.keys()
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -77,7 +77,7 @@ def main(extended=True, verbose=True):
     representatives = [random.choice(species[i]) for i in range(NUM_SPECIES)]
     best_fitness_history = [None] * IMPROVMENT_LENGTH
     
-    if pylab and extended:
+    if plt and extended:
         contribs = [[]]
         stag_gen = []
         collab = []
@@ -98,13 +98,13 @@ def main(extended=True, verbose=True):
             stats.update(s, index=j, add=True)
             
             if verbose: 
-                logger.logGeneration(gen="%d.%d" % (g, j), evals=len(s), stats=stats, index=j)
+                logger.logGeneration(gen=g, species=j, evals=len(s), stats=stats, index=j)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
             next_repr[i] = toolbox.get_best(s)[0]   # Best selection
             
-            if pylab and extended:
+            if plt and extended:
                 # Book keeping of the collaborative fitness
                 collab.append(next_repr[i].fitness.values[0])
             
@@ -121,7 +121,7 @@ def main(extended=True, verbose=True):
         except TypeError:
             diff = float("inf")
         
-        if pylab and extended:
+        if plt and extended:
             for (i, rep), j in zip(enumerate(representatives), species_index):
                 contribs[j].append((toolbox.evaluateContribution(representatives,
                     target_set, i)[0], g-1))
@@ -143,7 +143,7 @@ def main(extended=True, verbose=True):
             species.append(toolbox.species())
             species_index.append(last_index_added)
             representatives.append(random.choice(species[-1]))
-            if extended and pylab:
+            if extended and plt:
                 stag_gen.append(g-1)
                 contribs.append([])
 
@@ -152,25 +152,25 @@ def main(extended=True, verbose=True):
             # print final representatives without noise
             print "".join(str(x) for x, y in zip(r, noise) if y == "*")
     
-    if extended and pylab:      # Ploting of the evolution
-        line1, = pylab.plot(collab, "--", color="k")
+    if extended and plt:      # Ploting of the evolution
+        line1, = plt.plot(collab, "--", color="k")
         
         for con in contribs:
             try:
                 con, g = zip(*con)
-                line2, = pylab.plot(g, con, "-", color="k")
+                line2, = plt.plot(g, con, "-", color="k")
             except ValueError:
                 pass
         
-        axis = pylab.axis("tight")
+        axis = plt.axis("tight")
         
         for s in stag_gen:
-            pylab.plot([s, s], [0, axis[-1]], "--", color="k")
+            plt.plot([s, s], [0, axis[-1]], "--", color="k")
         
-        pylab.legend((line1, line2), ("Collaboration", "Contribution"), loc="center right")
-        pylab.xlabel("Generations")
-        pylab.ylabel("Fitness")
-        pylab.show()
+        plt.legend((line1, line2), ("Collaboration", "Contribution"), loc="center right")
+        plt.xlabel("Generations")
+        plt.ylabel("Fitness")
+        plt.show()
     
 if __name__ == "__main__":
     main()
