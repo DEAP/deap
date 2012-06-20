@@ -628,7 +628,7 @@ def mutInsert(individual):
     # it must accept the return value of the current node
     primitives = [p for p in pset.primitives[node.ret] if node.ret in p.args]
     
-    if len(availablePrim) == 0:
+    if len(primitives) == 0:
         return individual,
     
     new_node = random.choice(primitives)
