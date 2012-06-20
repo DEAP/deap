@@ -24,7 +24,7 @@ from deap import tools
 
 # gr*.json contains the distance map in list of list style in JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
-tsp = json.load(open("gr17.json", "r"))
+tsp = json.load(open("tsp/gr17.json", "r"))
 distance_map = tsp["DistanceMatrix"]
 IND_SIZE = tsp["TourSize"]
 

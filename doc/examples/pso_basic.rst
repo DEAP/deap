@@ -15,7 +15,7 @@ Modules
 
 Before writing functions and algorithms, we need to import some module from the standard library and from DEAP.
 
-.. literalinclude:: /code/examples/pso_basic.py
+.. literalinclude:: /code/examples/pso/pso_basic.py
    :lines: 16-23
 
 Representation
@@ -29,7 +29,7 @@ Finally, each particle keeps a reference to the best state in which it has been 
 
 This translates in DEAP by the following two lines of code :
 
-.. literalinclude:: /code/examples/pso_basic.py
+.. literalinclude:: /code/examples/pso/pso_basic.py
    :lines: 24-27
 
 Here we create two new objects in the :mod:`~deap.creator` space. First, we create a :class:`FitnessMax` object, 
@@ -50,13 +50,13 @@ initialization consist in generating a random position and a random speed for a 
 The next function create a particle and initialize its attributes, except for the attribute 
 :attr:`best`, which will be set only after evaluation :
 
-.. literalinclude:: /code/examples/pso_basic.py
+.. literalinclude:: /code/examples/pso/pso_basic.py
    :pyobject: generate
 
 The function :func:`updateParticle` first computes the speed, then limits the speed values between 
 ``smin`` and ``smax``, and finally computes the new particle position.
 
-.. literalinclude:: /code/examples/pso_basic.py
+.. literalinclude:: /code/examples/pso/pso_basic.py
    :pyobject: updateParticle
 
 The operators are registered in the toolbox with their parameters. The particle value at the 
@@ -66,7 +66,7 @@ limited in the range ``[-50, 50]`` through all the evolution.
 The evaluation function :func:`~deap.benchmarks.h1` is from [Knoek2003]_. The function is already 
 defined in the benchmarks module, so we can register it directly.
 
-.. literalinclude:: /code/examples/pso_basic.py
+.. literalinclude:: /code/examples/pso/pso_basic.py
    :lines: 49-53
 
 Algorithm
@@ -76,18 +76,16 @@ Once the operators are registered in the toolbox, we can fire up the algorithm b
 a new population, and then apply the original PSO algorithm. The variable `best` contains the best 
 particle ever found (it known as gbest in the original algorithm).
 
-.. literalinclude:: /code/examples/pso_basic.py
+.. literalinclude:: /code/examples/pso/pso_basic.py
    :pyobject: main
 
 Conclusion
 ==========
 
-The full PSO basic example can be found 
+The full PSO basic example can be found here : [`source code <code/pso/pso_basic.py>`_]. 
 
 This is a video of the algorithm in action, plotted with matplotlib_. 
 The red dot represents the best solution found so far.
-
-.. _here: http://code.google.com/p/deap/source/browse/examples/pso_basic.py
 
 .. _matplotlib: http://matplotlib.sourceforge.net/
 

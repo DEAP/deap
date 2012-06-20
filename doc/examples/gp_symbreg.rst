@@ -16,7 +16,7 @@ Creating the primitives set
 
 One of the most crucial aspect of a GP program is the choice of the primitives set. They should make good building blocks for the individuals so the evolution can succeed. In this problem, we use a classical set of primitives, which are basic arithmetic functions :
     
-.. literalinclude:: /code/examples/gp_symbreg.py
+.. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 27-41
     
 The redefinition of the division is made to protect it against a zero division error (which would crash the program). The other functions are simply a mapping from the Python :mod:`operator` module. The number following the function is the *arity* of the primitive, that is the number of entries it takes (this will be used by DTM to build the individuals from the primitives).
@@ -25,7 +25,7 @@ On the last line, we declare an :class:`~deap.gp.Ephemeral` constant. This is a 
 
 The second argument of :class:`~deap.gp.PrimitiveSet` is the number of inputs. Here, as we have only a one dimension regression problem, there is only one input, but it could have as many as you want. By default, those inputs are named "ARGx", where "x" is a number, but you can easily rename them :
     
-.. literalinclude:: /code/examples/gp_symbreg.py
+.. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 42
 
 Creator
@@ -33,7 +33,7 @@ Creator
 
 As any evolutionary program, symbolic regression needs (at least) two object types : an individual containing the genotype and a fitness. We can easily create them with the creator :
     
-.. literalinclude:: /code/examples/gp_symbreg.py
+.. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 44-45
 
 The first line creates the fitness object (this is a minimization problem, so the weight is negative). The `weights` argument must be an iterable of weights, even if there is only one fitness measure. The second line create the individual object itself. Very straightforward, we can see that it will be based upon a tree, to which we add two attributes : a fitness and the primitive set. If, for any reason, the user would want to add any other attribute (for instance, a file in which the individual will be saved), it would be as easy as adding this attribute of any type to this line. After this declaration, any individual produced will contain those wanted attributes.
@@ -44,7 +44,7 @@ Toolbox
 
 Now, we want to register some parameters specific to the evolution process. In DEAP, this is done through the toolbox : 
     
-.. literalinclude:: /code/examples/gp_symbreg.py
+.. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 47-67
 
 First, a toolbox instance is created (in some problem types like coevolution, you may consider creating more than one toolbox). Then, we can register any parameters. The first lines register how to create an individual (by calling gp.genRamped with the previously defined primitive set), and how to create the population (by repeating the individual initialization).
@@ -54,7 +54,7 @@ We may now introduce the evaluation function, which will receive an individual a
 .. warning::
     Even if the fitness only contains one measure, keep in mind that DEAP stores it as an iterable. Knowing that, you can understand why the evaluation function must return a tuple value (even if it is a 1-tuple) :
 
-    .. literalinclude:: /code/examples/gp_symbreg.py
+    .. literalinclude:: /code/examples/gp/gp_symbreg.py
         :pyobject: evalSymbReg
         :emphasize-lines: 9
         
@@ -82,13 +82,13 @@ Launching the evolution
 
 At this point, DEAP has all the information needed to begin the evolutionary process, but nothing has been initialized. We can start the evolution by creating the population and then call a pre-made algorithm, as eaSimple :
 
-.. literalinclude:: /code/examples/gp_symbreg.py
+.. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 69, 72-85
 
 
 The hall of fame is a specific structure which contains the *n* best individuals (here, the best one only). The first line set up the Python logger used by DEAP to provide information, warnings or errors about the evolution. Its level can be adjusted according to the desired verbosity level (see :mod:`logging`).
 
-The complete example : [`source code <code/gp_symbreg.py>`_].
+The complete example : [`source code <code/gp/gp_symbreg.py>`_].
 
 
 .. _refPapersSymbreg:

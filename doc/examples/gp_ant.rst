@@ -14,7 +14,7 @@ Primitives set used
 
 We use the standard primitives set for the Artificial Ant problem :
     
-.. literalinclude:: /code/examples/gp_ant.py
+.. literalinclude:: /code/examples/gp/gp_ant.py
    :lines: 147-153
 
 - ``if_food_ahead`` is a primitive which executes its first argument if there is food in front of the ant; else, it executes its second argument.
@@ -27,7 +27,7 @@ We use the standard primitives set for the Artificial Ant problem :
 
 Although those functions are obviously not already built-in in Python, it is very easy to define them : 
 
-.. literalinclude:: /code/examples/gp_ant.py
+.. literalinclude:: /code/examples/gp/gp_ant.py
    :lines: 59-72, 119-120
 
 Partial functions are a powerful feature of Python which allow to create functions on the fly. For more detailed information, please refer to the Python documentation of :func:`functools.partial`.
@@ -38,7 +38,7 @@ Evaluation function
 
 The evaluation function use an instance of a simulator class to evaluate the individual. Each individual is given 600 moves on the simulator map (obtained from an external file). The fitness of each individual corresponds to the number of pieces of food picked up. In this example, we are using a classical trail, the *Santa Fe trail*, in which there is 89 pieces of food. Therefore, a perfect individual would achieve a fitness of 89.
 
-.. literalinclude:: /code/examples/gp_ant.py
+.. literalinclude:: /code/examples/gp/gp_ant.py
    :pyobject: evalArtificialAnt
 
 Where `ant` is the instance of the simulator used. The :func:`~deap.gp.evaluate` function is a convenience one provided by DEAP and returning an executable Python program from a GP individual and its primitives function set.
@@ -49,12 +49,12 @@ Complete example
 
 Except for the simulator code (about 75 lines), the code does not fundamentally differ from the :ref:`Symbolic Regression example <symbreg>`. Note that as the problem is harder, improving the selection pressure by increasing the size of the tournament to 7 allows to achieve better performance.
     
-.. literalinclude:: /code/examples/gp_ant.py
+.. literalinclude:: /code/examples/gp/gp_ant.py
     :lines: 54-
 
 .. note:: The import of the Python standard library modules are not shown.
 
-[`source code <code/gp_ant.py>`_]
+[`source code <code/gp/gp_ant.py>`_]
 
 .. _refPapersAnt:
 

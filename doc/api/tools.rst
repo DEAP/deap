@@ -39,7 +39,6 @@ and genetic programming specific operators.
  :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutUniform`             
  :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutNodeReplacement`     
  ..                                          :func:`~deap.gp.mutEphemeral`           
- ..                                          :func:`~deap.gp.mutShrink`              
  ..                                          :func:`~deap.gp.mutInsert`
 =========================================== =========================================
 
@@ -110,8 +109,6 @@ Mutation
 .. autofunction:: deap.gp.mutNodeReplacement
 
 .. autofunction:: deap.gp.mutEphemeral
-
-.. autofunction:: deap.gp.mutShrink
 
 .. autofunction:: deap.gp.mutInsert
 
