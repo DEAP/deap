@@ -182,7 +182,6 @@ class PrimitiveSetTyped(object):
         self.functions = dict()
         self.terms_count = 0
         self.prims_count = 0
-        self.adfs_count = 0
         
         self.__name__ = name 
         self.ret = ret_type
