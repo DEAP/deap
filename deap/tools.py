@@ -897,7 +897,7 @@ def cxOrdered(ind1, ind2):
     a, b = random.sample(xrange(size), 2)
     if a > b:
         a, b = b, a
-    print a, b
+
     holes1, holes2 = [True]*size, [True]*size
     for i in range(size):
         if i < a or i > b:
