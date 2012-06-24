@@ -527,7 +527,7 @@ class EvolutionLogger(object):
     """File object indicating where the log is written. By default log is
     written in sys.stdout.
     """
-    def __init__(self, columns=["gen", "evals"], precision=4):
+    def __init__(self, columns=("gen", "evals"), precision=4):
         self.columns = tuple(columns)
         self.line = " ".join("{%s:<8}" % name for name in self.columns)        
         self.precision = "{0:.%if}" % precision
