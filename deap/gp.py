@@ -44,8 +44,8 @@ class PrimitiveTree(list):
     primitive. An arity of 0 is expected from terminals nodes.
     """
     def __init__(self, content):
-        self[:] = content
-    
+        list.__init__(self, content)
+
     def __deepcopy__(self, memo):
         new = self.__class__(self)
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
@@ -640,7 +640,7 @@ def mutInsert(individual):
     
     new_subtree[position:position+1] = individual[slice_]
     new_subtree.insert(0, new_node)
-    individual[slice_] = subtree
+    individual[slice_] = new_subtree
     return individual,
 
 
