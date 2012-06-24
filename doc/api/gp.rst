@@ -2,10 +2,10 @@ Genetic Programming
 ===================
 .. automodule:: deap.gp
 
-.. autoclass:: deap.gp.PrimitiveSet
+.. autoclass:: deap.gp.PrimitiveTree
 	:members:
 
-.. autoclass:: deap.gp.PrimitiveTree
+.. autoclass:: deap.gp.PrimitiveSet
 	:members:
 
 .. autoclass:: deap.gp.Primitive
