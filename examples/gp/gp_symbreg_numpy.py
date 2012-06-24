@@ -45,7 +45,7 @@ pset.addPrimitive(numpy.negative, 1)
 pset.addPrimitive(numpy.cos, 1)
 pset.addPrimitive(numpy.sin, 1)
 pset.addEphemeralConstant(lambda: random.randint(-1,1))
-pset.renameArguments({'ARG0' : 'x'})
+pset.renameArguments(ARG0='x')
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)

@@ -191,16 +191,16 @@ class PrimitiveSetTyped(object):
             self.arguments.append(prefix + ("%s" % i))
             PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type_)
             
-    def renameArguments(self, new_args):
-        """Rename function arguments with new arguments name *new_args*.
+    def renameArguments(self, **kargs):
+        """Rename function arguments with new names from *kargs*.
         """
         for i, argument in enumerate(self.arguments):
-            if argument in new_args:
-                self.arguments[i] = new_args[argument]
+            if argument in kargs:
+                self.arguments[i] = kargs[argument]
         for terminals in self.terminals.itervalues():
             for terminal in terminals:
-                if isinstance(terminal, Terminal) and terminal.value in new_args:
-                    terminal.value = new_args[terminal.value]
+                if isinstance(terminal, Terminal) and terminal.value in kargs:
+                    terminal.value = kargs[terminal.value]
 
     def addPrimitive(self, primitive, in_types, ret_type, symbol=None):
         """Add a primitive to the set. 
