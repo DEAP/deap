@@ -567,15 +567,16 @@ def mutNodeReplacement(individual):
 
     index = random.randrange(1, len(individual))
     node = individual[index]
+    pset = individual.pset
 
     if node.arity == 0: # Terminal
-        term = random.choice(individual.pset.terminals[node.ret])
+        term = random.choice(pset.terminals[node.ret])
         if isinstance(term, EphemeralGenerator):
             term = term()
         individual[index] = term 
     else:   # Primitive
-        listPrim = [p for p in individual.pset.primitives[node.ret] if p.args == node.args]
-        individual[index] = random.choice(listPrim)
+        prims = [p for p in pset.primitives[node.ret] if p.args == node.args]
+        individual[index] = random.choice(prims)
 
     return individual,
 
