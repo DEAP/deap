@@ -71,7 +71,7 @@ pset.addEphemeralConstant(lambda: random.randint(-1, 1))
 pset.addADF(adfset0)
 pset.addADF(adfset1)
 pset.addADF(adfset2)
-pset.renameArguments({"ARG0" : "x"})
+pset.renameArguments(ARG0='x')
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("ADF0", gp.PrimitiveTree, pset=adfset0)
