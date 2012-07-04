@@ -682,9 +682,9 @@ def staticDepthLimit(max_depth):
         def wrapper(*args, **kwargs):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = func(*args, **kwargs)
-            for ind in new_inds:
+            for i, ind in enumerate(new_inds):
                 if ind.height > max_depth:
-                    ind = random.choice(keep_inds)
+                    new_inds[i] = random.choice(keep_inds)
             return new_inds
         return wrapper
     return decorator
@@ -703,9 +703,9 @@ def staticSizeLimit(max_size):
         def wrapper(*args, **kwargs):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = func(*args, **kwargs)
-            for ind in new_inds:
+            for i, ind in enumerate(new_inds):
                 if len(ind) > max_size:
-                    ind = random.choice(keep_inds)
+                    new_inds[i] = random.choice(keep_inds)
             return new_inds
         return wrapper
     return decorator
