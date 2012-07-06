@@ -67,15 +67,15 @@ def varAnd(population, toolbox, cxpb, mutpb):
     offspring = [toolbox.clone(ind) for ind in population]
     
     # Apply crossover and mutation on the offspring
-    for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+    for i in range(0, len(offspring), 2):
         if random.random() < cxpb:
-            toolbox.mate(ind1, ind2)
-            del ind1.fitness.values, ind2.fitness.values
+            offspring[i], offspring[i+1] = toolbox.mate(offspring[i], offspring[i+1])
+            del offspring[i].fitness.values, offspring[i+1].fitness.values
     
-    for ind in offspring:
+    for i in range(len(offspring)):
         if random.random() < mutpb:
-            toolbox.mutate(ind)
-            del ind.fitness.values
+            offspring[i], = toolbox.mutate(offspring[i])
+            del offspring[i].fitness.values
     
     return offspring
 
@@ -215,12 +215,12 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
-            toolbox.mate(ind1, ind2)
+            ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             offspring.append(ind1)
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
-            toolbox.mutate(ind)
+            ind, = toolbox.mutate(ind)
             del ind.fitness.values
             offspring.append(ind)
         else:                           # Apply reproduction
