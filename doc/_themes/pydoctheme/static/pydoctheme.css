@@ -14,7 +14,7 @@ div.related {
 }
 
 div.related a:hover {
-    color: #0095C4;
+    color: #41cdce;
 }
 
 div.related:first-child {
@@ -42,7 +42,7 @@ div.sphinxsidebarwrapper > ul > li > ul > li {
 }
 
 div.sphinxsidebar a:hover {
-    color: #0095C4;
+    color: #41cdce;
 }
 
 div.sphinxsidebar input {
@@ -94,15 +94,15 @@ div.body div.seealso {
 }
 
 div.body a {
-    color: #00608f;
+    color: #167171;
 }
 
 div.body a:visited {
-    color: #30306f;
+    color: #f38b28;
 }
 
 div.body a:hover {
-    color: #00B0E4;
+    color: #41cdce;
 }
 
 tt, pre {
@@ -166,5 +166,5 @@ div.footer {
 }
 
 div.footer a:hover {
-    color: #0095C4;
+    color: #41cdce;
 }
