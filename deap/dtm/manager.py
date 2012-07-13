@@ -1056,6 +1056,9 @@ class Control(object):
             listTasks.append(task)
             listTids.append(task.tid)
 
+        if len(listTids) == 0:
+            return []
+
         if self.traceMode:
             self.traceLock.acquire()
             newTaskElem = etree.SubElement(cThread.xmlTrace, "event",
@@ -1148,6 +1151,9 @@ class Control(object):
 
             listTasks.append(task)
             listTids.append(task.tid)
+
+        if len(listTids) == 0:
+            return []
 
         resultKey = listTids[0]
 
