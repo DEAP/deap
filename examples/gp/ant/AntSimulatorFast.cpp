@@ -367,6 +367,8 @@ PyTypeObject AntSimulatorWrapper_Type = {
 PyObject* progn(PyObject *self, PyObject *args){
     for(Py_ssize_t i = 0; i < PyTuple_Size(args); i++)
         PyObject_CallFunctionObjArgs(PyTuple_GET_ITEM(args, i), NULL);
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 static PyMethodDef AntC_functions[] = {
