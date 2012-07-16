@@ -51,6 +51,33 @@ class PrimitiveTree(list):
         new.__dict__.update(copy.deepcopy(self.__dict__, memo))
         return new
 
+    def __setitem__(self, key, val):
+        # Check for most common errors
+        # Does NOT check for STGP constraints
+        if isinstance(key, slice):
+            if (key.start >= len(self)):
+                raise IndexError, "Invalid slice object (try to assign a %s"\
+                    " in a tree of size %d). Even if this is allowed by the"\
+                    " list object slice setter, this should not be done in"\
+                    " the PrimitiveTree context, as this may lead to an"\
+                    " unpredictable behavior for searchSubtree or evaluate."\
+                     % (key, len(self))
+            total = val[0].arity
+            for node in val[1:]:
+                total += node.arity - 1
+            if total != 0:
+                raise ValueError, "Invalid slice assignation : insertion of"\
+                    " an incomplete subtree is not allowed in PrimitiveTree."\
+                    " A tree is defined as incomplete when some nodes cannot"\
+                    " be mapped to any position in the tree, considering the"\
+                    " primitives' arity. For instance, the tree [sub, 4, 5,"\
+                    " 6] is incomplete if the arity of sub is 2, because it"\
+                    " would produce an orphan node (the 6)."
+        elif val.arity != self[key].arity:
+            raise ValueError, "Invalid node replacement with a node of a"\
+                    " different arity."
+        list.__setitem__(self, key, val)
+
     @property
     def height(self):
         """Return the height of the tree, or the depth of the
