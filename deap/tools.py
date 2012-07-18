@@ -1346,11 +1346,8 @@ def selTournament(individuals, k, tournsize):
     """
     chosen = []
     for i in xrange(k):
-        chosen.append(random.choice(individuals))
-        for j in xrange(tournsize - 1):
-            aspirant = random.choice(individuals)
-            if aspirant.fitness > chosen[i].fitness:
-                chosen[i] = aspirant
+        aspirants = selRandom(individuals, tournsize)
+        chosen.append(max(aspirants, key=attrgetter("fitness")))
     return chosen
 
 def selRoulette(individuals, k):
