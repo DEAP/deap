@@ -1427,7 +1427,7 @@ def selTournamentDCD(individuals, k):
     return chosen
     
 
-def selDoubleTournament(individuals, k, fit_tourn_size, size_tourn_size, do_fit_first):
+def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_first):
     """Tournament selection which use the size of the individuals in order
     to discriminate good solutions. This kind of tournament is obviously
     useless with fixed-length representation, but has been shown to
@@ -1451,13 +1451,12 @@ def selDoubleTournament(individuals, k, fit_tourn_size, size_tourn_size, do_fit_
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
-    :param fit_tourn_size: The number of individuals participating in each
+    :param fitness_size: The number of individuals participating in each
     fitness tournament
-    :param size_tourn_size: The number of individuals participating in each
-    size tournament. This value can be interpreted the same way as a normal
-    tournament size (thus should be > 2), but can also be a real number 
-    in the range [1,2[, see above for details.
-    :param do_fit_first: Set this to True if the first tournament done should
+    :param parsimony_size: The number of individuals participating in each
+    size tournament. This value has to be a real number
+    in the range [1,2], see above for details.
+    :param fitness_first: Set this to True if the first tournament done should
     be the fitness one (i.e. the fitness tournament producing aspirants for
     the size tournament). Setting it to False will behaves as the opposite
     (size tournament feeding fitness tournaments with candidates). It has been
@@ -1468,47 +1467,40 @@ def selDoubleTournament(individuals, k, fit_tourn_size, size_tourn_size, do_fit_
     .. [Luke2002fighting] Luke and Panait, 2002, Fighting bloat with 
         nonparametric parsimony pressure
     """
-    def _sizeTournament(pop, k, selectfunc):
-        chosen = []
-        while len(chosen) < k:
-            if size_tourn_size < 2:
-                # Select two individuals from the population
-                prob = size_tourn_size / 2.
-                ind1, ind2 = selectfunc(pop)[0], selectfunc(pop)[0]
-                s1, s2 = len(ind1), len(ind2)
+    assert (1 <= parsimony_size <= 2), "Parsimony tournament size has to be in the range [1, 2]."
 
-                # If size1 < size2 then ind1 is selected 
-                # with a probability of size_tourn_size/2
-                if s1 < s2:
-                    chosen.append(ind1 if random.random() < prob else ind2)
-                elif s1 > s2:
-                    chosen.append(ind2 if random.random() < prob else ind1)
-                else:
-                    chosen.append(random.choice((ind1, ind2)))
-            else:
-                chosen.append(selectfunc(pop)[0])
-                for j in xrange(size_tourn_size - 1):
-                    aspirant = selectfunc(pop)[0]
-                    if len(aspirant) > len(chosen[-1]):
-                        chosen[-1] = aspirant
-        return chosen
-    
-    def _fitTournament(pop, k, selectfunc):
+    def _sizeTournament(individuals, k, select):
         chosen = []
         for i in xrange(k):
-            chosen.append(selectfunc(pop)[0])
-            for j in xrange(fit_tourn_size - 1):
-                aspirant = selectfunc(pop)[0]
-                if aspirant.fitness > chosen[i].fitness:
-                    chosen[i] = aspirant                
+                # Select two individuals from the population
+            # The first individual has to be the shortest
+            prob = parsimony_size / 2.
+            ind1, ind2 = select(individuals, k=2)
+
+            if len(ind1) > len(ind2):
+                ind1, ind2 = ind2, ind1
+            elif len(ind1) == len(ind2):
+                # random selection in case of a tie
+                prob = 0.5
+
+            # Since size1 <= size2 then ind1 is selected
+            # with a probability prob
+                    chosen.append(ind1 if random.random() < prob else ind2)
+
         return chosen
     
-    randlist = lambda d: (random.choice(d),)
-    if do_fit_first:
-        tfit = partial(_fitTournament, k=1, selectfunc=randlist)
+    def _fitTournament(individuals, k, select):
+        chosen = []
+        for i in xrange(k):
+            aspirants = select(individuals, k=fitness_size)
+            chosen.append(max(aspirants, key=attrgetter("fitness")))
+        return chosen
+    
+    if fitness_first:
+        tfit = partial(_fitTournament, select=selRandom)
         return _sizeTournament(individuals, k, tfit)
-    else: # do_size_first
-        tsize = partial(_sizeTournament, k=1, selectfunc=randlist)
+    else:
+        tsize = partial(_sizeTournament, select=selRandom)
         return _fitTournament(individuals, k, tsize)
 
 ######################################
