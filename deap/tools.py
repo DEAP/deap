@@ -1472,7 +1472,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
     def _sizeTournament(individuals, k, select):
         chosen = []
         for i in xrange(k):
-                # Select two individuals from the population
+            # Select two individuals from the population
             # The first individual has to be the shortest
             prob = parsimony_size / 2.
             ind1, ind2 = select(individuals, k=2)
@@ -1485,7 +1485,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
             # Since size1 <= size2 then ind1 is selected
             # with a probability prob
-                    chosen.append(ind1 if random.random() < prob else ind2)
+            chosen.append(ind1 if random.random() < prob else ind2)
 
         return chosen
     
