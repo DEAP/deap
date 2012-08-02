@@ -178,7 +178,9 @@ class Fitness(object):
             _, _, traceback = sys.exc_info()
             raise TypeError, ("Both weights and assigned values must be a "
             "sequence of numbers when assigning to values of "
-            "%r." % self.__class__, ), traceback
+            "%r. Currently assigning value(s) %r of %r to a fitness with "
+            "weights %s."
+            % (self.__class__, values, type(values), self.weights)), traceback
             
     def delValues(self):
         self.wvalues = ()
