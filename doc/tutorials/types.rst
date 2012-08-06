@@ -40,6 +40,8 @@ Here is a guide on how to create some of those
 individuals using the :mod:`~deap.creator` and initializing them using a
 :class:`~deap.base.Toolbox`.
 
+.. _list-of-floats:
+
 List of Floats
 ++++++++++++++
 The first individual created will be a simple list containing floats. In order
@@ -68,6 +70,8 @@ or :class:`numpy.ndarray` as following.
 The type inheriting from array needs a *typecode* on initialization just as
 the original class.
 
+.. _permutation:
+
 Permutation
 +++++++++++
 An individual for the permutation representation is almost similar to the
@@ -90,6 +94,8 @@ function.
 Calling :func:`toolbox.individual` will readily return a complete individual
 that is a permutation of the integers ``0`` to ``IND_SIZE`` with a minimizing
 single objective fitness attribute.
+
+.. _arithmetic-expr:
 
 Arithmetic Expression
 +++++++++++++++++++++
@@ -148,6 +154,8 @@ arguments.
 Calling :func:`toolbox.individual` will readily return a complete particle
 with a speed vector and a maximizing two objectives fitness attribute.
 
+.. _funky:
+
 A Funky One
 +++++++++++
 Supposing your problem have very specific needs. It is also possible to build
@@ -161,7 +169,9 @@ alternating integers and floating point numbers, using the
 Calling :func:`toolbox.individual` will readily return a complete individual
 of the form ``[int float int float ... int float]`` with a maximizing two
 objectives fitness attribute.
-	
+
+.. _population:
+
 Population
 ----------
 Population are much like individuals, instead of being initialized with

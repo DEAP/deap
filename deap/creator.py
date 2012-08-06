@@ -132,6 +132,9 @@ def create(name, base, **kargs):
             
             def __init__(self):
                 self.bar = dict()
+
+    The :ref:`creating-types` tutorial gives more examples of the creator
+    usage.
     """
     dict_inst = {}
     dict_cls = {}

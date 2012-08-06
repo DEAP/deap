@@ -37,6 +37,10 @@ class Toolbox(object):
     arguments, this method defaults to the :func:`map` function. You may
     populate the toolbox with any other function by using the
     :meth:`~deap.base.Toolbox.register` method.
+
+    Concrete usages of the toolbox are shown for initialization in the
+    :ref:`creating-types` tutorial and for tools container in the
+    :ref:`next-step` tutorial.
     """
 
     def __init__(self):
@@ -126,6 +130,9 @@ class Fitness(object):
     can be made between fitnesses of different size, if the fitnesses are
     equal until the extra elements, the longer fitness will be superior to the
     shorter.
+
+    Different types of fitnesses are created in the :ref:`creating-types`
+    tutorial.
 
     .. note::
        When comparing fitness values that are **minimized**, ``a > b`` will
