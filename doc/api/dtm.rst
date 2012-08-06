@@ -3,6 +3,9 @@
 Distributed Task Manager Overview
 =================================
 
+.. deprecated:: 0.9
+   DTM will be removed in version 1.0. Please consider using `SCOOP <http://scoop.googlecode.com>`_ instead for distributing your evolutionnary algorithms or other software.
+
 DTM is a distributed task manager which works over many communication layers. Currently, all modern MPI implementations are supported through `mpi4py <http://code.google.com/p/mpi4py/>`_, and an experimental TCP backend is available.
 
 .. warning::
