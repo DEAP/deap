@@ -60,6 +60,7 @@ def initRepeat(container, func, n):
         ...                                    # doctest: +NORMALIZE_WHITESPACE
         [0.4761..., 0.6302...]
 
+    See the :ref:`list-of-floats` and :ref:`population` tutorials for more examples.
     """
     return container(func() for _ in xrange(n))
 
@@ -84,6 +85,8 @@ def initIterate(container, generator):
         >>> initIterate(list, gen_idx)
         [4, 5, 3, 6, 0, 9, 2, 7, 1, 8]
 
+    See the :ref:`permutation` and :ref:`arithmetic-expr` tutorials for
+    more examples.
     """
     return container(generator())
 
@@ -106,6 +109,7 @@ def initCycle(container, seq_func, n=1):
         >>> initCycle(list, func_seq, n=2)
         [1, 'a', 3, 1, 'a', 3]
 
+    See the :ref:`funky` tutorial for an example.
     """
     return container(func() for _ in xrange(n) for func in seq_func)
 
