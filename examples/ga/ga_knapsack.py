@@ -67,6 +67,7 @@ def cxSet(ind1, ind2):
     temp = set(ind1)                # Used in order to keep type
     ind1 &= ind2                    # Intersection (inplace)
     ind2 ^= temp                    # Symmetric Difference (inplace)
+    return ind1, ind2
     
 def mutSet(individual):
     """Mutation that pops or add an element."""
@@ -75,6 +76,7 @@ def mutSet(individual):
             individual.remove(random.choice(sorted(tuple(individual))))
     else:
         individual.add(random.randrange(NBR_ITEMS))
+    return individual,
 
 toolbox.register("evaluate", evalKnapsack)
 toolbox.register("mate", cxSet)
