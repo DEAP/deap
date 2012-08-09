@@ -224,7 +224,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
             del ind.fitness.values
             offspring.append(ind)
         else:                           # Apply reproduction
-            offspring.append(random.choice(population))
+            offspring.append(toolbox.clone(random.choice(population)))
     
     return offspring
 
