@@ -51,13 +51,13 @@ def mutNetwork(individual, dimension, mutpb, addpb, delpb, indpb):
     if random.random() < delpb:
         index = random.randrange(len(individual))
         del individual[index]
-    return individual
+    return individual,
 
 def mutParasite(individual, indmut, indpb):
     for i in individual:
         if random.random() < indpb:
             indmut(i)
-    return individual
+    return individual,
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
