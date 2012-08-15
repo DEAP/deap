@@ -48,6 +48,10 @@ class Strategy(object):
     |                |                           | keep from the              |
     |                |                           | lambda children (integer). |
     +----------------+---------------------------+----------------------------+
+    | ``cmatrix``    | ``identity(N)``           | The initial covariance     |
+    |                |                           | matrix of the distribution |
+    |                |                           | that will be sampled.      |
+    +----------------+---------------------------+----------------------------+
     | ``weights``    | ``"superlinear"``         | Decrease speed, can be     |
     |                |                           | ``"superlinear"``,         |
     |                |                           | ``"linear"`` or            |
@@ -84,12 +88,16 @@ class Strategy(object):
         self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) + \
                                       1. / (21. * self.dim**2))
         
-        self.B = numpy.identity(self.dim)
-        self.C = numpy.identity(self.dim)
-        self.diagD = numpy.ones(self.dim)
+        self.C = self.params.get("cmatrix", numpy.identity(self.dim))
+        self.diagD, self.B = numpy.linalg.eigh(self.C)
+
+        indx = numpy.argsort(self.diagD)
+        self.diagD = self.diagD[indx]**0.5
+        self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
         
-        self.cond = 1
+        self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
+        
         self.lambda_ = self.params.get("lambda_", int(4 + 3 * log(self.dim)))
         self.update_count = 0
         self.computeParams(self.params)
