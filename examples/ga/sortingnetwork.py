@@ -47,20 +47,24 @@ class SortingNetwork(list):
         
         if wire1 > wire2:
             wire1, wire2 = wire2, wire1
+
+        index = 0
+        for level in reversed(self):
+            if checkConflict(level, wire1, wire2):
+                break
+            index -= 1
         
-        try:
-            last_level = self[-1]
-        except IndexError:
-            # Empty network, create new level and connector
+        if index == 0:
             self.append([(wire1, wire2)])
-            return
-        
-        for wires in last_level:
+        else:
+            self[index].append((wire1, wire2))
+
+    def checkConflict(level, wire1, wire2):
+        """Check if a connection between `wire1` and `wire2` can be 
+        added on this `level`."""
+        for wires in level:
             if wires[1] >= wire1 and wires[0] <= wire2:
-                self.append([(wire1, wire2)])
-                return
-        
-        last_level.append((wire1, wire2))
+                return True
     
     def sort(self, values):
         """Sort the values in-place based on the connectors in the network."""
