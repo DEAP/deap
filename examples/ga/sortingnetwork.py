@@ -50,7 +50,7 @@ class SortingNetwork(list):
 
         index = 0
         for level in reversed(self):
-            if checkConflict(level, wire1, wire2):
+            if self.checkConflict(level, wire1, wire2):
                 break
             index -= 1
         
@@ -59,7 +59,7 @@ class SortingNetwork(list):
         else:
             self[index].append((wire1, wire2))
 
-    def checkConflict(level, wire1, wire2):
+    def checkConflict(self, level, wire1, wire2):
         """Check if a connection between `wire1` and `wire2` can be 
         added on this `level`."""
         for wires in level:
