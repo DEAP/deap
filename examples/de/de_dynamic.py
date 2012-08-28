@@ -52,7 +52,7 @@ toolbox.register("best", tools.selBest, k=1)
 toolbox.register("evaluate", mpb)
 
 def main(verbose=True):
-    NPOP = 20
+    NPOP = 10   # Should be equal to the number of peaks
     CR = 0.6
     F = 0.4
     regular, brownian = 4, 2
@@ -132,6 +132,10 @@ def main(verbose=True):
 
             # Apply Brownian to the last part of the population
             newpop.extend(toolbox.brownian_individual(xbest) for _ in range(brownian))
+
+            # Evaluate the brownian individuals
+            for individual in newpop[-brownian:]:
+                individual.fitness.value = toolbox.evaluate(individual)
 
             # Replace the population 
             populations[idx] = newpop
