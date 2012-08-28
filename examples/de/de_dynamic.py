@@ -83,7 +83,7 @@ def main(verbose=True):
     while mpb.nevals < 5e5:
         # Detect a change and invalidate fitnesses if necessary
         bests = [toolbox.best(subpop)[0] for subpop in populations]
-        if any(b.fitness.values != toolbox.evaluate(b) for b in bests):
+        if any(abs(b.fitness.values - toolbox.evaluate(b)) > 1e-12 for b in bests):
             for individual in itertools.chain(*populations):
                 del individual.fitness.values
 
