@@ -34,10 +34,10 @@ scenario = movingpeaks.SCENARIO_2
 NDIM = 5
 BOUNDS = [scenario["min_coord"], scenario["max_coord"]]
 
+mpb = movingpeaks.MovingPeaks(dim=NDIM, **scenario)
+
 def brown_ind(iclass, best, sigma):
     return iclass(random.gauss(x, sigma) for x in best)
-
-mpb = movingpeaks.MovingPeaks(dim=NDIM, **scenario)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMax)
@@ -57,17 +57,14 @@ def main(verbose=True):
     F = 0.4
     regular, brownian = 4, 2
 
-    # Initialize populations
-    populations = [toolbox.population(n=regular + brownian) for _ in range(NPOP)]
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", tools.mean)
     stats.register("std", tools.std)
     stats.register("min", min)
     stats.register("max", max)
 
-    if verbose:
-        logger = tools.EvolutionLogger(["gen", "evals", "error", "offline_error"] + stats.functions.keys())
-        logger.logHeader()
+    # Initialize populations
+    populations = [toolbox.population(n=regular + brownian) for _ in range(NPOP)]
 
     # Evaluate the individuals
     for idx, subpop in enumerate(populations):
@@ -77,13 +74,15 @@ def main(verbose=True):
 
     stats.update(itertools.chain(*populations))
     if verbose:
+        logger = tools.EvolutionLogger(["gen", "evals", "error", "offline_error"] + stats.functions.keys())
+        logger.logHeader()
         logger.logGeneration(gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
 
     g = 1
     while mpb.nevals < 5e5:
         # Detect a change and invalidate fitnesses if necessary
         bests = [toolbox.best(subpop)[0] for subpop in populations]
-        if any(abs(b.fitness.values - toolbox.evaluate(b)) > 1e-12 for b in bests):
+        if any(b.fitness.values != toolbox.evaluate(b) for b in bests):
             for individual in itertools.chain(*populations):
                 del individual.fitness.values
 
