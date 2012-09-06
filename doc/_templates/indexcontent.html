@@ -4,7 +4,7 @@
   <h1>{{ docstitle|e }}</h1>
   <p>
     {% block description %}
-    {% if last_updated %}Last built {{ last_updated|e }}.{% endif %}
+    {% if last_updated %}Last build {{ last_updated|e }}.{% endif %}
     {% endblock %}
   </p>
   {% block tables %}
