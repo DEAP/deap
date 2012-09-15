@@ -44,6 +44,7 @@ Evolution Strategy (ES)
 	es_fctmin
 	es_onefifth
 	cmaes
+	bipop_cmaes
 
 Particle Swarm Optimization (PSO)
 ---------------------------------
