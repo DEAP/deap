@@ -205,11 +205,8 @@ class StrategyOnePlusLambda(object):
         self.sigma = sigma
         self.dim = len(self.parent)
 
-        # self.C = numpy.identity(self.dim)
-        # self.A = numpy.identity(self.dim)
-
-        self.C = kargs.get("cmatrix", numpy.identity(self.dim))
-        self.A = numpy.linalg.cholesky(self.C)
+        self.C = numpy.identity(self.dim)
+        self.A = numpy.identity(self.dim)
         
         self.pc = numpy.zeros(self.dim)
         
