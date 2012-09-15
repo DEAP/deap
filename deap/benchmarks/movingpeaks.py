@@ -198,11 +198,11 @@ class MovingPeaks:
                                             self.peaks_height,
                                             self.peaks_width):
             val = func(pos, pos, height, width)
-            if val >= self.__call__(pos)[0]:
+            if val >= self.__call__(pos, count=False)[0]:
                 maximums.append((val, pos))
         return sorted(maximums, reverse=True)
     
-    def __call__(self, individual):
+    def __call__(self, individual, count=True):
         possible_values = []
         
         for func, pos, height, width in zip(self.peaks_function,
@@ -216,17 +216,18 @@ class MovingPeaks:
 
         fitness = max(possible_values)
 
-        # Compute the offline error
-        self.nevals += 1
-        if self._optimum is None:
-            self._optimum = self.globalMaximum()[0]
-            self._error = abs(fitness - self._optimum)
-        self._error = min(self._error, abs(fitness - self._optimum))
-        self._offline_error += self._error
+        if count:
+            # Compute the offline error
+            self.nevals += 1
+            if self._optimum is None:
+                self._optimum = self.globalMaximum()[0]
+                self._error = abs(fitness - self._optimum)
+            self._error = min(self._error, abs(fitness - self._optimum))
+            self._offline_error += self._error
 
-        # We exausted the number of evaluation, change peaks for the next one.
-        if self.period > 0 and self.nevals % self.period == 0:
-            self.changePeaks()
+            # We exausted the number of evaluation, change peaks for the next one.
+            if self.period > 0 and self.nevals % self.period == 0:
+                self.changePeaks()
         
         return fitness,
     
