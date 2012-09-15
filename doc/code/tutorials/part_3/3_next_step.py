@@ -47,7 +47,7 @@ del child2.fitness.values
 
 ## 3.5 Selection
 selected = tools.selBest([child1, child2], 2)
-print child1 in selected                # True
+print child1 in selected	# True
 
 ## 3.5 Note
 LAMBDA = 10
