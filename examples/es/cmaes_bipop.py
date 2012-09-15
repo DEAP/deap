@@ -98,7 +98,7 @@ def main(verbose=True):
         bestvalues = list()
         medianvalues = list()
 
-        # We start with a centroid in [-4, 4]**D, and a sigma of 2 (1/5 of the domain)
+        # We start with a centroid in [-4, 4]**D
         strategy = cma.Strategy(centroid=numpy.random.uniform(-4, 4, N), sigma=sigma, lambda_=lambda_)
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
@@ -116,7 +116,7 @@ def main(verbose=True):
                # All components of pc and sqrt(diag(C)) are smaller than the threshold
                (any(strategy.pc > TOLX) or any(numpy.sqrt(numpy.diag(strategy.C)) > TOLX)) and
                # The sigma ratio is bigger than a threshold
-               strategy.sigma / SIGMA0 < strategy.diagD[-1]**2 * TOLUPSIGMA and
+               strategy.sigma / sigma < strategy.diagD[-1]**2 * TOLUPSIGMA and
                # Stagnation occured
                ((numpy.median(bestvalues[-20:]) < numpy.median(bestvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]) or
                  numpy.median(medianvalues[-20:]) < numpy.median(medianvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]))
