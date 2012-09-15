@@ -17,6 +17,7 @@ adding a single line of code will do the job).
 	start
 	types
 	next_step
+	comp_tools
 	speedup
 	distribution
 	benchmarking
