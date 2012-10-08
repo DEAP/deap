@@ -159,7 +159,7 @@ class Operator(Primitive):
 
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
-    be symbols, values, or 0-arity functions.
+    be values or 0-arity functions.
     """
     def __init__(self, terminal, ret = __type__):
         self.ret = ret
@@ -174,6 +174,14 @@ class Terminal(object):
     
     def __repr__(self):
         return str(self.value)
+
+class Symbol(Terminal):
+    """Class that encapsulates symbol primitive in expression."""
+    def toString(self):
+        return self.value
+
+    def __repr__(self):
+        return self.value
 
 class Ephemeral(Terminal):
     """Class that encapsulates a terminal which value is set at run-time.
@@ -215,7 +223,8 @@ class PrimitiveSetTyped(object):
         self.ins = in_types
         for i, type_ in enumerate(in_types):
             self.arguments.append(prefix + ("%s" % i))
-            PrimitiveSetTyped.addTerminal(self, self.arguments[-1], type_)
+            PrimitiveSetTyped.addTerminal(self, self.arguments[-1],
+                                          type_, symbolic=True)
             
     def renameArguments(self, **kargs):
         """Rename function arguments with new names from *kargs*.
@@ -243,15 +252,19 @@ class PrimitiveSetTyped(object):
         self.functions[primitive.__name__] = primitive
         self.prims_count += 1
         
-    def addTerminal(self, terminal, ret_type):
+    def addTerminal(self, terminal, ret_type, symbolic=False):
         """Add a terminal to the set. 
 
         *terminal* is an object, or a function with no arguments.
         *ret_type* is the type of the terminal.
         """
-        if callable(terminal):
-            self.functions[terminal.__name__] = terminal
-        prim = Terminal(terminal, ret_type)
+        if symbolic:
+            prim = Symbol(terminal, ret_type)
+        else:
+            if callable(terminal):
+                self.functions[terminal.__name__] = terminal
+            prim = Terminal(terminal, ret_type)
+
         self.terminals[ret_type].append(prim)
         self.terms_count += 1
         
@@ -299,9 +312,9 @@ class PrimitiveSet(PrimitiveSetTyped):
         args = [__type__] * arity 
         PrimitiveSetTyped.addPrimitive(self, primitive, args, __type__, symbol)
 
-    def addTerminal(self, terminal):
+    def addTerminal(self, terminal, symbolic=False):
         """Add a terminal to the set.""" 
-        PrimitiveSetTyped.addTerminal(self, terminal, __type__)
+        PrimitiveSetTyped.addTerminal(self, terminal, __type__, symbolic)
 
     def addEphemeralConstant(self, ephemeral):
         """Add an ephemeral constant to the set."""
