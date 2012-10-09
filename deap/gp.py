@@ -161,27 +161,20 @@ class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
     """
-    def __init__(self, terminal, ret = __type__):
+    def __init__(self, terminal, ret = __type__, symbolic=False):
         self.ret = ret
         self.arity = 0
-        try:
-            self.value = terminal.__name__
-        except AttributeError:
-            self.value = terminal
+        self.value = terminal
+        if symbolic:
+            self.conv_fct = str
+        else:
+            self.conv_fct = repr
     
     def toString(self):
-        return str(self.value)
+        return self.conv_fct(self.value)
     
     def __repr__(self):
-        return str(self.value)
-
-class Symbol(Terminal):
-    """Class that encapsulates symbol primitive in expression."""
-    def toString(self):
-        return self.value
-
-    def __repr__(self):
-        return self.value
+        return self.conv_fct(self.value)
 
 class Ephemeral(Terminal):
     """Class that encapsulates a terminal which value is set at run-time.
@@ -214,7 +207,7 @@ class PrimitiveSetTyped(object):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
         self.arguments = []
-        self.functions = dict()
+        self.context = dict()
         self.terms_count = 0
         self.prims_count = 0
         
@@ -222,10 +215,10 @@ class PrimitiveSetTyped(object):
         self.ret = ret_type
         self.ins = in_types
         for i, type_ in enumerate(in_types):
-            self.arguments.append(prefix + ("%s" % i))
-            PrimitiveSetTyped.addTerminal(self, self.arguments[-1],
-                                          type_, symbolic=True)
-            
+            self.arguments.append("%s%s" % (prefix,i))
+            self.terminals[type_].append(Terminal(self.arguments[-1], type_, True))
+            self.terms_count += 1
+
     def renameArguments(self, **kargs):
         """Rename function arguments with new names from *kargs*.
         """
@@ -249,21 +242,31 @@ class PrimitiveSetTyped(object):
         else:
             prim = Primitive(primitive, in_types, ret_type)
         self.primitives[ret_type].append(prim)
-        self.functions[primitive.__name__] = primitive
+        self.context[primitive.__name__] = primitive
         self.prims_count += 1
         
-    def addTerminal(self, terminal, ret_type, symbolic=False):
+    def addTerminal(self, terminal, ret_type, name=None):
         """Add a terminal to the set. 
 
         *terminal* is an object, or a function with no arguments.
-        *ret_type* is the type of the terminal.
+        *ret_type* is the type of the terminal. *name* defines the
+        name of the terminal in the expression. This should be
+        used : to define named constant (i.e.: pi); to speed the
+        evaluation time when the object is long to build; when
+        the object does not have a __repr__ functions that returns
+        the code to build the object; when the object class is
+        not a Python built-in.
         """
-        if symbolic:
-            prim = Symbol(terminal, ret_type)
-        else:
-            if callable(terminal):
-                self.functions[terminal.__name__] = terminal
-            prim = Terminal(terminal, ret_type)
+        symbolic = False
+        if name is None and callable(terminal):
+            name = terminal.__name__
+        
+        if name is not None:
+            self.context[name] = terminal
+            terminal = name
+            symbolic = True
+
+        prim = Terminal(terminal, ret_type, symbolic)
 
         self.terminals[ret_type].append(prim)
         self.terms_count += 1
@@ -312,9 +315,9 @@ class PrimitiveSet(PrimitiveSetTyped):
         args = [__type__] * arity 
         PrimitiveSetTyped.addPrimitive(self, primitive, args, __type__, symbol)
 
-    def addTerminal(self, terminal, symbolic=False):
+    def addTerminal(self, terminal, name=None):
         """Add a terminal to the set.""" 
-        PrimitiveSetTyped.addTerminal(self, terminal, __type__, symbolic)
+        PrimitiveSetTyped.addTerminal(self, terminal, __type__, name)
 
     def addEphemeralConstant(self, ephemeral):
         """Add an ephemeral constant to the set."""
@@ -345,7 +348,7 @@ def evaluate(expr, pset):
     """
     string = stringify(expr)
     try:
-        return eval(string, dict(pset.functions))
+        return eval(string, dict(pset.context))
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -365,7 +368,7 @@ def lambdify(expr, pset):
     args = ",".join(arg for arg in pset.arguments)
     lstr = "lambda %s: %s" % (args, string)
     try:
-        return eval(lstr, dict(pset.functions))
+        return eval(lstr, dict(pset.context))
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -383,7 +386,7 @@ def lambdifyADF(expr):
     adfdict = {}
     func = None
     for subexpr in reversed(expr):
-        subexpr.pset.functions.update(adfdict)
+        subexpr.pset.context.update(adfdict)
         func = lambdify(subexpr, subexpr.pset)
         adfdict.update({subexpr.pset.__name__ : func})
     return func
