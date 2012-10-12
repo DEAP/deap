@@ -534,7 +534,7 @@ class EvolutionLogger(object):
     def __init__(self, columns=("gen", "evals"), precision=4):
         self.columns = tuple(columns)
         self.line = " ".join("{%s:<8}" % name for name in self.columns)        
-        self.precision = "{0:.%if}" % precision
+        self.precision = "{0:.%ig}" % precision
     
     def logHeader(self):
         """Logs the column titles specified during initialization.
