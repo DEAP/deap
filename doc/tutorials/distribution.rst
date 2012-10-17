@@ -38,7 +38,7 @@ as the main module.
 
     $ python -m scoop your_program.py
 
-That it, your program has been run in parallel on all available processors.
+That is it, your program has been run in parallel on all available processors.
 
 
 Distributed Task Manager
