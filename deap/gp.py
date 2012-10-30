@@ -125,7 +125,7 @@ class Primitive(object):
         self.arity = len(args)           
         self.args = args
         self.ret = ret
-        args = ", ".join(("{}",) * self.arity)
+        args = ", ".join(map("{{{0}}}".format, range(self.arity)))
         self.seq = "{name}({args})".format(name=self.name, args=args)
     
     def format(self, *args):
