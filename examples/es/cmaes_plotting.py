@@ -23,7 +23,6 @@ from deap import creator
 from deap import tools
 
 import matplotlib.pyplot as plt
-import numpy
 
 # Problem size
 N = 10
