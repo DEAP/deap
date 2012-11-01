@@ -1,8 +1,8 @@
 .. _bipopcma-es:
 
-============================================
+=============================================
 Controlling the Evolution Loop: BI-POP CMA-ES
-============================================
+=============================================
 A variant of the Covariance Matrix Adaptation Evolution Strategy (CMA-ES)
 [Hansen2001]_ implies to control very specifically the termination criteria
 in the generational loop. This can be achieved by writing the algorithm
