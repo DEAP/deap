@@ -17,8 +17,7 @@ class translate(object):
     evaluation function. Thus, the evaluation function shall not be expecting
     an individual as it will receive a plain list.
     
-    This decorator adds a :func:`translate` function to the decorated
-    function.
+    This decorator adds a :func:`translate` method to the decorated function.
     """
     def __init__(self, vector):
         self.vector = vector
@@ -58,8 +57,7 @@ class rotate(object):
     shall not be expecting an individual as it will receive a plain list
     (numpy.array). The multiplication is done using numpy.
     
-    This decorator adds a :func:`rotate` function to the decorated
-    function.
+    This decorator adds a :func:`rotate` method to the decorated function.
     
     .. note::
     
@@ -113,7 +111,7 @@ class noise(object):
     equal to the number of objectives. The noise argument also accept
     :obj:`None`, which will leave the objective without noise.
 
-    This decorator adds a :func:`noise` function to the decorated
+    This decorator adds a :func:`noise` method to the decorated
     function.
     """
     def __init__(self, noise):
@@ -165,8 +163,7 @@ class scale(object):
     Thus, the evaluation function shall not be expecting an individual as it
     will receive a plain list.
     
-    This decorator adds a :func:`scale` function to the decorated
-    function.
+    This decorator adds a :func:`scale` method to the decorated function.
     """
     def __init__(self, factor):
         # Factor is inverted since it is aplied to the individual and not the
@@ -197,6 +194,50 @@ class scale(object):
         # Factor is inverted since it is aplied to the individual and not the
         # objective function
         self.factor = tuple(1.0/f for f in factor)
+
+class bound(object):
+    """Decorator for crossover and mutation functions, it changes the
+    individuals after the modification is done to bring it back in the allowed
+    *bounds*. The *bounds* are functions taking individual and returning
+    wheter of not the variable is allowed. You can provide one or multiple such
+    functions. In the former case, the function is used on all dimensions and
+    in the latter case, the number of functions must be greater or equal to
+    the number of dimension of the individuals.
+
+    The *type* determines how the attributes are brought back into the valid
+    range
+    
+    This decorator adds a :func:`bound` method to the decorated function.
+    """
+    def _clip(self, individual):
+        return individual
+
+    def _wrap(self, individual):
+        return individual
+
+    def _mirror(self, individual):
+        return individual
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrapper(*args, **kargs):
+            individuals = func(*args, **kargs)
+            return self.bound(individuals)
+        wrapper.bound = self.bound
+        return wrapper
+
+    def __init__(self, bounds, type):
+        try:
+            self.bounds = tuple(bounds)
+        except TypeError:
+            self.bounds = itertools.repeat(bounds)
+
+        if type == "mirror":
+            self.bound = self._mirror
+        elif type == "wrap":
+            self.bound = self._wrap
+        elif type == "clip":
+            self.bound = self._clip
         
 def diversity(first_front, first, last):
     """Given a Pareto front `first_front` and the two extreme points of the 
