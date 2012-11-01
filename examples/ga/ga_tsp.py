@@ -13,6 +13,11 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""Resolution of the TSP.
+
+**Keywords:** permutation, minimization
+"""
+
 import array
 import random
 import json
@@ -24,9 +29,24 @@ from deap import tools
 
 # gr*.json contains the distance map in list of list style in JSON format
 # Optimal solutions are : gr17 = 2085, gr24 = 1272, gr120 = 6942
-tsp = json.load(open("tsp/gr17.json", "r"))
-distance_map = tsp["DistanceMatrix"]
-IND_SIZE = tsp["TourSize"]
+try:
+    tsp = json.load(open("tsp/gr17.json", "r"))
+except IOError:
+    import warnings
+    warnings.warn("No TSP file found.")
+    tsp = False
+
+if tsp:
+    IND_SIZE = tsp["TourSize"]
+    distance_map = tsp["DistanceMatrix"]
+else:
+    IND_SIZE = 25
+    distance_map = [[0]*IND_SIZE for _ in range(IND_SIZE)]
+    for i in range(IND_SIZE):
+        for j in range(IND_SIZE):
+            d = random.random()
+            distance_map[i][j] = d
+            distance_map[j][i] = d
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessMin)
