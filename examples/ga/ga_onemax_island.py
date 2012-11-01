@@ -13,6 +13,11 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""Example distributing multiple island populations on multiple processors.
+
+**Keywords:** bit string, minimization, :mod:`multiprocessing`, multipopulation, pipe migrator
+"""
+
 import array
 from collections import deque
 from multiprocessing import Event, Pipe, Process
@@ -107,7 +112,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
         ind.fitness.values = toolbox.evaluate(ind)
     stats.update(deme)
     hof.update(deme)
-    logger.logGeneration(gen="0", deme=procid, evals=len(deme), stats=stats)
+    logger.logGeneration(gen=0, deme=procid, evals=len(deme), stats=stats)
     
     for gen in range(1, NGEN):
         deme = toolbox.select(deme, len(deme))
@@ -119,7 +124,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
         
         stats.update(deme)
         hof.update(deme)
-        logger.logGeneration(gen="%d" % gen, deme=procid, evals=len(invalid_ind), stats=stats)
+        logger.logGeneration(gen=gen, deme=procid, evals=len(invalid_ind), stats=stats)
             
         if gen % MIG_RATE == 0 and gen > 0:
             toolbox.migrate(deme)

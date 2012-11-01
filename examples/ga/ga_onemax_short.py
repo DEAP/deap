@@ -13,6 +13,12 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+"""Example exposing the use of the :func:`~deap.algorithms.eaSimple` function.
+It also uses :class:`array.array` as base class.
+
+**Keywords:** Bit String, Minimization, :class:`array.array`
+"""
+
 import array
 import random
 
