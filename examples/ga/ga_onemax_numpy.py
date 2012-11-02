@@ -13,12 +13,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The same One Max example similar to the short version but using
-:class:`numpy.ndarray` as base class.
-
-**Keywords:** bit string, minimization, :class:`numpy.ndarray`
-"""
-
 import numpy
 import random
 
