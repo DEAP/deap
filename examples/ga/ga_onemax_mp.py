@@ -14,11 +14,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""Example distributing evaluations on multiple processors.
-
-**Keywords:** bit string, minimization, :mod:`multiprocessing`
-"""
-
 import array
 import multiprocessing
 import random
