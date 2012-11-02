@@ -33,7 +33,7 @@ is simply the generate-update loop as presented in the
 :func:`deap.algorithms.eaGenerateUpdate` function.
 
 .. literalinclude:: /code/examples/es/cmaes_bipop.py
-   :lines: 64,100,102-105,108-142,165-168
+   :lines: 64,100,102-109,112-119,123-125,148-187,190
 
 Some variables have been omited for clarity, refer to the complete example for
 more details [`source code <code/es/cmaes_bipop.py>`_].
