@@ -87,9 +87,10 @@ def main(verbose=True):
             logger.logGeneration(evals=len(population), gen=gen, stats=stats)
         
         # Save more data along the evolution for latter plotting
+        # diagD is sorted and sqrooted in the update method
         sigma[gen] = strategy.sigma
-        axis_ratio[gen] = max(strategy.diagD)/min(strategy.diagD)
-        diagD[gen, :N] = sorted(strategy.diagD)
+        axis_ratio[gen] = max(strategy.diagD)**2/min(strategy.diagD)**2
+        diagD[gen, :N] = strategy.diagD**2
         fbest[gen] = halloffame[0].fitness.values
         best[gen, :N] = halloffame[0]
         std[gen, :N] = numpy.std(population, axis=0)
