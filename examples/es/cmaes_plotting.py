@@ -60,12 +60,12 @@ def main(verbose=True):
         logger.logHeader()
     
     # Objects that will compile the data
-    sigma = list()
-    axis_ratio = list()
-    diagD = list()
-    fbest = list()
-    best = list()
-    std = list()
+    sigma = numpy.ndarray((NGEN,1))
+    axis_ratio = numpy.ndarray((NGEN,1))
+    diagD = numpy.ndarray((NGEN,N))
+    fbest = numpy.ndarray((NGEN,1))
+    best = numpy.ndarray((NGEN,N))
+    std = numpy.ndarray((NGEN,N))
 
     for gen in xrange(NGEN):
         # Generate a new population
@@ -87,12 +87,12 @@ def main(verbose=True):
             logger.logGeneration(evals=len(population), gen=gen, stats=stats)
         
         # Save more data along the evolution for latter plotting
-        sigma.append(strategy.sigma)
-        axis_ratio.append(max(strategy.diagD)/min(strategy.diagD))
-        diagD.append(sorted(list(strategy.diagD)))
-        fbest.append(halloffame[0].fitness.values)
-        best.append(halloffame[0])
-        std.append(numpy.std(population, axis=0))
+        sigma[gen] = strategy.sigma
+        axis_ratio[gen] = max(strategy.diagD)/min(strategy.diagD)
+        diagD[gen, :N] = sorted(strategy.diagD)
+        fbest[gen] = halloffame[0].fitness.values
+        best[gen, :N] = halloffame[0]
+        std[gen, :N] = numpy.std(population, axis=0)
 
     # The x-axis will be the number of evaluations
     x = range(0, strategy.lambda_ * NGEN, strategy.lambda_)
