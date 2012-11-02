@@ -61,8 +61,8 @@ def main(verbose=True):
     
     # Objects that will compile the data
     sigma = list()
-    diagD = list()
     axis_ratio = list()
+    diagD = list()
     fbest = list()
     best = list()
     std = list()
@@ -88,13 +88,13 @@ def main(verbose=True):
         
         # Save more data along the evolution for latter plotting
         sigma.append(strategy.sigma)
-        diagD.append(sorted(list(strategy.diagD)))
         axis_ratio.append(max(strategy.diagD)/min(strategy.diagD))
+        diagD.append(sorted(list(strategy.diagD)))
         fbest.append(halloffame[0].fitness.values)
         best.append(halloffame[0])
         std.append(numpy.std(population, axis=0))
 
-    # Once the evolution is done, plot the data
+    # The x-axis will be the number of evaluations
     x = range(0, strategy.lambda_ * NGEN, strategy.lambda_)
 
     plt.figure()
@@ -106,7 +106,7 @@ def main(verbose=True):
     plt.semilogy(x, sigma, "-g")
     plt.semilogy(x, axis_ratio, "-r")
     plt.grid(True)
-    plt.title("blue: fvalues, green: sigma, red: axis ratio")
+    plt.title("blue: f-values, green: sigma, red: axis ratio")
 
     plt.subplot(2, 2, 2)
     plt.plot(x, best)
@@ -124,8 +124,6 @@ def main(verbose=True):
     plt.title("Standard Deviations in All Coordinates")
     
     plt.show()
-    
-    return
 
 if __name__ == "__main__":
     main()
