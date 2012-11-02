@@ -99,11 +99,14 @@ def main(verbose=True):
 
     plt.figure()
     plt.subplot(2, 2, 1)
-    plt.semilogy(x, fbest, "-b")
+    plt.semilogy(x, stats.avg[0], "--b")
+    plt.semilogy(x, stats.max[0], "--b")
+    plt.semilogy(x, stats.min[0], "-b")
+    plt.semilogy(x, fbest, "-c")
     plt.semilogy(x, sigma, "-g")
     plt.semilogy(x, axis_ratio, "-r")
     plt.grid(True)
-    plt.title("blue: fbest, green: sigma, red: axis ratio")
+    plt.title("blue: fvalues, green: sigma, red: axis ratio")
 
     plt.subplot(2, 2, 2)
     plt.plot(x, best)
