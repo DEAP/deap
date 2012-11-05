@@ -134,7 +134,7 @@ def main(verbose=True):
             
             # Log the best and median value of this population
             bestvalues.append(population[-1].fitness.values)
-            medianvalues.append(population[len(population)/2].fitness.values)
+            medianvalues.append(population[int(round(len(population)/2.))].fitness.values)
 
             # First run does not count into the budget
             if regime == 1 and i > 0:
