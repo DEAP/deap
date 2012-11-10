@@ -22,7 +22,8 @@ removing species as stagnation occurs.
 import random
 try:
     import matplotlib.pyplot as plt
-except ImportError:
+    plt.figure()
+except:
     plt = False
 
 from deap import algorithms
