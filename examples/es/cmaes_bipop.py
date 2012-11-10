@@ -103,33 +103,16 @@ def main(verbose=True):
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
 
+        conditions = {"MaxIter" : False, "TolHistFun" : False, "EqualFunVals" : False,
+                      "TolX" : False, "TolUpSigma" : False, "Stagnation" : False,
+                      "ConditionCov" : False, "NoEffectAxis" : False, "NoEffectCoor" : False}
+
         # Run the current regime until one of the following is true:
         ## Note that the algorithm won't stop by itself on the optimum (0.0 on rastrigin).
-        while (# The maximum number of iteration per CMA-ES ran
-               t < MAXITER and 
-               # The range of the best values is smaller than the threshold
-               (max(stats.min[i][-TOLHISTFUN_ITER:])[0] - min(stats.min[i][-TOLHISTFUN_ITER:])[0] > TOLHISTFUN
-                ## At the first iteration, there is no stats.min[i]
-                if (len(stats.min) > i and not len(stats.min[i]) < TOLHISTFUN_ITER) else True) and
-               # In 1/3rd of the last N iterations the best and k'th best solutions are equal
-               (sum(equalfunvalues[-N:]) / float(N) < EQUALFUNVALS if t > N else True) and
-               # All components of pc and sqrt(diag(C)) are smaller than the threshold
-               (any(strategy.pc > TOLX) or any(numpy.sqrt(numpy.diag(strategy.C)) > TOLX)) and
-               # The sigma ratio is bigger than a threshold
-               strategy.sigma / sigma < strategy.diagD[-1]**2 * TOLUPSIGMA and
-               # Stagnation occured
-               ((numpy.median(bestvalues[-20:]) < numpy.median(bestvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]) or
-                 numpy.median(medianvalues[-20:]) < numpy.median(medianvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]))
-                if (len(bestvalues) > STAGNATION_ITER and len(medianvalues) > STAGNATION_ITER) else True) and
-               # The condition number is bigger than a threshold
-               strategy.cond < 10**14 and
-               # The coordinate axis std is too low
-               any(strategy.centroid != strategy.centroid + 0.1 * strategy.sigma * strategy.diagD[-NOEFFECTAXIS_INDEX] * strategy.B[-NOEFFECTAXIS_INDEX]) and
-               # The main axis std has no effect
-               all(strategy.centroid != strategy.centroid + 0.2 * strategy.sigma * numpy.diag(strategy.C))):
-            
+        while not any(conditions.values()):
             # Generate a new population
             population = toolbox.generate()
+            
             # Evaluate the individuals
             fitnesses = toolbox.map(toolbox.evaluate, population)
             for ind, fit in zip(population, fitnesses):
@@ -151,7 +134,7 @@ def main(verbose=True):
             
             # Log the best and median value of this population
             bestvalues.append(population[-1].fitness.values)
-            medianvalues.append(population[len(population)/2].fitness.values)
+            medianvalues.append(population[int(round(len(population)/2.))].fitness.values)
 
             # First run does not count into the budget
             if regime == 1 and i > 0:
@@ -163,6 +146,47 @@ def main(verbose=True):
             STAGNATION_ITER = int(numpy.ceil(0.2 * t + 120 + 30. * N / lambda_))
             NOEFFECTAXIS_INDEX = t % N
 
+            if t >= MAXITER:
+                # The maximum number of iteration per CMA-ES ran
+                conditions["MaxIter"] = True
+
+            if (len(stats.min) > i and not len(stats.min[i]) < TOLHISTFUN_ITER) and \
+               max(stats.min[i][-TOLHISTFUN_ITER:])[0] - min(stats.min[i][-TOLHISTFUN_ITER:])[0] < TOLHISTFUN:
+                # The range of the best values is smaller than the threshold
+                conditions["TolHistFun"] = True
+
+            if t > N and sum(equalfunvalues[-N:]) / float(N) > EQUALFUNVALS:
+                # In 1/3rd of the last N iterations the best and k'th best solutions are equal
+                conditions["EqualFunVals"] = True
+
+            if all(strategy.pc < TOLX) and all(numpy.sqrt(numpy.diag(strategy.C)) < TOLX):
+                # All components of pc and sqrt(diag(C)) are smaller than the threshold
+                conditions["TolX"] = True
+            
+            if strategy.sigma / sigma > strategy.diagD[-1]**2 * TOLUPSIGMA:
+                # The sigma ratio is bigger than a threshold
+                conditions["TolUpSigma"] = True
+            
+            if len(bestvalues) > STAGNATION_ITER and len(medianvalues) > STAGNATION_ITER and \
+               numpy.median(bestvalues[-20:]) >= numpy.median(bestvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]) and \
+               numpy.median(medianvalues[-20:]) >= numpy.median(medianvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]):
+                # Stagnation occured
+                conditions["Stagnation"] = True
+
+            if strategy.cond > 10**14:
+                # The condition number is bigger than a threshold
+                conditions["ConditionCov"] = True
+
+            if all(strategy.centroid == strategy.centroid + 0.1 * strategy.sigma * strategy.diagD[-NOEFFECTAXIS_INDEX] * strategy.B[-NOEFFECTAXIS_INDEX]):
+                # The coordinate axis std is too low
+                conditions["NoEffectAxis"] = True
+
+            if any(strategy.centroid == strategy.centroid + 0.2 * strategy.sigma * numpy.diag(strategy.C)):
+                # The main axis std has no effect
+                conditions["NoEffectCoor"] = True
+
+        stop_causes = [k for k, v in conditions.items() if v]
+        print "Stopped because of condition%s %s" % ((":" if len(stop_causes) == 1 else "s:"), ",".join(stop_causes))
         i += 1
 
     return halloffame[0]
