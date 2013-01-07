@@ -476,7 +476,7 @@ def generate(pset, min_, max_, condition, type_=__type__):
         else:
             prim = random.choice(pset.primitives[type_])
             expr.append(prim)
-            for arg in prim.args[-1::-1]:
+            for arg in reversed(prim.args):
                 stack.append((depth+1, arg))
     return expr
 
