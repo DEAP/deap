@@ -253,6 +253,9 @@ def diversity(first_front, first, last):
                 first.fitness.values[1] - second.fitness.values[1])
           for first, second in zip(first_front[:-1], first_front[1:])]
 
+    if len(first_front) == 1:
+        return df + dl
+
     dm = sum(dt)/len(dt)
     di = sum(abs(d_i - dm) for d_i in dt)
     delta = (df + dl + di)/(df + dl + len(dt) * dm )
