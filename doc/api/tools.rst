@@ -20,9 +20,9 @@ Here is a list of the implemented operators in DEAP,
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`     :func:`migRing`
  :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`       ..             
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`          ..             
- :func:`~deap.gp.genFull`     :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`          ..             
- :func:`~deap.gp.genGrow`     :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`         ..             
- :func:`~deap.gp.genRamped`   :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`           ..             
+ ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`          ..             
+ ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`         ..             
+ ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`           ..             
  ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`          ..             
  ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`  ..             
  ..                           :func:`cxESTwoPoints`                       ..                                        ..                        ..             
@@ -33,14 +33,14 @@ Here is a list of the implemented operators in DEAP,
 
 and genetic programming specific operators.
 
-=========================================== =========================================
- Crossover                                   Mutation                                
-=========================================== =========================================
- :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutUniform`             
- :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutNodeReplacement`     
- ..                                          :func:`~deap.gp.mutEphemeral`           
- ..                                          :func:`~deap.gp.mutInsert`
-=========================================== =========================================
+============================ =========================================== =========================================
+ Initialization               Crossover                                   Mutation                                
+============================ =========================================== =========================================
+ :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutUniform`             
+ :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutNodeReplacement`     
+ :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutEphemeral`           
+ ..                           ..                                          :func:`~deap.gp.mutInsert`
+============================ =========================================== =========================================
 
 
 Initialization
