@@ -11,16 +11,16 @@ basic evolutionary computation concepts. All algorithms accept, in addition to
 their arguments, an initialized :class:`~deap.tools.Statistics` object to
 maintain stats of the evolution, an initialized
 :class:`~deap.tools.HallOfFame` to hold the best individual(s) to appear in
-the population, and/or an initialized :class:`~deap.tools.EvolutionLogger` to
-log what is happening during the evolution.
+the population, and a boolean `verbose` to specify wether to
+log what is happening during the evolution or not.
 
-.. autofunction:: deap.algorithms.eaSimple(population, toolbox, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaSimple(population, toolbox, cxpb, mutpb, ngen[, stats, halloffame, verbose])
 
-.. autofunction:: deap.algorithms.eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, verbose])
 
-.. autofunction:: deap.algorithms.eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, verbose])
 
-.. autofunction:: deap.algorithms.eaGenerateUpdate(toolbox, ngen[, stats, halloffame, logger])
+.. autofunction:: deap.algorithms.eaGenerateUpdate(toolbox, ngen[, stats, halloffame, verbose])
 
 Variations
 ----------

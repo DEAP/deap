@@ -1630,17 +1630,19 @@ def assignCrowdingDist(individuals):
         return
     
     distances = [0.0] * len(individuals)
-    crowding = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
+    crowd = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
     
-    number_objectives = len(individuals[0].fitness.values)
+    nobj = len(individuals[0].fitness.values)
     
-    for i in xrange(number_objectives):
-        crowding.sort(key=lambda element: element[0][i])
-        distances[crowding[0][1]] = float("inf")
-        distances[crowding[-1][1]] = float("inf")
-        for j in xrange(1, len(crowding) - 1):
-            distances[crowding[j][1]] += crowding[j + 1][0][i] - \
-                                         crowding[j - 1][0][i]
+    for i in xrange(nobj):
+        crowd.sort(key=lambda element: element[0][i])
+        distances[crowd[0][1]] = float("inf")
+        distances[crowd[-1][1]] = float("inf")
+        if crowd[-1][0][i] == crowd[0][0][i]:
+            continue
+        norm = nobj * float(crowd[-1][0][i] - crowd[0][0][i])
+        for prev, cur, next in zip(crowd[:-2], crowd[1:-1], crowd[2:]):
+            distances[cur[1]] += (next[0][i] - prev[0][i]) / norm
 
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
