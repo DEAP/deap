@@ -469,12 +469,24 @@ def generate(pset, min_, max_, condition, type_=__type__):
     while len(stack) != 0:
         depth, type_ = stack.pop()
         if condition(height, depth):
-            term = random.choice(pset.terminals[type_])
+            try:
+                term = random.choice(pset.terminals[type_])
+            except IndexError:
+                _, _, traceback = sys.exc_info()
+                raise IndexError, "The gp.generate function tried to add "\
+                                  "a terminal of type '%s', but there is "\
+                                  "none available." % (type_,), traceback
             if isinstance(term, EphemeralGenerator):
                 term = term()
             expr.append(term)
         else:
-            prim = random.choice(pset.primitives[type_])
+            try:
+                prim = random.choice(pset.primitives[type_])
+            except IndexError:
+                _, _, traceback = sys.exc_info()                
+                raise IndexError, "The gp.generate function tried to add "\
+                                  "a primitive of type '%s', but there is "\
+                                  "none available." % (type_,), traceback                
             expr.append(prim)
             for arg in reversed(prim.args):
                 stack.append((depth+1, arg))
