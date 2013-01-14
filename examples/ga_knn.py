@@ -44,7 +44,7 @@ classifier.train(trainset[:N_TRAIN], trainlabels[:N_TRAIN])
 
 def evalClassifier(individual):
     labels = classifier.predict(trainset[N_TRAIN:], individual)
-    return sum(1 for x, y in zip(labels, trainlabels) if x == y)  / float(len(trainlabels)), \
+    return sum(x == y for x, y in zip(labels, trainlabels[N_TRAIN:]))  / float(len(trainlabels[N_TRAIN:])), \
            sum(individual) / float(classifier.ndim)
 
 creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
@@ -68,7 +68,7 @@ def main():
     # random.seed(64)
     MU, LAMBDA = 100, 200
     pop = toolbox.population(n=MU)
-    hof = tools.HallOfFame(1)
+    hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", tools.mean)
     stats.register("std", tools.std)
@@ -76,7 +76,7 @@ def main():
     stats.register("max", max)
     
     algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA,
-                              cxpb=0.5, mutpb=0.2, ngen=40, 
+                              cxpb=0.7, mutpb=0.3, ngen=40, 
                               stats=stats, halloffame=hof)
     
     return pop, stats, hof
