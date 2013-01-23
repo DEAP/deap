@@ -33,7 +33,7 @@ from operator import eq, lt
 ######################################
 
 # Define the name of type for any types.
-__type__ = None
+__type__ = object
 
 class PrimitiveTree(list):
     """Tree spefically formated for optimization of genetic 
@@ -219,7 +219,7 @@ class PrimitiveSetTyped(object):
         for i, type_ in enumerate(in_types):
             arg_str = "{prefix}{index}".format(prefix=prefix,index=i)
             self.arguments.append(arg_str)
-            self.terminals[type_].append(Terminal(arg_str, True, type_))
+            self._addType(self.terminals, Terminal(arg_str, True, type_), type_)
             self.terms_count += 1
 
     def renameArguments(self, **kargs):
@@ -233,6 +233,17 @@ class PrimitiveSetTyped(object):
                 if isinstance(terminal, Terminal) and terminal.value in kargs:
                     terminal.value = kargs[terminal.value]
 
+    def _addType(self, dict_, prim, ret_type):
+        if not ret_type in dict_:
+            dict_[ret_type]
+            for type_, list_ in dict_.items():
+                if issubclass(type_, ret_type):
+                    dict_[ret_type].extend(list_)
+
+        for type_ in dict_:
+            if issubclass(ret_type, type_):
+                dict_[type_].append(prim)
+
     def addPrimitive(self, primitive, in_types, ret_type, symbol=None):
         """Add a primitive to the set. 
 
@@ -244,7 +255,8 @@ class PrimitiveSetTyped(object):
             prim = Operator(primitive, symbol, in_types, ret_type)
         else:
             prim = Primitive(primitive, in_types, ret_type)
-        self.primitives[ret_type].append(prim)
+
+        self._addType(self.primitives, prim, ret_type)
         self.context[primitive.__name__] = primitive
         self.prims_count += 1
         
@@ -271,7 +283,7 @@ class PrimitiveSetTyped(object):
 
         prim = Terminal(terminal, symbolic, ret_type)
 
-        self.terminals[ret_type].append(prim)
+        self._addType(self.terminals, prim, ret_type)
         self.terms_count += 1
         
     def addEphemeralConstant(self, ephemeral, ret_type):
@@ -284,7 +296,7 @@ class PrimitiveSetTyped(object):
         *ret_type* is the type of the object returned by the function.
         """
         prim = EphemeralGenerator(ephemeral, ret_type)
-        self.terminals[ret_type].append(prim)
+        self._addType(self.terminals, prim, ret_type)
         self.terms_count += 1
         
     def addADF(self, adfset):
@@ -294,7 +306,7 @@ class PrimitiveSetTyped(object):
         the ADF can be built.        
         """
         prim = Primitive(adfset, adfset.ins, adfset.ret)
-        self.primitives[adfset.ret].append(prim)
+        self._addType(self.primitive, prim, adfset.ret)
         self.prims_count += 1
     
     @property

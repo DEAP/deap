@@ -32,12 +32,12 @@ spamReader = csv.reader(open("spambase.csv"))
 spam = list(list(float(elem) for elem in row) for row in spamReader)
 
 # defined a new primitive set for strongly typed GP
-pset = gp.PrimitiveSetTyped("MAIN", itertools.repeat("float", 57), "bool", "IN")
+pset = gp.PrimitiveSetTyped("MAIN", itertools.repeat(float, 57), bool, "IN")
 
 # boolean operators
-pset.addPrimitive(operator.and_, ["bool", "bool"], "bool")
-pset.addPrimitive(operator.or_, ["bool", "bool"], "bool")
-pset.addPrimitive(operator.not_, ["bool"], "bool")
+pset.addPrimitive(operator.and_, [bool, bool], bool)
+pset.addPrimitive(operator.or_, [bool, bool], bool)
+pset.addPrimitive(operator.not_, [bool], bool)
 
 # floating point operators
 # Define a safe division function
@@ -45,10 +45,10 @@ def safeDiv(left, right):
     try: return left / right
     except ZeroDivisionError: return 0
 
-pset.addPrimitive(operator.add, ["float","float"], "float")
-pset.addPrimitive(operator.sub, ["float","float"], "float")
-pset.addPrimitive(operator.mul, ["float","float"], "float")
-pset.addPrimitive(safeDiv, ["float","float"], "float")
+pset.addPrimitive(operator.add, [float,float], float)
+pset.addPrimitive(operator.sub, [float,float], float)
+pset.addPrimitive(operator.mul, [float,float], float)
+pset.addPrimitive(safeDiv, [float,float], float)
 
 # logic operators
 # Define a new if-then-else function
@@ -56,14 +56,14 @@ def if_then_else(input, output1, output2):
     if input: return output1
     else: return output2
 
-pset.addPrimitive(operator.lt, ["float", "float"], "bool")
-pset.addPrimitive(operator.eq, ["float", "float"], "bool")
-pset.addPrimitive(if_then_else, ["bool", "float", "float"], "float")
+pset.addPrimitive(operator.lt, [float, float], bool)
+pset.addPrimitive(operator.eq, [float, float], bool)
+pset.addPrimitive(if_then_else, [bool, float, float], float)
 
 # terminals
-pset.addEphemeralConstant(lambda: random.random() * 100, "float")
-pset.addTerminal(0, "bool")
-pset.addTerminal(1, "bool")
+pset.addEphemeralConstant(lambda: random.random() * 100, float)
+pset.addTerminal(0, bool)
+pset.addTerminal(1, bool)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
