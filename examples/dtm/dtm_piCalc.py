@@ -23,7 +23,7 @@ from random import random
 from deap import dtm
 
 def test(tries):
-    return sum(hypot(random(), random()) < 1 for i in xrange(tries))
+    return sum(hypot(random(), random()) < 1 for i in range(tries))
 
 def calcPi(n, t):
     expr = dtm.repeat(test, n, t)

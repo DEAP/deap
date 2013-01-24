@@ -54,7 +54,7 @@ def main():
     MUTPB = 0.2
     MIG_RATE = 5    
     
-    demes = [toolbox.population(n=MU) for _ in xrange(NBR_DEMES)]
+    demes = [toolbox.population(n=MU) for _ in range(NBR_DEMES)]
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values, 4)
     stats.register("avg", tools.mean)
@@ -62,7 +62,9 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "deme", "evals"] + stats.functions.keys())
+    column_names = ["gen", "deme", "evals"]
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
     
     for idx, deme in enumerate(demes):

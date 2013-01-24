@@ -55,7 +55,8 @@ def main(extended=True, verbose=True):
     stats.register("max", max)
     
     if verbose:
-        column_names = ["gen", "species", "evals"] + stats.functions.keys()
+        column_names = ["gen", "species", "evals"]
+        column_names.extend(stats.functions.keys())
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -112,7 +113,7 @@ def main(extended=True, verbose=True):
     if extended:
         for r in representatives:
             # print individuals without noise
-            print "".join(str(x) for x, y in zip(r, noise) if y == "*")
+            print("".join(str(x) for x, y in zip(r, noise) if y == "*"))
     
     if plt and extended:
         # Do the final plotting

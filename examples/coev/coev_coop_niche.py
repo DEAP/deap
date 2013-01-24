@@ -52,7 +52,8 @@ def main(extended=True, verbose=True):
     stats.register("max", max)
     
     if verbose:
-        column_names = ["gen", "species", "evals"] + stats.functions.keys()
+        column_names = ["gen", "species", "evals"]
+        column_names.extend(stats.functions.keys())
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -94,7 +95,7 @@ def main(extended=True, verbose=True):
 
     if extended:
         for r in representatives:
-            print "".join(str(x) for x in r)
+            print("".join(str(x) for x in r))
     
 if __name__ == "__main__":
     main()

@@ -74,7 +74,9 @@ def main(verbose=True):
 
     stats.update(itertools.chain(*populations))
     if verbose:
-        logger = tools.EvolutionLogger(["gen", "evals", "error", "offline_error"] + stats.functions.keys())
+        column_names = ["gen", "evals", "error", "offline_error"]
+        column_names.extend(stats.functions.keys())
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
         logger.logGeneration(gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
 

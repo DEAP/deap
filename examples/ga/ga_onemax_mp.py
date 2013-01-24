@@ -20,7 +20,7 @@ import random
 import sys
 
 if sys.version_info < (2, 7):
-    print "mpga_onemax example requires Python >= 2.7."
+    print("mpga_onemax example requires Python >= 2.7.")
     exit(1)
 
 from deap import algorithms

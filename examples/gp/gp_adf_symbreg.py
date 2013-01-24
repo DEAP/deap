@@ -102,7 +102,7 @@ def evalSymbReg(individual):
     func = toolbox.lambdify(individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
-    values = (x/10. for x in xrange(-10, 10))
+    values = (x/10. for x in range(-10, 10))
     diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
     diff = sum(map(diff_func, values))
     return diff,
@@ -126,7 +126,9 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    column_names = ["gen", "evals"]
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
@@ -172,7 +174,7 @@ def main():
         
         logger.logGeneration(gen=g, evals=len(invalids), stats=stats)
     
-    print 'Best individual : ', gp.stringify(hof[0][0]), hof[0].fitness
+    print('Best individual : ', gp.stringify(hof[0][0]), hof[0].fitness)
     
     return pop, stats, hof
     

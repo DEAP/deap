@@ -35,7 +35,7 @@ def genWire(dimension):
 
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
-    return [genWire(dimension) for i in xrange(size)]
+    return [genWire(dimension) for i in range(size)]
 
 def getParasite(dimension):
     return [random.choice((0, 1)) for i in range(dimension)]
@@ -117,7 +117,9 @@ def main():
     hstats.register("min", min)
     hstats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + hstats.functions.keys())
+    column_names = ["gen", "evals"]
+    column_names.extend(hstats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
     
     MAXGEN = 50
@@ -150,9 +152,9 @@ def main():
         logger.logGeneration(gen=g, evals=len(hosts), stats=hstats)
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
-    print best_network
-    print best_network.draw()
-    print "%i errors" % best_network.assess()
+    print(best_network)
+    print(best_network.draw())
+    print("%i errors" % best_network.assess())
 
     return hosts, hstats, hof
 

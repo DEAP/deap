@@ -33,7 +33,7 @@ random.seed(64)
 # a (weight, value) 2-uple.
 items = {}
 # Create random items and store them in the items' dictionary.
-for i in xrange(NBR_ITEMS):
+for i in range(NBR_ITEMS):
     items[i] = (random.randint(1, 10), random.uniform(0, 100))
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, 1.0))

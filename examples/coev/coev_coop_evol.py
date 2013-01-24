@@ -59,7 +59,8 @@ def main(extended=True, verbose=True):
     stats.register("max", max)
     
     if verbose:
-        column_names = ["gen", "species", "evals"] + stats.functions.keys()
+        column_names = ["gen", "species", "evals"]
+        column_names.extend(stats.functions.keys())
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -71,7 +72,7 @@ def main(extended=True, verbose=True):
         target_set.extend(toolbox.target_set(schematas[i], size))
     
     species = [toolbox.species() for _ in range(NUM_SPECIES)]
-    species_index = range(NUM_SPECIES)
+    species_index = list(range(NUM_SPECIES))
     last_index_added = species_index[-1]
     
     # Init with random a representative for each species
@@ -151,7 +152,7 @@ def main(extended=True, verbose=True):
     if extended:
         for r in representatives:
             # print final representatives without noise
-            print "".join(str(x) for x, y in zip(r, noise) if y == "*")
+            print("".join(str(x) for x, y in zip(r, noise) if y == "*"))
     
     if extended and plt:      # Ploting of the evolution
         line1, = plt.plot(collab, "--", color="k")

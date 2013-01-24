@@ -50,7 +50,7 @@ def main():
     random.seed(64)
 
     interval = (-3,7)
-    mu = (random.uniform(interval[0], interval[1]) for _ in xrange(IND_SIZE))
+    mu = (random.uniform(interval[0], interval[1]) for _ in range(IND_SIZE))
     sigma = (interval[1] - interval[0])/2.0
     alpha = 2.0**(1.0/IND_SIZE)
 
@@ -59,7 +59,7 @@ def main():
     worst = creator.Individual((0.0,)*IND_SIZE)
 
     NGEN = 1500
-    for g in xrange(NGEN):
+    for g in range(NGEN):
         tools.update(worst, best, sigma) 
         worst.fitness.values = tools.evaluate(worst)
         if best.fitness <= worst.fitness:
@@ -68,9 +68,9 @@ def main():
         else:
             sigma = sigma * alpha**(-0.25)
 
-        print "Generation", g, "- Fitness:", best.fitness.values[0]
+        print("Generation", g, "- Fitness:", best.fitness.values[0])
  
-    print "Best individual is ", best, best.fitness.values[0]
+    print("Best individual is ", best, best.fitness.values[0])
     
     return best
     

@@ -68,7 +68,9 @@ def main(seed=None):
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    column_names = ["gen", "evals"]
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
 
     pop = toolbox.population(n=MU)
@@ -121,8 +123,8 @@ if __name__ == "__main__":
     pop = main()
     pop.sort(key=lambda x: x.fitness.values)
     
-    print "Convergence: ", convergence(pop, optimal_front)
-    print "Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1])
+    print("Convergence: ", convergence(pop, optimal_front))
+    print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
     
     # import matplotlib.pyplot as plt
     # import numpy

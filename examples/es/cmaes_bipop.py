@@ -50,7 +50,8 @@ def main(verbose=True):
     stats.register("max", max)
 
     if verbose:
-        column_names = ["gen", "evals", "restart", "regime"] + stats.functions.keys()
+        column_names = ["gen", "evals", "restart", "regime"]
+        column_names.extend(stats.functions.keys())
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
 
@@ -186,7 +187,7 @@ def main(verbose=True):
                 conditions["NoEffectCoor"] = True
 
         stop_causes = [k for k, v in conditions.items() if v]
-        print "Stopped because of condition%s %s" % ((":" if len(stop_causes) == 1 else "s:"), ",".join(stop_causes))
+        print("Stopped because of condition%s %s" % ((":" if len(stop_causes) == 1 else "s:"), ",".join(stop_causes)))
         i += 1
 
     return halloffame[0]

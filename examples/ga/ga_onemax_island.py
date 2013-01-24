@@ -95,7 +95,9 @@ def main(procid, pipein, pipeout, sync, seed=None):
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "deme", "evals"] + stats.functions.keys())
+    column_names = ["gen", "deme", "evals"]
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     if procid == 0:
         # Synchronization needed to log header on top and only once
         logger.logHeader()
