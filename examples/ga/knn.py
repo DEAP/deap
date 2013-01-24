@@ -88,7 +88,7 @@ _knn.train(trainset[:N_TRAIN], trainlabels[:N_TRAIN])
 def classification_rate(features):
     """Returns the classification rate of the default KNN."""
     labels = _knn.predict(trainset[N_TRAIN:], features)
-    return sum(1 for x, y in zip(labels, trainlabels) if x == y)/float(len(trainlabels))
+    return sum(x == y for x, y in zip(labels, trainlabels[N_TRAIN:]))/float(len(trainlabels[N_TRAIN:]))
 
 if __name__ == "__main__":
     trainset = [[1, 0], [1, 1], [1, 2]]
