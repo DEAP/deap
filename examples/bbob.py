@@ -19,6 +19,8 @@ import math
 import random
 import time
 
+from itertools import chain
+
 from deap import base
 from deap import creator
 from deap import benchmarks
@@ -60,7 +62,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
     alpha = 2.0**(1.0/dim)
     
     # Initialize best randomly and worst as a place holder
-    best = creator.Individual(random.uniform(interval[0], interval[1]) for _ in xrange(dim))
+    best = creator.Individual(random.uniform(interval[0], interval[1]) for _ in range(dim))
     worst = creator.Individual([0.0] * dim)
     
     # Evaluate the first individual
@@ -68,7 +70,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
     
     # Evolve until ftarget is reached or the number of evaluation
     # is exausted (maxfuncevals)
-    for g in xrange(1, maxfuncevals):
+    for g in range(1, maxfuncevals):
         toolbox.update(worst, best, sigma)
         worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:
@@ -106,13 +108,13 @@ if __name__ == "__main__":
             
             # Iterate over all the instance of a single problem
             # Rotation, translation, etc.
-            for instance in range(1, 6) + range(21, 31):
+            for instance in chain(range(1, 6), range(21, 31)):
                 
                 # Set the function to be used (problem) in the logger
                 e.setfun(*bn.instantiate(f_name, iinstance=instance))
                 
                 # Independent restarts until maxfunevals or ftarget is reached
-                for restarts in xrange(0, maxrestarts + 1):
+                for restarts in range(0, maxrestarts + 1):
                     if restarts > 0:
                         # Signal the experiment that the algorithm restarted
                         e.restart('independent restart')  # additional info
@@ -132,4 +134,4 @@ if __name__ == "__main__":
                       % (f_name, dim, instance, e.evaluations, restarts,
                          e.fbest - e.ftarget))
                          
-            print 'date and time: %s' % (time.asctime())
+            print('date and time: %s' % time.asctime())

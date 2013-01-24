@@ -37,7 +37,7 @@ class EDA(object):
     def generate(self, ind_init):
         # Generate lambda_ individuals and put them into the provided class
         arz = self.sigma * numpy.random.randn(self.lambda_, self.dim) + self.loc
-        return map(ind_init, arz)
+        return list(map(ind_init, arz))
     
     def update(self, population):
         # Sort individuals so the best is first

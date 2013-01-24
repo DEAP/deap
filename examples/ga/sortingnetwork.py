@@ -13,19 +13,9 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    from itertools import product
-except ImportError:
-    def product(*args, **kwds):
-        # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
-        # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
-        pools = map(tuple, args) * kwds.get('repeat', 1)
-        result = [[]]
-        for pool in pools:
-            result = [x+[y] for x in result for y in pool]
-        for prod in result:
-            yield tuple(prod)
-            
+
+from itertools import product
+
 class SortingNetwork(list):
     """Sorting network class.
     
@@ -96,7 +86,7 @@ class SortingNetwork(list):
         str_wires[0][1] = " o"
         str_spaces = []
 
-        for i in xrange(1, self.dimension):
+        for i in range(1, self.dimension):
             str_wires.append(["-"]*7 * self.depth)
             str_spaces.append([" "]*7 * self.depth)
             str_wires[i][0] = str(i)
@@ -106,9 +96,9 @@ class SortingNetwork(list):
             for wire1, wire2 in level:
                 str_wires[wire1][(index+1)*6] = "x"
                 str_wires[wire2][(index+1)*6] = "x"
-                for i in xrange(wire1, wire2):
+                for i in range(wire1, wire2):
                     str_spaces[i][(index+1)*6+1] = "|"
-                for i in xrange(wire1+1, wire2):
+                for i in range(wire1+1, wire2):
                     str_wires[i][(index+1)*6] = "|"
         
         network_draw = "".join(str_wires[0])

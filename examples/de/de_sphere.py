@@ -17,6 +17,8 @@
 import random
 import array
 
+from itertools import chain
+
 from deap import base
 from deap import benchmarks
 from deap import creator
@@ -46,7 +48,7 @@ def cxExponential(x, y, cr):
     size = len(x)
     index = random.randrange(size)
     # Loop on the indices index -> end, then on 0 -> index
-    for i in range(index, size) + range(0, index):
+    for i in chain(range(index, size), range(0, index)):
         x[i] = y[i]
         if random.random() < cr:
             break
@@ -74,7 +76,9 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    column_names = ["gen", "evals"]
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
     
     # Evaluate the individuals
@@ -109,8 +113,8 @@ def main():
         
         logger.logGeneration(gen=g, evals=len(pop), stats=stats)
             
-    print "Best individual is ", hof[0]
-    print "with fitness", hof[0].fitness.values[0]
+    print("Best individual is ", hof[0])
+    print("with fitness", hof[0].fitness.values[0])
             
 if __name__ == "__main__":
     main()

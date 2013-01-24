@@ -15,7 +15,7 @@
 
 import operator
 import random
-from itertools import imap
+
 
 from deap import base
 from deap import benchmarks
@@ -27,8 +27,8 @@ creator.create("Particle", list, fitness=creator.FitnessMax, speed=list,
     smin=None, smax=None, best=None)
 
 def generate(size, pmin, pmax, smin, smax):
-    part = creator.Particle(random.uniform(pmin, pmax) for _ in xrange(size)) 
-    part.speed = [random.uniform(smin, smax) for _ in xrange(size)]
+    part = creator.Particle(random.uniform(pmin, pmax) for _ in range(size)) 
+    part.speed = [random.uniform(smin, smax) for _ in range(size)]
     part.smin = smin
     part.smax = smax
     return part
@@ -36,15 +36,15 @@ def generate(size, pmin, pmax, smin, smax):
 def updateParticle(part, best, phi1, phi2):
     u1 = (random.uniform(0, phi1) for _ in range(len(part)))
     u2 = (random.uniform(0, phi2) for _ in range(len(part)))
-    v_u1 = imap(operator.mul, u1, imap(operator.sub, part.best, part))
-    v_u2 = imap(operator.mul, u2, imap(operator.sub, best, part))
-    part.speed = map(operator.add, part.speed, imap(operator.add, v_u1, v_u2))
+    v_u1 = map(operator.mul, u1, map(operator.sub, part.best, part))
+    v_u2 = map(operator.mul, u2, map(operator.sub, best, part))
+    part.speed = list(map(operator.add, part.speed, map(operator.add, v_u1, v_u2)))
     for i, speed in enumerate(part.speed):
         if speed < part.smin:
             part.speed[i] = part.smin
         elif speed > part.smax:
             part.speed[i] = part.smax
-    part[:] = map(operator.add, part, part.speed)
+    part[:] = list(map(operator.add, part, part.speed))
 
 toolbox = base.Toolbox()
 toolbox.register("particle", generate, size=2, pmin=-6, pmax=6, smin=-3, smax=3)
@@ -60,13 +60,15 @@ def main():
     stats.register("Min", min)
     stats.register("Max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    column_names = ["gen", "evals"]
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
 
     GEN = 1000
     best = None
 
-    for g in xrange(GEN):
+    for g in range(GEN):
         for part in pop:
             part.fitness.values = toolbox.evaluate(part)
             if not part.best or part.best.fitness < part.fitness:

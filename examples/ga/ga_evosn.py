@@ -33,7 +33,7 @@ def genWire(dimension):
     
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
-    return [genWire(dimension) for i in xrange(size)]
+    return [genWire(dimension) for i in range(size)]
     
 def mutWire(individual, dimension, indpb):
     for index, elem in enumerate(individual):
@@ -79,7 +79,9 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    column_names = ["gen", "evals"] 
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
@@ -95,7 +97,7 @@ def main():
     logger.logGeneration(gen=0, evals=len(population), stats=stats)
     
     # Begin the evolution
-    for g in xrange(1, NGEN):
+    for g in range(1, NGEN):
         offspring = [toolbox.clone(ind) for ind in population]
     
         # Apply crossover and mutation
@@ -131,9 +133,9 @@ def main():
         logger.logGeneration(gen=g, evals=len(invalid_ind), stats=stats)
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
-    print best_network
-    print best_network.draw()
-    print "%i errors, length %i, depth %i" % hof[0].fitness.values
+    print(best_network)
+    print(best_network.draw())
+    print("%i errors, length %i, depth %i" % hof[0].fitness.values)
     
     return population, stats, hof
 

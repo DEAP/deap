@@ -55,7 +55,7 @@ def main(verbose=True):
     if verbose:
         column_names = ["gen", "evals"]
         if stats is not None:
-            column_names += stats.functions.keys()
+            column_names.extend(stats.functions.keys())
         logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
@@ -67,7 +67,7 @@ def main(verbose=True):
     best = numpy.ndarray((NGEN,N))
     std = numpy.ndarray((NGEN,N))
 
-    for gen in xrange(NGEN):
+    for gen in range(NGEN):
         # Generate a new population
         population = toolbox.generate()
         # Evaluate the individuals
@@ -96,7 +96,7 @@ def main(verbose=True):
         std[gen, :N] = numpy.std(population, axis=0)
 
     # The x-axis will be the number of evaluations
-    x = range(0, strategy.lambda_ * NGEN, strategy.lambda_)
+    x = list(range(0, strategy.lambda_ * NGEN, strategy.lambda_))
 
     plt.figure()
     plt.subplot(2, 2, 1)

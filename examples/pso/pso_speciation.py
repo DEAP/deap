@@ -40,8 +40,8 @@ creator.create("Particle", list, fitness=creator.FitnessMax, speed=list,
     best=None, bestfit=creator.FitnessMax)
 
 def generate(pclass, dim, pmin, pmax, smin, smax):
-    part = pclass(random.uniform(pmin, pmax) for _ in xrange(dim)) 
-    part.speed = [random.uniform(smin, smax) for _ in xrange(dim)]
+    part = pclass(random.uniform(pmin, pmax) for _ in range(dim)) 
+    part.speed = [random.uniform(smin, smax) for _ in range(dim)]
     return part
 
 def convert_quantum(swarm, rcloud, centre):
@@ -71,17 +71,17 @@ def convert_quantum(swarm, rcloud, centre):
 def updateParticle(part, best, chi, c):
     ce1 = (c*random.uniform(0, 1) for _ in range(len(part)))
     ce2 = (c*random.uniform(0, 1) for _ in range(len(part)))
-    ce1_p = itertools.imap(operator.mul, ce1, itertools.imap(operator.sub, best, part))
-    ce2_g = itertools.imap(operator.mul, ce2, itertools.imap(operator.sub, part.best, part))
-    a = itertools.imap(operator.sub,
-                      itertools.imap(operator.mul,
+    ce1_p = map(operator.mul, ce1, map(operator.sub, best, part))
+    ce2_g = map(operator.mul, ce2, map(operator.sub, part.best, part))
+    a = map(operator.sub,
+                      map(operator.mul,
                                     itertools.repeat(chi),
-                                    itertools.imap(operator.add, ce1_p, ce2_g)),
-                      itertools.imap(operator.mul,
+                                    map(operator.add, ce1_p, ce2_g)),
+                      map(operator.mul,
                                      itertools.repeat(1-chi),
                                      part.speed))
-    part.speed = map(operator.add, part.speed, a)
-    part[:] = map(operator.add, part, part.speed)
+    part.speed = list(map(operator.add, part.speed, a))
+    part[:] = list(map(operator.add, part, part.speed))
     
 toolbox = base.Toolbox()
 toolbox.register("particle", generate, creator.Particle, dim=NDIM,
@@ -107,7 +107,9 @@ def main(verbose=True):
     swarm = toolbox.swarm(n=NPARTICLES)
 
     if verbose:
-        logger = tools.EvolutionLogger(["gen", "evals", "nspecies", "error", "offline_error"] + stats.functions.keys())
+        column_names = ["gen", "evals", "nspecies", "error", "offline_error"]
+        column_names.extend(stats.functions.keys())
+        logger = tools.EvolutionLogger(column_names)
         logger.logHeader()
     
     generation = 0

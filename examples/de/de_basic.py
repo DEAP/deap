@@ -49,7 +49,9 @@ def main():
     stats.register("min", min)
     stats.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats.functions.keys())
+    column_names = ["gen", "evals"] 
+    column_names.extend(stats.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
     
     # Evaluate the individuals
@@ -78,7 +80,7 @@ def main():
         logger.logGeneration(gen=g, evals=len(pop), stats=stats)
 
 
-    print "Best individual is ", hof[0], hof[0].fitness.values[0]
+    print("Best individual is ", hof[0], hof[0].fitness.values[0])
     
 if __name__ == "__main__":
     main()

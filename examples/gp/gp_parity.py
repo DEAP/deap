@@ -29,12 +29,12 @@ PARITY_SIZE_M = 2**PARITY_FANIN_M
 inputs = [None] * PARITY_SIZE_M
 outputs = [None] * PARITY_SIZE_M
 
-for i in xrange(PARITY_SIZE_M):
+for i in range(PARITY_SIZE_M):
     inputs[i] = [None] * PARITY_FANIN_M
     value = i
     dividor = PARITY_SIZE_M
     parity = 1
-    for j in xrange(PARITY_FANIN_M):
+    for j in range(PARITY_FANIN_M):
         dividor /= 2
         if value >= dividor:
             inputs[i][j] = 1

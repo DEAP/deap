@@ -33,7 +33,7 @@ class PBIL(object):
         return (random.random() < prob for prob in self.prob_vector)
 
     def generate(self, ind_init):
-        return [ind_init(self.sample()) for _ in xrange(self.lambda_)]
+        return [ind_init(self.sample()) for _ in range(self.lambda_)]
 
     def update(self, population):
         best = max(population, key=lambda ind: ind.fitness)

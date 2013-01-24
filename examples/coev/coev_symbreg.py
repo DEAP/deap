@@ -70,7 +70,9 @@ def main():
     stats_gp.register("min", min)
     stats_gp.register("max", max)
     
-    logger = tools.EvolutionLogger(["gen", "evals"] + stats_ga.functions.keys())
+    column_names = ["gen", "evals"]
+    column_names.extend(stats_ga.functions.keys())
+    logger = tools.EvolutionLogger(column_names)
     logger.logHeader()
     
     best_ga = tools.selRandom(pop_ga, 1)[0]
@@ -148,8 +150,8 @@ def main():
         logger.logGeneration(gen="%d (ga)" % g, evals=eval_ga, stats=stats_ga)
         logger.logGeneration(gen="%d (gp)" % g, evals=eval_gp, stats=stats_gp)
 
-    print "Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)
-    print "Best individual GP is %s, %s" % (gp.stringify(best_gp), best_gp.fitness.values)
+    print("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values))
+    print("Best individual GP is %s, %s" % (gp.stringify(best_gp), best_gp.fitness.values))
 
     return pop_ga, pop_gp, stats_ga, stats_gp, best_ga, best_gp
 

@@ -48,7 +48,7 @@ def main(fTasks):
     retVals = dtm.map(executor, tasksList)
     if sum(retVals) > 0:
         _logger.warning("Some tasks did not run well (return code > 0) :")
-        for i in xrange(len(retVals)):
+        for i in range(len(retVals)):
             if retVals[i] > 0:
                 _logger.warning("%s returns %s", tasksList[i], retVals[i])
     

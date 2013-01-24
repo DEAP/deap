@@ -45,23 +45,23 @@ def main():
     pop = toolbox.population(n=300)
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
-    print "Start of evolution"
+    print("Start of evolution")
     
     # Evaluate the entire population
-    fitnesses = map(toolbox.evaluate, pop)
+    fitnesses = list(map(toolbox.evaluate, pop))
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    print "  Evaluated %i individuals" % len(pop)
+    print("  Evaluated %i individuals" % len(pop))
     
     # Begin the evolution
     for g in range(NGEN):
-        print "-- Generation %i --" % g
+        print("-- Generation %i --" % g)
         
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
         # Clone the selected individuals
-        offspring = map(toolbox.clone, offspring)
+        offspring = list(map(toolbox.clone, offspring))
     
         # Apply crossover and mutation on the offspring
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
@@ -81,7 +81,7 @@ def main():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
-        print "  Evaluated %i individuals" % len(invalid_ind)
+        print("  Evaluated %i individuals" % len(invalid_ind))
         
         # The population is entirely replaced by the offspring
         pop[:] = offspring
@@ -94,15 +94,15 @@ def main():
         sum2 = sum(x*x for x in fits)
         std = abs(sum2 / length - mean**2)**0.5
         
-        print "  Min %s" % min(fits)
-        print "  Max %s" % max(fits)
-        print "  Avg %s" % mean
-        print "  Std %s" % std
+        print("  Min %s" % min(fits))
+        print("  Max %s" % max(fits))
+        print("  Avg %s" % mean)
+        print("  Std %s" % std)
     
-    print "-- End of (successful) evolution --"
+    print("-- End of (successful) evolution --")
     
     best_ind = tools.selBest(pop, 1)[0]
-    print "Best individual is %s, %s" % (best_ind, best_ind.fitness.values)
+    print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
 
 if __name__ == "__main__":
     main()
