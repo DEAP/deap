@@ -3,6 +3,15 @@ What's New?
 ===========
 Here is a (incomplete) log of the changes made to DEAP over time. 
 
+Release 0.9
+===========
+
+- Major overhaul of the genetic programming with significant speed increase.
+- Added state of the art operators to control bloat in GP.
+- Several new examples from diverse fields.
+- Examples are now compatible Python 2 and 3 out of the box.
+- Organization of the examples.
+
 Release 0.8
 ===========
 - Added forward compatibility to Python 3.2
