@@ -723,13 +723,13 @@ def staticDepthLimit(max_depth):
     be accepted in the population (except if it was generated at initialization
     time).
     
+    :param max_depth: The maximum depth allowed for an individual.
+    :returns: A decorator that can be applied to a GP operator using \
+    :func:`~deap.base.Toolbox.decorate`
+
     .. note::
        If you want to reproduce the exact behavior intended by Koza, set
        the *max_depth* param to 17.
-       
-    :param max_depth: The maximum depth allowed for an individual
-    :returns: A decorator that can be applied to a GP operator using 
-    :method:`~deap.tools.Toolbox.decorate`
     
     .. [Koza1989] J.R. Koza, Genetic Programming - On the Programming of 
         Computers by Means of Natural Selection (MIT Press, 
@@ -752,10 +752,10 @@ def staticSizeLimit(max_size):
     decorate both crossover and mutation operators. When an invalid (too big)
     child is generated, it is simply replaced by one of its parents.
     
-    :param max_size: The maximum size (number of nodes) allowed for an 
+    :param max_size: The maximum size (number of nodes) allowed for an \
     individual
-    :returns: A decorator that can be applied to a GP operator using 
-    :method:`~deap.tools.Toolbox.decorate`
+    :returns: A decorator that can be applied to a GP operator using \
+    :func:`~deap.base.Toolbox.decorate`
     """
     def decorator(func):
         def wrapper(*args, **kwargs):
