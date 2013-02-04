@@ -11,9 +11,6 @@ Genetic Programming
 .. autoclass:: deap.gp.Primitive
 	:members:
 
-.. autoclass:: deap.gp.Operator
-	:members:
-
 .. autoclass:: deap.gp.Terminal
 	:members:
 
