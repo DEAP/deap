@@ -28,5 +28,4 @@ functions are readily implemented in the :mod:`~deap.benchmarks`.
 	tools
 	algo
 	gp
-	dtm
 	benchmarks

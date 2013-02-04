@@ -14,7 +14,7 @@ and return values.
 
 Scalable Concurent Operations in Python (SCOOP)
 -----------------------------------------------
-SCOOP is a distributed task module allowing concurrent parallel programming on
+SCOOP_ is a distributed task module allowing concurrent parallel programming on
 various environments, from heterogeneous grids to supercomputers. It has an
 interface similar to the :mod:`concurrent.futures` module introduced in Python
 3.2. Its two simple functions :func:`~scoop.futures.submit` and
@@ -40,42 +40,7 @@ as the main module.
 
 That is it, your program has been run in parallel on all available processors.
 
-
-Distributed Task Manager
-------------------------
-.. deprecated:: 0.9
-   Use `SCOOP <http://scoop.googlecode.com>`_ instead, it is a fork of DTM and
-   developped by the same group.
-
-Distributing tasks on multiple computers is taken care of by the distributed
-task manager module :mod:`~deap.dtm`. Its API similar to the multiprocessing
-module allows it to be very easy to use. In the :ref:`last section
-<using-tools>` a complete algorithm was exposed with the :func:`toolbox.map`
-left to the default :func:`map`. In order to distribute the evaluations,
-simply replace this map with the one provided by the dtm module
-and tell to dtm which function is the main program here it is the :func:`main`
-function.
-::
-
-    from deap import dtm
-    
-    toolbox.register("map", dtm.map)
-    
-    def main():
-        # My evolutionary algorithm
-        pass
-    
-    if __name__ == "__main__":
-        dtm.start(main)
-
-That's it. The map operation contained in the toolbox will now be distributed.
-The next time you run the algorithm, it will run on the number of cores
-specified to the ``mpirun`` command used to run the python script. The usual
-bash command to use dtm will be :
-
-.. code-block:: bash
-
-    $ mpirun [options] python my_script.py
+.. _SCOOP: http://scoop.googlecode.com/
 
 Multiprocessing Module
 ----------------------
