@@ -130,9 +130,6 @@ class Primitive(object):
     def format(self, *args):
         return self.seq.format(*args)
 
-    def __repr__(self):
-        return self.name
-
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
@@ -148,9 +145,6 @@ class Terminal(object):
         return 0
 
     def format(self):
-        return self.conv_fct(self.value)
-    
-    def __repr__(self):
         return self.conv_fct(self.value)
 
 class Ephemeral(Terminal):
@@ -172,9 +166,6 @@ class EphemeralGenerator(object):
     
     def __call__(self):
         return Ephemeral(self.id, self.function(), self.ret)
-    
-    def __repr__(self):
-        return self.name
 
 class PrimitiveSetTyped(object):
     """Class that contains the primitives that can be used to solve a
