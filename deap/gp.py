@@ -114,14 +114,13 @@ class Primitive(object):
     """Class that encapsulates a primitive and when called with arguments it
     returns the Python code to call the primitive with the arguments.
         
-        >>> import operator
-        >>> pr = Primitive(operator.mul, (int, int), int)
+        >>> pr = Primitive("mul", (int, int), int)
         >>> pr.format(1, 2)
         'mul(1, 2)'
-    """    
+    """
     __slots__ = ('name', 'arity', 'args', 'ret', 'seq')
-    def __init__(self, primitive, args, ret):
-        self.name = primitive.__name__
+    def __init__(self, name, args, ret):
+        self.name = name
         self.arity = len(args)           
         self.args = args
         self.ret = ret
@@ -133,29 +132,6 @@ class Primitive(object):
 
     def __repr__(self):
         return self.name
-
-class Operator(Primitive):
-    """Class that encapsulates an operator and when called with arguments it
-    returns the Python code to call the operator with the arguments. It acts
-    as the Primitive class, but instead of returning a function and its 
-    arguments, it returns an operator and its operands.
-        
-        >>> import operator
-        >>> op = Operator(operator.mul, '*', (int, int), int)
-        >>> op.format(1, 2)
-        '(1 * 2)'
-        >>> op2 = Operator(operator.neg, '-', (int,), int)
-        >>> op2.format(1)
-        '-(1)'
-    """
-    def __init__(self, operator, symbol, args, ret):
-        Primitive.__init__(self, operator, args, ret)
-        if self.arity == 1:
-            self.seq = "{symbol}({{0}})".format(symbol=symbol)
-        elif self.arity == 2:
-            self.seq = "({{0}} {symbol} {{1}})".format(symbol=symbol)
-        else:
-            raise ValueError("Operator arity can be either 1 or 2.")
 
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
@@ -213,7 +189,7 @@ class PrimitiveSetTyped(object):
         self.terms_count = 0
         self.prims_count = 0
         
-        self.__name__ = name 
+        self.name = name 
         self.ret = ret_type
         self.ins = in_types
         for i, type_ in enumerate(in_types):
@@ -244,20 +220,26 @@ class PrimitiveSetTyped(object):
             if issubclass(ret_type, type_):
                 dict_[type_].append(prim)
 
-    def addPrimitive(self, primitive, in_types, ret_type, symbol=None):
+    def addPrimitive(self, primitive, in_types, ret_type, name=None):
         """Add a primitive to the set. 
 
         *primitive* is a callable object or a function.
         *in_types* is a list of argument's types the primitive takes.
         *ret_type* is the type returned by the primitive.
+        *name* is the alternative name for the primitive instead
+        of its __name__ attribute.
         """
-        if symbol is not None:
-            prim = Operator(primitive, symbol, in_types, ret_type)
-        else:
-            prim = Primitive(primitive, in_types, ret_type)
+        if name is None:
+            name = primitive.__name__
+        prim = Primitive(name, in_types, ret_type)
 
         self._addType(self.primitives, prim, ret_type)
-        self.context[primitive.__name__] = primitive
+        assert name not in self.context or \
+               self.context[name] is primitive, \
+               "Primitives are required to have a unique name. " \
+               "Consider using the argument 'name' to rename your "\
+               "second '%s' primitive." % (name,)        
+        self.context[primitive.name] = primitive
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type, name=None):
@@ -276,6 +258,11 @@ class PrimitiveSetTyped(object):
         if name is None and callable(terminal):
             name = terminal.__name__
         
+        assert name not in self.context, \
+               "Terminals are required to have a unique name. " \
+               "Consider using the argument 'name' to rename your "\
+               "second %s terminal." % (name,)
+
         if name is not None:
             self.context[name] = terminal
             terminal = name
@@ -305,7 +292,7 @@ class PrimitiveSetTyped(object):
         *adfset* is a PrimitiveSetTyped containing the primitives with which
         the ADF can be built.        
         """
-        prim = Primitive(adfset, adfset.ins, adfset.ret)
+        prim = Primitive(adfset.name, adfset.ins, adfset.ret)
         self._addType(self.primitive, prim, adfset.ret)
         self.prims_count += 1
     
@@ -324,11 +311,14 @@ class PrimitiveSet(PrimitiveSetTyped):
         args = [__type__]*arity
         PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
 
-    def addPrimitive(self, primitive, arity, symbol=None):
-        """Add primitive *primitive* with arity *arity* to the set."""
+    def addPrimitive(self, primitive, arity, name=None):
+        """Add primitive *primitive* with arity *arity* to the set. 
+        If a name *name* is provided, it will replace the attribute __name__
+        attribute to represent/identify the primitive.
+        """
         assert arity > 0, "arity should be >= 1"
         args = [__type__] * arity 
-        PrimitiveSetTyped.addPrimitive(self, primitive, args, __type__, symbol)
+        PrimitiveSetTyped.addPrimitive(self, primitive, args, __type__, name)
 
     def addTerminal(self, terminal, name=None):
         """Add a terminal to the set.""" 
@@ -403,7 +393,7 @@ def lambdifyADF(expr):
     for subexpr in reversed(expr):
         subexpr.pset.context.update(adfdict)
         func = lambdify(subexpr, subexpr.pset)
-        adfdict.update({subexpr.pset.__name__ : func})
+        adfdict.update({subexpr.pset.name : func})
     return func
 
 ######################################
