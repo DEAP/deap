@@ -239,7 +239,7 @@ class PrimitiveSetTyped(object):
                "Primitives are required to have a unique name. " \
                "Consider using the argument 'name' to rename your "\
                "second '%s' primitive." % (name,)        
-        self.context[primitive.name] = primitive
+        self.context[prim.name] = primitive
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type, name=None):
@@ -293,7 +293,7 @@ class PrimitiveSetTyped(object):
         the ADF can be built.        
         """
         prim = Primitive(adfset.name, adfset.ins, adfset.ret)
-        self._addType(self.primitive, prim, adfset.ret)
+        self._addType(self.primitives, prim, adfset.ret)
         self.prims_count += 1
     
     @property
