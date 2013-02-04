@@ -153,7 +153,7 @@ pset.addTerminal(ant.turn_left)
 pset.addTerminal(ant.turn_right)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 
@@ -175,7 +175,7 @@ toolbox.register("evaluate", evalArtificialAnt)
 toolbox.register("select", tools.selTournament, tournsize=7)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
-toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
+toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 def main():
     random.seed(69)

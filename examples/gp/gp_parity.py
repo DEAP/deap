@@ -53,7 +53,7 @@ pset.addTerminal(1)
 pset.addTerminal(0)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=pset)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 toolbox.register("expr", gp.genFull, pset=pset, min_=3, max_=5)
@@ -69,7 +69,7 @@ toolbox.register("evaluate", evalParity)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
-toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut)
+toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 def main():
     random.seed(21)

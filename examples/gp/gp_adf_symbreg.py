@@ -73,11 +73,10 @@ pset.addADF(adfset1)
 pset.addADF(adfset2)
 pset.renameArguments(ARG0='x')
 
+psets = (pset, adfset0, adfset1, adfset2)
+
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("ADF0", gp.PrimitiveTree, pset=adfset0)
-creator.create("ADF1", gp.PrimitiveTree, pset=adfset1)
-creator.create("ADF2", gp.PrimitiveTree, pset=adfset2)
-creator.create("MAIN", gp.PrimitiveTree, pset=pset)
+creator.create("Tree", gp.PrimitiveTree)
 
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
@@ -87,10 +86,10 @@ toolbox.register('adf_expr1', gp.genFull, pset=adfset1, min_=1, max_=2)
 toolbox.register('adf_expr2', gp.genFull, pset=adfset2, min_=1, max_=2)
 toolbox.register('main_expr', gp.genRamped, pset=pset, min_=1, max_=2)
 
-toolbox.register('ADF0', tools.initIterate, creator.ADF0, toolbox.adf_expr0)
-toolbox.register('ADF1', tools.initIterate, creator.ADF1, toolbox.adf_expr1)
-toolbox.register('ADF2', tools.initIterate, creator.ADF2, toolbox.adf_expr2)
-toolbox.register('MAIN', tools.initIterate, creator.MAIN, toolbox.main_expr)
+toolbox.register('ADF0', tools.initIterate, creator.Tree, toolbox.adf_expr0)
+toolbox.register('ADF1', tools.initIterate, creator.Tree, toolbox.adf_expr1)
+toolbox.register('ADF2', tools.initIterate, creator.Tree, toolbox.adf_expr2)
+toolbox.register('MAIN', tools.initIterate, creator.Tree, toolbox.main_expr)
 
 func_cycle = [toolbox.MAIN, toolbox.ADF0, toolbox.ADF1, toolbox.ADF2]
 
@@ -107,12 +106,12 @@ def evalSymbReg(individual):
     diff = sum(map(diff_func, values))
     return diff,
 
-toolbox.register('lambdify', gp.lambdifyADF)
+toolbox.register('lambdify', gp.lambdifyADF, psets=psets)
 toolbox.register('evaluate', evalSymbReg)
 toolbox.register('select', tools.selTournament, tournsize=3)
 toolbox.register('mate', gp.cxOnePoint)
 toolbox.register('expr', gp.genFull, min_=1, max_=2)
-toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr)
+toolbox.register('mutate', gp.mutEphemeral, mode='all')
 
 def main():
     random.seed(1024)
@@ -157,9 +156,9 @@ def main():
                     del ind2.fitness.values
 
         for ind in offspring:
-            for tree in ind:
+            for tree, pset in zip(ind, psets):
                 if random.random() < MUTPB:
-                    toolbox.mutate(tree)
+                    toolbox.mutate(individual=tree, pset=pset)
                     del ind.fitness.values
                             
         # Evaluate the individuals with an invalid fitness

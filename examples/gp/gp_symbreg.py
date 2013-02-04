@@ -42,7 +42,7 @@ pset.addEphemeralConstant(lambda: random.randint(-1,1))
 pset.renameArguments(ARG0='x')
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin, pset=pset)
+creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
@@ -64,7 +64,7 @@ toolbox.register("evaluate", evalSymbReg)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
-toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut)
+toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 def main():
     random.seed(318)
