@@ -23,7 +23,7 @@ provides a convenient method for creating types called the creator.
 
 First of all, we need to import some modules.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 16-20
 
 -------
@@ -47,7 +47,7 @@ argument *base* is the base classe that the new type created should inherit
 from. Finally the optional arguments are members to add to the new type, for
 example a :attr:`fitness` for an individual or :attr:`speed` for a particle.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 22-23
 
 The first line creates a maximizing fitness by replacing, in the base type
@@ -74,7 +74,7 @@ to store functions with their arguments. The toolbox contains two
 methods, :meth:`~deap.base.Toolbox.register` and
 :meth:`~deap.base.Toolbox.unregister` that are used to do the tricks.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 25-31
 
 In this code block we registered a generation function and two initialization
@@ -107,7 +107,7 @@ The Evaluation Function
 The evaluation function is pretty simple in this case, we need to count the
 number of ones in the individual. This is done by the following lines of code. 
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 33-34
 
 The returned value must be an iterable of length equal to the number of
@@ -122,12 +122,12 @@ them with their argument in a toolbox as for the initialization methods. The
 most convenient way is to register them in the toolbox, because it allows to
 easily switch between operators if desired. The toolbox method is also used in
 the algorithms, see the `one max short version
-<http://doc.deap.googlecode.com/hg/short_ga_onemax.html>`_ for an example.
+<http://doc.deap.googlecode.com/hg/short_ga/ga_onemax.html>`_ for an example.
 
 Registering the operators and their default arguments in the toolbox is done
 as follow. 
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 37-40
 
 The evaluation is given the alias evaluate. Having a single argument being the
@@ -155,7 +155,7 @@ Creating the Population
 Before evolving it, we need to instantiate a population. This step is done
 effortless using the method we registered in the toolbox. 
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 42, 45
 
 
@@ -163,7 +163,7 @@ effortless using the method we registered in the toolbox.
 parameter left open earlier in the toolbox. The next thing to do is to
 evaluate this brand new population.
 	
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 50-53
 
 We first :func:`map` the evaluation function to every individual, then assign
@@ -178,7 +178,7 @@ The evolution of the population is the last thing to accomplish. Let say that
 we want to evolve for a fixed number of generation :data:`NGEN`, the
 evolution will then begin with a simple for statement.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 57-59
 
 Is that simple enough? Lets continue with more complicated things, selecting,
@@ -189,7 +189,7 @@ individuals.
 
 In a simple GA, the first step is to select the next generation.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 61-64
 
 This step creates an offspring list that is an exact copy of the selected
@@ -202,19 +202,19 @@ of code, where a crossover is applied with probability :data:`CXPB` and a
 mutation with probability :data:`MUTPB`. The ``del`` statement simply
 invalidate the fitness of the modified individuals.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 66-76
 
 The population now needs to be re-evaluated, we then apply the evaluation as
 seen earlier, but this time only on the individuals with an invalid fitness. 
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 78-82
 
 And finally, last but not least, we replace the old population by the
 offspring. 
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 87
 
 This is the end of the evolution part, it will continue until the predefined
@@ -223,11 +223,11 @@ number of generation are accomplished.
 Although, some statistics may be gathered on the population, the following
 lines print the min, max, mean and standard deviation of the population.
 
-.. literalinclude:: /code/examples/ga_onemax.py
+.. literalinclude:: /code/examples/ga/ga_onemax.py
    :lines: 89-100
 
 A :class:`~deap.tools.Statistics` object has been defined to facilitate how
 statistics are gathered. It is not presented here so that we can focus on the
 core and not the gravitating helper objects of DEAP.
 
-The complete example : [`source code <code/ga_onemax.py>`_].
+The complete example : [`source code <code/ga/ga_onemax.py>`_].

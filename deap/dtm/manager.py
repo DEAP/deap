@@ -958,6 +958,9 @@ class Control(object):
         self.refTime = self._calibrateExecTime()
 
         self.commReadyEvent.wait()
+        if self.commExitNotification.is_set():
+            sys.exit()
+            
 
         if self.commThread.isLaunchProcess:
             sys.exit()

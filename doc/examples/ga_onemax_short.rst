@@ -12,13 +12,13 @@ algorithms impemented use specific functions from the toolbox, in this case
 :func:`evaluate`, :func:`mate`, :func:`mutate` and :func:`~deap.Toolbox.select`
 must be registered. 
 
-.. literalinclude:: /code/examples/ga_onemax_short.py
+.. literalinclude:: /code/examples/ga/ga_onemax_short.py
    :lines: 39-42
 
 The toolbox is then passed to the algorithm and the algorithm uses the
 registered function. 
 
-.. literalinclude:: /code/examples/ga_onemax_short.py
+.. literalinclude:: /code/examples/ga/ga_onemax_short.py
    :lines: 44, 47-56
 
 The short GA One max example makes use of a
@@ -32,4 +32,4 @@ these objects. Finally, the *verbose* keyword indicate wheter we
 want the algorithm to output the results after each generation or
 not.
 
-The complete example : [`source code <code/ga_onemax_short.py>`_]
+The complete example : [`source code <code/ga/ga_onemax_short.py>`_]

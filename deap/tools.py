@@ -60,6 +60,7 @@ def initRepeat(container, func, n):
         ...                                    # doctest: +NORMALIZE_WHITESPACE
         [0.4761..., 0.6302...]
 
+    See the :ref:`list-of-floats` and :ref:`population` tutorials for more examples.
     """
     return container(func() for _ in xrange(n))
 
@@ -84,6 +85,8 @@ def initIterate(container, generator):
         >>> initIterate(list, gen_idx)
         [4, 5, 3, 6, 0, 9, 2, 7, 1, 8]
 
+    See the :ref:`permutation` and :ref:`arithmetic-expr` tutorials for
+    more examples.
     """
     return container(generator())
 
@@ -106,6 +109,7 @@ def initCycle(container, seq_func, n=1):
         >>> initCycle(list, func_seq, n=2)
         [1, 'a', 3, 1, 'a', 3]
 
+    See the :ref:`funky` tutorial for an example.
     """
     return container(func() for _ in xrange(n) for func in seq_func)
 
@@ -527,10 +531,10 @@ class EvolutionLogger(object):
     """File object indicating where the log is written. By default log is
     written in sys.stdout.
     """
-    def __init__(self, columns=["gen", "evals"], precision=4):
+    def __init__(self, columns=("gen", "evals"), precision=4):
         self.columns = tuple(columns)
         self.line = " ".join("{%s:<8}" % name for name in self.columns)        
-        self.precision = "{0:.%if}" % precision
+        self.precision = "{0:.%ig}" % precision
     
     def logHeader(self):
         """Logs the column titles specified during initialization.
@@ -733,7 +737,7 @@ def cxTwoPoints(ind1, ind2):
     cxpoint2 = random.randint(1, size - 1)
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
-    else:			# Swap the two cx points
+    else: # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
    
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
@@ -810,7 +814,7 @@ def cxPartialyMatched(ind1, ind2):
     cxpoint2 = random.randint(0, size - 1)
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
-    else:			# Swap the two cx points
+    else: # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
     
     # Apply crossover between cx points
@@ -897,7 +901,7 @@ def cxOrdered(ind1, ind2):
     a, b = random.sample(xrange(size), 2)
     if a > b:
         a, b = b, a
-    print a, b
+
     holes1, holes2 = [True]*size, [True]*size
     for i in range(size):
         if i < a or i > b:
@@ -1107,7 +1111,7 @@ def cxESTwoPoints(ind1, ind2):
     pt2 = random.randint(1, size - 1)
     if pt2 >= pt1:
         pt2 += 1
-    else:			# Swap the two cx points
+    else: # Swap the two cx points
         pt1, pt2 = pt2, pt1
    
     ind1[pt1:pt2], ind2[pt1:pt2] = ind2[pt1:pt2], ind1[pt1:pt2]     
@@ -1346,12 +1350,8 @@ def selTournament(individuals, k, tournsize):
     """
     chosen = []
     for i in xrange(k):
-        chosen.append(random.choice(individuals))
-        for j in xrange(tournsize - 1):
-            aspirant = random.choice(individuals)
-            if aspirant.fitness > chosen[i].fitness:
-                chosen[i] = aspirant
-                
+        aspirants = selRandom(individuals, tournsize)
+        chosen.append(max(aspirants, key=attrgetter("fitness")))
     return chosen
 
 def selRoulette(individuals, k):
@@ -1429,6 +1429,83 @@ def selTournamentDCD(individuals, k):
         chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
 
     return chosen
+    
+
+def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_first):
+    """Tournament selection which use the size of the individuals in order
+    to discriminate good solutions. This kind of tournament is obviously
+    useless with fixed-length representation, but has been shown to
+    significantly reduce excessive growth of individuals, especially in GP,
+    where it can be used as a bloat control technique (see 
+    [Luke2002fighting]_). This selection operator implements the double 
+    tournament technique presented in this paper.
+    
+    The core principle is to use a normal tournament selection, but using a
+    special sample function to select aspirants, which is another tournament
+    based on the size of the individuals. To ensure that the selection
+    pressure is not too high, the size of the size tournament (the number
+    of candidates evaluated) can be a real number between 1 and 2. In this
+    case, the smaller individual among two will be selected with a probability
+    *size_tourn_size*/2. For instance, if *size_tourn_size* is set to 1.4,
+    then the smaller individual will have a 0.7 probability to be selected.
+    
+    .. note::
+        In GP, it has been shown that this operator produces better results
+        when it is combined with some kind of a depth limit.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param fitness_size: The number of individuals participating in each
+    fitness tournament
+    :param parsimony_size: The number of individuals participating in each
+    size tournament. This value has to be a real number
+    in the range [1,2], see above for details.
+    :param fitness_first: Set this to True if the first tournament done should
+    be the fitness one (i.e. the fitness tournament producing aspirants for
+    the size tournament). Setting it to False will behaves as the opposite
+    (size tournament feeding fitness tournaments with candidates). It has been
+    shown that this parameter does not have a significant effect in most cases
+    (see [Luke2002fighting]_).
+    :returns: A list of selected individuals.
+    
+    .. [Luke2002fighting] Luke and Panait, 2002, Fighting bloat with 
+        nonparametric parsimony pressure
+    """
+    assert (1 <= parsimony_size <= 2), "Parsimony tournament size has to be in the range [1, 2]."
+
+    def _sizeTournament(individuals, k, select):
+        chosen = []
+        for i in xrange(k):
+            # Select two individuals from the population
+            # The first individual has to be the shortest
+            prob = parsimony_size / 2.
+            ind1, ind2 = select(individuals, k=2)
+
+            if len(ind1) > len(ind2):
+                ind1, ind2 = ind2, ind1
+            elif len(ind1) == len(ind2):
+                # random selection in case of a tie
+                prob = 0.5
+
+            # Since size1 <= size2 then ind1 is selected
+            # with a probability prob
+            chosen.append(ind1 if random.random() < prob else ind2)
+
+        return chosen
+    
+    def _fitTournament(individuals, k, select):
+        chosen = []
+        for i in xrange(k):
+            aspirants = select(individuals, k=fitness_size)
+            chosen.append(max(aspirants, key=attrgetter("fitness")))
+        return chosen
+    
+    if fitness_first:
+        tfit = partial(_fitTournament, select=selRandom)
+        return _sizeTournament(individuals, k, tfit)
+    else:
+        tsize = partial(_sizeTournament, select=selRandom)
+        return _fitTournament(individuals, k, tsize)
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
@@ -1553,17 +1630,19 @@ def assignCrowdingDist(individuals):
         return
     
     distances = [0.0] * len(individuals)
-    crowding = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
+    crowd = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
     
-    number_objectives = len(individuals[0].fitness.values)
+    nobj = len(individuals[0].fitness.values)
     
-    for i in xrange(number_objectives):
-        crowding.sort(key=lambda element: element[0][i])
-        distances[crowding[0][1]] = float("inf")
-        distances[crowding[-1][1]] = float("inf")
-        for j in xrange(1, len(crowding) - 1):
-            distances[crowding[j][1]] += crowding[j + 1][0][i] - \
-                                         crowding[j - 1][0][i]
+    for i in xrange(nobj):
+        crowd.sort(key=lambda element: element[0][i])
+        distances[crowd[0][1]] = float("inf")
+        distances[crowd[-1][1]] = float("inf")
+        if crowd[-1][0][i] == crowd[0][0][i]:
+            continue
+        norm = nobj * float(crowd[-1][0][i] - crowd[0][0][i])
+        for prev, cur, next in zip(crowd[:-2], crowd[1:-1], crowd[2:]):
+            distances[cur[1]] += (next[0][i] - prev[0][i]) / norm
 
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
@@ -1596,12 +1675,12 @@ def selSPEA2(individuals, k):
     fits = [0] * N
     dominating_inds = [list() for i in xrange(N)]
     
-    for i in xrange(N):
-        for j in xrange(i + 1, N):
-            if isDominated(individuals[i].fitness.wvalues, individuals[j].fitness.wvalues):
+    for i, ind_i in enumerate(individuals):
+        for j, ind_j in enumerate(individuals[i+1:], i+1):
+            if isDominated(ind_i.fitness.wvalues, ind_j.fitness.wvalues):
                 strength_fits[j] += 1
                 dominating_inds[i].append(j)
-            elif isDominated(individuals[j].fitness.wvalues, individuals[i].fitness.wvalues):
+            elif isDominated(ind_j.fitness.wvalues, ind_i.fitness.wvalues):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
     
@@ -1626,8 +1705,8 @@ def selSPEA2(individuals, k):
             density = 1.0 / (kth_dist + 2.0)
             fits[i] += density
             
-        next_indices = [(fits[i], i) for i in xrange(N) \
-                                                if not i in chosen_indices]
+        next_indices = [(fits[i], i) for i in xrange(N)
+                        if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
         chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
@@ -1763,13 +1842,14 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
                      a particular position in the list goes. This defaults
                      to a ring migration.
     """
+    nbr_demes = len(populations)
     if migarray is None:
-        migarray = range(1, len(populations)) + [0]
+        migarray = range(1, nbr_demes) + [0]
     
-    immigrants = [[] for i in xrange(len(migarray))]
-    emigrants = [[] for i in xrange(len(migarray))]
+    immigrants = [[] for i in xrange(nbr_demes)]
+    emigrants = [[] for i in xrange(nbr_demes)]
 
-    for from_deme in xrange(len(migarray)):
+    for from_deme in xrange(nbr_demes):
         emigrants[from_deme].extend(selection(populations[from_deme], k))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
@@ -1778,19 +1858,11 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
             # Else select those who will be replaced
             immigrants[from_deme].extend(replacement(populations[from_deme], k))
 
-    mig_buf = emigrants[0]
-    for from_deme, to_deme in enumerate(migarray[1:]):
-        from_deme += 1  # Enumerate starts at 0
-
+    for from_deme, to_deme in enumerate(migarray):
         for i, immigrant in enumerate(immigrants[to_deme]):
             indx = populations[to_deme].index(immigrant)
             populations[to_deme][indx] = emigrants[from_deme][i]
-
-    to_deme = migarray[0]
-    for i, immigrant in enumerate(immigrants[to_deme]):
-        indx = populations[to_deme].index(immigrant)
-        populations[to_deme][indx] = mig_buf[i]
-    
+            
     
 if __name__ == "__main__":
     import doctest
