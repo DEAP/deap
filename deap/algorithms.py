@@ -16,8 +16,8 @@
 """The :mod:`algorithms` module is intended to contain some specific algorithms
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
-evolutionary algorithm may vary infinitely. Most of the algorithms in this module
-use operators registered in the toolbox. Generaly, the keyword used are
+evolutionary algorithm may vary infinitely. Most of the algorithms in this 
+module use operators registered in the toolbox. Generaly, the keyword used are
 :meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~deap.select`
 for selection and :meth:`evaluate` for evaluation.
 
@@ -67,15 +67,15 @@ def varAnd(population, toolbox, cxpb, mutpb):
     offspring = [toolbox.clone(ind) for ind in population]
     
     # Apply crossover and mutation on the offspring
-    for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
+    for i in range(0, len(offspring), 2):
         if random.random() < cxpb:
-            toolbox.mate(ind1, ind2)
-            del ind1.fitness.values, ind2.fitness.values
+            offspring[i], offspring[i+1] = toolbox.mate(offspring[i], offspring[i+1])
+            del offspring[i].fitness.values, offspring[i+1].fitness.values
     
-    for ind in offspring:
+    for i in range(len(offspring)):
         if random.random() < mutpb:
-            toolbox.mutate(ind)
-            del ind.fitness.values
+            offspring[i], = toolbox.mutate(offspring[i])
+            del offspring[i].fitness.values
     
     return offspring
 
@@ -214,13 +214,13 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     for _ in xrange(lambda_):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = [toolbox.clone(ind) for ind in random.sample(population, 2)]
-            toolbox.mate(ind1, ind2)
+            ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
+            ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             offspring.append(ind1)
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
-            toolbox.mutate(ind)
+            ind, = toolbox.mutate(ind)
             del ind.fitness.values
             offspring.append(ind)
         else:                           # Apply reproduction
@@ -396,8 +396,8 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
                      verbose=__debug__):
-    """This is algorithm implements the ask-tell model proposed in [Colette2010]_,
-    where ask is called `generate` and tell is called `update`.
+    """This is algorithm implements the ask-tell model proposed in 
+    [Colette2010]_, where ask is called `generate` and tell is called `update`.
     
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.

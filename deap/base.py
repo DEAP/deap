@@ -14,19 +14,18 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """The :mod:`~deap.base` module provides basic structures to build evolutionary
-algorithms. It contains only two simple containers that are a basic N-ary 
-:class:`~deap.base.Tree`, usefull for implementing genetic programing, and a 
+algorithms. It contains only two simple containers that are toolbox
+:class:`~deap.base.Toolbox`, useful to store evolutionary operators, and a 
 virtual :class:`~deap.base.Fitness` class used as base class, for the fitness 
 member of any individual.
 """
 
 import sys
-import copy
-import operator
-import functools
 
-from collections import deque, Sequence
-from itertools import izip, repeat, count
+from collections import Sequence
+from copy import deepcopy
+from functools import partial 
+from operator import mul, truediv
 
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators.
@@ -38,10 +37,14 @@ class Toolbox(object):
     arguments, this method defaults to the :func:`map` function. You may
     populate the toolbox with any other function by using the
     :meth:`~deap.base.Toolbox.register` method.
+
+    Concrete usages of the toolbox are shown for initialization in the
+    :ref:`creating-types` tutorial and for tools container in the
+    :ref:`next-step` tutorial.
     """
 
     def __init__(self):
-        self.register("clone", copy.deepcopy)
+        self.register("clone", deepcopy)
         self.register("map", map)
 
     def register(self, alias, method, *args, **kargs):
@@ -73,7 +76,7 @@ class Toolbox(object):
         documentation. The :attr:`__dict__` attribute will also be updated
         with the original function's instance dictionnary, if any.
         """
-        pfunc = functools.partial(method, *args, **kargs)
+        pfunc = partial(method, *args, **kargs)
         pfunc.__name__ = alias
         pfunc.__doc__ = method.__doc__
         
@@ -112,6 +115,7 @@ class Toolbox(object):
             method = decorator(method)
         self.register(alias, method, *args, **kargs)
 
+
 class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
     provided as a tuple, the fitness is initalized using those values,
@@ -126,6 +130,9 @@ class Fitness(object):
     can be made between fitnesses of different size, if the fitnesses are
     equal until the extra elements, the longer fitness will be superior to the
     shorter.
+
+    Different types of fitnesses are created in the :ref:`creating-types`
+    tutorial.
 
     .. note::
        When comparing fitness values that are **minimized**, ``a > b`` will
@@ -169,16 +176,18 @@ class Fitness(object):
             self.values = values
         
     def getValues(self):
-        return tuple(map(operator.truediv, self.wvalues, self.weights))
+        return tuple(map(truediv, self.wvalues, self.weights))
             
     def setValues(self, values):
         try:
-            self.wvalues = tuple(map(operator.mul, values, self.weights))
+            self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
             _, _, traceback = sys.exc_info()
             raise TypeError, ("Both weights and assigned values must be a "
             "sequence of numbers when assigning to values of "
-            "%r." % self.__class__, ), traceback
+            "%r. Currently assigning value(s) %r of %r to a fitness with "
+            "weights %s."
+            % (self.__class__, values, type(values), self.weights)), traceback
             
     def delValues(self):
         self.wvalues = ()
@@ -201,18 +210,12 @@ class Fitness(object):
         return not self.__lt__(other)
 
     def __le__(self, other):
-        if not other:                   # Protection against yamling
-            return False
         return self.wvalues <= other.wvalues
 
     def __lt__(self, other):
-        if not other:                   # Protection against yamling
-            return False
         return self.wvalues < other.wvalues
 
     def __eq__(self, other):
-        if not other:                   # Protection against yamling
-            return False
         return self.wvalues == other.wvalues
     
     def __ne__(self, other):
@@ -225,9 +228,9 @@ class Fitness(object):
         immutable and the fitness does not contain any other object 
         than :attr:`values` and :attr:`weights`.
         """
-        copy = self.__class__()
-        copy.wvalues = self.wvalues
-        return copy
+        copy_ = self.__class__()
+        copy_.wvalues = self.wvalues
+        return copy_
 
     def __str__(self):
         """Return the values of the Fitness object."""
@@ -239,271 +242,3 @@ class Fitness(object):
         name = self.__class__.__name__
         return "%s.%s(%r)" % (module, name, self.values)
 
-class Tree(list):
-    """Basic N-ary tree class. A tree is initialized from the list `content`.
-    The first element of the list is the root of the tree, then the
-    following elements are the nodes. Each node can be either a list or a 
-    single element. In the case of a list, it is considered as a subtree, 
-    otherwise a leaf.
-    """
-    
-    class NodeProxy(object):
-        __slots__ = ['obj']
-        def __new__(cls, obj, *args, **kargs):
-            if isinstance(obj, cls):
-                return obj
-            inst = object.__new__(cls)
-            inst.obj = obj
-            return inst
-            
-        def getstate(self):
-            """Return the state of the NodeProxy: the proxied object."""
-            return self.obj
-            
-        @property
-        def size(self):
-            """Return the size of a leaf: 1."""
-            return 1
-            
-        @property
-        def height(self):
-            """Return the height of a leaf: 0."""
-            return 0
-            
-        @property
-        def root(self):
-            """Return the root of a leaf: itself."""
-            return self
-        
-        def __eq__(self, other):
-            if isinstance(other, self.__class__):
-                return self.obj == other.obj
-            else:
-                return False
-
-        def __getattr__(self, attr):
-            return getattr(self.obj, attr)
-        def __call__(self, *args, **kargs):
-            return self.obj(*args, **kargs)
-        def __repr__(self):
-            return self.obj.__repr__()
-        def __str__(self):
-            return self.obj.__str__()
-                
-    @classmethod        
-    def convertNode(cls, node):
-        """Convert node into the proper object either a Tree or a Node."""
-        if isinstance(node, cls):
-            if len(node) == 1:
-                return cls.NodeProxy(node[0])
-            return node
-        elif isinstance(node, list):
-            if len(node) > 1:
-                return cls(node)
-            else:
-                return cls.NodeProxy(node[0])
-        else:
-            return cls.NodeProxy(node)
-
-    def __init__(self, content=None):
-        """Initialize a tree with a list `content`.
-        
-        The first element of the list is the root of the tree, then the
-        following elements are the nodes. A node could be a list, then
-        representing a subtree.
-        """
-        for elem in content:
-            self.append(self.convertNode(elem))
-        
-    def getstate(self):
-        """Return the state of the Tree as a list of arbitrary elements.
-        It is mainly used for pickling a Tree object.
-        """
-        return [elem.getstate() for elem in self] 
-    
-    def __reduce__(self):
-        """Return the class init, the object's state and the object's
-        dict in a tuple. The function is used to pickle Tree.
-        """
-        return (self.__class__, (self.getstate(),), self.__dict__)
-    
-    def __deepcopy__(self, memo):
-        """Deepcopy a Tree by first converting it back to a list of list."""
-        new = self.__class__(copy.deepcopy(self.getstate()))
-        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
-        return new
-        
-    def __setitem__(self, key, value):
-        """Set the item at `key` with the corresponding `value`."""
-        list.__setitem__(self, key, self.convertNode(value))
-        
-    def __setslice__(self, i, j, value):
-        """Set the slice at `i` to `j` with the corresponding `value`."""
-        list.__setslice__(self, i, j, self.convertNode(value))
-            
-    def __str__(self):
-        """Return the tree in its original form, a list, as a string."""
-        return list.__str__(self)
-        
-    def __repr__(self):
-        """Return the Python code to build a copy of the object."""
-        module = self.__module__
-        name = self.__class__.__name__
-        return "%s.%s(%s)" % (module, name, list.__repr__(self))
-        
-    @property
-    def root(self):
-        """Return the root element of the tree.
-        
-        The root node of a tree is the node with no parents. There is at most 
-        one root node in a rooted tree.
-        """
-        return self[0]
-
-    @property
-    def size(self):
-        """Return the number of nodes in the tree.
-        
-        The size of a node is the number of descendants it has including itself.
-        """
-        return sum(elem.size for elem in self)
-
-    @property
-    def height(self):
-        """Return the height of the tree.
-        
-        The height of a tree is the length of the path from the root to the 
-        deepest node in the tree. A (rooted) tree with only one node (the root) 
-        has a height of zero.
-        """
-        try:
-            return max(elem.height for elem in self[1:])+1
-        except ValueError:
-            return 0
-    
-    @property
-    def iter(self):
-        """Return a generator function that iterates on the element
-         of the tree in linear time using depth first algorithm.
-        
-            >>> t = Tree([1,2,3[4,5,[6,7]],8])
-            >>> [i for i in t.iter]:
-            [1, 2, 3, 4, 5, 6, 7, 8]
-        """
-        for elem in self:
-            if isinstance(elem, Tree):
-                for elem2 in elem.iter:
-                    yield elem2
-            else:
-                yield elem
-    
-    @property
-    def iter_leaf(self):
-        """Return a generator function that iterates on the leaf
-         of the tree in linear time using depth first 
-         algorithm.
-    
-            >>> t = Tree([1,2,3,[4,5,[6,7]],8])
-            >>> [i for i in t.iter_leaf]
-            [2, 3, 5, 7, 8]
-        """
-        for elem in self[1:]:
-            if isinstance(elem, Tree):
-                for elem2 in elem.iter_leaf:
-                    yield elem2
-            else:
-                yield elem
-    
-    @property
-    def iter_leaf_idx(self):
-        """Return a generator function that iterates on the leaf
-        indices of the tree in linear time using depth first 
-        algorithm.
-        
-            >>>  t = Tree([1,2,3,[4,[5,6,7],[8,9]],[10,11]]);
-            >>> [i for i in t.iter_leaf_idx]
-            [1, 2, 5, 6, 8, 10]
-        """
-        def leaf_idx(tree, total):
-            total[0] += 1
-            for elem in tree[1:]:
-                if isinstance(elem, Tree):
-                    for elem2 in leaf_idx(elem, total):
-                        yield total[0]
-                else:
-                    yield total[0]
-                    total[0] += 1
-        return leaf_idx(self, [0])
-
-    def searchSubtreeDF(self, index):
-        """Search the subtree with the corresponding index based on a 
-        depth-first search.
-        """
-        if index == 0:
-            return self
-        total = 0
-        for child in self:
-            if total == index:
-                return child
-            nbr_child = child.size
-            if nbr_child + total > index:
-                return child.searchSubtreeDF(index-total)
-            total += nbr_child
-
-    def setSubtreeDF(self, index, subtree):
-        """Replace the tree with the corresponding index by subtree based
-        on a depth-first search.
-        """
-        if index == 0:
-            try:
-                self[:] = subtree
-            except TypeError:
-                del self[1:]
-                self[0] = subtree
-            return
-    
-        total = 0
-        for i, child in enumerate(self):
-            if total == index:
-                self[i] = subtree
-                return
-            nbr_child = child.size
-            if nbr_child + total > index:
-                child.setSubtreeDF(index-total, subtree)
-                return
-            total += nbr_child
-
-    def searchSubtreeBF(self, index):
-        """Search the subtree with the corresponding index based on a 
-        breadth-first search.
-        """
-        if index == 0:
-            return self
-        queue = deque(self[1:])
-        for i in xrange(index):
-            subtree = queue.popleft()
-            if isinstance(subtree, Tree):
-                queue.extend(subtree[1:])
-        return subtree
-
-    def setSubtreeBF(self, index, subtree):
-        """Replace the subtree with the corresponding index by subtree based
-        on a breadth-first search.
-        """
-        if index == 0:
-            try:
-                self[:] = subtree
-            except TypeError:
-                del self[1:]
-                self[0] = subtree
-            return
-         
-        queue = deque(izip(repeat(self, len(self[1:])), count(1)))
-        for i in xrange(index):
-            elem = queue.popleft()
-            parent = elem[0]
-            child  = elem[1]
-            if isinstance(parent[child], Tree):
-                tree = parent[child]
-                queue.extend(izip(repeat(tree, len(tree[1:])), count(1)))
-        parent[child] = subtree

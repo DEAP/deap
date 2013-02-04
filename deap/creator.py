@@ -20,7 +20,7 @@ create new classes via both composition and inheritance. Attributes both datas
 and functions are added to existing types in order to create new types
 empowered with user specific evolutionary computation capabilities. In effect,
 new classes can be built from any imaginable type, from :class:`list` to
-:class:`set`, :class:`dict`, :class:`~deap.base.Tree` and more,
+:class:`set`, :class:`dict`, :class:`~deap.gp.PrimitiveTree` and more,
 providing the possibility to implement genetic algorithms, genetic
 programming, evolution strategies, particle swarm optimizers, and many more.
 """
@@ -132,6 +132,9 @@ def create(name, base, **kargs):
             
             def __init__(self):
                 self.bar = dict()
+
+    The :ref:`creating-types` tutorial gives more examples of the creator
+    usage.
     """
     dict_inst = {}
     dict_cls = {}

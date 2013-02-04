@@ -35,6 +35,7 @@ class CommThread(AbstractCommThread):
 
     def __init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs):
         AbstractCommThread.__init__(self, recvQ, sendQ, mainThreadEvent, exitEvent, commReadyEvent, randomGenerator, cmdlineArgs)
+        self.importErrorTrigged = False
 
     @property
     def poolSize(self):
@@ -60,7 +61,13 @@ class CommThread(AbstractCommThread):
         return range(self.pSize)
 
     def run(self):
-        from mpi4py import MPI
+        try:
+            from mpi4py import MPI
+        except ImportError:
+            _logger.error("Unable to import mpi4py. Check if the mpi4py module is in your PYTHONPATH or use a different communication manager. DTM will now exit.")
+            self.commReadyEvent.set()
+            self.exitStatus.set()       # Set exit at the beginning
+            return
 
         def mpiSend(msg, dest):
             # Pickle and send over MPI
@@ -73,8 +80,6 @@ class CommThread(AbstractCommThread):
 
             self.msgSendTag += 1
             return b, arrayBuf
-
-        assert MPI.Is_initialized(), "Error in MPI Init!"
 
         self.pSize = MPI.COMM_WORLD.Get_size()
         self.currentId = MPI.COMM_WORLD.Get_rank()

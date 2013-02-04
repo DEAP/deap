@@ -22,6 +22,8 @@ import time
 import copy
 import logging
 
+from collections import defaultdict
+
 try:
     from lxml import etree
 except ImportError:
@@ -88,6 +90,9 @@ class LoadBalancer(object):
         self.sendDelayMultiplier = DTM_SEND_TASK_DELAY*float(len(self.ws))**0.5
         self.lastTaskSend = time.time() - self.sendDelayMultiplier
         self.lastQuerySend = time.time()
+        
+        self.randomizedWorkersList = [w for w in self.wIter]
+        randomizer.shuffle(self.randomizedWorkersList)
     
     def setTraceModeOn(self, xmlLogger):
         self.xmlLogger = xmlLogger
@@ -103,12 +108,7 @@ class LoadBalancer(object):
         self.ws[self.wid].seqNbr += 1
 
     def mergeNodeStatus(self, otherDict):
-        for wId in otherDict:
-            if len(self.ws[wId].ackWaiting) == 0 and otherDict[wId].seqNbr > self.ws[wId].seqNbr and wId != self.wid:
-                remInfoUpToDate = self.ws[wId].infoUpToDate                
-                self.ws[wId] = otherDict[wId]   # Les deux dernieres infos sont "personnelles"
-                self.ws[wId].infoUpToDate = remInfoUpToDate
-                self.ws[wId].ackWaiting = []
+        return
     
     def notifyTaskReceivedFrom(self, fromId):
         self.ws[fromId].infoUpToDate = True
@@ -121,115 +121,32 @@ class LoadBalancer(object):
             print("ERROR : Tentative to delete an already received or non-existant ACK!", self.ws[fromWorker].ackWaiting, ackN)
 
     def takeDecision(self):
-        MAX_PROB = 1.
-        MIN_PROB = 0.00
-
         sendTasksList = []
-        sendNotifList = []
-        
-        if not self.xmlLogger is None:
-            decisionLog = etree.SubElement(self.xmlLogger, "decision", {"time" : repr(time.time()), 
-                                                                        "selfLoad" : repr(self.ws[self.wid].loadCurrentExec)+","+repr(self.ws[self.wid].loadExecQ)+","+repr(self.ws[self.wid].loadWaitingRestartQ)+","+repr(self.ws[self.wid].loadWaitingQ)})
-            for workerId in self.ws:
-                etree.SubElement(decisionLog, "workerKnownState", {"id" : repr(workerId), "load" : repr(self.ws[workerId].loadCurrentExec)+","+repr(self.ws[workerId].loadExecQ)+","+repr(self.ws[workerId].loadWaitingRestartQ)+","+repr(self.ws[workerId].loadWaitingQ)})
-
-        listLoads = self.ws.values()
-        self.totalExecLoad, self.totalEQueueLoad, self.totalWaitingRQueueLoad, self.totalWaitingQueueLoad = 0., 0., 0., 0.
-        totalSum2 = 0.
-        for r in listLoads:
-            self.totalExecLoad += r.loadCurrentExec
-            self.totalEQueueLoad += r.loadExecQ
-            self.totalWaitingRQueueLoad += r.loadWaitingRestartQ
-            self.totalWaitingQueueLoad += r.loadWaitingQ
-            totalSum2 += (r.loadCurrentExec+r.loadExecQ+r.loadWaitingRestartQ)**2
-
-        avgLoad = (self.totalExecLoad + self.totalEQueueLoad + self.totalWaitingRQueueLoad) / float(len(self.ws))
-        try:
-            stdDevLoad = (totalSum2/float(len(self.ws)) - avgLoad**2)**0.5
-        except ValueError:
-            # Some weird cases with floating point precision, where avgLoad**2 might be an epsilon greater than totalSum2/len(self.ws)
-            stdDevLoad = 0.
-        selfLoad = self.ws[self.wid].sumRealLoad()
-        diffLoad = selfLoad - avgLoad
-
-
-        listPossibleSendTo = filter(lambda d: d[1].infoUpToDate and d[1].sumRealLoad() > avgLoad, self.ws.items())
-        if selfLoad == 0 and len(listPossibleSendTo) > 0 and avgLoad != 0 and self.ws[self.wid].loadWaitingRestartQ < DTM_RESTART_QUEUE_BLOCKING_FROM:
-            # Algorithme d'envoi de demandes de taches
-            self.lastQuerySend = time.time()
-            txtList = ""
-            for worker in listPossibleSendTo:
-                sendNotifList.append(worker[0])
-                txtList +=str(worker[0])+","
-                self.ws[worker[0]].infoUpToDate = False
-                
-            if not self.xmlLogger is None:
-                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendrequest", "destination":txtList})
-
-           
-        if self.ws[self.wid].loadExecQ > 0 and diffLoad > -stdDevLoad and avgLoad != 0 and stdDevLoad != 0:
-            # Algorithme d'envoi de taches
-            def scoreFunc(loadi):
-                if loadi < (avgLoad-2*stdDevLoad) or loadi == 0:
-                    return MAX_PROB    # Si le load du worker est vraiment tres bas, forte probabilite de lui envoyer des taches
-                elif loadi > (avgLoad + stdDevLoad):
-                    return MIN_PROB    # Si le load du worker est tres haut, tres faible probabilite de lui envoyer des taches
-                else:
-                    a = (MIN_PROB-MAX_PROB)/(3*stdDevLoad)
-                    b = MIN_PROB - a*(avgLoad + stdDevLoad)
-                    return a*loadi + b      # Lineaire entre Avg-2*stdDev et Avg+stdDev
-
-            scores = [(None,0)] * (len(self.ws)-1)      # Gagne-t-on vraiment du temps en prechargeant la liste?
-            i = 0
-            for worker in self.ws:
-                if worker == self.wid:
-                    continue
-                scores[i] = (worker, scoreFunc(self.ws[worker].sumRealLoad()))
-                i += 1
-            
-            if not self.xmlLogger is None:
-                 etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "checkavail", "destination":str(scores)})
-            
-            while diffLoad > 0.00000001 and len(scores) > 0 and self.ws[self.wid].loadExecQ > 0.:
-                selectedIndex = self.localRandom.randint(0,len(scores)-1)
-                if self.localRandom.random() > scores[selectedIndex][1]:
-                    del scores[selectedIndex]
-                    continue
-
-                widToSend = scores[selectedIndex][0]
-
-                loadForeign = self.ws[widToSend]
-                diffLoadForeign = loadForeign.sumRealLoad() - avgLoad
-                sendT = 0.
-
-                if diffLoadForeign < 0:     # On veut lui envoyer assez de taches pour que son load = loadAvg
-                    sendT = diffLoadForeign*-1 if diffLoadForeign*-1 < self.ws[self.wid].loadExecQ else self.ws[self.wid].loadExecQ
-                elif diffLoadForeign < stdDevLoad:  # On veut lui envoyer assez de taches pour son load = loadAvg + stdDev
-                    sendT = stdDevLoad - diffLoadForeign if stdDevLoad - diffLoadForeign < self.ws[self.wid].loadExecQ else self.ws[self.wid].loadExecQ
-                else:               # On envoie une seule tache
-                    sendT = 0.
-
-                tasksIDs, retiredTime = self.execQ.getTasksIDsWithExecTime(sendT)
-                tasksObj = []
-                for tID in tasksIDs:
-                    t = self.execQ.getSpecificTask(tID)
-                    if not t is None:
-                        tasksObj.append(t)
-
-                if len(tasksObj) > 0:
-                    diffLoad -= retiredTime
-                    self.ws[self.wid].loadExecQ -= retiredTime
-                    self.ws[widToSend].loadExecQ += retiredTime
-
-                    ackNbr = len(self.ws[widToSend].ackWaiting)
-                    self.ws[widToSend].ackWaiting.append(ackNbr)
-
-                    sendTasksList.append((widToSend, tasksObj, ackNbr))
-
-                del scores[selectedIndex]       # On s'assure de ne pas reprendre le meme worker
-                        
-            if not self.xmlLogger is None:
-                etree.SubElement(decisionLog, "action", {"time" : repr(time.time()), "type" : "sendtasks", "destination":str([b[0] for b in sendTasksList])[1:-1], "tasksinfo" : str([len(b[1]) for b in sendTasksList])[1:-1]})
-                
-            self.lastTaskSend = time.time()
-        return sendNotifList, sendTasksList
+        checkedTasksNbr = 0
+        sendTmpDict = defaultdict(list)
+        while self.execQ.getLen() > 1 and checkedTasksNbr < self.execQ.getLen():
+            # We only send a task if we are its creator
+            # Round-robin task assignation to other workers
+            for worker in self.randomizedWorkersList:
+                if self.execQ.getLen() <= 1:
+                    break
+                if not worker == self.wid:
+                    while checkedTasksNbr < self.execQ.getLen():
+                        checkedTasksNbr += 1
+                        try:
+                            tObj = self.execQ.getTask()
+                        except Queue.Empty:
+                            break
+                        if tObj.creatorWid == self.wid:
+                            sendTmpDict[worker].append(tObj)
+                            break
+                        else:
+                            self.execQ.put(tObj)
+                    
+        for widToSend in self.randomizedWorkersList:
+            if len(sendTmpDict[widToSend]) == 0:
+                continue
+            ackNbr = len(self.ws[widToSend].ackWaiting)
+            self.ws[widToSend].ackWaiting.append(ackNbr)
+            sendTasksList.append((widToSend, sendTmpDict[widToSend], ackNbr))
+        return [], sendTasksList

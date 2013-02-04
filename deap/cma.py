@@ -31,8 +31,7 @@ class Strategy(object):
     
     :param centroid: An iterable object that indicates where to start the
                      evolution.
-    :param sigma: The list of initial standard deviations of the distribution,
-                  it shall be the same length than the centroid.
+    :param sigma: The initial standard deviation of the distribution.
     :param parameter: One or more parameter to pass to the strategy as
                       described in the following table, optional.
     
@@ -47,6 +46,10 @@ class Strategy(object):
     | ``mu``         | ``int(lambda_ / 2)``      | The number of parents to   | 
     |                |                           | keep from the              |
     |                |                           | lambda children (integer). |
+    +----------------+---------------------------+----------------------------+
+    | ``cmatrix``    | ``identity(N)``           | The initial covariance     |
+    |                |                           | matrix of the distribution |
+    |                |                           | that will be sampled.      |
     +----------------+---------------------------+----------------------------+
     | ``weights``    | ``"superlinear"``         | Decrease speed, can be     |
     |                |                           | ``"superlinear"``,         |
@@ -70,6 +73,7 @@ class Strategy(object):
     |                | mueff) / ((N + 2)^2 +     | update.                    |
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
+
     """
     def __init__(self, centroid, sigma, **kargs):
         self.params = kargs
@@ -84,12 +88,16 @@ class Strategy(object):
         self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) + \
                                       1. / (21. * self.dim**2))
         
-        self.B = numpy.identity(self.dim)
-        self.C = numpy.identity(self.dim)
-        self.diagD = numpy.ones(self.dim)
+        self.C = self.params.get("cmatrix", numpy.identity(self.dim))
+        self.diagD, self.B = numpy.linalg.eigh(self.C)
+
+        indx = numpy.argsort(self.diagD)
+        self.diagD = self.diagD[indx]**0.5
+        self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
         
-        self.cond = 1
+        self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
+        
         self.lambda_ = self.params.get("lambda_", int(4 + 3 * log(self.dim)))
         self.update_count = 0
         self.computeParams(self.params)
@@ -107,11 +115,11 @@ class Strategy(object):
         return map(ind_init, arz)
         
     def update(self, population):
-        """Update the current covariance matrix strategy and *population*.
+        """Update the current covariance matrix strategy from the
+        *population*.
         
         :param population: A list of individuals from which to update the
-                           parameters and where the new population will be
-                           placed.
+                           parameters.
         """
         population.sort(key=lambda ind: ind.fitness, reverse=True)
         
@@ -192,6 +200,15 @@ class Strategy(object):
         self.damps = params.get("damps", self.damps)
         
 class StrategyOnePlusLambda(object):
+    """
+    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigme.
+    
+    :param parent: An iterable object that indicates where to start the
+                   evolution. The parent requires a fitness attribute.
+    :param sigma: The initial standard deviation of the distribution.
+    :param parameter: One or more parameter to pass to the strategy as
+                      described in the following table, optional.
+    """
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
         self.sigma = sigma
@@ -206,6 +223,11 @@ class StrategyOnePlusLambda(object):
         self.psucc = self.ptarg
         
     def computeParams(self, params):
+        """Computes the parameters depending on *lambda_*. It needs to be
+        called again if *lambda_* changes during evolution.
+        
+        :param params: A dictionary of the manually set parameters.
+        """
         # Selection :
         self.lambda_ = params.get("lambda_", 1)
         
@@ -220,12 +242,25 @@ class StrategyOnePlusLambda(object):
         self.pthresh = params.get("pthresh", 0.44)
     
     def generate(self, ind_init):
+        """Generate a population from the current strategy using the 
+        centroid individual as parent.
+        
+        :param ind_init: A function object that is able to initialize an
+                         individual from a list.
+        :returns: A list of individuals.
+        """
         # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)        
         return map(ind_init, arz)
     
     def update(self, population):
+        """Update the current covariance matrix strategy from the
+        *population*.
+        
+        :param population: A list of individuals from which to update the
+                           parameters.
+        """
         population.sort(key=lambda ind: ind.fitness, reverse=True)
         lambda_succ = sum(self.parent.fitness <= ind.fitness for ind in population)
         p_succ = float(lambda_succ) / self.lambda_

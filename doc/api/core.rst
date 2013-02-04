@@ -33,16 +33,7 @@ aliases instead of direct function names.
 	
 	.. automethod:: deap.base.Toolbox.decorate(alias, decorator[, decorator[, ...]])
 
-Additional Base Types
----------------------
-Even if there is a very large variety of implemented types in Python, we must provide additional ones for sake of completeness.
-
 Fitness
-+++++++
+-------
 .. autoclass:: deap.base.Fitness([values])
-	:members:
-
-Tree
-++++
-.. autoclass:: deap.base.Tree([content])
 	:members:
