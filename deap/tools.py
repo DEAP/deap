@@ -1455,16 +1455,16 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
-    :param fitness_size: The number of individuals participating in each
+    :param fitness_size: The number of individuals participating in each \
     fitness tournament
-    :param parsimony_size: The number of individuals participating in each
-    size tournament. This value has to be a real number
+    :param parsimony_size: The number of individuals participating in each \
+    size tournament. This value has to be a real number\
     in the range [1,2], see above for details.
-    :param fitness_first: Set this to True if the first tournament done should
-    be the fitness one (i.e. the fitness tournament producing aspirants for
-    the size tournament). Setting it to False will behaves as the opposite
-    (size tournament feeding fitness tournaments with candidates). It has been
-    shown that this parameter does not have a significant effect in most cases
+    :param fitness_first: Set this to True if the first tournament done should \
+    be the fitness one (i.e. the fitness tournament producing aspirants for \
+    the size tournament). Setting it to False will behaves as the opposite \
+    (size tournament feeding fitness tournaments with candidates). It has been \
+    shown that this parameter does not have a significant effect in most cases\
     (see [Luke2002fighting]_).
     :returns: A list of selected individuals.
     
