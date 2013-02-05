@@ -10,7 +10,7 @@ crossover will transform those individuals in-place. The responsibility of
 making offspring(s) independent of their parent(s) and invalidating the
 fitness is left to the user and is generally fulfilled in the algorithms by
 calling :func:`toolbox.clone` on an individual to duplicate it and 
-``del`` onthe :attr:`values` attribute of the individual's fitness to 
+``del`` on the :attr:`values` attribute of the individual's fitness to 
 invalidate it.
 
 Here is a list of the implemented operators in DEAP,
