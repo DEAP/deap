@@ -30,7 +30,7 @@ from functools import partial
 from inspect import isclass
 from operator import eq, lt
 
-import creator
+from deap import creator
 
 ######################################
 # GP Data structure                  #
@@ -158,7 +158,7 @@ class Ephemeral(Terminal):
     """
     __metaclass__ = abc.ABCMeta
     def __init__(self):
-        Terminal.__init__(self, self.func(), False, self.ret)
+        Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
 
     @abc.abstractmethod
     def func():
@@ -185,7 +185,7 @@ class PrimitiveSetTyped(object):
         self.ret = ret_type
         self.ins = in_types
         for i, type_ in enumerate(in_types):
-            arg_str = "{prefix}{index}".format(prefix=prefix,index=i)
+            arg_str = "{prefix}{index}".format(prefix=prefix, index=i)
             self.arguments.append(arg_str)
             self._add(self.terminals, Terminal(arg_str, True, type_))
             self.terms_count += 1
