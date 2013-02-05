@@ -16,9 +16,11 @@ algorithms in EC: generational, steady-state, :math:`(\mu\ ,\ \lambda)`,
 :math:`(\mu+\lambda)`, and CMA-ES. These are readily usable for the most
 common population layouts. Specific genetic programming tools are provided in
 the :mod:`~deap.gp` module. A complete and efficient (and stand alone)
-parallelization module, base on MPI, providing some very useful parallel
-method is provided in the :mod:`~deap.dtm` module. Finally, common benchmark
-functions are readily implemented in the :mod:`~deap.benchmarks`.
+parallelization module including some very useful parallel methods is provided 
+by the SCOOP_ project. Finally, common benchmark functions are readily 
+implemented in the :mod:`~deap.benchmarks`.
+
+.. _SCOOP: http://scoop.googlecode.com/
 
 .. toctree::
 	:maxdepth: 2
