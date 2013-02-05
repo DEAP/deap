@@ -61,7 +61,7 @@ pset.addPrimitive(operator.eq, [float, float], bool)
 pset.addPrimitive(if_then_else, [bool, float, float], float)
 
 # terminals
-pset.addEphemeralConstant(lambda: random.random() * 100, float)
+pset.addEphemeralConstant("rand100", lambda: random.random() * 100, float)
 pset.addTerminal(0, bool)
 pset.addTerminal(1, bool)
 
