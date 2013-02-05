@@ -10,6 +10,7 @@ programs, the most commonly used representation is the syntax tree which is
 handled by DEAP in two forms, the loosely and strongly typed trees.
 
 .. image:: /_images/gptree.png
+   :align: center
 
 For example, the above figure presents the program :math:`\max(x + 3 * y, x +
 x)`. For this tree and further examples, the leaves of the tree, in green,
@@ -94,6 +95,7 @@ multiplication operator operates only on floats. For example, the following code
 can produce this tree.
 
 .. image:: /_images/gptypedtree.png
+   :align: center
 
 In the last code sample, we first define an *if then else* function, that
 returns the second argument if the first argument is true and the third one
@@ -119,7 +121,9 @@ can only have the terminal ``3.0``, the ``if_then_else`` function or the
    will occur, no terminal can be placed to terminate the tree.
    
    |
+
    .. image:: /_images/gptypedinvtree.png
+      :align: center
 
    In this situation you'll get an :class:`IndexError` with the message ``"The
    gp.generate function tried to add a terminal of type TYPE, but there is
