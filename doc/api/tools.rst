@@ -9,38 +9,39 @@ individuals. This means, for example, that providing two individuals to the
 crossover will transform those individuals in-place. The responsibility of
 making offspring(s) independent of their parent(s) and invalidating the
 fitness is left to the user and is generally fulfilled in the algorithms by
-calling :func:`toolbox.clone` on an individual to duplicate it and ``del`` on
-the :attr:`values` attribute of the individual's fitness to invalidate it.
+calling :func:`toolbox.clone` on an individual to duplicate it and 
+``del`` on the :attr:`values` attribute of the individual's fitness to 
+invalidate it.
 
 Here is a list of the implemented operators in DEAP,
 
-============================ =========================================== ========================================= ========================= ================
- Initialization               Crossover                                   Mutation                                  Selection                 Migration 
-============================ =========================================== ========================================= ========================= ================
- :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`     :func:`migRing`
- :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`       ..             
- :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`          ..             
- ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`          ..             
- ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`         ..             
- ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`           ..             
- ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`          ..             
- ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`  ..             
- ..                           :func:`cxESTwoPoints`                       ..                                        ..                        ..             
- ..                           :func:`cxSimulatedBinary`                   ..                                        ..                        ..             
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                        ..             
- ..                           :func:`cxMessyOnePoint`                     ..                                        ..                        ..             
-============================ =========================================== ========================================= ========================= ================
+============================ =========================================== ========================================= ============================ ================
+ Initialization               Crossover                                   Mutation                                  Selection                   Migration 
+============================ =========================================== ========================================= ============================ ================
+ :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`       :func:`migRing`
+ :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`         ..             
+ :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`            ..             
+ ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`            ..             
+ ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`           ..             
+ ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`             ..             
+ ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`            ..             
+ ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`    ..             
+ ..                           :func:`cxESTwoPoints`                       ..                                        :func:`selDoubleTournament` ..             
+ ..                           :func:`cxSimulatedBinary`                   ..                                        ..                          ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                          ..             
+ ..                           :func:`cxMessyOnePoint`                     ..                                        ..                          ..             
+============================ =========================================== ========================================= ============================ ================
 
 and genetic programming specific operators.
 
-============================ =========================================== =========================================
- Initialization               Crossover                                   Mutation                                
-============================ =========================================== =========================================
- :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutUniform`             
- :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutNodeReplacement`     
- :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutEphemeral`           
- ..                           ..                                          :func:`~deap.gp.mutInsert`
-============================ =========================================== =========================================
+============================ =========================================== ========================================= ================================
+ Initialization               Crossover                                   Mutation                                 Bloat control
+============================ =========================================== ========================================= ================================
+ :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutUniform`              :func:`~deap.gp.staticDepthLimit`
+ :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutNodeReplacement`      :func:`~deap.gp.staticSizeLimit`
+ :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutEphemeral`            :func:`selDoubleTournament`
+ ..                           ..                                          :func:`~deap.gp.mutInsert`               ..
+============================ =========================================== ========================================= ================================
 
 
 Initialization
@@ -129,11 +130,20 @@ Selection
 
 .. autofunction:: deap.tools.selWorst
 
+.. autofunction:: deap.tools.selDoubleTournament
+
 .. autofunction:: deap.tools.selTournamentDCD
 
 .. autofunction:: sortFastND
 
 .. autofunction:: assignCrowdingDist
+
+Bloat control
++++++++++++++
+
+.. autofunction:: deap.gp.staticDepthLimit
+
+.. autofunction:: deap.gp.staticSizeLimit
 
 Migration
 +++++++++
