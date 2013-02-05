@@ -19,7 +19,7 @@ One of the most crucial aspect of a GP program is the choice of the primitives s
 .. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 27-41
     
-The redefinition of the division is made to protect it against a zero division error (which would crash the program). The other functions are simply a mapping from the Python :mod:`operator` module. The number following the function is the *arity* of the primitive, that is the number of entries it takes (this will be used by DTM to build the individuals from the primitives).
+The redefinition of the division is made to protect it against a zero division error (which would crash the program). The other functions are simply a mapping from the Python :mod:`operator` module. The number following the function is the *arity* of the primitive, that is the number of entries it takes.
 
 On the last line, we declare an :class:`~deap.gp.Ephemeral` constant. This is a special terminal type, which does not have a fixed value. When the program appends an ephemeral constant terminal to a tree, the function it contains is executed, and its result is inserted as a constant terminal. In this case, those constant terminals can take the values -1, 0 or 1.
 
@@ -36,7 +36,7 @@ As any evolutionary program, symbolic regression needs (at least) two object typ
 .. literalinclude:: /code/examples/gp/gp_symbreg.py
    :lines: 44-45
 
-The first line creates the fitness object (this is a minimization problem, so the weight is negative). The `weights` argument must be an iterable of weights, even if there is only one fitness measure. The second line create the individual object itself. Very straightforward, we can see that it will be based upon a tree, to which we add two attributes : a fitness and the primitive set. If, for any reason, the user would want to add any other attribute (for instance, a file in which the individual will be saved), it would be as easy as adding this attribute of any type to this line. After this declaration, any individual produced will contain those wanted attributes.
+The first line creates the fitness object (this is a minimization problem, so the weight is negative). The `weights` argument must be an iterable of weights, even if there is only one fitness measure. The second line create the individual object itself. Very straightforward, we can see that it will be based upon a tree, to which we add a fitness. If, for any reason, the user would want to add any other attribute (for instance, a file in which the individual will be saved), it would be as easy as adding this attribute of any type to this line. After this declaration, any individual produced will contain those wanted attributes.
     
 
 Toolbox
