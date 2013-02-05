@@ -20,7 +20,6 @@ Genetic Algorithm (GA)
 	ga_onemax
 	ga_onemax_short
 	ga_knapsack
-	coev_comp
 	coev_coop
 
 Genetic Programming (GP)
