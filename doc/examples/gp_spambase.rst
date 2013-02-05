@@ -26,9 +26,6 @@ On the first line, we see the declaration of a typed primitive set with :class:`
 
 After that, we define the primitives themselves. The definition of a typed primitive has two additional parameters : a list containing the parameters type, in order, and the return type.
 
-.. note::
-    The types specified do not have to be real Python or C types. In the above example, we may rename "float" in "type1" and "bool" in "type2" without any issue. For the same reason, DEAP nor Python actually check if a given parameter has the good type.
-
 The terminals set is then filled, with at least one terminal of each type, and that is for the primitive set declaration.
 
 Evaluation function
