@@ -127,7 +127,7 @@ can only have the terminal ``3.0``, the ``if_then_else`` function or the
 
 Generation of Tree Individuals
 ------------------------------
-The code presented n the last two sections produce valid trees. 
+The code presented in the last two sections produce valid trees. 
 However, as in the :ref:`next-step` tutorial, these trees are not valid
 individuals for evolution. One must combine the creator and the toolbox to
 produce valid individuals. With the primitive set created earlier we will
@@ -136,7 +136,7 @@ create the :class:`Fitness` and the :class:`Individual` classes.
 
 	creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 	creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin,
-				      pset=pset)
+	               pset=pset)
 
 Then we will register the generation function into a
 :class:`~deap.base.Toolbox`.
@@ -145,10 +145,20 @@ Then we will register the generation function into a
 	toolbox = base.Toolbox()
 	toolbox.register("expr", gp.genFull, pset=pset, min_=1, max_=3)
 	toolbox.register("individual", tools.initIterate, creator.Individual,
-					     toolbox.expr)
+	                 toolbox.expr)
+
+Calling :func:`toolbox.individual` will readily return an individual that is
+a :class:`~deap.gp.PrimitiveTree`.
 
 Ephemeral Constants
 -------------------
+An ephemeral constant is a terminal encapsulating a value that will be generated
+from a given function a run time. Ephemeral constant are used to have terminals
+that don't have all the same values. For example, to create an ephemeral constant
+that takes its value in :math:`[-1, 1)` we use
+::
 
-Representing Functions with Symbols
------------------------------------
+	pset.addEphemeralConstant(lambda: random.uniform(-1, 1))
+
+The ephemeral constant, when selected as a terminal for a tree, will contain a value
+drawn from the interval independent of the last time it was drawn.
