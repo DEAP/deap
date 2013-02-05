@@ -3,6 +3,15 @@ What's New?
 ===========
 Here is a (incomplete) log of the changes made to DEAP over time. 
 
+To be released 1.0
+==================
+
+- Added object oriented inheritance to strongly typed genetic programming.
+- Added the possibility to name primitives added to a PrimitiveSet.
+- Added the pset to GP mutation operators that require it.
+- Removed pset from the GP individuals in the examples.
+- Removed DTM from the sources.
+
 Release 0.9
 ===========
 
