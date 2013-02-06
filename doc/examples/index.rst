@@ -22,6 +22,8 @@ Genetic Algorithm (GA)
 	ga_knapsack
 	coev_coop
 
+.. _gpexamples:
+
 Genetic Programming (GP)
 ------------------------
 
