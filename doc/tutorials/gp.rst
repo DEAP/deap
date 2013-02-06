@@ -187,34 +187,30 @@ In DEAP, trees can be translated to readable Python code and compiled to
 Python code object using functions provided by the :py:mod:`~deap.gp` 
 module. The first function, :func:`~deap.gp.stringify` takes an expression
 or a PrimitiveTree and translates it into readable Python code. For example,
-the following lines generate a tree and output its code
+the following lines generate a tree and output the code from the first example
+primitive set
 ::
 
-	expr = genFull(pset, min_=1, max_=3)
-	tree = PrimitiveTree(expr)
-	print(stringify(tree))
-
-Using the primitive set from the first example, a possible output 
-could be :
-::
-
+	>>> expr = genFull(pset, min_=1, max_=3)
+	>>> tree = PrimitiveTree(expr)
+	>>> print(stringify(tree))
 	'mul(add(x, x), max(y, x))'
 	
-Now, this string represents the program we just generated, but we are
-yet able to execute it. To do so, we have to compile the expression to
-Python code object. Since this is a function with two inputs, we wish
-to compile the code into a function. This is possible with 
+Now, this string represents the program we just generated, but it cannot
+yet be executed. To do so, we have to compile the expression to
+Python code object. Since this function has two inputs, we wish
+to compile the code into a callable object. This is possible with 
 :func:`~deap.gp.lambdify`. The term `lambdify` comes from the fact that
-it returns a :keyword:`lambda` function corresponding to the code. It takes
-two arguments, the expression to compile and the associated primitive set.
+it returns a :keyword:`lambda` function corresponding to the code.
+:func:`~deap.gp.lambdify` takes two arguments, the expression to compile and
+the associated primitive set.
 The following example compiles the preceding tree and evaluates the resulting
 function for :math:`x=1` and :math:`y=2`.
 ::
 
-	function = lambdify(tree, pset)
-	print(function(1, 2))
-
-This outputs `4`.
+	>>> function = lambdify(tree, pset)
+	>>> print(function(1, 2))
+	4
 
 Finally, when the generated program has no input argument and terminals
 are functions, the expression can be compiled to byte code using the
@@ -226,9 +222,10 @@ Tree Size Limit and Bloat Control
 
 Since DEAP uses the Python parser to compile the code represented
 by the trees, it inherits from its limitations. The most commonly 
-encountered is the parsing stack limit. Python interpreter parser
+encountered restriction is the parsing stack limit. Python interpreter parser
 stack limit is commonly fixed between 92 and 99. This means that
-an expression can at most be composed of 91 succeeding primitives. 
+an expression can at most be composed of 91 succeeding primitives. In other
+words, a tree can have a maximum depth of 91. 
 When the limit is exceeded, Python raises the following error
 ::
 
