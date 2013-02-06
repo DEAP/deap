@@ -114,11 +114,8 @@ which are the only floats defined.
 The preceding code can produce the tree on the left but not the one on
 the right because the type restrictions.
 
-.. image:: /_images/gptypedtree.png
-   :align: center
-
-.. TODO: Aad a figure of an impossible tree.
-
+.. image:: /_images/gptypedtrees.png
+	:align: center
 
 .. note::
    The generation of trees is done randomly while making sure type constraints
@@ -133,12 +130,29 @@ the right because the type restrictions.
    
    |
 
-   .. image:: /_images/gptypedinvtree.png
+   .. image:: /_images/gptypederrtree.png
       :align: center
 
    In this case, DEAP raises an :class:`IndexError` with the message ``"The
    gp.generate function tried to add a terminal of type float, but there is
    none available."``
+
+Ephemeral Constants
+-------------------
+An ephemeral constant is a terminal encapsulating a value that is generated
+from a given function at run time. Ephemeral constants allow to have terminals
+that don't have all the same values. For example, to create an ephemeral constant
+that takes its value in :math:`[-1, 1)` we use
+::
+
+	pset.addEphemeralConstant(lambda: random.uniform(-1, 1))
+
+The ephemeral constant value is determined when it is inserted in the tree and
+never changes unless it is replaced by another ephemeral constant. Since it is
+a terminal, ephemeral constant can also be typed
+::
+
+	pset.addEphemeralConstant(lambda: random.randint(-10, 10), int)
 
 Generation of Tree Individuals
 ------------------------------
@@ -166,15 +180,75 @@ We then register the generation functions into a :class:`~deap.base.Toolbox`.
 Calling :func:`toolbox.individual` readily returns an individual of type
 :class:`~deap.gp.PrimitiveTree`.
 
-Ephemeral Constants
+Evaluation of Trees
 -------------------
-An ephemeral constant is a terminal encapsulating a value that is generated
-from a given function at run time. Ephemeral constants allow to have terminals
-that don't have all the same values. For example, to create an ephemeral constant
-that takes its value in :math:`[-1, 1)` we use
+
+In DEAP, trees can be translated to readable Python code and compiled to
+Python code object using functions provided by the :py:mod:`~deap.gp` 
+module. The first function, :func:`~deap.gp.stringify` takes an expression
+or a PrimitiveTree and translates it into readable Python code. For example,
+the following lines generate a tree and output its code
 ::
 
-	pset.addEphemeralConstant(lambda: random.uniform(-1, 1))
+	expr = genFull(pset, min_=1, max_=3)
+	tree = PrimitiveTree(expr)
+	print(stringify(tree))
 
-The ephemeral constant value is determined when it is inserted in the tree and
-never changes unless it is replaced by another ephemeral constant.
+Using the primitive set from the first example, a possible output 
+could be :
+::
+
+	'mul(add(x, x), max(y, x))'
+	
+Now, this string represents the program we just generated, but we are
+yet able to execute it. To do so, we have to compile the expression to
+Python code object. Since this is a function with two inputs, we wish
+to compile the code into a function. This is possible with 
+:func:`~deap.gp.lambdify`. The term `lambdify` comes from the fact that
+it returns a :keyword:`lambda` function corresponding to the code. It takes
+two arguments, the expression to compile and the associated primitive set.
+The following example compiles the preceding tree and evaluates the resulting
+function for :math:`x=1` and :math:`y=2`.
+::
+
+	function = lambdify(tree, pset)
+	print(function(1, 2))
+
+This outputs `4`.
+
+Finally, when the generated program has no input argument and terminals
+are functions, the expression can be compiled to byte code using the
+function :func:`~deap.gp.evaluate`. An example of this sort of problem
+is the :ref:`artificial-ant`.
+
+Tree Size Limit and Bloat Control
+---------------------------------
+
+Since DEAP uses the Python parser to compile the code represented
+by the trees, it inherits from its limitations. The most commonly 
+encountered is the parsing stack limit. Python interpreter parser
+stack limit is commonly fixed between 92 and 99. This means that
+an expression can at most be composed of 91 succeeding primitives. 
+When the limit is exceeded, Python raises the following error
+::
+
+	s_push: parser stack overflow 
+	Traceback (most recent call last): 
+	[...]
+	MemoryError
+
+Since this limit is hardcoded in the interpreter, there exists no
+easy way to increase it. Furthermore, in GP this error commonly
+stems from a phenomema known as bloat. That is, the produced individuals
+have reached a point where they contain too much primitives to 
+effectively solved the problem and the evolution stagnates. To counter
+this, DEAP provides different functions that can effectively maintain 
+the size and height of the trees under an acceptable limit. These
+operators are listed in the GP section of :ref:`operators`.
+
+How to Evolve Programs
+----------------------
+
+The different ways to evolve program trees are presented
+through the :ref:`gpexamples` examples.
+

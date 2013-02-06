@@ -2,6 +2,8 @@ Evolutionary Tools
 ==================
 .. automodule:: deap.tools
 
+.. _operators:
+
 Operators
 ---------
 The operator set does the minimum job for transforming or selecting
