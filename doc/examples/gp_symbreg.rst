@@ -86,7 +86,7 @@ At this point, DEAP has all the information needed to begin the evolutionary pro
    :lines: 69, 72-85
 
 
-The hall of fame is a specific structure which contains the *n* best individuals (here, the best one only). The first line set up the Python logger used by DEAP to provide information, warnings or errors about the evolution. Its level can be adjusted according to the desired verbosity level (see :mod:`logging`).
+The hall of fame is a specific structure which contains the *n* best individuals (here, the best one only).
 
 The complete example : [`source code <code/gp/gp_symbreg.py>`_].
 
