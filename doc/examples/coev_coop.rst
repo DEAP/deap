@@ -21,7 +21,7 @@ The first step is to create a bunch of species that will evolve in our
 population.
 
 .. literalinclude:: /code/examples/coev/coev_coop_evol.py
-   :lines: 75
+   :lines: 74
 
 Cooperative coevolution works by sending the best individual of each species
 (called representative) to help in the evaluation of the individuals of the
