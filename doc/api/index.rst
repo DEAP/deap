@@ -29,3 +29,4 @@ functions are readily implemented in the :mod:`~deap.benchmarks`.
 	algo
 	gp
 	dtm
+        benchmarks
