@@ -168,13 +168,13 @@ Calling :func:`toolbox.individual` readily returns an individual of type
 
 Ephemeral Constants
 -------------------
-An ephemeral constant is a terminal encapsulating a value that will be generated
-from a given function a run time. Ephemeral constant are used to have terminals
+An ephemeral constant is a terminal encapsulating a value that is generated
+from a given function at run time. Ephemeral constants allow to have terminals
 that don't have all the same values. For example, to create an ephemeral constant
 that takes its value in :math:`[-1, 1)` we use
 ::
 
 	pset.addEphemeralConstant(lambda: random.uniform(-1, 1))
 
-The ephemeral constant, when selected as a terminal for a tree, will contain a value
-drawn from the interval independent of the last time it was drawn.
+The ephemeral constant value is determined when it is inserted in the tree and
+never changes unless it is replaced by another ephemeral constant.
