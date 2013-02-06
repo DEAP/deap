@@ -114,11 +114,8 @@ which are the only floats defined.
 The preceding code can produce the tree on the left but not the one on
 the right because the type restrictions.
 
-.. image:: /_images/gptypedtree.png
-   :align: center
-
-.. TODO: Aad a figure of an impossible tree.
-
+.. image:: /_images/gptypedtrees.png
+	:align: center
 
 .. note::
    The generation of trees is done randomly while making sure type constraints
@@ -133,7 +130,7 @@ the right because the type restrictions.
    
    |
 
-   .. image:: /_images/gptypedinvtree.png
+   .. image:: /_images/gptypederrtree.png
       :align: center
 
    In this case, DEAP raises an :class:`IndexError` with the message ``"The
