@@ -193,7 +193,7 @@ primitive set
 
 	>>> expr = genFull(pset, min_=1, max_=3)
 	>>> tree = PrimitiveTree(expr)
-	>>> print(stringify(tree))
+	>>> stringify(tree)
 	'mul(add(x, x), max(y, x))'
 	
 Now, this string represents the program we just generated, but it cannot
@@ -209,7 +209,7 @@ function for :math:`x=1` and :math:`y=2`.
 ::
 
 	>>> function = lambdify(tree, pset)
-	>>> print(function(1, 2))
+	>>> function(1, 2)
 	4
 
 Finally, when the generated program has no input argument and terminals
