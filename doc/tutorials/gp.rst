@@ -4,24 +4,25 @@ Genetic Programming
 ===================
 
 Genetic programming is a special field of evolutionary computation that aims
-at building programs automatically to solve problem independently of their
-domain. Although there exist vast diversity of representations used to evolve
-programs, the most commonly used representation is the syntax tree which is
-handled by DEAP in two forms, the loosely and strongly typed trees.
+at building programs automatically to solve problems independently of their
+domain. Although there exists diverse representations used to evolve
+programs, the most common is the syntax tree.
 
 .. image:: /_images/gptree.png
    :align: center
 
 For example, the above figure presents the program :math:`\max(x + 3 * y, x +
 x)`. For this tree and further examples, the leaves of the tree, in green,
-will be called terminals, while the internal nodes, in red, are called
-primitves. The primitive set is the group containing all the possible
-primitives and leaves. The terminals are divided in two subtypes, the
+are called terminals, while the internal nodes, in red, are called
+primitves. The terminals are divided in two subtypes, the
 constants and the arguments. The constants remain the same for the entire
-evolution while the arguments are the input of the program. For the last
+evolution while the arguments are the program inputs. For the last
 presented tree, the arguments are the variables :math:`x` and :math:`y`, and
 the constant is the number :math:`3`.
 
+In DEAP, user defined primitives and terminals are contained in a primitive
+set. For now, there exists two kinds of primitive set, the loosely and the
+strongly typed. 
 
 Loosely Typed Primitive Set
 ---------------------------
