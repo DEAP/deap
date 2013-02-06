@@ -24,14 +24,14 @@ In DEAP, user defined primitives and terminals are contained in a primitive
 set. For now, there exists two kinds of primitive set, the loosely and the
 strongly typed. 
 
-Loosely Typed Primitive Set
----------------------------
-A loosely typed tree is one that does not force any type between the nodes.
-More specifically, any primitive can take any type from the primitive set as
-argument.
+Loosely Typed GP
+----------------
+Loosely typed GP does not enforce specific type between the nodes.
+More specifically, primitives' arguments can be any primitives or terminals
+present in the primitive set.
 
-To define a loosely typed :class:`~deap.gp.PrimitiveSet` for the
-previous tree use
+The following code define a loosely typed :class:`~deap.gp.PrimitiveSet` 
+for the previous tree
 ::
 
 	pset = PrimitiveSet("main", 2)
@@ -40,44 +40,48 @@ previous tree use
 	pset.addPrimitive(operator.mul, 2)
 	pset.addTerminal(3)
 
-The first line creates a primitive set called ``"main"`` taking 2 arguments as
-input. The next three lines, add function as primitives. The first argument
-tell what function to add and the second argument tells how many input they
-take. The last line add a constant terminal. Currently the default name for
-the arguments is ``"ARG0"`` and ``"ARG1"``. To change it to ``"x"`` and
-``"y"`` simply call
+The first line creates a primitive set. Its argument are the name of the
+procedure it will generate ``"main"`` and its number of inputs, 2.
+The next three lines add function as primitives. The first argument
+is the function to add and the second argument the function arity_. 
+The last line adds a constant terminal. Currently the default names for
+the arguments are ``"ARG0"`` and ``"ARG1"``. To change it to ``"x"`` and
+``"y"``, simply call
 ::
 
 	pset.renameArguments(ARG0="x")
 	pset.renameArguments(ARG1="y")
 
-In our case, all functons take two arguments. Having a 1 argument negation
+.. _arity: http://en.wikipedia.org/wiki/Arity
+
+In this case, all functons take two arguments. Having a 1 argument negation
 function, for example, could be done with
 ::
 
 	pset.addPrimitive(operator.neg, 1)
 
 Our primitive set is now ready to generate some trees. The :mod:`~deap.gp`
-module contains three generation functions for trees: :func:`~deap.gp.genFull`,
-:func:`~deap.gp.genGrow`, and :func:`~deap.gp.genRamped`. They all take as
-first argument the primitive set and return a valid list of primitives.
-This list serves as argument to the :class:`~deap.gp.PrimitiveTree`
-creator.
+module contains three prefix expression generation functions 
+:func:`~deap.gp.genFull`, :func:`~deap.gp.genGrow`, and 
+:func:`~deap.gp.genRamped`. Their first argument is a primitive set 
+and they return a valid prefix expression in the form of a list of primitives. 
+The content of this list can be read by the :class:`~deap.gp.PrimitiveTree`
+class to create a prefix tree.
 ::
-	
+
 	expr = genFull(pset, min_=1, max_=3)
 	tree = PrimitiveTree(expr)
 
-The last code will produce a valid tree with depth randomly chosen between 2
-and 4.
+The last code produces a valid full tree with height randomly chosen 
+between 1 and 3.
 
-Strongly Typed Primitive Set
-----------------------------
-A strongly typed primitive set assigns types to every primitive and terminal
-inputs and outputs. The output of a primitive must match the input of another
-one if we want them to be connected. In this way a primitive can return a
-boolean and this boolean would not be multipled with a float if the
-multiplication operator operates only on floats. For example, the following code
+Strongly Typed GP
+-----------------
+In strongly typed GP, every primitive and terminal is assigned a specific
+type. The output type of a primitive must match the input type of another
+one for them to be connected. For example, a primitive can return a
+boolean and this value is guaranteed to not be multipled with a float if the
+multiplication operator operates only on floats.
 ::
 
 	def if_then_else(input, output1, output2):
@@ -93,58 +97,65 @@ multiplication operator operates only on floats. For example, the following code
 	pset.renameArguments(ARG0="x")
 	pset.renameArguments(ARG1="y")
 
-can produce this tree.
+In the last code sample, we first define an *if then else* function, that
+returns the second argument if the first argument is true and the third one
+otherwise. Then, we define our :class:`~deap.gp.PrimitiveSetTyped`. Again,
+the procedure is named ``"main"``. The second argument defines the input types
+of the program, here ``"x"`` is a :class:`bool` and ``"y"`` is a :class:`float`. 
+The third argument defines the output type of the program, a :class:`float`. 
+Adding primitives to this primitive now requires to set the input and 
+output types of the primitives and terminal. For example, we define our 
+``"if_then_else"`` function first argument as a boolean, the second and third
+argument have to be floats. The function is defined as returning a float.
+We now understand that the multiplication primitive can only have the 
+terminal ``3.0``, the ``if_then_else`` function or the ``"y"`` as input, 
+which are the only floats defined.
+
+The preceding code can produce the tree on the left but not the one on
+the right because the type restrictions.
 
 .. image:: /_images/gptypedtree.png
    :align: center
 
-In the last code sample, we first define an *if then else* function, that
-returns the second argument if the first argument is true and the third one
-otherwise. Then we define our :class:`~deap.gp.PrimitiveSetTyped` of name
-``"main"``. Th second argument defines the input types of the program, here
-``"x"`` is a :class:`bool` and ``"y"`` is a :class:`float`. The third argument
-defines the output type of the program, a :class:`float`. Adding primitives to
-this primitive set now requires us to set the input and output of the
-primitives and terminal. For example, we define our if then else function as
-taking a boolean as first input and floats as second and third input, it also
-returns a float as output. We now understand that the multiplication primitive
-can only have the terminal ``3.0``, the ``if_then_else`` function or the
-``"y"`` as input, which are the only floats defined.
+.. TODO: Aad a figure of an impossible tree.
+
 
 .. note::
-   The generation of trees is made randomly. If any primitive as an input type
-   that no terminal can provide, chances are that this primitive will be
-   placed on the last layer of a tree resulting in the imposibility to
+   The generation of trees is done randomly while making sure type constraints
+   are respected. If any primitive as an input type
+   that no primitive and terminal can provide, chances are that this primitive will be
+   picked and placed in the tree, resulting in the imposibility to
    complete the tree within the limit fixed by the generator. For example,
-   when generating a full tree of depth 2, suppose ``"op"`` takes a boolean
+   when generating a full tree of height 2, suppose ``"op"`` takes a boolean
    and a float, ``"and"`` takes 2 boolean and ``"neg"`` takes a float, no
-   terminal is defined and the arguments ar booleans. The following situation
-   will occur, no terminal can be placed to terminate the tree.
+   terminal is defined and the arguments are booleans. The following situation
+   will occur where no terminal can be placed to complete the tree.
    
    |
 
    .. image:: /_images/gptypedinvtree.png
       :align: center
 
-   In this situation you'll get an :class:`IndexError` with the message ``"The
-   gp.generate function tried to add a terminal of type TYPE, but there is
+   In this case, DEAP raises an :class:`IndexError` with the message ``"The
+   gp.generate function tried to add a terminal of type float, but there is
    none available."``
 
 Generation of Tree Individuals
 ------------------------------
 The code presented in the last two sections produce valid trees. 
-However, as in the :ref:`next-step` tutorial, these trees are not valid
+However, as in the :ref:`next-step` tutorial, these trees are yet valid
 individuals for evolution. One must combine the creator and the toolbox to
-produce valid individuals. With the primitive set created earlier we will
-create the :class:`Fitness` and the :class:`Individual` classes.
+produce valid individuals. We need to create the :class:`Fitness` and the
+:class:`Individual` classes. To the :class:`Individual`, in addition to the
+fitness we add a reference to the primitive set. This is used by some of the
+gp operators to modify the individuals.
 ::
 
 	creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 	creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin,
 	               pset=pset)
 
-Then we will register the generation function into a
-:class:`~deap.base.Toolbox`.
+We then register the generation functions into a :class:`~deap.base.Toolbox`.
 ::
 
 	toolbox = base.Toolbox()
@@ -152,8 +163,8 @@ Then we will register the generation function into a
 	toolbox.register("individual", tools.initIterate, creator.Individual,
 	                 toolbox.expr)
 
-Calling :func:`toolbox.individual` will readily return an individual that is
-a :class:`~deap.gp.PrimitiveTree`.
+Calling :func:`toolbox.individual` readily returns an individual of type
+:class:`~deap.gp.PrimitiveTree`.
 
 Ephemeral Constants
 -------------------
