@@ -125,17 +125,11 @@ def main():
                 del ind.fitness.values
     
         # Evaluate the individuals with an invalid fitness
-        eval_ga = 0
         for ind in off_ga:
-            if not ind.fitness.valid:
-               ind.fitness.values = evalSymbReg(best_gp, ind)
-               eval_ga += 1
+            ind.fitness.values = evalSymbReg(best_gp, ind)
         
-        eval_gp = 0
         for ind in off_gp:
-            if not ind.fitness.valid:
-                ind.fitness.values = evalSymbReg(ind, best_ga)
-                eval_gp += 1
+            ind.fitness.values = evalSymbReg(ind, best_ga)
                 
         # Replace the old population by the offspring
         pop_ga = off_ga
@@ -147,8 +141,8 @@ def main():
         best_ga = tools.selBest(pop_ga, 1)[0]
         best_gp = tools.selBest(pop_gp, 1)[0]    
     
-        logger.logGeneration(gen="%d (ga)" % g, evals=eval_ga, stats=stats_ga)
-        logger.logGeneration(gen="%d (gp)" % g, evals=eval_gp, stats=stats_gp)
+        logger.logGeneration(gen="%d (ga)" % g, evals=len(off_ga), stats=stats_ga)
+        logger.logGeneration(gen="%d (gp)" % g, evals=len(off_gp), stats=stats_gp)
 
     print("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values))
     print("Best individual GP is %s, %s" % (gp.stringify(best_gp), best_gp.fitness.values))
