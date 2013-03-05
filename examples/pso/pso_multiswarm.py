@@ -23,6 +23,14 @@ import math
 import operator
 import random
 
+try:
+    from itertools import imap
+except:
+    # Python 3 nothing to do
+    pass
+else:
+    map = imap
+
 from deap import base
 from deap.benchmarks import movingpeaks
 from deap import creator
