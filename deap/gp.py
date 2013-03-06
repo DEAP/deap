@@ -202,13 +202,16 @@ class PrimitiveSetTyped(object):
                     terminal.value = kargs[terminal.value]
 
     def _add(self, dict_, prim):
-        ret_type = prim.ret
-        if not ret_type in dict_:
-            dict_[ret_type]
-            for type_, list_ in dict_.items():
-                if issubclass(type_, ret_type):
-                    dict_[ret_type].extend(list_)
+        def addType(dict_, ret_type):
+            if not ret_type in dict_:
+                dict_[ret_type]
+                for type_, list_ in dict_.items():
+                    if issubclass(type_, ret_type):
+                        dict_[ret_type].extend(list_)
 
+        ret_type = prim.ret
+        addType(self.primitives, ret_type)
+        addType(self.terminals, ret_type)
         for type_ in dict_:
             if issubclass(ret_type, type_):
                 dict_[type_].append(prim)
