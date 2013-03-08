@@ -146,7 +146,7 @@ def create(name, base, **kargs):
     dict_inst = {}
     dict_cls = {}
     for obj_name, obj in kargs.iteritems():
-        if hasattr(obj, "__call__"):
+        if isinstance(obj, type):
             dict_inst[obj_name] = obj
         else:
             dict_cls[obj_name] = obj
