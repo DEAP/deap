@@ -857,21 +857,24 @@ def graph(expr):
     edges = list()
     labels = dict()
     
-    if len(expr) > 1:
-        stack = [[0, 0, expr[0]]]
-        labels[0] = expr[0].name
-        for i, node in enumerate(expr[1:], 1):
-            edges.append((stack[-1][0], i))
-            stack[-1][1] += 1
-            stack.append([i, 0, node])
+    if isinstance(node, Primitive)
+        labels[0] = node.name
+    else:
+        labels[0] = node.value
+    
+    stack = [[0, 0, expr[0]]]
+    for i, node in enumerate(expr[1:], 1):
+        edges.append((stack[-1][0], i))
+        stack[-1][1] += 1
+        stack.append([i, 0, node])
             
-            while stack and stack[-1][1] >= stack[-1][2].arity:
-                stack.pop()
+        while stack and stack[-1][1] >= stack[-1][2].arity:
+            stack.pop()
                 
-            try:
-                labels[i] = node.name
-            except AttributeError:
-                labels[i] = node.format()
+        if isinstance(node, Primitive)
+            labels[i] = node.name
+        else:
+            labels[i] = node.value
     
     return nodes, edges, labels
 
