@@ -30,3 +30,5 @@ Genetic Programming
 
 .. autoclass:: deap.gp.PrimitiveSetTyped
 	:members:
+
+.. autofunction:: deap.gp.graph
