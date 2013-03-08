@@ -14,12 +14,13 @@ and return values.
 
 Scalable Concurent Operations in Python (SCOOP)
 -----------------------------------------------
-SCOOP is a distributed task module allowing concurrent parallel programming on
-various environments, from heterogeneous grids to supercomputers. It has an
-interface similar to the :mod:`concurrent.futures` module introduced in Python
-3.2. Its two simple functions :func:`~scoop.futures.submit` and
-:func:`~scoop.futures.map` allow to distribute computation efficiently and
-easily over a grid of computers.
+
+`SCOOP <http://scoop.googlecode.com>`_ is a distributed task module allowing
+concurrent parallel programming on various environments, from heterogeneous
+grids  to supercomputers. It has an interface similar to the
+:mod:`concurrent.futures`  module introduced in Python 3.2. Its two simple
+functions :func:`~scoop.futures.submit`  and :func:`~scoop.futures.map` allow to
+distribute computation efficiently and easily over a grid of computers.
 
 In the :ref:`last section <using-tools>` a complete algorithm was exposed with
 the :func:`toolbox.map` left to the default :func:`map`. In order to
@@ -30,9 +31,9 @@ distribute the evaluations, we will replace this map by the one from SCOOP.
 
     toolbox.register("map", futures.map)
 
-Once this line is added, your program absolutly needs to be run from a :func:`main`
-function as mentionned in the scoop documentation. To run your program, use scoop
-as the main module.
+Once this line is added, your program absolutly needs to be run from a
+:func:`main` function as mentionned in the scoop documentation. To run your
+program, use scoop as the main module.
 
 .. code-block:: bash
 
@@ -44,7 +45,7 @@ That is it, your program has been run in parallel on all available processors.
 Distributed Task Manager
 ------------------------
 .. deprecated:: 0.9
-   Use `SCOOP <http://scoop.googlecode.com>`_ instead, it is a fork of DTM and
+   Use `SCOOP`_ instead, it is a fork of DTM and
    developped by the same group.
 
 Distributing tasks on multiple computers is taken care of by the distributed
