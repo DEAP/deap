@@ -122,6 +122,12 @@ div.body tt.xref, div.body a tt {
     font-weight: normal;
 }
 
+p.deprecated, p.deprecated-removed {
+    background-color: #ffe4e4;
+    border: 1px solid #f66;
+    padding: 7px
+}
+
 p.deprecated {
     border-radius: 3px;
 }
