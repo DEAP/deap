@@ -168,8 +168,6 @@ def create(name, base, **kargs):
             setattr(self, obj_name, obj())
         if base.__init__ is not object.__init__:
             base.__init__(self, *args, **kargs)
-        else:
-            base.__init__(self)
 
     objtype = type(name, (base,), dict_cls)
     objtype.__init__ = initType
