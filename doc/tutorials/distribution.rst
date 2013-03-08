@@ -30,9 +30,9 @@ distribute the evaluations, we will replace this map by the one from SCOOP.
 
     toolbox.register("map", futures.map)
 
-Once this line is added, your program absolutly needs to be run from a :func:`main`
-function as mentionned in the scoop documentation. To run your program, use scoop
-as the main module.
+Once this line is added, your program absolutly needs to be run from a
+:func:`main` function as mentionned in the scoop documentation. To run your
+program, use scoop as the main module.
 
 .. code-block:: bash
 
