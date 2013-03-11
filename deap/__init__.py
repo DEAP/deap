@@ -66,10 +66,5 @@ And these hypotheses lead to the following objectives:
 """
 
 __author__ = "DEAP Team"
-<<<<<<< local
 __version__ = "1.0"
 __revision__ = "1.0.0"
-=======
-__version__ = "0.9"
-__revision__ = "0.9.1"
->>>>>>> other
