@@ -23,6 +23,7 @@ This module support both strongly and loosely typed GP.
 import abc
 import copy
 import random
+import re
 import sys
 
 from collections import defaultdict
@@ -81,6 +82,52 @@ class PrimitiveTree(list):
             raise ValueError, "Invalid node replacement with a node of a"\
                     " different arity."
         list.__setitem__(self, key, val)
+
+    @classmethod
+    def from_string(cls, string, pset):
+        """Try to convert a string expression into a PrimitiveTree given a 
+        PrimitiveSet *pset*.
+
+        The primitive set needs to contain every primitives and terminals
+        that are present in the expression. In the cases of terminals,
+        the function will convert it to a Terminal even if it is not already
+        present in the set. Numbers are converted to float, and strings stay
+        strings. 
+
+        .. warning:: This functions does not work with STGP terminals that
+                     are not defined in the PrimitiveSet since it is not 
+                     possible to guess the type.
+        """
+        tokens = re.split("[ \t\n\r\f\v(),]", string)
+        expr = []
+        for token in tokens:
+            if token == '':
+                continue
+            if pset.mapping.has_key(token):
+                expr.append(pset.mapping[token])
+            else:
+                try:
+                    token = float(token)
+                except ValueError:
+                    pass
+                expr.append(Terminal(token, False, __type__))
+        return cls(expr)
+
+    def to_string(self):
+        """Return the expression in a human readable string.
+        """
+        string = ""
+        stack = []
+        for node in self:
+            stack.append((node, []))
+            while len(stack[-1][1]) == stack[-1][0].arity:
+                prim, args = stack.pop()
+                string = prim.format(*args)
+                if len(stack) == 0:
+                    break   # If stack is empty, all nodes should have been seen
+                stack[-1][1].append(string)
+
+        return string
 
     @property
     def height(self):
@@ -178,6 +225,7 @@ class PrimitiveSetTyped(object):
         self.primitives = defaultdict(list)
         self.arguments = []
         self.context = dict()
+        self.mapping = dict()
         self.terms_count = 0
         self.prims_count = 0
         
@@ -187,7 +235,9 @@ class PrimitiveSetTyped(object):
         for i, type_ in enumerate(in_types):
             arg_str = "{prefix}{index}".format(prefix=prefix, index=i)
             self.arguments.append(arg_str)
-            self._add(self.terminals, Terminal(arg_str, True, type_))
+            term = Terminal(arg_str, True, type_)
+            self._add(self.terminals, term)
+            self.mapping[term.value] = term
             self.terms_count += 1
 
     def renameArguments(self, **kargs):
@@ -236,6 +286,7 @@ class PrimitiveSetTyped(object):
                "Consider using the argument 'name' to rename your "\
                "second '%s' primitive." % (name,)        
         self.context[prim.name] = primitive
+        self.mapping[prim.name] = prim
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type, name=None):
@@ -265,7 +316,7 @@ class PrimitiveSetTyped(object):
             symbolic = True
 
         prim = Terminal(terminal, symbolic, ret_type)
-
+        self.mapping[prim.value] = prim
         self._add(self.terminals, prim)
         self.terms_count += 1
         
@@ -333,6 +384,9 @@ class PrimitiveSet(PrimitiveSetTyped):
 ######################################
 def stringify(expr):
     """Evaluate the expression *expr* into a string.
+
+    .. deprecated:: 1.0
+        Use PrimitiveTree.to_string instead.
     """
     string = ""
     stack = []
