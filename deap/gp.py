@@ -185,7 +185,7 @@ class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
     """
-    __slots__ = ('value', 'ret', 'conv_fct')
+    # __slots__ = ('value', 'ret', 'conv_fct')
     def __init__(self, terminal, symbolic, ret):
         self.ret = ret
         self.value = terminal
@@ -209,6 +209,10 @@ class Ephemeral(Terminal):
 
     @abc.abstractmethod
     def func():
+        pass
+    
+    @abc.abstractproperty
+    def ret():
         pass
 
     def regen(self):
