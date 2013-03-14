@@ -47,16 +47,16 @@ class Toolbox(object):
         self.register("clone", deepcopy)
         self.register("map", map)
 
-    def register(self, alias, method, *args, **kargs):
-        """Register a *method* in the toolbox under the name *alias*. You 
+    def register(self, alias, function, *args, **kargs):
+        """Register a *function* in the toolbox under the name *alias*. You 
         may provide default arguments that will be passed automatically when 
-        calling the registered method. Fixed arguments can then be overriden 
+        calling the registered function. Fixed arguments can then be overriden 
         at function call time.
         
         :param alias: The name the operator will take in the toolbox. If the
                       alias already exist it will overwrite the the operator
                       already present.
-        :param method: The function to which refer the alias.
+        :param function: The function to which refer the alias.
         :param argument: One or more argument (and keyword argument) to pass
                          automatically to the registered function when called,
                          optional.
@@ -76,16 +76,15 @@ class Toolbox(object):
         documentation. The :attr:`__dict__` attribute will also be updated
         with the original function's instance dictionnary, if any.
         """
-        pfunc = partial(method, *args, **kargs)
+        pfunc = partial(function, *args, **kargs)
         pfunc.__name__ = alias
-        pfunc.__doc__ = method.__doc__
+        pfunc.__doc__ = function.__doc__
         
-        try:
-            # Some methods don't have any dictionary, in these cases simply 
-            # don't copy it.
-            pfunc.__dict__.update(method.__dict__.copy())
-        except AttributeError:
-            pass
+        if hasattr(function, "__dict__") and not isinstance(function, type):
+            # Some functions don't have a dictionary, in these cases 
+            # simply don't copy it. Moreover, if the function is actually
+            # a class, we do not want to copy the dictionary.
+            pfunc.__dict__.update(function.__dict__.copy())
         
         setattr(self, alias, pfunc)
 
@@ -110,10 +109,10 @@ class Toolbox(object):
            Decoration is not signature preserving anymore.
         """
         pfunc = getattr(self, alias)
-        method, args, kargs = pfunc.func, pfunc.args, pfunc.keywords
+        function, args, kargs = pfunc.func, pfunc.args, pfunc.keywords
         for decorator in decorators:
-            method = decorator(method)
-        self.register(alias, method, *args, **kargs)
+            function = decorator(function)
+        self.register(alias, function, *args, **kargs)
 
 
 class Fitness(object):
