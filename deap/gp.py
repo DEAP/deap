@@ -247,13 +247,13 @@ class PrimitiveSetTyped(object):
     def renameArguments(self, **kargs):
         """Rename function arguments with new names from *kargs*.
         """
-        for i, argument in enumerate(self.arguments):
-            if argument in kargs:
-                self.arguments[i] = kargs[argument]
-        for terminals in self.terminals.itervalues():
-            for terminal in terminals:
-                if isinstance(terminal, Terminal) and terminal.value in kargs:
-                    terminal.value = kargs[terminal.value]
+        for i, old_name in enumerate(self.arguments):
+            if old_name in kargs:
+                new_name = kargs[old_name]
+                self.arguments[i] = new_name
+                self.mapping[new_name] = self.mapping[old_name]
+                self.mapping[new_name].value = new_name
+                del self.mapping[old_name]
 
     def _add(self, dict_, prim):
         def addType(dict_, ret_type):
