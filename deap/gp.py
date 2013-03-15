@@ -236,7 +236,7 @@ class PrimitiveSetTyped(object):
             arg_str = "{prefix}{index}".format(prefix=prefix, index=i)
             self.arguments.append(arg_str)
             term = Terminal(arg_str, True, type_)
-            self._add(self.terminals, term)
+            self._add(term)
             self.mapping[term.value] = term
             self.terms_count += 1
 
@@ -251,7 +251,7 @@ class PrimitiveSetTyped(object):
                 self.mapping[new_name].value = new_name
                 del self.mapping[old_name]
 
-    def _add(self, dict_, prim):
+    def _add(self, prim):
         def addType(dict_, ret_type):
             if not ret_type in dict_:
                 dict_[ret_type]
@@ -259,11 +259,19 @@ class PrimitiveSetTyped(object):
                     if issubclass(type_, ret_type):
                         dict_[ret_type].extend(list_)
 
-        ret_type = prim.ret
-        addType(self.primitives, ret_type)
-        addType(self.terminals, ret_type)
+        addType(self.primitives, prim.ret)
+        addType(self.terminals, prim.ret)
+
+        if isinstance(prim, Primitive):
+            for type_ in prim.args:
+                addType(self.primitives, type_)
+                addType(self.terminals, type_)
+            dict_ = self.primitives
+        else:
+            dict_ = self.terminals
+
         for type_ in dict_:
-            if issubclass(ret_type, type_):
+            if issubclass(prim.ret, type_):
                 dict_[type_].append(prim)
 
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
@@ -279,12 +287,13 @@ class PrimitiveSetTyped(object):
             name = primitive.__name__
         prim = Primitive(name, in_types, ret_type)
 
-        self._add(self.primitives, prim)
         assert name not in self.context or \
                self.context[name] is primitive, \
                "Primitives are required to have a unique name. " \
                "Consider using the argument 'name' to rename your "\
-               "second '%s' primitive." % (name,)        
+               "second '%s' primitive." % (name,)
+
+        self._add(prim)
         self.context[prim.name] = primitive
         self.mapping[prim.name] = prim
         self.prims_count += 1
@@ -316,8 +325,8 @@ class PrimitiveSetTyped(object):
             symbolic = True
 
         prim = Terminal(terminal, symbolic, ret_type)
+        self._add(prim)
         self.mapping[prim.value] = prim
-        self._add(self.terminals, prim)
         self.terms_count += 1
         
     def addEphemeralConstant(self, name, ephemeral, ret_type):
@@ -333,7 +342,7 @@ class PrimitiveSetTyped(object):
         creator.create(name, Ephemeral, func=staticmethod(ephemeral))
         class_ = getattr(creator, name)
         class_.ret = ret_type
-        self._add(self.terminals, class_)
+        self._add(class_)
         self.terms_count += 1
         
     def addADF(self, adfset):
@@ -343,7 +352,7 @@ class PrimitiveSetTyped(object):
         the ADF can be built.        
         """
         prim = Primitive(adfset.name, adfset.ins, adfset.ret)
-        self._add(self.primitives, prim)
+        self._add(prim)
         self.prims_count += 1
     
     @property
