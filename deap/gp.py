@@ -692,7 +692,7 @@ def mutNodeReplacement(individual, pset):
 
     if node.arity == 0: # Terminal
         term = random.choice(pset.terminals[node.ret])
-        if issubclass(term, Ephemeral):
+        if isclass(term):
             term = term()
         individual[index] = term 
     else:   # Primitive
