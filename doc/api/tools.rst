@@ -139,7 +139,7 @@ Selection
 
 .. autofunction:: deap.tools.selTournamentDCD
 
-.. autofunction:: sortFastND
+.. autofunction:: sortNondominated
 
 .. autofunction:: assignCrowdingDist
 

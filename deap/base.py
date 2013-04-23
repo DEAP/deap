@@ -197,11 +197,27 @@ class Fitness(object):
          "in order to clear (invalidate) the fitness. The (unweighted) fitness "
          "can be directly accessed via ``individual.fitness.values``."))
     
-    @property 
+    def dominates(self, other):
+        """Return true if each objective of *self* is not strictly worse than 
+        the corresponding objective of *other* and at least one objective is 
+        strictly better.
+        """
+        not_equal = False
+        for self_wvalue, other_wvalue in zip(self.wvalues, other.wvalues):
+            if self_wvalue > other_wvalue:
+                not_equal = True
+            elif self_wvalue < other_wvalue:
+                return False                
+        return not_equal
+
+    @property
     def valid(self):
         """Assess if a fitness is valid or not."""
         return len(self.wvalues) != 0
         
+    def __hash__(self):
+        return hash(self.wvalues)
+
     def __gt__(self, other):
         return not self.__le__(other)
         
