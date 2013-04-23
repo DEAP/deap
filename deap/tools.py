@@ -703,10 +703,10 @@ class ParetoFront(HallOfFame):
             has_twin = False
             to_remove = []
             for i, hofer in enumerate(self):    # hofer = hall of famer
-                if isDominated(ind.fitness.wvalues, hofer.fitness.wvalues):
+                if hofer.fitness.dominates(ind.fitness):
                     is_dominated = True
                     break
-                elif isDominated(hofer.fitness.wvalues, ind.fitness.wvalues):
+                elif ind.fitness.dominates(hofer.fitness):
                     to_remove.append(i)
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
@@ -1404,10 +1404,10 @@ def selTournamentDCD(individuals, k):
     :returns: A list of selected individuals.
     """
     def tourn(ind1, ind2):
-        if isDominated(ind1.fitness.wvalues, ind2.fitness.wvalues):
-            return ind2
-        elif isDominated(ind2.fitness.wvalues, ind1.fitness.wvalues):
+        if ind1.fitness.dominates(ind2.fitness):
             return ind1
+        elif ind2.fitness.dominates(ind1.fitness):
+            return ind2
 
         if ind1.fitness.crowding_dist < ind2.fitness.crowding_dist:
             return ind2
@@ -1528,7 +1528,7 @@ def selNSGA2(individuals, k):
        non-dominated sorting genetic algorithm for multi-objective
        optimization: NSGA-II", 2002.
     """
-    pareto_fronts = sortFastND(individuals, k)
+    pareto_fronts = sortNondominated(individuals, k)
     for front in pareto_fronts:
         assignCrowdingDist(front)
     
@@ -1540,91 +1540,76 @@ def selNSGA2(individuals, k):
         
     return chosen
 
-def isDominated(wvalues1, wvalues2):
-    """Returns wheter or not *wvalues1* dominates *wvalues2*.
-    
-    :param wvalues1: The weighted fitness values that would be dominated.
-    :param wvalues2: The weighted fitness values of the dominant.
-    :returns: :obj:`True` if wvalues2 dominates wvalues1, :obj:`False`
-              otherwise.
-    """
-    not_equal = False
-    for self_wvalue, other_wvalue in zip(wvalues1, wvalues2):
-        if self_wvalue > other_wvalue:
-            return False
-        elif self_wvalue < other_wvalue:
-            not_equal = True
-    return not_equal
-
-def sortFastND(individuals, k, first_front_only=False):
-    """Sort the first *k* *individuals* according the the fast non-dominated
-    sorting algorithm.
+def sortNondominated(individuals, k, first_front_only=False):
+    """Sort the first *k* *individuals* into different nondomination levels 
+    using the "Fast Nondominated Sorting Approach" proposed by Deb et al.,
+    see [Deb2002]_. This algorithm has a time complexity of :math:`O(MN^2)`, 
+    where :math:`M` is the number of objectives and :math:`N` the number of 
+    individuals.
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
     :param first_front_only: If :obj:`True` sort only the first front and
                              exit.
-    :returns: A list of Pareto fronts (lists), with the first list being the
-              true Pareto front.
+    :returns: A list of Pareto fronts (lists), the first list includes 
+              nondominated individuals.
+
+    .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
+       non-dominated sorting genetic algorithm for multi-objective
+       optimization: NSGA-II", 2002.
     """
     if k == 0:
         return []
 
-    unique_fits = defaultdict(list)
+    map_fit_ind = defaultdict(list)
     for ind in individuals:
-        unique_fits[ind.fitness.wvalues].append(ind)
-    fits = unique_fits.keys()
-
-    N = len(fits)
-    pareto_fronts = []
+        map_fit_ind[ind.fitness].append(ind)
+    fits = map_fit_ind.keys()
     
-    pareto_fronts.append([])
-    pareto_sorted = 0
-    dominating_fits = [0] * N
-    dominated_fits = [list() for i in xrange(N)]
+    current_front = []
+    next_front = []
+    dominating_fits = defaultdict(int)
+    dominated_fits = defaultdict(list)
     
     # Rank first Pareto front
     for i, fit_i in enumerate(fits):
-        for j, fit_j in enumerate(fits[i+1:], i+1):
-            if isDominated(fit_i, fit_j):
-                dominating_fits[i] += 1
-                dominated_fits[j].append(i)
-            elif isDominated(fit_j, fit_i):
-                dominating_fits[j] += 1
-                dominated_fits[i].append(j)
-        if dominating_fits[i] == 0:
-            pareto_fronts[-1].append(i)
-            pareto_sorted += 1
+        for fit_j in fits[i+1:]:
+            if fit_i.dominates(fit_j):
+                dominating_fits[fit_j] += 1
+                dominated_fits[fit_i].append(fit_j)
+            elif fit_j.dominates(fit_i):
+                dominating_fits[fit_i] += 1
+                dominated_fits[fit_j].append(fit_i)
+        if dominating_fits[fit_i] == 0:
+            current_front.append(fit_i)
     
-    # Rank the next front until all individuals are sorted or the given
-    # number of individual are sorted
-    if not first_front_only:
-        N = min(N, k)
-        while pareto_sorted < N:
-            pareto_fronts.append([])
-            for indice_p in pareto_fronts[-2]:
-                for indice_d in dominated_fits[indice_p]:
-                    dominating_fits[indice_d] -= 1
-                    if dominating_fits[indice_d] == 0:
-                        pareto_fronts[-1].append(indice_d)
-                        pareto_sorted += 1
-    
-    total = min(len(individuals), k)
-    fronts = list()
-    for front in pareto_fronts:
-        fronts.append([])       
-        for index in front:
-            fronts[-1].extend(unique_fits[fits[index]])
-        total -= len(fronts[-1])
-        if total <= 0:
-            break
+    fronts = [[]]
+    for fit in current_front:
+        fronts[-1].extend(map_fit_ind[fit])
+    pareto_sorted = len(fronts[-1])
 
+    # Rank the next front until all individuals are sorted or 
+    # the given number of individual are sorted.
+    if not first_front_only:
+        N = min(len(individuals), k)
+        while pareto_sorted < N:
+            fronts.append([])
+            for fit_p in current_front:
+                for fit_d in dominated_fits[fit_p]:
+                    dominating_fits[fit_d] -= 1
+                    if dominating_fits[fit_d] == 0:
+                        next_front.append(fit_d)
+                        pareto_sorted += len(map_fit_ind[fit_d])
+                        fronts[-1].extend(map_fit_ind[fit_d])
+            current_front = next_front
+            next_front = []
+    
     return fronts
 
 def assignCrowdingDist(individuals):
-    """Assign a crowding distance to each individual of the list. The 
-    crowding distance is set to the :attr:`crowding_dist` attribute of
-    each individual.
+    """Assign a crowding distance to each individual's fitness. The 
+    crowding distance can be retrieve via the :attr:`crowding_dist` 
+    attribute of each individual's fitness.
     """
     if len(individuals) == 0:
         return
@@ -1677,12 +1662,12 @@ def selSPEA2(individuals, k):
     
     for i, ind_i in enumerate(individuals):
         for j, ind_j in enumerate(individuals[i+1:], i+1):
-            if isDominated(ind_i.fitness.wvalues, ind_j.fitness.wvalues):
-                strength_fits[j] += 1
-                dominating_inds[i].append(j)
-            elif isDominated(ind_j.fitness.wvalues, ind_i.fitness.wvalues):
+            if ind_i.fitness.dominates(ind_j.fitness):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
+            elif ind_j.fitness.dominates(ind_i.fitness):
+                strength_fits[j] += 1
+                dominating_inds[i].append(j)
     
     for i in xrange(N):
         for j in dominating_inds[i]:
