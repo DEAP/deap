@@ -4,7 +4,7 @@ Using Multiple Processors
 =========================
 
 This section of the tutorial shows all the work that is needed to
-distribute operations in deap. Distribution relies on serialization of objects
+distribute operations in DEAP. Distribution relies on serialization of objects
 and serialization is usually done by pickling, thus all objects that are
 distributed (functions and arguments, e.g. individuals and parameters) must be
 pickleable. This means modifications made to an object on a distant processing

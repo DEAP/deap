@@ -1,0 +1,29 @@
+About DEAP
+==========
+
+
+
+Publications on DEAP
+--------------------
+
+- Félix-Antoine Fortin, François-Michel De Rainville, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: Evolutionary Algorithms Made Easy", Journal of Machine Learning Research, pp. 2171-2175, no 13, jul 2012.
+- François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012.
+
+
+Citation
+--------
+
+Authors of scientific papers including results generated using DEAP are
+encouraged to cite the following paper.
+
+.. code-block:: latex
+
+     @article{DEAP_JMLR2012, 
+         author    = " F\'elix-Antoine Fortin and Fran\c{c}ois-Michel {De Rainville} and Marc-Andr\'e Gardner and Marc Parizeau and Christian Gagn\'e ",
+         title     = { {DEAP}: Evolutionary Algorithms Made Easy },
+         pages     = { 2171--2175 },
+         volume    = { 13 },
+         month     = { jul },
+         year      = { 2012 },
+         journal   = { Journal of Machine Learning Research }
+     }
