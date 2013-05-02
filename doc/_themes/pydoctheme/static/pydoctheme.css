@@ -22,6 +22,11 @@ div.related:first-child {
     border-bottom: 1px solid #ccc;
 }
 
+div.sidebar {
+    background-color: #eeeeee;
+}
+
+
 div.sphinxsidebar {
     background-color: #eeeeee;
     border-radius: 5px;
