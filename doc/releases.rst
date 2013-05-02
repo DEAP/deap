@@ -1,6 +1,6 @@
-===========
-What's New?
-===========
+==================
+Release Highlights
+==================
 Here is a (incomplete) log of the changes made to DEAP over time. 
 
 To be released 1.0

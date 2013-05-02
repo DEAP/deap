@@ -98,6 +98,10 @@ div.body div.seealso {
     border: 1px solid #dddd66;
 }
 
+a.reference em {
+    font-style: normal;
+}
+
 div.body a {
     color: #167171;
 }

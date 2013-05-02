@@ -1,7 +1,7 @@
 .. _next-step:
 
-Next Step Toward Evolution
-==========================
+Operators and Algorithms
+========================
 
 Before starting with complex algorithms, we will see some basis of DEAP.
 First, we will start by creating simple individuals (as seen in the
