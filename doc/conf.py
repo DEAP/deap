@@ -47,7 +47,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8'
 
 # The master toctree document.
-master_doc = 'contents'
+master_doc = 'index'
 
 # General information about the project.
 project = u'DEAP'
@@ -175,9 +175,7 @@ html_sidebars = {
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-html_additional_pages = {
-    'index': 'indexcontent.html',
-}
+html_additional_pages = {}
 
 # If false, no module index is generated.
 #html_use_modindex = True
