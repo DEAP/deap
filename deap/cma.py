@@ -103,8 +103,8 @@ class Strategy(object):
         self.computeParams(self.params)
         
     def generate(self, ind_init):
-        """Generate a population from the current strategy using the 
-        centroid individual as parent.
+        """Generate a population of :math:`\lambda` individuals of type
+        *ind_init* from the current strategy.
         
         :param ind_init: A function object that is able to initialize an
                          individual from a list.
@@ -166,8 +166,8 @@ class Strategy(object):
         self.BD = self.B * self.diagD
 
     def computeParams(self, params):
-        """Computes the parameters depending on *lambda_*. It needs to be
-        called again if *lambda_* changes during evolution.
+        """Computes the parameters depending on :math:`\lambda`. It needs to
+        be called again if :math:`\lambda` changes during evolution.
         
         :param params: A dictionary of the manually set parameters.
         """
@@ -223,8 +223,8 @@ class StrategyOnePlusLambda(object):
         self.psucc = self.ptarg
         
     def computeParams(self, params):
-        """Computes the parameters depending on *lambda_*. It needs to be
-        called again if *lambda_* changes during evolution.
+        """Computes the parameters depending on :math:`\lambda`. It needs to
+        be called again if :math:`\lambda` changes during evolution.
         
         :param params: A dictionary of the manually set parameters.
         """
@@ -242,8 +242,8 @@ class StrategyOnePlusLambda(object):
         self.pthresh = params.get("pthresh", 0.44)
     
     def generate(self, ind_init):
-        """Generate a population from the current strategy using the 
-        centroid individual as parent.
+        """Generate a population of :math:`\lambda` individuals of type
+        *ind_init* from the current strategy.
         
         :param ind_init: A function object that is able to initialize an
                          individual from a list.
