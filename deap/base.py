@@ -13,12 +13,10 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`~deap.base` module provides basic structures to build evolutionary
-algorithms. It contains only two simple containers that are toolbox
-:class:`~deap.base.Toolbox`, useful to store evolutionary operators, and a 
-virtual :class:`~deap.base.Fitness` class used as base class, for the fitness 
-member of any individual.
-"""
+"""The :mod:`~deap.base` module provides basic structures to build
+evolutionary algorithms. It contains the :class:`~deap.base.Toolbox`, useful
+to store evolutionary operators, and a virtual :class:`~deap.base.Fitness`
+class used as base class, for the fitness member of any individual. """
 
 import sys
 
@@ -28,15 +26,14 @@ from functools import partial
 from operator import mul, truediv
 
 class Toolbox(object):
-    """A toolbox for evolution that contains the evolutionary operators.
-    At first the toolbox contains two simple methods. The first method
-    :meth:`~deap.toolbox.clone` duplicates any element it is passed as
-    argument, this method defaults to the :func:`copy.deepcopy` function.
-    The second method :meth:`~deap.toolbox.map` applies the function given
-    as first argument to every items of the iterables given as next
-    arguments, this method defaults to the :func:`map` function. You may
-    populate the toolbox with any other function by using the
-    :meth:`~deap.base.Toolbox.register` method.
+    """A toolbox for evolution that contains the evolutionary operators. At
+    first the toolbox contains a :meth:`~deap.toolbox.clone` method that
+    duplicates any element it is passed as argument, this method defaults to
+    the :func:`copy.deepcopy` function. and a :meth:`~deap.toolbox.map`
+    method that applies the function given as first argument to every items
+    of the iterables given as next arguments, this method defaults to the
+    :func:`map` function. You may populate the toolbox with any other
+    function by using the :meth:`~deap.base.Toolbox.register` method.
 
     Concrete usages of the toolbox are shown for initialization in the
     :ref:`creating-types` tutorial and for tools container in the

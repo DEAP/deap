@@ -13,13 +13,9 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`~deap.creator` module is the heart and soul of DEAP, it allows to
-create classes that will fulfill the needs of your evolutionary
-algorithms. This module follows the meta-factory paradigm by allowing to
-create new classes via both composition and inheritance. Attributes both datas
-and functions are added to existing types in order to create new types
-empowered with user specific evolutionary computation capabilities. In effect,
-new classes can be built from any imaginable type, from :class:`list` to
+"""The :mod:`~deap.creator` is a meta-factory allowing to create classes that
+will fulfill the needs of your evolutionary algorithms. In effect, new
+classes can be built from any imaginable type, from :class:`list` to
 :class:`set`, :class:`dict`, :class:`~deap.gp.PrimitiveTree` and more,
 providing the possibility to implement genetic algorithms, genetic
 programming, evolution strategies, particle swarm optimizers, and many more.
@@ -30,8 +26,8 @@ import copy
 
 class_replacers = {}
 """Some classes in Python's standard library as well as third party library
-may be in part incompatible with the logic used in DEAP. In order to palliate
-to this problem, the method :func:`create` uses the dictionary
+may be in part incompatible with the logic used in DEAP. To palliate
+this problem, the method :func:`create` uses the dictionary
 `class_replacers` to identify if the base type provided is problematic, and if
 so  the new class inherits from the replacement class instead of the
 original base class.
