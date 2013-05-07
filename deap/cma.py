@@ -204,8 +204,7 @@ class StrategyOnePlusLambda(object):
     A CMA-ES strategy that uses the :math:`1 + \lambda` paradigme.
     
     :param parent: An iterable object that indicates where to start the
-                   evolution. If the parent has no fitness attribute it
-                   will automatically be replaced on the first iteration.
+                   evolution. The parent requires a fitness attribute.
     :param sigma: The initial standard deviation of the distribution.
     :param parameter: One or more parameter to pass to the strategy as
                       described in the following table, optional.
@@ -267,7 +266,7 @@ class StrategyOnePlusLambda(object):
         p_succ = float(lambda_succ) / self.lambda_
         self.psucc = (1-self.cp)*self.psucc + self.cp*p_succ
         
-        if not hasattr(self.parent, "fitness") or self.parent.fitness <= population[0].fitness:
+        if self.parent.fitness <= population[0].fitness:
             x_step = (population[0] - numpy.array(self.parent)) / self.sigma
             self.parent = copy.deepcopy(population[0])
             if self.psucc < self.pthresh:

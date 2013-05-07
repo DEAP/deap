@@ -41,36 +41,19 @@ toolbox.register("mate", tools.cxTwoPoints)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-history = tools.History()
-toolbox.decorate("mate", history.decorator)
-toolbox.decorate("mutate", history.decorator)
-
 def main():
     random.seed(64)
     
-    pop = toolbox.population(n=20)
+    pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    history.update(pop)
-    
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", tools.mean)
     stats.register("std", tools.std)
     stats.register("min", min)
     stats.register("max", max)
     
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=20, stats=stats,
+    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
                         halloffame=hof, verbose=True)
-    
-    import matplotlib.pyplot as plt
-    import networkx
-
-    graph = networkx.DiGraph(history.genealogy_tree)
-    graph = graph.reverse()     # Make the grah top-down
-    colors = [toolbox.evaluate(history.genealogy_history[i])[0] for i in graph]
-    positions = networkx.graphviz_layout(graph, prog="dot")
-    
-    networkx.draw(graph, positions, node_color=colors)
-    plt.show()
     
     return pop, stats, hof
 
