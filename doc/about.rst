@@ -8,9 +8,9 @@ In alphabetical order
 
 - `François-Michel De Rainville <https://vision.gel.ulaval.ca/~fmdrainville>`_
 - Félix-Antoine Fortin
-- Marc-André Gardner
 - `Christian Gagné <https://vision.gel.ulaval.ca/~cgagne>`_
 - Olivier Gagnon
+- Marc-André Gardner
 - Simon Grenier
 - Yannick Hold-Geoffroy
 - Marc Parizeau
