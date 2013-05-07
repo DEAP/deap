@@ -46,7 +46,7 @@ it will be possible to call the function :func:`toolbox.population` to
 instantly create a population.
 More initialization methods
 are found in the :doc:`tutorials/basic/part1` tutorial and the various 
-:ref:`examples`.
+:doc:`examples/index`.
 
 Operators
 ---------
@@ -61,7 +61,7 @@ evaluation function. This is how it is done in DEAP.
 The registered functions are renamed by the toolbox to allows genericity so
 that the algorithm does not depend on operators name. Note also that fitness
 values must be iterable, that is why we return tuple in the evaluate function.
-More on this in the :doc:`tutorials/basic/part2` tutorial and :ref:`examples`.
+More on this in the :doc:`tutorials/basic/part2` tutorial and :doc:`examples/index`.
 
 Algorithms
 ----------
