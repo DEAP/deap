@@ -16,6 +16,8 @@
 import array
 import random
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -71,10 +73,10 @@ def main(seed):
 
     # Statistics computation
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
 
     pop = algorithms.eaGenerateUpdate(toolbox, NGEN, stats=stats, verbose=True)
 

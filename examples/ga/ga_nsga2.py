@@ -16,6 +16,9 @@
 import array
 import random
 import json
+
+import numpy
+
 from math import sqrt
 
 from deap import algorithms
@@ -63,16 +66,11 @@ def main(seed=None):
     CXPB = 0.9
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
-    column_names = ["gen", "evals"]
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
-
     pop = toolbox.population(n=MU)
 
     # Evaluate the individuals with an invalid fitness
@@ -85,8 +83,7 @@ def main(seed=None):
     # no actual selection is done
     pop = toolbox.select(pop, len(pop))
     
-    stats.update(pop)
-    logger.logGeneration(evals=len(invalid_ind), gen=0, stats=stats)
+    stats.append(pop, evals=len(invalid_ind), gen=0)
 
     # Begin the generational process
     for gen in range(1, NGEN):
@@ -110,19 +107,19 @@ def main(seed=None):
 
         # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
-        stats.update(pop)
-        logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
+        stats.append(pop, evals=len(invalid_ind), gen=gen)
 
-    return pop
+    return pop, stats
         
 if __name__ == "__main__":
     optimal_front = json.load(open("pareto_front/zdt1_front.json"))
     # Use 500 of the 1000 points in the json file
     optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
     
-    pop = main()
+    pop, stats = main()
     pop.sort(key=lambda x: x.fitness.values)
     
+    print(stats)
     print("Convergence: ", convergence(pop, optimal_front))
     print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
     

@@ -15,6 +15,8 @@
 
 import random
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -79,10 +81,10 @@ def main(seed=0):
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
+    stats.register("Avg", numpy.mean)
+    stats.register("Std", numpy.std)
+    stats.register("Min", numpy.min)
+    stats.register("Max", numpy.max)
 
     algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, stats=stats,
                         halloffame=hof, verbose=True)

@@ -24,6 +24,8 @@ import math
 import operator
 import random
 
+import numpy
+
 from deap import base
 from deap.benchmarks import movingpeaks
 from deap import creator
@@ -58,10 +60,10 @@ def main(verbose=True):
     regular, brownian = 4, 2
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
 
     # Initialize populations
     populations = [toolbox.population(n=regular + brownian) for _ in range(NPOP)]
@@ -72,13 +74,9 @@ def main(verbose=True):
         for ind, fit in zip(subpop, fitnesses):
             ind.fitness.values = fit
 
-    stats.update(itertools.chain(*populations))
+    stats.append(itertools.chain(*populations), gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
     if verbose:
-        column_names = ["gen", "evals", "error", "offline_error"]
-        column_names.extend(stats.functions.keys())
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
+        print(stats.stream)
 
     g = 1
     while mpb.nevals < 5e5:
@@ -109,9 +107,9 @@ def main(verbose=True):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        stats.update(itertools.chain(*populations))
+        stats.append(itertools.chain(*populations), gen=g, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
         if verbose:
-            logger.logGeneration(gen=g, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
+            print(stats.stream)
 
         # Evolve the sub-populations
         for idx, subpop in enumerate(populations):

@@ -31,10 +31,19 @@ try:
 except ImportError:
     import pickle
 
+try:
+    import numpy
+except ImportError:
+    import platform
+    if platform.python_implementation() == "PyPy":
+        import numpypy as numpy
+    else:
+        raise ImportError("DEAP requires Numpy.")
+
 from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
-from collections import Sequence, defaultdict
+from collections import Sequence, defaultdict, OrderedDict
 from sys import stdout
 
 def identity(obj):
@@ -348,233 +357,143 @@ class Checkpoint(object):
         """
         self.values.update(pickle.load(file))
 
-def mean(seq):
-    """Returns the arithmetic mean of the sequence *seq* = 
-    :math:`\{x_1,\ldots,x_n\}` as :math:`A = \\frac{1}{n} \sum_{i=1}^n x_i`.
-    """
-    return sum(seq) / len(seq)
+class Statistics(list):
+    """Object that keeps record of statistics and key-value pair information
+    computed during the evolution. When created the statistics object receives
+    a *key* argument that is used to get the values on which the function will
+    be computed. If not provided the *key* argument defaults to the identity 
+    function.
 
-def median(seq):
-    """Returns the median of *seq* - the numeric value separating the higher half 
-    of a sample from the lower half. If there is an even number of elements in 
-    *seq*, it returns the mean of the two middle values.
-    """
-    sseq = sorted(seq)
-    length = len(seq)
-    if length % 2 == 1:
-        return sseq[int((length - 1) / 2)]
-    else:
-        return (sseq[int((length - 1) / 2)] + sseq[int(length / 2)]) / 2
-
-def var(seq):
-    """Returns the variance :math:`\sigma^2` of *seq* = 
-    :math:`\{x_1,\ldots,x_n\}` as
-    :math:`\sigma^2 = \\frac{1}{N} \sum_{i=1}^N (x_i - \\mu )^2`,
-    where :math:`\\mu` is the arithmetic mean of *seq*.
-    """
-    return abs(sum(x*x for x in seq) / len(seq) - mean(seq)**2)
-
-def std(seq):
-    """Returns the square root of the variance :math:`\sigma^2` of *seq*.
-    """
-    return var(seq)**0.5
-    
-class Statistics(object):
-    """A statistics object that holds the required data for as long as it
-    exists. When created the statistics object receives a *key* argument that
-    is used to get the required data, if not provided the *key* argument
-    defaults to the identity function. A statistics object can be represented
-    as multiple 3 dimensional matrix, for each registered function there is
-    a matrix.
-    
-    :param key: A function to access the data on which to compute the
+    :param key: A function to access the values on which to compute the
                 statistics, optional.
-    :param n: The number of independent statistics to maintain in this
-              statistics object.
 
-    Along the first axis (wich length is given by the *n* argument) are
-    independent statistics on different collections given this index in the 
-    :meth:`update` method. The second is the accumulator of statistics, each 
-    time the update function is called the new statistics are added using the 
-    registered functions at the end of this axis. The third axis is used when 
-    the entered data is an iterable (for example a multiobjective fitness).
-    
-    Data can be retrieved by accessing the statistic function name followed
-    by the indicices of the element we wish to access.
+    Values can be retrieved via the *select* method given the appropriate
+    key.
     ::
     
-        >>> s = Statistics(n=2)
-        >>> s.register("Mean", mean)
-        >>> s.update([1, 2, 3, 4], index=0)
-        >>> s.update([5, 6, 7, 8], index=1)
-        >>> s.Mean[0][-1]
-        [2.5]
-        >>> s.Mean[1][-1]
-        [6.5]
-        >>> s.update([10, 20, 30, 40], index=0)
-        >>> s.update([50, 60, 70, 80], index=1)
-        >>> s.Mean[0][1]
-        [25.0]
-        >>> s.Mean[1][1]
-        [65.0]
+        >>> s = Statistics()
+        >>> s.register("mean", mean)
+        >>> s.register("max", mean)
+        >>> s.update([1, 2, 3, 4])
+        >>> s.update([5, 6, 7, 8])
+        >>> s.select("mean")
+        [2.5, 6.5]
+        >>> s.select("max")
+        [4, 8]
+        >>> s[-1]["mean"]
+        6.5
+        >>> mean, max_ = s.select("mean", "max")
+        >>> mean[0]
+        2.5
+        >>> max_[0]
+        4
     """
-    __slots__ = ['key', 'functions', 'dim', 'data']
-    def __init__(self, key=identity, n=1):
+    def __init__(self, key=identity):
         self.key = key
-        self.data = {}
         self.functions = {}
-        self.dim = n
-
-    def __getattr__(self, name):
-        if name in self.__getattribute__("data"):
-            return self.data[name]
-        else:
-            return self.__getattribute__(name)
+        self.axis = 0
+        self.header = None
+        self.buffindex = 0
 
     def __getstate__(self):
-        return None, {'functions' : self.functions, 
-                      'dim' : self.dim, 'data' : self.data}
+        state = {}
+        state['axis'] = self.axis
+        state['functions'] = self.functions
+        state['header'] = self.header
+        # Most key cannot be pickled in Python 2
+        state['key'] = None
+        return state
 
     def __setstate__(self, state):
-        self.functions = state[1]['functions']
-        self.dim = state[1]['dim']
-        self.data = state[1]['data']
+        self.__init__(state['key'])
+        self.axis = state['axis']
+        self.functions = state['functions']
+        self.header = state['header']
 
     def register(self, name, function):
         """Register a function *function* that will be apply on the sequence
-        each time :func:`~deap.tools.Statistics.update` is called.
+        each time :func:`~deap.tools.Statistics.append` is called.
         
         :param name: The name of the statistics function as it would appear
                      in the dictionnary of the statistics object.
         :param function: A function that will compute the desired statistics
                          on the data as preprocessed by the key.
-        
-        The function result will be accessible by using the string given by
-        the argument *name* as a function of the statistics object.
-        ::
-
-            >>> s = Statistics()
-            >>> s.register("Mean", mean)
-            >>> s.update([1,2,3,4,5,6,7])
-            >>> s.Mean
-            [[[4.0]]]
-        """
-        if name in self.__slots__:
-            raise ValueError("Statistics.register: The registered name"
-                             " can't be 'key', 'functions', 'dim' or 'data'.")
+        """        
         self.functions[name] = function
-        self.data[name] = [[] for _ in xrange(self.dim)]
 
-    def update(self, seq, index=0, add=False):
-        """Apply to the input sequence *seq* each registered function 
-        and store each result in a list specific to the function and 
-        the data index *index*.
-        
-        :param seq: A sequence on which the key will be applied to get the
-                    data.
-        :param index: The index of the independent statistics object in which
-                      to add the computed statistics, optional (defaults to 0).
-        :param add: A boolean to force adding depth to the statistics
-                    object when the index is out of range. If the given index
-                    is not yet registered, it adds it to the statistics only
-                    if it is one greater than the larger index, optional
-                    (defaults to False).
-        
+    def select(self, *names):
+        """Return a list of values associated to the *names* provided
+        in argument in each dictionary of the Statistics object list.
+        One list per name is returned.
         ::
 
             >>> s = Statistics()
-            >>> s.register("Mean", mean)
-            >>> s.register("Max", max)
-            >>> s.update([4,5,6,7,8])
-            >>> s.Max
-            [[[8]]]
-            >>> s.Mean
-            [[[6.0]]]
-            >>> s.update([1,2,3])
-            >>> s.Max
-            [[[8], [3]]]
+            >>> s.register("mean", numpy.mean)
+            >>> s.append([1,2,3,4,5,6,7])
+            >>> s.select("mean")
+            [4.0]
         """
-        # Transpose the values
-        try:
-            # seq is a sequence of number sequences.
-            values = zip(*(self.key(elem) for elem in seq))
-        except TypeError:
-            # seq is a sequence of numbers.
-            values = (seq,)
+        if len(names) == 1:
+            return [entry[names[0]] for entry in self]
+        return tuple([entry[name] for entry in self] for name in names)
 
+    def append(self, data=[], **kargs):
+        """Apply to the input sequence *data* each registered function 
+        and store the results plus the additional information from *kargs*
+        in a dictionnary at the end of the list.
+        
+        :param data: sequence of objects on which the statistics are computed.
+        :param kargs: Additional key-value pairs to record.
+        """
+        if not self.key:
+            raise AttributeError('It is required to set a key after unpickling a %s object.' % self.__class__.__name__)
+
+        if not self.header:
+            self.header = kargs.keys() + self.functions.keys()
+
+        values = numpy.array([self.key(elem) for elem in data])
+        
+        entry = OrderedDict.fromkeys(self.header, "")
         for key, func in self.functions.iteritems():
-            try:
-                self.data[key][index].append(map(func, values))
-            except IndexError:
-                if add and index == len(self.data[key]):
-                    self.data[key].append([map(func, values)])
-                else:
-                    raise
+            entry[key] = func(values, self.axis)
+        entry.update(kargs)
+        list.append(self, entry)
 
-class EvolutionLogger(object):
-    """The evolution logger logs data about the evolution to either the stdout
-    or a file. To change the destination of the logger simply change its
-    attribute :attr:`output` to an filestream. The *columns* argument provides
-    the data column to log when using statistics, the names should be
-    identical to what is registered in the statistics object (it default to
-    `["gen", "evals"]` wich will log the generation number and the number of
-    evaluated individuals). When logging with function :func:`logGeneration`, 
-    the provided columns must be given either as arguments or in the
-    statistics object. The *precision* indicates the precision to use when
-    logging statistics.
-    
-    :param columns: A list of strings of the name of the data as it will 
-                    appear in the statistics object, optional.
-    :param precision: Number of decimal digits to log, optional.
-    """
-    output = stdout
-    """File object indicating where the log is written. By default log is
-    written in sys.stdout.
-    """
-    def __init__(self, columns=("gen", "evals"), precision=4):
-        self.columns = tuple(columns)
-        self.line = " ".join("{%s:<8}" % name for name in self.columns)        
-        self.precision = "{0:.%ig}" % precision
-    
-    def logHeader(self):
-        """Logs the column titles specified during initialization.
-        """
-        self.output.write(" ".join(map("{0:<8s}".format, self.columns)))
-        self.output.write("\n")
-
-    def logGeneration(self, stats=None, index=0, **kargs):
-        """Logs the registered generation identifiers given a columns on
-        initialization. Each element of the columns must be provided either in
-        the *stats* object or as keyword argument. When loggin through the
-        stats object, the last entry of the data under the column names at
-        *index* is logged (*index* defaults to 0).
-        
-        :param stats: A statistics object containing the data to log, optional.
-        :param index: The index in the statistics, optional.
-        :param data: Kerword arguments of the data that is not in the
-                     statistics object, optional.
-        
-        Here is an example on how to use the logger with a statistics object
+    @property
+    def stream(self):
+        """Retrieve the formated unstreamed entries of the database including
+        the headers.
         ::
-            
-            >>> s = Statistics(n=2)
-            >>> s.register("mean", mean)
-            >>> s.register("max", max)
-            >>> s.update([1, 2, 3, 4], index=0)
-            >>> s.update([5, 6, 7, 8], index=1)
-            >>> l = EvolutionLogger(columns=["gen", "evals", "mean", "max"])
-            >>> l.logHeader()
-            gen      evals    mean     max
-            >>> l.logGeneration(gen="0_1", evals=4, stats=s, index=0)
-            0_1      4        [2.5000] [4.0000]
-            >>> l.logGeneration(gen="0_2", evals=4, stats=s, index=1)
-            0_2      4        [6.5000] [8.0000]
+
+            >>> s = Statistics()
+            >>> s.append(gen=0)
+            >>> print s.stream
+            gen
+              0
+            >>> s.append(gen=1)
+            >>> print s.stream
+              1
         """
-        if stats:
-            for name in stats.functions:
-                kargs[name] = "[%s]" % ", ".join(map(self.precision.format, stats.data[name][index][-1]))
-        self.output.write(self.line.format(**kargs))
-        self.output.write("\n")
+        startindex, self.buffindex = self.buffindex, len(self)
+        return self.__str__(startindex)
+
+    def __str__(self, startindex=0):
+        columns_len = map(len, self.header)
+        str_matrix = [map(str, (line.get(name, "") for name in self.header)) for line in self[startindex:]]
+        for line in str_matrix:
+            for i, column in enumerate(line):
+                columns_len[i] = max(columns_len[i], len(column))
+ 
+        template = "\t".join(("{:<%i}" % i for i in columns_len))
+        
+        text = []
+        if startindex == 0:
+            text.append(template.format(*self.header))
+        
+        for line in str_matrix:
+            text.append(template.format(*line))
+ 
+        return "\n".join(text)
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
