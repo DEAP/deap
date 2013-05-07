@@ -14,8 +14,10 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import random
-from operator import attrgetter
+
 import numpy
+
+from operator import attrgetter
 
 from deap import algorithms
 from deap import base
@@ -63,10 +65,10 @@ def main():
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     algorithms.eaGenerateUpdate(toolbox, ngen=150, stats=stats, halloffame=hof)
     

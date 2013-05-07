@@ -44,16 +44,10 @@ def main(verbose=True):
     halloffame = tools.HallOfFame(1)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
-
-    if verbose:
-        column_names = ["gen", "evals", "restart", "regime"]
-        column_names.extend(stats.functions.keys())
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
 
     nsmallpopruns = 0
     smallbudget = list()
@@ -120,13 +114,13 @@ def main(verbose=True):
                 ind.fitness.values = fit
             
             halloffame.update(population)
-            stats.update(population, index=i, add=True)
+            stats.append(population, gen=t, evals=lambda_, restart=i, regime=regime)
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
 
             if verbose:
-                logger.logGeneration(gen=t, evals=lambda_, restart=i, regime=regime, stats=stats, index=i)
+                print(stats.stream)
                 
             # Count the number of times the k'th best solution is equal to the best solution
             # At this point the population is sorted (method update)

@@ -14,9 +14,12 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 import array
+import random
+
+import numpy
+
 from collections import deque
 from multiprocessing import Event, Pipe, Process
-import random
 
 from deap import algorithms
 from deap import base
@@ -90,26 +93,22 @@ def main(procid, pipein, pipeout, sync, seed=None):
     deme = toolbox.population(n=MU)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
-    column_names = ["gen", "deme", "evals"]
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
     if procid == 0:
         # Synchronization needed to log header on top and only once
-        logger.logHeader()
         sync.set()
     else:
         sync.wait()
     
     for ind in deme:
         ind.fitness.values = toolbox.evaluate(ind)
-    stats.update(deme)
+    stats.append(deme, gen=0, deme=procid, evals=len(deme))
     hof.update(deme)
-    logger.logGeneration(gen="0", deme=procid, evals=len(deme), stats=stats)
+    print(stats.stream)
     
     for gen in range(1, NGEN):
         deme = toolbox.select(deme, len(deme))
@@ -119,9 +118,9 @@ def main(procid, pipein, pipeout, sync, seed=None):
         for ind in invalid_ind:
             ind.fitness.values = toolbox.evaluate(ind)
         
-        stats.update(deme)
+        stats.append(deme, gen=gen, deme=procid, evals=len(invalid_ind))
         hof.update(deme)
-        logger.logGeneration(gen="%d" % gen, deme=procid, evals=len(invalid_ind), stats=stats)
+        print(stats.stream)
             
         if gen % MIG_RATE == 0 and gen > 0:
             toolbox.migrate(deme)

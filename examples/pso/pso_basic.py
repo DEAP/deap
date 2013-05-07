@@ -16,6 +16,7 @@
 import operator
 import random
 
+import numpy
 
 from deap import base
 from deap import benchmarks
@@ -55,15 +56,10 @@ toolbox.register("evaluate", benchmarks.h1)
 def main():
     pop = toolbox.population(n=5)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("Avg", tools.mean)
-    stats.register("Std", tools.std)
-    stats.register("Min", min)
-    stats.register("Max", max)
-    
-    column_names = ["gen", "evals"]
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
 
     GEN = 1000
     best = None
@@ -81,8 +77,8 @@ def main():
             toolbox.update(part, best)
 
         # Gather all the fitnesses in one list and print the stats
-        stats.update(pop)
-        logger.logGeneration(gen=g, evals=len(pop), stats=stats)
+        stats.append(pop, gen=g, evals=len(pop))
+        print(stats.stream)
     
     return pop, stats, best
 
