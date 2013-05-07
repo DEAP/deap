@@ -1,5 +1,5 @@
-Benchmarking Against the Best (BBOB)
-====================================
+Benchmarking Against the Bests (BBOB)
+=====================================
 
 Once you've created your own algorithm, the structure of DEAP allows you to
 benchmark it against the best algorithms very easily. The interface of the

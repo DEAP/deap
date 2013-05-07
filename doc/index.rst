@@ -42,7 +42,7 @@ and many features to build your own evolutions.
 
 * :doc:`examples/index`
 
-* :doc:`Library Reference <api/index>`
+* :doc:`api/index`
 
 * :doc:`releases`
 
