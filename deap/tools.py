@@ -585,15 +585,27 @@ class HallOfFame(object):
     
     :param maxsize: The maximum number of individual to keep in the hall of
                     fame.
+    :param keep: Tells what individual to keep when the fitness are equals.
+                 Options are to keep the ``"old"`` individual (default) or the
+                 ``"new"`` individual.
     
     The class :class:`HallOfFame` provides an interface similar to a list
     (without being one completely). It is possible to retrieve its length, to
     iterate on it forward and backward and to get an item or a slice from it.
     """
-    def __init__(self, maxsize):
+    def __init__(self, maxsize, keep="old"):
         self.maxsize = maxsize
         self.keys = list()
         self.items = list()
+        self.keep_all = False
+        
+        if keep == "old":
+            self.bisect = bisect.bisect_right
+        elif keep == "new":
+            self.bisect = bisect.bisect_left
+        else:
+            raise ValueError("Unknown item to keep %s, use 'old', "
+                             "'new', or all" % keep)
     
     def update(self, population):
         """Update the hall of fame with the *population* by replacing the
@@ -652,7 +664,7 @@ class HallOfFame(object):
         del self.keys[:]
 
     def __len__(self):
-        return len(self.items)
+        return len(self.keys)
 
     def __getitem__(self, i):
         return self.items[i]
@@ -665,6 +677,7 @@ class HallOfFame(object):
     
     def __str__(self):
         return str(self.items) + "\n" + str(self.keys)
+
 
 
 class ParetoFront(HallOfFame):
@@ -1528,6 +1541,10 @@ def selNSGA2(individuals, k):
        non-dominated sorting genetic algorithm for multi-objective
        optimization: NSGA-II", 2002.
     """
+
+    if len(individuals) == k:
+        return individuals
+    
     pareto_fronts = sortNondominated(individuals, k)
     for front in pareto_fronts:
         assignCrowdingDist(front)

@@ -41,7 +41,9 @@ toolbox.register("attr_bool", random.randint, 0, 1)
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+import time
 def evalOneMax(individual):
+    time.sleep(0.001)
     return sum(individual),
 
 toolbox.register("evaluate", evalOneMax)
