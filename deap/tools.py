@@ -374,8 +374,8 @@ class Statistics(list):
         >>> s = Statistics()
         >>> s.register("mean", mean)
         >>> s.register("max", mean)
-        >>> s.update([1, 2, 3, 4])
-        >>> s.update([5, 6, 7, 8])
+        >>> s.append([1, 2, 3, 4])
+        >>> s.append([5, 6, 7, 8])
         >>> s.select("mean")
         [2.5, 6.5]
         >>> s.select("max")
