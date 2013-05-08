@@ -578,22 +578,30 @@ class EvolutionLogger(object):
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
-    population during the evolution. It is sorted at all time so that the
-    first element of the hall of fame is the individual that has the best
-    first fitness value ever seen, according to the weights provided to the
-    fitness at creation time.
+    population during the evolution. It is lexicographically sorted at all
+    time so that the first element of the hall of fame is the individual that
+    has the best first fitness value ever seen, according to the weights
+    provided to the fitness at creation time.
     
+    The insertion is made so that old individuals have priority on new
+    individuals. A single copy of each individual is kept at all time, the
+    equivalence between two individuals is made by the operator passed to the
+    *similar* argument.
+
     :param maxsize: The maximum number of individual to keep in the hall of
                     fame.
+    :param similar: An equivalence operator between two individuals, optional.
+                    It defaults to operator :func:`operator.eq`.
     
     The class :class:`HallOfFame` provides an interface similar to a list
     (without being one completely). It is possible to retrieve its length, to
     iterate on it forward and backward and to get an item or a slice from it.
     """
-    def __init__(self, maxsize):
+    def __init__(self, maxsize, similar=eq):
         self.maxsize = maxsize
         self.keys = list()
         self.items = list()
+        self.similar = similar
     
     def update(self, population):
         """Update the hall of fame with the *population* by replacing the
@@ -604,21 +612,23 @@ class HallOfFame(object):
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
         """
-        if len(self) < self.maxsize:
-            # Items are sorted with the best fitness first
-            self.items = sorted(chain(self, population), 
-                                key=attrgetter("fitness"), 
-                                reverse=True)[:self.maxsize]
-            self.items = [copy.deepcopy(item) for item in self.items]
-            # The keys are the fitnesses in reverse order to allow the use
-            # of the bisection algorithm 
-            self.keys = map(attrgetter("fitness"), reversed(self.items))
-        else:
-            for ind in population: 
-                if ind.fitness > self[-1].fitness:
-                    # Delete the worst individual from the front
-                    self.remove(-1)
-                    # Insert the new individual
+        if len(self) == 0 and self.maxsize !=0:
+            # Working on an empty hall of fame is problematic for the
+            # "for else"
+            self.insert(population[0])
+        
+        for ind in population:
+            if ind.fitness > self[-1].fitness or len(self) < self.maxsize:
+                for hofer in self:
+                    # Loop through the hall of fame to check for any
+                    # similar individual
+                    if self.similar(ind, hofer):
+                        break
+                else:
+                    # The individual is unique and strictly better than
+                    # the worst
+                    if len(self) >= self.maxsize:
+                        self.remove(-1)
                     self.insert(ind)
     
     def insert(self, item):
@@ -664,7 +674,7 @@ class HallOfFame(object):
         return reversed(self.items)
     
     def __str__(self):
-        return str(self.items) + "\n" + str(self.keys)
+        return str(self.items)
 
 
 class ParetoFront(HallOfFame):
@@ -686,8 +696,7 @@ class ParetoFront(HallOfFame):
     it is sorted lexicographically at every moment.
     """
     def __init__(self, similar=eq):
-        self.similar = similar
-        HallOfFame.__init__(self, None)
+        HallOfFame.__init__(self, None, similar)
     
     def update(self, population):
         """Update the Pareto front hall of fame with the *population* by adding 
