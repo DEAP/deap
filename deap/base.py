@@ -194,13 +194,17 @@ class Fitness(object):
          "in order to clear (invalidate) the fitness. The (unweighted) fitness "
          "can be directly accessed via ``individual.fitness.values``."))
     
-    def dominates(self, other):
+    def dominates(self, other, obj=slice(None)):
         """Return true if each objective of *self* is not strictly worse than 
         the corresponding objective of *other* and at least one objective is 
         strictly better.
+
+        :param obj: Slice indicating on which objectives the domination is 
+                    tested. The default value is `slice(None)`, representing
+                    every objectives.
         """
         not_equal = False
-        for self_wvalue, other_wvalue in zip(self.wvalues, other.wvalues):
+        for self_wvalue, other_wvalue in zip(self.wvalues[obj], other.wvalues[obj]):
             if self_wvalue > other_wvalue:
                 not_equal = True
             elif self_wvalue < other_wvalue:

@@ -17,6 +17,8 @@ import array
 import random
 import json
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -58,10 +60,10 @@ def main():
 
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats, 
                         halloffame=hof)

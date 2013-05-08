@@ -15,6 +15,8 @@
 
 import random
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -74,15 +76,11 @@ def main():
     hof = tools.ParetoFront()
     
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
-    
-    column_names = ["gen", "evals"] 
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
+
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
@@ -92,9 +90,7 @@ def main():
         ind.fitness.values = fit
     
     hof.update(population)
-    stats.update(population)
-    
-    logger.logGeneration(gen=0, evals=len(population), stats=stats)
+    stats.append(population, gen=0, evals=len(population))
     
     # Begin the evolution
     for g in range(1, NGEN):
@@ -128,11 +124,10 @@ def main():
         
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
-        stats.update(population)
-        
-        logger.logGeneration(gen=g, evals=len(invalid_ind), stats=stats)
+        stats.append(population, gen=g, evals=len(invalid_ind))
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
+    print(stats)
     print(best_network)
     print(best_network.draw())
     print("%i errors, length %i, depth %i" % hof[0].fitness.values)

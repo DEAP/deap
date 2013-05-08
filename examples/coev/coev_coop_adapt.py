@@ -24,6 +24,8 @@ try:
 except ImportError:
     plt = False
 
+import numpy
+
 from deap import algorithms
 from deap import tools
 
@@ -46,17 +48,12 @@ if plt:
 def main(extended=True, verbose=True):
     target_set = []
     
-    stats = tools.Statistics(lambda ind: ind.fitness.values, n=NUM_SPECIES)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
-    if verbose:
-        column_names = ["gen", "species", "evals"]
-        column_names.extend(stats.functions.keys())
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
     
     ngen = 300
     adapt_length = 100
@@ -86,10 +83,10 @@ def main(extended=True, verbose=True):
             for ind in s:
                 ind.fitness.values = toolbox.evaluate([ind] + r, target_set)
                 
-            stats.update(s, index=i, add=True)
+            stats.append(s, gen=g, species=i, evals=len(s))
             
             if verbose: 
-                logger.logGeneration(gen=g, species=i, evals=len(s), stats=stats, index=i)
+                print(stats.stream)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection

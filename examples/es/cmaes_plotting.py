@@ -47,17 +47,10 @@ def main(verbose=True):
 
     halloffame = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
-   
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names.extend(stats.functions.keys())
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     # Objects that will compile the data
     sigma = numpy.ndarray((NGEN,1))
@@ -81,10 +74,10 @@ def main(verbose=True):
         # Update the hall of fame and the statistics with the
         # currently evaluated population
         halloffame.update(population)
-        stats.update(population)
+        stats.append(population, evals=len(population), gen=gen,)
         
         if verbose:
-            logger.logGeneration(evals=len(population), gen=gen, stats=stats)
+            print(stats.stream)
         
         # Save more data along the evolution for latter plotting
         # diagD is sorted and sqrooted in the update method
@@ -97,12 +90,12 @@ def main(verbose=True):
 
     # The x-axis will be the number of evaluations
     x = list(range(0, strategy.lambda_ * NGEN, strategy.lambda_))
-
+    avg, max_, min_ = stats.select("avg", "max", "min")
     plt.figure()
     plt.subplot(2, 2, 1)
-    plt.semilogy(x, stats.avg[0], "--b")
-    plt.semilogy(x, stats.max[0], "--b")
-    plt.semilogy(x, stats.min[0], "-b")
+    plt.semilogy(x, avg, "--b")
+    plt.semilogy(x, max_, "--b")
+    plt.semilogy(x, min_, "-b")
     plt.semilogy(x, fbest, "-c")
     plt.semilogy(x, sigma, "-g")
     plt.semilogy(x, axis_ratio, "-r")

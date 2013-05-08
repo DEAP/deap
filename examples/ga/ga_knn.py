@@ -17,6 +17,8 @@
 import csv
 import random
 
+import numpy
+
 import knn
 from deap import algorithms
 from deap import base
@@ -70,10 +72,10 @@ def main():
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA,
                               cxpb=0.7, mutpb=0.3, ngen=40, 
