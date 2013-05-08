@@ -16,6 +16,8 @@
 import random
 import sys
 
+import numpy
+
 from deap import base
 from deap import creator
 from deap import gp
@@ -59,21 +61,16 @@ def main():
     pop_gp = tools_gp.population(n=200)
     
     stats_ga = tools.Statistics(lambda ind: ind.fitness.values)
-    stats_ga.register("avg", tools.mean)
-    stats_ga.register("std", tools.std)
-    stats_ga.register("min", min)
-    stats_ga.register("max", max)
+    stats_ga.register("avg", numpy.mean)
+    stats_ga.register("std", numpy.std)
+    stats_ga.register("min", numpy.min)
+    stats_ga.register("max", numpy.max)
     
     stats_gp = tools.Statistics(lambda ind: ind.fitness.values)
-    stats_gp.register("avg", tools.mean)
-    stats_gp.register("std", tools.std)
-    stats_gp.register("min", min)
-    stats_gp.register("max", max)
-    
-    column_names = ["gen", "evals"]
-    column_names.extend(stats_ga.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    stats_gp.register("avg", numpy.mean)
+    stats_gp.register("std", numpy.std)
+    stats_gp.register("min", numpy.min)
+    stats_gp.register("max", numpy.max)
     
     best_ga = tools.selRandom(pop_ga, 1)[0]
     best_gp = tools.selRandom(pop_gp, 1)[0]
@@ -84,11 +81,10 @@ def main():
     for ind in pop_ga:
         ind.fitness.values = evalSymbReg(best_gp, ind)
     
-    stats_ga.update(pop_ga)
-    stats_gp.update(pop_gp)
-    
-    logger.logGeneration(gen="0 (ga)", evals=len(pop_ga), stats=stats_ga)
-    logger.logGeneration(gen="0 (gp)", evals=len(pop_gp), stats=stats_gp)
+    stats_ga.append(pop_ga, gen=0, type='ga', evals=len(pop_ga))
+    stats_gp.append(pop_gp, gen=0, type='gp', evals=len(pop_gp))
+    print stats_ga.stream
+    print stats_gp.stream
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
     
@@ -135,14 +131,14 @@ def main():
         pop_ga = off_ga
         pop_gp = off_gp
         
-        stats_ga.update(pop_ga)
-        stats_gp.update(pop_gp)
+        stats_ga.append(pop_ga, gen=g, type='ga', evals=len(pop_ga))
+        stats_gp.append(pop_gp, gen=g, type='gp', evals=len(pop_gp))
+        print stats_ga.stream
+        print stats_gp.stream
         
         best_ga = tools.selBest(pop_ga, 1)[0]
         best_gp = tools.selBest(pop_gp, 1)[0]    
     
-        logger.logGeneration(gen="%d (ga)" % g, evals=len(off_ga), stats=stats_ga)
-        logger.logGeneration(gen="%d (gp)" % g, evals=len(off_gp), stats=stats_gp)
 
     print("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values))
     print("Best individual GP is %s, %s" % (gp.stringify(best_gp), best_gp.fitness.values))

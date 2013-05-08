@@ -16,6 +16,8 @@
 import random
 import sys
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -111,16 +113,12 @@ def main():
     hosts = htoolbox.population(n=300)
     parasites = ptoolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    hstats = tools.Statistics(lambda ind: ind.fitness.values)
-    hstats.register("avg", tools.mean)
-    hstats.register("std", tools.std)
-    hstats.register("min", min)
-    hstats.register("max", max)
     
-    column_names = ["gen", "evals"]
-    column_names.extend(hstats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    hstats = tools.Statistics(lambda ind: ind.fitness.values)
+    hstats.register("avg", numpy.mean)
+    hstats.register("std", numpy.std)
+    hstats.register("min", numpy.min)
+    hstats.register("max", numpy.max)
     
     MAXGEN = 50
     H_CXPB, H_MUTPB = 0.5, 0.3
@@ -131,9 +129,8 @@ def main():
         host.fitness.values = parasite.fitness.values = fit
     
     hof.update(hosts)
-    hstats.update(hosts)
-    
-    logger.logGeneration(gen=0, evals=len(hosts), stats=hstats)
+    hstats.append(hosts, gen=0, evals=len(hosts))
+    print hstats.stream
     
     for g in range(1, MAXGEN):
         
@@ -148,8 +145,8 @@ def main():
             host.fitness.values = parasite.fitness.values = fit
         
         hof.update(hosts)
-        hstats.update(hosts)
-        logger.logGeneration(gen=g, evals=len(hosts), stats=hstats)
+        hstats.append(hosts, gen=g, evals=len(hosts))
+        print hstats.stream
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(best_network)

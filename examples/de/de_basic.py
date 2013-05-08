@@ -16,6 +16,8 @@
 import random
 import array
 
+import numpy
+
 from deap import base
 from deap import benchmarks
 from deap import creator
@@ -44,24 +46,18 @@ def main():
     pop = toolbox.population(n=MU);
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
-    
-    column_names = ["gen", "evals"] 
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    stats.update(pop)
-    
-    logger.logGeneration(gen=0, evals=len(pop), stats=stats)
+    stats.append(pop, gen=0, evals=len(pop))
+    print(stats.stream)
     
     for g in range(1, NGEN):
         for k, agent in enumerate(pop):
@@ -75,9 +71,9 @@ def main():
             if y.fitness > agent.fitness:
                 pop[k] = y
         hof.update(pop)
-        stats.update(pop)
-        
-        logger.logGeneration(gen=g, evals=len(pop), stats=stats)
+        stats.append(pop, gen=g, evals=len(pop))
+        print(stats.stream)
+
 
 
     print("Best individual is ", hof[0], hof[0].fitness.values[0])

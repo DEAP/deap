@@ -134,14 +134,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     if halloffame is not None:
         halloffame.update(population)
     if stats is not None:
-        stats.update(population)
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
+        stats.append(population, evals=len(population), gen=0)
+        if verbose:
+            print stats.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -166,10 +161,10 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         
         # Update the statistics with the new population
         if stats is not None:
-            stats.update(population)
+            stats.append(population, evals=len(invalid_ind), gen=gen)
+            if verbose:
+                print stats.stream
 
-        if verbose:
-            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
 
     return population
 
@@ -274,15 +269,11 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     if halloffame is not None:
         halloffame.update(population)
+
     if stats is not None:
-        stats.update(population)
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
+        stats.append(population, evals=len(population), gen=0)
+        if verbose:
+            print stats.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -304,9 +295,9 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
         # Update the statistics with the new population
         if stats is not None:
-            stats.update(population)
-        if verbose:
-            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
+            stats.append(population, evals=len(invalid_ind), gen=gen)
+            if verbose:
+                print stats.stream
 
     return population
     
@@ -358,15 +349,11 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     if halloffame is not None:
         halloffame.update(population)
+
     if stats is not None:
-        stats.update(population)
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
+        stats.append(population, evals=len(population), gen=0)
+        if verbose:
+            print stats.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -388,9 +375,9 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
         # Update the statistics with the new population
         if stats is not None:
-            stats.update(population)
-        if verbose:
-            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
+            stats.append(population, evals=len(invalid_ind), gen=gen)
+            if verbose:
+                print stats.stream
 
     return population
 
@@ -420,13 +407,6 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
        Wiley, pp. 527-565;
 
     """
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-    
     for gen in xrange(ngen):
         # Generate a new population
         population = toolbox.generate()
@@ -442,10 +422,9 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         toolbox.update(population)
         
         if stats is not None:
-            stats.update(population)
-        
-        if verbose:
-            logger.logGeneration(evals=len(population), gen=gen, stats=stats)
+            stats.append(population, evals=len(fitnesses), gen=gen)
+            if verbose:
+                print stats.stream
 
     return population
 

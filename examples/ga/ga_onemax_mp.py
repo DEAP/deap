@@ -23,6 +23,8 @@ if sys.version_info < (2, 7):
     print("mpga_onemax example requires Python >= 2.7.")
     exit(1)
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -59,10 +61,10 @@ if __name__ == "__main__":
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
 
     algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, 
                         stats=stats, halloffame=hof)

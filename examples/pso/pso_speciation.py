@@ -23,6 +23,8 @@ import math
 import operator
 import random
 
+import numpy
+
 try:
     from itertools import imap
 except:
@@ -107,18 +109,12 @@ def main(verbose=True):
     RCLOUD = 1.0    # 0.5 times the move severity
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     swarm = toolbox.swarm(n=NPARTICLES)
-
-    if verbose:
-        column_names = ["gen", "evals", "nspecies", "error", "offline_error"]
-        column_names.extend(stats.functions.keys())
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
     
     generation = 0
     while mpb.nevals < 5e5:
@@ -129,7 +125,6 @@ def main(verbose=True):
                 part.best = toolbox.clone(part[:])         # Get the position
                 part.bestfit.values = part.fitness.values  # Get the fitness
         
-        stats.update(swarm)
 
         # Sort swarm into species, best individual comes first
         sorted_swarm = sorted(swarm, key=lambda ind: ind.bestfit, reverse=True)
@@ -146,8 +141,9 @@ def main(verbose=True):
                 species.append([sorted_swarm[0]])
             sorted_swarm.pop(0)
         
+        stats.append(swarm, gen=generation, evals=mpb.nevals, nspecies=len(species), error=mpb.currentError(), offline_error=mpb.offlineError())
         if verbose:
-            logger.logGeneration(gen=generation, evals=mpb.nevals, nspecies=len(species), error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
+            print(stats.stream)
 
         # Detect change
         if any(s[0].bestfit.values != toolbox.evaluate(s[0].best) for s in species):

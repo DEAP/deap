@@ -23,6 +23,8 @@ import math
 import operator
 import random
 
+import numpy
+
 try:
     from itertools import imap
 except:
@@ -108,10 +110,10 @@ def main(verbose=True):
     RCLOUD = 0.5    # 0.5 times the move severity
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     # Generate the initial population
     population = [toolbox.swarm(n=NPARTICLES) for _ in range(NSWARMS)]
@@ -129,14 +131,10 @@ def main(verbose=True):
                 swarm.best = toolbox.clone(part[:])         # Get the position
                 swarm.bestfit.values = part.fitness.values  # Get the fitness
 
-    stats.update(itertools.chain(*population))
+    stats.append(itertools.chain(*population), gen=0, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
 
     if verbose:
-        column_names = ["gen", "evals", "nswarm", "error", "offline_error"]
-        column_names.extend(stats.functions.keys())
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(gen=0, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
+        print(stats.stream)
     
     generation = 1
     while mpb.nevals < 5e5:
@@ -189,10 +187,10 @@ def main(verbose=True):
                     swarm.best = toolbox.clone(part[:])
                     swarm.bestfit.values = part.fitness.values
         
-        stats.update(itertools.chain(*population))
+        stats.append(itertools.chain(*population), gen=generation, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
 
         if verbose:
-            logger.logGeneration(gen=generation, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError(), stats=stats)
+            print(stats.stream)
 
         # Apply exclusion
         reinit_swarms = set()

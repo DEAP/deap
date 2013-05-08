@@ -16,6 +16,8 @@
 import array
 import random
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -56,29 +58,24 @@ def main():
     
     demes = [toolbox.population(n=MU) for _ in range(NBR_DEMES)]
     hof = tools.HallOfFame(1)
-    stats = tools.Statistics(lambda ind: ind.fitness.values, 4)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
-    
-    column_names = ["gen", "deme", "evals"]
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     for idx, deme in enumerate(demes):
         for ind in deme:
             ind.fitness.values = toolbox.evaluate(ind)
-        stats.update(deme, idx)
+        stats.append(deme, gen=0, deme=idx, evals=len(deme))
         hof.update(deme)
-        logger.logGeneration(gen="0", deme=idx, evals=len(deme), stats=stats, index=idx)
+        print(stats.stream)
     
-    stats.update(demes[0]+demes[1]+demes[2], 3)
-    logger.logGeneration(gen=0, deme=idx, evals="-", stats=stats, index=3)
+    stats.append(demes[0]+demes[1]+demes[2], gen=0)
+    print(stats.stream)
     
     gen = 1
-    while gen <= NGEN and stats.max[3][-1][0] < 100.0:
+    while gen <= NGEN and stats[-1]["max"] < 100.0:
         for idx, deme in enumerate(demes):
             deme[:] = toolbox.select(deme, len(deme))
             deme[:] = algorithms.varAnd(deme, toolbox, cxpb=CXPB, mutpb=MUTPB)
@@ -87,14 +84,14 @@ def main():
             for ind in invalid_ind:
                 ind.fitness.values = toolbox.evaluate(ind)
             
-            stats.update(deme, idx)
+            stats.append(deme, gen=gen, deme=idx, evals=len(invalid_ind))
             hof.update(deme)
-            logger.logGeneration(gen="%d" %gen, deme=idx, evals=len(invalid_ind), stats=stats, index=idx)
+            print(stats.stream)
             
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)
-        stats.update(demes[0]+demes[1]+demes[2], 3)
-        logger.logGeneration(gen="%d" % gen, deme="-", evals="-", stats=stats, index=3)
+        stats.append(demes[0]+demes[1]+demes[2], gen=gen)
+        print(stats.stream)
         gen += 1
     
     return demes, stats, hof

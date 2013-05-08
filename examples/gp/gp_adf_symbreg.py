@@ -17,6 +17,8 @@ import random
 import operator
 import math
 
+import numpy
+
 from deap import base
 from deap import creator
 from deap import gp
@@ -120,15 +122,10 @@ def main():
     pop = toolbox.population(n=100)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", tools.mean)
-    stats.register("std", tools.std)
-    stats.register("min", min)
-    stats.register("max", max)
-    
-    column_names = ["gen", "evals"]
-    column_names.extend(stats.functions.keys())
-    logger = tools.EvolutionLogger(column_names)
-    logger.logHeader()
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
     
@@ -137,9 +134,8 @@ def main():
         ind.fitness.values = toolbox.evaluate(ind)
 
     hof.update(pop)
-    stats.update(pop)
-    
-    logger.logGeneration(gen=0, evals=len(pop), stats=stats)    
+    stats.append(pop, gen=0, evals=len(pop))
+    print(stats.stream)
     
     for g in range(1, NGEN):
         # Select the offspring
@@ -169,9 +165,8 @@ def main():
         # Replacement of the population by the offspring
         pop = offspring
         hof.update(pop)
-        stats.update(pop)
-        
-        logger.logGeneration(gen=g, evals=len(invalids), stats=stats)
+        stats.append(pop, gen=g, evals=len(invalids))
+        print(stats.stream)
     
     print('Best individual : ', gp.stringify(hof[0][0]), hof[0].fitness)
     
