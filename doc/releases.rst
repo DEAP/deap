@@ -9,8 +9,17 @@ To be released 1.0
 - Added object oriented inheritance to strongly typed genetic programming.
 - Added the possibility to name primitives added to a PrimitiveSet.
 - Added the pset to GP mutation operators that require it.
-- Removed pset from the GP individuals in the examples.
+- Added a from_string function to PrimitiveTree.
+- Removed the ephemeral generator.
 - Removed DTM from the sources.
+- Added an explicit description of the error when there are no available
+  primitive/terminal of a certain type.
+- Added a ``dominates`` function to the Fitness, which can be replaced. This
+  function is now used in the multi-objective specific selection methods
+  instead of ``tools.isDominated``.
+- Added symbolic regression benchmarks in ``benchmarks.gp``.
+- A Fitness is now hashable.
+- Revised the Hall of Fame to inlude only unique individuals.
 
 Release 0.9
 ===========
