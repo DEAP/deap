@@ -95,6 +95,7 @@ def main():
     
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
+
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
