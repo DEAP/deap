@@ -391,13 +391,11 @@ class Statistics(list):
     def __init__(self, key=identity):
         self.key = key
         self.functions = {}
-        self.axis = 0
         self.header = None
         self.buffindex = 0
 
     def __getstate__(self):
         state = {}
-        state['axis'] = self.axis
         state['functions'] = self.functions
         state['header'] = self.header
         # Most key cannot be pickled in Python 2
@@ -406,11 +404,10 @@ class Statistics(list):
 
     def __setstate__(self, state):
         self.__init__(state['key'])
-        self.axis = state['axis']
         self.functions = state['functions']
         self.header = state['header']
 
-    def register(self, name, function):
+    def register(self, name, function, *args, **kargs):
         """Register a function *function* that will be apply on the sequence
         each time :func:`~deap.tools.Statistics.append` is called.
         
@@ -418,8 +415,11 @@ class Statistics(list):
                      in the dictionnary of the statistics object.
         :param function: A function that will compute the desired statistics
                          on the data as preprocessed by the key.
+        :param argument: One or more argument (and keyword argument) to pass
+                         automatically to the registered function when called,
+                         optional.
         """        
-        self.functions[name] = function
+        self.functions[name] = partial(function, *args, **kargs)
 
     def select(self, *names):
         """Return a list of values associated to the *names* provided
@@ -455,7 +455,7 @@ class Statistics(list):
         
         entry = OrderedDict.fromkeys(self.header, "")
         for key, func in self.functions.iteritems():
-            entry[key] = func(values, self.axis)
+            entry[key] = func(values)
         entry.update(kargs)
         list.append(self, entry)
 
@@ -494,6 +494,57 @@ class Statistics(list):
             text.append(template.format(*line))
  
         return "\n".join(text)
+
+class MultiStatistics(dict):
+    """Dictionary of Statistics object allowing to compute statistics on
+    multiple keys using a single call to *append*. It takes a set of
+    key-value pairs associating a Statistics object to a unique name. This
+    name can then be used to retrieve the Statistics object.
+    ::
+
+        >>> stats1 = Statistics()
+        >>> stats2 = Statistics(key=attrgetter("fitness.values"))
+        >>> mstats = MultStatistics(genotype=stats1, fitness=stats2)
+        >>> mstats.register("mean", numpy.mean, axis=0)
+        >>> mstats.register("max", numpy.max)
+        >>> mstats.append(pop, gen=0)
+        >>> mstats['fitness'].select("mean")
+        [5.0]
+        >>> mstats['genotype'].select("max")
+        [[1,0,0,0]]
+        >>> stats1.select("max")
+        [[1,0,0,0]]
+    """
+    def __init__(self, **kargs):
+        for name, stats in kargs.items():
+            self[name] = stats
+
+    def append(self, data=[], **kargs):
+        """Call `append` with *data* and *kargs* for each Statistics object.
+        """
+        for stats in self.values():
+            stats.append(data, **kargs)
+
+    def register(self, name, function, *args, **kargs):
+        """Register a function *function* in each Statistics object.
+        
+        :param name: The name of the statistics function as it would appear
+                     in the dictionnary of the statistics object.
+        :param function: A function that will compute the desired statistics
+                         on the data as preprocessed by the key.
+        :param argument: One or more argument (and keyword argument) to pass
+                         automatically to the registered function when called,
+                         optional.
+        """
+        for stats in self.values():
+            stats.register(name, function, *args, **kargs)
+
+    @property
+    def stream(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        raise NotImplementedError
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
@@ -1788,8 +1839,8 @@ if __name__ == "__main__":
     doctest.run_docstring_examples(initCycle, globals())
     
     doctest.run_docstring_examples(Statistics.register, globals())
-    doctest.run_docstring_examples(Statistics.update, globals())
-    
+    doctest.run_docstring_examples(Statistics.append, globals())
+
     doctest.run_docstring_examples(Checkpoint, globals())
     doctest.run_docstring_examples(Checkpoint.add, globals())
     
