@@ -370,8 +370,8 @@ class Statistics(list):
     Values can be retrieved via the *select* method given the appropriate
     key.
     ::
-        
-        >>> s = Statistics(fieldname=identity)
+    
+        >>> s = Statistics()
         >>> s.register("mean", mean)
         >>> s.register("max", mean)
         >>> s.append([1, 2, 3, 4])
@@ -387,23 +387,10 @@ class Statistics(list):
         2.5
         >>> max_[0]
         4
-
-        >>> s = Statistics(fitness=lambda ind: ind.fitness.values,
-                                size=lambda ind: len(ind))
-        >>> s.register("mean", mean)
-        >>> s.register("max", mean)
-        >>> s.append([ind1, ind2, ind3])
-        >>> meanfit, maxfit = s.select(fitness=['mean', 'max'])
-        >>> meansize = s.select(size=['mean'])
-        >>> bothinfos = s.select(fitness=['mean', 'max'], size=['mean'])
-        >>> bothinfos['fitness'][0] == meanfit
-        True
-        >>> bothinfos['size'] == meansize
-        True
     """
-    def __init__(self, **kargs):
-        self.fields = kargs
-        self.functions = OrderedDict()
+    def __init__(self, key=identity):
+        self.key = key
+        self.functions = {}
         self.axis = 0
         self.header = None
         self.buffindex = 0
@@ -414,11 +401,11 @@ class Statistics(list):
         state['functions'] = self.functions
         state['header'] = self.header
         # Most key cannot be pickled in Python 2
-        state['fields'] = self.fields.keys()
+        state['key'] = None
         return state
 
     def __setstate__(self, state):
-        self.__init__(state['fields'])
+        self.__init__(state['key'])
         self.axis = state['axis']
         self.functions = state['functions']
         self.header = state['header']
@@ -431,11 +418,10 @@ class Statistics(list):
                      in the dictionnary of the statistics object.
         :param function: A function that will compute the desired statistics
                          on the data as preprocessed by the key.
-        """
-        for field in self.fields:
-            self.functions[(field, name)] = function
+        """        
+        self.functions[name] = function
 
-    def select(self, *names, **knames):
+    def select(self, *names):
         """Return a list of values associated to the *names* provided
         in argument in each dictionary of the Statistics object list.
         One list per name is returned.
@@ -447,24 +433,9 @@ class Statistics(list):
             >>> s.select("mean")
             [4.0]
         """
-        output = {}
-        for field in names:
-            if len(self.fields) == 1 and not field in self.header:
-                fieldreal = (list(self.fields.iterkeys())[0], field)
-                output[field] = [entry[fieldreal] for entry in self]
-            else:
-                output[field] = [entry[field] for entry in self]
-
-        for field,keys in knames.items():
-            if len(keys) == 1:
-                output[field] = [entry[(field, keys[0])] for entry in self]
-            else:
-                output[field] = tuple([entry[(field, key)] for entry in self] for key in keys)
-
-        if len(output) == 1:
-            return output.popitem()[1]
-
-        return output
+        if len(names) == 1:
+            return [entry[names[0]] for entry in self]
+        return tuple([entry[name] for entry in self] for name in names)
 
     def append(self, data=[], **kargs):
         """Apply to the input sequence *data* each registered function 
@@ -474,18 +445,17 @@ class Statistics(list):
         :param data: sequence of objects on which the statistics are computed.
         :param kargs: Additional key-value pairs to record.
         """
-        #if not self.key:
-        #    raise AttributeError('It is required to set a key after unpickling a %s object.' % self.__class__.__name__)
+        if not self.key:
+            raise AttributeError('It is required to set a key after unpickling a %s object.' % self.__class__.__name__)
 
         if not self.header:
-            keyorder = sorted(self.functions, key = lambda k: k[0])
-            self.header = kargs.keys() + keyorder
+            self.header = kargs.keys() + self.functions.keys()
+
+        values = numpy.array([self.key(elem) for elem in data])
         
         entry = OrderedDict.fromkeys(self.header, "")
         for key, func in self.functions.iteritems():
-            field = self.fields[key[0]]
-            entry[key] = func(numpy.array([field(elem) for elem in data]), 
-                                self.axis)
+            entry[key] = func(values, self.axis)
         entry.update(kargs)
         list.append(self, entry)
 
