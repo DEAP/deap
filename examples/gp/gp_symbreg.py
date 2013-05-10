@@ -73,15 +73,24 @@ def main():
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean)
-    stats.register("std", numpy.std)
-    stats.register("min", numpy.min)
-    stats.register("max", numpy.max)
     
-    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats, halloffame=hof)
+    # 
+    stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
+    stats_siz = tools.Statistics(len)
+    mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_siz)
+    mstats.register("avg", numpy.mean)
+    mstats.register("std", numpy.std)
+    mstats.register("min", numpy.min)
+    mstats.register("max", numpy.max)
     
-    return pop, stats, hof
+    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, mstats, halloffame=hof, verbose=False)
+
+    print "Fitness evolution"
+    print mstats['fitness']
+    print "Size evolution"
+    print mstats['size']
+    
+    return pop, mstats, hof
 
 if __name__ == "__main__":
     main()
