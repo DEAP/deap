@@ -73,19 +73,13 @@ def main():
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    stats = tools.Statistics(fitness=lambda ind: ind.fitness.values,
-                                size=lambda ind: len(ind))
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
     algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats, halloffame=hof)
-
-    infos = stats.select('gen', fitness=['avg'], size=['avg', 'std'])
-    print(infos['gen'])
-    print(infos['fitness'])
-    print(zip(*infos['size']))
     
     return pop, stats, hof
 
