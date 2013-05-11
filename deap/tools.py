@@ -391,7 +391,22 @@ class Statistics(list):
     def __init__(self, key=identity):
         self.key = key
         self.functions = {}
+        
         self.header = None
+        """Order of the columns to print when using the :meth:`stream` and
+        :meth:`__str__` methods. The syntax is a single iterable containing
+        string elements. For example, with the previously
+        defined statistics class, one can print the generation and the
+        fitness average, and maximum with
+        ::
+
+            s.header = ("gen", "mean", "max")
+        
+        If not set the header is built with all fields, in arbritrary order
+        on insertion of the first data. The header can be removed by setting
+        it to :data:`None`.
+        """
+        
         self.buffindex = 0
 
     def __getstate__(self):
@@ -408,9 +423,9 @@ class Statistics(list):
         self.header = state['header']
 
     def register(self, name, function, *args, **kargs):
-        """Register a function *function* that will be apply on the sequence
-        each time :func:`~deap.tools.Statistics.append` is called.
-        
+        """Register a *function* that will be applied on the sequence each
+        time :meth:`append` is called.
+
         :param name: The name of the statistics function as it would appear
                      in the dictionnary of the statistics object.
         :param function: A function that will compute the desired statistics
@@ -424,14 +439,17 @@ class Statistics(list):
     def select(self, *names):
         """Return a list of values associated to the *names* provided
         in argument in each dictionary of the Statistics object list.
-        One list per name is returned.
+        One list per name is returned in order.
         ::
 
             >>> s = Statistics()
             >>> s.register("mean", numpy.mean)
+            >>> s.register("max", numpy.mean)
             >>> s.append([1,2,3,4,5,6,7])
             >>> s.select("mean")
             [4.0]
+            >>> s.select("mean", "max")
+            ([4.0], [7.0])
         """
         if len(names) == 1:
             return [entry[names[0]] for entry in self]
@@ -442,7 +460,7 @@ class Statistics(list):
         and store the results plus the additional information from *kargs*
         in a dictionnary at the end of the list.
         
-        :param data: sequence of objects on which the statistics are computed.
+        :param data: Sequence of objects on which the statistics are computed.
         :param kargs: Additional key-value pairs to record.
         """
         if not self.key:
@@ -458,6 +476,34 @@ class Statistics(list):
             entry[key] = func(values)
         entry.update(kargs)
         list.append(self, entry)
+    
+    def __delitem__(self, key):
+        if isinstance(key, int):
+            self.pop(key)
+        elif isinstance(key, slice):
+            stop = key.stop
+            start = key.start if key.start else 0
+            step = key.step if key.step else 1
+            indexes = range(start, stop, step)
+            for i in indexes:
+                self.pop(i)
+        
+    def pop(self, index=0):
+        """Retreive and delete element *index*. The header and stream will be
+        adjusted to follow the modification.
+
+        :param item: The index of the element to remove, optional. It defaults
+                     to the first element.
+        
+        You can also use the following syntax to delete elements.
+        ::
+        
+            del s[0]
+            del s[1::5]
+        """
+        if index < self.buffindex:
+            self.buffindex -= 1
+        return super(self.__class__, self).pop(index)
 
     @property
     def stream(self):
@@ -507,10 +553,10 @@ class Statistics(list):
         return "\n".join(text)
 
 class MultiStatistics(dict):
-    """Dictionary of Statistics object allowing to compute statistics on
-    multiple keys using a single call to *append*. It takes a set of
-    key-value pairs associating a Statistics object to a unique name. This
-    name can then be used to retrieve the Statistics object.
+    """Dictionary of :class:`Statistics` object allowing to compute
+    statistics on multiple keys using a single call to :meth:`append`. It
+    takes a set of key-value pairs associating a statistics object to a
+    unique name. This name can then be used to retrieve the statistics object.
     ::
 
         >>> stats1 = Statistics()
@@ -534,6 +580,20 @@ class MultiStatistics(dict):
     
     @property
     def header(self):
+        """Order of the columns to print when using the :meth:`stream` and
+        :meth:`__str__` methods. The syntax is a single iterable containing
+        string elements for shared data between the functions, and tuples key
+        - function name for function data. For example, with the previously
+        defined multi statistics class one can print the generation and the
+        fitness maximum with
+        ::
+
+            mstats.header = ("gen", ("fitness", ("max",)))
+        
+        If not set the header is built with all fields, in arbritrary order
+        on insertion of the first data. The header can be removed by setting
+        it to :data:`None` or deleting it.
+        """
         header = list()
         for key, columns in self._header:
             if key is None:
@@ -544,6 +604,9 @@ class MultiStatistics(dict):
     
     @header.setter
     def header(self, header):
+        if header is None:
+            self._header = None
+        
         # Take a header of form ["common", ("key", ["function", "function"])]
         # and transforms it to [(None, ["common"]), ("key", ["function", "function"])]
         # The order can be mixed
@@ -555,10 +618,17 @@ class MultiStatistics(dict):
                 self._header.append((None, [item]))
             else:
                 self._header.append(item)
-            
+    
+    @header.deleter
+    def header(self):
+        self.header = None
         
     def append(self, data=[], **kargs):
-        """Calls `append` with *data* and *kargs* for each Statistics object.
+        """Calls :meth:`Statistics.append` with *data* and *kargs* on each
+        :class:`Statistics` object.
+        
+        :param data: Sequence of objects on which the statistics are computed.
+        :param kargs: Additional key-value pairs to record.
         """
         if not self._header:
             header = kargs.keys()
@@ -571,7 +641,7 @@ class MultiStatistics(dict):
             stats.append(data, **kargs)
 
     def register(self, name, function, *args, **kargs):
-        """Register a function *function* in each Statistics object.
+        """Register a *function* in each :class:`Statistics` object.
         
         :param name: The name of the statistics function as it would appear
                      in the dictionnary of the statistics object.
@@ -583,27 +653,78 @@ class MultiStatistics(dict):
         """
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
-
+    
+    def __delitem__(self, key):
+        if isinstance(key, str) or isinstance(key, int):
+            self.pop(key)
+        elif isinstance(key, slice):
+            stop = key.stop
+            start = key.start if key.start else 0
+            step = key.step if key.step else 1
+            indexes = range(start, stop, step)
+            for i in indexes:
+                self.pop(i)
+    
+    def pop(self, item):
+        """Retreive and delete element *item*. The item can be either a
+        string, to remove an entire function or an integer to remove an entry
+        in all underlying :class:`Statistics` objects. The header and stream
+        will be adjusted to follow the modification. 
+        
+        :param item: The element to remove, either a key of the current
+                     :class:`MultiStatistics` or an index of all
+                     sub- :class:`Statistics` objects.
+        
+        You can also use the following syntax to delete items.
+        ::
+        
+            del mstats["key"]
+            del mstats[1::5]
+        """
+        if isinstance(item, str):
+            value = super(self.__class__, self).pop(item)
+            self._header = [(fname, cols) for fname, cols in self._header if fname != item]
+            return value
+        elif isinstance(item, int):
+            if item < self.buffindex:
+                self.buffindex -= 1
+            return {key : self[key].pop(item) for key in self.keys()}
+    
     @property
     def stream(self):
+        """Retrieve the formated unstreamed entries of the database including
+        the headers. For the previous multi statistics object the result is
+        ::
+
+            >>> print mstats.stream
+                   < fitness >  <             genotype             >
+            gen    max  mean    max             mean
+              0    6    5.0     [1, 1, 1, 0]    [0.5, 0.33, 0.75, 0]
+            >>> mstats.append(pop, gen=1)
+            >>> print mstats.stream
+              1    8    5.5     [1, 1, 1, 1]    [0.75, 0.5, 1.0, 0.5]
+        """
         startindex, self.buffindex = self.buffindex, len(self[self.keys()[0]])
         return self.__str__(startindex)
 
     def __str__(self, startindex=0):
         # The header for multi statistics is
-        #                       function1               function2           ...
-        # common1   common2 ... key1        key2    ... key1        key2    ...
+        #                       <      function1      > <    function2    >   ...
+        # common1   common2 ... key1        key2    ... key1        key2      ...
         columns_len = list()
         columns_name = list()
         keys_span = list()
         keys_name = list()
         for key, columns in self._header:
-            columns_len += [max(len(key), len(columns[0])) if key is not None else len(columns[0])] \
-                           + [len(c) for c in columns[1:]]
+            # The first column of each function in the header is at least as
+            # large as the function name
+            columns_len += [max(len(key), len(columns[0])) if key is not None else len(columns[0])]
+            columns_len += [len(c) for c in columns[1:]]
             columns_name.extend(columns)
             keys_span.append((key, len(columns)))
             keys_name.append(key if key is not None else "")
-            
+        
+        # Take the first key as default key for common info
         fkey = self.keys()[0]
         str_matrix = list()
         for i in range(startindex, len(self[fkey])):
@@ -611,19 +732,20 @@ class MultiStatistics(dict):
             j = 0
             for key, columns in self._header:
                 if key is None:
-                    # if None (common) take the first item
+                    # If we are in a common column, use the default key
                     key = fkey
                     
                 for c in columns:
                     try:
+                        # Format ints and floats with %g for pretty printing
                         item = "{:g}".format(self[key][i].get(c, ""))
                     except ValueError:
+                        # If not int nor float use default formatting
                         item = str(self[key][i].get(c, ""))
                     line.append(item)
                     columns_len[j] = max(columns_len[j], len(item))
                     j += 1
                 
-            
             str_matrix.append(line)
         
         template = "\t".join("{:<%i}" % i for i in columns_len)
@@ -633,12 +755,15 @@ class MultiStatistics(dict):
             keys_template = list()
             i = 0
             for key, span in keys_span:
+                # Tabs width are hard to estimate, transform then into spaces
+                # and get the spanned columns width for pretty printing of the
+                # keys
                 tt = "\t".join("{:<%i}" % i for i in columns_len[i:i+span])
-                hs = tt.format(*columns_name[i:i+span])
+                hs_len = len(tt.format(*columns_name[i:i+span]).expandtabs())
                 if key:
-                    keys_template.append("<{:^%i}>" % (len(hs.expandtabs()) - 2))
+                    keys_template.append("<{:^%i}>" % (hs_len - 2))
                 else:
-                    keys_template.append("{:%i}" % (sum(columns_len[i:i+span])))
+                    keys_template.append("{:%i}" % hs_len)
                 i += span
         
             keys_template = "\t".join(keys_template)
