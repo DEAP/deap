@@ -518,10 +518,44 @@ class MultiStatistics(dict):
     def __init__(self, **kargs):
         for name, stats in kargs.items():
             self[name] = stats
-
+        self._header = None
+        self.buffindex = 0
+    
+    @property
+    def header(self):
+        header = list()
+        for key, columns in self._header:
+            if key is None:
+                header.extend(columns)
+            else:
+                header.append((key, columns))
+        return header
+    
+    @header.setter
+    def header(self, header):
+        # Take a header of form ["common", ("key", ["function", "function"])]
+        # and transforms it to [(None, ["common"]), ("key", ["function", "function"])]
+        # The order can be mixed
+        self._header = list()
+        for item in header:
+            if isinstance(item, str) and len(self._header) > 0 and self._header[-1][0] is None:
+                self._header[-1][1].append(item)
+            elif isinstance(item, str):
+                self._header.append((None, [item]))
+            else:
+                self._header.append(item)
+            
+        
     def append(self, data=[], **kargs):
-        """Call `append` with *data* and *kargs* for each Statistics object.
+        """Calls `append` with *data* and *kargs* for each Statistics object.
         """
+        if not self._header:
+            header = kargs.keys()
+            for k in self.keys():
+                header.append((k, self[k].functions.keys()))
+        
+            self.header = header
+        
         for stats in self.values():
             stats.append(data, **kargs)
 
@@ -541,10 +575,70 @@ class MultiStatistics(dict):
 
     @property
     def stream(self):
-        raise NotImplementedError
+        startindex, self.buffindex = self.buffindex, len(self[self.keys()[0]])
+        return self.__str__(startindex)
 
-    def __str__(self):
-        raise NotImplementedError
+    def __str__(self, startindex=0):
+        # The header for multi statistics is
+        #                       function1               function2           ...
+        # common1   common2 ... key1        key2    ... key1        key2    ...
+        columns_len = list()
+        columns_name = list()
+        keys_span = list()
+        keys_name = list()
+        for key, columns in self._header:
+            columns_len += [max(len(key), len(columns[0])) if key is not None else len(columns[0])] \
+                           + [len(c) for c in columns[1:]]
+            columns_name.extend(columns)
+            keys_span.append((key, len(columns)))
+            keys_name.append(key if key is not None else "")
+            
+        fkey = self.keys()[0]
+        str_matrix = list()
+        for i in range(startindex, len(self[fkey])):
+            line = list()
+            j = 0
+            for key, columns in self._header:
+                if key is None:
+                    # if None (common) take the first item
+                    key = fkey
+                    
+                for c in columns:
+                    try:
+                        item = "{:g}".format(self[key][i].get(c, ""))
+                    except ValueError:
+                        item = str(self[key][i].get(c, ""))
+                    line.append(item)
+                    columns_len[j] = max(columns_len[j], len(item))
+                    j += 1
+                
+            
+            str_matrix.append(line)
+        
+        template = "\t".join("{:<%i}" % i for i in columns_len)
+        
+        text = list()
+        if startindex == 0:
+            keys_template = list()
+            i = 0
+            for key, span in keys_span:
+                tt = "\t".join("{:<%i}" % i for i in columns_len[i:i+span])
+                hs = tt.format(*columns_name[i:i+span])
+                if key:
+                    keys_template.append("<{:^%i}>" % (len(hs.expandtabs()) - 2))
+                else:
+                    keys_template.append("{:%i}" % (sum(columns_len[i:i+span])))
+                i += span
+        
+            keys_template = "\t".join(keys_template)
+            
+            text.append(keys_template.format(*keys_name))
+            text.append(template.format(*columns_name))
+        for line in str_matrix:
+            text.append(template.format(*line))
+        
+        return "\n".join(text)
+        
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
