@@ -157,16 +157,11 @@ Migration
 
 Statistics
 ----------
-.. autoclass:: deap.tools.Statistics([key][, n])
+.. autoclass:: deap.tools.Statistics([key])
 	:members:
 
-.. autofunction:: deap.tools.mean
-
-.. autofunction:: deap.tools.median
-
-.. autofunction:: deap.tools.var
-
-.. autofunction:: deap.tools.std
+.. autoclass:: deap.tools.MultiStatistics(**kargs)
+	:members:
 
 Hall-Of-Fame
 ------------
@@ -184,13 +179,13 @@ Hall-Of-Fame
 
    .. automethod:: deap.tools.ParetoFront.update
 
-Evolution Logger
-----------------
-.. autoclass:: deap.tools.EvolutionLogger([col_names][, precision])
-
-   .. automethod:: deap.tools.EvolutionLogger.logHeader
-
-   .. automethod:: deap.tools.EvolutionLogger.logGeneration([stats[, index]][, data[, ...]])
+.. Evolution Logger
+.. ----------------
+.. .. autoclass:: deap.tools.EvolutionLogger([col_names][, precision])
+.. 
+..    .. automethod:: deap.tools.EvolutionLogger.logHeader
+.. 
+..    .. automethod:: deap.tools.EvolutionLogger.logGeneration([stats[, index]][, data[, ...]])
    
 ..   .. autoattribute:: deap.tools.EvolutionLogger.output
 
