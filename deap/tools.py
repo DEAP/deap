@@ -480,6 +480,17 @@ class Statistics(list):
     def __str__(self, startindex=0):
         columns_len = map(len, self.header)
         str_matrix = [map(str, (line.get(name, "") for name in self.header)) for line in self[startindex:]]
+        str_matrix = list()
+        for line in self[startindex:]:
+            l = list()
+            for name in self.header:
+                try:
+                    item = "{:g}".format(line.get(name, ""))
+                except ValueError:
+                    item = str(line.get(name, ""))
+                l.append(item)
+            str_matrix.append(l)
+                
         for line in str_matrix:
             for i, column in enumerate(line):
                 columns_len[i] = max(columns_len[i], len(column))
