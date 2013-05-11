@@ -364,7 +364,7 @@ class Statistics(list):
     
         >>> s = Statistics()
         >>> s.register("mean", mean)
-        >>> s.register("max", mean)
+        >>> s.register("max", max)
         >>> s.append([1, 2, 3, 4])
         >>> s.append([5, 6, 7, 8])
         >>> s.select("mean")
@@ -469,15 +469,11 @@ class Statistics(list):
         list.append(self, entry)
     
     def __delitem__(self, key):
-        if isinstance(key, int):
-            self.pop(key)
-        elif isinstance(key, slice):
-            stop = key.stop
-            start = key.start if key.start else 0
-            step = key.step if key.step else 1
-            indexes = range(start, stop, step)
-            for i in indexes:
+        if isinstance(key, slice):
+            for i, in range(*key.indices(len(self))):
                 self.pop(i)
+        else:
+            self.pop(key)
         
     def pop(self, index=0):
         """Retreive and delete element *index*. The header and stream will be
