@@ -31,19 +31,10 @@ try:
 except ImportError:
     import pickle
 
-try:
-    import numpy
-except ImportError:
-    import platform
-    if platform.python_implementation() == "PyPy":
-        import numpypy as numpy
-    else:
-        raise ImportError("DEAP requires Numpy.")
-
 from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
-from collections import Sequence, defaultdict, OrderedDict
+from collections import Sequence, defaultdict
 from sys import stdout
 
 def identity(obj):
@@ -451,9 +442,9 @@ class Statistics(list):
         if not self.header:
             self.header = kargs.keys() + self.functions.keys()
 
-        values = numpy.array([self.key(elem) for elem in data])
+        values = tuple(self.key(elem) for elem in data)
         
-        entry = OrderedDict.fromkeys(self.header, "")
+        entry = {}
         for key, func in self.functions.iteritems():
             entry[key] = func(values)
         entry.update(kargs)
@@ -479,30 +470,22 @@ class Statistics(list):
 
     def __str__(self, startindex=0):
         columns_len = map(len, self.header)
-        str_matrix = [map(str, (line.get(name, "") for name in self.header)) for line in self[startindex:]]
-        str_matrix = list()
+
+        str_matrix = []
         for line in self[startindex:]:
-            l = list()
-            for name in self.header:
-                try:
-                    item = "{:g}".format(line.get(name, ""))
-                except ValueError:
-                    item = str(line.get(name, ""))
-                l.append(item)
-            str_matrix.append(l)
-                
-        for line in str_matrix:
-            for i, column in enumerate(line):
+            str_line = []
+            for i, name in enumerate(self.header):
+                value = line.get(name, "")
+                string = "{:n}" if isinstance(value, float) else "{}"
+                column = string.format(value)
                 columns_len[i] = max(columns_len[i], len(column))
+                str_line.append(column)
+            str_matrix.append(str_line)
  
-        template = "\t".join(("{:<%i}" % i for i in columns_len))
-        
-        text = []
+        template = "\t".join("{:<%i}" % i for i in columns_len)
+        text = (template.format(*line) for line in str_matrix)
         if startindex == 0:
-            text.append(template.format(*self.header))
-        
-        for line in str_matrix:
-            text.append(template.format(*line))
+            text = chain([template.format(*self.header)], text)
  
         return "\n".join(text)
 
