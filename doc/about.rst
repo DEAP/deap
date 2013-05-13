@@ -15,7 +15,7 @@ In alphabetical order
 - Yannick Hold-Geoffroy
 - Marc Parizeau
 
-DEAP is developed at the `Computer Vision and Systems Laboratory (CVSL) <https://vision.gel.ulaval.ca/>`_ at `Laval University <http://www.ulaval.ca>`_, in Quebec city, Canada.
+DEAP is developed at the `Computer Vision and Systems Laboratory (CVSL) <https://vision.gel.ulaval.ca/>`_ at `Université Laval <http://www.ulaval.ca>`_, in Quebec city, Canada.
 
 
 Publications on DEAP
