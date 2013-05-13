@@ -7,7 +7,7 @@ Main Contributors
 In alphabetical order
 
 - `François-Michel De Rainville <https://vision.gel.ulaval.ca/~fmdrainville>`_
-- Félix-Antoine Fortin
+- `Félix-Antoine Fortin <https://vision.gel.ulaval.ca/~fafortin>`_
 - `Christian Gagné <https://vision.gel.ulaval.ca/~cgagne>`_
 - Olivier Gagnon
 - Marc-André Gardner
