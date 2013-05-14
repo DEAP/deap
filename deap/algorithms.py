@@ -134,7 +134,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     if halloffame is not None:
         halloffame.update(population)
     if stats is not None:
-        stats.append(population, evals=len(population), gen=0)
+        stats.append(population, evals=len(invalid_ind), gen=0)
         if verbose:
             print stats.stream
 
