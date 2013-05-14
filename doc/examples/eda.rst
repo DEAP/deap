@@ -38,7 +38,7 @@ combine the fitness and the real values. Moreover, we will use
 :class:`numpy.ndarray` as base class for our individuals.
 
 .. literalinclude:: /code/examples/eda/eda_fctmin.py
-   :lines: 26-27
+   :lines: 28-29
 
 Operators
 =========
