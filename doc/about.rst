@@ -1,3 +1,18 @@
+.. image:: _static/deap_long.png
+   :width: 300 px
+   :align: right
+   :target: index.html
+
+.. image:: _static/lvsn.png
+   :width: 175 px
+   :align: right
+   :target: http://vision.gel.ulaval.ca/
+
+.. image:: _static/ul.gif
+   :width: 175 px
+   :align: right
+   :target: http://www.ulaval.ca/
+
 About DEAP
 ==========
 
@@ -7,7 +22,7 @@ Main Contributors
 In alphabetical order
 
 - `François-Michel De Rainville <https://vision.gel.ulaval.ca/~fmdrainville>`_
-- Félix-Antoine Fortin
+- `Félix-Antoine Fortin <https://vision.gel.ulaval.ca/~fafortin>`_
 - `Christian Gagné <https://vision.gel.ulaval.ca/~cgagne>`_
 - Olivier Gagnon
 - Marc-André Gardner
@@ -15,7 +30,7 @@ In alphabetical order
 - Yannick Hold-Geoffroy
 - Marc Parizeau
 
-DEAP is developed at the `Computer Vision and Systems Laboratory (CVSL) <https://vision.gel.ulaval.ca/>`_ at `Laval University <http://www.ulaval.ca>`_, in Quebec city, Canada.
+DEAP is developed at the `Computer Vision and Systems Laboratory (CVSL) <https://vision.gel.ulaval.ca/>`_ at `Université Laval <http://www.ulaval.ca>`_, in Quebec city, Canada.
 
 
 Publications on DEAP

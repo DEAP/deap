@@ -31,7 +31,7 @@ clean:
 	-rm -rf $(BUILDDIR)/*
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html	
+	PYTHONPATH=${PWD}/../ $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html	
 	@echo
 	mkdir -p $(BUILDDIR)/html/examples/code 
 	cp -R code/examples/* $(BUILDDIR)/html/examples/code
