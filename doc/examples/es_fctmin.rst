@@ -15,7 +15,7 @@ contains a :attr:`strategy` attribute. We'll also minimize the objective
 function, which gives the following classes creation.
 
 .. literalinclude:: /code/examples/es/es_fctmin.py
-   :lines: 31-33
+   :lines: 33-35
 
 The initialization function for an evolution strategy is not defined by DEAP.
 The following generation function takes as argument the class of individual
@@ -31,7 +31,7 @@ This generation function is registered in the toolbox like any other
 initializer.
 
 .. literalinclude:: /code/examples/es/es_fctmin.py
-   :lines: 54-55
+   :lines: 56-57
 
 The strategy controls the standard deviation of the mutation. It is common to
 have a lower bound on the values so that the algorithm don't fall in
@@ -46,15 +46,15 @@ The variation operators are decorated via the
 function is taken from the :mod:`~deap.benchmarks` module.
 
 .. literalinclude:: /code/examples/es/es_fctmin.py
-   :lines: 62-63,61,60
+   :lines: 59,60,63-65
 
 From here, everything left to do is either write the algorithm or use one
 provided in :mod:`~deap.algorithms`. Here we will use the 
 :func:`~deap.algorithms.eaMuCommaLambda` algorithm.
 
 .. literalinclude:: /code/examples/es/es_fctmin.py
-   :lines: 65,67-80
+   :lines: 67,69-82
 
-The complete example : [`source code <code/es/es_fctmin.py>`_].
+The complete [`source code <code/es/es_fctmin.py>`_].
 
 .. [Beyer2002] Beyer and Schwefel, 2002, Evolution strategies - A Comprehensive Introduction

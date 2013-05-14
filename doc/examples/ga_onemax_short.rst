@@ -13,13 +13,13 @@ algorithms impemented use specific functions from the toolbox, in this case
 must be registered. 
 
 .. literalinclude:: /code/examples/ga/ga_onemax_short.py
-   :lines: 39-42
+   :lines: 41-44
 
 The toolbox is then passed to the algorithm and the algorithm uses the
 registered function. 
 
 .. literalinclude:: /code/examples/ga/ga_onemax_short.py
-   :lines: 44, 47-56
+   :lines: 46, 49-58
 
 The short GA One max example makes use of a
 :class:`~deap.tools.HallOfFame` in order to keep track of the best
