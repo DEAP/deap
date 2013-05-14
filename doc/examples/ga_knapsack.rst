@@ -12,7 +12,7 @@ be closer to a bag than a set? Lets make our individuals inherit from the
 :class:`set` class.
 
 .. literalinclude:: /code/examples/ga/ga_knapsack.py
-   :lines: 39-40
+   :lines: 41-42
 
 That's it. You now have individuals that are in fact sets, they have the usual
 attribute :attr:`fitness`. The fitness is a
@@ -21,14 +21,14 @@ of the second objective (the value of the bag). We will now create a
 dictionary of 100 random items to map the values and weights. 
 
 .. literalinclude:: /code/examples/ga/ga_knapsack.py
-   :lines: 32-37
+   :lines: 34-39
 
 We now need to initialize a population and the individuals therein. For this
 we will need a :class:`~deap.base.Toolbox` to register our generators since
 sets can also be created with an input iterable. 
 
 .. literalinclude:: /code/examples/ga/ga_knapsack.py
-   :lines: 39-45
+   :lines: 44,47,50-53
 
 Voilà! The *last* thing to do is to define our evaluation function.
 
@@ -49,30 +49,27 @@ input individual.
 .. literalinclude:: /code/examples/ga/ga_knapsack.py
    :pyobject: mutSet
 
-.. note::
-
-   The outcome of this mutation is dependent of the python you use. The
-   :meth:`set.pop` function is not consistent between versions of python. See
-   the sources of the actual example for a version that will be stable but
-   more complicated.
 
 We then register these operators in the toolbox. Since it is a multi-objective
 problem, we have selected the SPEA-II selection scheme : 
 :func:`~deap.tools.selSPEA2`
 
 .. literalinclude:: /code/examples/ga/ga_knapsack.py
-   :lines: 79-82
+   :lines: 83-86
 
 From here, everything left to do is either write the algorithm or use 
 provided in :mod:`~deap.algorithms`. Here we will use the 
 :func:`~deap.algorithms.eaMuPlusLambda` algorithm.
 
 .. literalinclude:: /code/examples/ga/ga_knapsack.py
-   :lines: 84,86-103
+   :lines: 88,90-107
 
 Finally, a :class:`~deap.tools.ParetoFront` may be used to retrieve the best
 non dominated individuals of the evolution and a
-:class:`~deap.tools.Statistics` object is created for compiling four different
-statistics over the generations. 
+:class:`~deap.tools.Statistics` object is created for compiling four
+different statistics over the generations. The Numpy functions are registered
+in the statistics object with the ``axis=0`` argument to compute the
+statistics on each objective independently. Otherwise, Numpy would compute
+a single mean for both objectives.
 
 The complete example : [`source code <code/ga/ga_knapsack.py>`_].
