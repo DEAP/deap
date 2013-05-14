@@ -471,11 +471,11 @@ class Statistics(list):
     def __delitem__(self, key):
         if isinstance(key, slice):
             for i, in range(*key.indices(len(self))):
-                self.pop(i)
+                self._pop(i)
         else:
-            self.pop(key)
+            self._pop(key)
         
-    def pop(self, index=0):
+    def _pop(self, index=0):
         """Retreive and delete element *index*. The header and stream will be
         adjusted to follow the modification.
 
@@ -491,6 +491,15 @@ class Statistics(list):
         if index < self.buffindex:
             self.buffindex -= 1
         return super(self.__class__, self).pop(index)
+
+    def setColumns(self, *args):
+        """Set which columns will be outputed when calling converting
+        the object to a string with `str` or using the stream property.
+        The provided arguments must correspond to either the names of
+        the registered functions or the keys of keyword arguments 
+        provided when calling the append method.
+        """
+        self.header = args
 
     @property
     def stream(self):
@@ -510,13 +519,15 @@ class Statistics(list):
         startindex, self.buffindex = self.buffindex, len(self)
         return self.__str__(startindex)
 
-    def __str__(self, startindex=0):
-        columns_len = map(len, self.header)
+    def __str__(self, startindex=0, columns=None):
+        if not columns:
+            columns = self.header
+        columns_len = map(len, columns)
 
         str_matrix = []
         for line in self[startindex:]:
             str_line = []
-            for i, name in enumerate(self.header):
+            for i, name in enumerate(columns):
                 value = line.get(name, "")
                 string = "{:n}" if isinstance(value, float) else "{}"
                 column = string.format(value)
@@ -527,7 +538,7 @@ class Statistics(list):
         template = "\t".join("{:<%i}" % i for i in columns_len)
         text = (template.format(*line) for line in str_matrix)
         if startindex == 0:
-            text = chain([template.format(*self.header)], text)
+            text = chain([template.format(*columns)], text)
  
         return "\n".join(text)
 
@@ -554,53 +565,19 @@ class MultiStatistics(dict):
     def __init__(self, **kargs):
         for name, stats in kargs.items():
             self[name] = stats
-        self._header = None
         self.buffindex = 0
-    
-    @property
-    def header(self):
-        """Order of the columns to print when using the :meth:`stream` and
-        :meth:`__str__` methods. The syntax is a single iterable containing
-        string elements for shared data between the functions, and tuples key
-        - function name for function data. For example, with the previously
-        defined multi statistics class one can print the generation and the
-        fitness maximum with
-        ::
+        self.columns = []
 
-            mstats.header = ("gen", ("fitness", ("max",)))
-        
-        If not set the header is built with all fields, in arbritrary order
-        on insertion of the first data. The header can be removed by setting
-        it to :data:`None` or deleting it.
+    def setColumns(self, *args):
+        """Set which columns will be outputed when calling converting
+        the object to a string with `str` or using the stream property.
+        The provided arguments must correspond to either the names of
+        keys provided during the init or the keys of keyword arguments 
+        provided when calling the append method.
         """
-        header = list()
-        for key, columns in self._header:
-            if key is None:
-                header.extend(columns)
-            else:
-                header.append((key, columns))
-        return header
-    
-    @header.setter
-    def header(self, header):
-        if header is None:
-            self._header = None
-        
-        # Take a header of form ["common", ("key", ["function", "function"])]
-        # and transforms it to [(None, ["common"]), ("key", ["function", "function"])]
-        # The order can be mixed
-        self._header = list()
-        for item in header:
-            if isinstance(item, str) and len(self._header) > 0 and self._header[-1][0] is None:
-                self._header[-1][1].append(item)
-            elif isinstance(item, str):
-                self._header.append((None, [item]))
-            else:
-                self._header.append(item)
-    
-    @header.deleter
-    def header(self):
-        self.header = None
+        self.columns = args
+        # self.is_key_column = True
+        self.is_key_column = any(self.has_key(arg) for arg in args)
         
     def append(self, data=[], **kargs):
         """Calls :meth:`Statistics.append` with *data* and *kargs* on each
@@ -609,12 +586,9 @@ class MultiStatistics(dict):
         :param data: Sequence of objects on which the statistics are computed.
         :param kargs: Additional key-value pairs to record.
         """
-        if not self._header:
-            header = kargs.keys()
-            for k in self.keys():
-                header.append((k, self[k].functions.keys()))
-        
-            self.header = header
+        if not self.columns:
+            args = self.keys()
+            self.setColumns(*args)
         
         for stats in self.values():
             stats.append(data, **kargs)
@@ -633,42 +607,6 @@ class MultiStatistics(dict):
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
     
-    def __delitem__(self, key):
-        if isinstance(key, str) or isinstance(key, int):
-            self.pop(key)
-        elif isinstance(key, slice):
-            stop = key.stop
-            start = key.start if key.start else 0
-            step = key.step if key.step else 1
-            indexes = range(start, stop, step)
-            for i in indexes:
-                self.pop(i)
-    
-    def pop(self, item):
-        """Retreive and delete element *item*. The item can be either a
-        string, to remove an entire function or an integer to remove an entry
-        in all underlying :class:`Statistics` objects. The header and stream
-        will be adjusted to follow the modification. 
-        
-        :param item: The element to remove, either a key of the current
-                     :class:`MultiStatistics` or an index of all
-                     sub- :class:`Statistics` objects.
-        
-        You can also use the following syntax to delete items.
-        ::
-        
-            del mstats["key"]
-            del mstats[1::5]
-        """
-        if isinstance(item, str):
-            value = super(self.__class__, self).pop(item)
-            self._header = [(fname, cols) for fname, cols in self._header if fname != item]
-            return value
-        elif isinstance(item, int):
-            if item < self.buffindex:
-                self.buffindex -= 1
-            return {key : self[key].pop(item) for key in self.keys()}
-    
     @property
     def stream(self):
         """Retrieve the formated unstreamed entries of the database including
@@ -676,7 +614,8 @@ class MultiStatistics(dict):
         ::
 
             >>> print mstats.stream
-                   < fitness >  <             genotype             >
+                    fitness                  genotype              
+                   ---------    ------------------------------------
             gen    max  mean    max             mean
               0    6    5.0     [1, 1, 1, 0]    [0.5, 0.33, 0.75, 0]
             >>> mstats.append(pop, gen=1)
@@ -687,73 +626,26 @@ class MultiStatistics(dict):
         return self.__str__(startindex)
 
     def __str__(self, startindex=0):
-        # The header for multi statistics is
-        #                       <      function1      > <    function2    >   ...
-        # common1   common2 ... key1        key2    ... key1        key2      ...
-        columns_len = list()
-        columns_name = list()
-        keys_span = list()
-        keys_name = list()
-        for key, columns in self._header:
-            # The first column of each function in the header is at least as
-            # large as the function name
-            columns_len += [max(len(key), len(columns[0])) if key is not None else len(columns[0])]
-            columns_len += [len(c) for c in columns[1:]]
-            columns_name.extend(columns)
-            keys_span.append((key, len(columns)))
-            keys_name.append(key if key is not None else "")
-        
-        # Take the first key as default key for common info
-        fkey = self.keys()[0]
-        str_matrix = list()
-        for i in range(startindex, len(self[fkey])):
-            line = list()
-            j = 0
-            for key, columns in self._header:
-                if key is None:
-                    # If we are in a common column, use the default key
-                    key = fkey
-                    
-                for c in columns:
-                    try:
-                        # Format ints and floats with %g for pretty printing
-                        item = "{:g}".format(self[key][i].get(c, ""))
-                    except ValueError:
-                        # If not int nor float use default formatting
-                        item = str(self[key][i].get(c, ""))
-                    line.append(item)
-                    columns_len[j] = max(columns_len[j], len(item))
-                    j += 1
-                
-            str_matrix.append(line)
-        
-        template = "\t".join("{:<%i}" % i for i in columns_len)
-        
-        text = list()
-        if startindex == 0:
-            keys_template = list()
-            i = 0
-            for key, span in keys_span:
-                # Tabs width are hard to estimate, transform then into spaces
-                # and get the spanned columns width for pretty printing of the
-                # keys
-                tt = "\t".join("{:<%i}" % i for i in columns_len[i:i+span])
-                hs_len = len(tt.format(*columns_name[i:i+span]).expandtabs())
-                if key:
-                    keys_template.append("<{:^%i}>" % (hs_len - 2))
-                else:
-                    keys_template.append("{:%i}" % hs_len)
-                i += span
-        
-            keys_template = "\t".join(keys_template)
-            
-            text.append(keys_template.format(*keys_name))
-            text.append(template.format(*columns_name))
-        for line in str_matrix:
-            text.append(template.format(*line))
-        
+        matrices = []
+        first = next(self.itervalues())
+        for column in self.columns:
+            if self.has_key(column):
+                stats = self[column]
+                lines = stats.__str__(startindex).split('\n')
+                length = max(len(line.expandtabs()) for line in lines)
+                if startindex == 0:
+                    lines.insert(0, "-" * length)
+                    lines.insert(0, column.center(length))
+            else:
+                lines = first.__str__(startindex, (column,)).split('\n')
+                length = max(len(line.expandtabs()) for line in lines)
+                if startindex == 0 and self.is_key_column:
+                    lines.insert(0, " " * length) 
+                    lines.insert(0, " " * length)
+            matrices.append(lines)
+
+        text = ("\t".join(line) for line in zip(*matrices))
         return "\n".join(text)
-        
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
