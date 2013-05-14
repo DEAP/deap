@@ -146,7 +146,7 @@ def main():
         
         hof.update(hosts)
         hstats.append(hosts, gen=g, evals=len(hosts))
-        print hstats.stream
+        print(hstats.stream)
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(best_network)

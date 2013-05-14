@@ -83,8 +83,8 @@ def main():
     
     stats_ga.append(pop_ga, gen=0, type='ga', evals=len(pop_ga))
     stats_gp.append(pop_gp, gen=0, type='gp', evals=len(pop_gp))
-    print stats_ga.stream
-    print stats_gp.stream
+    print(stats_ga.stream)
+    print(stats_gp.stream)
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
     
@@ -133,8 +133,8 @@ def main():
         
         stats_ga.append(pop_ga, gen=g, type='ga', evals=len(pop_ga))
         stats_gp.append(pop_gp, gen=g, type='gp', evals=len(pop_gp))
-        print stats_ga.stream
-        print stats_gp.stream
+        print(stats_ga.stream)
+        print(stats_gp.stream)
         
         best_ga = tools.selBest(pop_ga, 1)[0]
         best_gp = tools.selBest(pop_gp, 1)[0]    

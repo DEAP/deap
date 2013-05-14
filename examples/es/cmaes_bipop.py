@@ -42,12 +42,7 @@ def main(verbose=True):
     toolbox.register("evaluate", benchmarks.rastrigin)
 
     halloffame = tools.HallOfFame(1)
-
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean)
-    stats.register("std", numpy.std)
-    stats.register("min", numpy.min)
-    stats.register("max", numpy.max)
+    stats = list()
 
     nsmallpopruns = 0
     smallbudget = list()
@@ -97,6 +92,12 @@ def main(verbose=True):
         strategy = cma.Strategy(centroid=numpy.random.uniform(-4, 4, N), sigma=sigma, lambda_=lambda_)
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
+        
+        stats.append(tools.Statistics(lambda ind: ind.fitness.values))
+        stats[-1].register("avg", numpy.mean)
+        stats[-1].register("std", numpy.std)
+        stats[-1].register("min", numpy.min)
+        stats[-1].register("max", numpy.max)
 
         conditions = {"MaxIter" : False, "TolHistFun" : False, "EqualFunVals" : False,
                       "TolX" : False, "TolUpSigma" : False, "Stagnation" : False,
@@ -114,13 +115,13 @@ def main(verbose=True):
                 ind.fitness.values = fit
             
             halloffame.update(population)
-            stats.append(population, gen=t, evals=lambda_, restart=i, regime=regime)
+            stats[-1].append(population, gen=t, evals=lambda_, restart=i, regime=regime)
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
 
             if verbose:
-                print(stats.stream)
+                print(stats[-1].stream)
                 
             # Count the number of times the k'th best solution is equal to the best solution
             # At this point the population is sorted (method update)
@@ -144,9 +145,10 @@ def main(verbose=True):
             if t >= MAXITER:
                 # The maximum number of iteration per CMA-ES ran
                 conditions["MaxIter"] = True
-
-            if (len(stats.min) > i and not len(stats.min[i]) < TOLHISTFUN_ITER) and \
-               max(stats.min[i][-TOLHISTFUN_ITER:])[0] - min(stats.min[i][-TOLHISTFUN_ITER:])[0] < TOLHISTFUN:
+            
+            mins = stats[-1].select("min")
+            if (len(mins) >= TOLHISTFUN_ITER) and \
+               max(mins[-TOLHISTFUN_ITER:]) - min(mins[-TOLHISTFUN_ITER:]) < TOLHISTFUN:
                 # The range of the best values is smaller than the threshold
                 conditions["TolHistFun"] = True
 
@@ -184,7 +186,7 @@ def main(verbose=True):
         print("Stopped because of condition%s %s" % ((":" if len(stop_causes) == 1 else "s:"), ",".join(stop_causes)))
         i += 1
 
-    return halloffame[0]
+    return halloffame
 
 if __name__ == "__main__":
     main()

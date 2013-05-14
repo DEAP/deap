@@ -62,8 +62,12 @@ def main():
     toolbox.register("evaluate", benchmarks.rastrigin)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
-
-    hof = tools.HallOfFame(1)
+    
+    # Numpy equality function (operators.eq) between two arrays returns the
+    # equality element wise, which raises an exception in the if similar()
+    # check of the hall of fame. Using a different equality function like
+    # numpy.array_equal or numpy.allclose solve this issue.
+    hof = tools.HallOfFame(1, similar=numpy.array_equal)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)

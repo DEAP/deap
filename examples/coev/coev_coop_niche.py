@@ -80,7 +80,7 @@ def main(extended=True, verbose=True):
             stats.append(s, gen=g, species=i, evals=len(s))
             
             if verbose: 
-                print stats.stream
+                print(stats.stream)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
