@@ -48,12 +48,6 @@ except AttributeError:
     pass
 else:
     class _numpy_array(numpy.ndarray):
-        def __getslice__(self, i, j):
-            """Overrides the getslice from numpy.ndarray that returns a shallow
-            copy of the slice. This one will return a deepcopy.
-            """
-            return numpy.ndarray.__getslice__(self, i, j).copy()
-        
         def __deepcopy__(self, memo):
             """Overrides the deepcopy from numpy.ndarray that does not copy
             the object's attributes. This one will deepcopy the array and its
