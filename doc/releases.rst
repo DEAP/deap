@@ -25,6 +25,10 @@ To be released 1.0
 - Added symbolic regression benchmarks in ``benchmarks.gp``.
 - A Fitness is now hashable.
 - Revised the Hall of Fame to inlude only unique individuals.
+- The creator does not handle proper slicing of created classes inheriting
+  from ``numpy.ndarray`` anymore. This was bug prone and extremely hard to maintain.
+  Users are now requested to include ``numpy.copy()`` operation in their
+  operators. A tutorial on inheriting from numpy is on its way.
 
 Release 0.9
 ===========
