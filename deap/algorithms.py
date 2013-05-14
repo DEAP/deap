@@ -422,7 +422,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         toolbox.update(population)
         
         if stats is not None:
-            stats.append(population, evals=len(fitnesses), gen=gen)
+            stats.append(population, evals=len(population), gen=gen)
             if verbose:
                 print stats.stream
 
