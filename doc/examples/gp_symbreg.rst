@@ -130,7 +130,7 @@ maximum of both the individuals fitness and size. For that we'll use a
 :class:`~deap.tools.MultiStatistics` object.
     
 	.. literalinclude:: /code/examples/gp/gp_symbreg.py
-	   :lines: 77-83
+	   :lines: 77-86
 
 Note that a simple :class:`~deap.tools.Statistics` object can be used, as in
 previous examples when statistics over a single key are desired.
@@ -144,13 +144,13 @@ creating the population and then calling a complete algorithm. In this case,
 we'll use :func:`~deap.algorithms.eaSimple`.
 
 .. literalinclude:: /code/examples/gp/gp_symbreg.py
-   :lines: 61, 73-87
+   :lines: 71,74,75,88-91
 
 
 The hall of fame is a specific structure which contains the *n* best
 individuals (here, the best one only).
 
-The complete example : [`source code <code/gp/gp_symbreg.py>`_].
+The complete [`source code <code/gp/gp_symbreg.py>`_].
 
 
 .. _refPapersSymbreg:

@@ -6,6 +6,11 @@ Here is a (incomplete) log of the changes made to DEAP over time.
 To be released 1.0
 ==================
 
+- Changed the way statistics are handled and printed. See the
+  :class:`~deap.tools.Statistics` and :class:`~deap.tools.MultiStatistics`
+  documentation for more details.
+- Removed the EvolutionLogger, which functionalities are now handled by
+  by the ``__str__`` function of statistics objects.
 - Added object oriented inheritance to strongly typed genetic programming.
 - Added the possibility to name primitives added to a PrimitiveSet.
 - Added the pset to GP mutation operators that require it.

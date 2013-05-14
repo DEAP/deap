@@ -85,7 +85,8 @@ def main():
     stats_fit.setColumns("avg", "max", "min", "std")
     stats_size.setColumns("avg", "max", "min", "std")
 
-    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, mstats, halloffame=hof, verbose=True)
+    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats,
+        halloffame=hof, verbose=True)
 
     return pop, mstats, hof
 
