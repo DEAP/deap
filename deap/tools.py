@@ -529,13 +529,13 @@ class Statistics(list):
             str_line = []
             for i, name in enumerate(columns):
                 value = line.get(name, "")
-                string = "{:n}" if isinstance(value, float) else "{}"
+                string = "{0:n}" if isinstance(value, float) else "{0}"
                 column = string.format(value)
                 columns_len[i] = max(columns_len[i], len(column))
                 str_line.append(column)
             str_matrix.append(str_line)
  
-        template = "\t".join("{:<%i}" % i for i in columns_len)
+        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(columns_len))
         text = (template.format(*line) for line in str_matrix)
         if startindex == 0:
             text = chain([template.format(*columns)], text)
