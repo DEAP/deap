@@ -130,7 +130,7 @@ def main():
     
     hof.update(hosts)
     hstats.append(hosts, gen=0, evals=len(hosts))
-    print hstats.stream
+    print(hstats.stream)
     
     for g in range(1, MAXGEN):
         
