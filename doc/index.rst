@@ -39,7 +39,8 @@ and many features to build your own evolutions.
   * :doc:`tutorials/advanced/gp`
   * :doc:`tutorials/advanced/speedup`
   * :doc:`tutorials/advanced/benchmarking`
-
+  * :doc:`tutorials/advanced/numpy`
+  
 * :doc:`examples/index`
 
 * :doc:`api/index`
@@ -61,6 +62,7 @@ and many features to build your own evolutions.
 	tutorials/advanced/gp
 	tutorials/advanced/speedup
 	tutorials/advanced/benchmarking
+	tutorials/advanced/numpy
 	examples/index
 	api/index
 	releases
