@@ -59,22 +59,12 @@ else:
 
         @staticmethod
         def __new__(cls, iterable):
-            """Creates a new instance of a numpy.ndarray from a function call"""
+            """Creates a new instance of a numpy.ndarray from a function call.
+            Adds the possibility to instanciate from an iterable."""
             return numpy.array(list(iterable)).view(cls)
             
         def __setstate__(self, state):
             self.__dict__.update(state)
-
-        def __array_finalize__(self, obj):
-            # __init__ will reinitialize every member of the subclass.
-            # This might not be desirable for example in the case of an ES. 
-            self.__init__()
-
-            # Instead, we could use the following that will simply deepcopy 
-            # every member that is present in the original class.
-            # This is significantly slower. 
-            #if self.__class__ == obj.__class__:
-            #    self.__dict__.update(copy.deepcopy(obj.__dict__))
 
         def __reduce__(self):
             return (self.__class__, (list(self),), self.__dict__)
