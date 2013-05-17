@@ -243,6 +243,69 @@ this, DEAP provides different functions that can effectively maintain
 the size and height of the trees under an acceptable limit. These
 operators are listed in the GP section of :ref:`operators`.
 
+Plotting Trees
+--------------
+The function :func:`deap.gp.graph` returns the necessary elements to plot
+tree graphs using `NetworX <http://networkx.github.com/>`_ or `pygraphviz
+<http://networkx.lanl.gov/pygraphviz/>`_. The graph function takes a valid
+:class:`~deap.gp.PrimitiveTree` object and returns a node list, an edge list,
+and a dictionary of labels keyed by nodes. It can be used like following with
+pygraphviz.
+::
+
+	from deap import base, creator, gp
+	
+	pset = gp.PrimitiveSet("MAIN", 1)
+	pset.addPrimitive(operator.add, 2)
+	pset.addPrimitive(operator.sub, 2)
+	pset.addPrimitive(operator.mul, 2)
+	pset.renameArguments(ARG0='x')
+	
+	creator.create("Individual", gp.PrimitiveTree)
+	
+	toolbox = base.Toolbox()
+	toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
+	toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
+	
+	expr = toolbox.individual()
+	nodes, edges, labels = gp.graph(expr)
+	
+	### Graphviz Section ###
+	import pygraphviz as pgv
+	
+	g = pgv.AGraph()
+	g.add_nodes_from(nodes)
+	g.add_edges_from(edges)
+	g.layout(prog="dot")
+	
+	for i in nodes:
+	    n = g.get_node(i)
+	    n.attr["label"] = labels[i]
+		 
+	g.draw("tree.pdf")
+
+
+Using NetworkX, the last section becomes
+::
+
+	import matplotlib.pyplot as plt
+	import networkx as nx
+	
+	g = nx.Graph()
+	g.add_nodes_from(nodes)
+	g.add_edges_from(edges)
+	pos = nx.graphviz_layout(g, prog="dot")
+	
+	nx.draw_networkx_nodes(g, pos)
+	nx.draw_networkx_edges(g, pos)
+	nx.draw_networkx_labels(g, pos, labels)
+	plt.show()
+
+Depending on the version of graphviz, the nodes may appear in an
+unpredictable order. Plotting twice the same tree can lead to children of a
+node being swapped. This does not affect the primitive tree representation
+nor the numerical results.
+
 How to Evolve Programs
 ----------------------
 

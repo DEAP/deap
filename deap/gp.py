@@ -857,7 +857,7 @@ def staticSizeLimit(max_size):
     return decorator
 
 def graph(expr):
-    """Construct the graph of an tree expression. The tree expression must be
+    """Construct the graph of a tree expression. The tree expression must be
     valid. It returns in order a node list, an edge list, and a dictionary of
     the per node labels. The node are represented by numbers, the edges are
     tuples connecting two nodes (number), and the labels are values of a
