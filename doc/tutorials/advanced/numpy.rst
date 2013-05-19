@@ -3,10 +3,10 @@ Inheriting from Numpy
 =====================
 
 DEAP's :class:`~deap.creator` allows to inherit from :class:`numpy.ndarray`
-so that individuals can have special the properties enabled by the power
+so that individuals can have the properties of the powerful
 `Numpy <http://http://docs.scipy.org/doc/numpy/>`_ library. As with any other
-base class inheriting from a :class:`numpy.ndarray` is no more complicated
-than putting it as base class.
+base class, inheriting from a :class:`numpy.ndarray` is no more complicated
+than putting it as a base class.
 ::
 	
 	import numpy
@@ -65,9 +65,10 @@ to explicitely copy the view returned by the ``__getitem__``.
 	>>> print(b)
 	[5 2 3 8]
 
-Thus care must be taken when inheriting from :class:`numpy.ndarray` and
-**None** of the operators in the :mod:`~deap.tools` module implement such
-copying.
+Thus, care must be taken when inheriting from :class:`numpy.ndarray`;
+**none** of the operators in the :mod:`~deap.tools` module implement such
+copying. See the One Max with Numpy example for the complete two points
+crossover.
 
 Performance
 -----------
