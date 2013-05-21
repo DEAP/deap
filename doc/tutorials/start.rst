@@ -1,6 +1,6 @@
 Where to Start?
 ===============
-If your are used to an other evolutionary algorithm framework, you'll notice
+If you are used to an other evolutionary algorithm framework, you'll notice
 we do things differently with DEAP. Instead of limiting you with predefined
 types, we provide ways of creating the appropriate ones. Instead of providing
 closed initializers, we enable you to customize them as you wish. Instead of

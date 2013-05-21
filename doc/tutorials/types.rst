@@ -210,7 +210,7 @@ that it is composed of lists of individuals.
 Calling :func:`toolbox.population` will readily return a complete population
 where the individuals are accessible using two indices for example
 ``pop[r][c]``. For the moment there is no algorithm specialized for structured
-population, we are waiting your submissions.
+population, we are waiting for your submissions.
 
 Swarm
 +++++
