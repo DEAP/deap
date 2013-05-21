@@ -76,7 +76,7 @@ def main(extended=True, verbose=True):
         # Initialize a container for the next generation representatives
         next_repr = [None] * len(species)
         for i, s in enumerate(species):
-            # Variate the species individuals
+            # Vary the species individuals
             s = algorithms.varAnd(s, toolbox, 0.6, 1.0)
             
             # Get the representatives excluding the current species

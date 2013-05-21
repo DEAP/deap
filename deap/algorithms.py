@@ -35,7 +35,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     fitness invalidated. The individuals are cloned so returned population is
     independent of the input population.
     
-    :param population: A list of individuals to variate.
+    :param population: A list of individuals to vary.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
     :param cxpb: The probability of mating two individuals.
@@ -43,7 +43,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     :returns: A list of varied individuals that are independent of their
               parents.
     
-    The variator goes as follow. First, the parental population
+    The variation goes as follow. First, the parental population
     :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
     and the result is put into the offspring population :math:`P_\mathrm{o}`.
     A first loop over :math:`P_\mathrm{o}` is executed to mate consecutive
@@ -143,7 +143,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
         
-        # Variate the pool of individuals
+        # Vary the pool of individuals
         offspring = varAnd(offspring, toolbox, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
@@ -174,7 +174,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     their fitness invalidated. The individuals are cloned so returned
     population is independent of the input population.
     
-    :param population: A list of individuals to variate.
+    :param population: A list of individuals to vary.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
     :param lambda\_: The number of children to produce
@@ -183,7 +183,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :returns: A list of varied individuals that are independent of their
               parents.
     
-    The variator goes as follow. On each of the *lambda_* iteration, it
+    The variation goes as follow. On each of the *lambda_* iteration, it
     selects one of the three operations; crossover, mutation or reproduction.
     In the case of a crossover, two individuals are selected at random from
     the parental population :math:`P_\mathrm{p}`, those individuals are cloned
@@ -277,7 +277,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     # Begin the generational process
     for gen in range(1, ngen+1):
-        # Variate the population
+        # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
@@ -357,7 +357,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     # Begin the generational process
     for gen in range(1, ngen+1):
-        # Variate the population
+        # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
 
         # Evaluate the individuals with an invalid fitness
