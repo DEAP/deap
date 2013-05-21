@@ -157,7 +157,7 @@ a terminal, ephemeral constant can also be typed
 Generation of Tree Individuals
 ------------------------------
 The code presented in the last two sections produce valid trees. 
-However, as in the :ref:`next-step` tutorial, these trees are yet valid
+However, as in the :ref:`next-step` tutorial, these trees are not yet valid
 individuals for evolution. One must combine the creator and the toolbox to
 produce valid individuals. We need to create the :class:`Fitness` and the
 :class:`Individual` classes. To the :class:`Individual`, in addition to the
