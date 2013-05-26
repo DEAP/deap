@@ -81,8 +81,8 @@ def main():
     for ind in pop_ga:
         ind.fitness.values = evalSymbReg(best_gp, ind)
     
-    stats_ga.append(pop_ga, gen=0, type='ga', evals=len(pop_ga))
-    stats_gp.append(pop_gp, gen=0, type='gp', evals=len(pop_gp))
+    stats_ga.record(pop_ga, gen=0, type='ga', evals=len(pop_ga))
+    stats_gp.record(pop_gp, gen=0, type='gp', evals=len(pop_gp))
     print(stats_ga.stream)
     print(stats_gp.stream)
     
@@ -131,8 +131,8 @@ def main():
         pop_ga = off_ga
         pop_gp = off_gp
         
-        stats_ga.append(pop_ga, gen=g, type='ga', evals=len(pop_ga))
-        stats_gp.append(pop_gp, gen=g, type='gp', evals=len(pop_gp))
+        stats_ga.record(pop_ga, gen=g, type='ga', evals=len(pop_ga))
+        stats_gp.record(pop_gp, gen=g, type='gp', evals=len(pop_gp))
         print(stats_ga.stream)
         print(stats_gp.stream)
         

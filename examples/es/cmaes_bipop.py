@@ -93,7 +93,7 @@ def main(verbose=True):
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
         
-        stats.record(tools.Statistics(lambda ind: ind.fitness.values))
+        stats.append(tools.Statistics(lambda ind: ind.fitness.values))
         stats[-1].register("avg", numpy.mean)
         stats[-1].register("std", numpy.std)
         stats[-1].register("min", numpy.min)
@@ -115,7 +115,7 @@ def main(verbose=True):
                 ind.fitness.values = fit
             
             halloffame.update(population)
-            stats[-1].append(population, gen=t, evals=lambda_, restart=i, regime=regime)
+            stats[-1].record(population, gen=t, evals=lambda_, restart=i, regime=regime)
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
