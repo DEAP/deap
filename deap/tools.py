@@ -365,8 +365,8 @@ class Statistics(list):
         >>> s = Statistics()
         >>> s.register("mean", mean)
         >>> s.register("max", max)
-        >>> s.append([1, 2, 3, 4])
-        >>> s.append([5, 6, 7, 8])
+        >>> s.record([1, 2, 3, 4])
+        >>> s.record([5, 6, 7, 8])
         >>> s.select("mean")
         [2.5, 6.5]
         >>> s.select("max")
@@ -415,7 +415,7 @@ class Statistics(list):
 
     def register(self, name, function, *args, **kargs):
         """Register a *function* that will be applied on the sequence each
-        time :meth:`append` is called.
+        time :meth:`record` is called.
 
         :param name: The name of the statistics function as it would appear
                      in the dictionnary of the statistics object.
@@ -436,7 +436,7 @@ class Statistics(list):
             >>> s = Statistics()
             >>> s.register("mean", numpy.mean)
             >>> s.register("max", numpy.mean)
-            >>> s.append([1,2,3,4,5,6,7])
+            >>> s.record([1,2,3,4,5,6,7])
             >>> s.select("mean")
             [4.0]
             >>> s.select("mean", "max")
@@ -497,7 +497,7 @@ class Statistics(list):
         the object to a string with `str` or using the stream property.
         The provided arguments must correspond to either the names of
         the registered functions or the keys of keyword arguments 
-        provided when calling the append method.
+        provided when calling the record method.
         """
         self.header = args
 
@@ -508,11 +508,11 @@ class Statistics(list):
         ::
 
             >>> s = Statistics()
-            >>> s.append(gen=0)
+            >>> s.record(gen=0)
             >>> print s.stream
             gen
               0
-            >>> s.append(gen=1)
+            >>> s.record(gen=1)
             >>> print s.stream
               1
         """
@@ -544,7 +544,7 @@ class Statistics(list):
 
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
-    statistics on multiple keys using a single call to :meth:`append`. It
+    statistics on multiple keys using a single call to :meth:`record`. It
     takes a set of key-value pairs associating a statistics object to a
     unique name. This name can then be used to retrieve the statistics object.
     ::
@@ -1940,7 +1940,7 @@ if __name__ == "__main__":
     doctest.run_docstring_examples(initCycle, globals())
     
     doctest.run_docstring_examples(Statistics.register, globals())
-    doctest.run_docstring_examples(Statistics.append, globals())
+    doctest.run_docstring_examples(Statistics.record, globals())
 
     doctest.run_docstring_examples(Checkpoint, globals())
     doctest.run_docstring_examples(Checkpoint.add, globals())
