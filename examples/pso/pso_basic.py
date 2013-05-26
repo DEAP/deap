@@ -77,7 +77,7 @@ def main():
             toolbox.update(part, best)
 
         # Gather all the fitnesses in one list and print the stats
-        stats.append(pop, gen=g, evals=len(pop))
+        stats.record(pop, gen=g, evals=len(pop))
         print(stats.stream)
     
     return pop, stats, best

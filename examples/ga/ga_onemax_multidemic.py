@@ -67,11 +67,11 @@ def main():
     for idx, deme in enumerate(demes):
         for ind in deme:
             ind.fitness.values = toolbox.evaluate(ind)
-        stats.append(deme, gen=0, deme=idx, evals=len(deme))
+        stats.record(deme, gen=0, deme=idx, evals=len(deme))
         hof.update(deme)
         print(stats.stream)
     
-    stats.append(demes[0]+demes[1]+demes[2], gen=0)
+    stats.record(demes[0]+demes[1]+demes[2], gen=0)
     print(stats.stream)
     
     gen = 1
@@ -84,13 +84,13 @@ def main():
             for ind in invalid_ind:
                 ind.fitness.values = toolbox.evaluate(ind)
             
-            stats.append(deme, gen=gen, deme=idx, evals=len(invalid_ind))
+            stats.record(deme, gen=gen, deme=idx, evals=len(invalid_ind))
             hof.update(deme)
             print(stats.stream)
             
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)
-        stats.append(demes[0]+demes[1]+demes[2], gen=gen)
+        stats.record(demes[0]+demes[1]+demes[2], gen=gen)
         print(stats.stream)
         gen += 1
     

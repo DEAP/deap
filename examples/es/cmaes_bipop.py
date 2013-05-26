@@ -93,7 +93,7 @@ def main(verbose=True):
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
         
-        stats.append(tools.Statistics(lambda ind: ind.fitness.values))
+        stats.record(tools.Statistics(lambda ind: ind.fitness.values))
         stats[-1].register("avg", numpy.mean)
         stats[-1].register("std", numpy.std)
         stats[-1].register("min", numpy.min)

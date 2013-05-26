@@ -84,7 +84,7 @@ def main(extended=True, verbose=True):
             for ind in s:
                 ind.fitness.values = toolbox.evaluate([ind] + r, target_set)
                 
-            stats.append(s, gen=g, species=i, evals=len(s))
+            stats.record(s, gen=g, species=i, evals=len(s))
             
             if verbose: 
                 print(stats.stream)

@@ -83,7 +83,7 @@ def main(seed=None):
     # no actual selection is done
     pop = toolbox.select(pop, len(pop))
     
-    stats.append(pop, evals=len(invalid_ind), gen=0)
+    stats.record(pop, evals=len(invalid_ind), gen=0)
 
     # Begin the generational process
     for gen in range(1, NGEN):
@@ -107,7 +107,7 @@ def main(seed=None):
 
         # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
-        stats.append(pop, evals=len(invalid_ind), gen=gen)
+        stats.record(pop, evals=len(invalid_ind), gen=gen)
 
     return pop, stats
         

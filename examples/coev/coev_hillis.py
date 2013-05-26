@@ -129,7 +129,7 @@ def main():
         host.fitness.values = parasite.fitness.values = fit
     
     hof.update(hosts)
-    hstats.append(hosts, gen=0, evals=len(hosts))
+    hstats.record(hosts, gen=0, evals=len(hosts))
     print(hstats.stream)
     
     for g in range(1, MAXGEN):
@@ -145,7 +145,7 @@ def main():
             host.fitness.values = parasite.fitness.values = fit
         
         hof.update(hosts)
-        hstats.append(hosts, gen=g, evals=len(hosts))
+        hstats.record(hosts, gen=g, evals=len(hosts))
         print(hstats.stream)
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])

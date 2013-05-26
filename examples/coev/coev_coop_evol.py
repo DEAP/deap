@@ -93,7 +93,7 @@ def main(extended=True, verbose=True):
                 # Evaluate and set the individual fitness
                 ind.fitness.values = toolbox.evaluate([ind] + r, target_set)
             
-            stats.append(s, gen=g, species=j, evals=len(s))
+            stats.record(s, gen=g, species=j, evals=len(s))
             
             if verbose: 
                 print(stats.stream)
