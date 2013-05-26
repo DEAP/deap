@@ -134,7 +134,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     if halloffame is not None:
         halloffame.update(population)
     if stats is not None:
-        stats.append(population, evals=len(invalid_ind), gen=0)
+        stats.record(population, evals=len(invalid_ind), gen=0)
         if verbose:
             print stats.stream
 
@@ -161,7 +161,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         
         # Update the statistics with the new population
         if stats is not None:
-            stats.append(population, evals=len(invalid_ind), gen=gen)
+            stats.record(population, evals=len(invalid_ind), gen=gen)
             if verbose:
                 print stats.stream
 
@@ -271,7 +271,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         halloffame.update(population)
 
     if stats is not None:
-        stats.append(population, evals=len(population), gen=0)
+        stats.record(population, evals=len(population), gen=0)
         if verbose:
             print stats.stream
 
@@ -295,7 +295,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
         # Update the statistics with the new population
         if stats is not None:
-            stats.append(population, evals=len(invalid_ind), gen=gen)
+            stats.record(population, evals=len(invalid_ind), gen=gen)
             if verbose:
                 print stats.stream
 
@@ -351,7 +351,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         halloffame.update(population)
 
     if stats is not None:
-        stats.append(population, evals=len(population), gen=0)
+        stats.record(population, evals=len(population), gen=0)
         if verbose:
             print stats.stream
 
@@ -375,7 +375,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
         # Update the statistics with the new population
         if stats is not None:
-            stats.append(population, evals=len(invalid_ind), gen=gen)
+            stats.record(population, evals=len(invalid_ind), gen=gen)
             if verbose:
                 print stats.stream
 
@@ -422,7 +422,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         toolbox.update(population)
         
         if stats is not None:
-            stats.append(population, evals=len(population), gen=gen)
+            stats.record(population, evals=len(population), gen=gen)
             if verbose:
                 print stats.stream
 

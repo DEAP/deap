@@ -90,7 +90,7 @@ def main():
         ind.fitness.values = fit
     
     hof.update(population)
-    stats.append(population, gen=0, evals=len(population))
+    stats.record(population, gen=0, evals=len(population))
     
     # Begin the evolution
     for g in range(1, NGEN):
@@ -124,7 +124,7 @@ def main():
         
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
-        stats.append(population, gen=g, evals=len(invalid_ind))
+        stats.record(population, gen=g, evals=len(invalid_ind))
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(stats)

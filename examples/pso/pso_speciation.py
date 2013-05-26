@@ -141,7 +141,7 @@ def main(verbose=True):
                 species.append([sorted_swarm[0]])
             sorted_swarm.pop(0)
         
-        stats.append(swarm, gen=generation, evals=mpb.nevals, nspecies=len(species), error=mpb.currentError(), offline_error=mpb.offlineError())
+        stats.record(swarm, gen=generation, evals=mpb.nevals, nspecies=len(species), error=mpb.currentError(), offline_error=mpb.offlineError())
         if verbose:
             print(stats.stream)
 

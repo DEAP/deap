@@ -446,7 +446,7 @@ class Statistics(list):
             return [entry[names[0]] for entry in self]
         return tuple([entry[name] for entry in self] for name in names)
 
-    def append(self, data=[], **kargs):
+    def record(self, data=[], **kargs):
         """Apply to the input sequence *data* each registered function 
         and store the results plus the additional information from *kargs*
         in a dictionnary at the end of the list.
@@ -466,7 +466,7 @@ class Statistics(list):
         for key, func in self.functions.iteritems():
             entry[key] = func(values)
         entry.update(kargs)
-        list.append(self, entry)
+        self.append(entry)
     
     def __delitem__(self, key):
         if isinstance(key, slice):
@@ -554,7 +554,7 @@ class MultiStatistics(dict):
         >>> mstats = MultStatistics(genotype=stats1, fitness=stats2)
         >>> mstats.register("mean", numpy.mean, axis=0)
         >>> mstats.register("max", numpy.max)
-        >>> mstats.append(pop, gen=0)
+        >>> mstats.record(pop, gen=0)
         >>> mstats['fitness'].select("mean")
         [5.0]
         >>> mstats['genotype'].select("max")
@@ -573,14 +573,14 @@ class MultiStatistics(dict):
         the object to a string with `str` or using the stream property.
         The provided arguments must correspond to either the names of
         keys provided during the init or the keys of keyword arguments 
-        provided when calling the append method.
+        provided when calling the `record` method.
         """
         self.columns = args
         # self.is_key_column = True
         self.is_key_column = any(self.has_key(arg) for arg in args)
         
-    def append(self, data=[], **kargs):
-        """Calls :meth:`Statistics.append` with *data* and *kargs* on each
+    def record(self, data=[], **kargs):
+        """Calls :meth:`Statistics.record` with *data* and *kargs* on each
         :class:`Statistics` object.
         
         :param data: Sequence of objects on which the statistics are computed.
@@ -591,7 +591,7 @@ class MultiStatistics(dict):
             self.setColumns(*args)
         
         for stats in self.values():
-            stats.append(data, **kargs)
+            stats.record(data, **kargs)
 
     def register(self, name, function, *args, **kargs):
         """Register a *function* in each :class:`Statistics` object.
@@ -618,7 +618,7 @@ class MultiStatistics(dict):
                    ---------    ------------------------------------
             gen    max  mean    max             mean
               0    6    5.0     [1, 1, 1, 0]    [0.5, 0.33, 0.75, 0]
-            >>> mstats.append(pop, gen=1)
+            >>> mstats.record(pop, gen=1)
             >>> print mstats.stream
               1    8    5.5     [1, 1, 1, 1]    [0.75, 0.5, 1.0, 0.5]
         """
