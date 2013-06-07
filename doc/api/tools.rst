@@ -141,8 +141,6 @@ Selection
 
 .. autofunction:: sortNondominated
 
-.. autofunction:: assignCrowdingDist
-
 Bloat control
 +++++++++++++
 
