@@ -27,10 +27,10 @@ import numpy
 from deap import algorithms
 from deap import tools
 
-import coev_coop_base
+import coop_base
 
-IND_SIZE = coev_coop_base.IND_SIZE
-SPECIES_SIZE = coev_coop_base.SPECIES_SIZE
+IND_SIZE = coop_base.IND_SIZE
+SPECIES_SIZE = coop_base.SPECIES_SIZE
 TARGET_SIZE = 200
 TARGET_TYPE = 2
 
@@ -41,7 +41,7 @@ def nicheSchematas(type, size):
     rept = int(size/type)
     return ["#" * (i*rept) + "1" * rept + "#" * ((type-i-1)*rept) for i in range(type)]
 
-toolbox = coev_coop_base.toolbox
+toolbox = coop_base.toolbox
 
 def main(extended=True, verbose=True):
     target_set = []
