@@ -31,10 +31,10 @@ import numpy
 from deap import algorithms
 from deap import tools
 
-import coev_coop_base
+import coop_base
 
-IND_SIZE = coev_coop_base.IND_SIZE
-SPECIES_SIZE = coev_coop_base.SPECIES_SIZE
+IND_SIZE = coop_base.IND_SIZE
+SPECIES_SIZE = coop_base.SPECIES_SIZE
 NUM_SPECIES = 1
 TARGET_SIZE = 30
 IMPROVMENT_TRESHOLD = 0.5
@@ -47,8 +47,8 @@ schematas = ("1##1###1###11111##1##1111#1##1###1#1111##111111##1#11#1#11######",
              "1##1###1###11111##1##1000#0##0###0#0000##000000##0#00#0#00######",
              "0##0###0###00000##0##0000#0##0###0#0000##001111##1#11#1#11######")
 
-toolbox = coev_coop_base.toolbox
-toolbox.register("evaluateContribution", coev_coop_base.matchSetContribution)
+toolbox = coop_base.toolbox
+toolbox.register("evaluateContribution", coop_base.matchSetContribution)
 
 def main(extended=True, verbose=True):
     target_set = []

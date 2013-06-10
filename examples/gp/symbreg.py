@@ -52,17 +52,16 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ex
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("lambdify", gp.lambdify, pset=pset)
 
-def evalSymbReg(individual):
+def evalSymbReg(individual, points):
     # Transform the tree expression in a callable function
     func = toolbox.lambdify(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
-    values = (x/10. for x in range(-10,10))
     diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
-    diff = sum(map(diff_func, values))
+    diff = sum(map(diff_func, points))
     return diff,
 
-toolbox.register("evaluate", evalSymbReg)
+toolbox.register("evaluate", evalSymbReg, points=[x/10. for x in range(-10,10)])
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
