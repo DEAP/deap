@@ -115,7 +115,7 @@ def main(verbose=True):
                 ind.fitness.values = fit
             
             halloffame.update(population)
-            stats[-1].append(population, gen=t, evals=lambda_, restart=i, regime=regime)
+            stats[-1].record(population, gen=t, evals=lambda_, restart=i, regime=regime)
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)

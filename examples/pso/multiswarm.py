@@ -131,7 +131,7 @@ def main(verbose=True):
                 swarm.best = toolbox.clone(part[:])         # Get the position
                 swarm.bestfit.values = part.fitness.values  # Get the fitness
 
-    stats.append(itertools.chain(*population), gen=0, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
+    stats.record(itertools.chain(*population), gen=0, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
 
     if verbose:
         print(stats.stream)
@@ -187,7 +187,7 @@ def main(verbose=True):
                     swarm.best = toolbox.clone(part[:])
                     swarm.bestfit.values = part.fitness.values
         
-        stats.append(itertools.chain(*population), gen=generation, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
+        stats.record(itertools.chain(*population), gen=generation, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
 
         if verbose:
             print(stats.stream)

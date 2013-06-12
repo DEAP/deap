@@ -17,7 +17,7 @@ Primitives set used
 
 We use the standard primitives set for the Artificial Ant problem :
     
-.. literalinclude:: /code/examples/gp/gp_ant.py
+.. literalinclude:: /code/examples/gp/ant.py
    :lines: 150-156
 
 - ``if_food_ahead`` is a primitive which executes its first argument if there
@@ -38,7 +38,7 @@ We use the standard primitives set for the Artificial Ant problem :
 Although those functions are obviously not already built-in in Python, it is
 very easy to define them :
 
-.. literalinclude:: /code/examples/gp/gp_ant.py
+.. literalinclude:: /code/examples/gp/ant.py
    :lines: 62-75, 122-123
 
 Partial functions are a powerful feature of Python which allow to create
@@ -56,7 +56,7 @@ number of pieces of food picked up. In this example, we are using a classical
 trail, the *Santa Fe trail*, in which there is 89 pieces of food. Therefore,
 a perfect individual would achieve a fitness of 89.
 
-.. literalinclude:: /code/examples/gp/gp_ant.py
+.. literalinclude:: /code/examples/gp/ant.py
    :pyobject: evalArtificialAnt
 
 Where `ant` is the instance of the simulator used. The
@@ -73,7 +73,7 @@ Note that as the problem is harder, improving the selection pressure by
 increasing the size of the tournament to 7 allows to achieve better
 performance.
 
-The complete [`source code <code/gp/gp_ant.py>`_]
+The complete [`source code <code/gp/ant.py>`_]
 
 .. _refPapersAnt:
 

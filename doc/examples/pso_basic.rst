@@ -17,7 +17,7 @@ Modules
 Before writing functions and algorithms, we need to import some module from
 the standard library and from DEAP.
 
-.. literalinclude:: /code/examples/pso/pso_basic.py
+.. literalinclude:: /code/examples/pso/basic.py
    :lines: 16-24
 
 Representation
@@ -32,7 +32,8 @@ particle in each dimension. Finally, each particle keeps a reference to the
 best state in which it has been so far.
 
 This translates in DEAP by the following two lines of code :
-.. literalinclude:: /code/examples/pso/pso_basic.py
+
+.. literalinclude:: /code/examples/pso/basic.py
    :lines: 26-28
 
 Here we create two new objects in the :mod:`~deap.creator` space. First, we
@@ -58,14 +59,14 @@ random speed for a particle. The next function create a particle and
 initialize its attributes, except for the attribute :attr:`best`, which will
 be set only after evaluation :
 
-.. literalinclude:: /code/examples/pso/pso_basic.py
+.. literalinclude:: /code/examples/pso/basic.py
    :pyobject: generate
 
 The function :func:`updateParticle` first computes the speed, then limits the
 speed values between ``smin`` and ``smax``, and finally computes the new
 particle position.
 
-.. literalinclude:: /code/examples/pso/pso_basic.py
+.. literalinclude:: /code/examples/pso/basic.py
    :pyobject: updateParticle
 
 The operators are registered in the toolbox with their parameters. The
@@ -77,7 +78,7 @@ The evaluation function :func:`~deap.benchmarks.h1` is from [Knoek2003]_. The
 function is already defined in the benchmarks module, so we can register it
 directly.
 
-.. literalinclude:: /code/examples/pso/pso_basic.py
+.. literalinclude:: /code/examples/pso/basic.py
    :lines: 50-54
 
 Algorithm
@@ -88,19 +89,19 @@ algorithm by firstly creating a new population, and then apply the original
 PSO algorithm. The variable `best` contains the best particle ever found (it
 known as gbest in the original algorithm).
 
-.. literalinclude:: /code/examples/pso/pso_basic.py
+.. literalinclude:: /code/examples/pso/basic.py
    :pyobject: main
 
 Conclusion
 ==========
 
 The full PSO basic example can be found here : [`source code
-<code/pso/pso_basic.py>`_].
+<code/pso/basic.py>`_].
 
 This is a video of the algorithm in action, plotted with matplotlib_. 
 The red dot represents the best solution found so far.
 
-.. _matplotlib: http://matplotlib.sourceforge.net/
+.. _matplotlib: http://matplotlib.org/
 
 .. raw:: html
 
