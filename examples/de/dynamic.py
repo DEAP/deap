@@ -74,7 +74,7 @@ def main(verbose=True):
         for ind, fit in zip(subpop, fitnesses):
             ind.fitness.values = fit
 
-    stats.append(itertools.chain(*populations), gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
+    stats.record(itertools.chain(*populations), gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
     if verbose:
         print(stats.stream)
 
@@ -107,7 +107,7 @@ def main(verbose=True):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        stats.append(itertools.chain(*populations), gen=g, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
+        stats.record(itertools.chain(*populations), gen=g, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
         if verbose:
             print(stats.stream)
 

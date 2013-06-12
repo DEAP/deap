@@ -106,7 +106,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
     
     for ind in deme:
         ind.fitness.values = toolbox.evaluate(ind)
-    stats.append(deme, gen=0, deme=procid, evals=len(deme))
+    stats.record(deme, gen=0, deme=procid, evals=len(deme))
     hof.update(deme)
     print(stats.stream)
     
@@ -118,7 +118,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
         for ind in invalid_ind:
             ind.fitness.values = toolbox.evaluate(ind)
         
-        stats.append(deme, gen=gen, deme=procid, evals=len(invalid_ind))
+        stats.record(deme, gen=gen, deme=procid, evals=len(invalid_ind))
         hof.update(deme)
         print(stats.stream)
             

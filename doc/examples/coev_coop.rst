@@ -20,7 +20,7 @@ population.
 The first step is to create a bunch of species that will evolve in our
 population.
 
-.. literalinclude:: /code/examples/coev/coev_coop_evol.py
+.. literalinclude:: /code/examples/coev/coop_evol.py
    :lines: 70
 
 Cooperative coevolution works by sending the best individual of each species
@@ -28,7 +28,7 @@ Cooperative coevolution works by sending the best individual of each species
 other species. Since the individuals are not yet evaluated we select randomly
 the individuals that will be in the set of representatives. 
 
-.. literalinclude:: /code/examples/coev/coev_coop_evol.py
+.. literalinclude:: /code/examples/coev/coop_evol.py
    :lines: 75
 
 The evaluation function takes a list of individuals to be evaluated including
@@ -42,7 +42,7 @@ usual, something like this ::
 
 The evolution can now begin.
 
-.. literalinclude:: /code/examples/coev/coev_coop_evol.py
+.. literalinclude:: /code/examples/coev/coop_evol.py
    :lines: 83-95,101-103,111
 
 The last lines evolve each species once before sharing their representatives.
@@ -56,11 +56,11 @@ to add a species and remove useless species on stagnation. These steps are not
 covered in this example but are present in the complete source code of
 the coevolution examples.
 
-- `Coevolution Base <code/coev/coev_coop_base.py>`_
-- `Coevolution Niching <code/coev/coev_coop_niche.py>`_
-- `Coevolution Generalization <code/coev/coev_coop_gen.py>`_
-- `Coevolution Adaptation <code/coev/coev_coop_adapt.py>`_
-- `Coevolution Final <code/coev/coev_coop_evol.py>`_
+- `Coevolution Base <code/coev/coop_base.py>`_
+- `Coevolution Niching <code/coev/coop_niche.py>`_
+- `Coevolution Generalization <code/coev/coop_gen.py>`_
+- `Coevolution Adaptation <code/coev/coop_adapt.py>`_
+- `Coevolution Final <code/coev/coop_evol.py>`_
        
 .. [Potter2001] Potter, M. and De Jong, K., 2001, Cooperative
    Coevolution: An Architecture for Evolving Co-adapted Subcomponents.

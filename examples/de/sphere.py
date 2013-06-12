@@ -83,7 +83,7 @@ def main():
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    stats.append(pop, gen=0, evals=len(pop))
+    stats.record(pop, gen=0, evals=len(pop))
     print(stats.stream)
 
     for g in range(1, NGEN):
@@ -105,7 +105,7 @@ def main():
                 pop[i] = ind
         
         hof.update(pop)
-        stats.append(pop, gen=g, evals=len(pop))
+        stats.record(pop, gen=g, evals=len(pop))
         print(stats.stream)
     
     print("Best individual is ", hof[0])

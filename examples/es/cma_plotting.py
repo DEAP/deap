@@ -74,7 +74,7 @@ def main(verbose=True):
         # Update the hall of fame and the statistics with the
         # currently evaluated population
         halloffame.update(population)
-        stats.append(population, evals=len(population), gen=gen,)
+        stats.record(population, evals=len(population), gen=gen,)
         
         if verbose:
             print(stats.stream)

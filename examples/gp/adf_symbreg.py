@@ -134,7 +134,7 @@ def main():
         ind.fitness.values = toolbox.evaluate(ind)
 
     hof.update(pop)
-    stats.append(pop, gen=0, evals=len(pop))
+    stats.record(pop, gen=0, evals=len(pop))
     print(stats.stream)
     
     for g in range(1, NGEN):
@@ -165,7 +165,7 @@ def main():
         # Replacement of the population by the offspring
         pop = offspring
         hof.update(pop)
-        stats.append(pop, gen=g, evals=len(invalids))
+        stats.record(pop, gen=g, evals=len(invalids))
         print(stats.stream)
     
     print('Best individual : ', gp.stringify(hof[0][0]), hof[0].fitness)
