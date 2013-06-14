@@ -55,11 +55,10 @@ toolbox.register("lambdify", gp.lambdify, pset=pset)
 def evalSymbReg(individual, points):
     # Transform the tree expression in a callable function
     func = toolbox.lambdify(expr=individual)
-    # Evaluate the sum of squared difference between the expression
+    # Evaluate the mean squared error between the expression
     # and the real function : x**4 + x**3 + x**2 + x
-    diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
-    diff = sum(map(diff_func, points))
-    return diff,
+    sqerrors = ((func(x) - x**4 - x**3 - x**2 - x)**2 for x in points)
+    return sum(sqerrors) / len(points),
 
 toolbox.register("evaluate", evalSymbReg, points=[x/10. for x in range(-10,10)])
 toolbox.register("select", tools.selTournament, tournsize=3)
