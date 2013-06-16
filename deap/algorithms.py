@@ -125,6 +125,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
        Basic Algorithms and Operators", 2000.
     """
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -133,10 +136,11 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
     if halloffame is not None:
         halloffame.update(population)
-    if stats is not None:
-        stats.record(population, evals=len(invalid_ind), gen=0)
-        if verbose:
-            print stats.stream
+
+    record = stats.compile(population) if stats else {}
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
+    if verbose:
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -159,14 +163,13 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         # Replace the current population by the offspring
         population[:] = offspring
         
-        # Update the statistics with the new population
-        if stats is not None:
-            stats.record(population, evals=len(invalid_ind), gen=gen)
-            if verbose:
-                print stats.stream
+        # Append the current generation statistics to the logbook
+        record = stats.compile(population) if stats else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        if verbose:
+            print logbook.stream        
 
-
-    return population
+    return population, logbook
 
 def varOr(population, toolbox, lambda_, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
@@ -261,6 +264,9 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     registered in the toolbox. This algorithm uses the :func:`varOr`
     variation.
     """
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + stats.fields if stats else ()
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -270,10 +276,10 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     if halloffame is not None:
         halloffame.update(population)
 
-    if stats is not None:
-        stats.record(population, evals=len(population), gen=0)
-        if verbose:
-            print stats.stream
+    record = stats.compile(population) if stats is not None else {}
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
+    if verbose:
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -294,10 +300,10 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         population[:] = toolbox.select(population + offspring, mu)
 
         # Update the statistics with the new population
-        if stats is not None:
-            stats.record(population, evals=len(invalid_ind), gen=gen)
-            if verbose:
-                print stats.stream
+        record = stats.compile(population) if stats is not None else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        if verbose:
+            print logbook.stream
 
     return population
     
@@ -350,10 +356,13 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     if halloffame is not None:
         halloffame.update(population)
 
-    if stats is not None:
-        stats.record(population, evals=len(population), gen=0)
-        if verbose:
-            print stats.stream
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
+
+    record = stats.compile(population) if stats is not None else {}
+    logbook.append(gen=0, nevals=len(invalid_ind), **record)
+    if verbose:
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
@@ -374,12 +383,13 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         population[:] = toolbox.select(offspring, mu)
 
         # Update the statistics with the new population
-        if stats is not None:
-            stats.record(population, evals=len(invalid_ind), gen=gen)
-            if verbose:
-                print stats.stream
+        record = stats.compile(population) if stats is not None else {}
+        logbook.append(gen=gen, nevals=len(invalid_ind), **record)
+        if verbose:
+            print logbook.stream
 
-    return population
+
+    return population, logbook
 
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
                      verbose=__debug__):
@@ -407,6 +417,9 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
        Wiley, pp. 527-565;
 
     """
+    logbook = tools.Logbook()
+    logbook.headers = ['gen', 'nevals'] + stats.fields if stats else []
+
     for gen in xrange(ngen):
         # Generate a new population
         population = toolbox.generate()
@@ -421,10 +434,10 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
         
-        if stats is not None:
-            stats.record(population, evals=len(population), gen=gen)
-            if verbose:
-                print stats.stream
+        record = stats.compile(population) if stats is not None else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        if verbose:
+            print logbook.stream
 
     return population
 
