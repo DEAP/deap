@@ -7,6 +7,7 @@ try:
 except ImportError:
     import pickle
 
+from collections import defaultdict, OrderedDict
 from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
@@ -252,70 +253,29 @@ class Checkpoint(object):
         """
         self.values.update(pickle.load(file))
 
-class Statistics(list):
-    """Object that keeps record of statistics and key-value pair information
-    computed during the evolution. When created the statistics object receives
-    a *key* argument that is used to get the values on which the function will
-    be computed. If not provided the *key* argument defaults to the identity 
-    function.
+class Statistics(object):
+    """Object that compiles statistics on a list of arbitrary objects. 
+    When created the statistics object receives a *key* argument that 
+    is used to get the values on which the function will be computed. 
+    If not provided the *key* argument defaults to the identity function.
 
     :param key: A function to access the values on which to compute the
                 statistics, optional.
 
-    Values can be retrieved via the *select* method given the appropriate
-    key.
     ::
     
         >>> s = Statistics()
         >>> s.register("mean", mean)
         >>> s.register("max", max)
-        >>> s.record([1, 2, 3, 4])
-        >>> s.record([5, 6, 7, 8])
-        >>> s.select("mean")
-        [2.5, 6.5]
-        >>> s.select("max")
-        [4, 8]
-        >>> s[-1]["mean"]
-        6.5
-        >>> mean, max_ = s.select("mean", "max")
-        >>> mean[0]
-        2.5
-        >>> max_[0]
-        4
+        >>> s.compile([1, 2, 3, 4])
+        {"mean" : 2.5, "max" : 4}
+        >>> s.compile([5, 6, 7, 8])
+        {"mean" : 6.5, "max" : 8}
     """
     def __init__(self, key=identity):
         self.key = key
-        self.functions = {}
-        
-        self.header = None
-        """Order of the columns to print when using the :meth:`stream` and
-        :meth:`__str__` methods. The syntax is a single iterable containing
-        string elements. For example, with the previously
-        defined statistics class, one can print the generation and the
-        fitness average, and maximum with
-        ::
-
-            s.header = ("gen", "mean", "max")
-        
-        If not set the header is built with all fields, in arbritrary order
-        on insertion of the first data. The header can be removed by setting
-        it to :data:`None`.
-        """
-        
-        self.buffindex = 0
-
-    def __getstate__(self):
-        state = {}
-        state['functions'] = self.functions
-        state['header'] = self.header
-        # Most key cannot be pickled in Python 2
-        state['key'] = None
-        return state
-
-    def __setstate__(self, state):
-        self.__init__(state['key'])
-        self.functions = state['functions']
-        self.header = state['header']
+        self.functions = dict()
+        self.fields = []
 
     def register(self, name, function, *args, **kargs):
         """Register a *function* that will be applied on the sequence each
@@ -330,121 +290,20 @@ class Statistics(list):
                          optional.
         """        
         self.functions[name] = partial(function, *args, **kargs)
+        self.fields.append(name)
 
-    def select(self, *names):
-        """Return a list of values associated to the *names* provided
-        in argument in each dictionary of the Statistics object list.
-        One list per name is returned in order.
-        ::
-
-            >>> s = Statistics()
-            >>> s.register("mean", numpy.mean)
-            >>> s.register("max", numpy.mean)
-            >>> s.record([1,2,3,4,5,6,7])
-            >>> s.select("mean")
-            [4.0]
-            >>> s.select("mean", "max")
-            ([4.0], [7.0])
-        """
-        if len(names) == 1:
-            return [entry[names[0]] for entry in self]
-        return tuple([entry[name] for entry in self] for name in names)
-
-    def record(self, data=[], **kargs):
+    def compile(self, data):
         """Apply to the input sequence *data* each registered function 
-        and store the results plus the additional information from *kargs*
-        in a dictionnary at the end of the list.
+        and return the results as a dictionnary.
         
         :param data: Sequence of objects on which the statistics are computed.
-        :param kargs: Additional key-value pairs to record.
         """
-        if not self.key:
-            raise AttributeError('It is required to set a key after unpickling a %s object.' % self.__class__.__name__)
-
-        if not self.header:
-            self.header = kargs.keys() + self.functions.keys()
-
         values = tuple(self.key(elem) for elem in data)
         
-        entry = {}
+        entry = OrderedDict()
         for key, func in self.functions.iteritems():
             entry[key] = func(values)
-        entry.update(kargs)
-        self.append(entry)
-    
-    def __delitem__(self, key):
-        if isinstance(key, slice):
-            for i, in range(*key.indices(len(self))):
-                self._pop(i)
-        else:
-            self._pop(key)
-        
-    def _pop(self, index=0):
-        """Retreive and delete element *index*. The header and stream will be
-        adjusted to follow the modification.
-
-        :param item: The index of the element to remove, optional. It defaults
-                     to the first element.
-        
-        You can also use the following syntax to delete elements.
-        ::
-        
-            del s[0]
-            del s[1::5]
-        """
-        if index < self.buffindex:
-            self.buffindex -= 1
-        return super(self.__class__, self).pop(index)
-
-    def setColumns(self, *args):
-        """Set which columns will be outputed when calling converting
-        the object to a string with `str` or using the stream property.
-        The provided arguments must correspond to either the names of
-        the registered functions or the keys of keyword arguments 
-        provided when calling the record method.
-        """
-        self.header = args
-
-    @property
-    def stream(self):
-        """Retrieve the formated unstreamed entries of the database including
-        the headers.
-        ::
-
-            >>> s = Statistics()
-            >>> s.record(gen=0)
-            >>> print s.stream
-            gen
-              0
-            >>> s.record(gen=1)
-            >>> print s.stream
-              1
-        """
-        startindex, self.buffindex = self.buffindex, len(self)
-        return self.__str__(startindex)
-
-    def __str__(self, startindex=0, columns=None):
-        if not columns:
-            columns = self.header
-        columns_len = map(len, columns)
-
-        str_matrix = []
-        for line in self[startindex:]:
-            str_line = []
-            for i, name in enumerate(columns):
-                value = line.get(name, "")
-                string = "{0:n}" if isinstance(value, float) else "{0}"
-                column = string.format(value)
-                columns_len[i] = max(columns_len[i], len(column))
-                str_line.append(column)
-            str_matrix.append(str_line)
- 
-        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(columns_len))
-        text = (template.format(*line) for line in str_matrix)
-        if startindex == 0:
-            text = chain([template.format(*columns)], text)
- 
-        return "\n".join(text)
+        return entry
 
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
@@ -453,49 +312,28 @@ class MultiStatistics(dict):
     unique name. This name can then be used to retrieve the statistics object.
     ::
 
-        >>> stats1 = Statistics()
+        >>> stats1 = Statistics(key=len)
         >>> stats2 = Statistics(key=attrgetter("fitness.values"))
-        >>> mstats = MultStatistics(genotype=stats1, fitness=stats2)
+        >>> mstats = MultStatistics(length=stats1, fitness=stats2)
         >>> mstats.register("mean", numpy.mean, axis=0)
         >>> mstats.register("max", numpy.max)
-        >>> mstats.record(pop, gen=0)
-        >>> mstats['fitness'].select("mean")
-        [5.0]
-        >>> mstats['genotype'].select("max")
-        [[1,0,0,0]]
-        >>> stats1.select("max")
-        [[1,0,0,0]]
-    """
-    def __init__(self, **kargs):
-        for name, stats in kargs.items():
-            self[name] = stats
-        self.buffindex = 0
-        self.columns = []
-
-    def setColumns(self, *args):
-        """Set which columns will be outputed when calling converting
-        the object to a string with `str` or using the stream property.
-        The provided arguments must correspond to either the names of
-        keys provided during the init or the keys of keyword arguments 
-        provided when calling the `record` method.
-        """
-        self.columns = args
-        # self.is_key_column = True
-        self.is_key_column = any(self.has_key(arg) for arg in args)
-        
-    def record(self, data=[], **kargs):
-        """Calls :meth:`Statistics.record` with *data* and *kargs* on each
+        >>> mstats.compile(pop)
+        {'length' : {'mean' : 2.5, 'max' : 7}, 'fitness' : {'mean' : 1.0, 'max': 5.0}}
+    """ 
+    def compile(self, data):
+        """Calls :meth:`Statistics.compile` with *data* of each
         :class:`Statistics` object.
         
         :param data: Sequence of objects on which the statistics are computed.
-        :param kargs: Additional key-value pairs to record.
         """
-        if not self.columns:
-            args = self.keys()
-            self.setColumns(*args)
-        
-        for stats in self.values():
-            stats.record(data, **kargs)
+        record = {}
+        for name, stats in self.items():
+            record[name] = stats.compile(data)
+        return record
+
+    @property
+    def fields(self):
+        return list(self.keys())
 
     def register(self, name, function, *args, **kargs):
         """Register a *function* in each :class:`Statistics` object.
@@ -510,46 +348,160 @@ class MultiStatistics(dict):
         """
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
-    
+
+class Logbook(list):
+    """Evolution records as a chronological list of dictionary.
+
+    Columns can be retrieved via the *select* method given the appropriate
+    names.
+    """
+    def __init__(self):
+        self.buffindex = 0
+        self.chapters = defaultdict(Logbook)
+        self.header = None
+        """Order of the columns to print when using the :meth:`stream` and
+        :meth:`__str__` methods. The syntax is a single iterable containing
+        string elements. For example, with the previously
+        defined statistics class, one can print the generation and the
+        fitness average, and maximum with
+        ::
+
+            logbook.header = ("gen", "mean", "max")
+        
+        If not set the header is built with all fields, in arbritrary order
+        on insertion of the first data. The header can be removed by setting
+        it to :data:`None`.
+        """        
+
+    def record(self, **infos):
+        for key, value in infos.items():
+            if isinstance(value, dict):
+                self.chapters[key].record(**value)
+                del infos[key]
+        self.append(infos)
+
+    def select(self, *names):
+        """Return a list of values associated to the *names* provided
+        in argument in each dictionary of the Statistics object list.
+        One list per name is returned in order.
+        ::
+
+            >>> log = Logbook()
+            >>> log.append({'gen' : 0, 'mean' : 5.4, 'max' : 10.0})
+            >>> log.append({'gen' : 1, 'mean' : 9.4, 'max' : 15.0})
+            >>> log.select("mean")
+            [5.4, 9.4]
+            >>> s.select("gen", "max")
+            ([0, 1], [10.0, 15.0])
+        """
+        if len(names) == 1:
+            return [entry.get(names[0], None) for entry in self]
+        return tuple([entry.get(name, None) for entry in self] for name in names)
+
     @property
     def stream(self):
         """Retrieve the formated unstreamed entries of the database including
-        the headers. For the previous multi statistics object the result is
+        the headers.
         ::
 
-            >>> print mstats.stream
-                    fitness                  genotype              
-                   ---------    ------------------------------------
-            gen    max  mean    max             mean
-              0    6    5.0     [1, 1, 1, 0]    [0.5, 0.33, 0.75, 0]
-            >>> mstats.record(pop, gen=1)
-            >>> print mstats.stream
-              1    8    5.5     [1, 1, 1, 1]    [0.75, 0.5, 1.0, 0.5]
+            >>> log = Logbook()
+            >>> log.append({'gen' : 0})
+            >>> print log.stream
+            gen
+              0
+            >>> log.append({'gen' : 1})
+            >>> print log.stream
+              1
         """
-        startindex, self.buffindex = self.buffindex, len(self[self.keys()[0]])
+        startindex, self.buffindex = self.buffindex, len(self)
         return self.__str__(startindex)
 
-    def __str__(self, startindex=0):
-        matrices = []
-        first = next(self.itervalues())
-        for column in self.columns:
-            if self.has_key(column):
-                stats = self[column]
-                lines = stats.__str__(startindex).split('\n')
-                length = max(len(line.expandtabs()) for line in lines)
-                if startindex == 0:
-                    lines.insert(0, "-" * length)
-                    lines.insert(0, column.center(length))
-            else:
-                lines = first.__str__(startindex, (column,)).split('\n')
-                length = max(len(line.expandtabs()) for line in lines)
-                if startindex == 0 and self.is_key_column:
-                    lines.insert(0, " " * length) 
-                    lines.insert(0, " " * length)
-            matrices.append(lines)
+    def __delitem__(self, key):
+        if isinstance(key, slice):
+            for i, in range(*key.indices(len(self))):
+                self.pop(i)
+                for chapter in self.chapters.values():
+                    chapter.pop(i)
+        else:
+            self.pop(key)
+            for chapter in self.chapters.values():
+                chapter.pop(key)
+        
+    def pop(self, index=0):
+        """Retreive and delete element *index*. The header and stream will be
+        adjusted to follow the modification.
 
-        text = ("\t".join(line) for line in zip(*matrices))
+        :param item: The index of the element to remove, optional. It defaults
+                     to the first element.
+        
+        You can also use the following syntax to delete elements.
+        ::
+        
+            del log[0]
+            del log[1::5]
+        """
+        if index < self.buffindex:
+            self.buffindex -= 1
+        return super(self.__class__, self).pop(index)
+
+    def __txt__(self, startindex):
+        columns = self.header
+        if not columns:
+            columns = self[0].keys() + self.chapters.keys()
+        columns_len = map(len, columns)
+
+        chapters_txt = {}
+        offsets = defaultdict(int)
+        for name, chapter in self.chapters.items():
+            chapters_txt[name] = chapter.__txt__(startindex)
+            if startindex == 0:
+                offsets[name] = len(chapters_txt[name]) - len(self)
+
+        str_matrix = []
+        for i, line in enumerate(self[startindex:]):
+            str_line = []
+            for j, name in enumerate(columns):
+                if name in chapters_txt:
+                    column = chapters_txt[name][i+offsets[name]]
+                else:
+                    value = line.get(name, "")
+                    string = "{0:n}" if isinstance(value, float) else "{0}"
+                    column = string.format(value)
+                columns_len[j] = max(columns_len[j], len(column))
+                str_line.append(column)
+            str_matrix.append(str_line)
+
+        if startindex == 0:
+            header = []
+            nlines = 1
+            if len(self.chapters) > 0:
+                nlines += max(map(len, chapters_txt.values())) - len(self) + 1
+            header = [[] for i in xrange(nlines)]
+            for j, name in enumerate(columns):
+                if name in chapters_txt:
+                    length = max(len(line.expandtabs()) for line in chapters_txt[name])
+                    blanks = nlines - 2 - offsets[name]
+                    for i in xrange(blanks):
+                        header[i].append(" " * length)
+                    header[blanks].append(name.center(length))
+                    header[blanks+1].append("-" * length)
+                    for i in xrange(offsets[name]):
+                        header[blanks+2+i].append(chapters_txt[name][i])
+                else:
+                    length = max(len(line[j].expandtabs()) for line in str_matrix)
+                    for line in header[:-1]:
+                        line.append(" " * length)
+                    header[-1].append(name)
+            str_matrix = chain(header, str_matrix)
+
+        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(columns_len))
+        text = [template.format(*line) for line in str_matrix]
+        return text
+
+    def __str__(self, startindex=0):
+        text = self.__txt__(startindex)
         return "\n".join(text)
+
 
 class HallOfFame(object):
     """The hall of fame contains the best individual that ever lived in the
@@ -701,7 +653,7 @@ class ParetoFront(HallOfFame):
             if not is_dominated and not has_twin:
                 self.insert(ind)
 
-__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Checkpoint']
+__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook', 'Checkpoint']
 
 if __name__ == "__main__":
 

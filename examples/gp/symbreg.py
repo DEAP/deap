@@ -79,14 +79,11 @@ def main():
     mstats.register("std", numpy.std)
     mstats.register("min", numpy.min)
     mstats.register("max", numpy.max)
-    mstats.setColumns("gen", "evals", "size", "fitness")
-    stats_fit.setColumns("avg", "max", "min", "std")
-    stats_size.setColumns("avg", "max", "min", "std")
 
-    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats,
-        halloffame=hof, verbose=True)
-
-    return pop, mstats, hof
+    pop, log = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats,
+                                   halloffame=hof, verbose=True)
+    # print log
+    return pop, log, hof
 
 if __name__ == "__main__":
     main()
