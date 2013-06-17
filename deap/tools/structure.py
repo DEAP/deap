@@ -7,7 +7,7 @@ try:
 except ImportError:
     import pickle
 
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from functools import partial
 from itertools import chain
 from operator import attrgetter, eq
@@ -300,7 +300,7 @@ class Statistics(object):
         """
         values = tuple(self.key(elem) for elem in data)
         
-        entry = OrderedDict()
+        entry = dict()
         for key, func in self.functions.iteritems():
             entry[key] = func(values)
         return entry
