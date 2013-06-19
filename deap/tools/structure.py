@@ -599,7 +599,7 @@ class ParetoFront(HallOfFame):
             if not is_dominated and not has_twin:
                 self.insert(ind)
 
-__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Checkpoint']
+__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics']
 
 if __name__ == "__main__":
 
