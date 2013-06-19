@@ -418,7 +418,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
 
     """
     logbook = tools.Logbook()
-    logbook.headers = ['gen', 'nevals'] + stats.fields if stats else []
+    logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
 
     for gen in xrange(ngen):
         # Generate a new population
@@ -435,7 +435,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         toolbox.update(population)
         
         record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
             print logbook.stream
 
