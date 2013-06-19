@@ -163,12 +163,12 @@ class Statistics(object):
     ::
     
         >>> s = Statistics()
-        >>> s.register("mean", mean)
+        >>> s.register("mean", numpy.mean)
         >>> s.register("max", max)
         >>> s.compile([1, 2, 3, 4])
-        {"mean" : 2.5, "max" : 4}
+        {'max': 4, 'mean': 2.5}
         >>> s.compile([5, 6, 7, 8])
-        {"mean" : 6.5, "max" : 8}
+        {'max': 8, 'mean': 6.5}
     """
     def __init__(self, key=identity):
         self.key = key
@@ -211,12 +211,12 @@ class MultiStatistics(dict):
     ::
 
         >>> stats1 = Statistics(key=len)
-        >>> stats2 = Statistics(key=attrgetter("fitness.values"))
-        >>> mstats = MultStatistics(length=stats1, fitness=stats2)
+        >>> stats2 = Statistics(key=itemgetter(0))
+        >>> mstats = MultiStatistics(length=stats1, fitness=stats2)
         >>> mstats.register("mean", numpy.mean, axis=0)
         >>> mstats.register("max", numpy.max)
-        >>> mstats.compile(pop)
-        {'length' : {'mean' : 2.5, 'max' : 7}, 'fitness' : {'mean' : 1.0, 'max': 5.0}}
+        >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
+        {'length': {'max': 4, 'mean': 3.0}, 'fitness': {'max': 2.0, 'mean': 1.0}}
     """ 
     def compile(self, data):
         """Calls :meth:`Statistics.compile` with *data* of each
@@ -554,6 +554,14 @@ class ParetoFront(HallOfFame):
 __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
 if __name__ == "__main__":
+    import doctest
+    from operator import itemgetter
+
+    import numpy
+    doctest.run_docstring_examples(Statistics, globals())
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.compile, globals())
 
+    doctest.run_docstring_examples(MultiStatistics, globals())
+    doctest.run_docstring_examples(MultiStatistics.register, globals())
+    doctest.run_docstring_examples(MultiStatistics.compile, globals())
