@@ -10,7 +10,7 @@ except ImportError:
 from collections import defaultdict
 from functools import partial
 from itertools import chain
-from operator import attrgetter, eq
+from operator import eq
 
 
 def identity(obj):
@@ -656,11 +656,6 @@ class ParetoFront(HallOfFame):
 __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook', 'Checkpoint']
 
 if __name__ == "__main__":
-
     doctest.run_docstring_examples(Statistics.register, globals())
-    doctest.run_docstring_examples(Statistics.record, globals())
-
-    doctest.run_docstring_examples(Checkpoint, globals())
-    doctest.run_docstring_examples(Checkpoint.add, globals())
-
+    doctest.run_docstring_examples(Statistics.compile, globals())
 
