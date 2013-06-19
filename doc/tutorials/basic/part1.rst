@@ -24,7 +24,7 @@ objective and single objective fitnesses can be treated the same way. A
    :lines: 9
 
 rendering a fitness that minimize the first objective and maximize the
-second one. The weights can also be used to variate the importance of each
+second one. The weights can also be used to vary the importance of each
 objective one against another. This means that the weights can be any real
 number and only the sign is used to determine if a maximization or
 minimization is done. An example of where the weights can be useful is in the
