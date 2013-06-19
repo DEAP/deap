@@ -61,6 +61,9 @@ def main():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
 
+    logbook = tools.Logbook()
+    logbook.header = ["gen", "evals"] + stats.fields
+
     GEN = 1000
     best = None
 
@@ -77,10 +80,10 @@ def main():
             toolbox.update(part, best)
 
         # Gather all the fitnesses in one list and print the stats
-        stats.record(pop, gen=g, evals=len(pop))
-        print(stats.stream)
+        logbook.record(gen=g, evals=len(pop), **stats.compile(pop))
+        print(logbook.stream)
     
-    return pop, stats, best
+    return pop, logbook, best
 
 if __name__ == "__main__":
     main()
