@@ -551,11 +551,7 @@ class ParetoFront(HallOfFame):
             if not is_dominated and not has_twin:
                 self.insert(ind)
 
-<<<<<<< /Users/mitch/Documents/Development/Python/deap/dev/deap/tools/structure.py
-__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics']
-=======
-__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook', 'Checkpoint']
->>>>>>> /var/folders/mn/_4jp9q4s6svbnk_lbjxnc3xw0000gn/T/structure.py~other.czbOIJ
+__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
 if __name__ == "__main__":
 
