@@ -360,7 +360,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
 
     record = stats.compile(population) if stats is not None else {}
-    logbook.append(gen=0, nevals=len(invalid_ind), **record)
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
         print logbook.stream
 
@@ -384,7 +384,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
         # Update the statistics with the new population
         record = stats.compile(population) if stats is not None else {}
-        logbook.append(gen=gen, nevals=len(invalid_ind), **record)
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
             print logbook.stream
 
