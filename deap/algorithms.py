@@ -435,7 +435,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         toolbox.update(population)
         
         record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
+        logbook.record(gen=gen, nevals=len(fitnesses), **record)
         if verbose:
             print logbook.stream
 
