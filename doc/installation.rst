@@ -40,10 +40,5 @@ If you wish to build from sources, download_ or clone_ the repository and type::
 .. _download: https://code.google.com/p/deap/downloads/list
 .. _clone: https://code.google.com/p/deap/source/checkout
 
-Building from sources allows you to build the cTools, which includes a C++ version
-of the NSGA-II algorithm. To enable it, add the ``--with-ctools`` option. ::
-
-   python setup.py install --with-ctools
-
 .. _easy_install: http://pythonhosted.org/distribute/easy_install.html
 .. _pip: http://www.pip-installer.org/en/latest/
