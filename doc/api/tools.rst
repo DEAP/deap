@@ -187,18 +187,6 @@ Hall-Of-Fame
    
 ..   .. autoattribute:: deap.tools.EvolutionLogger.output
 
-Checkpoint
-----------
-.. autoclass:: deap.tools.Checkpoint()
-   
-   .. automethod:: deap.tools.Checkpoint.dump(filestream)
-   
-   .. automethod:: deap.tools.Checkpoint.load(filestream)
-   
-   .. automethod:: deap.tools.Checkpoint.add(name, object[, key])
-   
-   .. automethod:: deap.tools.Checkpoint.remove(name[, ...])
-
 History
 -------
 .. autoclass:: deap.tools.History
