@@ -428,7 +428,7 @@ class Logbook(list):
                 chapter.pop(key)
         
     def pop(self, index=0):
-        """Retreive and delete element *index*. The header and stream will be
+        """Retrieve and delete element *index*. The header and stream will be
         adjusted to follow the modification.
 
         :param item: The index of the element to remove, optional. It defaults
