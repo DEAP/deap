@@ -1,7 +1,6 @@
 from __future__ import division
 import random
 
-from functools import partial
 from collections import Sequence
 
 ######################################
