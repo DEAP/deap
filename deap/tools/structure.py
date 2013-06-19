@@ -151,108 +151,6 @@ class History(object):
         genealogy(individual.history_index, 0)
         return gtree
 
-
-class Checkpoint(object):
-    """A checkpoint is a file containing the state of any object that has been
-    hooked. While initializing a checkpoint, add the objects that you want to
-    be dumped by appending keyword arguments to the initializer or using the 
-    :meth:`add`. 
-
-    In order to use efficiently this module, you must understand properly the
-    assignment principles in Python. This module uses the *pointers* you passed
-    to dump the object, for example the following won't work as desired ::
-
-        >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint()
-        >>> cp.add("my_object", my_object)
-        >>> my_object = [3, 5, 6]
-        >>> cp.dump(open("example.ecp", "w"))
-        >>> cp.load(open("example.ecp", "r"))
-        >>> cp["my_object"]
-        [1, 2, 3]
-
-    In order to dump the new value of ``my_object`` it is needed to change its
-    internal values directly and not touch the *label*, as in the following ::
-
-        >>> my_object = [1, 2, 3]
-        >>> cp = Checkpoint()
-        >>> cp.add("my_object", my_object)
-        >>> my_object[:] = [3, 5, 6]
-        >>> cp.dump(open("example.ecp", "w"))
-        >>> cp.load(open("example.ecp", "r"))
-        >>> cp["my_object"]
-        [3, 5, 6]
-
-    """
-    def __init__(self):
-        self.objects = {}
-        self.keys = {}
-        self.values = {}
-
-    def add(self, name, object, key=identity):
-        """Add an object to the list of objects to be dumped. The object is
-        added under the name specified by the argument *name*, the object
-        added is *object*, and the *key* argument allow to specify a subpart
-        of the object that should be dumped (*key* defaults to an identity key
-        that dumps the entire object).
-        
-        :param name: The name under which the object will be dumped.
-        :param object: The object to register for dumping.
-        :param key: A function access the subcomponent of the object to dump,
-                    optional.
-        
-        The following illustrates how to use the key.
-        ::
-
-            >>> from operator import itemgetter
-            >>> my_object = [1, 2, 3]
-            >>> cp = Checkpoint()
-            >>> cp.add("item0", my_object, key=itemgetter(0))
-            >>> cp.dump(open("example.ecp", "w"))
-            >>> cp.load(open("example.ecp", "r"))
-            >>> cp["item0"]
-            1
-
-        """
-        self.objects[name] = object
-        self.keys[name] = partial(key, object)
-
-    def remove(self, *args):
-        """Remove objects with the specified name from the list of objects to
-        be dumped.
-        
-        :param name: The name of one or more object to remove from dumping.
-        
-        """
-        for element in args:
-            del self.objects[element]
-            del self.keys[element]
-            del self.values[element]
-
-    def __getitem__(self, value):
-        return self.values.get(value)
-
-    def dump(self, file):
-        """Dump the current registered object values in the provided
-        *filestream*.
-        
-        :param filestream: A stream in which write the data.
-        """
-        self.values = dict.fromkeys(self.objects.iterkeys())
-        for name, key in self.keys.iteritems():
-            self.values[name] = key()
-        pickle.dump(self.values, file)
-
-    def load(self, file):
-        """Load a checkpoint from the provided *filestream* retrieving the
-        dumped object values, it is not safe to load a checkpoint file in a
-        checkpoint object that contains references as all conflicting names
-        will be updated with the new values.
-        
-        :param filestream: A stream from which to read a checkpoint.
-        """
-        self.values.update(pickle.load(file))
-
 class Statistics(object):
     """Object that compiles statistics on a list of arbitrary objects. 
     When created the statistics object receives a *key* argument that 
@@ -653,7 +551,7 @@ class ParetoFront(HallOfFame):
             if not is_dominated and not has_twin:
                 self.insert(ind)
 
-__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook', 'Checkpoint']
+__all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
 if __name__ == "__main__":
     doctest.run_docstring_examples(Statistics.register, globals())

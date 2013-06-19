@@ -87,7 +87,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
             return best
     
     return best
-    
+
 if __name__ == "__main__":
     # Maximum number of restart for an algorithm that detects stagnation
     maxrestarts = 1000
