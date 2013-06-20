@@ -80,8 +80,10 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-
-
+    
+    logbook = tools.Logbook()
+    logbook.header = "gen", "evals", "std", "min", "avg", "max"
+    
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
     
     # Evaluate every individuals
@@ -90,7 +92,9 @@ def main():
         ind.fitness.values = fit
     
     hof.update(population)
-    stats.record(population, gen=0, evals=len(population))
+    record = stats.compile(population)
+    logbook.record(gen=0, evals=len(population), **record)
+    print(logbook.stream)
     
     # Begin the evolution
     for g in range(1, NGEN):
@@ -124,7 +128,9 @@ def main():
         
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
-        stats.record(population, gen=g, evals=len(invalid_ind))
+        record = stats.compile(population)
+        logbook.record(gen=g, evals=len(invalid_ind), **record)
+        print(logbook.stream)
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(stats)
@@ -132,7 +138,7 @@ def main():
     print(best_network.draw())
     print("%i errors, length %i, depth %i" % hof[0].fitness.values)
     
-    return population, stats, hof
+    return population, logbook, hof
 
 if __name__ == "__main__":
     main()

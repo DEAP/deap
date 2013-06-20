@@ -42,8 +42,14 @@ def main(verbose=True):
     toolbox.register("evaluate", benchmarks.rastrigin)
 
     halloffame = tools.HallOfFame(1)
-    stats = list()
-
+    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats.register("avg", numpy.mean)
+    stats.register("std", numpy.std)
+    stats.register("min", numpy.min)
+    stats.register("max", numpy.max)
+    
+    logbooks = list()
+    
     nsmallpopruns = 0
     smallbudget = list()
     largebudget = list()
@@ -93,12 +99,9 @@ def main(verbose=True):
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
         
-        stats.append(tools.Statistics(lambda ind: ind.fitness.values))
-        stats[-1].register("avg", numpy.mean)
-        stats[-1].register("std", numpy.std)
-        stats[-1].register("min", numpy.min)
-        stats[-1].register("max", numpy.max)
-
+        logbooks.append(tools.Logbook())
+        logbooks[-1].header = "gen", "evals", "restart", "regime", "std", "min", "avg", "max"
+        
         conditions = {"MaxIter" : False, "TolHistFun" : False, "EqualFunVals" : False,
                       "TolX" : False, "TolUpSigma" : False, "Stagnation" : False,
                       "ConditionCov" : False, "NoEffectAxis" : False, "NoEffectCoor" : False}
@@ -115,13 +118,13 @@ def main(verbose=True):
                 ind.fitness.values = fit
             
             halloffame.update(population)
-            stats[-1].record(population, gen=t, evals=lambda_, restart=i, regime=regime)
+            record = stats.compile(population)
+            logbooks[-1].record(gen=t, evals=lambda_, restart=i, regime=regime, **record)
+            if verbose:
+                print(logbooks[-1].stream)
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
-
-            if verbose:
-                print(stats[-1].stream)
                 
             # Count the number of times the k'th best solution is equal to the best solution
             # At this point the population is sorted (method update)
@@ -146,7 +149,7 @@ def main(verbose=True):
                 # The maximum number of iteration per CMA-ES ran
                 conditions["MaxIter"] = True
             
-            mins = stats[-1].select("min")
+            mins = logbooks[-1].select("min")
             if (len(mins) >= TOLHISTFUN_ITER) and \
                max(mins[-TOLHISTFUN_ITER:]) - min(mins[-TOLHISTFUN_ITER:]) < TOLHISTFUN:
                 # The range of the best values is smaller than the threshold

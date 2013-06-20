@@ -120,6 +120,9 @@ def main():
     hstats.register("min", numpy.min)
     hstats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "evals", "std", "min", "avg", "max"
+    
     MAXGEN = 50
     H_CXPB, H_MUTPB = 0.5, 0.3
     P_CXPB, P_MUTPB = 0.5, 0.3
@@ -129,8 +132,9 @@ def main():
         host.fitness.values = parasite.fitness.values = fit
     
     hof.update(hosts)
-    hstats.record(hosts, gen=0, evals=len(hosts))
-    print(hstats.stream)
+    record = hstats.compile(hosts)
+    logbook.record(gen=0, evals=len(hosts), **record)
+    print(logbook.stream)
     
     for g in range(1, MAXGEN):
         
@@ -145,15 +149,16 @@ def main():
             host.fitness.values = parasite.fitness.values = fit
         
         hof.update(hosts)
-        hstats.record(hosts, gen=g, evals=len(hosts))
-        print(hstats.stream)
+        record = hstats.compile(hosts)
+        logbook.record(gen=g, evals=len(hosts), **record)
+        print(logbook.stream)
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(best_network)
     print(best_network.draw())
     print("%i errors" % best_network.assess())
 
-    return hosts, hstats, hof
+    return hosts, logbook, hof
 
 if __name__ == "__main__":
     main()

@@ -58,18 +58,22 @@ def main():
     
     demes = [toolbox.population(n=MU) for _ in range(NBR_DEMES)]
     hof = tools.HallOfFame(1)
-    logbook = tools.Logbook(verbose=True)
+    
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "deme", "evals", "std", "min", "avg", "max"
+    
     for idx, deme in enumerate(demes):
         for ind in deme:
             ind.fitness.values = toolbox.evaluate(ind)
         logbook.record(gen=0, deme=idx, evals=len(deme), **stats.compile(deme))
         hof.update(deme)
+    print(logbook.stream)
     
     gen = 1
     while gen <= NGEN and logbook[-1]["max"] < 100.0:
@@ -83,12 +87,13 @@ def main():
             
             logbook.record(gen=gen, deme=idx, evals=len(deme), **stats.compile(deme))
             hof.update(deme)
+        print(logbook.stream)
             
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)
         gen += 1
     
-    return demes, stats, hof
+    return demes, logbook, hof
 
 if __name__ == "__main__":
     main()

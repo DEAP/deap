@@ -20,10 +20,9 @@ import random
 from deap import base
 from deap import creator
 from deap import benchmarks
+from deap import tools
 
 IND_SIZE = 10
-
-tools = base.Toolbox()
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
@@ -31,9 +30,10 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 def update(ind, mu, std):
     for i, mu_i in enumerate(mu):
         ind[i] = random.gauss(mu_i,std)
-                   
-tools.register("update", update)
-tools.register("evaluate", benchmarks.sphere)
+ 
+toolbox = base.Toolbox()                  
+toolbox.register("update", update)
+toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
     """Implements the One-Fifth rule algorithm as expressed in :
@@ -48,6 +48,9 @@ def main():
     the sigma computed as the standard deviation.
     """
     random.seed(64)
+    
+    logbook = tools.Logbook()
+    logbook.header = "gen", "fitness"
 
     interval = (-3,7)
     mu = (random.uniform(interval[0], interval[1]) for _ in range(IND_SIZE))
@@ -55,22 +58,21 @@ def main():
     alpha = 2.0**(1.0/IND_SIZE)
 
     best = creator.Individual(mu)
-    best.fitness.values = tools.evaluate(best)
+    best.fitness.values = toolbox.evaluate(best)
     worst = creator.Individual((0.0,)*IND_SIZE)
 
     NGEN = 1500
     for g in range(NGEN):
-        tools.update(worst, best, sigma) 
-        worst.fitness.values = tools.evaluate(worst)
+        toolbox.update(worst, best, sigma) 
+        worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:
             sigma = sigma * alpha
             best, worst = worst, best
         else:
             sigma = sigma * alpha**(-0.25)
-
-        print("Generation", g, "- Fitness:", best.fitness.values[0])
- 
-    print("Best individual is ", best, best.fitness.values[0])
+            
+        logbook.record(gen=g, fitness=best.fitness.values)
+        print(logbook.stream)
     
     return best
     
