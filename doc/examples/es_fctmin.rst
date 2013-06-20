@@ -53,7 +53,7 @@ provided in :mod:`~deap.algorithms`. Here we will use the
 :func:`~deap.algorithms.eaMuCommaLambda` algorithm.
 
 .. literalinclude:: /code/examples/es/fctmin.py
-   :lines: 67,69-82
+   :lines: 67,69-81
 
 The complete [`source code <code/es/fctmin.py>`_].
 

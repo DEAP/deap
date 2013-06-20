@@ -114,6 +114,9 @@ def main(verbose=True):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "nswarm", "evals", "error", "offline_error", "avg", "max"
+    
     swarm = toolbox.swarm(n=NPARTICLES)
     
     generation = 0
@@ -141,9 +144,12 @@ def main(verbose=True):
                 species.append([sorted_swarm[0]])
             sorted_swarm.pop(0)
         
-        stats.record(swarm, gen=generation, evals=mpb.nevals, nspecies=len(species), error=mpb.currentError(), offline_error=mpb.offlineError())
+        record = stats.compile(swarm)
+        logbook.record(gen=generation, evals=mpb.nevals, nswarm=len(species),
+                       error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
+
         if verbose:
-            print(stats.stream)
+            print(logbook.stream)
 
         # Detect change
         if any(s[0].bestfit.values != toolbox.evaluate(s[0].best) for s in species):

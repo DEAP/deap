@@ -78,7 +78,7 @@ def main(seed):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
 
-    pop = algorithms.eaGenerateUpdate(toolbox, NGEN, stats=stats, verbose=True)
+    pop, logbook = algorithms.eaGenerateUpdate(toolbox, NGEN, stats=stats, verbose=True)
 
 if __name__ == "__main__":
     main(seed=None)

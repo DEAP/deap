@@ -115,6 +115,9 @@ def main(verbose=True):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "nswarm", "evals", "error", "offline_error", "avg", "max"
+    
     # Generate the initial population
     population = [toolbox.swarm(n=NPARTICLES) for _ in range(NSWARMS)]
     
@@ -131,10 +134,12 @@ def main(verbose=True):
                 swarm.best = toolbox.clone(part[:])         # Get the position
                 swarm.bestfit.values = part.fitness.values  # Get the fitness
 
-    stats.record(itertools.chain(*population), gen=0, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
+    record = stats.compile(itertools.chain(*population))
+    logbook.record(gen=0, evals=mpb.nevals, nswarm=len(population),
+                   error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
     if verbose:
-        print(stats.stream)
+        print(logbook.stream)
     
     generation = 1
     while mpb.nevals < 5e5:
@@ -187,11 +192,13 @@ def main(verbose=True):
                     swarm.best = toolbox.clone(part[:])
                     swarm.bestfit.values = part.fitness.values
         
-        stats.record(itertools.chain(*population), gen=generation, evals=mpb.nevals, nswarm=len(population), error=mpb.currentError(), offline_error=mpb.offlineError())
+        record = stats.compile(itertools.chain(*population))
+        logbook.record(gen=generation, evals=mpb.nevals, nswarm=len(population),
+                       error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
         if verbose:
-            print(stats.stream)
-
+            print(logbook.stream)
+        
         # Apply exclusion
         reinit_swarms = set()
         for s1, s2 in itertools.combinations(range(len(population)), 2):

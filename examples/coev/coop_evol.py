@@ -60,6 +60,9 @@ def main(extended=True, verbose=True):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "species", "evals", "std", "min", "avg", "max"
+    
     ngen = 300
     g = 0
     
@@ -93,10 +96,11 @@ def main(extended=True, verbose=True):
                 # Evaluate and set the individual fitness
                 ind.fitness.values = toolbox.evaluate([ind] + r, target_set)
             
-            stats.record(s, gen=g, species=j, evals=len(s))
+            record = stats.compile(s)
+            logbook.record(gen=g, species=j, evals=len(s), **record)
             
             if verbose: 
-                print(stats.stream)
+                print(logbook.stream)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection

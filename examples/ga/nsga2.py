@@ -71,6 +71,9 @@ def main(seed=None):
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "evals", "std", "min", "avg", "max"
+    
     pop = toolbox.population(n=MU)
 
     # Evaluate the individuals with an invalid fitness
@@ -83,7 +86,9 @@ def main(seed=None):
     # no actual selection is done
     pop = toolbox.select(pop, len(pop))
     
-    stats.record(pop, evals=len(invalid_ind), gen=0)
+    record = stats.compile(pop)
+    logbook.record(gen=0, evals=len(invalid_ind), **record)
+    print(logbook.stream)
 
     # Begin the generational process
     for gen in range(1, NGEN):
@@ -107,9 +112,11 @@ def main(seed=None):
 
         # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
-        stats.record(pop, evals=len(invalid_ind), gen=gen)
+        record = stats.compile(pop)
+        logbook.record(gen=gen, evals=len(invalid_ind), **record)
+        print(logbook.stream)
 
-    return pop, stats
+    return pop, logbook
         
 if __name__ == "__main__":
     optimal_front = json.load(open("pareto_front/zdt1_front.json"))

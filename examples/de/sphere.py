@@ -78,13 +78,17 @@ def main():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "evals", "std", "min", "avg", "max"
+    
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    stats.record(pop, gen=0, evals=len(pop))
-    print(stats.stream)
+    record = stats.compile(pop)
+    logbook.record(gen=0, evals=len(pop), **record)
+    print(logbook.stream)
 
     for g in range(1, NGEN):
         children = []
@@ -105,11 +109,13 @@ def main():
                 pop[i] = ind
         
         hof.update(pop)
-        stats.record(pop, gen=g, evals=len(pop))
-        print(stats.stream)
+        record = stats.compile(pop)
+        logbook.record(gen=g, evals=len(pop), **record)
+        print(logbook.stream)
     
     print("Best individual is ", hof[0])
     print("with fitness", hof[0].fitness.values[0])
+    return logbook
             
 if __name__ == "__main__":
     main()

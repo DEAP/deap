@@ -64,6 +64,9 @@ def main(verbose=True):
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
+    
+    logbook = tools.Logbook()
+    logbook.header = "gen", "evals", "error", "offline_error", "avg", "max"
 
     # Initialize populations
     populations = [toolbox.population(n=regular + brownian) for _ in range(NPOP)]
@@ -74,9 +77,11 @@ def main(verbose=True):
         for ind, fit in zip(subpop, fitnesses):
             ind.fitness.values = fit
 
-    stats.record(itertools.chain(*populations), gen=0, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
+    record = stats.compile(itertools.chain(*populations))
+    logbook.record(gen=0, evals=mpb.nevals, error=mpb.currentError(),
+                   offline_error=mpb.offlineError(), **record)
     if verbose:
-        print(stats.stream)
+        print(logbook.stream)
 
     g = 1
     while mpb.nevals < 5e5:
@@ -107,9 +112,11 @@ def main(verbose=True):
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        stats.record(itertools.chain(*populations), gen=g, evals=mpb.nevals, error=mpb.currentError(), offline_error=mpb.offlineError())
+        record = stats.compile(itertools.chain(*populations))
+        logbook.record(gen=g, evals=mpb.nevals, error=mpb.currentError(),
+                       offline_error=mpb.offlineError(), **record)
         if verbose:
-            print(stats.stream)
+            print(logbook.stream)
 
         # Evolve the sub-populations
         for idx, subpop in enumerate(populations):
@@ -141,7 +148,7 @@ def main(verbose=True):
 
         g += 1
 
-    return stats
+    return logbook
 
 if __name__ == "__main__":
     main()

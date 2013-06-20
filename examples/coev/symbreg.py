@@ -53,6 +53,9 @@ def main():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
+    logbook = tools.Logbook()
+    logbook.header = "gen", "type", "evals", "std", "min", "avg", "max"
+    
     best_ga = tools.selRandom(pop_ga, 1)[0]
     best_gp = tools.selRandom(pop_gp, 1)[0]
     
@@ -62,9 +65,13 @@ def main():
     for ind in pop_ga:
         ind.fitness.values = toolbox_gp.evaluate(best_gp, points=ind)
     
-    stats.record(pop_ga, gen=0, type='ga', evals=len(pop_ga))
-    stats.record(pop_gp, gen=0, type='gp', evals=len(pop_gp))
-    print(stats.stream)
+    record = stats.compile(pop_ga)
+    logbook.record(gen=0, type='ga', evals=len(pop_ga), **record)
+    
+    record = stats.compile(pop_gp)
+    logbook.record(gen=0, type='gp', evals=len(pop_gp), **record)
+    
+    print(logbook.stream)
     
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
     
@@ -111,9 +118,13 @@ def main():
         pop_ga = off_ga
         pop_gp = off_gp
         
-        stats.record(pop_ga, gen=g, type='ga', evals=len(pop_ga))
-        stats.record(pop_gp, gen=g, type='gp', evals=len(pop_gp))
-        print(stats.stream)
+        record = stats.compile(pop_ga)
+        logbook.record(gen=g, type='ga', evals=len(pop_ga), **record)
+        
+        record = stats.compile(pop_gp)
+        logbook.record(gen=g, type='gp', evals=len(pop_gp), **record)
+        print(logbook.stream)
+        
         
         best_ga = tools.selBest(pop_ga, 1)[0]
         best_gp = tools.selBest(pop_gp, 1)[0]
@@ -122,7 +133,7 @@ def main():
     print("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values))
     print("Best individual GP is %s, %s" % (stringify(best_gp), best_gp.fitness.values))
 
-    return pop_ga, pop_gp, best_ga, best_gp, stats
+    return pop_ga, pop_gp, best_ga, best_gp, logbook
 
 if __name__ == "__main__":
     main()

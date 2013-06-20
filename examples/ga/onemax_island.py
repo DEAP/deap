@@ -98,17 +98,23 @@ def main(procid, pipein, pipeout, sync, seed=None):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
     
-    if procid == 0:
-        # Synchronization needed to log header on top and only once
-        sync.set()
-    else:
-        sync.wait()
+    logbook = tools.Logbook()
+    logbook.header = "gen", "deme", "evals", "std", "min", "avg", "max"
     
     for ind in deme:
         ind.fitness.values = toolbox.evaluate(ind)
-    stats.record(deme, gen=0, deme=procid, evals=len(deme))
+    record = stats.compile(deme)
+    logbook.record(gen=0, deme=procid, evals=len(deme), **record)
     hof.update(deme)
-    print(stats.stream)
+    
+    if procid == 0:
+        # Synchronization needed to log header on top and only once
+        print(logbook.stream)
+        sync.set()
+    else:
+        logbook.log_header = False  # Never output the header
+        sync.wait()
+        print(logbook.stream)
     
     for gen in range(1, NGEN):
         deme = toolbox.select(deme, len(deme))
@@ -118,9 +124,10 @@ def main(procid, pipein, pipeout, sync, seed=None):
         for ind in invalid_ind:
             ind.fitness.values = toolbox.evaluate(ind)
         
-        stats.record(deme, gen=gen, deme=procid, evals=len(invalid_ind))
         hof.update(deme)
-        print(stats.stream)
+        record = stats.compile(deme)
+        logbook.record(gen=gen, deme=procid, evals=len(deme), **record)
+        print(logbook.stream)
             
         if gen % MIG_RATE == 0 and gen > 0:
             toolbox.migrate(deme)

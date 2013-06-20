@@ -81,7 +81,7 @@ def main():
                               cxpb=0.7, mutpb=0.3, ngen=40, 
                               stats=stats, halloffame=hof)
     
-    return pop, stats, hof
+    return pop, logbook, hof
 
 if __name__ == "__main__":
     main()
