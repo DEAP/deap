@@ -342,7 +342,6 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-<<<<<<< Local Changes
     registered in the toolbox. This algorithm uses the :func:`varOr`
     variation.
     """
@@ -441,4 +440,3 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
             print logbook.stream
 
     return population, logbook
-
