@@ -76,7 +76,7 @@ __all__ = ['initRepeat', 'initIterate', 'initCycle']
 
 if __name__ == "__main__":
     import doctest
-    
+    import random
     random.seed(64)
     doctest.run_docstring_examples(initRepeat, globals())
     

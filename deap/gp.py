@@ -20,7 +20,6 @@ build a Genetic Program Tree, and the functions to evaluate it.
 This module support both strongly and loosely typed GP.
 """
 
-import abc
 import copy
 import random
 import re
