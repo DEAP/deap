@@ -269,7 +269,12 @@ class Logbook(list):
         If not set the header is built with all fields, in arbritrary order
         on insertion of the first data. The header can be removed by setting
         it to :data:`None`.
-        """        
+        """
+        
+        self.log_header = True
+        """Tells the log book to output or not the header when streaming the
+        first line or getting its entire string representation.
+        """
 
     def record(self, **infos):
         for key, value in infos.items():
@@ -369,7 +374,7 @@ class Logbook(list):
                 str_line.append(column)
             str_matrix.append(str_line)
 
-        if startindex == 0:
+        if startindex == 0 and self.log_header:
             header = []
             nlines = 1
             if len(self.chapters) > 0:
