@@ -161,6 +161,12 @@ Statistics
 .. autoclass:: deap.tools.MultiStatistics(**kargs)
 	:members:
 
+Logbook
+-------
+
+.. autoclass:: deap.tools.Logbook
+   :members:
+
 Hall-Of-Fame
 ------------
 .. autoclass:: deap.tools.HallOfFame
