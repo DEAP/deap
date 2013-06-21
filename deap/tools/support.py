@@ -1,13 +1,13 @@
 from __future__ import division
-import bisect
-import copy
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
+from bisect import bisect_right
 from collections import defaultdict
+from copy import deepcopy
 from functools import partial
 from itertools import chain
 from operator import eq
@@ -99,7 +99,7 @@ class History(object):
         for ind in individuals:
             self.genealogy_index += 1
             ind.history_index = self.genealogy_index
-            self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
+            self.genealogy_history[self.genealogy_index] = deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = parent_indices
     
     @property
@@ -477,8 +477,8 @@ class HallOfFame(object):
         :param item: The individual with a fitness attribute to insert in the
                      hall of fame.
         """
-        item = copy.deepcopy(item)
-        i = bisect.bisect_right(self.keys, item.fitness)
+        item = deepcopy(item)
+        i = bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
         self.keys.insert(i, item.fitness)
     
