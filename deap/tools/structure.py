@@ -256,6 +256,7 @@ class Logbook(list):
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
+        self.columns_len = None
         self.header = None
         """Order of the columns to print when using the :meth:`stream` and
         :meth:`__str__` methods. The syntax is a single iterable containing
@@ -351,7 +352,9 @@ class Logbook(list):
         columns = self.header
         if not columns:
             columns = self[0].keys() + self.chapters.keys()
-        columns_len = map(len, columns)
+        
+        if not self.columns_len or len(self.columns_len) != len(columns):
+            self.columns_len = map(len, columns)
 
         chapters_txt = {}
         offsets = defaultdict(int)
@@ -370,7 +373,7 @@ class Logbook(list):
                     value = line.get(name, "")
                     string = "{0:n}" if isinstance(value, float) else "{0}"
                     column = string.format(value)
-                columns_len[j] = max(columns_len[j], len(column))
+                self.columns_len[j] = max(self.columns_len[j], len(column))
                 str_line.append(column)
             str_matrix.append(str_line)
 
@@ -397,8 +400,9 @@ class Logbook(list):
                     header[-1].append(name)
             str_matrix = chain(header, str_matrix)
 
-        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(columns_len))
+        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(self.columns_len))
         text = [template.format(*line) for line in str_matrix]
+
         return text
 
     def __str__(self, startindex=0):
