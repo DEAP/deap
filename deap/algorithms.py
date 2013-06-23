@@ -126,7 +126,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
        Basic Algorithms and Operators", 2000.
     """
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -265,7 +265,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     variation.
     """
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + stats.fields if stats else ()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -357,7 +357,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         halloffame.update(population)
 
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     record = stats.compile(population) if stats is not None else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
@@ -418,7 +418,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
 
     """
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + stats.fields if stats else []
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     for gen in xrange(ngen):
         # Generate a new population
