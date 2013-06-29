@@ -51,6 +51,9 @@ def main(verbose=True):
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
+
+    logbook = tools.Logbook()
+    logbook.header = "gen", "evals", "std", "min", "avg", "max"
     
     # Objects that will compile the data
     sigma = numpy.ndarray((NGEN,1))
@@ -74,10 +77,11 @@ def main(verbose=True):
         # Update the hall of fame and the statistics with the
         # currently evaluated population
         halloffame.update(population)
-        stats.record(population, evals=len(population), gen=gen,)
+        record = stats.compile(population)
+        logbook.record(evals=len(population), gen=gen, **record)
         
         if verbose:
-            print(stats.stream)
+            print(logbook.stream)
         
         # Save more data along the evolution for latter plotting
         # diagD is sorted and sqrooted in the update method
@@ -90,7 +94,7 @@ def main(verbose=True):
 
     # The x-axis will be the number of evaluations
     x = list(range(0, strategy.lambda_ * NGEN, strategy.lambda_))
-    avg, max_, min_ = stats.select("avg", "max", "min")
+    avg, max_, min_ = logbook.select("avg", "max", "min")
     plt.figure()
     plt.subplot(2, 2, 1)
     plt.semilogy(x, avg, "--b")
