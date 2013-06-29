@@ -183,15 +183,6 @@ Hall-Of-Fame
 
    .. automethod:: deap.tools.ParetoFront.update
 
-.. Evolution Logger
-.. ----------------
-.. .. autoclass:: deap.tools.EvolutionLogger([col_names][, precision])
-.. 
-..    .. automethod:: deap.tools.EvolutionLogger.logHeader
-.. 
-..    .. automethod:: deap.tools.EvolutionLogger.logGeneration([stats[, index]][, data[, ...]])
-   
-..   .. autoattribute:: deap.tools.EvolutionLogger.output
 
 History
 -------
