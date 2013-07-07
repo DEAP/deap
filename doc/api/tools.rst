@@ -139,7 +139,9 @@ Selection
 
 .. autofunction:: deap.tools.selTournamentDCD
 
-.. autofunction:: sortNondominated
+.. autofunction:: deap.tools.sortNondominated
+
+.. autofunction:: deap.tools.sortLogNondominated
 
 Bloat control
 +++++++++++++
