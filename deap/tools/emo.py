@@ -3,7 +3,6 @@ import bisect
 import math
 import random
 
-
 from itertools import chain
 from operator import attrgetter, itemgetter
 from collections import defaultdict
