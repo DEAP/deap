@@ -351,7 +351,7 @@ class Logbook(list):
     def __txt__(self, startindex):
         columns = self.header
         if not columns:
-            columns = self[0].keys() + self.chapters.keys()
+            columns = self[0].keys() + sorted(self.chapters.keys())
         
         if not self.columns_len or len(self.columns_len) != len(columns):
             self.columns_len = map(len, columns)
