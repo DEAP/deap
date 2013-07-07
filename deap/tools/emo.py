@@ -1,9 +1,11 @@
 from __future__ import division
+import bisect
 import math
 import random
 
+
 from itertools import chain
-from operator import attrgetter
+from operator import attrgetter, itemgetter
 from collections import defaultdict
 
 ######################################
@@ -131,6 +133,239 @@ def assignCrowdingDist(individuals):
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
 
+
+#######################################
+# Generalized Reduced runtime ND sort #
+#######################################
+
+def identity(obj):
+    """Returns directly the argument *obj*.
+    """
+    return obj
+
+def isDominated(wvalues1, wvalues2):
+    """Returns whether or not *wvalues1* dominates *wvalues2*.
+    
+    :param wvalues1: The weighted fitness values that would be dominated.
+    :param wvalues2: The weighted fitness values of the dominant.
+    :returns: :obj:`True` if wvalues2 dominates wvalues1, :obj:`False`
+              otherwise.
+    """
+    not_equal = False
+    for self_wvalue, other_wvalue in zip(wvalues1, wvalues2):
+        if self_wvalue > other_wvalue:
+            return False
+        elif self_wvalue < other_wvalue:
+            not_equal = True
+    return not_equal
+
+def median(seq, key=identity):
+    """Returns the median of *seq* - the numeric value separating the higher 
+    half of a sample from the lower half. If there is an even number of 
+    elements in *seq*, it returns the mean of the two middle values.
+    """
+    sseq = sorted(seq, key=key)
+    length = len(seq)
+    if length % 2 == 1:
+        return key(sseq[(length - 1) // 2])
+    else:
+        return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
+
+def sortLogNondominated(individuals):
+    """Sort *individuals* in pareto non-dominated fronts using the Generalized
+    Reduced Run-Time Complexity Non-Dominated Sorting Algorithm presented by
+    Fortin et al. (2013).
+    
+    :param individuals: A list of individuals to select from.
+    :returns: A list of Pareto fronts (lists), with the first list being the
+              true Pareto front.
+    """
+    #Separate individuals according to unique fitnesses
+    unique_fits = defaultdict(list)
+    for i, ind in enumerate(individuals):
+        unique_fits[ind.fitness.wvalues].append(ind)
+    
+    #Launch the sorting algorithm
+    obj = len(individuals[0].fitness.wvalues)-1
+    fitnesses = unique_fits.keys()
+    front = dict.fromkeys(fitnesses, 0)
+
+    # Sort the fitnesses lexicographically.
+    fitnesses.sort(reverse=True)
+    sortNDHelperA(fitnesses, obj, front)    
+    
+    #Extract individuals from front list here
+    nbfronts = max(front.values())+1
+    pareto_fronts = [[] for i in range(nbfronts)]
+    for fit in fitnesses:
+        index = front[fit]
+        pareto_fronts[index].extend(unique_fits[fit])
+    return pareto_fronts
+
+def sortNDHelperA(fitnesses, obj, front):
+    """Create a non-dominated sorting of S on the first M objectives"""
+    if len(fitnesses) < 2:
+        return
+    elif len(fitnesses) == 2:
+        # Only two individuals, compare them and adjust front number
+        s1, s2 = fitnesses[0], fitnesses[1]
+        if isDominated(s2[:obj+1], s1[:obj+1]):
+            front[s2] = max(front[s2], front[s1] + 1)
+    elif obj == 1:
+        sweepA(fitnesses, front)
+    elif len(frozenset(map(itemgetter(obj), fitnesses))) == 1:
+        #All individuals for objective M are equal: go to objective M-1
+        sortNDHelperA(fitnesses, obj-1, front)
+    else:
+        # More than two individuals, split list and then apply recursion
+        best, worst = splitA(fitnesses, obj)
+        sortNDHelperA(best, obj, front)
+        sortNDHelperB(best, worst, obj-1, front)
+        sortNDHelperA(worst, obj, front)
+
+def splitA(fitnesses, obj):
+    """Partition the set of fitnesses in two according to the median of
+    the objective index *obj*. The values equal to the median are put in
+    the set containing the least elements.
+    """
+    median_ = median(fitnesses, itemgetter(obj))
+    best_a, worst_a = [], []
+    best_b, worst_b = [], []
+
+    for fit in fitnesses:
+        if fit[obj] > median_:
+            best_a.append(fit)
+            best_b.append(fit)
+        elif fit[obj] < median_:
+            worst_a.append(fit)
+            worst_b.append(fit)
+        else:
+            best_a.append(fit)
+            worst_b.append(fit)
+
+    balance_a = abs(len(best_a) - len(worst_a))
+    balance_b = abs(len(best_b) - len(worst_b))
+
+    if balance_a <= balance_b:
+        return best_a, worst_a
+    else:
+        return best_b, worst_b
+
+def sweepA(fitnesses, front):
+    """Update rank number associated to the fitnesses according
+    to the first two objectives using a geometric sweep procedure.
+    """
+    stairs = [-fitnesses[0][1]]
+    fstairs = [fitnesses[0]]  
+    for fit in fitnesses[1:]:
+        idx = bisect.bisect_right(stairs, -fit[1])
+        if 0 < idx <= len(stairs):
+            fstair = max(fstairs[:idx], key=front.__getitem__)
+            front[fit] = max(front[fit], front[fstair]+1)
+        for i, fstair in enumerate(fstairs[idx:], idx):
+            if front[fstair] == front[fit]:
+                del stairs[i]
+                del fstairs[i]
+                break
+        stairs.insert(idx, -fit[1])
+        fstairs.insert(idx, fit)
+
+def sortNDHelperB(best, worst, obj, front):
+    """Assign front numbers to the solutions in H according to the solutions 
+    in L. The solutions in L are assumed to have correct front numbers and the 
+    solutions in H are not compared with each other, as this is supposed to 
+    happen after sortNDHelperB is called."""
+    key = itemgetter(obj)    
+    if len(worst) == 0 or len(best) == 0:
+        #One of the lists is empty: nothing to do
+        return
+    elif len(best) == 1 or len(worst) == 1:
+        #One of the lists has one individual: compare directly
+        for hi in worst:
+            for li in best:
+                if isDominated(hi[:obj+1], li[:obj+1]) or hi[:obj+1] == li[:obj+1]:
+                    front[hi] = max(front[hi], front[li] + 1)
+    elif obj == 1:
+        sweepB(best, worst, front)
+    elif key(min(best, key=key)) >= key(max(worst, key=key)):
+        #All individuals from L dominate H for objective M:
+        #Also supports the case where every individuals in L and H 
+        #has the same value for the current objective
+        #Skip to objective M-1
+        sortNDHelperB(best, worst, obj-1, front)
+    elif key(max(best, key=key)) >= key(min(worst, key=key)):
+        best1, best2, worst1, worst2 = splitB(best, worst, obj)
+        sortNDHelperB(best1, worst1, obj, front)
+        sortNDHelperB(best1, worst2, obj-1, front)
+        sortNDHelperB(best2, worst2, obj, front)
+
+def splitB(best, worst, obj):
+    """Split both best individual and worst sets of fitnesses according
+    to the median of objective *obj* computed on the set containing the
+    most elements. The values equal to the median are attributed so as 
+    to balance the four resulting sets as much as possible.
+    """
+    median_ = median(best if len(best) > len(worst) else worst, itemgetter(obj))
+    best1_a, best2_a, best1_b, best2_b = [], [], [], []
+    for fit in best:
+        if fit[obj] > median_:
+            best1_a.append(fit)
+            best1_b.append(fit)
+        elif fit[obj] < median_:
+            best2_a.append(fit)
+            best2_b.append(fit)
+        else:
+            best1_a.append(fit)
+            best2_b.append(fit)
+    
+    worst1_a, worst2_a, worst1_b, worst2_b = [], [], [], []        
+    for fit in worst:
+        if fit[obj] > median_:
+            worst1_a.append(fit)
+            worst1_b.append(fit)
+        elif fit[obj] < median_:
+            worst2_a.append(fit)
+            worst2_b.append(fit)
+        else:
+            worst1_a.append(fit)
+            worst2_b.append(fit)
+    
+    balance_a = abs(len(best1_a) - len(best2_a) + len(worst1_a) - len(worst2_a))
+    balance_b = abs(len(best1_b) - len(best2_b) + len(worst1_b) - len(worst2_b))
+
+    if balance_a <= balance_b:
+        return best1_a, best2_a, worst1_a, worst2_a
+    else:
+        return best1_b, best2_b, worst1_b, worst2_b
+
+def sweepB(best, worst, front):
+    """Adjust the rank number of the worst fitnesses according to
+    the best fitnesses on the first two objectives using a sweep
+    procedure.
+    """
+    stairs, fstairs = [], []
+    iter_best = iter(best)
+    next_best = next(iter_best, False)
+    for h in worst:
+        while next_best and h[:2] <= next_best[:2]:
+            insert = True
+            for i, fstair in enumerate(fstairs):
+                if front[fstair] == front[next_best]:
+                    if fstair[1] > next_best[1]:
+                        insert = False
+                    else:
+                        del stairs[i], fstairs[i]
+                    break
+            if insert:
+                idx = bisect.bisect_right(stairs, -next_best[1])
+                stairs.insert(idx, -next_best[1])
+                fstairs.insert(idx, next_best)
+            next_best = next(iter_best, False)
+
+        idx = bisect.bisect_right(stairs, -h[1])
+        if 0 < idx <= len(stairs):
+            fstair = max(fstairs[:idx], key=front.__getitem__)
+            front[h] = max(front[h], front[fstair]+1)
 
 ######################################
 # Strength Pareto         (SPEA-II)  #
@@ -288,4 +523,4 @@ def _partition(array, begin, end):
         else:
             return j
 
-__all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated']
+__all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated', 'sortLogNondominated']
