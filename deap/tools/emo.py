@@ -565,8 +565,5 @@ def _partition(array, begin, end):
         else:
             return j
 
-<<<<<<< local
-__all__ = ['selNSGA2', 'selTournamentDCD', 'selSPEA2', 'sortNondominated']
-=======
+
 __all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated', 'sortLogNondominated']
->>>>>>> other
