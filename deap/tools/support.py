@@ -297,10 +297,26 @@ class Logbook(list):
             [5.4, 9.4]
             >>> s.select("gen", "max")
             ([0, 1], [10.0, 15.0])
+
+        If the logbook is used on a MultiStatistics object, then the
+        *names* provided should be in a tuple form.
+        ::
+
+            >>> log = Logbook()
+            >>> log.append({'gen' : 0, 'fit': {'max': 15, 'avg': 11}, 
+                'size': {'max': 40, 'avg': 10}})
+            >>> log.select(('size', 'avg'), 'gen')
+            ([10], [0])
         """
         if len(names) == 1:
-            return [entry.get(names[0], None) for entry in self]
-        return tuple([entry.get(name, None) for entry in self] for name in names)
+            if isinstance(names[0], tuple):
+                return [entry.get(names[0][1], None) 
+                    for entry in self.chapters[names[0][0]]]
+            else:
+                return [entry.get(names[0], None) for entry in self]
+        return tuple([entry.get(name[1], None) for entry in self.chapters[name[0]]] 
+            if isinstance(name, tuple) else
+            [entry.get(name, None) for entry in self] for name in names)
 
     @property
     def stream(self):
