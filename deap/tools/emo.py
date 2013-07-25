@@ -565,4 +565,5 @@ def _partition(array, begin, end):
             return j
 
 
-__all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated', 'sortLogNondominated']
+__all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated', 'sortLogNondominated',
+           'selTournamentDCD']
