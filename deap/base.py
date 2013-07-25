@@ -102,6 +102,14 @@ class Toolbox(object):
                           order, with the last decorator decorating all the
                           others.
         
+        .. note::
+            Decorate a function using the toolbox makes it unpicklable, and
+            will produce an error on pickling. Although this limitation is not
+            relevant in most cases, it may have an impact on distributed
+            environments like multiprocessing.
+            A function can still be decorated manually before it is added to
+            the toolbox (using the @ notation) in order to be picklable.
+
         .. versionchanged:: 0.8
            Decoration is not signature preserving anymore.
         """
