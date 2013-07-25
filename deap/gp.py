@@ -26,7 +26,7 @@ import re
 import sys
 
 from collections import defaultdict
-from functools import partial
+from functools import partial,wraps
 from inspect import isclass
 from operator import eq, lt
 
@@ -820,6 +820,7 @@ def staticDepthLimit(max_depth):
 
     """
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = list(func(*args, **kwargs))
@@ -841,6 +842,7 @@ def staticSizeLimit(max_size):
     :func:`~deap.base.Toolbox.decorate`
     """
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = list(func(*args, **kwargs))
