@@ -252,6 +252,10 @@ class Logbook(list):
 
     Columns can be retrieved via the *select* method given the appropriate
     names.
+
+    The :class:`Logbook` class is recursive, and may contain **chapters** in
+    the case of a :class:`MultiStatistics` log. See the :meth:`select` method
+    documentation for an example.
     """
     def __init__(self):
         self.buffindex = 0
@@ -298,25 +302,23 @@ class Logbook(list):
             >>> s.select("gen", "max")
             ([0, 1], [10.0, 15.0])
 
-        If the logbook is used on a MultiStatistics object, then the
-        *names* provided should be in a tuple form.
+        With a :class:`MultiStatistics` object, the statistics for each
+        measurement can be retrieved using the *chapters* member :
         ::
 
             >>> log = Logbook()
-            >>> log.append({'gen' : 0, 'fit': {'max': 15, 'avg': 11}, 
-                'size': {'max': 40, 'avg': 10}})
-            >>> log.select(('size', 'avg'), 'gen')
-            ([10], [0])
+            >>> log.append({'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5}, 
+            ... 'size' : {'mean' : 25.4, 'max' : 67}})
+            >>> log.append({'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7}, 
+            ... 'size' : {'mean' : 28.1, 'max' : 71}})
+            >>> log.chapters['size'].select("mean")
+            [25.4, 28.1]
+            >>> log.chapters['fit'].select("gen", "max")
+            ([0, 1], [1.5, 1.7])
         """
         if len(names) == 1:
-            if isinstance(names[0], tuple):
-                return [entry.get(names[0][1], None) 
-                    for entry in self.chapters[names[0][0]]]
-            else:
-                return [entry.get(names[0], None) for entry in self]
-        return tuple([entry.get(name[1], None) for entry in self.chapters[name[0]]] 
-            if isinstance(name, tuple) else
-            [entry.get(name, None) for entry in self] for name in names)
+            return [entry.get(names[0], None) for entry in self]
+        return tuple([entry.get(name, None) for entry in self] for name in names)
 
     @property
     def stream(self):
