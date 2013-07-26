@@ -260,6 +260,43 @@ class Logbook(list):
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
+        """Dictionary containing the sub-sections of the logbook that also 
+        are logbooks. To access a specific chapter logbook, use the name
+        of the chapter as a dictionnary key. For example, to access the
+        fitness lobgook and select the mean
+        ::
+
+            logbook.chapters["fitness"].select("mean")
+
+        Chapters are automatically created when the right hand side of a
+        keyword argument provided to the *record* function is a dictionnary,
+        the keyword determines the chapter name. For example, the following
+        line adds a new chapter "size" that will contain the fields "max" 
+        and "mean".
+        ::
+
+            logbook.record(gen=0, size={'max' : 10.0, mean : 7.5})
+
+        Multistatistics object is a dictionary containing dictionnaries,
+        therefore when recording one in a logbook using the double-star 
+        (**) magic, chapters will be automatically added to the logbook.
+        ::
+            >>> from operator import itemgetter
+            >>> stats1 = Statistics(key=len)
+            >>> stats2 = Statistics(key=itemgetter(0))
+            >>> mstats = MultiStatistics(length=stats1, fitness=stats2)
+            >>> mstats.register("mean", numpy.mean, axis=0)
+            >>> mstats.register("max", numpy.max)
+            >>> record = mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
+            >>> logbook.record(**record)
+            >>> print logbook
+              fitness          length
+            ------------    ------------
+            max     mean    max     mean
+            2       1       4       3
+
+        """
+
         self.columns_len = None
         self.header = None
         """Order of the columns to print when using the :meth:`stream` and
@@ -282,6 +319,12 @@ class Logbook(list):
         """
 
     def record(self, **infos):
+        """Enter a record of event in the logbook as a list of key-value pairs.
+        The informations are appended chronogically to a list as a dictionnary.
+        When the value part of a pair is a dictionnary, the informations contained
+        in the dictionnary are recorded in a chapter intitled as the name of the
+        key part of the pair. Chapters are also Logbook.
+        """
         for key, value in infos.items():
             if isinstance(value, dict):
                 self.chapters[key].record(**value)
@@ -295,8 +338,8 @@ class Logbook(list):
         ::
 
             >>> log = Logbook()
-            >>> log.append({'gen' : 0, 'mean' : 5.4, 'max' : 10.0})
-            >>> log.append({'gen' : 1, 'mean' : 9.4, 'max' : 15.0})
+            >>> log.record(gen = 0, mean = 5.4, max = 10.0)
+            >>> log.record(gen = 1, mean = 9.4, max = 15.0)
             >>> log.select("mean")
             [5.4, 9.4]
             >>> s.select("gen", "max")
@@ -307,9 +350,9 @@ class Logbook(list):
         ::
 
             >>> log = Logbook()
-            >>> log.append({'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5}, 
+            >>> log.record(**{'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5}, 
             ... 'size' : {'mean' : 25.4, 'max' : 67}})
-            >>> log.append({'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7}, 
+            >>> log.record(**{'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7}, 
             ... 'size' : {'mean' : 28.1, 'max' : 71}})
             >>> log.chapters['size'].select("mean")
             [25.4, 28.1]
