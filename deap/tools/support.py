@@ -248,15 +248,18 @@ class MultiStatistics(dict):
             stats.register(name, function, *args, **kargs)
 
 class Logbook(list):
-    """Evolution records as a chronological list of dictionary.
+    """Evolution records as a chronological list of dictionaries.
 
     Columns can be retrieved via the *select* method given the appropriate
     names.
 
-    The :class:`Logbook` class is recursive, and may contain **chapters** in
-    the case of a :class:`MultiStatistics` log. See the :meth:`select` method
-    documentation for an example.
+    The :class:`Logbook` class may also contain other Logbook refered to 
+    as chapters. Chapters are used to store information associated to a
+    specific part of the evolution. For example when computing statistics
+    on different components of individuals, chapters can be used to 
+    distinguish the average fitness and the average size.
     """
+    chapters = defaultdict(Logbook)
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
@@ -275,19 +278,16 @@ class Logbook(list):
         and "mean".
         ::
 
-            logbook.record(gen=0, size={'max' : 10.0, mean : 7.5})
+            logbook.record(gen=0, size={'max' : 10.0, 'mean' : 7.5})
 
         Multistatistics object is a dictionary containing dictionnaries,
-        therefore when recording one in a logbook using the double-star 
-        (**) magic, chapters will be automatically added to the logbook.
+        therefore when recording one in a logbook using the keyword argument
+        unpacking operator (**), chapters will be automatically added to 
+        the logbook.
         ::
-            >>> from operator import itemgetter
-            >>> stats1 = Statistics(key=len)
-            >>> stats2 = Statistics(key=itemgetter(0))
-            >>> mstats = MultiStatistics(length=stats1, fitness=stats2)
-            >>> mstats.register("mean", numpy.mean, axis=0)
-            >>> mstats.register("max", numpy.max)
-            >>> record = mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
+            >>> mstats = MultiStatistics(fitness=stats, size=stats2)
+            [...]
+            >>> record = mstats.compile(pop)
             >>> logbook.record(**record)
             >>> print logbook
               fitness          length
@@ -322,7 +322,7 @@ class Logbook(list):
         """Enter a record of event in the logbook as a list of key-value pairs.
         The informations are appended chronogically to a list as a dictionnary.
         When the value part of a pair is a dictionnary, the informations contained
-        in the dictionnary are recorded in a chapter intitled as the name of the
+        in the dictionnary are recorded in a chapter entitled as the name of the
         key part of the pair. Chapters are also Logbook.
         """
         for key, value in infos.items():
@@ -365,8 +365,8 @@ class Logbook(list):
 
     @property
     def stream(self):
-        """Retrieve the formated unstreamed entries of the database including
-        the headers.
+        """Retrieve the formatted not streamed yet entries of the database 
+        including the headers.
         ::
 
             >>> log = Logbook()
