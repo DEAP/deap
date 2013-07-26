@@ -157,9 +157,13 @@ class Statistics(object):
     is used to get the values on which the function will be computed. 
     If not provided the *key* argument defaults to the identity function.
 
+    The value returned by the key may be a multi-dimensional object, i.e.:
+    a tuple or a list, as long as the statistical function registered
+    support it. So for example, statistics can be computed directly on
+    multi-objective fitnesses when using numpy statistical function.
+
     :param key: A function to access the values on which to compute the
                 statistics, optional.
-
     ::
     
         >>> s = Statistics()
@@ -253,32 +257,31 @@ class Logbook(list):
     Columns can be retrieved via the *select* method given the appropriate
     names.
 
-    The :class:`Logbook` class may also contain other Logbook refered to 
+    The :class:`Logbook` class may also contain other logbooks refered to 
     as chapters. Chapters are used to store information associated to a
     specific part of the evolution. For example when computing statistics
     on different components of individuals, chapters can be used to 
     distinguish the average fitness and the average size.
     """
-    chapters = defaultdict(Logbook)
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
-        """Dictionary containing the sub-sections of the logbook that also 
-        are logbooks. To access a specific chapter logbook, use the name
+        """Dictionary containing the sub-sections of the logbook which also are
+        :class:`Logbook`. Chapters are automatically created when the right
+        hand  side of a keyword argument provided to the *record* function is a
+        dictionnary, the keyword determines the chapter name. For example,  the
+        following line adds a new chapter "size" that will contain the  fields
+        "max" and "mean". 
+        ::
+
+            logbook.record(gen=0, fitness={'max' : 10.0, 'mean' : 7.5})
+
+        To access a specific chapter logbook, use the name
         of the chapter as a dictionnary key. For example, to access the
         fitness lobgook and select the mean
         ::
 
             logbook.chapters["fitness"].select("mean")
-
-        Chapters are automatically created when the right hand side of a
-        keyword argument provided to the *record* function is a dictionnary,
-        the keyword determines the chapter name. For example, the following
-        line adds a new chapter "size" that will contain the fields "max" 
-        and "mean".
-        ::
-
-            logbook.record(gen=0, size={'max' : 10.0, 'mean' : 7.5})
 
         Multistatistics object is a dictionary containing dictionnaries,
         therefore when recording one in a logbook using the keyword argument
@@ -296,6 +299,7 @@ class Logbook(list):
             2       1       4       3
 
         """
+        self.chapters = defaultdict(Logbook)
 
         self.columns_len = None
         self.header = None
@@ -412,8 +416,7 @@ class Logbook(list):
     def __txt__(self, startindex):
         columns = self.header
         if not columns:
-            columns = self[0].keys() + sorted(self.chapters.keys())
-        
+            columns = sorted(self[0].keys()) + sorted(self.chapters.keys())
         if not self.columns_len or len(self.columns_len) != len(columns):
             self.columns_len = map(len, columns)
 
