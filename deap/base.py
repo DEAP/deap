@@ -258,11 +258,10 @@ class Fitness(object):
 
     def __str__(self):
         """Return the values of the Fitness object."""
-        return str(self.values)
+        return str(self.values if self.valid else tuple())
 
     def __repr__(self):
         """Return the Python code to build a copy of the object."""
-        module = self.__module__
-        name = self.__class__.__name__
-        return "%s.%s(%r)" % (module, name, self.values)
+        return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
+            self.values if self.valid else tuple())
 
