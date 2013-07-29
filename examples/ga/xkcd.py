@@ -16,7 +16,7 @@
 xkcd comics: http://xkcd.com/287/. In the comic, the characters want to get
 exactly 15.05$ worth of appetizers, as fast as possible."""
 import random
-
+from operator import attrgetter
 from collections import Counter
 
 # We delete the reduction function of the Counter because it doesn't copy added
@@ -36,63 +36,53 @@ IND_INIT_SIZE = 3
 # Create the item dictionary: item id is an integer, and value is 
 # a (name, weight, value) 3-uple. Since the comic didn't specified a time for
 # each menu item, random was called to generate a time.
-
-item_names = ["Mixed Fruit", "French Fries", "Side Salad", "Hot Wings",
-             "Mozzarella Sticks", "Sampler Plate"]
-
-item_values = [2.15, 2.75, 3.35, 3.55, 4.2, 5.8]
-
-items = dict((name, (price, random.uniform(1, 5))) for name, price in zip(item_names, item_values))
-
+ITEMS_NAME = "Mixed Fruit", "French Fries", "Side Salad", "Hot Wings", "Mozzarella Sticks", "Sampler Plate"
+ITEMS_PRICE = 2.15, 2.75, 3.35, 3.55, 4.2, 5.8
+ITEMS = dict((name, (price, random.uniform(1, 5))) for name, price in zip(ITEMS_NAME, ITEMS_PRICE))
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", Counter, fitness=creator.Fitness)
 
 toolbox = base.Toolbox()
-
-# Attribute generator
-toolbox.register("attr_item", random.choice, item_names)
-
-# Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual, 
-    toolbox.attr_item, IND_INIT_SIZE)
+toolbox.register("attr_item", random.choice, ITEMS_NAME)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_item, IND_INIT_SIZE)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-def evalXkcd(individual, target_price):
+def evalXKCD(individual, target_price):
     """Evaluates the fitness and return the error on the price and the time
-    taken by the order."""
+    taken by the order if the chef can cook everything in parallel."""
     price = 0.0
-    time = 0.0
-    for item in individual:
-        price += items[item][0]
-        time += items[item][1]
-    return abs(price - target_price), time
+    times = list()
+    for item, number in individual.items():
+        price += ITEMS[item][0] * number
+        times.append(ITEMS[item][1])
+    return abs(price - target_price), max(times)
 
-def mateCounter(ind1, ind2, indpb = 0.1):
+def cxCounter(ind1, ind2, indpb):
     """Swaps the number of perticular items between two individuals"""
-    for key in items:
+    for key in ITEMS.keys():
         if random.random() < indpb:
             ind1[key], ind2[key] = ind2[key], ind1[key]
     return ind1, ind2
 
-def mutateCounter(individual):
+def mutCounter(individual):
     """Adds or remove an item from an individual"""
-    if random.randint(0,1) > 0:
-        individual.update([random.choice(item_names)])
+    if random.random() > 0.5:
+        individual.update([random.choice(ITEMS_NAME)])
     else:
-        val = random.choice(item_names)
+        val = random.choice(ITEMS_NAME)
         individual.subtract([val])
         if individual[val] < 0:
             del individual[val]
     return individual,
 
-toolbox.register("evaluate", evalXkcd, target_price = 15.05)
-toolbox.register("mate", mateCounter)
-toolbox.register("mutate", mutateCounter)
+toolbox.register("evaluate", evalXKCD, target_price=15.05)
+toolbox.register("mate", cxCounter, indpb=0.5)
+toolbox.register("mutate", mutCounter)
 toolbox.register("select", tools.selNSGA2)
 
 def main():
-    NGEN = 40 
+    NGEN = 40
     MU = 100
     LAMBDA = 200
     CXPB = 0.3
@@ -100,15 +90,13 @@ def main():
 
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
-    stats1 = tools.Statistics(lambda ind: ind.fitness.values[0])
-    stats1.register("avg", numpy.mean)
-    stats1.register("std", numpy.std)
-    stats1.register("min", numpy.min)
-    stats2 = tools.Statistics(lambda ind: ind.fitness.values[1])
-    stats2.register("avg", numpy.mean)
-    stats2.register("std", numpy.std)
-    stats2.register("min", numpy.min)
-    stats = tools.MultiStatistics(price=stats1, time=stats2)
+    
+    price_stats = tools.Statistics(key=lambda ind: ind.fitness.values[0])
+    time_stats = tools.Statistics(key=lambda ind: ind.fitness.values[1])
+    stats = tools.MultiStatistics(price=price_stats, time=time_stats)
+    stats.register("avg", numpy.mean, axis=0)
+    stats.register("std", numpy.std, axis=0)
+    stats.register("min", numpy.min, axis=0)
 
     algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN,
                               stats, halloffame=hof)
@@ -121,6 +109,6 @@ if __name__ == "__main__":
     error_price = [i.fitness.values[0] for i in hof]
     time = [i.fitness.values[1] for i in hof]
     plt.plot(error_price, time, 'bo')
-    plt.xlabel("Error on the price")
+    plt.xlabel("Price difference")
     plt.ylabel("Total time")
     plt.show()
