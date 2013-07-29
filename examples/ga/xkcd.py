@@ -32,18 +32,18 @@ from deap import creator
 from deap import tools
 
 IND_INIT_SIZE = 3
-NBR_ITEMS = 5
 
 # Create the item dictionary: item id is an integer, and value is 
 # a (name, weight, value) 3-uple. Since the comic didn't specified a time for
 # each menu item, random was called to generate a time.
-items = {0 : ("Mixed Fruit", 2.15, random.uniform(1, 5)),
-         1 : ("French Fries", 2.75, random.uniform(1, 5)),
-         2 : ("Side Salad", 3.35, random.uniform(1, 5)),
-         3 : ("Hot Wings", 3.55, random.uniform(1, 5)),
-         4 : ("Mozzarella Sticks", 4.2, random.uniform(1, 5)),
-         5 : ("Sampler Plate", 5.8, random.uniform(1, 5))
-         }
+
+item_names = ["Mixed Fruit", "French Fries", "Side Salad", "Hot Wings",
+             "Mozzarella Sticks", "Sampler Plate"]
+
+item_values = [2.15, 2.75, 3.35, 3.55, 4.2, 5.8]
+
+items = dict((name, (price, random.uniform(1, 5))) for name, price in zip(item_names, item_values))
+
 
 creator.create("Fitness", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", Counter, fitness=creator.Fitness)
@@ -51,7 +51,7 @@ creator.create("Individual", Counter, fitness=creator.Fitness)
 toolbox = base.Toolbox()
 
 # Attribute generator
-toolbox.register("attr_item", random.randrange, NBR_ITEMS)
+toolbox.register("attr_item", random.choice, item_names)
 
 # Structure initializers
 toolbox.register("individual", tools.initRepeat, creator.Individual, 
@@ -64,8 +64,8 @@ def evalXkcd(individual, target_price):
     price = 0.0
     time = 0.0
     for item in individual:
-        price += items[item][1]
-        time += items[item][2]
+        price += items[item][0]
+        time += items[item][1]
     return abs(price - target_price), time
 
 def mateCounter(ind1, ind2, indpb = 0.1):
@@ -78,9 +78,9 @@ def mateCounter(ind1, ind2, indpb = 0.1):
 def mutateCounter(individual):
     """Adds or remove an item from an individual"""
     if random.randint(0,1) > 0:
-        individual.update([random.randint(0, NBR_ITEMS)])
+        individual.update([random.choice(item_names)])
     else:
-        val = random.randint(0, NBR_ITEMS)
+        val = random.choice(item_names)
         individual.subtract([val])
         if individual[val] < 0:
             del individual[val]
