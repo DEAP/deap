@@ -593,7 +593,7 @@ class ParetoFront(HallOfFame):
     of individuals, it is possible to specify a similarity function that will
     return :data:`True` if the genotype of two individuals are similar. In that
     case only one of the two individuals will be added to the hall of fame. By
-    default the similarity function is :func:`operator.__eq__`.
+    default the similarity function is :func:`operator.eq`.
     
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
     it is sorted lexicographically at every moment.
