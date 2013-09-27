@@ -217,7 +217,10 @@ class PrimitiveSetTyped(object):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
         self.arguments = []
-        self.context = dict()
+        # setting "__builtins__" to None avoid the context
+        # being polluted by builtins function when evaluating
+        # GP expression.
+        self.context = {"__builtins__" : None}
         self.mapping = dict()
         self.terms_count = 0
         self.prims_count = 0
@@ -408,7 +411,7 @@ def evaluate(expr, pset):
     """
     string = stringify(expr)
     try:
-        return eval(string, dict(pset.context))
+        return eval(string, pset.context, {})
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -428,7 +431,7 @@ def lambdify(expr, pset):
     args = ",".join(arg for arg in pset.arguments)
     lstr = "lambda {args}: {code}".format(args=args, code=code)
     try:
-        return eval(lstr, dict(pset.context))
+        return eval(lstr, pset.context, {})
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
