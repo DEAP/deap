@@ -351,7 +351,7 @@ class Logbook(list):
             >>> log.record(gen = 1, mean = 9.4, max = 15.0)
             >>> log.select("mean")
             [5.4, 9.4]
-            >>> s.select("gen", "max")
+            >>> log.select("gen", "max")
             ([0, 1], [10.0, 15.0])
 
         With a :class:`MultiStatistics` object, the statistics for each
