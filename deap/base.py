@@ -109,9 +109,6 @@ class Toolbox(object):
             environments like multiprocessing.
             A function can still be decorated manually before it is added to
             the toolbox (using the @ notation) in order to be picklable.
-
-        .. versionchanged:: 0.8
-           Decoration is not signature preserving anymore.
         """
         pfunc = getattr(self, alias)
         function, args, kargs = pfunc.func, pfunc.args, pfunc.keywords

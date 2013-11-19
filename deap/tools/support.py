@@ -164,6 +164,7 @@ class Statistics(object):
 
     :param key: A function to access the values on which to compute the
                 statistics, optional.
+        
     ::
     
         >>> s = Statistics()
