@@ -18,7 +18,6 @@ Genetic Algorithm (GA)
 	ga_onemax_short
 	ga_knapsack
 	coev_coop
-	checkpoint
 
 .. _gpexamples:
 
