@@ -17,7 +17,7 @@ with a certain distribution and estimate the problem distribution from the
 generate-update logic. The strategy contains a random number generator which
 is adapted from the population. The following :class:`EDA` class do just that.
 
-.. literalinclude:: /code/examples/eda/fctmin.py
+.. literalinclude:: ../../examples/eda/fctmin.py
    :pyobject: EDA
 
 A normal random number generator is initialized with a certain mean
@@ -37,7 +37,7 @@ Two classes are needed, a minimization fitness and a individual that will
 combine the fitness and the real values. Moreover, we will use
 :class:`numpy.ndarray` as base class for our individuals.
 
-.. literalinclude:: /code/examples/eda/fctmin.py
+.. literalinclude:: ../../examples/eda/fctmin.py
    :lines: 28-29
 
 Operators
@@ -49,7 +49,7 @@ We will use the method of an initialized :class:`EDA`. For the generate
 method, we set the class that the individuals are transferred in to our
 :class:`Individual` class containing a fitness.
 
-.. literalinclude:: /code/examples/eda/fctmin.py
+.. literalinclude:: ../../examples/eda/fctmin.py
    :pyobject: main
 
-The complete example : [`source code <code/eda/fctmin.py>`_]. 
+The complete :example:`eda/fctmin`. 

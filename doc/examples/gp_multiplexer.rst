@@ -20,7 +20,7 @@ The primitive set is almost the same as the set used in :ref:`Parity
 :mod:`operator`, and a specific if-then-else primitive, which return either
 its second or third argument depending on the value of the first one.
 
-.. literalinclude:: /code/examples/gp/multiplexer.py
+.. literalinclude:: ../../examples/gp/multiplexer.py
    :lines: 56-62
 
 As usual, we also add two terminals, a Boolean true and a Boolean false.
@@ -33,7 +33,7 @@ at start up, instead of at each evaluation call. This pre-computation also
 allows to easily tune the multiplexer size, by changing the value of
 *MUX_SELECT_LINES*.
 
-.. literalinclude:: /code/examples/gp/multiplexer.py
+.. literalinclude:: ../../examples/gp/multiplexer.py
    :lines: 32-54
 
 
@@ -41,10 +41,10 @@ After that, the evaluation function is trivial, as we have both inputs and
 output values. The fitness is then the number of well predicted outputs over
 the 2048 cases (for a 3-8 multiplexer).
 
-.. literalinclude:: /code/examples/gp/multiplexer.py
+.. literalinclude:: ../../examples/gp/multiplexer.py
    :pyobject: evalMultiplexer
 
-The complete example: [`source code <code/gp/multiplexer.py>`_]
+The complete :example:`gp/multiplexer`.
 
 .. _refPapersMux:
 
