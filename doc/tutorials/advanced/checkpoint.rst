@@ -1,14 +1,17 @@
 =============
 Checkpointing
 =============
+In this tutorial we will present how persistance can be acheived. The only required
+tools are a simple :class:`dict` and a serialization method. Important data will
+be inserted in the diction and serialized to a file so that if something goes wrong
+the evolution can be restarted from the last saved checkpoint. It can also serve
+to continue an evolution beyond the pre-fixed termination criterion.
 
-This example will cover how to checkpoint important data during an evolution
-to restart when something goes wrong or even after a termination criterion has
-been met. Checkpointing is not offered in standard algorithm such as eaSimple,
+Checkpointing is not offered in standard algorithm such as eaSimple,
 eaMuPlus/CommaLambda, and eaGenerateUpdate. You must create your own algorithm
-as in the onemax example or use variation to shorten things up.
+(or copy an existing one) and intriduce this feature yourself.
 
-Starting with a very basic example we will add the necessary  stuff to
+Starting with a very basic example we will cover the necessary stuff to
 checkpoint everything needed to restart an evolution. We will skip the
 creation of classe and registration of tools in the toolbox to go directly to
 the algorithm and the main function. Our main function will receive a string
@@ -18,6 +21,7 @@ of the checkpoint path if desired. ::
     
     def main(checkpoint=None):
         if checkpoint:
+            # A file name has been given, then load the data from the file
             cp = pickle.load(open(checkpoint, "r"))
             population = cp["population"]
             start_gen = cp["generation"]
@@ -25,6 +29,7 @@ of the checkpoint path if desired. ::
             logbook = cp["logbook"]
             random.setstate(cp["rndstate"])
         else:
+            # Start a new evolution
             population = toolbox.population(n=300)
             start_gen = 0
             halloffame = tools.HallOfFame(maxsize=1)
@@ -32,8 +37,6 @@ of the checkpoint path if desired. ::
 
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", numpy.mean)
-        stats.register("std", numpy.std)
-        stats.register("min", numpy.min)
         stats.register("max", numpy.max)
 
         for gen in range(start_gen, NGEN):
@@ -51,14 +54,15 @@ of the checkpoint path if desired. ::
 
             population = toolbox.select(population, k=len(population))
 
-            if gen % FREQ ==0:
+            if gen % FREQ == 0:
+                # Fill the dictionary using the dict(key=value[, ...]) constructor
                 cp = dict(population=population, generation=gen, halloffame=halloffame,
                           logbook=logbook, rndstate=random.getstate())
                 pickle.dump(cp, open("checkpoint_name.pkl", "w"))
 
-That's it, the whole data will be written in a pickled dictionary at every
-*FREQ* generation. Loading the checkpoint is done if the main function is
-given a path. The evolution restarts from where it was in the last checkpoint
-and will produce the exact same results as if it was not stopped and reloaded
-because of the state of the random module. If you use numpy random numbers
-don't forget to save and reload its state too.
+Now, the whole data will be written in a pickled dictionary every *FREQ*
+generations. Loading the checkpoint is done if the main function is given a
+path to a checkpoint file. In that case, the evolution restarts from where it
+was in the last checkpoint. It will produce the exact same results as if it
+was not stopped and reloaded because of the random module state . If you use
+numpy random numbers don't forget to save and reload its state too.
