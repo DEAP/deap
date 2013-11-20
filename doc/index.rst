@@ -37,6 +37,7 @@ and many features to build your own evolutions.
 * **Advanced tutorials:**
 
   * :doc:`tutorials/advanced/gp`
+  * :doc:`tutorials/advanced/checkpoint`
   * :doc:`tutorials/advanced/benchmarking`
   * :doc:`tutorials/advanced/numpy`
   
