@@ -22,7 +22,7 @@ is then to transform them in a single element tuple as required by DEAP
 philosophy on single objective optimization. We will use a decorator
 for this.
 
-.. literalinclude:: /code/examples/bbob.py
+.. literalinclude:: ../../../examples/bbob.py
    :pyobject: tupleize
 
 The algorithm is encapsulated in a main function that receives four
@@ -36,7 +36,7 @@ Then, the target fitness value is encapsulated in a :class:`FitnessMin` object
 so that we can easily compare the individuals with it. Following is simply the
 algorithm, which is explained in the :ref:`one-fifth` example.
 
-.. literalinclude:: /code/examples/bbob.py
+.. literalinclude:: ../../../examples/bbob.py
    :pyobject: main
 
 Running the Benchmark
@@ -54,11 +54,11 @@ there is even no need to save the best individual found by our algorithm (call
 to the :func:`main` function). The single line that is related to the provided
 algorithm in the call to the :func:`main` function.
 
-.. literalinclude:: /code/examples/bbob.py
+.. literalinclude:: ../../../examples/bbob.py
    :lines: 26,27,28,90-137
 
 Once these experiments are done, the data contained in the :file:`ouput`
 directory can be used to build the results document. See the `BBOB
 <http://coco.gforge.inria.fr/>`_ web site on how to build the document.
 
-The complete example : [`source code <code/bbob.py>`_].
+The complete :example:`bbob`.
