@@ -26,27 +26,27 @@ step size, the axis ratio and the major axis of the covariace matrix, the best
 value so far, the best coordinates so far and the standard deviation of the
 all coordinates at each generation.
 
-.. literalinclude:: ../../examples/es/cma_plotting.py
+.. literalinclude:: /../examples/es/cma_plotting.py
    :lines: 59-64
 
 Once the objects are created, the evolution loop, based on a generational
 stopping criterion, calls repeatedly the :meth:`generate`, :meth:`evaluate`
 and :meth:`update` methods registered in the toolbox.
 
-.. literalinclude:: ../../examples/es/cma_plotting.py
+.. literalinclude:: /../examples/es/cma_plotting.py
    :lines: 66-75
 
 Then, the previoulsy created objects start to play their role. The according
 data is recorded in each object on each generation.
 
-.. literalinclude:: ../../examples/es/cma_plotting.py
+.. literalinclude:: /../examples/es/cma_plotting.py
    :lines: 80,81,88-93
 
 Now that the data is recorded the only thing left to do is to plot it. We'll
 use `matplotlib <http://matplotlib.org>`_ to generate the graphics from the
 recorded data.
 
-.. literalinclude:: ../../examples/es/cma_plotting.py
+.. literalinclude:: /../examples/es/cma_plotting.py
    :lines: 95-124
 
 Which gives the following result.

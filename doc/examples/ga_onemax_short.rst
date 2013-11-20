@@ -12,13 +12,13 @@ algorithms impemented use specific functions from the toolbox, in this case
 :func:`evaluate`, :func:`mate`, :func:`mutate` and :func:`~deap.Toolbox.select`
 must be registered. 
 
-.. literalinclude:: ../../examples/ga/onemax_short.py
+.. literalinclude:: /../examples/ga/onemax_short.py
    :lines: 41-44
 
 The toolbox is then passed to the algorithm and the algorithm uses the
 registered function. 
 
-.. literalinclude:: ../../examples/ga/onemax_short.py
+.. literalinclude:: /../examples/ga/onemax_short.py
    :lines: 46, 49-58
 
 The short GA One max example makes use of a

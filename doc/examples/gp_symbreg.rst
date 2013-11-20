@@ -29,7 +29,7 @@ primitives set. They should make good building blocks for the individuals so
 the evolution can succeed. In this problem, we use a classical set of
 primitives, which are basic arithmetic functions :
   
-.. literalinclude:: ../../examples/gp/symbreg.py
+.. literalinclude:: /../examples/gp/symbreg.py
    :lines: 29-43
     
 The redefinition of the division is made to protect it against a zero
@@ -50,7 +50,7 @@ only one input, but it could have as many as you want. By default, those
 inputs are named "ARGx", where "x" is a number, but you can easily rename
 them :
   
-.. literalinclude:: ../../examples/gp/symbreg.py
+.. literalinclude:: /../examples/gp/symbreg.py
    :lines: 44
 
 Creator
@@ -60,7 +60,7 @@ As any evolutionary program, symbolic regression needs (at least) two object
 types : an individual containing the genotype and a fitness. We can easily
 create them with the creator :
    
-.. literalinclude:: ../../examples/gp/symbreg.py
+.. literalinclude:: /../examples/gp/symbreg.py
    :lines: 46-47
 
 The first line creates the fitness object (this is a minimization problem, so
@@ -80,7 +80,7 @@ Toolbox
 Now, we want to register some parameters specific to the evolution process.
 In DEAP, this is done through the toolbox :
    
-.. literalinclude:: ../../examples/gp/symbreg.py
+.. literalinclude:: /../examples/gp/symbreg.py
    :lines: 49-69
 
 First, a toolbox instance is created (in some problem types like coevolution,
@@ -102,7 +102,7 @@ the RMSE, which is returned as the fitness of the individual.
     stores it as an iterable. Knowing that, you can understand why the
     evaluation function must return a tuple value (even if it is a 1-tuple) :
 
-    .. literalinclude:: ../../examples/gp/symbreg.py
+    .. literalinclude:: /../examples/gp/symbreg.py
         :pyobject: evalSymbReg
         :emphasize-lines: 9
         
@@ -129,7 +129,7 @@ this case, we want to compute the mean, standard deviation, minimum, and
 maximum of both the individuals fitness and size. For that we'll use a
 :class:`~deap.tools.MultiStatistics` object.
     
-	.. literalinclude:: ../../examples/gp/symbreg.py
+	.. literalinclude:: /../examples/gp/symbreg.py
 	   :lines: 77-86
 
 Note that a simple :class:`~deap.tools.Statistics` object can be used, as in
@@ -143,7 +143,7 @@ process, but nothing has been initialized. We can start the evolution by
 creating the population and then calling a complete algorithm. In this case,
 we'll use :func:`~deap.algorithms.eaSimple`.
 
-.. literalinclude:: ../../examples/gp/symbreg.py
+.. literalinclude:: /../examples/gp/symbreg.py
    :lines: 71,74,75,88-91
 
 

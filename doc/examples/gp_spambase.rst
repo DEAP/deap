@@ -29,7 +29,7 @@ type, and where the return value type is specified before run time.
 We define a typed primitive set almost the same way than a normal one, but we
 have to specify the types used.
  
-.. literalinclude:: ../../examples/gp/spambase.py
+.. literalinclude:: /../examples/gp/spambase.py
    :lines: 37-68
 
 On the first line, we see the declaration of a typed primitive set with
@@ -55,7 +55,7 @@ spam database, and then checks if the prediction made by the individual
 matches the expected Boolean output. The count of well predicted emails is
 returned as the fitness of the individual (which is so, at most, 400).
 
-.. literalinclude:: ../../examples/gp/spambase.py
+.. literalinclude:: /../examples/gp/spambase.py
    :pyobject: evalSpambase
 
 
@@ -66,7 +66,7 @@ The toolbox used is very similar to the one presented in the symbolic
 regression example, but notice that we now use specific STGP operators for
 crossovers and mutations :
 
-.. literalinclude:: ../../examples/gp/spambase.py
+.. literalinclude:: /../examples/gp/spambase.py
    :lines: 88-92
     
 
