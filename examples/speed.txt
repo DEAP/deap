@@ -14,7 +14,7 @@ ga/ga_onemax_island
 ga/ga_nqueens
 gp/gp_adf_symbreg
 gp/gp_ant
-gp_multiplexer
+gp/gp_multiplexer
 gp/gp_parity
 gp/gp_spambase
 gp/gp_symbreg
