@@ -55,28 +55,28 @@ def generate(pclass, dim, pmin, pmax, smin, smax):
     part.speed = [random.uniform(smin, smax) for _ in range(dim)]
     return part
 
-def convert_quantum(swarm, rcloud, centre):
+def convertQuantum(swarm, rcloud, centre, dist):
     dim = len(swarm[0])
     for part in swarm:
         position = [random.gauss(0, 1) for _ in range(dim)]
         dist = math.sqrt(sum(x**2 for x in position))
         
-        # Gaussian distribution
-        # u = abs(random.gauss(0, 1.0/3.0))
-        # part[:] = [(rcloud * x * u**(1.0/dim) / dist) + c for x, c in zip(position, centre)]
+        if dist == "gaussian":
+            u = abs(random.gauss(0, 1.0/3.0))
+            part[:] = [(rcloud * x * u**(1.0/dim) / dist) + c for x, c in zip(position, centre)]
         
-        # UVD distribution
-        # u = random.random()
-        # part[:] = [(rcloud * x * u**(1.0/dim) / dist) + c for x, c in zip(position, centre)]
+        elif dist == "uvd":
+            u = random.random()
+            part[:] = [(rcloud * x * u**(1.0/dim) / dist) + c for x, c in zip(position, centre)]
         
-        # NUVD distribution
-        u = abs(random.gauss(0, 1.0/3.0))
-        part[:] = [(rcloud * x * u / dist) + c for x, c in zip(position, centre)]
+        elif dist == "nuvd":
+            u = abs(random.gauss(0, 1.0/3.0))
+            part[:] = [(rcloud * x * u / dist) + c for x, c in zip(position, centre)]
         
         del part.fitness.values
         del part.bestfit.values
         part.best = None
-
+    
     return swarm
 
 def updateParticle(part, best, chi, c):
@@ -100,7 +100,7 @@ toolbox.register("particle", generate, creator.Particle, dim=NDIM,
     smax=(BOUNDS[1] - BOUNDS[0])/2.0)
 toolbox.register("swarm", tools.initRepeat, creator.Swarm, toolbox.particle)
 toolbox.register("update", updateParticle, chi=0.729843788, c=2.05)
-toolbox.register("convert", convert_quantum)
+toolbox.register("convert", convertQuantum, dist="nuvd")
 toolbox.register("evaluate", mpb)
 
 def main(verbose=True):
