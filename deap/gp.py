@@ -43,7 +43,7 @@ class PrimitiveTree(list):
     """Tree spefically formated for optimization of genetic 
     programming operations. The tree is represented with a 
     list where the nodes are appended in a depth-first order.
-    The nodes appended to the tree are required to define to
+    The nodes appended to the tree are required to
     have an attribute *arity* which defines the arity of the
     primitive. An arity of 0 is expected from terminals nodes.
     """

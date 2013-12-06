@@ -325,7 +325,8 @@ class Logbook(list):
         
         self.log_header = True
         """Tells the log book to output or not the header when streaming the
-        first line or getting its entire string representation.
+        first line or getting its entire string representation. This defaults
+        :data:`True`.
         """
 
     def record(self, **infos):
@@ -356,7 +357,7 @@ class Logbook(list):
             ([0, 1], [10.0, 15.0])
 
         With a :class:`MultiStatistics` object, the statistics for each
-        measurement can be retrieved using the *chapters* member :
+        measurement can be retrieved using the :data:`chapters` member :
         ::
 
             >>> log = Logbook()
