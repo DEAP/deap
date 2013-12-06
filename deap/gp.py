@@ -295,11 +295,11 @@ class PrimitiveSetTyped(object):
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
         """Add a primitive to the set. 
 
-        *primitive* is a callable object or a function.
-        *in_types* is a list of argument's types the primitive takes.
-        *ret_type* is the type returned by the primitive.
-        *name* is the alternative name for the primitive instead
-        of its __name__ attribute.
+        :param primitive: callable object or a function.
+        :parma in_types: list of primitives arguments' type
+        :param ret_type: type returned by the primitive.
+        :param name: alternative name for the primitive instead
+                     of its __name__ attribute.
         """
         if name is None:
             name = primitive.__name__
@@ -316,16 +316,17 @@ class PrimitiveSetTyped(object):
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type, name=None):
-        """Add a terminal to the set. 
-
-        *terminal* is an object, or a function with no arguments.
-        *ret_type* is the type of the terminal. *name* defines the
-        name of the terminal in the expression. This should be
+        """Add a terminal to the set. Terminals can be named
+        using the optional *name* argument. This should be
         used : to define named constant (i.e.: pi); to speed the
         evaluation time when the object is long to build; when
         the object does not have a __repr__ functions that returns
         the code to build the object; when the object class is
         not a Python built-in.
+
+        :param terminal: Object, or a function with no arguments.
+        :param ret_type: Type of the terminal. 
+        :param name: defines the name of the terminal in the expression.
         """
         symbolic = False
         if name is None and callable(terminal):
@@ -354,9 +355,9 @@ class PrimitiveSetTyped(object):
         of the constant is constant for a Tree, but may differ from one
         Tree to another.
 
-        *name* is the name that will be used to refers to this ephemeral type.
-        *ephemeral* function with no arguments that returns a random value.
-        *ret_type* is the type of the object returned by the function.
+        :param name: name used to refers to this ephemeral type.
+        :param ephemeral: function with no arguments that returns a random value.
+        :param ret_type: type of the object returned by *ephemeral*.
         """
         creator.create(name, Ephemeral, func=staticmethod(ephemeral))
         class_ = getattr(creator, name)
@@ -367,8 +368,8 @@ class PrimitiveSetTyped(object):
     def addADF(self, adfset):
         """Add an Automatically Defined Function (ADF) to the set.
 
-        *adfset* is a PrimitiveSetTyped containing the primitives with which
-        the ADF can be built.        
+        :param adfset: PrimitiveSetTyped containing the primitives with which
+                       the ADF can be built.        
         """
         prim = Primitive(adfset.name, adfset.ins, adfset.ret)
         self._add(prim)
@@ -484,7 +485,7 @@ def genFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
     
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
@@ -500,7 +501,7 @@ def genGrow(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
     between *min* and *max*.
     
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
@@ -520,7 +521,7 @@ def genRamped(pset, min_, max_, type_=__type__):
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
     the other half, the expression is generated with :func:`~deap.gp.genFull`.
     
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
@@ -535,7 +536,7 @@ def generate(pset, min_, max_, condition, type_=__type__):
     from the root to the leaves, and it stop growing when the
     condition is fulfilled.
 
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param condition: The condition is a function that takes two arguments,
