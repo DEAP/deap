@@ -54,14 +54,14 @@ toolbox = base.Toolbox()
 toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("lambdify", gp.lambdify, pset=pset)
+toolbox.register("compile", gp.compile, pset=pset)
 
 samples = numpy.linspace(-1, 1, 10000)
 values = samples**4 + samples**3 + samples**2 + samples
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
-    func = toolbox.lambdify(expr=individual)
+    func = toolbox.compile(expr=individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function values : x**4 + x**3 + x**2 + x 
     diff = numpy.sum((func(samples) - values)**2)

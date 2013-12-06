@@ -68,10 +68,10 @@ toolbox = base.Toolbox()
 toolbox.register("expr", gp.genFull, pset=pset, min_=2, max_=4)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("lambdify", gp.lambdify, pset=pset)
+toolbox.register("compile", gp.compile, pset=pset)
 
 def evalMultiplexer(individual):
-    func = toolbox.lambdify(expr=individual)
+    func = toolbox.compile(expr=individual)
     return sum(func(*in_) == out for in_, out in zip(inputs, outputs)),
 
 toolbox.register("evaluate", evalMultiplexer)

@@ -67,7 +67,7 @@ def prog2(out1, out2):
     return partial(progn,out1,out2)
 
 def prog3(out1, out2, out3):     
-    return partial(progn,out1,out2,out3)  
+    return partial(progn,out1,out2,out3)
 
 def if_then_else(condition, out1, out2):
     out1() if condition() else out2()
@@ -169,7 +169,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalArtificialAnt(individual):
     # Transform the tree expression to functionnal Python code
-    routine = gp.evaluate(individual, pset)
+    routine = gp.compile(individual, pset)
     # Run the generated routine
     ant.run(routine)
     return ant.eaten,

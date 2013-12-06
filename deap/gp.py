@@ -409,33 +409,22 @@ class PrimitiveSet(PrimitiveSetTyped):
 
 
 ######################################
-# GP Tree evaluation functions       #
+# GP Tree compilation functions      #
 ######################################
-def stringify(expr):
-    """Evaluate the expression *expr* into a string.
+def compile(expr, pset):
+    """Compile the expression *expr*.
 
-    .. deprecated:: 1.0
-        Use PrimitiveTree.to_string instead.
+    :returns: a function if the primitive set has 1 or more arguments, 
+              or return the results produced by evaluating the tree.
     """
-    string = ""
-    stack = []
-    for node in expr:
-        stack.append((node, []))
-        while len(stack[-1][1]) == stack[-1][0].arity:
-            prim, args = stack.pop()
-            string = prim.format(*args)
-            if len(stack) == 0:
-                break   # If stack is empty, all nodes should have been seen
-            stack[-1][1].append(string)
-
-    return string
-
-def evaluate(expr, pset):
-    """Evaluate the expression *expr* into Python code object.
-    """
-    string = stringify(expr)
+    code = expr.to_string()
+    if len(pset.arguments) > 0:
+        # This section is a stripped version of the lambdify
+        # function of SymPy 0.6.6.
+        args = ",".join(arg for arg in pset.arguments)
+        code = "lambda {args}: {code}".format(args=args, code=code)
     try:
-        return eval(string, pset.context, {})
+        return eval(code, pset.context, {})
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -444,37 +433,20 @@ def evaluate(expr, pset):
         "operators. See the DEAP documentation for more information. "
         "DEAP will now abort."), traceback
 
-def lambdify(expr, pset):
-    """Return a lambda function of the expression *expr*.
-
-    .. note::
-       This function is a stripped version of the lambdify
-       function of sympy0.6.6.
-    """
-    code = stringify(expr)
-    args = ",".join(arg for arg in pset.arguments)
-    lstr = "lambda {args}: {code}".format(args=args, code=code)
-    try:
-        return eval(lstr, pset.context, {})
-    except MemoryError:
-        _, _, traceback = sys.exc_info()
-        raise MemoryError, ("DEAP : Error in tree evaluation :"
-        " Python cannot evaluate a tree higher than 90. "
-        "To avoid this problem, you should use bloat control on your "
-        "operators. See the DEAP documentation for more information. "
-        "DEAP will now abort."), traceback
-
-def lambdifyADF(expr, psets):
-    """Return a lambda function created from a list of trees. The first 
+def compileADF(expr, psets):
+    """Compile the expression represented by a list of trees. The first 
     element of the list is the main tree, and the following elements are
     automatically defined functions (ADF) that can be called by the first
     tree.
+
+    :returns: a function if the main primitive set has 1 or more arguments, 
+              or return the results produced by evaluating the tree.
     """
     adfdict = {}
     func = None
     for pset, subexpr in reversed(zip(psets, expr)):
         pset.context.update(adfdict)
-        func = lambdify(subexpr, pset)
+        func = compile(subexpr, pset)
         adfdict.update({pset.name : func})
     return func
 

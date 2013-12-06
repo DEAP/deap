@@ -74,11 +74,11 @@ toolbox = base.Toolbox()
 toolbox.register("expr", gp.genRamped, pset=pset, type_=pset.ret, min_=1, max_=2)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("lambdify", gp.lambdify, pset=pset)
+toolbox.register("compile", gp.compile, pset=pset)
 
 def evalSpambase(individual):
     # Transform the tree expression in a callable function
-    func = toolbox.lambdify(expr=individual)
+    func = toolbox.compile(expr=individual)
     # Randomly sample 400 mails in the spam database
     spam_samp = random.sample(spam, 400)
     # Evaluate the sum of correctly identified mail as spam

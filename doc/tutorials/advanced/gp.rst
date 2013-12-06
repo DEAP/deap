@@ -200,22 +200,19 @@ Now, this string represents the program we just generated, but it cannot
 yet be executed. To do so, we have to compile the expression to
 Python code object. Since this function has two inputs, we wish
 to compile the code into a callable object. This is possible with 
-:func:`~deap.gp.lambdify`. The term `lambdify` comes from the fact that
-it returns a :keyword:`lambda` function corresponding to the code.
-:func:`~deap.gp.lambdify` takes two arguments, the expression to compile and
-the associated primitive set.
+:func:`~deap.gp.compile`. :func:`~deap.gp.compile` takes two arguments, 
+the expression to compile and the associated primitive set.
 The following example compiles the preceding tree and evaluates the resulting
 function for :math:`x=1` and :math:`y=2`.
 ::
 
-	>>> function = lambdify(tree, pset)
+	>>> function = compile(tree, pset)
 	>>> function(1, 2)
 	4
 
-Finally, when the generated program has no input argument and terminals
-are functions, the expression can be compiled to byte code using the
-function :func:`~deap.gp.evaluate`. An example of this sort of problem
-is the :ref:`artificial-ant`.
+When the generated program has no input argument, the expression can be 
+compiled to byte code using the same :func:`~deap.gp.compile` function. 
+An example of this sort of problem is the :ref:`artificial-ant`.
 
 Tree Size Limit and Bloat Control
 ---------------------------------
