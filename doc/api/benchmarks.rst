@@ -134,6 +134,8 @@ Moving Peaks Benchmark
 .. autoclass:: deap.benchmarks.movingpeaks.MovingPeaks(self, dim[, pfunc][, npeaks][, bfunc][, random][, ...])
    :members:
 
+   .. automethod:: deap.benchmarks.movingpeaks.MovingPeaks.__call__(self, individual[, count])
+
 .. autofunction:: deap.benchmarks.movingpeaks.cone
 
 .. autofunction:: deap.benchmarks.movingpeaks.function1
