@@ -39,7 +39,7 @@ def update(individual, mu, sigma):
         individual[i] = random.gauss(mu_i, sigma)
 
 def tupleize(func):
-    """A decorator that tuple-ize the result of a function. This is usefull
+    """A decorator that tuple-ize the result of a function. This is useful
     when the evaluation function returns a single value.
     """
     def wrapper(*args, **kargs):
