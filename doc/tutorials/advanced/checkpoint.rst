@@ -1,21 +1,22 @@
 =============
 Checkpointing
 =============
-In this tutorial we will present how persistance can be acheived. The only required
-tools are a simple :class:`dict` and a serialization method. Important data will
-be inserted in the diction and serialized to a file so that if something goes wrong
-the evolution can be restarted from the last saved checkpoint. It can also serve
-to continue an evolution beyond the pre-fixed termination criterion.
+In this tutorial, we will present how persistence can be achieved in your
+evolutions. The only required tools are a simple :class:`dict` and a
+serialization method. Important data will be inserted in the dictionary and
+serialized to a file so that if something goes wrong, the evolution can be
+restored from the last saved checkpoint. It can also serve to continue an
+evolution beyond the pre-fixed termination criterion.
 
-Checkpointing is not offered in standard algorithm such as eaSimple,
-eaMuPlus/CommaLambda, and eaGenerateUpdate. You must create your own algorithm
-(or copy an existing one) and intriduce this feature yourself.
+Checkpointing is not offered in standard algorithms such as eaSimple,
+eaMuPlus/CommaLambda and eaGenerateUpdate. You must create your own algorithm
+(or copy an existing one) and introduce this feature yourself.
 
-Starting with a very basic example we will cover the necessary stuff to
-checkpoint everything needed to restart an evolution. We will skip the
-creation of classe and registration of tools in the toolbox to go directly to
-the algorithm and the main function. Our main function will receive a string
-of the checkpoint path if desired. ::
+Starting with a very basic example, we will cover the necessary stuff to
+checkpoint everything needed to restore an evolution. We skip the class
+definition and registration of tools in the toolbox to go directly to the
+algorithm and the main function. Our main function receives an optional string
+argument containing the path of the checkpoint file to restore. ::
 
     import pickle
     
@@ -61,8 +62,8 @@ of the checkpoint path if desired. ::
                 pickle.dump(cp, open("checkpoint_name.pkl", "w"))
 
 Now, the whole data will be written in a pickled dictionary every *FREQ*
-generations. Loading the checkpoint is done if the main function is given a
-path to a checkpoint file. In that case, the evolution restarts from where it
-was in the last checkpoint. It will produce the exact same results as if it
-was not stopped and reloaded because of the random module state . If you use
-numpy random numbers don't forget to save and reload its state too.
+generations. Loading the checkpoint is done if the main function is given a path
+to a checkpoint file. In that case, the evolution continues from where it was in
+the last checkpoint. It will produce the exact same results as if it was not
+stopped and reloaded because we also restored the random module state. If you
+use numpy's random numbers, don't forget to save and reload their state too.
