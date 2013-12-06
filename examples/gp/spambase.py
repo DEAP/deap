@@ -64,8 +64,8 @@ pset.addPrimitive(if_then_else, [bool, float, float], float)
 
 # terminals
 pset.addEphemeralConstant("rand100", lambda: random.random() * 100, float)
-pset.addTerminal(0, bool)
-pset.addTerminal(1, bool)
+pset.addTerminal(False, bool)
+pset.addTerminal(True, bool)
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMax)
