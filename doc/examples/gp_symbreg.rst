@@ -91,7 +91,7 @@ the population (by repeating the individual initialization).
 
 We may now introduce the evaluation function, which will receive an
 individual as input, and return the corresponding fitness. This function uses
-the `lambdify` function previously defined to transform the individual into
+the `compile` function previously defined to transform the individual into
 its executable form -- that is, a program. After that, the evaluation is only
 simple maths, where the difference between the values produced by the
 evaluated individual and the real values are squared and summed to compute

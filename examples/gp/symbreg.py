@@ -50,11 +50,11 @@ toolbox = base.Toolbox()
 toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("lambdify", gp.lambdify, pset=pset)
+toolbox.register("compile", gp.compile, pset=pset)
 
 def evalSymbReg(individual, points):
     # Transform the tree expression in a callable function
-    func = toolbox.lambdify(expr=individual)
+    func = toolbox.compile(expr=individual)
     # Evaluate the mean squared error between the expression
     # and the real function : x**4 + x**3 + x**2 + x
     sqerrors = ((func(x) - x**4 - x**3 - x**2 - x)**2 for x in points)
