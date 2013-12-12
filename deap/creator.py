@@ -90,8 +90,8 @@ class _array(array.array):
         return (self.__class__, (list(self),), self.__dict__)
 class_replacers[array.array] = _array
 
-def create(name, base, **kargs):
-    """Creates a new class named *name* inheriting from *base* in the
+def create(classname, baseclass, **kargs):
+    """Creates a new class named *classname* inheriting from *baseclass* in the
     :mod:`~deap.creator` module. The new class can have attributes defined by
     the subsequent keyword arguments passed to the function create. If the
     argument is a class (without the parenthesis), the __init__ function is
@@ -100,8 +100,8 @@ def create(name, base, **kargs):
     Otherwise, if the argument is not a class, (for example an :class:`int`),
     it is added as a "static" attribute of the class.
     
-    :param name: The name of the class to create.
-    :param base: A base class from which to inherit.
+    :param classname: The name of the class to create.
+    :param baseclass: A base class from which to inherit.
     :param attribute: One or more attributes to add on instanciation of this
                       class, optional.
     
@@ -132,8 +132,8 @@ def create(name, base, **kargs):
             dict_cls[obj_name] = obj
 
     # Check if the base class has to be replaced
-    if base in class_replacers:
-        base = class_replacers[base]
+    if baseclass in class_replacers:
+        baseclass = class_replacers[baseclass]
 
     # A DeprecationWarning is raised when the object inherits from the 
     # class "object" which leave the option of passing arguments, but
@@ -146,9 +146,9 @@ def create(name, base, **kargs):
         """
         for obj_name, obj in dict_inst.iteritems():
             setattr(self, obj_name, obj())
-        if base.__init__ is not object.__init__:
-            base.__init__(self, *args, **kargs)
+        if baseclass.__init__ is not object.__init__:
+            baseclass.__init__(self, *args, **kargs)
 
-    objtype = type(name, (base,), dict_cls)
+    objtype = type(classname, (baseclass,), dict_cls)
     objtype.__init__ = initType
-    globals()[name] = objtype
+    globals()[classname] = objtype
