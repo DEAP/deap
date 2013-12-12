@@ -357,7 +357,7 @@ class PrimitiveSetTyped(object):
         :param ephemeral: function with no arguments that returns a random value.
         :param ret_type: type of the object returned by *ephemeral*.
         """
-        creator.create(name, Ephemeral, func=staticmethod(ephemeral))
+        creator.create(name, Ephemeral, name=name, func=staticmethod(ephemeral))
         class_ = getattr(creator, name)
         class_.ret = ret_type
         self._add(class_)
