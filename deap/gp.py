@@ -115,8 +115,6 @@ class PrimitiveTree(list):
                 if isinstance(primitive, Primitive):
                     ret_types.extendleft(primitive.args)
             else:
-                import pdb
-                pdb.set_trace()
                 try:
                     token = eval(token)
                 except NameError:
