@@ -76,10 +76,10 @@ def main():
     hof = tools.ParetoFront()
     
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean)
-    stats.register("std", numpy.std)
-    stats.register("min", numpy.min)
-    stats.register("max", numpy.max)
+    stats.register("avg", numpy.mean, axis=0)
+    stats.register("std", numpy.std, axis=0)
+    stats.register("min", numpy.min, axis=0)
+    stats.register("max", numpy.max, axis=0)
     
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
