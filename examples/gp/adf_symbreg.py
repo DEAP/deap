@@ -100,7 +100,7 @@ toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
-    func = toolbox.lambdify(individual)
+    func = toolbox.compile(individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
     values = (x/10. for x in range(-10, 10))
@@ -108,7 +108,7 @@ def evalSymbReg(individual):
     diff = sum(map(diff_func, values))
     return diff,
 
-toolbox.register('lambdify', gp.lambdifyADF, psets=psets)
+toolbox.register('compile', gp.compileADF, psets=psets)
 toolbox.register('evaluate', evalSymbReg)
 toolbox.register('select', tools.selTournament, tournsize=3)
 toolbox.register('mate', gp.cxOnePoint)
@@ -173,7 +173,7 @@ def main():
         logbook.record(gen=g, evals=len(invalids), **record)
         print(logbook.stream)
     
-    print('Best individual : ', gp.stringify(hof[0][0]), hof[0].fitness)
+    print('Best individual : ', hof[0][0].to_string(), hof[0].fitness)
     
     return pop, stats, hof
     

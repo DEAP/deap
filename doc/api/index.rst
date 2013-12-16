@@ -12,4 +12,4 @@ Description of the functions, classes and modules contained within DEAP.
 	tools
 	algo
 	gp
-	benchmarks
+	.. benchmarks

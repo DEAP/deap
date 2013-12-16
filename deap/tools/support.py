@@ -1,13 +1,13 @@
 from __future__ import division
-import bisect
-import copy
 
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
+from bisect import bisect_right
 from collections import defaultdict
+from copy import deepcopy
 from functools import partial
 from itertools import chain
 from operator import eq
@@ -99,7 +99,7 @@ class History(object):
         for ind in individuals:
             self.genealogy_index += 1
             ind.history_index = self.genealogy_index
-            self.genealogy_history[self.genealogy_index] = copy.deepcopy(ind)
+            self.genealogy_history[self.genealogy_index] = deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = parent_indices
     
     @property
@@ -157,9 +157,14 @@ class Statistics(object):
     is used to get the values on which the function will be computed. 
     If not provided the *key* argument defaults to the identity function.
 
+    The value returned by the key may be a multi-dimensional object, i.e.:
+    a tuple or a list, as long as the statistical function registered
+    support it. So for example, statistics can be computed directly on
+    multi-objective fitnesses when using numpy statistical function.
+
     :param key: A function to access the values on which to compute the
                 statistics, optional.
-
+        
     ::
     
         >>> s = Statistics()
@@ -205,18 +210,21 @@ class Statistics(object):
 
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
-    statistics on multiple keys using a single call to :meth:`record`. It
+    statistics on multiple keys using a single call to :meth:`compile`. It
     takes a set of key-value pairs associating a statistics object to a
     unique name. This name can then be used to retrieve the statistics object.
+
+    The following code computes statistics simultaneously on the length and
+    the first value of the provided objects.
     ::
 
-        >>> stats1 = Statistics(key=len)
-        >>> stats2 = Statistics(key=itemgetter(0))
-        >>> mstats = MultiStatistics(length=stats1, fitness=stats2)
+        >>> len_stats = Statistics(key=len)
+        >>> itm0_stats = Statistics(key=itemgetter(0))
+        >>> mstats = MultiStatistics(length=len_stats, item=itm0_stats)
         >>> mstats.register("mean", numpy.mean, axis=0)
-        >>> mstats.register("max", numpy.max)
+        >>> mstats.register("max", numpy.max, axis=0)
         >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
-        {'length': {'max': 4, 'mean': 3.0}, 'fitness': {'max': 2.0, 'mean': 1.0}}
+        {'length': {'max': 4, 'mean': 3.0}, 'item': {'max': 2.0, 'mean': 1.0}}
     """ 
     def compile(self, data):
         """Calls :meth:`Statistics.compile` with *data* of each
@@ -231,7 +239,7 @@ class MultiStatistics(dict):
 
     @property
     def fields(self):
-        return list(self.keys())
+        return sorted(self.keys())
 
     def register(self, name, function, *args, **kargs):
         """Register a *function* in each :class:`Statistics` object.
@@ -248,16 +256,60 @@ class MultiStatistics(dict):
             stats.register(name, function, *args, **kargs)
 
 class Logbook(list):
-    """Evolution records as a chronological list of dictionary.
+    """Evolution records as a chronological list of dictionaries.
 
-    Columns can be retrieved via the *select* method given the appropriate
+    Data can be retrieved via the :meth:`select` method given the appropriate
     names.
+
+    The :class:`Logbook` class may also contain other logbooks refered to 
+    as chapters. Chapters are used to store information associated to a
+    specific part of the evolution. For example when computing statistics
+    on different components of individuals (namely :class:`MultiStatistics`),
+    chapters can be used to distinguish the average fitness and the average
+    size.
     """
+    
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
+        """Dictionary containing the sub-sections of the logbook which are also
+        :class:`Logbook`. Chapters are automatically created when the right hand
+        side of a keyworded argument, provided to the *record* function, is a
+        dictionnary. The keyword determines the chapter's name. For example, the
+        following line adds a new chapter "size" that will contain the fields
+        "max" and "mean". ::
+
+            logbook.record(gen=0, size={'max' : 10.0, 'mean' : 7.5})
+
+        To access a specific chapter, use the name of the chapter as a
+        dictionnary key. For example, to access the size chapter and select
+        the mean use ::
+
+            logbook.chapters["size"].select("mean")
+
+        Compiling a :class:`MultiStatistics` object returns a dictionary
+        containing dictionnaries, therefore when recording such an object in a
+        logbook using the keyword argument unpacking operator (**), chapters
+        will be automatically added to the logbook.
+        ::
+            
+            >>> fit_stats = Statistics(key=attrgetter("fitness.values"))
+            >>> size_stats = Statistics(key=len)
+            >>> mstats = MultiStatistics(fitness=fit_stats, size=size_stats)
+            >>> # [...]
+            >>> record = mstats.compile(population)
+            >>> logbook.record(**record)
+            >>> print logbook
+              fitness          length
+            ------------    ------------
+            max     mean    max     mean
+            2       1       4       3
+
+        """
+
+        self.columns_len = None
         self.header = None
-        """Order of the columns to print when using the :meth:`stream` and
+        """Order of the columns to print when using the :data:`stream` and
         :meth:`__str__` methods. The syntax is a single iterable containing
         string elements. For example, with the previously
         defined statistics class, one can print the generation and the
@@ -273,10 +325,17 @@ class Logbook(list):
         
         self.log_header = True
         """Tells the log book to output or not the header when streaming the
-        first line or getting its entire string representation.
+        first line or getting its entire string representation. This defaults
+        :data:`True`.
         """
 
     def record(self, **infos):
+        """Enter a record of event in the logbook as a list of key-value pairs.
+        The informations are appended chronogically to a list as a dictionnary.
+        When the value part of a pair is a dictionnary, the informations contained
+        in the dictionnary are recorded in a chapter entitled as the name of the
+        key part of the pair. Chapters are also Logbook.
+        """
         for key, value in infos.items():
             if isinstance(value, dict):
                 self.chapters[key].record(**value)
@@ -290,12 +349,26 @@ class Logbook(list):
         ::
 
             >>> log = Logbook()
-            >>> log.append({'gen' : 0, 'mean' : 5.4, 'max' : 10.0})
-            >>> log.append({'gen' : 1, 'mean' : 9.4, 'max' : 15.0})
+            >>> log.record(gen = 0, mean = 5.4, max = 10.0)
+            >>> log.record(gen = 1, mean = 9.4, max = 15.0)
             >>> log.select("mean")
             [5.4, 9.4]
-            >>> s.select("gen", "max")
+            >>> log.select("gen", "max")
             ([0, 1], [10.0, 15.0])
+
+        With a :class:`MultiStatistics` object, the statistics for each
+        measurement can be retrieved using the :data:`chapters` member :
+        ::
+
+            >>> log = Logbook()
+            >>> log.record(**{'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5}, 
+            ... 'size' : {'mean' : 25.4, 'max' : 67}})
+            >>> log.record(**{'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7}, 
+            ... 'size' : {'mean' : 28.1, 'max' : 71}})
+            >>> log.chapters['size'].select("mean")
+            [25.4, 28.1]
+            >>> log.chapters['fit'].select("gen", "max")
+            ([0, 1], [1.5, 1.7])
         """
         if len(names) == 1:
             return [entry.get(names[0], None) for entry in self]
@@ -303,8 +376,8 @@ class Logbook(list):
 
     @property
     def stream(self):
-        """Retrieve the formated unstreamed entries of the database including
-        the headers.
+        """Retrieve the formatted not streamed yet entries of the database 
+        including the headers.
         ::
 
             >>> log = Logbook()
@@ -350,8 +423,9 @@ class Logbook(list):
     def __txt__(self, startindex):
         columns = self.header
         if not columns:
-            columns = self[0].keys() + self.chapters.keys()
-        columns_len = map(len, columns)
+            columns = sorted(self[0].keys()) + sorted(self.chapters.keys())
+        if not self.columns_len or len(self.columns_len) != len(columns):
+            self.columns_len = map(len, columns)
 
         chapters_txt = {}
         offsets = defaultdict(int)
@@ -370,7 +444,7 @@ class Logbook(list):
                     value = line.get(name, "")
                     string = "{0:n}" if isinstance(value, float) else "{0}"
                     column = string.format(value)
-                columns_len[j] = max(columns_len[j], len(column))
+                self.columns_len[j] = max(self.columns_len[j], len(column))
                 str_line.append(column)
             str_matrix.append(str_line)
 
@@ -397,8 +471,9 @@ class Logbook(list):
                     header[-1].append(name)
             str_matrix = chain(header, str_matrix)
 
-        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(columns_len))
+        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(self.columns_len))
         text = [template.format(*line) for line in str_matrix]
+
         return text
 
     def __str__(self, startindex=0):
@@ -473,8 +548,8 @@ class HallOfFame(object):
         :param item: The individual with a fitness attribute to insert in the
                      hall of fame.
         """
-        item = copy.deepcopy(item)
-        i = bisect.bisect_right(self.keys, item.fitness)
+        item = deepcopy(item)
+        i = bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
         self.keys.insert(i, item.fitness)
     
@@ -520,7 +595,7 @@ class ParetoFront(HallOfFame):
     of individuals, it is possible to specify a similarity function that will
     return :data:`True` if the genotype of two individuals are similar. In that
     case only one of the two individuals will be added to the hall of fame. By
-    default the similarity function is :func:`operator.__eq__`.
+    default the similarity function is :func:`operator.eq`.
     
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
     it is sorted lexicographically at every moment.

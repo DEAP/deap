@@ -102,8 +102,13 @@ class Toolbox(object):
                           order, with the last decorator decorating all the
                           others.
         
-        .. versionchanged:: 0.8
-           Decoration is not signature preserving anymore.
+        .. note::
+            Decorate a function using the toolbox makes it unpicklable, and
+            will produce an error on pickling. Although this limitation is not
+            relevant in most cases, it may have an impact on distributed
+            environments like multiprocessing.
+            A function can still be decorated manually before it is added to
+            the toolbox (using the @ notation) in order to be picklable.
         """
         pfunc = getattr(self, alias)
         function, args, kargs = pfunc.func, pfunc.args, pfunc.keywords
@@ -250,11 +255,10 @@ class Fitness(object):
 
     def __str__(self):
         """Return the values of the Fitness object."""
-        return str(self.values)
+        return str(self.values if self.valid else tuple())
 
     def __repr__(self):
         """Return the Python code to build a copy of the object."""
-        module = self.__module__
-        name = self.__class__.__name__
-        return "%s.%s(%r)" % (module, name, self.values)
+        return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
+            self.values if self.valid else tuple())
 

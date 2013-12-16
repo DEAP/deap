@@ -33,8 +33,6 @@ clean:
 html:
 	PYTHONPATH=${PWD}/../ $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html	
 	@echo
-	mkdir -p $(BUILDDIR)/html/examples/code 
-	cp -R code/examples/* $(BUILDDIR)/html/examples/code
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 dirhtml:
