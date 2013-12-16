@@ -16,7 +16,7 @@ def cxOnePoint(ind1, ind2):
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    This function use the :func:`~random.randint` function from the
+    This function uses the :func:`~random.randint` function from the
     python base :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
@@ -33,7 +33,7 @@ def cxTwoPoints(ind1, ind2):
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    This function use the :func:`~random.randint` function from the python base
+    This function uses the :func:`~random.randint` function from the python base
     :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
@@ -58,7 +58,7 @@ def cxUniform(ind1, ind2, indpb):
     :param indpb: Independent probabily for each attribute to be exchanged.
     :returns: A tuple of two individuals.
     
-    This function use the :func:`~random.random` function from the python base
+    This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))    
@@ -82,7 +82,7 @@ def cxPartialyMatched(ind1, ind2):
     pairs of values in a certain range of the two parents and swapping the values
     of those indexes. For more details see [Goldberg1985]_.
 
-    This function use the :func:`~random.randint` function from the python base
+    This function uses the :func:`~random.randint` function from the python base
     :mod:`random` module.
     
     .. [Goldberg1985] Goldberg and Lingel, "Alleles, loci, and the traveling
@@ -132,7 +132,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     parents and swapping the values of those indexes. For more details see
     [Cicirello2000]_.
 
-    This function use the :func:`~random.random` and :func:`~random.randint`
+    This function uses the :func:`~random.random` and :func:`~random.randint`
     functions from the python base :mod:`random` module.
     
     .. [Cicirello2000] Cicirello and Smith, "Modeling GA performance for
@@ -177,7 +177,7 @@ def cxOrdered(ind1, ind2):
     them with the removed elements in order. For more details see
     [Goldberg1989]_.
     
-    This function use the :func:`~random.sample` function from the python base
+    This function uses the :func:`~random.sample` function from the python base
     :mod:`random` module.
     
     .. [Goldberg1989] Goldberg. Genetic algorithms in search, 
@@ -223,7 +223,7 @@ def cxBlend(ind1, ind2, alpha):
                   for each attribute on both side of the parents' attributes.
     :returns: A tuple of two individuals.
     
-    This function use the :func:`~random.random` function from the python base
+    This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
     for i, (x1, x2) in enumerate(zip(ind1, ind2)):
@@ -245,7 +245,7 @@ def cxSimulatedBinary(ind1, ind2, eta):
                 produce solutions much more different.
     :returns: A tuple of two individuals.
     
-    This function use the :func:`~random.random` function from the python base
+    This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
     for i, (x1, x2) in enumerate(zip(ind1, ind2)):
@@ -277,7 +277,7 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                search space.
     :returns: A tuple of two individuals.
 
-    This function use the :func:`~random.random` function from the python base
+    This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
 
     .. note::
@@ -344,7 +344,7 @@ def cxMessyOnePoint(ind1, ind2):
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
     
-    This function use the :func:`~random.randint` function from the python base
+    This function uses the :func:`~random.randint` function from the python base
     :mod:`random` module.        
     """
     cxpoint1 = random.randint(0, len(ind1))
@@ -368,6 +368,9 @@ def cxESBlend(ind1, ind2, alpha):
     :param alpha: Extent of the interval in which the new values can be drawn
                   for each attribute on both side of the parents' attributes.
     :returns: A tuple of two evolution strategies.
+
+    This function uses the :func:`~random.random` function from the python base
+    :mod:`random` module.  
     """
     for i, (x1, s1, x2, s2) in enumerate(zip(ind1, ind1.strategy, 
                                              ind2, ind2.strategy)):
@@ -390,6 +393,9 @@ def cxESTwoPoints(ind1, ind2):
     :param ind1: The first evolution strategy participating in the crossover.
     :param ind2: The second evolution strategy participating in the crossover.
     :returns: A tuple of two evolution strategies.
+    
+    This function uses the :func:`~random.randint` function from the python base
+    :mod:`random` module.  
     """
     size = min(len(ind1), len(ind2))
     

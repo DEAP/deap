@@ -27,7 +27,7 @@ import deap
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx'] 
+              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks'] 
 
 try:
     import matplotlib
@@ -124,6 +124,14 @@ plot_include_source = False
 
 #  Whether to show links to the files in HTML.
 plot_html_show_formats = True
+
+# -- Options for extlinks extension ----------------------------------------------
+
+import subprocess
+branch = subprocess.check_output(["hg", "branch"])[:-1]
+extlinks = {'example': ('https://code.google.com/p/deap/source/browse/examples/%s.py?name='+branch,
+                      'examples/')}
+
 
 # -- Options for HTML output ---------------------------------------------------
 

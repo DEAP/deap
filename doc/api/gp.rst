@@ -21,9 +21,9 @@ Genetic Programming
 
 .. autofunction:: deap.gp.evaluate
 
-.. autofunction:: deap.gp.lambdify
+.. autofunction:: deap.gp.compile
 
-.. autofunction:: deap.gp.lambdifyADF
+.. autofunction:: deap.gp.compileADF
 
 .. autoclass:: deap.gp.PrimitiveSetTyped
 	:members:

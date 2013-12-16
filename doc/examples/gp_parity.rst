@@ -20,7 +20,7 @@ Primitives set used
 Parity uses standard Boolean operators as primitives, available in the Python
 operator module :
    
-.. literalinclude:: /code/examples/gp/parity.py
+.. literalinclude:: /../examples/gp/parity.py
    :lines: 49-55
     
 In addition to the *n* inputs, we add two constant terminals, one at 0, one
@@ -38,7 +38,7 @@ In this implementation, the fitness of a Parity individual is simply the
 number of successful cases. Thus, the fitness is maximized, and the maximum
 value is 64 in the case of a 6 inputs problems.
    
-.. literalinclude:: /code/examples/gp/parity.py
+.. literalinclude:: /../examples/gp/parity.py
    :pyobject: evalParity
 
 `inputs` and `outputs` are two pre-generated lists, to speedup the
@@ -53,7 +53,7 @@ Conclusion
 The other parts of the program are mostly the same as the :ref:`Symbolic
 Regression algorithm <symbreg>`.
 
-The complete example: [`source code <code/gp/parity.py>`_]
+The complete :example:`gp/parity`.
 
 .. _refPapersParity:
 

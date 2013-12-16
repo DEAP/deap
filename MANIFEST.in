@@ -3,3 +3,5 @@ recursive-include deap *.cpp
 recursive-include examples *.py *.csv *.json 
 recursive-include doc *
 prune doc/_build
+global-exclude .DS_Store
+global-exclude *.pyc

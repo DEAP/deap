@@ -52,6 +52,7 @@ Particle Swarm Optimization (PSO)
 	:maxdepth: 1
 
 	pso_basic
+	pso_multiswarm
 
 Estimation of Distribution Algorithms (EDA)
 -------------------------------------------

@@ -25,8 +25,8 @@ import random
 import re
 import sys
 
-from collections import defaultdict
-from functools import partial
+from collections import defaultdict, deque
+from functools import partial,wraps
 from inspect import isclass
 from operator import eq, lt
 
@@ -43,7 +43,7 @@ class PrimitiveTree(list):
     """Tree spefically formated for optimization of genetic 
     programming operations. The tree is represented with a 
     list where the nodes are appended in a depth-first order.
-    The nodes appended to the tree are required to define to
+    The nodes appended to the tree are required to
     have an attribute *arity* which defines the arity of the
     primitive. An arity of 0 is expected from terminals nodes.
     """
@@ -85,31 +85,50 @@ class PrimitiveTree(list):
     @classmethod
     def from_string(cls, string, pset):
         """Try to convert a string expression into a PrimitiveTree given a 
-        PrimitiveSet *pset*.
+        PrimitiveSet *pset*. The primitive set needs to contain every primitive
+        present in the expression.
 
-        The primitive set needs to contain every primitives and terminals
-        that are present in the expression. In the cases of terminals,
-        the function will convert it to a Terminal even if it is not already
-        present in the set. Numbers are converted to float, and strings stay
-        strings. 
-
-        .. warning:: This functions does not work with STGP terminals that
-                     are not defined in the PrimitiveSet since it is not 
-                     possible to guess the type.
+        :param string: String representation of a Python expression.
+        :param pset: Primitive set from which primitives are selected.
+        :returns: PrimitiveTree populated with the deserialized primitives.
         """
         tokens = re.split("[ \t\n\r\f\v(),]", string)
         expr = []
+        ret_types = deque()
         for token in tokens:
             if token == '':
                 continue
-            if pset.mapping.has_key(token):
-                expr.append(pset.mapping[token])
+            if len(ret_types) != 0:
+                type_ = ret_types.popleft()
+            else:
+                type_ = None
+
+            if token in pset.mapping:
+                primitive = pset.mapping[token]
+                
+                if len(ret_types) != 0 and primitive.ret != type_:
+                    raise TypeError("Primitive {} return type {} does not "
+                                    "match the expected one: {}."
+                                    .format(primitive, primitive.ret, type_))
+                
+                expr.append(primitive)
+                if isinstance(primitive, Primitive):
+                    ret_types.extendleft(primitive.args)
             else:
                 try:
-                    token = float(token)
-                except ValueError:
-                    pass
-                expr.append(Terminal(token, False, __type__))
+                    token = eval(token)
+                except NameError:
+                    raise TypeError("Unable to evaluate terminal: {}.".format(token))
+
+                if type_ is None:
+                    type_ = type(token)
+
+                if type(token) != type_:
+                    raise TypeError("Terminal {} type {} does not "
+                                    "match the expected one: {}."
+                                    .format(token, type(token), type_))
+                
+                expr.append(Terminal(token, False, type_))
         return cls(expr)
 
     def to_string(self):
@@ -184,10 +203,11 @@ class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
     """
-    __slots__ = ('value', 'ret', 'conv_fct')
+    __slots__ = ('name', 'value', 'ret', 'conv_fct')
     def __init__(self, terminal, symbolic, ret):
         self.ret = ret
         self.value = terminal
+        self.name = str(terminal)
         self.conv_fct = str if symbolic else repr
     
     @property
@@ -217,7 +237,10 @@ class PrimitiveSetTyped(object):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
         self.arguments = []
-        self.context = dict()
+        # setting "__builtins__" to None avoid the context
+        # being polluted by builtins function when evaluating
+        # GP expression.
+        self.context = {"__builtins__" : None}
         self.mapping = dict()
         self.terms_count = 0
         self.prims_count = 0
@@ -230,7 +253,6 @@ class PrimitiveSetTyped(object):
             self.arguments.append(arg_str)
             term = Terminal(arg_str, True, type_)
             self._add(term)
-            self.mapping[term.value] = term
             self.terms_count += 1
 
     def renameArguments(self, **kargs):
@@ -255,6 +277,7 @@ class PrimitiveSetTyped(object):
         addType(self.primitives, prim.ret)
         addType(self.terminals, prim.ret)
 
+        self.mapping[prim.name] = prim
         if isinstance(prim, Primitive):
             for type_ in prim.args:
                 addType(self.primitives, type_)
@@ -270,11 +293,11 @@ class PrimitiveSetTyped(object):
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
         """Add a primitive to the set. 
 
-        *primitive* is a callable object or a function.
-        *in_types* is a list of argument's types the primitive takes.
-        *ret_type* is the type returned by the primitive.
-        *name* is the alternative name for the primitive instead
-        of its __name__ attribute.
+        :param primitive: callable object or a function.
+        :parma in_types: list of primitives arguments' type
+        :param ret_type: type returned by the primitive.
+        :param name: alternative name for the primitive instead
+                     of its __name__ attribute.
         """
         if name is None:
             name = primitive.__name__
@@ -288,20 +311,20 @@ class PrimitiveSetTyped(object):
 
         self._add(prim)
         self.context[prim.name] = primitive
-        self.mapping[prim.name] = prim
         self.prims_count += 1
         
     def addTerminal(self, terminal, ret_type, name=None):
-        """Add a terminal to the set. 
-
-        *terminal* is an object, or a function with no arguments.
-        *ret_type* is the type of the terminal. *name* defines the
-        name of the terminal in the expression. This should be
+        """Add a terminal to the set. Terminals can be named
+        using the optional *name* argument. This should be
         used : to define named constant (i.e.: pi); to speed the
         evaluation time when the object is long to build; when
         the object does not have a __repr__ functions that returns
         the code to build the object; when the object class is
         not a Python built-in.
+
+        :param terminal: Object, or a function with no arguments.
+        :param ret_type: Type of the terminal. 
+        :param name: defines the name of the terminal in the expression.
         """
         symbolic = False
         if name is None and callable(terminal):
@@ -316,10 +339,12 @@ class PrimitiveSetTyped(object):
             self.context[name] = terminal
             terminal = name
             symbolic = True
+        elif str(terminal) in __builtins__:
+            # To support True and False terminals with Python 2.
+            self.context[str(terminal)] = terminal
 
         prim = Terminal(terminal, symbolic, ret_type)
         self._add(prim)
-        self.mapping[prim.value] = prim
         self.terms_count += 1
         
     def addEphemeralConstant(self, name, ephemeral, ret_type):
@@ -328,11 +353,11 @@ class PrimitiveSetTyped(object):
         of the constant is constant for a Tree, but may differ from one
         Tree to another.
 
-        *name* is the name that will be used to refers to this ephemeral type.
-        *ephemeral* function with no arguments that returns a random value.
-        *ret_type* is the type of the object returned by the function.
+        :param name: name used to refers to this ephemeral type.
+        :param ephemeral: function with no arguments that returns a random value.
+        :param ret_type: type of the object returned by *ephemeral*.
         """
-        creator.create(name, Ephemeral, func=staticmethod(ephemeral))
+        creator.create(name, Ephemeral, name=name, func=staticmethod(ephemeral))
         class_ = getattr(creator, name)
         class_.ret = ret_type
         self._add(class_)
@@ -341,8 +366,8 @@ class PrimitiveSetTyped(object):
     def addADF(self, adfset):
         """Add an Automatically Defined Function (ADF) to the set.
 
-        *adfset* is a PrimitiveSetTyped containing the primitives with which
-        the ADF can be built.        
+        :param adfset: PrimitiveSetTyped containing the primitives with which
+                       the ADF can be built.        
         """
         prim = Primitive(adfset.name, adfset.ins, adfset.ret)
         self._add(prim)
@@ -382,33 +407,22 @@ class PrimitiveSet(PrimitiveSetTyped):
 
 
 ######################################
-# GP Tree evaluation functions       #
+# GP Tree compilation functions      #
 ######################################
-def stringify(expr):
-    """Evaluate the expression *expr* into a string.
+def compile(expr, pset):
+    """Compile the expression *expr*.
 
-    .. deprecated:: 1.0
-        Use PrimitiveTree.to_string instead.
+    :returns: a function if the primitive set has 1 or more arguments, 
+              or return the results produced by evaluating the tree.
     """
-    string = ""
-    stack = []
-    for node in expr:
-        stack.append((node, []))
-        while len(stack[-1][1]) == stack[-1][0].arity:
-            prim, args = stack.pop()
-            string = prim.format(*args)
-            if len(stack) == 0:
-                break   # If stack is empty, all nodes should have been seen
-            stack[-1][1].append(string)
-
-    return string
-
-def evaluate(expr, pset):
-    """Evaluate the expression *expr* into Python code object.
-    """
-    string = stringify(expr)
+    code = expr.to_string()
+    if len(pset.arguments) > 0:
+        # This section is a stripped version of the lambdify
+        # function of SymPy 0.6.6.
+        args = ",".join(arg for arg in pset.arguments)
+        code = "lambda {args}: {code}".format(args=args, code=code)
     try:
-        return eval(string, dict(pset.context))
+        return eval(code, pset.context, {})
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
@@ -417,37 +431,20 @@ def evaluate(expr, pset):
         "operators. See the DEAP documentation for more information. "
         "DEAP will now abort."), traceback
 
-def lambdify(expr, pset):
-    """Return a lambda function of the expression *expr*.
-
-    .. note::
-       This function is a stripped version of the lambdify
-       function of sympy0.6.6.
-    """
-    code = stringify(expr)
-    args = ",".join(arg for arg in pset.arguments)
-    lstr = "lambda {args}: {code}".format(args=args, code=code)
-    try:
-        return eval(lstr, dict(pset.context))
-    except MemoryError:
-        _, _, traceback = sys.exc_info()
-        raise MemoryError, ("DEAP : Error in tree evaluation :"
-        " Python cannot evaluate a tree higher than 90. "
-        "To avoid this problem, you should use bloat control on your "
-        "operators. See the DEAP documentation for more information. "
-        "DEAP will now abort."), traceback
-
-def lambdifyADF(expr, psets):
-    """Return a lambda function created from a list of trees. The first 
+def compileADF(expr, psets):
+    """Compile the expression represented by a list of trees. The first 
     element of the list is the main tree, and the following elements are
     automatically defined functions (ADF) that can be called by the first
     tree.
+
+    :returns: a function if the main primitive set has 1 or more arguments, 
+              or return the results produced by evaluating the tree.
     """
     adfdict = {}
     func = None
     for pset, subexpr in reversed(zip(psets, expr)):
         pset.context.update(adfdict)
-        func = lambdify(subexpr, pset)
+        func = compile(subexpr, pset)
         adfdict.update({pset.name : func})
     return func
 
@@ -458,7 +455,7 @@ def genFull(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf has a the same depth 
     between *min* and *max*.
     
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
@@ -474,7 +471,7 @@ def genGrow(pset, min_, max_, type_=__type__):
     """Generate an expression where each leaf might have a different depth 
     between *min* and *max*.
     
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
@@ -494,7 +491,7 @@ def genRamped(pset, min_, max_, type_=__type__):
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
     the other half, the expression is generated with :func:`~deap.gp.genFull`.
     
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
@@ -509,7 +506,7 @@ def generate(pset, min_, max_, condition, type_=__type__):
     from the root to the leaves, and it stop growing when the
     condition is fulfilled.
 
-    :param pset: A primitive set from wich to select primitives of the trees.
+    :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param condition: The condition is a function that takes two arguments,
@@ -820,6 +817,7 @@ def staticDepthLimit(max_depth):
 
     """
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = list(func(*args, **kwargs))
@@ -841,6 +839,7 @@ def staticSizeLimit(max_size):
     :func:`~deap.base.Toolbox.decorate`
     """
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = list(func(*args, **kwargs))

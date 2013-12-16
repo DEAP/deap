@@ -22,8 +22,6 @@ from deap import base
 from deap import creator
 from deap import tools
 
-from deap.gp import stringify
-
 # GP example "symbreg.py" already defines some useful structures
 sys.path.append("..")
 import gp.symbreg as symbreg
@@ -131,7 +129,7 @@ def main():
     
 
     print("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values))
-    print("Best individual GP is %s, %s" % (stringify(best_gp), best_gp.fitness.values))
+    print("Best individual GP is %s, %s" % (best_gp.to_string(), best_gp.fitness.values))
 
     return pop_ga, pop_gp, best_ga, best_gp, logbook
 

@@ -70,6 +70,42 @@ Thus, care must be taken when inheriting from :class:`numpy.ndarray`;
 copying. See the One Max with Numpy example for the complete two points
 crossover.
 
+Multi-objective
+---------------
+In multi-objective situation when one wants to use a :class:`~deap.tools.ParetoFront`
+hall-of-fame. The *similar* function should be changed to a compare all function. Using 
+the regular :func:`operator.eq` function will result in a vector of comparisons
+::
+
+	>>> a = numpy.array([1, 2, 3])
+	>>> b = numpy.array([1, 2, 3])
+	>>> operator.eq(a, b)
+	array([ True,  True,  True], dtype=bool)
+
+This cannot be used as a condition
+::
+
+	>>> if operator.eq(a, b):
+	...     print "Gosh!"
+	... 
+	Traceback (most recent call last):
+	  File "<stdin>", line 1, in <module>
+	ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+
+One must replace the *similar* operator by a numpy function like :func:`numpy.array_equal`
+or :func:`numpy.allclose`.
+::
+
+	hof = tools.ParetoFront(similar=numpy.array_equal)
+
+Now the condition can be computed and the hall-of-fame will be happy.
+::
+
+	>>> if numpy.array_equal(a, b):
+	...     print "Yeah!"
+	"Yeah!"
+
+
 Performance
 -----------
 If your intent is performance, `DEAP Speed
