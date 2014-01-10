@@ -16,9 +16,9 @@ def mutGaussian(individual, mu, sigma, indpb):
     The *indpb* argument is the probability of each attribute to be mutated.
     
     :param individual: Individual to be mutated.
-    :param mu: Mean or :term:`iterable` of means for the
+    :param mu: Mean or :term:`python:iterable` of means for the
                gaussian addition mutation.
-    :param sigma: Standard deviation or :term:`iterable` of 
+    :param sigma: Standard deviation or :term:`python:iterable` of 
                   standard deviations for the gaussian addition mutation.
     :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
@@ -48,9 +48,9 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
     :param eta: Crowding degree of the mutation. A high eta will produce
                 a mutant resembling its parent, while a small eta will
                 produce a solution much more different.
-    :param low: A value or an :term:`iterable` of values that
+    :param low: A value or an :term:`python:iterable` of values that
                 is the lower bound of the search space.
-    :param up: A value or an :term:`iterable` of values that
+    :param up: A value or an :term:`python:iterable` of values that
                is the upper bound of the search space.
     :returns: A tuple of one individual.
     """
@@ -134,10 +134,10 @@ def mutUniformInt(individual, low, up, indpb):
     by a integer uniformly drawn between *low* and *up* inclusively.
     
     :param individual: :term:`Sequence <sequence>` individual to be mutated.
-    :param low: The lower bound or an :term:`iterable` of
+    :param low: The lower bound or an :term:`python:iterable` of
                 of lower bounds of the range from wich to draw the new
                 integer.
-    :param up: The upper bound or an :term:`iterable` of
+    :param up: The upper bound or an :term:`python:iterable` of
                of upper bounds of the range from wich to draw the new
                integer.
     :param indpb: Independent probability for each attribute to be mutated.
