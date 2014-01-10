@@ -71,7 +71,7 @@ def cxUniform(ind1, ind2, indpb):
     return ind1, ind2
     
 def cxPartialyMatched(ind1, ind2):
-    """Execute a partially matched crossover (PMX) on the input individuals.
+    """Executes a partially matched crossover (PMX) on the input individuals.
     The two individuals are modified in place. This crossover expects
     :term:`sequence` individuals of indices, the result for any other type of
     individuals is unpredictable.
@@ -120,7 +120,7 @@ def cxPartialyMatched(ind1, ind2):
     return ind1, ind2
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
-    """Execute a uniform partially matched crossover (UPMX) on the input
+    """Executes a uniform partially matched crossover (UPMX) on the input
     individuals. The two individuals are modified in place. This crossover
     expects :term:`sequence` individuals of indices, the result for any other
     type of individuals is unpredictable.
@@ -163,7 +163,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     return ind1, ind2
 
 def cxOrdered(ind1, ind2):
-    """Execute an ordered crossover (OX) on the input
+    """Executes an ordered crossover (OX) on the input
     individuals. The two individuals are modified in place. This crossover
     expects :term:`sequence` individuals of indices, the result for any other
     type of individuals is unpredictable.
