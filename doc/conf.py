@@ -103,8 +103,8 @@ pygments_style = 'default'
 todo_include_todos = True
 
 # Search in python documentation
-intersphinx_mapping = {'http://docs.python.org/': None,
-                       'http://docs.scipy.org/doc/numpy' : None}
+intersphinx_mapping = {'python' : ('http://docs.python.org/', None),
+                       'numpy'  : ('http://docs.scipy.org/doc/numpy', None)}
 
 # Reload the cached values every 5 days
 intersphinx_cache_limit = 5
