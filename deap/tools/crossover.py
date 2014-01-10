@@ -8,7 +8,7 @@ from collections import Sequence
 ######################################
 
 def cxOnePoint(ind1, ind2):
-    """Execute a one point crossover on the input individuals.
+    """Executes a one point crossover on the input :term:`sequence` individuals.
     The two individuals are modified in place. The resulting individuals will
     respectively have the length of the other.
     
@@ -26,8 +26,9 @@ def cxOnePoint(ind1, ind2):
     return ind1, ind2
 
 def cxTwoPoints(ind1, ind2):
-    """Execute a two points crossover on the input individuals. The two 
-    individuals are modified in place and both keep their original length. 
+    """Executes a two points crossover on the input :term:`sequence`
+    individuals. The two individuals are modified in place and both keep their
+    original length. 
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
@@ -50,8 +51,9 @@ def cxTwoPoints(ind1, ind2):
     return ind1, ind2
 
 def cxUniform(ind1, ind2, indpb):
-    """Execute a uniform crossover that modify in place the two individuals.
-    The attributes are swapped according to the *indpb* probability.
+    """Executes a uniform crossover that modify in place the two
+    :term:`sequence` individuals. The attributes are swapped accordingto the
+    *indpb* probability.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
@@ -69,16 +71,16 @@ def cxUniform(ind1, ind2, indpb):
     return ind1, ind2
     
 def cxPartialyMatched(ind1, ind2):
-    """Execute a partially matched crossover (PMX) on the input individuals.
-    The two individuals are modified in place. This crossover expect iterable
-    individuals of indices, the result for any other type of individuals is
-    unpredictable.
+    """Executes a partially matched crossover (PMX) on the input individuals.
+    The two individuals are modified in place. This crossover expects
+    :term:`sequence` individuals of indices, the result for any other type of
+    individuals is unpredictable.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    Moreover, this crossover consists of generating two children by matching
+    Moreover, this crossover generates two children by matching
     pairs of values in a certain range of the two parents and swapping the values
     of those indexes. For more details see [Goldberg1985]_.
 
@@ -118,16 +120,16 @@ def cxPartialyMatched(ind1, ind2):
     return ind1, ind2
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
-    """Execute a uniform partially matched crossover (UPMX) on the input
+    """Executes a uniform partially matched crossover (UPMX) on the input
     individuals. The two individuals are modified in place. This crossover
-    expect iterable individuals of indices, the result for any other type of
-    individuals is unpredictable.
+    expects :term:`sequence` individuals of indices, the result for any other
+    type of individuals is unpredictable.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    Moreover, this crossover consists of generating two children by matching
+    Moreover, this crossover generates two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
     parents and swapping the values of those indexes. For more details see
     [Cicirello2000]_.
@@ -161,16 +163,16 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     return ind1, ind2
 
 def cxOrdered(ind1, ind2):
-    """Execute an ordered crossover (OX) on the input
+    """Executes an ordered crossover (OX) on the input
     individuals. The two individuals are modified in place. This crossover
-    expect iterable individuals of indices, the result for any other type of
-    individuals is unpredictable.
+    expects :term:`sequence` individuals of indices, the result for any other
+    type of individuals is unpredictable.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    Moreover, this crossover consists of generating holes in the input
+    Moreover, this crossover generates holes in the input
     individuals. A hole is created when an attribute of an individual is
     between the two crossover points of the other individual. Then it rotates
     the element so that all holes are between the crossover points and fills
@@ -214,7 +216,7 @@ def cxOrdered(ind1, ind2):
 
 def cxBlend(ind1, ind2, alpha):
     """Executes a blend crossover that modify in-place the input individuals.
-    The blend crossover expect individuals formed of a list of floating point
+    The blend crossover expects :term:`sequence` individuals of floating point
     numbers.
     
     :param ind1: The first individual participating in the crossover.
@@ -235,8 +237,8 @@ def cxBlend(ind1, ind2, alpha):
 
 def cxSimulatedBinary(ind1, ind2, eta):
     """Executes a simulated binary crossover that modify in-place the input
-    individuals. The simulated binary crossover expect individuals formed of
-    a list of floating point numbers.
+    individuals. The simulated binary crossover expects :term:`sequence`
+    individuals of floating point numbers.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
@@ -263,18 +265,18 @@ def cxSimulatedBinary(ind1, ind2, eta):
 
 def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     """Executes a simulated binary crossover that modify in-place the input
-    individuals. The simulated binary crossover expect individuals formed of
-    a list of floating point numbers.
+    individuals. The simulated binary crossover expects :term:`sequence`
+    individuals of floating point numbers.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
     :param eta: Crowding degree of the crossover. A high eta will produce
                 children resembling to their parents, while a small eta will
                 produce solutions much more different.
-    :param low: A value or a sequence of values that is the lower bound of the
-                search space.
-    :param up: A value or a sequence of values that is the upper bound of the
-               search space.
+    :param low: A value or an :term:`python:iterable` of values that is the lower
+                bound of the search space.
+    :param up: A value or an :term:`python:iterable` of values that is the upper
+               bound of the search space.
     :returns: A tuple of two individuals.
 
     This function uses the :func:`~random.random` function from the python base
@@ -284,22 +286,21 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
        This implementation is similar to the one implemented in the 
        original NSGA-II C code presented by Deb.
     """
-    size = min(len(ind1), len(ind2))
-    
-    if not isinstance(low, Sequence):
-        low = [low] * size
-    if not isinstance(up, Sequence):
-        up = [up] * size
+    size = len(individual)
+    if not isinstance(low, Iterable):
+        low = repeat(low, size)
+    if not isinstance(up, Iterable):
+        up = repeat(up, size)
 
     for i in xrange(size):
+        xl = next(low)
+        xu = next(up)
         if random.random() <= 0.5:
             # This epsilon should probably be changed for 0 since 
             # floating point arithmetic in Python is safer
             if abs(ind1[i] - ind2[i]) > 1e-14:
                 x1 = min(ind1[i], ind2[i])
                 x2 = max(ind1[i], ind2[i])
-                xl = low[i]
-                xu = up[i]
                 rand = random.random()
                 
                 beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
@@ -337,8 +338,9 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
 ######################################
 
 def cxMessyOnePoint(ind1, ind2):
-    """Execute a one point crossover that will in most cases change the
-    individuals size. The two individuals are modified in place.
+    """Executes a one point crossover on :term:`sequence` individual.
+    The crossover will in most cases change the individuals size. The two
+    individuals are modified in place.
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
@@ -358,10 +360,10 @@ def cxMessyOnePoint(ind1, ind2):
 ######################################
 
 def cxESBlend(ind1, ind2, alpha):
-    """Execute a blend crossover on both, the individual and the strategy. The
-    individuals must have a :attr:`strategy` attribute. Adjustement of the
-    minimal strategy shall be done after the call to this function, consider
-    using a decorator.
+    """Executes a blend crossover on both, the individual and the strategy. The
+    individuals shall be a :term:`sequence` and must have a :term:`sequence`
+    :attr:`strategy` attribute. Adjustement of the minimal strategy shall be done
+    after the call to this function, consider using a decorator.
     
     :param ind1: The first evolution strategy participating in the crossover.
     :param ind2: The second evolution strategy participating in the crossover.
@@ -386,9 +388,10 @@ def cxESBlend(ind1, ind2, alpha):
     return ind1, ind2
 
 def cxESTwoPoints(ind1, ind2):
-    """Execute a classical two points crossover on both the individual and its
-    strategy. The individuals must have a :attr:`strategy` attribute.The
-    crossover points for the individual and the strategy are the same.
+    """Executes a classical two points crossover on both the individuals and their
+    strategy. The individuals shall be a :term:`sequence` and must have a
+    :term:`sequence` :attr:`strategy` attribute. The crossover points for the
+    individual and the strategy are the same.
     
     :param ind1: The first evolution strategy participating in the crossover.
     :param ind2: The second evolution strategy participating in the crossover.
