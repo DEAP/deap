@@ -80,7 +80,7 @@ def cxPartialyMatched(ind1, ind2):
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    Moreover, this crossover consists of generating two children by matching
+    Moreover, this crossover generates two children by matching
     pairs of values in a certain range of the two parents and swapping the values
     of those indexes. For more details see [Goldberg1985]_.
 
@@ -129,7 +129,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    Moreover, this crossover consists of generating two children by matching
+    Moreover, this crossover generates two children by matching
     pairs of values chosen at random with a probability of *indpb* in the two
     parents and swapping the values of those indexes. For more details see
     [Cicirello2000]_.
@@ -172,7 +172,7 @@ def cxOrdered(ind1, ind2):
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    Moreover, this crossover consists of generating holes in the input
+    Moreover, this crossover generates holes in the input
     individuals. A hole is created when an attribute of an individual is
     between the two crossover points of the other individual. Then it rotates
     the element so that all holes are between the crossover points and fills
