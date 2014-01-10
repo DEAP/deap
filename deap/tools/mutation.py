@@ -2,6 +2,7 @@ from __future__ import division
 import math
 import random
 
+from itertools import repeat
 from collections import Sequence
 
 ######################################
@@ -10,22 +11,32 @@ from collections import Sequence
 
 def mutGaussian(individual, mu, sigma, indpb):
     """This function applies a gaussian mutation of mean *mu* and standard
-    deviation *sigma* on the input individual. This mutation expects an
-    iterable individual composed of real valued attributes. The *indpb*
-    argument is the probability of each attribute to be mutated.
+    deviation *sigma* on the input individual. This mutation expects a
+    :term:`sequence` individual composed of real valued attributes.
+    The *indpb* argument is the probability of each attribute to be mutated.
     
     :param individual: Individual to be mutated.
-    :param mu: Mean around the individual of the mutation.
-    :param sigma: Standard deviation of the mutation.
-    :param indpb: Probability for each attribute to be mutated.
+    :param mu: Mean or :term:`iterable` of means for the
+               gaussian addition mutation.
+    :param sigma: Standard deviation or :term:`iterable` of 
+                  standard deviations for the gaussian addition mutation.
+    :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
     
     This function uses the :func:`~random.random` and :func:`~random.gauss`
     functions from the python base :mod:`random` module.
     """
-    for i in xrange(len(individual)):
+    size = len(individual)
+    if not isinstance(mu, Iterable):
+        mu = repeat(mu, size)
+    if not isinstance(sigma, Iterable):
+        sigma = repeat(sigma, size)
+    
+    for i in xrange(size):
+        m = next(mu)
+        s = next(sigma)
         if random.random() < indpb:
-            individual[i] += random.gauss(mu, sigma)
+            individual[i] += random.gauss(m, s)
     
     return individual,
 
@@ -33,27 +44,27 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
     """Polynomial mutation as implemented in original NSGA-II algorithm in
     C by Deb.
     
-    :param individual: Individual to be mutated.
+    :param individual: :term:`Sequence <sequence>` individual to be mutated.
     :param eta: Crowding degree of the mutation. A high eta will produce
                 a mutant resembling its parent, while a small eta will
                 produce a solution much more different.
-    :param low: A value or a sequence of values that is the lower bound of the
-                search space.
-    :param up: A value or a sequence of values that is the upper bound of the
-               search space.
+    :param low: A value or an :term:`iterable` of values that
+                is the lower bound of the search space.
+    :param up: A value or an :term:`iterable` of values that
+               is the upper bound of the search space.
     :returns: A tuple of one individual.
     """
     size = len(individual)
-    if not isinstance(low, Sequence):
-        low = [low] * size
-    if not isinstance(up, Sequence):
-        up = [up] * size
+    if not isinstance(low, Iterable):
+        low = repeat(low, size)
+    if not isinstance(up, Iterable):
+        up = repeat(up, size)
     
     for i in xrange(size):
+        xl = next(low)
+        xu = next(up)
         if random.random() <= indpb:
             x = individual[i]
-            xl = low[i]
-            xu = up[i]
             delta_1 = (x - xl) / (xu - xl)
             delta_2 = (xu - x) / (xu - xl)
             rand = random.random()
@@ -75,13 +86,13 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
-    The *individual* is expected to be iterable. The *indpb* argument is the
+    The *individual* is expected to be a :term:`sequence`. The *indpb* argument is the
     probability of each attribute to be moved. Usually this mutation is applied on 
     vector of indices.
     
     :param individual: Individual to be mutated.
-    :param indpb: Probability for each attribute to be exchanged to another
-                  position.
+    :param indpb: Independent probability for each attribute to be exchanged to
+                  another position.
     :returns: A tuple of one individual.
     
     This function uses the :func:`~random.random` and :func:`~random.randint`
@@ -100,21 +111,21 @@ def mutShuffleIndexes(individual, indpb):
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
-    mutant. The *individual* is expected to be iterable and the values of the
+    mutant. The *individual* is expected to be a :term:`sequence` and the values of the
     attributes shall stay valid after the ``not`` operator is called on them.
     The *indpb* argument is the probability of each attribute to be
     flipped. This mutation is usually applied on boolean individuals.
     
     :param individual: Individual to be mutated.
-    :param indpb: Probability for each attribute to be flipped.
+    :param indpb: Independent probability for each attribute to be flipped.
     :returns: A tuple of one individual.
     
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    for indx in xrange(len(individual)):
+    for i in xrange(len(individual)):
         if random.random() < indpb:
-            individual[indx] = type(individual[indx])(not individual[indx])
+            individual[i] = type(individual[i])(not individual[i])
     
     return individual,
 
@@ -122,16 +133,27 @@ def mutUniformInt(individual, low, up, indpb):
     """Mutate an individual by replacing attributes, with probability *indpb*,
     by a integer uniformly drawn between *low* and *up* inclusively.
     
-    :param low: The lower bound of the range from wich to draw the new
+    :param individual: :term:`Sequence <sequence>` individual to be mutated.
+    :param low: The lower bound or an :term:`iterable` of
+                of lower bounds of the range from wich to draw the new
                 integer.
-    :param up: The upper bound of the range from wich to draw the new
-                integer.
-    :param indpb: Probability for each attribute to be mutated.
+    :param up: The upper bound or an :term:`iterable` of
+               of upper bounds of the range from wich to draw the new
+               integer.
+    :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
     """
-    for indx in xrange(len(individual)):
+    size = len(individual)
+    if not isinstance(low, Iterable):
+        low = repeat(low, size)
+    if not isinstance(up, Iterable):
+        up = repeat(up, size)
+    
+    for i in xrange(size):
+        xl = next(low)
+        xu = next(up)
         if random.random() < indpb:
-            individual[indx] = random.randint(low, up)
+            individual[i] = random.randint(xl, xu)
     
     return individual,
 
@@ -153,9 +175,9 @@ def mutESLogNormal(individual, c, indpb):
     strategy) then . A recommended choice is ``c=1`` when using a :math:`(10,
     100)` evolution strategy [Beyer2002]_ [Schwefel1995]_.
     
-    :param individual: Individual to be mutated.
+    :param individual: :term:`Sequence <sequence>` individual to be mutated.
     :param c: The learning parameter.
-    :param indpb: Probability for each attribute to be flipped.
+    :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
     
     .. [Beyer2002] Beyer and Schwefel, 2002, Evolution strategies - A
