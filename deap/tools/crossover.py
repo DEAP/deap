@@ -1,7 +1,7 @@
 from __future__ import division
 import random
 
-from collections import Sequence
+from collections import Iterable
 
 ######################################
 # GA Crossovers                      #
