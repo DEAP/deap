@@ -3,7 +3,7 @@ import math
 import random
 
 from itertools import repeat
-from collections import Sequence
+from collections import Iterable
 
 ######################################
 # GA Mutations                       #
