@@ -286,7 +286,7 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
        This implementation is similar to the one implemented in the 
        original NSGA-II C code presented by Deb.
     """
-    size = len(individual)
+    size = min(len(ind1), len(ind2))
     if not isinstance(low, Iterable):
         low = repeat(low, size)
     if not isinstance(up, Iterable):
