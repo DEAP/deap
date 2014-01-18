@@ -2,6 +2,7 @@ from __future__ import division
 import random
 
 from collections import Iterable
+from itertools import repeat
 
 ######################################
 # GA Crossovers                      #
