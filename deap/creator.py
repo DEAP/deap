@@ -149,6 +149,6 @@ def create(classname, baseclass, **kargs):
         if baseclass.__init__ is not object.__init__:
             baseclass.__init__(self, *args, **kargs)
 
-    objtype = type(classname, (baseclass,), dict_cls)
+    objtype = type(str(classname), (baseclass,), dict_cls)
     objtype.__init__ = initType
     globals()[classname] = objtype
