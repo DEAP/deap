@@ -171,6 +171,6 @@ def create(name, base, **kargs):
         else:
             base.__init__(self)
 
-    objtype = type(name, (base,), dict_cls)
+    objtype = type(str(name), (base,), dict_cls)
     objtype.__init__ = initType
     globals()[name] = objtype
