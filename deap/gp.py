@@ -82,6 +82,22 @@ class PrimitiveTree(list):
                     " different arity."
         list.__setitem__(self, key, val)
 
+    def __str__(self):
+        """Return the expression in a human readable string.
+        """
+        string = ""
+        stack = []
+        for node in self:
+            stack.append((node, []))
+            while len(stack[-1][1]) == stack[-1][0].arity:
+                prim, args = stack.pop()
+                string = prim.format(*args)
+                if len(stack) == 0:
+                    break   # If stack is empty, all nodes should have been seen
+                stack[-1][1].append(string)
+
+        return string
+
     @classmethod
     def from_string(cls, string, pset):
         """Try to convert a string expression into a PrimitiveTree given a 
@@ -130,22 +146,6 @@ class PrimitiveTree(list):
                 
                 expr.append(Terminal(token, False, type_))
         return cls(expr)
-
-    def to_string(self):
-        """Return the expression in a human readable string.
-        """
-        string = ""
-        stack = []
-        for node in self:
-            stack.append((node, []))
-            while len(stack[-1][1]) == stack[-1][0].arity:
-                prim, args = stack.pop()
-                string = prim.format(*args)
-                if len(stack) == 0:
-                    break   # If stack is empty, all nodes should have been seen
-                stack[-1][1].append(string)
-
-        return string
 
     @property
     def height(self):
@@ -415,7 +415,7 @@ def compile(expr, pset):
     :returns: a function if the primitive set has 1 or more arguments, 
               or return the results produced by evaluating the tree.
     """
-    code = expr.to_string()
+    code = str(expr)
     if len(pset.arguments) > 0:
         # This section is a stripped version of the lambdify
         # function of SymPy 0.6.6.

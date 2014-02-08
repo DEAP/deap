@@ -173,7 +173,7 @@ def main():
         logbook.record(gen=g, evals=len(invalids), **record)
         print(logbook.stream)
     
-    print('Best individual : ', hof[0][0].to_string(), hof[0].fitness)
+    print('Best individual : ', hof[0][0], hof[0].fitness)
     
     return pop, stats, hof
     
