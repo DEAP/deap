@@ -412,6 +412,11 @@ class PrimitiveSet(PrimitiveSetTyped):
 def compile(expr, pset):
     """Compile the expression *expr*.
 
+    :param expr: Expression to compile. It can either be a PrimitiveTree,
+                 a string of Python code or any object that when 
+                 converted into string produced a valid Python code 
+                 expression.
+    :param pset: Primitive set against which the expression is compile.
     :returns: a function if the primitive set has 1 or more arguments, 
               or return the results produced by evaluating the tree.
     """
@@ -437,6 +442,14 @@ def compileADF(expr, psets):
     automatically defined functions (ADF) that can be called by the first
     tree.
 
+
+    :param expr: Expression to compile. It can either be a PrimitiveTree,
+                 a string of Python code or any object that when 
+                 converted into string produced a valid Python code 
+                 expression.
+    :param psets: List of primitive sets. Each set corresponds to an ADF 
+                  while the last set is associated with the expression 
+                  and should contain reference to the preceding ADFs.
     :returns: a function if the main primitive set has 1 or more arguments, 
               or return the results produced by evaluating the tree.
     """
