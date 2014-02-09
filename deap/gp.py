@@ -228,6 +228,7 @@ class Ephemeral(Terminal):
         """Regenerate the ephemeral value.
         """
         self.value = self.func()
+        self.name = str(self.value)
 
     @staticmethod
     def func():
