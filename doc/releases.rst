@@ -1,34 +1,65 @@
 ==================
 Release Highlights
 ==================
-Here is a (incomplete) log of the changes made to DEAP over time. 
+Here is a (incomplete) log of the changes made to DEAP over time.
 
 To be released 1.0
 ==================
 
-- Changed the way statistics are handled and printed. See the
-  :class:`~deap.tools.Statistics` and :class:`~deap.tools.MultiStatistics`
-  documentation for more details.
-- Removed the EvolutionLogger, which functionalities are now handled by
-  by the ``__str__`` function of statistics objects.
-- Added object oriented inheritance to strongly typed genetic programming.
-- Added the possibility to name primitives added to a PrimitiveSet.
-- Added the pset to GP mutation operators that require it.
-- Added a from_string function to PrimitiveTree.
-- Removed the ephemeral generator.
-- Removed DTM from the sources.
-- Added an explicit description of the error when there are no available
+API enhancements
+++++++++++++++++
+
+- algorithms: every algorithm now return the final population and a logbook
+  containing the evolution statistical data.
+- base: Fitness objects are now hashable.
+- base: Added a ``dominates`` function to the Fitness, which can be replaced.
+  This function is now used in most multi-objective specific selection methods
+  instead of ``isDominated``.
+- base: Fitness - implementation of a ``__repr__`` method. (issue 20)
+- examples: remove prefix (ga, gp, pso, etc.) from examples filename.
+- gp: Added the pset to mutation operators that require it.
+- gp: Removed the stringify function from
+- gp: Added an explicit description of the error when there are no available
   primitive/terminal of a certain type.
-- Added a ``dominates`` function to the Fitness, which can be replaced. This
-  function is now used in the multi-objective specific selection methods
-  instead of ``tools.isDominated``.
-- Added symbolic regression benchmarks in ``benchmarks.gp``.
-- A Fitness is now hashable.
-- Revised the Hall of Fame to inlude only unique individuals.
-- The creator does not handle proper slicing of created classes inheriting
+- gp: Added symbolic regression benchmarks in ``benchmarks.gp``.
+- gp: Removed the ephemeral generator.
+- gp: Added a from_string function to PrimitiveTree.
+- gp: Added the possibility to name primitives added to a PrimitiveSet.
+- gp: Added object oriented inheritance to strongly typed genetic programming.
+- gp: Removed stringify function, use str on your trees instead.
+- gp: Replaced `evaluate` and `lambdify` by a single function `compile`.
+- gp: Replaced lambidfyADF by compileADF.
+- gp: New graph function that returns a list of nodes, edges and a
+  labels dictionnary that can then be feeded directly to networkx to
+  draw the tree.
+- tools: Revised the Hall of Fame to include only unique individuals.
+- tools: Changed the way statistics are handled and printed. See the
+  :class:`~deap.tools.Statistics` and :class:`~deap.tools.MultiStatistics`
+  documentation for more details. (issue 19)
+- tools: Removed the EvolutionLogger, which functionalities are now handled by
+  by the ``__str__`` function of statistics objects. (issue 19)
+- tools: Removed Checkpoint class since it was more trivial to do simple
+  checkpointing than using the class. The documentation now includes an
+  example on how to do checkpointing without Checkpoint.
+- tools: Reorganize the operators in submodule, tools now being a package.
+- tools: Implementation of the logarithmic non-dominated sort by
+  Fortin et al. (2013), available under the name `sortLogNondominated`.
+- tools: mutation operators can now take either a value or a sequence
+  of values as long as the individual as parameters (low, up, sigma, etc.).
+- tools: Removed DTM from the sources.
+- tools: Removed the cTools module. It was not properly maintain and
+  rarely used.
+
+Bug fixes
++++++++++
+
+- creator: Issue 23: error in creator when using unicode source.
+- creator: create does not handle proper slicing of created classes inheriting
   from ``numpy.ndarray`` anymore. This was bug prone and extremely hard to maintain.
   Users are now requested to include ``numpy.copy()`` operation in their
   operators. A tutorial on inheriting from numpy is on its way.
+
+
 
 Release 0.9
 ===========
@@ -63,12 +94,12 @@ Release 0.7
 ===========
 - Modified structure so that DTM is a module of DEAP.
 - Restructured modules in a more permanent and coherent way.
-	
+
   - The toolbox is now in the module base.
   - The operators have been moved to the tools module.
   - Checkpoint, Statistics, History and Hall-of-Fame are now also in the tools module.
   - Moved the GP specific operators to the gp module.
-	
+
 - Renamed some operator for coherence.
 - Reintroduced a convenient, coherent and simple Statistics module.
 - Changed the Milestone module name for the more common Checkpoint name.
@@ -76,7 +107,7 @@ Release 0.7
 - Refactored the whole documentation in a more structured manner.
 - Added a benchmark module containing some of the most classic benchmark functions.
 - Added a lot of examples again :
-	
+
   - Differential evolution (*x2*);
   - Evolution strategy : One fifth rule;
   - *k*-nearest neighbours feature selection;
@@ -96,7 +127,7 @@ Release 0.6
 - Algorithms now refers to literature algorithms.
 - Added new examples :
 
-  - Coevolution; 
+  - Coevolution;
   - Variable length genotype;
   - Multiobjective;
   - Inheriting from a Set;
