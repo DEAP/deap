@@ -347,7 +347,7 @@ class PrimitiveSetTyped(object):
             self.context[name] = terminal
             terminal = name
             symbolic = True
-        elif str(terminal) in __builtins__:
+        elif str(terminal) in __builtins__.__dict__:
             # To support True and False terminals with Python 2.
             self.context[str(terminal)] = terminal
 
