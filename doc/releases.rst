@@ -9,16 +9,16 @@ To be released 1.0
 API enhancements
 ++++++++++++++++
 
-- algorithms: every algorithm now return the final population and a logbook
+- algorithms: Every algorithm now return the final population and a logbook
   containing the evolution statistical data.
 - base: Fitness objects are now hashable.
 - base: Added a ``dominates`` function to the Fitness, which can be replaced.
   This function is now used in most multi-objective specific selection methods
   instead of ``isDominated``.
 - base: Fitness - implementation of a ``__repr__`` method. (issue 20)
-- examples: remove prefix (ga, gp, pso, etc.) from examples filename.
+- examples: Removed prefix (ga, gp, pso, etc.) from examples filename.
 - gp: Added the pset to mutation operators that require it.
-- gp: Removed the stringify function from
+- gp: Removed the stringify function.
 - gp: Added an explicit description of the error when there are no available
   primitive/terminal of a certain type.
 - gp: Added symbolic regression benchmarks in ``benchmarks.gp``.
@@ -44,7 +44,7 @@ API enhancements
 - tools: Reorganize the operators in submodule, tools now being a package.
 - tools: Implementation of the logarithmic non-dominated sort by
   Fortin et al. (2013), available under the name `sortLogNondominated`.
-- tools: mutation operators can now take either a value or a sequence
+- tools: Mutation operators can now take either a value or a sequence
   of values as long as the individual as parameters (low, up, sigma, etc.).
 - tools: Removed DTM from the sources.
 - tools: Removed the cTools module. It was not properly maintain and

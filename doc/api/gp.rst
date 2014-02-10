@@ -17,10 +17,6 @@ Genetic Programming
 .. autoclass:: deap.gp.Ephemeral
 	:members:
 
-.. autofunction:: deap.gp.stringify
-
-.. autofunction:: deap.gp.evaluate
-
 .. autofunction:: deap.gp.compile
 
 .. autofunction:: deap.gp.compileADF
