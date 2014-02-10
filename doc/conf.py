@@ -128,7 +128,7 @@ plot_html_show_formats = True
 # -- Options for extlinks extension ----------------------------------------------
 
 import subprocess
-branch = subprocess.check_output(["hg", "branch"])[:-1]
+branch = str(subprocess.check_output(["hg", "branch"])[:-1])
 extlinks = {'example': ('https://code.google.com/p/deap/source/browse/examples/%s.py?name='+branch,
                       'examples/')}
 
