@@ -3,14 +3,13 @@
 Using Multiple Processors
 =========================
 
-This section of the tutorial shows all the work that is needed to
-distribute operations in DEAP. Distribution relies on serialization of objects
-and serialization is usually done by pickling, thus all objects that are
-distributed (functions and arguments, e.g. individuals and parameters) must be
-pickleable. This means modifications made to an object on a distant processing
-unit will not be made available to the other processing units (including the
-master one) if it is not explicitly communicated through function arguments
-and return values.
+This section of the tutorial shows all the work that is needed to distribute
+operations in DEAP. Distribution relies on serialization of objects which is
+usually done by pickling, thus all objects that are distributed (functions and
+arguments, e.g. individuals and parameters) must be pickleable. This means
+that modifications made to an object on a distant processing unit will not be
+made available to the other processing units (including the master one) if it
+is not explicitly communicated through function arguments and return values.
 
 Scalable Concurent Operations in Python (SCOOP)
 -----------------------------------------------
@@ -21,7 +20,7 @@ interface similar to the :mod:`concurrent.futures` module introduced in Python
 :func:`~scoop.futures.map` allow to distribute computation efficiently and
 easily over a grid of computers.
 
-In the :ref:`last section <using-tools>` a complete algorithm was exposed with
+In the :ref:`second part <using-tools>`, a complete algorithm was exposed with
 the :func:`toolbox.map` left to the default :func:`map`. In order to
 distribute the evaluations, we will replace this map by the one from SCOOP.
 ::
@@ -31,22 +30,24 @@ distribute the evaluations, we will replace this map by the one from SCOOP.
     toolbox.register("map", futures.map)
 
 Once this line is added, your program absolutly needs to be run from a
-:func:`main` function as mentionned in the scoop documentation. To run your
-program, use scoop as the main module.
+:func:`main` function as mentioned in the
+`scoop documentation <http://scoop.readthedocs.org/en/latest/usage.html>`_. To
+run your program, use scoop as the main module.
 
 .. code-block:: bash
 
     $ python -m scoop your_program.py
 
-That is it, your program has been run in parallel on all available processors.
+That is it, your program has been run in parallel on all available processors
+on your computer.
 
 .. _SCOOP: http://scoop.googlecode.com/
 
 Multiprocessing Module
 ----------------------
-Using the :mod:`multiprocessing` module is exactly similar to using the
-distributed task manager. Again in the
-toolbox, replace the appropriate function by the distributed one.
+Using the :mod:`multiprocessing` module is similar to using SCOOP. It can be
+done by replacing the appropriate function by the distributed one in the
+toolbox.
 ::
 
     import multiprocessing
