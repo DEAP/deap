@@ -63,7 +63,7 @@ Thus, the preceding code creates two aliases in the toolbox; ``attr_float`` and 
 
 Now, calling :func:`toolbox.individual` will call :func:`~deap.tools.initRepeat` with the fixed arguments and return a complete :class:`creator.Individual`
 composed of ``IND_SIZE`` floating point numbers with a maximizing single
-objective :attr:`fitness attribute.
+objective :attr:`fitness` attribute.
 
 Variations of this type are possible by inheriting from :class:`array.array`
 or :class:`numpy.ndarray` as following.
@@ -82,21 +82,25 @@ An individual for the permutation representation is almost similar to the
 general list individual. In fact they both inherit from the basic :class:`list`
 type. The only difference is that instead of filling the list with a series of
 floats, we need to generate a random permutation and provide that permutation to
-the individual. First, the individual class is created the exact same way as the
-previous one. Then, an :func:`indices` function is added to the toolbox
-referring to the :func:`~random.sample` function. Sample is used instead of
-:func:`~random.shuffle` because the latter does not return the shuffled list.
-The indices function returns a complete permutation of the numbers between ``0``
-and ``IND_SIZE - 1``. Finally, the individual is initialized with the
-:func:`~deap.tools.initIterate` function which gives to the individual an
-iterable of what is produced by the call to the indices function.
+the individual.
+
+.. First, the individual class is created the exact same way as the
+.. previous one. Then, an :func:`indices` function is added to the toolbox
+.. referring to the :func:`~random.sample` function. Sample is used instead of
+.. :func:`~random.shuffle` because the latter does not return the shuffled list.
+.. The indices function returns a complete permutation of the numbers between ``0``
+.. and ``IND_SIZE - 1``. Finally, the individual is initialized with the
+.. :func:`~deap.tools.initIterate` function which gives to the individual an
+.. iterable of what is produced by the call to the indices function.
 
 .. literalinclude:: /code/tutorials/part_2/2_2_2_permutation.py
    :lines: 2-
 
-Calling :func:`toolbox.individual` will readily return a complete individual
-that is a permutation of the integers in the range ``0`` to ``IND_SIZE`` with a
-minimizing single objective fitness attribute.
+The first registered function ``indices`` redirects to the :func:`random.sample` function with its arguments fixed to sample ``IND_SIZE`` numbers from the given range. The second registered function ``individual`` is a shortcut to the :func:`~deap.tools.initIterate` function, with its :data:`container` argument set to the :class:`creator.Individual` class and its :data:`generator` argument to the :func:`toolbox.indices` alias.
+
+Calling :func:`toolbox.individual` will call :func:`~deap.tools.initIterate` with the fixed arguments and return a complete :class:`creator.Individual`
+composed of permutation with a maximizing single
+objective :attr:`fitness` attribute.
 
 .. _arithmetic-expr:
 
