@@ -17,8 +17,8 @@ has positive weights. For example, the following line creates, in the
 .. literalinclude:: /code/tutorials/part_2/2_1_fitness.py
    :lines: 6
 
-The :attr:`~deap.base.Fitness.weights` argument must be a tuple so that multi
-objective and single objective fitnesses can be treated the same way. A
+The :func:`~deap.creator.create` function takes at least two argument, a name for the newly created class and a base class. Any subsequent argument becomes an attribute of the class.
+As specified in the :class:`~deap.base.Fitness` documentation, the :attr:`~deap.base.Fitness.weights` attribute must be a tuple so that multi-objective and single objective fitnesses can be treated the same way. A
 :class:`FitnessMulti` would be created the same way but using:
 
 .. literalinclude:: /code/tutorials/part_2/2_1_fitness.py
@@ -47,18 +47,23 @@ List of Floats
 The first individual created will be a simple list containing floats. In order
 to produce this kind of individual, we need to create an :class:`Individual`
 class, using the creator, that will inherit from the standard :class:`list` type
-and have a :attr:`fitness` attribute. Then, we will initialize this list using
-the :func:`~deap.tools.initRepeat` helper function that will repeat ``n`` times
-the float generator that has been registered under the :func:`attr_float` alias
-of the toolbox. Note that the :func:`attr_float` is a direct reference to the
-:func:`~random.random` function.
+and have a :attr:`fitness` attribute.
+
+.. Then, we will initialize this list using
+.. the :func:`~deap.tools.initRepeat` helper function that will repeat ``n`` times
+.. the float generator that has been registered under the :func:`attr_float` alias
+.. of the toolbox. Note that the :func:`attr_float` is a direct reference to the
+.. :func:`~random.random` function.
 
 .. literalinclude:: /code/tutorials/part_2/2_2_1_list_of_floats.py
    :lines: 2,5-18
 
-Calling :func:`toolbox.individual` will readily return a complete individual
+The newly introduced :meth:`~deap.base.Toolbox.register` method takes at least two argument; an alias and a function to assign to this alias. Any subsequent argument will is passed to the function when called (à la :func:`functools.partial`).
+Thus, the preceding code creates two aliases in the toolbox; ``attr_float`` and ``individual``. The first one redirects to the :func:`random.random` function. The second one is a shortcut to the :func:`~deap.tools.initRepeat` function, qhile also fixing its container argument to the :class:`creator.Individual` class, its filler argument to the :func:`toolbox.attr_float` function, and its number of repetitions argument to ``IND_SIZE``.
+
+Now, calling :func:`toolbox.individual` will call :func:`~deap.tools.initRepeat` with the fixed arguments and return a complete :class:`creator.Individual`
 composed of ``IND_SIZE`` floating point numbers with a maximizing single
-objective fitness attribute.
+objective :attr:`fitness attribute.
 
 Variations of this type are possible by inheriting from :class:`array.array`
 or :class:`numpy.ndarray` as following.
