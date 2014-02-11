@@ -23,7 +23,7 @@ and many features to build your own evolutions.
 
 * **First steps:** 
 
-  * :doc:`Overview <overview>`
+  * :doc:`Overview (Start Here!) <overview>`
   * :doc:`Installation <installation>`
 
 
@@ -31,7 +31,8 @@ and many features to build your own evolutions.
 
   * :doc:`Part 1: creating types <tutorials/basic/part1>`
   * :doc:`Part 2: operators and algorithms <tutorials/basic/part2>`
-  * :doc:`Part 3: using multiple processors <tutorials/basic/part3>`
+  * :doc:`Part 3: logging statistics <tutorials/basic/part3>`
+  * :doc:`Part 4: using multiple processors <tutorials/basic/part4>`
 
 
 * **Advanced tutorials:**

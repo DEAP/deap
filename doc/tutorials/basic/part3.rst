@@ -1,133 +1,164 @@
-.. _distribution-deap:
+Computing Statistics
+====================
+Often, one wants to compile statistics on what is going on in the optimization.
+The :class:`~deap.tools.Statistics` are able to compile such data on arbitrary attributes of any designated object. To do that, one need to register statistics functions inside the stats objects using the exact same syntax as the toolbox.
 
-Using Multiple Processors
-=========================
+.. literalinclude:: /code/tutorials/part_3/stats.py
+   :lines: 12
 
-This section of the tutorial shows all the work that is needed to
-distribute operations in DEAP. Distribution relies on serialization of objects
-and serialization is usually done by pickling, thus all objects that are
-distributed (functions and arguments, e.g. individuals and parameters) must be
-pickleable. This means modifications made to an object on a distant processing
-unit will not be made available to the other processing units (including the
-master one) if it is not explicitly communicated through function arguments
-and return values.
+The statistics object is created using a key as first argument. The key is a function used latter to the data on which the statistics are computed. The given key indicates to use the :attr:`fitness.values` attribute of each given element.
 
-Scalable Concurent Operations in Python (SCOOP)
------------------------------------------------
-SCOOP_ is a distributed task module allowing concurrent parallel programming on
-various environments, from heterogeneous grids to supercomputers. It has an
-interface similar to the :mod:`concurrent.futures` module introduced in Python
-3.2. Its two simple functions :func:`~scoop.futures.submit` and
-:func:`~scoop.futures.map` allow to distribute computation efficiently and
-easily over a grid of computers.
+.. literalinclude:: /code/tutorials/part_3/stats.py
+   :lines: 13-16
 
-In the :ref:`last section <using-tools>` a complete algorithm was exposed with
-the :func:`toolbox.map` left to the default :func:`map`. In order to
-distribute the evaluations, we will replace this map by the one from SCOOP.
-::
+The statistical functions are now registered. The ``register`` function expects an alias as first argument, and a function operating on vectors as second argument. Any subsequent argument is passed to the the function when called. The creation of the statistics object is now complete.
 
-    from scoop import futures
+Predefined Algorithms
+---------------------
+When using a predefined algorithm such as :func:`~deap.algorithms.eaSimple`, :func:`~deap.algorithms.eaMuPlusLambda`, :func:`~deap.algorithms.eaMuCommaLambda`, or :func:`~deap.algorithms.eaGenerateUpdate`, the just created statistics object can be given as argument to the algorithm.
 
-    toolbox.register("map", futures.map)
+.. literalinclude:: /code/tutorials/part_3/stats.py
+   :lines: 50-51
 
-Once this line is added, your program absolutly needs to be run from a
-:func:`main` function as mentionned in the scoop documentation. To run your
-program, use scoop as the main module.
+Automatically, statistics will be computed on the population every generation. The verbose argument allows to print the statistics on screen. Once the algorithm returns, the final population and a :class:`~deap.tools.Logbook` are returned. See the :ref:`next section <logging>` or the :class:`~deap.tools.Logbook` documentation for more information.
 
-.. code-block:: bash
+Writing Your Own Algorithm
+--------------------------
+When writting your own algorithm including statistics is very simple. One need only to compile the statistics on the desired object. For example, compiling the statistics on a given population is done by calling the :meth:`~deap.tools.Statistics.compile` method.
 
-    $ python -m scoop your_program.py
+.. literalinclude:: /code/tutorials/part_3/stats.py
+   :lines: 38
 
-That is it, your program has been run in parallel on all available processors.
+The argument to the compile function must be an iterable of elements on which the key will be called. Here, our population (``pop``) contains individuals. The statistics object will call the key function on every individual to retreive their :attr:`fitness.values` attribute. The resulting array of values is finally given the each statistics function and the result is put into the ``record`` dictionary under the key associated with the function. Printing the record reveals its nature.::
 
-.. _SCOOP: http://scoop.googlecode.com/
+   >>> print(record)
+   {'std': 4.96, 'max': 63.0, 'avg': 50.2, 'min': 39.0}
 
-Multiprocessing Module
-----------------------
-Using the :mod:`multiprocessing` module is exactly similar to using the
-distributed task manager. Again in the
-toolbox, replace the appropriate function by the distributed one.
-::
+How to save and pretty print the statistics is shown in the :ref:`next section <logging>`.
 
-    import multiprocessing
-    
-    pool = multiprocessing.Pool()
-    toolbox.register("map", pool.map)
-    
-    # Continue on with the evolutionary algorithm
+Multi-objective Statistics
+--------------------------
+As statistics are computed directly on the values with numpy function, all the objectives are combined together by the default behaviour of numpy. Thus one need to specify the axis on which to operate. This is achieved by giving the axis as an aditional argument to the register function.
 
-.. warning::
-   As stated in the :mod:`multiprocessing` guidelines, under Windows, a
-   process pool must be protected in a ``if __name__ == "__main__"`` section
-   because of the way processes are initialized.
+.. literalinclude:: /code/tutorials/part_3/stats.py
+   :lines: 41-45
+
+One can always specify the axis even in the case of single objective. The only effect is to produce a different output as the objects are numpy arrays.
+
+   >>> print(record)
+   {'std': array([ 4.96]), 'max': array([ 63.]), 'avg': array([ 50.2]),
+   'min': array([ 39.])}
+
+Multiple Statistics
+-------------------
+It is also possible to compute statistics on different attributes of the population individuals. For instance, it is quite common in genetic programming to have statistics on the height of the trees in addition to the the fitness. One can combine multiple :class:`~deap.tools.Statistics` object in a :class:`~deap.tools.MultiStatistics`
+
+.. literalinclude:: /code/tutorials/part_3/multistats.py
+   :lines: 14-16
+
+Two statistics object are created as earlier. The second object will retreive the size of the individuals by calling :func:`len` on each of them. Once created the statistics objects are given to a MultiStatistics one, where the arguments are given with keywords. The keywords will serve to identify the different statistics. The statistical functions can be registered only once in the multi-statistics or individually in each statistics.
+
+.. literalinclude:: /code/tutorials/part_3/multistats.py
+   :lines: 17-20
+
+The multi-statistics can be given to an algorithm or they can be compiled using the exact same procedure as the simple statistics.
+
+.. literalinclude:: /code/tutorials/part_3/multistats.py
+   :lines: 54
+
+This time the ``record`` is a dictionary of dictionaries. The first level contains the keywords under which the statistics objects have been registered and the second level is similar to the previous simple statistics object.::
+
+   >>> print(record)
+   {'fitness': {'std': 1.64, 'max': 6.86, 'avg': 1.71, 'min': 0.166},
+   'size': {'std': 1.89, 'max': 7, 'avg': 4.54, 'min': 3}}
+
+.. _logging:
+
+Logging Data
+============
+Once the data is produced by the statistics (or multi-statistics), one can save it for further use in a :class:`~deap.tools.Logbook`. The logbook is intended to be a chronological sequence of entries (as dictionaries). It is directly compliant with the type of data returned by the statistics objects, but not limited to this data. In fact, anything can be incorporated in an entry of the logbook.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 7-8
+
+The :meth:`~deap.tools.Logbook.record` method takes a variable number of argument, each of which is a data to be recorded. In the last example, we saved the generation, the number of evaluations and everything contained in the ``record`` produced by a statistics object using the start magic. All record will be kept in the logbook until its destruction.
+
+After a number of records, one may want to retreive the information contained in the logbook.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 12
+
+The :meth:`~deap.tools.Logbook.select` method provides a way to retrieve all the information associated with a keyword in all records. The :meth:`~deap.tools.Logbook.select` method takes a variable number of string arguments, which are exactly the keyword used in the record or statistics object. Here, we retrieved the generation and the average fitness using a single call to select.
+
+A logbook is a picklable object (as long as all inserted objects are picklable) providing a very nice way to save the statistics of an evolution on disk.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 1,14
 
 .. note::
-   While Python 2.6 is required for the multiprocessing module, the pickling
-   of partial function is possible only since Python 2.7 (or 3.1), earlier
-   version of Python may throw some strange errors when using partial function
-   in the multiprocessing :func:`multiprocessing.Pool.map`. This may be
-   avoided by creating local function outside of the toolbox (in Python
-   version 2.6).
+   
+   Every algorithm returns a logbook containing the statistics for every generation and the number of evaluation for the whole evolution.
 
-.. note::
-   The pickling of lambda function is not yet available in Python.
+Printing to Screen
+------------------
+A logbook can be printed to screen or file. Its :meth:`~deap.tools.Logbook.__str__` method returns a header of each key inserted in the first record and the complete logbook for each of these keys. The row are in chronological order of insertion while the columns are in an undefined order. The easiest way to specify an order is to set the :attr:`~deap.tools.Logbook.header` attribute to a list of strings specifying the order of the columns.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 20
+
+The result is ::
+
+   >>> print(logbook)
+   gen   avg      spam
+   0     [ 50.2]
+
+A column name containing no entry in a specific record will be left blank as for the ``spam`` column in the las example.
+
+A logbook also contains a stream property returning only the yet unprinted entries. ::
+
+   >>> print(logbook.stream)
+   gen   avg      spam
+   0     [ 50.2]
+   >>> logbook.record(gen=1, evals=15, **record)
+   >>> print(logbook.stream)
+   1     [ 50.2]
 
 
-.. Parallel Evaluation
-.. -------------------
-.. The multiprocessing example shows how to use the :mod:`multiprocessing` module
-.. in order to enhance the computing power during the evaluations. First the
-.. toolbox contains a method named :func:`~deap.map`, this method has the same
-.. function as the built-in :func:`map` function. In order to use the
-.. multiprocessing module into the built-in :mod:`~deap.algorithms`, the only
-.. thing to do is to replace the map operation by a parallel one. Then the
-.. difference between the `Multiprocessing One Max Example
-.. <http://deap.googlecode.com/hg/examples/mpga_onemax.py>`_ and the `Regular One
-.. Max Example <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ is the
-.. addition of these two lines 
-.. ::
-.. 
-..    # Process Pool of 4 workers
-..    pool = multiprocessing.Pool(processes=4)
-..    tools.register("map", pool.map)
-.. 
-.. Parallel Variation
-.. ------------------
-.. 
-.. The paralellization of the variation operators is not directly supported in
-.. the algorithms, although it is still possible. What one needs is to create its
-.. own algorithm (from one in the algorithm module for example) and change the
-.. desired lines in order to use the :meth:`~deap.toolbox.map` method from the
-.. toolbox. This may be achieved for example, for the crossover operation from
-.. the :func:`~deap.algorithms.eaSimple` algorithm by replacing the crossover part
-.. of the algorithms by 
-.. ::
-..     
-..     parents1 = list()
-..     parents2 = list()
-..     to_replace = list()
-..     for i in range(1, len(offspring), 2):
-..         if random.random() < cxpb:
-..             parents1.append(offspring[i - 1])
-..             parents2.append(offspring[i])
-..             to_replace.append(i - 1)
-..             to_replace.append(i)
-..     
-..     children = tools.map(tools.mate, (parents1, parents2))
-..     
-..     for i, child in zip(to_replace, children):
-..         del child.fitness.values
-..         offspring[i] = child
-.. 
-.. Since the multiprocessing map does take a single iterable we must
-.. bundle/unbundle the parents, respectively by creating a tuple in the
-.. :func:`tools.map` function of the preceding code example and the following
-.. decorator on the crossover function.
-.. ::
-.. 
-..     def unbundle(func):
-..         def wrapUnbundle(bundled):
-..             return func(*bundled)
-..         return wrapUnbundle
-..     
-..     tools.decorate("mate", unbundle)
+Dealing with Multi-statistics
+-----------------------------
+The logbook is able to cope with the dictionary of dictionaries return by the :class:`~deap.tools.MultiStatistics` object. In fact, it will log the data in a :attr:`~deap.tools.Logbook.chapters` for each sub dictionary contained in the record. Thus, a *multi* record can be used exactly as a record.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 29-30
+
+One difference is the ordering of the columns, where we can specify an order for the chapters and their content as follow.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 32-34
+
+The resulting output is ::
+
+   >>> print(logbook)
+                        fitness                 size       
+               -------------------------  ---------------
+   gen   evals min      avg      max      min   avg   max
+   0     30    0.165572 1.71136  6.85956  3     4.54  7  
+
+Retrieving the data is also done through the chapters. 
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 38-40
+
+The generations, minimum fitness and average size are obtained in order. If some data is not available, a :data:`None` appears in the vector.
+
+Some Plotting Sugar
+-------------------
+One of the most common operation when an optimization is finished is to plot the data during the evolution. The :class:`~deap.tools.Logbook` allows to do this very efficiently. Using the select method, one can retrieve the desired data and plot it using matplotlib.
+
+.. literalinclude:: /code/tutorials/part_3/logbook.py
+   :lines: 38-41,42-61
+
+When added to the symbolic regression example it gives
+
+.. image:: /_images/twin_logbook.png
+   :width: 50%
