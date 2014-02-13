@@ -32,7 +32,7 @@ from operator import eq, lt
 
 ######################################
 # GP Data structure                  #
-######################################http://phdcomics.com/comics.php
+######################################
 
 # Define the name of type for any types.
 __type__ = object
