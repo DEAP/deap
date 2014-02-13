@@ -32,7 +32,7 @@ from operator import eq, lt
 
 ######################################
 # GP Data structure                  #
-######################################
+######################################http://phdcomics.com/comics.php
 
 # Define the name of type for any types.
 __type__ = object
@@ -815,25 +815,28 @@ def mutShrink(individual):
 # GP bloat control decorators        #
 ######################################
 
-def staticDepthLimit(max_depth):
-    """Implement a static limit on the depth of a GP tree, as defined by Koza
-    in [Koza1989]. It may be used to decorate both crossover and mutation
-    operators. When an invalid (too high) child is generated, it is simply
-    replaced by one of its parents.
+def staticLimit(key, max_value):
+    """Implement a static limit on some measurement on a GP tree, as defined
+    by Koza in [Koza1989]. It may be used to decorate both crossover and
+    mutation operators. When an invalid (over the limit) child is generated,
+    it is simply replaced by one of its parents, randomly selected.
 
     This operator can be used to avoid memory errors occuring when the tree
-    gets higher than 90-95 levels (as Python puts a limit on the call stack
-    depth), because it ensures that no tree higher than *max_depth* will ever
-    be accepted in the population (except if it was generated at initialization
-    time).
-
-    :param max_depth: The maximum depth allowed for an individual.
+    gets higher than 90 levels (as Python puts a limit on the call stack
+    depth), because it can ensure that no tree higher than this limit will ever
+    be accepted in the population, except if it was generated at initialization
+    time.
+    
+    :param key: The function to use in order the get the wanted value. For 
+                instance, on a GP tree, ``operator.attrgetter('height')`` may
+                be used to set a depth limit, and ``len`` to set a size limit.
+    :param max_value: The maximum value allowed for the given measurement.
     :returns: A decorator that can be applied to a GP operator using \
     :func:`~deap.base.Toolbox.decorate`
 
     .. note::
        If you want to reproduce the exact behavior intended by Koza, set
-       the *max_depth* param to 17.
+       *key* to ``operator.attrgetter('height')`` and *max_value* to 17.
 
     .. [Koza1989] J.R. Koza, Genetic Programming - On the Programming of
         Computers by Means of Natural Selection (MIT Press,
@@ -846,29 +849,7 @@ def staticDepthLimit(max_depth):
             keep_inds = [copy.deepcopy(ind) for ind in args]
             new_inds = list(func(*args, **kwargs))
             for i, ind in enumerate(new_inds):
-                if ind.height > max_depth:
-                    new_inds[i] = random.choice(keep_inds)
-            return new_inds
-        return wrapper
-    return decorator
-
-def staticSizeLimit(max_size):
-    """Implement a static limit on the size of a GP tree. It may be used to
-    decorate both crossover and mutation operators. When an invalid (too big)
-    child is generated, it is simply replaced by one of its parents.
-
-    :param max_size: The maximum size (number of nodes) allowed for an \
-    individual
-    :returns: A decorator that can be applied to a GP operator using \
-    :func:`~deap.base.Toolbox.decorate`
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            keep_inds = [copy.deepcopy(ind) for ind in args]
-            new_inds = list(func(*args, **kwargs))
-            for i, ind in enumerate(new_inds):
-                if len(ind) > max_size:
+                if key(ind) > max_value:
                     new_inds[i] = random.choice(keep_inds)
             return new_inds
         return wrapper

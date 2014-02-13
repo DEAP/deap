@@ -39,9 +39,9 @@ and genetic programming specific operators.
 ============================ =========================================== ========================================= ================================
  Initialization               Crossover                                   Mutation                                 Bloat control
 ============================ =========================================== ========================================= ================================
- :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`               :func:`~deap.gp.staticDepthLimit`
- :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`              :func:`~deap.gp.staticSizeLimit`
- :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutNodeReplacement`      :func:`selDoubleTournament`
+ :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`               :func:`~deap.gp.staticLimit`
+ :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`              :func:`selDoubleTournament`
+ :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutNodeReplacement`      ..
  ..                           ..                                          :func:`~deap.gp.mutEphemeral`            ..
  ..                           ..                                          :func:`~deap.gp.mutInsert`               ..
 ============================ =========================================== ========================================= ================================
@@ -146,9 +146,7 @@ Selection
 Bloat control
 +++++++++++++
 
-.. autofunction:: deap.gp.staticDepthLimit
-
-.. autofunction:: deap.gp.staticSizeLimit
+.. autofunction:: deap.gp.staticLimit
 
 Migration
 +++++++++
