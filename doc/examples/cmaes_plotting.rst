@@ -36,11 +36,11 @@ and :meth:`update` methods registered in the toolbox.
 .. literalinclude:: /../examples/es/cma_plotting.py
    :lines: 66-75
 
-Then, the previoulsy created objects start to play their role. The according
+Then, the previoulsy created objects start to play their role. The
 data is recorded in each object on each generation.
 
 .. literalinclude:: /../examples/es/cma_plotting.py
-   :lines: 80,81,88-93
+   :lines: 88-93
 
 Now that the data is recorded the only thing left to do is to plot it. We'll
 use `matplotlib <http://matplotlib.org>`_ to generate the graphics from the
