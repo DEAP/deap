@@ -48,7 +48,7 @@ API enhancements
 - tools: Mutation operators can now take either a value or a sequence
   of values as long as the individual as parameters (low, up, sigma, etc.).
 - tools: Removed DTM from the sources.
-- tools: Removed the cTools module. It was not properly maintain and
+- tools: Removed the cTools module. It was not properly maintained and
   rarely used.
 - tools: Renamed :func:`cxTwoPoints` as :func:`cxTwoPoint`
 - tools: Renamed :func:`cxESTwoPoints` as :func:`cxESTwoPoint`
@@ -61,6 +61,8 @@ Bug fixes
   from ``numpy.ndarray`` anymore. This was bug prone and extremely hard to maintain.
   Users are now requested to include ``numpy.copy()`` operation in their
   operators. A tutorial on inheriting from numpy is on its way.
+- Bounds as well as some other attribute related parameters now accept iterables or
+  values as argument in crossovers and mutations.
 
 
 

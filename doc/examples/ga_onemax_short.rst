@@ -32,4 +32,4 @@ these objects. Finally, the *verbose* keyword indicate wheter we
 want the algorithm to output the results after each generation or
 not.
 
-The complete :example:`ga/onemax_short`
+The complete source code: :example:`ga/onemax_short`.
