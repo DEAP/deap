@@ -11,6 +11,12 @@ in perfect harmony with parallelisation mechanism such as multiprocessing and `S
 <http://scoop.googlecode.com>`_. The following documentation presents the key concepts
 and many features to build your own evolutions.
 
+.. warning::
+   
+   If your are inheriting from :class:`numpy.ndarray` see the
+   :doc:`tutorials/advanced/numpy` tutorial and the
+   :doc:`/examples/ga_onemax_numpy` example.
+
 .. sidebar:: Getting Help
     
     Having trouble? We’d like to help!
@@ -53,19 +59,20 @@ and many features to build your own evolutions.
 * :doc:`about`
 
 .. toctree::
-	:hidden:
+  :hidden:
 
-	overview
-	installation
-	tutorials/basic/part1
-	tutorials/basic/part2
-	tutorials/basic/part3
-	tutorials/advanced/gp
-	tutorials/advanced/speedup
-	tutorials/advanced/benchmarking
-	tutorials/advanced/numpy
-	examples/index
-	api/index
-	releases
-	contributing
-	about
+  overview
+  installation
+  tutorials/basic/part1
+  tutorials/basic/part2
+  tutorials/basic/part3
+  tutorials/basic/part4
+  tutorials/advanced/gp
+  tutorials/advanced/checkpoint
+  tutorials/advanced/benchmarking
+  tutorials/advanced/numpy
+  examples/index
+  api/index
+  releases
+  contributing
+  about

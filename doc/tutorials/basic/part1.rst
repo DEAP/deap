@@ -40,6 +40,12 @@ by developers. Here is a guide on how to create some of those individuals using
 the :mod:`~deap.creator` and initializing them using a
 :class:`~deap.base.Toolbox`.
 
+.. warning::
+   
+   Before inheriting from :class:`numpy.ndarray` you should **absolutely** read
+   the :doc:`/tutorials/advanced/numpy` tutorial and have a look at the
+   :doc:`/examples/ga_onemax_numpy` example!
+
 .. _list-of-floats:
 
 List of Floats
