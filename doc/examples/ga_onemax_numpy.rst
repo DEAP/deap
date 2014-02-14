@@ -12,10 +12,10 @@ The first major difference is the crossover function that implements
 the copying mechanism mentionned in the :doc:`/tutorials/advanced/numpy` tutorial.
 
 .. literalinclude:: /../examples/ga/onemax_numpy.py
-   :pyobject: cxTwoPointsCopy
+   :pyobject: cxTwoPointCopy
 
 This crossover function is added to the toolbox instead of the original
-:func:`deap.tools.cxTwoPoints` crossover.
+:func:`deap.tools.cxTwoPoint` crossover.
 
 .. literalinclude:: /../examples/ga/onemax_numpy.py
    :lines: 67
