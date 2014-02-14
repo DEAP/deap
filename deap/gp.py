@@ -19,7 +19,6 @@ build a Genetic Program Tree, and the functions to evaluate it.
 
 This module support both strongly and loosely typed GP.
 """
-
 import copy
 import random
 import re
@@ -348,7 +347,7 @@ class PrimitiveSetTyped(object):
             self.context[name] = terminal
             terminal = name
             symbolic = True
-        elif str(terminal) in __builtins__.__dict__:
+        elif terminal in (True, False):
             # To support True and False terminals with Python 2.
             self.context[str(terminal)] = terminal
 
