@@ -16,6 +16,7 @@ Genetic Algorithm (GA)
 
 	ga_onemax
 	ga_onemax_short
+	ga_onemax_numpy
 	ga_knapsack
 	coev_coop
 

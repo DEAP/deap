@@ -43,10 +43,12 @@ API enhancements
 - tools: Mutation operators can now take either a value or a sequence
   of values as long as the individual as parameters (low, up, sigma, etc.).
 - tools: Removed DTM from the sources.
-- tools: Removed the cTools module. It was not properly maintain and
+- tools: Removed the cTools module. It was not properly maintained and
   rarely used.
 - tools: Renamed :func:`~deap.tools.cxTwoPoints` as :func:`~deap.tools.cxTwoPoint`
 - tools: Renamed :func:`~deap.tools.cxESTwoPoints` as :func:`~deap.tools.cxESTwoPoint`
+- tools: Bounds as well as some other attribute related parameters now accept iterables or
+  values as argument in crossovers and mutations.
 
 
 Documentation enhancements
