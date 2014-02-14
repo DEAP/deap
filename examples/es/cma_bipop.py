@@ -19,6 +19,8 @@ Testbed* with the exception of the modifications to the original CMA-ES
 parameters mentionned at the end of section 2's first paragraph.
 """
 
+from collections import deque
+
 import numpy
 
 from deap import algorithms
@@ -93,6 +95,7 @@ def main(verbose=True):
         equalfunvalues = list()
         bestvalues = list()
         medianvalues = list()
+        mins = deque(maxlen=TOLHISTFUN_ITER)
 
         # We start with a centroid in [-4, 4]**D
         strategy = cma.Strategy(centroid=numpy.random.uniform(-4, 4, N), sigma=sigma, lambda_=lambda_)
@@ -149,9 +152,8 @@ def main(verbose=True):
                 # The maximum number of iteration per CMA-ES ran
                 conditions["MaxIter"] = True
             
-            mins = logbooks[-1].select("min")
-            if (len(mins) >= TOLHISTFUN_ITER) and \
-               max(mins[-TOLHISTFUN_ITER:]) - min(mins[-TOLHISTFUN_ITER:]) < TOLHISTFUN:
+            mins.append(record["min"])
+            if (len(mins) == mins.maxlen) and max(mins) - min(mins) < TOLHISTFUN:
                 # The range of the best values is smaller than the threshold
                 conditions["TolHistFun"] = True
 
