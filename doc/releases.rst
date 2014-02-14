@@ -29,6 +29,9 @@ API enhancements
   labels dictionnary that can then be feeded directly to networkx to
   draw the tree.
 - gp: Renamed :func:`deap.gp.genRamped` as :func:`deap.gp.genHalfAndHalf`.
+- gp: Merged :func:`~deap.gp.staticDepthLimit` and :func:`~deap.gp.staticSizeLimit` in a 
+  single function :func:`~deap.gp.staticLimit` which takes a key function in argument than can
+  be return the height, the size or whatever attribute the tree should be limited on.
 - tools: Revised the :class:`~deap.tools.HallOfFame` to include only unique individuals.
 - tools: Changed the way statistics are computed. See the
   :class:`~deap.tools.Statistics` and :class:`~deap.tools.MultiStatistics`
