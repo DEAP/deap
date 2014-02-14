@@ -70,9 +70,9 @@ Thus, care must be taken when inheriting from :class:`numpy.ndarray`;
 copying. See the One Max with Numpy example for the complete two points
 crossover.
 
-Multi-objective
----------------
-In multi-objective situation when one wants to use a :class:`~deap.tools.ParetoFront`
+Comparing Individuals
+---------------------
+When one wants to use a :class:`~deap.tools.HallOfFame` or :class:`~deap.tools.ParetoFront`
 hall-of-fame. The *similar* function should be changed to a compare all function. Using 
 the regular :func:`operator.eq` function will result in a vector of comparisons
 ::
@@ -96,7 +96,7 @@ One must replace the *similar* operator by a numpy function like :func:`numpy.ar
 or :func:`numpy.allclose`.
 ::
 
-	hof = tools.ParetoFront(similar=numpy.array_equal)
+	hof = tools.HallOfFame(1, similar=numpy.array_equal)
 
 Now the condition can be computed and the hall-of-fame will be happy.
 ::
