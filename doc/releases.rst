@@ -32,6 +32,7 @@ API enhancements
 - gp: New graph function that returns a list of nodes, edges and a
   labels dictionnary that can then be feeded directly to networkx to
   draw the tree.
+- gp: Renamed :func:`genRamped` as :func:`genHalfAndHalf`.
 - tools: Revised the Hall of Fame to include only unique individuals.
 - tools: Changed the way statistics are handled and printed. See the
   :class:`~deap.tools.Statistics` and :class:`~deap.tools.MultiStatistics`
@@ -49,6 +50,8 @@ API enhancements
 - tools: Removed DTM from the sources.
 - tools: Removed the cTools module. It was not properly maintain and
   rarely used.
+- tools: Renamed :func:`cxTwoPoints` as :func:`cxTwoPoint`
+- tools: Renamed :func:`cxESTwoPoints` as :func:`cxESTwoPoint`
 
 Bug fixes
 +++++++++

@@ -21,7 +21,7 @@ Here is a list of the implemented operators in DEAP,
  Initialization               Crossover                                   Mutation                                  Selection                   Migration 
 ============================ =========================================== ========================================= ============================ ================
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`       :func:`migRing`
- :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`         ..             
+ :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`         ..             
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`            ..             
  ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`            ..             
  ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`           ..             
@@ -36,15 +36,15 @@ Here is a list of the implemented operators in DEAP,
 
 and genetic programming specific operators.
 
-============================ =========================================== ========================================= ================================
- Initialization               Crossover                                   Mutation                                 Bloat control
-============================ =========================================== ========================================= ================================
- :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`               :func:`~deap.gp.staticLimit`
- :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`              :func:`selDoubleTournament`
- :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutNodeReplacement`      ..
- ..                           ..                                          :func:`~deap.gp.mutEphemeral`            ..
- ..                           ..                                          :func:`~deap.gp.mutInsert`               ..
-============================ =========================================== ========================================= ================================
+================================ =========================================== ========================================= ================================
+ Initialization                  Crossover                                   Mutation                                 Bloat control
+================================ =========================================== ========================================= ================================
+ :func:`~deap.gp.genFull`        :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`               :func:`~deap.gp.staticLimit`
+ :func:`~deap.gp.genGrow`        :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`              :func:`selDoubleTournament`
+ :func:`~deap.gp.genHalfAndHalf` ..                                          :func:`~deap.gp.mutNodeReplacement`      ..
+ ..                              ..                                          :func:`~deap.gp.mutEphemeral`            ..
+ ..                              ..                                          :func:`~deap.gp.mutInsert`               ..
+=============================== =========================================== ========================================= ================================
 
 
 Initialization
@@ -60,12 +60,16 @@ Initialization
 
 .. autofunction:: deap.gp.genGrow
 
+.. autofunction:: deap.gp.genHalfAndHalf
+
 .. autofunction:: deap.gp.genRamped
 
 Crossover
 +++++++++
 
 .. autofunction:: deap.tools.cxOnePoint
+
+.. autofunction:: deap.tools.cxTwoPoint
 
 .. autofunction:: deap.tools.cxTwoPoints
 
@@ -80,6 +84,8 @@ Crossover
 .. autofunction:: deap.tools.cxBlend
 
 .. autofunction:: deap.tools.cxESBlend
+
+.. autofunction:: deap.tools.cxESTwoPoint
 
 .. autofunction:: deap.tools.cxESTwoPoints
 

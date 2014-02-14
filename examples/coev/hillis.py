@@ -78,12 +78,12 @@ ptoolbox.register("individual", tools.initRepeat, creator.Parasite, ptoolbox.par
 ptoolbox.register("population", tools.initRepeat, list, ptoolbox.individual)
 
 htoolbox.register("evaluate", evalNetwork, dimension=INPUTS)
-htoolbox.register("mate", tools.cxTwoPoints)
+htoolbox.register("mate", tools.cxTwoPoint)
 htoolbox.register("mutate", mutNetwork, dimension=INPUTS, mutpb=0.2, addpb=0.01, 
     delpb=0.01, indpb=0.05)
 htoolbox.register("select", tools.selTournament, tournsize=3)
 
-ptoolbox.register("mate", tools.cxTwoPoints)
+ptoolbox.register("mate", tools.cxTwoPoint)
 ptoolbox.register("indMutate", tools.mutFlipBit, indpb=0.05)
 ptoolbox.register("mutate", mutParasite, indmut=ptoolbox.indMutate, indpb=0.05)
 ptoolbox.register("select", tools.selTournament, tournsize=3)

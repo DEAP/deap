@@ -86,7 +86,7 @@ toolbox = base.Toolbox()
 toolbox.register('adf_expr0', gp.genFull, pset=adfset0, min_=1, max_=2)
 toolbox.register('adf_expr1', gp.genFull, pset=adfset1, min_=1, max_=2)
 toolbox.register('adf_expr2', gp.genFull, pset=adfset2, min_=1, max_=2)
-toolbox.register('main_expr', gp.genRamped, pset=pset, min_=1, max_=2)
+toolbox.register('main_expr', gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
 
 toolbox.register('ADF0', tools.initIterate, creator.Tree, toolbox.adf_expr0)
 toolbox.register('ADF1', tools.initIterate, creator.Tree, toolbox.adf_expr1)

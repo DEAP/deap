@@ -37,7 +37,7 @@ def evalSymbReg(individual, points):
     return sum(sqerrors) / len(points),
 
 toolbox = base.Toolbox()
-toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
+toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 

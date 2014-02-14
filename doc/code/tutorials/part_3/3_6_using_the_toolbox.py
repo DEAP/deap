@@ -9,7 +9,7 @@ def evaluateInd(individual):
     result = sum(individual)
     return result,
 
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evaluateInd)

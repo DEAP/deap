@@ -34,7 +34,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 def evalOneMax(individual):
     return sum(individual),
 
-def cxTwoPointsCopy(ind1, ind2):
+def cxTwoPointCopy(ind1, ind2):
     """Execute a two points crossover with copy on the input individuals. The
     copy is required because the slicing in numpy returns a view of the data,
     which leads to a self overwritting in the swap operation. For example,
@@ -64,7 +64,7 @@ def cxTwoPointsCopy(ind1, ind2):
     
     
 toolbox.register("evaluate", evalOneMax)
-toolbox.register("mate", cxTwoPointsCopy)
+toolbox.register("mate", cxTwoPointCopy)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
