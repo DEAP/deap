@@ -36,7 +36,7 @@ toolbox_ga.register("individual", tools.initRepeat, creator.IndGA, toolbox_ga.fl
 toolbox_ga.register("population", tools.initRepeat, list, toolbox_ga.individual)
 
 toolbox_ga.register("select", tools.selTournament, tournsize=3)
-toolbox_ga.register("mate", tools.cxTwoPoints)
+toolbox_ga.register("mate", tools.cxTwoPoint)
 toolbox_ga.register("mutate", tools.mutGaussian, mu=0, sigma=0.01, indpb=0.05)
 
 toolbox_gp = symbreg.toolbox

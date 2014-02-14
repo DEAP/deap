@@ -63,7 +63,7 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ne
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 toolbox.register("evaluate", evalEvoSN, dimension=INPUTS)
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", mutWire, dimension=INPUTS, indpb=0.05)
 toolbox.register("addwire", mutAddWire, dimension=INPUTS)
 toolbox.register("delwire", mutDelWire)

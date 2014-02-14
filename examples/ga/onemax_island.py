@@ -75,7 +75,7 @@ def migPipe(deme, k, pipein, pipeout, selection, replacement=None):
         deme[indx] = immigrant
 
 toolbox.register("evaluate", evalOneMax)
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 

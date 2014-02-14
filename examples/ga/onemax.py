@@ -35,7 +35,7 @@ def evalOneMax(individual):
 
 # Operator registering
 toolbox.register("evaluate", evalOneMax)
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 

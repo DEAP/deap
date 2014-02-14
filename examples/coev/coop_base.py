@@ -100,7 +100,7 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.bit
 toolbox.register("species", tools.initRepeat, list, toolbox.individual, SPECIES_SIZE)
 toolbox.register("target_set", initTargetSet)
 
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=1./IND_SIZE)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("get_best", tools.selBest, k=1)

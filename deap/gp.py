@@ -24,6 +24,7 @@ import copy
 import random
 import re
 import sys
+import warnings
 
 from collections import defaultdict, deque
 from functools import partial, wraps
@@ -510,7 +511,7 @@ def genGrow(pset, min_, max_, type_=__type__):
                (depth >= min_ and random.random() < pset.terminalRatio)
     return generate(pset, min_, max_, condition, type_)
 
-def genRamped(pset, min_, max_, type_=__type__):
+def genHalfAndHalf(pset, min_, max_, type_=__type__):
     """Generate an expression with a PrimitiveSet *pset*.
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
     the other half, the expression is generated with :func:`~deap.gp.genFull`.
@@ -524,6 +525,15 @@ def genRamped(pset, min_, max_, type_=__type__):
     """
     method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
+
+def genRamped(pset, min_, max_, type_=__type__):
+    """
+    .. deprecated:: 1.0
+        The function has been renamed. Use :func:`~deap.gp.genHalfAndHalf` instead.
+    """
+    warnings.warn("gp.genRamped has been renamed. Use genHalfAndHalf instead.",
+                  FutureWarning)
+    return genHalfAndHalf(pset, min_, max_, type_=__type__)
 
 def generate(pset, min_, max_, condition, type_=__type__):
     """Generate a Tree as a list of list. The tree is build

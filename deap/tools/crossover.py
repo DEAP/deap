@@ -1,5 +1,6 @@
 from __future__ import division
 import random
+import warnings
 
 from collections import Iterable
 from itertools import repeat
@@ -26,17 +27,17 @@ def cxOnePoint(ind1, ind2):
     
     return ind1, ind2
 
-def cxTwoPoints(ind1, ind2):
-    """Executes a two points crossover on the input :term:`sequence`
-    individuals. The two individuals are modified in place and both keep their
-    original length. 
+def cxTwoPoint(ind1, ind2):
+    """Executes a two-point crossover on the input :term:`sequence`
+    individuals. The two individuals are modified in place and both keep
+    their original length. 
     
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
     :returns: A tuple of two individuals.
 
-    This function uses the :func:`~random.randint` function from the python base
-    :mod:`random` module.
+    This function uses the :func:`~random.randint` function from the Python 
+    base :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
     cxpoint1 = random.randint(1, size)
@@ -50,6 +51,15 @@ def cxTwoPoints(ind1, ind2):
         = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
         
     return ind1, ind2
+
+def cxTwoPoints(ind1, ind2):
+    """
+    .. deprecated:: 1.0
+       The function has been renamed.  Use :func:`~deap.tools.cxTwoPoint` instead.
+    """
+    warnings.warn("tools.cxTwoPoints has been renamed. Use cxTwoPoint instead.",
+                  FutureWarning)
+    return cxTwoPoint(ind1, ind2)
 
 def cxUniform(ind1, ind2, indpb):
     """Executes a uniform crossover that modify in place the two
@@ -388,7 +398,7 @@ def cxESBlend(ind1, ind2, alpha):
     
     return ind1, ind2
 
-def cxESTwoPoints(ind1, ind2):
+def cxESTwoPoint(ind1, ind2):
     """Executes a classical two points crossover on both the individuals and their
     strategy. The individuals shall be a :term:`sequence` and must have a
     :term:`sequence` :attr:`strategy` attribute. The crossover points for the
@@ -416,7 +426,18 @@ def cxESTwoPoints(ind1, ind2):
     
     return ind1, ind2
 
-__all__ = ['cxOnePoint', 'cxTwoPoints', 'cxUniform', 'cxPartialyMatched',
+def cxESTwoPoints(ind1, ind2):
+    """
+    .. deprecated:: 1.0
+        The function has been renamed. Use :func:`cxESTwoPoint` instead.
+    """
+    return cxESTwoPoints(ind1, ind2)
+
+# List of exported function names.
+__all__ = ['cxOnePoint', 'cxTwoPoint', 'cxUniform', 'cxPartialyMatched',
            'cxUniformPartialyMatched', 'cxOrdered', 'cxBlend',
            'cxSimulatedBinary','cxSimulatedBinaryBounded', 'cxMessyOnePoint', 
-           'cxESBlend', 'cxESTwoPoints']
+           'cxESBlend', 'cxESTwoPoint']
+
+# Deprecated functions
+__all__.extend(['cxTwoPoints', 'cxESTwoPoints'])

@@ -58,7 +58,7 @@ function, for example, could be done with
 Our primitive set is now ready to generate some trees. The :mod:`~deap.gp`
 module contains three prefix expression generation functions
 :func:`~deap.gp.genFull`, :func:`~deap.gp.genGrow`, and
-:func:`~deap.gp.genRamped`. Their first argument is a primitive set. They return
+:func:`~deap.gp.genHalfAndHalf`. Their first argument is a primitive set. They return
 a valid prefix expression in the form of a list of primitives.  The content of
 this list can be read by the :class:`~deap.gp.PrimitiveTree` class to create a
 prefix tree.  ::
@@ -245,7 +245,7 @@ with pygraphviz.  ::
 	creator.create("Individual", gp.PrimitiveTree)
 	
 	toolbox = base.Toolbox()
-	toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
+	toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
 	toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 	
 	expr = toolbox.individual()
