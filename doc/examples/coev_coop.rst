@@ -21,7 +21,7 @@ The first step is to create a bunch of species that will evolve in our
 population.
 
 .. literalinclude:: /../examples/coev/coop_evol.py
-   :lines: 70
+   :lines: 72
 
 Cooperative coevolution works by sending the best individual of each species
 (called representative) to help in the evaluation of the individuals of the
@@ -29,7 +29,7 @@ other species. Since the individuals are not yet evaluated we select randomly
 the individuals that will be in the set of representatives. 
 
 .. literalinclude:: /../examples/coev/coop_evol.py
-   :lines: 75
+   :lines: 77
 
 The evaluation function takes a list of individuals to be evaluated including
 the representatives of the other species and possibly some other arguments.
@@ -43,7 +43,7 @@ usual, something like this ::
 The evolution can now begin.
 
 .. literalinclude:: /../examples/coev/coop_evol.py
-   :lines: 83-95,101-103,111
+   :lines: 85-96,103-106,113-114
 
 The last lines evolve each species once before sharing their representatives.
 The common parts of an evolutionary algorithm are all present, variation,

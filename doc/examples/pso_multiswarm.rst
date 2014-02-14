@@ -45,7 +45,7 @@ Finally, all the functions are registered in the toolbox for further use in the 
 
 Moving Peaks
 ------------
-The registered evaluation function in the toolbox refers directly to the instance of the moving peak benchmark object :data:`mpb`. The call to :func:`mpb` evaluates the given individuals as any other evaluation function.
+The registered evaluation function in the toolbox refers directly to the instance of the :class:`~deap.benchmarks.movingpeaks.MovingPeaks` benchmark object :data:`mpb`. The call to :func:`mpb` evaluates the given individuals as any other evaluation function.
 
 Algorithm
 ---------
