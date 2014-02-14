@@ -37,14 +37,14 @@ Here is a list of the implemented operators in DEAP,
 and genetic programming specific operators.
 
 ================================ =========================================== ========================================= ================================
- Initialization                  Crossover                                   Mutation                                 Bloat control
+ Initialization                   Crossover                                   Mutation                                  Bloat control
 ================================ =========================================== ========================================= ================================
- :func:`~deap.gp.genFull`        :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`               :func:`~deap.gp.staticLimit`
- :func:`~deap.gp.genGrow`        :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`              :func:`selDoubleTournament`
- :func:`~deap.gp.genHalfAndHalf` ..                                          :func:`~deap.gp.mutNodeReplacement`      ..
- ..                              ..                                          :func:`~deap.gp.mutEphemeral`            ..
- ..                              ..                                          :func:`~deap.gp.mutInsert`               ..
-=============================== =========================================== ========================================= ================================
+ :func:`~deap.gp.genFull`         :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`                :func:`~deap.gp.staticLimit`
+ :func:`~deap.gp.genGrow`         :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`               :func:`selDoubleTournament`
+ :func:`~deap.gp.genHalfAndHalf`  ..                                          :func:`~deap.gp.mutNodeReplacement`       ..
+ ..                               ..                                          :func:`~deap.gp.mutEphemeral`             ..
+ ..                               ..                                          :func:`~deap.gp.mutInsert`                ..
+================================ =========================================== ========================================= ================================
 
 
 Initialization
