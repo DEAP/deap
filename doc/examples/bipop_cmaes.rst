@@ -21,11 +21,11 @@ The main function includes the setting of some parameters, namely the number
 of increasing population restarts and the initial sigma value. Then, the
 instanciation of the :class:`~deap.base.Toolbox` is done in the main function
 because it will change with the restarts. Next are initialized the
-:class:`~deap.tools.HallOfFame` and the list of :class:`~deap.tools.Statistics`
-objects, one for each restart.
+:class:`~deap.tools.HallOfFame`, The :class:`~deap.tools.statistics` and the list
+of :class:`~deap.tools.Logbook` objects, one for each restart.
 
 .. literalinclude:: /../examples/es/cma_bipop.py
-   :lines: 37-45
+   :lines: 37-53
 
 Then the first loop controlling the restart is set up. It encapsulates the
 generational loop with its many stop criteria. The content of this last loop
@@ -33,7 +33,7 @@ is simply the generate-update loop as presented in the
 :func:`deap.algorithms.eaGenerateUpdate` function.
 
 .. literalinclude:: /../examples/es/cma_bipop.py
-   :lines: 54,92-104,108-121,145-184,187-189
+   :lines: 62,101-110,114-130,151-188,192-194
 
 Some variables have been omited for clarity, refer to the complete example for
 more details :example:`es/cma_bipop`.
