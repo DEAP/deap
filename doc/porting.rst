@@ -18,6 +18,7 @@ Genetic Algorithms (GA)
 
 #. Replace every call to the function :func:`~deap.tools.cxTwoPoints` by a call to :func:`~deap.tools.cxTwoPoint`.
 #. Remove any import of cTools. If you need a faster implementation of the non-dominated sort, use :func:`~deap.tools.sortLogNondominated`.
+#. When inheriting from Numpy, you must manually copy the slices and compare individuals with numpy comparators. See the :doc:`tutorials/advanced/numpy` tutorial.
 
 Genetic Programming (GP)
 ------------------------
