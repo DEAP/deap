@@ -28,7 +28,7 @@ Here is a list of the implemented operators in DEAP,
  ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`             ..             
  ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`            ..             
  ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`    ..             
- ..                           :func:`cxESTwoPoints`                       ..                                        :func:`selDoubleTournament` ..             
+ ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament` ..             
  ..                           :func:`cxSimulatedBinary`                   ..                                        ..                          ..             
  ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                          ..             
  ..                           :func:`cxMessyOnePoint`                     ..                                        ..                          ..             
