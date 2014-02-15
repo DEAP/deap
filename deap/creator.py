@@ -53,7 +53,8 @@ else:
             the object's attributes. This one will deepcopy the array and its
             :attr:`__dict__` attribute.
             """
-            copy_ = numpy.ndarray.__deepcopy__(self, memo)
+            # copy_ = numpy.ndarray.__deepcopy__(self, memo)
+            copy_ = numpy.ndarray.copy(self)
             copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
             return copy_
 
