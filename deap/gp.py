@@ -532,7 +532,7 @@ def genRamped(pset, min_, max_, type_=__type__):
     """
     warnings.warn("gp.genRamped has been renamed. Use genHalfAndHalf instead.",
                   FutureWarning)
-    return genHalfAndHalf(pset, min_, max_, type_=__type__)
+    return genHalfAndHalf(pset, min_, max_, type_)
 
 def generate(pset, min_, max_, condition, type_=__type__):
     """Generate a Tree as a list of list. The tree is build
