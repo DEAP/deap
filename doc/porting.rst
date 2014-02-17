@@ -15,6 +15,8 @@ General
 #. Statistics and logging of data are accomplished by two distinct objects: :class:`~deap.tools.Statistics` and :class:`~deap.tools.Logbook`. Read the tutorial on :doc:`logging statistics <tutorials/basic/part3>`. 
 #. Replace :class:`~deap.tools.EvolutionLogger` by :class:`~deap.tools.Logbook`.
 #. Replace usage of :func:`tools.mean`, :func:`tools.var`, :func:`tools.std`, and :func:`tools.median` by their Numpy equivalent.
+#. If the fitness has multiple objectives, add the keyword argument ``axis=0`` when registering statistical function.
+#. 
 
 Genetic Algorithms (GA)
 =======================
