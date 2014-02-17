@@ -16,7 +16,6 @@ General
 #. Replace :class:`~deap.tools.EvolutionLogger` by :class:`~deap.tools.Logbook`.
 #. Replace usage of :func:`tools.mean`, :func:`tools.var`, :func:`tools.std`, and :func:`tools.median` by their Numpy equivalent.
 #. If the fitness has multiple objectives, add the keyword argument ``axis=0`` when registering statistical function.
-#. 
 
 Genetic Algorithms (GA)
 =======================
