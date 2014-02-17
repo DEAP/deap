@@ -37,13 +37,13 @@ def safeDiv(left, right):
     return x
 
 pset = gp.PrimitiveSet("MAIN", 1)
-pset.addPrimitive(numpy.add, 2)
-pset.addPrimitive(numpy.subtract, 2)
-pset.addPrimitive(numpy.multiply, 2)
+pset.addPrimitive(numpy.add, 2, name="vadd")
+pset.addPrimitive(numpy.subtract, 2, name="vsub")
+pset.addPrimitive(numpy.multiply, 2, name="vmul")
 pset.addPrimitive(safeDiv, 2)
-pset.addPrimitive(numpy.negative, 1)
-pset.addPrimitive(numpy.cos, 1)
-pset.addPrimitive(numpy.sin, 1)
+pset.addPrimitive(numpy.negative, 1, name="vneg")
+pset.addPrimitive(numpy.cos, 1, name="vcos")
+pset.addPrimitive(numpy.sin, 1, name="vsin")
 pset.addEphemeralConstant("rand101", lambda: random.randint(-1,1))
 pset.renameArguments(ARG0='x')
 
