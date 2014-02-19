@@ -1,5 +1,5 @@
 include *.txt
 recursive-include deap *.cpp
-recursive-include examples *.py *.csv *.json 
+recursive-include examples *.py *.csv *.json *.txt
 recursive-include doc *
 prune doc/_build
