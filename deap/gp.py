@@ -365,12 +365,24 @@ class PrimitiveSetTyped(object):
         :param ephemeral: function with no arguments returning a random value.
         :param ret_type: type of the object returned by *ephemeral*.
         """
-        assert name not in globals(), "Ephemeral name should be different "\
-                                      "than classes defined in the gp module."
-
-        class_ = type(name, (Ephemeral,), {'func' : staticmethod(ephemeral),
-                                            'ret' : ret_type})
-        globals()[name] = class_
+        module_gp = globals()
+        if not name in module_gp:
+            class_ = type(name, (Ephemeral,), {'func' : staticmethod(ephemeral),
+                                               'ret' : ret_type})
+            module_gp[name] = class_
+        else:
+            class_ = module_gp[name]
+            if issubclass(class_, Ephemeral):
+                if class_.func is not ephemeral:
+                    raise Exception("Ephemerals with different functions should "
+                                    "be named differently, even between psets.")
+                elif class_.ret is not ret_type:
+                    raise Exception("Ephemerals with the same name and function "
+                                    "should have the same type, even between psets.")
+            else:
+                raise Exception("Ephemerals should be named differently "
+                                "than classes defined in the gp module.")
+        
         self._add(class_)
         self.terms_count += 1
 
