@@ -1,6 +1,3 @@
-.. _examples:
-
-========
 Examples
 ========
 
@@ -19,6 +16,7 @@ Genetic Algorithm (GA)
 
 	ga_onemax
 	ga_onemax_short
+	ga_onemax_numpy
 	ga_knapsack
 	coev_coop
 
@@ -55,6 +53,7 @@ Particle Swarm Optimization (PSO)
 	:maxdepth: 1
 
 	pso_basic
+	pso_multiswarm
 
 Estimation of Distribution Algorithms (EDA)
 -------------------------------------------
@@ -64,10 +63,3 @@ Estimation of Distribution Algorithms (EDA)
    
    eda
 
-Distributed Task Manager (DTM)
-------------------------------
-.. toctree::
-	:maxdepth: 1
-
-	dtm_pi
-	dtm_ga_onemax

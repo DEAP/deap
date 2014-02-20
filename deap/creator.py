@@ -13,13 +13,9 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-"""The :mod:`~deap.creator` module is the heart and soul of DEAP, it allows to
-create classes that will fulfill the needs of your evolutionary
-algorithms. This module follows the meta-factory paradigm by allowing to
-create new classes via both composition and inheritance. Attributes both datas
-and functions are added to existing types in order to create new types
-empowered with user specific evolutionary computation capabilities. In effect,
-new classes can be built from any imaginable type, from :class:`list` to
+"""The :mod:`~deap.creator` is a meta-factory allowing to create classes that
+will fulfill the needs of your evolutionary algorithms. In effect, new
+classes can be built from any imaginable type, from :class:`list` to
 :class:`set`, :class:`dict`, :class:`~deap.gp.PrimitiveTree` and more,
 providing the possibility to implement genetic algorithms, genetic
 programming, evolution strategies, particle swarm optimizers, and many more.
@@ -30,8 +26,8 @@ import copy
 
 class_replacers = {}
 """Some classes in Python's standard library as well as third party library
-may be in part incompatible with the logic used in DEAP. In order to palliate
-to this problem, the method :func:`create` uses the dictionary
+may be in part incompatible with the logic used in DEAP. To palliate
+this problem, the method :func:`create` uses the dictionary
 `class_replacers` to identify if the base type provided is problematic, and if
 so  the new class inherits from the replacement class instead of the
 original base class.
@@ -52,39 +48,23 @@ except AttributeError:
     pass
 else:
     class _numpy_array(numpy.ndarray):
-        def __getslice__(self, i, j):
-            """Overrides the getslice from numpy.ndarray that returns a shallow
-            copy of the slice. This one will return a deepcopy.
-            """
-            return numpy.ndarray.__getslice__(self, i, j).copy()
-        
         def __deepcopy__(self, memo):
             """Overrides the deepcopy from numpy.ndarray that does not copy
             the object's attributes. This one will deepcopy the array and its
             :attr:`__dict__` attribute.
             """
-            copy_ = numpy.ndarray.__deepcopy__(self, memo)
+            copy_ = numpy.ndarray.copy(self)
             copy_.__dict__.update(copy.deepcopy(self.__dict__, memo))
             return copy_
 
         @staticmethod
         def __new__(cls, iterable):
-            """Creates a new instance of a numpy.ndarray from a function call"""
+            """Creates a new instance of a numpy.ndarray from a function call.
+            Adds the possibility to instanciate from an iterable."""
             return numpy.array(list(iterable)).view(cls)
             
         def __setstate__(self, state):
             self.__dict__.update(state)
-
-        def __array_finalize__(self, obj):
-            # __init__ will reinitialize every member of the subclass.
-            # This might not be desirable for example in the case of an ES. 
-            self.__init__()
-
-            # Instead, we could use the following that will simply deepcopy 
-            # every member that is present in the original class.
-            # This is significantly slower. 
-            #if self.__class__ == obj.__class__:
-            #    self.__dict__.update(copy.deepcopy(obj.__dict__))
 
         def __reduce__(self):
             return (self.__class__, (list(self),), self.__dict__)
@@ -146,7 +126,7 @@ def create(name, base, **kargs):
     dict_inst = {}
     dict_cls = {}
     for obj_name, obj in kargs.iteritems():
-        if hasattr(obj, "__call__"):
+        if isinstance(obj, type):
             dict_inst[obj_name] = obj
         else:
             dict_cls[obj_name] = obj
@@ -168,8 +148,6 @@ def create(name, base, **kargs):
             setattr(self, obj_name, obj())
         if base.__init__ is not object.__init__:
             base.__init__(self, *args, **kargs)
-        else:
-            base.__init__(self)
 
     objtype = type(str(name), (base,), dict_cls)
     objtype.__init__ = initType

@@ -20,16 +20,16 @@ population.
 The first step is to create a bunch of species that will evolve in our
 population.
 
-.. literalinclude:: /code/examples/coev/coev_coop_evol.py
-   :lines: 74
+.. literalinclude:: /../examples/coev/coop_evol.py
+   :lines: 72
 
 Cooperative coevolution works by sending the best individual of each species
 (called representative) to help in the evaluation of the individuals of the
 other species. Since the individuals are not yet evaluated we select randomly
 the individuals that will be in the set of representatives. 
 
-.. literalinclude:: /code/examples/coev/coev_coop_evol.py
-   :lines: 79
+.. literalinclude:: /../examples/coev/coop_evol.py
+   :lines: 77
 
 The evaluation function takes a list of individuals to be evaluated including
 the representatives of the other species and possibly some other arguments.
@@ -42,8 +42,8 @@ usual, something like this ::
 
 The evolution can now begin.
 
-.. literalinclude:: /code/examples/coev/coev_coop_evol.py
-   :lines: 87-99,105-107,115
+.. literalinclude:: /../examples/coev/coop_evol.py
+   :lines: 85-96,103-106,113-114
 
 The last lines evolve each species once before sharing their representatives.
 The common parts of an evolutionary algorithm are all present, variation,
@@ -56,11 +56,11 @@ to add a species and remove useless species on stagnation. These steps are not
 covered in this example but are present in the complete source code of
 the coevolution examples.
 
-- `Coevolution Base <code/coev/coev_coop_base.py>`_
-- `Coevolution Niching <code/coev/coev_coop_niche.py>`_
-- `Coevolution Generalization <code/coev/coev_coop_gen.py>`_
-- `Coevolution Adaptation <code/coev/coev_coop_adapt.py>`_
-- `Coevolution Final <code/coev/coev_coop_evol.py>`_
+- :example:`Coevolution Base <coev/coop_base>`
+- :example:`Coevolution Niching <coev/coop_niche>`
+- :example:`Coevolution Generalization <coev/coop_gen>`
+- :example:`Coevolution Adaptation <coev/coop_adapt>`
+- :example:`Coevolution Final <coev/coop_evol>`
        
 .. [Potter2001] Potter, M. and De Jong, K., 2001, Cooperative
    Coevolution: An Architecture for Evolving Co-adapted Subcomponents.

@@ -35,7 +35,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     fitness invalidated. The individuals are cloned so returned population is
     independent of the input population.
     
-    :param population: A list of individuals to variate.
+    :param population: A list of individuals to vary.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
     :param cxpb: The probability of mating two individuals.
@@ -43,7 +43,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     :returns: A list of varied individuals that are independent of their
               parents.
     
-    The variator goes as follow. First, the parental population
+    The variation goes as follow. First, the parental population
     :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
     and the result is put into the offspring population :math:`P_\mathrm{o}`.
     A first loop over :math:`P_\mathrm{o}` is executed to mate consecutive
@@ -125,6 +125,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
        Basic Algorithms and Operators", 2000.
     """
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -133,22 +136,18 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
     if halloffame is not None:
         halloffame.update(population)
-    if stats is not None:
-        stats.update(population)
+
+    record = stats.compile(population) if stats else {}
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
         
-        # Variate the pool of individuals
+        # Vary the pool of individuals
         offspring = varAnd(offspring, toolbox, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
@@ -164,14 +163,13 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         # Replace the current population by the offspring
         population[:] = offspring
         
-        # Update the statistics with the new population
-        if stats is not None:
-            stats.update(population)
-
+        # Append the current generation statistics to the logbook
+        record = stats.compile(population) if stats else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
+            print logbook.stream        
 
-    return population
+    return population, logbook
 
 def varOr(population, toolbox, lambda_, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
@@ -179,7 +177,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     their fitness invalidated. The individuals are cloned so returned
     population is independent of the input population.
     
-    :param population: A list of individuals to variate.
+    :param population: A list of individuals to vary.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
     :param lambda\_: The number of children to produce
@@ -188,7 +186,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :returns: A list of varied individuals that are independent of their
               parents.
     
-    The variator goes as follow. On each of the *lambda_* iteration, it
+    The variation goes as follow. On each of the *lambda_* iteration, it
     selects one of the three operations; crossover, mutation or reproduction.
     In the case of a crossover, two individuals are selected at random from
     the parental population :math:`P_\mathrm{p}`, those individuals are cloned
@@ -266,6 +264,9 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     registered in the toolbox. This algorithm uses the :func:`varOr`
     variation.
     """
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -274,19 +275,15 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     if halloffame is not None:
         halloffame.update(population)
-    if stats is not None:
-        stats.update(population)
+
+    record = stats.compile(population) if stats is not None else {}
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
-        # Variate the population
+        # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
         
         # Evaluate the individuals with an invalid fitness
@@ -303,12 +300,12 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         population[:] = toolbox.select(population + offspring, mu)
 
         # Update the statistics with the new population
-        if stats is not None:
-            stats.update(population)
+        record = stats.compile(population) if stats is not None else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
+            print logbook.stream
 
-    return population
+    return population, logbook
     
 def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                     stats=None, halloffame=None, verbose=__debug__):
@@ -358,19 +355,18 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     if halloffame is not None:
         halloffame.update(population)
-    if stats is not None:
-        stats.update(population)
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    record = stats.compile(population) if stats is not None else {}
+    logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-        logger.logGeneration(evals=len(population), gen=0, stats=stats)
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen+1):
-        # Variate the population
+        # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
 
         # Evaluate the individuals with an invalid fitness
@@ -387,12 +383,13 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         population[:] = toolbox.select(offspring, mu)
 
         # Update the statistics with the new population
-        if stats is not None:
-            stats.update(population)
+        record = stats.compile(population) if stats is not None else {}
+        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            logger.logGeneration(evals=len(invalid_ind), gen=gen, stats=stats)
+            print logbook.stream
 
-    return population
+
+    return population, logbook
 
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
                      verbose=__debug__):
@@ -420,13 +417,9 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
        Wiley, pp. 527-565;
 
     """
-    if verbose:
-        column_names = ["gen", "evals"]
-        if stats is not None:
-            column_names += stats.functions.keys()
-        logger = tools.EvolutionLogger(column_names)
-        logger.logHeader()
-    
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
     for gen in xrange(ngen):
         # Generate a new population
         population = toolbox.generate()
@@ -441,11 +434,9 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
         
-        if stats is not None:
-            stats.update(population)
-        
+        record = stats.compile(population) if stats is not None else {}
+        logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
-            logger.logGeneration(evals=len(population), gen=gen, stats=stats)
+            print logbook.stream
 
-    return population
-
+    return population, logbook

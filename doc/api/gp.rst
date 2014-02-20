@@ -11,22 +11,15 @@ Genetic Programming
 .. autoclass:: deap.gp.Primitive
 	:members:
 
-.. autoclass:: deap.gp.Operator
-	:members:
-
 .. autoclass:: deap.gp.Terminal
 	:members:
 
 .. autoclass:: deap.gp.Ephemeral
 	:members:
 
-.. autofunction:: deap.gp.stringify
+.. autofunction:: deap.gp.compile
 
-.. autofunction:: deap.gp.evaluate
-
-.. autofunction:: deap.gp.lambdify
-
-.. autofunction:: deap.gp.lambdifyADF
+.. autofunction:: deap.gp.compileADF
 
 .. autoclass:: deap.gp.PrimitiveSetTyped
 	:members:

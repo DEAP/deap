@@ -3,9 +3,7 @@ wish to learn how to use evolutionary algorithms and to those who wish to
 rediscover evolutionary algorithms. DEAP is the proof that evolutionary 
 algorithms do **not** need to be neither complex or complicated.
 
-EAP is part of the DEAP project, that also includes some facilities for the 
-automatic distribution and parallelization of tasks over a cluster of computers.
-The D part of DEAP, called DTM, is under intense development and currently 
-available as an alpha version. DTM currently provides two and a half ways to 
-distribute work loads around a clusters or LAN of workstations, based MPI and 
-TCP communication managers.
+DEAP is a novel evolutionary computation framework for rapid prototyping and testing 
+of ideas. It seeks to make algorithms explicit and data structures transparent. It 
+works in perfect harmony with parallelisation mechanism such as multiprocessing 
+and SCOOP (http://scoop.googlecode.com/).
