@@ -37,7 +37,7 @@ If you wish to build from sources, download_ or clone_ the repository and type::
 
    python setup.py install
 
-.. _download: https://code.google.com/p/deap/downloads/list
+.. _download: https://pypi.python.org/pypi/deap/
 .. _clone: https://code.google.com/p/deap/source/checkout
 
 .. _easy_install: http://pythonhosted.org/distribute/easy_install.html
