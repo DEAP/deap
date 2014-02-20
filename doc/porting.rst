@@ -34,6 +34,7 @@ Genetic Programming (GP)
 #. Replace every call to the function :func:`~deap.gp.genRamped` by a call to :func:`~deap.gp.genHalfAndHalf`.
 #. Replace every call to :func:`~deap.gp.stringify` by a call to :func:`str` or remove the call completely.
 #. Replace every call to :func:`~deap.gp.lambdifyADF` by a call to :func:`~deap.gp.compileADF`.
+#. Replace the decorators :func:`~deap.gp.staticDepthLimit` and :func:`~deap.gp.staticSizeLimit` by :func:`~deap.gp.staticLimit`. To specify a limit on either depth, size or any other attribute, it is now required to specify a `key` function. See :func:`~deap.gp.staticLimit` documentation for more information.
 
 Strongly Typed Genetic Programming (STGP)
 -----------------------------------------
