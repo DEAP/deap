@@ -203,6 +203,14 @@ class MovingPeaks:
         return sorted(maximums, reverse=True)
     
     def __call__(self, individual, count=True):
+        """Evaluate a given *individual* with the current benchmark
+        configuration.
+
+        :param indidivudal: The individual to evaluate.
+        :param count: Wether or not to count this evaluation in
+                      the total evaluation count. (Defaults to
+                      :data:`True`)
+        """
         possible_values = []
         
         for func, pos, height, width in zip(self.peaks_function,

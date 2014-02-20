@@ -21,14 +21,14 @@ Here is a list of the implemented operators in DEAP,
  Initialization               Crossover                                   Mutation                                  Selection                   Migration 
 ============================ =========================================== ========================================= ============================ ================
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`       :func:`migRing`
- :func:`initIterate`          :func:`cxTwoPoints`                         :func:`mutShuffleIndexes`                 :func:`selRoulette`         ..             
+ :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`         ..             
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`            ..             
  ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`            ..             
  ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`           ..             
  ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`             ..             
  ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`            ..             
  ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`    ..             
- ..                           :func:`cxESTwoPoints`                       ..                                        :func:`selDoubleTournament` ..             
+ ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament` ..             
  ..                           :func:`cxSimulatedBinary`                   ..                                        ..                          ..             
  ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                          ..             
  ..                           :func:`cxMessyOnePoint`                     ..                                        ..                          ..             
@@ -36,15 +36,15 @@ Here is a list of the implemented operators in DEAP,
 
 and genetic programming specific operators.
 
-============================ =========================================== ========================================= ================================
- Initialization               Crossover                                   Mutation                                 Bloat control
-============================ =========================================== ========================================= ================================
- :func:`~deap.gp.genFull`     :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`               :func:`~deap.gp.staticDepthLimit`
- :func:`~deap.gp.genGrow`     :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`              :func:`~deap.gp.staticSizeLimit`
- :func:`~deap.gp.genRamped`   ..                                          :func:`~deap.gp.mutNodeReplacement`      :func:`selDoubleTournament`
- ..                           ..                                          :func:`~deap.gp.mutEphemeral`            ..
- ..                           ..                                          :func:`~deap.gp.mutInsert`               ..
-============================ =========================================== ========================================= ================================
+================================ =========================================== ========================================= ================================
+ Initialization                   Crossover                                   Mutation                                  Bloat control
+================================ =========================================== ========================================= ================================
+ :func:`~deap.gp.genFull`         :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`                :func:`~deap.gp.staticLimit`
+ :func:`~deap.gp.genGrow`         :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`               :func:`selDoubleTournament`
+ :func:`~deap.gp.genHalfAndHalf`  ..                                          :func:`~deap.gp.mutNodeReplacement`       ..
+ ..                               ..                                          :func:`~deap.gp.mutEphemeral`             ..
+ ..                               ..                                          :func:`~deap.gp.mutInsert`                ..
+================================ =========================================== ========================================= ================================
 
 
 Initialization
@@ -60,12 +60,16 @@ Initialization
 
 .. autofunction:: deap.gp.genGrow
 
+.. autofunction:: deap.gp.genHalfAndHalf
+
 .. autofunction:: deap.gp.genRamped
 
 Crossover
 +++++++++
 
 .. autofunction:: deap.tools.cxOnePoint
+
+.. autofunction:: deap.tools.cxTwoPoint
 
 .. autofunction:: deap.tools.cxTwoPoints
 
@@ -80,6 +84,8 @@ Crossover
 .. autofunction:: deap.tools.cxBlend
 
 .. autofunction:: deap.tools.cxESBlend
+
+.. autofunction:: deap.tools.cxESTwoPoint
 
 .. autofunction:: deap.tools.cxESTwoPoints
 
@@ -139,16 +145,14 @@ Selection
 
 .. autofunction:: deap.tools.selTournamentDCD
 
-.. autofunction:: sortFastND
+.. autofunction:: deap.tools.sortNondominated
 
-.. autofunction:: assignCrowdingDist
+.. autofunction:: deap.tools.sortLogNondominated
 
 Bloat control
 +++++++++++++
 
-.. autofunction:: deap.gp.staticDepthLimit
-
-.. autofunction:: deap.gp.staticSizeLimit
+.. autofunction:: deap.gp.staticLimit
 
 Migration
 +++++++++
@@ -157,16 +161,17 @@ Migration
 
 Statistics
 ----------
-.. autoclass:: deap.tools.Statistics([key][, n])
+.. autoclass:: deap.tools.Statistics([key])
 	:members:
 
-.. autofunction:: deap.tools.mean
+.. autoclass:: deap.tools.MultiStatistics(**kargs)
+	:members:
 
-.. autofunction:: deap.tools.median
+Logbook
+-------
 
-.. autofunction:: deap.tools.var
-
-.. autofunction:: deap.tools.std
+.. autoclass:: deap.tools.Logbook
+   :members:
 
 Hall-Of-Fame
 ------------
@@ -184,27 +189,6 @@ Hall-Of-Fame
 
    .. automethod:: deap.tools.ParetoFront.update
 
-Evolution Logger
-----------------
-.. autoclass:: deap.tools.EvolutionLogger([col_names][, precision])
-
-   .. automethod:: deap.tools.EvolutionLogger.logHeader
-
-   .. automethod:: deap.tools.EvolutionLogger.logGeneration([stats[, index]][, data[, ...]])
-   
-..   .. autoattribute:: deap.tools.EvolutionLogger.output
-
-Checkpoint
-----------
-.. autoclass:: deap.tools.Checkpoint()
-   
-   .. automethod:: deap.tools.Checkpoint.dump(filestream)
-   
-   .. automethod:: deap.tools.Checkpoint.load(filestream)
-   
-   .. automethod:: deap.tools.Checkpoint.add(name, object[, key])
-   
-   .. automethod:: deap.tools.Checkpoint.remove(name[, ...])
 
 History
 -------

@@ -13,7 +13,7 @@ As usual the first thing to do is to create the types and as usual we'll need
 a minimizing fitness and an individual that is a :class:`list`. A toolbox is
 then created with the desired evaluation function.
 
-.. literalinclude:: /code/examples/es/cmaes_minfct.py
+.. literalinclude:: /../examples/es/cma_minfct.py
    :lines: 28-32
 
 Then, it does not get any harder. Once a :class:`~deap.cma.Strategy` is
@@ -24,7 +24,7 @@ uses in the :func:`~deap.algorithms.eaGenerateUpdate` algorithm. The
 :class:`Individual` class. The random number generator from numpy is seeded
 because the :mod:`~deap.cma` module draws all its number from it.
 
-.. literalinclude:: /code/examples/es/cmaes_minfct.py
+.. literalinclude:: /../examples/es/cma_minfct.py
    :lines: 34,36,37,41-50,52,54
 
 .. [Hansen2001] Hansen and Ostermeier, 2001. Completely Derandomized

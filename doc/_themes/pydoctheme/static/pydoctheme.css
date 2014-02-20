@@ -22,6 +22,11 @@ div.related:first-child {
     border-bottom: 1px solid #ccc;
 }
 
+div.sidebar {
+    background-color: #eeeeee;
+}
+
+
 div.sphinxsidebar {
     background-color: #eeeeee;
     border-radius: 5px;
@@ -93,6 +98,10 @@ div.body div.seealso {
     border: 1px solid #dddd66;
 }
 
+a.reference em {
+    font-style: normal;
+}
+
 div.body a {
     color: #167171;
 }
@@ -122,13 +131,13 @@ div.body tt.xref, div.body a tt {
     font-weight: normal;
 }
 
-p.deprecated, p.deprecated-removed {
+.deprecated, .deprecated-removed {
     background-color: #ffe4e4;
     border: 1px solid #f66;
     padding: 7px
 }
 
-p.deprecated {
+.deprecated {
     border-radius: 3px;
 }
 

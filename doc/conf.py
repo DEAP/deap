@@ -27,7 +27,7 @@ import deap
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx'] 
+              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks'] 
 
 try:
     import matplotlib
@@ -47,7 +47,7 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8'
 
 # The master toctree document.
-master_doc = 'contents'
+master_doc = 'index'
 
 # General information about the project.
 project = u'DEAP'
@@ -103,8 +103,8 @@ pygments_style = 'default'
 todo_include_todos = True
 
 # Search in python documentation
-intersphinx_mapping = {'http://docs.python.org/': None,
-                       'http://docs.scipy.org/doc/numpy' : None}
+intersphinx_mapping = {'python' : ('http://docs.python.org/', None),
+                       'numpy'  : ('http://docs.scipy.org/doc/numpy', None)}
 
 # Reload the cached values every 5 days
 intersphinx_cache_limit = 5
@@ -124,6 +124,14 @@ plot_include_source = False
 
 #  Whether to show links to the files in HTML.
 plot_html_show_formats = True
+
+# -- Options for extlinks extension ----------------------------------------------
+
+import subprocess
+branch = str(subprocess.check_output(["hg", "branch"])[:-1])
+extlinks = {'example': ('https://code.google.com/p/deap/source/browse/examples/%s.py?name='+branch,
+                      'examples/')}
+
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -153,7 +161,7 @@ html_theme_options = {'collapsiblesidebar': True}
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-#html_favicon = None
+html_favicon = "deap_orange_icon_16x16.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -175,9 +183,7 @@ html_sidebars = {
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-html_additional_pages = {
-    'index': 'indexcontent.html',
-}
+html_additional_pages = {}
 
 # If false, no module index is generated.
 #html_use_modindex = True

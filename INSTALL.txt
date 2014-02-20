@@ -19,17 +19,6 @@ You might want to install this software somewhere else by addind the prefix opti
 
 $ python setup.py install --prefix=somewhere/else
 
-cTools
-++++++
-
-DEAP is shipped with a module named 'cTools' which provides a C++ implementation of NSGA-II.
-In order to install this module, you need to have previously installed Python headers for your distirbution
-and have C++ compiler. For example, on Ubuntu, it requires you to install the following packages :
-gcc and python-dev. Once all requirement are fulfilled, you can build/install DEAP with the cTools module with
-the following option '--with-ctools' :
-
-$ python setup.py install --with-ctools
-
 Other
 +++++
 

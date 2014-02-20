@@ -19,7 +19,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 def evaluate(individual):
     return sum(individual),
 
-toolbox.register("mate", tools.cxTwoPoints)
+toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evaluate)

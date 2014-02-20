@@ -16,6 +16,6 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin,
                pset=pset)
 
 toolbox = base.Toolbox()
-toolbox.register("expr", gp.genRamped, pset=pset, min_=1, max_=2)
+toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
 toolbox.register("individual", tools.initIterate, creator.Individual,
                  toolbox.expr)

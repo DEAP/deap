@@ -39,7 +39,7 @@ def update(individual, mu, sigma):
         individual[i] = random.gauss(mu_i, sigma)
 
 def tupleize(func):
-    """A decorator that tuple-ize the result of a function. This is usefull
+    """A decorator that tuple-ize the result of a function. This is useful
     when the evaluation function returns a single value.
     """
     def wrapper(*args, **kargs):
@@ -87,7 +87,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
             return best
     
     return best
-    
+
 if __name__ == "__main__":
     # Maximum number of restart for an algorithm that detects stagnation
     maxrestarts = 1000
