@@ -212,7 +212,7 @@ def median(seq, key=identity):
     else:
         return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
 
-def sortLogNondominated(individuals):
+def sortLogNondominated(individuals, k, first_front_only=False):
     """Sort *individuals* in pareto non-dominated fronts using the Generalized
     Reduced Run-Time Complexity Non-Dominated Sorting Algorithm presented by
     Fortin et al. (2013).
@@ -221,6 +221,9 @@ def sortLogNondominated(individuals):
     :returns: A list of Pareto fronts (lists), with the first list being the
               true Pareto front.
     """
+    if k == 0:
+        return []
+    
     #Separate individuals according to unique fitnesses
     unique_fits = defaultdict(list)
     for i, ind in enumerate(individuals):
@@ -241,7 +244,17 @@ def sortLogNondominated(individuals):
     for fit in fitnesses:
         index = front[fit]
         pareto_fronts[index].extend(unique_fits[fit])
-    return pareto_fronts
+
+    # Keep only the fronts required to have k individuals.
+    if not first_front_only:
+        count = 0
+        for i, front in enumerate(pareto_fronts):
+            count += len(front)
+            if count >= k:
+                return pareto_fronts[:i]
+        return pareto_fronts
+    else:
+        return pareto_fronts[0]
 
 def sortNDHelperA(fitnesses, obj, front):
     """Create a non-dominated sorting of S on the first M objectives"""
