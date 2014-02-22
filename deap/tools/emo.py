@@ -11,7 +11,7 @@ from collections import defaultdict
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
-def selNSGA2(individuals, k):
+def selNSGA2(individuals, k, nd='standard'):
     """Apply NSGA-II selection operator on the *individuals*. Usually, the
     size of *individuals* will be larger than *k* because any individual
     present in *individuals* will appear in the returned list at most once.
@@ -22,13 +22,21 @@ def selNSGA2(individuals, k):
     
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
+    :param nd: Specify the non-dominated algorithm to use: 'standard' or 'log'.
     :returns: A list of selected individuals.
     
     .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
        non-dominated sorting genetic algorithm for multi-objective
        optimization: NSGA-II", 2002.
     """
-    pareto_fronts = sortNondominated(individuals, k)
+    if nd == 'standard':
+        pareto_fronts = sortNondominated(individuals, k)
+    elif nd == 'log':
+        pareto_fronts = sortLogNondominated(individuals, k)
+    else:
+        raise Exception('selNSGA2: The choice of non-dominated sorting '
+                        'method "{0}" is invalid.'.format(nd))
+
     for front in pareto_fronts:
         assignCrowdingDist(front)
     
