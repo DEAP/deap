@@ -32,9 +32,7 @@ def mutGaussian(individual, mu, sigma, indpb):
     if not isinstance(sigma, Iterable):
         sigma = repeat(sigma, size)
     
-    for i in xrange(size):
-        m = next(mu)
-        s = next(sigma)
+    for i, m, s in zip(xrange(size), mu, sigma):
         if random.random() < indpb:
             individual[i] += random.gauss(m, s)
     
@@ -60,9 +58,7 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
     if not isinstance(up, Iterable):
         up = repeat(up, size)
     
-    for i in xrange(size):
-        xl = next(low)
-        xu = next(up)
+    for i, xl, xu in zip(xrange(size), low, up):
         if random.random() <= indpb:
             x = individual[i]
             delta_1 = (x - xl) / (xu - xl)
@@ -149,9 +145,7 @@ def mutUniformInt(individual, low, up, indpb):
     if not isinstance(up, Iterable):
         up = repeat(up, size)
     
-    for i in xrange(size):
-        xl = next(low)
-        xu = next(up)
+    for i, xl, xu in zip(xrange(size), low, up):
         if random.random() < indpb:
             individual[i] = random.randint(xl, xu)
     

@@ -303,9 +303,7 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     if not isinstance(up, Iterable):
         up = repeat(up, size)
 
-    for i in xrange(size):
-        xl = next(low)
-        xu = next(up)
+    for i, xl, xu in zip(xrange(size), low, up):
         if random.random() <= 0.5:
             # This epsilon should probably be changed for 0 since 
             # floating point arithmetic in Python is safer
