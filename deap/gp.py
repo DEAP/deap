@@ -368,8 +368,7 @@ class PrimitiveSetTyped(object):
         module_gp = globals()
         if not name in module_gp:
             class_ = type(name, (Ephemeral,), {'func' : staticmethod(ephemeral),
-                                               'ret' : ret_type,
-                                               'arity' : 0})
+                                               'ret' : ret_type})
             module_gp[name] = class_
         else:
             class_ = module_gp[name]
