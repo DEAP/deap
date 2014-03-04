@@ -2,7 +2,7 @@ from __future__ import division
 import random
 import warnings
 
-from collections import Iterable
+from collections import Sequence
 from itertools import repeat
 
 ######################################
@@ -284,9 +284,9 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     :param eta: Crowding degree of the crossover. A high eta will produce
                 children resembling to their parents, while a small eta will
                 produce solutions much more different.
-    :param low: A value or an :term:`python:iterable` of values that is the lower
+    :param low: A value or an :term:`python:sequence` of values that is the lower
                 bound of the search space.
-    :param up: A value or an :term:`python:iterable` of values that is the upper
+    :param up: A value or an :term:`python:sequence` of values that is the upper
                bound of the search space.
     :returns: A tuple of two individuals.
 
@@ -298,11 +298,15 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
        original NSGA-II C code presented by Deb.
     """
     size = min(len(ind1), len(ind2))
-    if not isinstance(low, Iterable):
+    if not isinstance(low, Sequence):
         low = repeat(low, size)
-    if not isinstance(up, Iterable):
+    elif len(low) < size:
+        raise IndexError("low must be at least the size of the shorter individual: %d < %d" % (len(low), size))
+    if not isinstance(up, Sequence):
         up = repeat(up, size)
-
+    elif len(up) < size:
+        raise IndexError("up must be at least the size of the shorter individual: %d < %d" % (len(up), size))
+    
     for i, xl, xu in zip(xrange(size), low, up):
         if random.random() <= 0.5:
             # This epsilon should probably be changed for 0 since 

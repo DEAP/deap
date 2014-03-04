@@ -3,7 +3,7 @@ import math
 import random
 
 from itertools import repeat
-from collections import Iterable
+from collections import Sequence
 
 ######################################
 # GA Mutations                       #
@@ -16,9 +16,9 @@ def mutGaussian(individual, mu, sigma, indpb):
     The *indpb* argument is the probability of each attribute to be mutated.
     
     :param individual: Individual to be mutated.
-    :param mu: Mean or :term:`python:iterable` of means for the
+    :param mu: Mean or :term:`python:sequence` of means for the
                gaussian addition mutation.
-    :param sigma: Standard deviation or :term:`python:iterable` of 
+    :param sigma: Standard deviation or :term:`python:sequence` of 
                   standard deviations for the gaussian addition mutation.
     :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
@@ -27,10 +27,14 @@ def mutGaussian(individual, mu, sigma, indpb):
     functions from the python base :mod:`random` module.
     """
     size = len(individual)
-    if not isinstance(mu, Iterable):
+    if not isinstance(mu, Sequence):
         mu = repeat(mu, size)
-    if not isinstance(sigma, Iterable):
+    elif len(mu) < size:
+        raise IndexError("mu must be at least the size of individual: %d < %d" % (len(mu), size))
+    if not isinstance(sigma, Sequence):
         sigma = repeat(sigma, size)
+    elif len(sigma) < size:
+        raise IndexError("sigma must be at least the size of individual: %d < %d" % (len(sigma), size))
     
     for i, m, s in zip(xrange(size), mu, sigma):
         if random.random() < indpb:
@@ -46,17 +50,21 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
     :param eta: Crowding degree of the mutation. A high eta will produce
                 a mutant resembling its parent, while a small eta will
                 produce a solution much more different.
-    :param low: A value or an :term:`python:iterable` of values that
+    :param low: A value or a :term:`python:sequence` of values that
                 is the lower bound of the search space.
-    :param up: A value or an :term:`python:iterable` of values that
+    :param up: A value or a :term:`python:sequence` of values that
                is the upper bound of the search space.
     :returns: A tuple of one individual.
     """
     size = len(individual)
-    if not isinstance(low, Iterable):
+    if not isinstance(low, Sequence):
         low = repeat(low, size)
-    if not isinstance(up, Iterable):
+    elif len(low) < size:
+        raise IndexError("low must be at least the size of individual: %d < %d" % (len(low), size))
+    if not isinstance(up, Sequence):
         up = repeat(up, size)
+    elif len(up) < size:
+        raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
     
     for i, xl, xu in zip(xrange(size), low, up):
         if random.random() <= indpb:
@@ -130,20 +138,24 @@ def mutUniformInt(individual, low, up, indpb):
     by a integer uniformly drawn between *low* and *up* inclusively.
     
     :param individual: :term:`Sequence <sequence>` individual to be mutated.
-    :param low: The lower bound or an :term:`python:iterable` of
+    :param low: The lower bound or a :term:`python:sequence` of
                 of lower bounds of the range from wich to draw the new
                 integer.
-    :param up: The upper bound or an :term:`python:iterable` of
+    :param up: The upper bound or a :term:`python:sequence` of
                of upper bounds of the range from wich to draw the new
                integer.
     :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
     """
     size = len(individual)
-    if not isinstance(low, Iterable):
+    if not isinstance(low, Sequence):
         low = repeat(low, size)
-    if not isinstance(up, Iterable):
+    elif len(low) < size:
+        raise IndexError("low must be at least the size of individual: %d < %d" % (len(low), size))
+    if not isinstance(up, Sequence):
         up = repeat(up, size)
+    elif len(up) < size:
+        raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
     
     for i, xl, xu in zip(xrange(size), low, up):
         if random.random() < indpb:
