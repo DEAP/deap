@@ -45,6 +45,7 @@ and many features to build your own evolutions.
 
   * :doc:`tutorials/advanced/gp`
   * :doc:`tutorials/advanced/checkpoint`
+  * :doc:`tutorials/advanced/constraints`
   * :doc:`tutorials/advanced/benchmarking`
   * :doc:`tutorials/advanced/numpy`
   
@@ -70,6 +71,7 @@ and many features to build your own evolutions.
   tutorials/basic/part4
   tutorials/advanced/gp
   tutorials/advanced/checkpoint
+  tutorials/advanced/constraints
   tutorials/advanced/benchmarking
   tutorials/advanced/numpy
   examples/index
