@@ -16,7 +16,7 @@ def selNSGA2(individuals, k):
     size of *individuals* will be larger than *k* because any individual
     present in *individuals* will appear in the returned list at most once.
     Having the size of *individuals* equals to *k* will have no effect other
-    than sorting the population according according to their front rank. The
+    than sorting the population according to their front rank. The
     list returned contains references to the input *individuals*. For more
     details on the NSGA-II operator see [Deb2002]_.
     
