@@ -77,5 +77,8 @@ Bug fixes
 
 - tools: issue #26: Operators with bounds do not work correctly when 
   bounds are provided as list instead of iterator. rev: `b172432515af`, `9d4718a8cf2a`.
-- tools: add missing arguments to sortLogNondominated  (`k`, `first_front_only`). rev: f60a6520b666 
+- tools: add missing arguments to sortLogNondominated  (`k`, `first_front_only`). rev: f60a6520b666
+- gp: issue #32: :method:`PrimitiveTree.from_tree` used incorrect argument order with STGP. rev: 58c1a0711e1f
+
+
 
