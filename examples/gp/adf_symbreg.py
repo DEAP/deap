@@ -25,17 +25,17 @@ from deap import gp
 from deap import tools
 
 # Define new functions
-def safeDiv(left, right):
+def protectedDiv(left, right):
     try:
         return left / right
     except ZeroDivisionError:
-        return 0
+        return 1
 
 adfset2 = gp.PrimitiveSet("ADF2", 2)
 adfset2.addPrimitive(operator.add, 2)
 adfset2.addPrimitive(operator.sub, 2)
 adfset2.addPrimitive(operator.mul, 2)
-adfset2.addPrimitive(safeDiv, 2)
+adfset2.addPrimitive(protectedDiv, 2)
 adfset2.addPrimitive(operator.neg, 1)
 adfset2.addPrimitive(math.cos, 1)
 adfset2.addPrimitive(math.sin, 1)
@@ -44,7 +44,7 @@ adfset1 = gp.PrimitiveSet("ADF1", 2)
 adfset1.addPrimitive(operator.add, 2)
 adfset1.addPrimitive(operator.sub, 2)
 adfset1.addPrimitive(operator.mul, 2)
-adfset1.addPrimitive(safeDiv, 2)
+adfset1.addPrimitive(protectedDiv, 2)
 adfset1.addPrimitive(operator.neg, 1)
 adfset1.addPrimitive(math.cos, 1)
 adfset1.addPrimitive(math.sin, 1)
@@ -54,7 +54,7 @@ adfset0 = gp.PrimitiveSet("ADF0", 2)
 adfset0.addPrimitive(operator.add, 2)
 adfset0.addPrimitive(operator.sub, 2)
 adfset0.addPrimitive(operator.mul, 2)
-adfset0.addPrimitive(safeDiv, 2)
+adfset0.addPrimitive(protectedDiv, 2)
 adfset0.addPrimitive(operator.neg, 1)
 adfset0.addPrimitive(math.cos, 1)
 adfset0.addPrimitive(math.sin, 1)
@@ -65,7 +65,7 @@ pset = gp.PrimitiveSet("MAIN", 1)
 pset.addPrimitive(operator.add, 2)
 pset.addPrimitive(operator.sub, 2)
 pset.addPrimitive(operator.mul, 2)
-pset.addPrimitive(safeDiv, 2)
+pset.addPrimitive(protectedDiv, 2)
 pset.addPrimitive(operator.neg, 1)
 pset.addPrimitive(math.cos, 1)
 pset.addPrimitive(math.sin, 1)

@@ -26,21 +26,21 @@ from deap import tools
 from deap import gp
 
 # Define new functions
-def safeDiv(left, right):
+def protectedDiv(left, right):
     with numpy.errstate(divide='ignore',invalid='ignore'):
         x = numpy.divide(left, right)
         if isinstance(x, numpy.ndarray):
-            x[numpy.isinf(x)] = 0
-            x[numpy.isnan(x)] = 0
+            x[numpy.isinf(x)] = 1
+            x[numpy.isnan(x)] = 1
         elif numpy.isinf(x) or numpy.isnan(x):
-            x = 0
+            x = 1
     return x
 
 pset = gp.PrimitiveSet("MAIN", 1)
 pset.addPrimitive(numpy.add, 2, name="vadd")
 pset.addPrimitive(numpy.subtract, 2, name="vsub")
 pset.addPrimitive(numpy.multiply, 2, name="vmul")
-pset.addPrimitive(safeDiv, 2)
+pset.addPrimitive(protectedDiv, 2)
 pset.addPrimitive(numpy.negative, 1, name="vneg")
 pset.addPrimitive(numpy.cos, 1, name="vcos")
 pset.addPrimitive(numpy.sin, 1, name="vsin")
