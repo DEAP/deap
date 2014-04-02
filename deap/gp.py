@@ -127,7 +127,7 @@ class PrimitiveTree(list):
 
                 expr.append(primitive)
                 if isinstance(primitive, Primitive):
-                    ret_types.extendleft(primitive.args)
+                    ret_types.extendleft(reversed(primitive.args))
             else:
                 try:
                     token = eval(token)
