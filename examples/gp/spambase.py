@@ -42,15 +42,15 @@ pset.addPrimitive(operator.or_, [bool, bool], bool)
 pset.addPrimitive(operator.not_, [bool], bool)
 
 # floating point operators
-# Define a safe division function
-def safeDiv(left, right):
+# Define a protected division function
+def protectedDiv(left, right):
     try: return left / right
-    except ZeroDivisionError: return 0
+    except ZeroDivisionError: return 1
 
 pset.addPrimitive(operator.add, [float,float], float)
 pset.addPrimitive(operator.sub, [float,float], float)
 pset.addPrimitive(operator.mul, [float,float], float)
-pset.addPrimitive(safeDiv, [float,float], float)
+pset.addPrimitive(protectedDiv, [float,float], float)
 
 # logic operators
 # Define a new if-then-else function
