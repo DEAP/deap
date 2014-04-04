@@ -24,6 +24,9 @@ import numpy
 import copy
 from math import sqrt, log, exp
 
+import tools
+import hv
+
 class Strategy(object):
     """
     A strategy that will keep track of the basic parameters of the CMA-ES
@@ -290,3 +293,146 @@ class StrategyOnePlusLambda(object):
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
         self.A = numpy.linalg.cholesky(self.C)
         
+class StrategyMultiObjective(object):
+    def __init__(self, population, sigma, **params):
+        self.parents = population
+        self.dim = len(self.parents[0])
+
+        self.sigmas = [sigma] * len(population)
+        self.C = [numpy.identity(self.dim) for _ in range(len(population))]
+        self.A = [numpy.identity(self.dim) for _ in range(len(population))]
+        
+        self.pc = [numpy.zeros(self.dim) for _ in range(len(population))]
+        self.computeParams(kargs)
+        self.psucc = [self.ptarg] * len(population)
+
+    def computeParams(self, params):
+        """Computes the parameters depending on :math:`\lambda`. It needs to
+        be called again if :math:`\lambda` changes during evolution.
+        
+        :param params: A dictionary of the manually set parameters.
+        """
+        # Selection :
+        self.lambda_ = params.get("lambda_", 1)
+        self.mu = params.get("mu", len(self.parents))
+        
+        # Step size control :
+        self.d = params.get("d", 1.0 + self.dim/(2.0*self.lambda_))
+        self.ptarg = params.get("ptarg", 1.0/(5+sqrt(self.lambda_)/2.0))
+        self.cp = params.get("cp", self.ptarg*self.lambda_/(2+self.ptarg*self.lambda_))
+        
+        # Covariance matrix adaptation
+        self.cc = params.get("cc", 2.0/(self.dim+2.0))
+        self.ccov = params.get("ccov", 2.0/(self.dim**2 + 6.0))
+        self.pthresh = params.get("pthresh", 0.44)
+
+    def generate(self, ind_init):
+        arz = numpy.random.standard_normal((self.lambda_, self.dim))
+        individuals = list()
+        if self.lambda_ == self.mu:
+            for i in range(self.lambda_):
+                z = self.parents[i] + self.sigma[i] * numpy.dot(arz[i], self.A[i].T)
+                individuals.append(ind_init(z))
+                individuals[-1]._ps = "o", i
+            numpy.random.shuffle(individuals)
+        else:
+            ndom = sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
+            for i in range(self.lambda_):
+                j = numpy.random.randint(0, len(ndom))
+                z = self.parents[j] + self.sigma[j] * numpy.dot(arz[i], self.A[j].T)
+                individuals.append(ind_init(z))
+                individuals[-1]._ps = "o", j
+        
+        for i, p in enumerate(self.parents):
+            p._ps = "p", i
+
+        return individuals
+
+    def update(self, population):
+        candidates = population + self.parents
+        pareto_fronts = sortLogNondominated(candidates, len(candidates))
+
+        chosen = list()
+        mid_front = None
+        not_chosen = list()
+
+        # Fill the next population (chosen) witht the fronts until there is not enouch space
+        # When an entire front does not fit in the space left we rely on the hypervolume
+        # for this front
+        # The remaining front is explicitely not chosen
+        for front in pareto_fronts:
+            if len(chosen) + len(front) <= self.mu:
+                chosen += front
+            elif mid_front is None and len(chosen) < self.mu:
+                mid_front = front
+            else:
+                not_chosen += front
+
+        # Separate the mid front to accept only k individuals
+        k = self.mu - len(chosen)
+        if k > 0:
+            keep_idx = hv.hypervolume_kmax(mid_front, k)
+            rm_idx = set(range(len(mid_front))) - set(keep_idx)
+            chosen += [mid_front[i] for i in keep_idx]
+            not_chosen += [mid_front[i] for i in rm_idx]
+
+        cp, cc, ccov = self.cp, self.cc, self.ccov
+        d, ptarg, pthresh = self.d, self.ptarg, self.pthresh
+
+        # Make copies for offspring only
+        sigmas = [self.sigmas[ind._ps[1]] for ind in chosen if ind._ps[0] == "o" else None]
+        C = [self.C[ind._ps[1]].copy() for ind in chosen if ind._ps[0] == "o" else None]
+        pc = [self.pc[ind._ps[1]].copy() for ind in chosen if ind._ps[0] == "o" else None]
+        psucc = [self.psucc[ind._ps[1]] for ind in chosen if ind._ps[0] == "o" else None]
+
+        # Update the appropriate internal parameters
+        for i, ind in enumerate(chosen):
+            t, parent_idx = ind._ps
+
+            # Only the offsprings update the parameter set
+            if t == "o":
+                # Update (Success = 1 since it is chosen)
+                psucc[i] = (1 - cp) * psucc[i] + cp
+                sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1 - ptarg)))
+
+                if psucc[i] < pthresh:
+                    x_p = numpy.array(ind)
+                    x = numpy.array(self.parents[idx])
+                    pc[i] = (1 - cc) * pc[i] + sqrt(cc * (2 - cc)) * (xp - x) / self.sigmas[idx]
+                    C[i] = (1 - ccov) * C[i] + ccov * numpy.dot(pc[i], pc[i])
+                else:
+                    pc[i] = (1 - cc) * pc
+                    C[i] = (1 - ccov) * C[i] + ccov * (numpy.dot(pc[i], pc[i]) + cc * (2 - cc) * C[i])
+
+                self.psucc[idx] = (1 - cp) * self.psucc[idx]
+                self.sigmas[idx] = self.sigmas[idx] * exp((self.psucc[idx] - ptarg) / (d * (1 - ptarg)))
+
+        # It is unnecessary to update the entire parameter set for not chosen individuals
+        # The parameter will not make it to the next generation
+        for ind in not_chosen:
+            t, parent_idx = ind._ps
+            
+            # Only the offsprings update the parameter set
+            if t == "o":
+                self.psucc[idx] = (1 - cp) * self.psucc[idx]
+                self.sigmas[idx] = self.sigmas[idx] * exp((self.psucc[idx] - ptarg) / (d * (1 - ptarg)))
+            
+        # Make a copy of the internal parameters
+        # The parameter is in the temporary variable for offspring and in the original one for parents
+        self.parents = chosen
+        self.sigmas = [sigmas[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.sigmas[ind._ps[1]]
+        self.C = [C[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.C[ind._ps[1]]
+        self.pc = [pc[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.pc[ind._ps[1]]
+        self.psucc = [psucc[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.psucc[ind._ps[1]]
+
+        # We use Cholesky since for now we have no use of eigen decomposition
+        # Basically, Cholesky returns a matrix A as C = A*A.T
+        # Eigen decomposition returns two matrix B and D^2 as C = B*D^2*B.T = B*D*D*B.T
+        # So A == B*D
+        # To compute the new individual we need to multiply each vector z by A
+        # as y = centroid + sigma * A*z
+        # So the Cholesky is more straightforward as we don't need to compute 
+        # the squareroot of D^2, and multiply B and D in order to get A, we directly get A.
+        # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
+        # to compute covariance matrix inverse in the step-size evolutionary path computation.
+        self.A = [numpy.linalg.cholesky(C) in self.C]
