@@ -25,7 +25,7 @@ import copy
 from math import sqrt, log, exp
 
 import tools
-import hv
+import tools.hv as hv
 
 class Strategy(object):
     """
@@ -303,7 +303,7 @@ class StrategyMultiObjective(object):
         self.A = [numpy.identity(self.dim) for _ in range(len(population))]
         
         self.pc = [numpy.zeros(self.dim) for _ in range(len(population))]
-        self.computeParams(kargs)
+        self.computeParams(params)
         self.psucc = [self.ptarg] * len(population)
 
     def computeParams(self, params):
@@ -331,15 +331,15 @@ class StrategyMultiObjective(object):
         individuals = list()
         if self.lambda_ == self.mu:
             for i in range(self.lambda_):
-                z = self.parents[i] + self.sigma[i] * numpy.dot(arz[i], self.A[i].T)
+                z = self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i].T)
                 individuals.append(ind_init(z))
                 individuals[-1]._ps = "o", i
             numpy.random.shuffle(individuals)
         else:
-            ndom = sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
+            ndom = tools.sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
             for i in range(self.lambda_):
                 j = numpy.random.randint(0, len(ndom))
-                z = self.parents[j] + self.sigma[j] * numpy.dot(arz[i], self.A[j].T)
+                z = self.parents[j] + self.sigmas[j] * numpy.dot(arz[i], self.A[j].T)
                 individuals.append(ind_init(z))
                 individuals[-1]._ps = "o", j
         
@@ -350,7 +350,7 @@ class StrategyMultiObjective(object):
 
     def update(self, population):
         candidates = population + self.parents
-        pareto_fronts = sortLogNondominated(candidates, len(candidates))
+        pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
 
         chosen = list()
         mid_front = None
@@ -387,7 +387,7 @@ class StrategyMultiObjective(object):
 
         # Update the appropriate internal parameters
         for i, ind in enumerate(chosen):
-            t, parent_idx = ind._ps
+            t, p_idx = ind._ps
 
             # Only the offsprings update the parameter set
             if t == "o":
@@ -397,25 +397,25 @@ class StrategyMultiObjective(object):
 
                 if psucc[i] < pthresh:
                     x_p = numpy.array(ind)
-                    x = numpy.array(self.parents[idx])
-                    pc[i] = (1 - cc) * pc[i] + sqrt(cc * (2 - cc)) * (xp - x) / self.sigmas[idx]
+                    x = numpy.array(self.parents[p_idx])
+                    pc[i] = (1 - cc) * pc[i] + sqrt(cc * (2 - cc)) * (xp - x) / self.sigmas[p_idx]
                     C[i] = (1 - ccov) * C[i] + ccov * numpy.dot(pc[i], pc[i])
                 else:
-                    pc[i] = (1 - cc) * pc
+                    pc[i] = (1 - cc) * pc[i]
                     C[i] = (1 - ccov) * C[i] + ccov * (numpy.dot(pc[i], pc[i]) + cc * (2 - cc) * C[i])
 
-                self.psucc[idx] = (1 - cp) * self.psucc[idx]
-                self.sigmas[idx] = self.sigmas[idx] * exp((self.psucc[idx] - ptarg) / (d * (1 - ptarg)))
+                self.psucc[p_idx] = (1 - cp) * self.psucc[p_idx]
+                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1 - ptarg)))
 
         # It is unnecessary to update the entire parameter set for not chosen individuals
         # The parameter will not make it to the next generation
         for ind in not_chosen:
-            t, parent_idx = ind._ps
+            t, p_idx = ind._ps
             
             # Only the offsprings update the parameter set
             if t == "o":
-                self.psucc[idx] = (1 - cp) * self.psucc[idx]
-                self.sigmas[idx] = self.sigmas[idx] * exp((self.psucc[idx] - ptarg) / (d * (1 - ptarg)))
+                self.psucc[p_idx] = (1 - cp) * self.psucc[p_idx]
+                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1 - ptarg)))
             
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents
@@ -435,4 +435,4 @@ class StrategyMultiObjective(object):
         # the squareroot of D^2, and multiply B and D in order to get A, we directly get A.
         # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
-        self.A = [numpy.linalg.cholesky(C) in self.C]
+        self.A = [numpy.linalg.cholesky(C) for C in self.C]

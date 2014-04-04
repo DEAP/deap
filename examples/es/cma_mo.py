@@ -18,18 +18,22 @@ import numpy
 from deap import algorithms
 from deap import base
 from deap import benchmarks
-# from deap import cma
-import cma
+from deap import cma
 from deap import creator
 from deap import tools
 
 # Problem size
-N = 30
+N = 3
 
-ZDT1_MIN = numpy.zeros(N)
-ZDT1_MAX = numpy.ones(N)
+# ZDT1, ZDT2, 
+# MIN_BOUND = numpy.zeros(N)
+# MAX_BOUND = numpy.ones(N)
 
-creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+# Kursawe
+MIN_BOUND = numpy.zeros(N) - 5
+MAX_BOUND = numpy.zeros(N) + 5
+
+creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 def distance(feasible_ind, original_ind):
@@ -45,12 +49,12 @@ def feasible(individual):
 
 def feasiblility(individual):
     """Determines if the individual is valid or not."""
-    if any(individual < ZDT1_MIN) or any(individual > ZDT1_MAX):
+    if any(individual < MIN_BOUND) or any(individual > MAX_BOUND):
         return False
     return True
 
 toolbox = base.Toolbox()
-toolbox.register("evaluate", benchmarks.zdt1)
+toolbox.register("evaluate", benchmarks.kursawe)
 toolbox.decorate("evaluate", tools.ClosestPenality(feasiblility, feasible, 1.0e-6, distance))
 
 def main():
@@ -60,17 +64,20 @@ def main():
     MU, LAMBDA = 100, 100
 
     # The MO-CMA-ES algorithm takes a full population as argument
-    pop = numpy.random.rand(MU, N)
+    pop = [creator.Individual(x) for x in numpy.random.rand(MU, N)]
+    for ind in pop:
+        ind.fitness.values = toolbox.evaluate(ind)
+
     strategy = cma.StrategyMultiObjective(pop, sigma=0.6, mu=MU, lambda_=LAMBDA)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean)
-    stats.register("std", numpy.std)
-    stats.register("min", numpy.min)
-    stats.register("max", numpy.max)
+    stats.register("avg", numpy.mean, axis=0)
+    stats.register("std", numpy.std, axis=0)
+    stats.register("min", numpy.min, axis=0)
+    stats.register("max", numpy.max, axis=0)
    
     # The CMA-ES algorithm converge with good probability with those settings
     algorithms.eaGenerateUpdate(toolbox, ngen=250, stats=stats, halloffame=hof)
