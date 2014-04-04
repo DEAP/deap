@@ -56,10 +56,11 @@ class EMNA(object):
         # Compute the average of the mu best individuals
         z = sorted_pop[:self.mu] - self.centroid
         avg = numpy.mean(z, axis=0)
-        
+
         # Adjust variance of the distribution
         self.sigma = numpy.sqrt(numpy.sum(numpy.sum((z - avg)**2, axis=1)) / (self.mu*self.dim))
         self.centroid = self.centroid + avg
+
 
 def main():
     N, LAMBDA = 30, 1000
@@ -67,7 +68,7 @@ def main():
     strategy = EMNA(centroid=[5.0]*N, sigma=5.0, mu=MU, lambda_=LAMBDA)
     
     toolbox = base.Toolbox()
-    toolbox.register("evaluate", benchmarks.rastrigin)
+    toolbox.register("evaluate", benchmarks.sphere)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
     
