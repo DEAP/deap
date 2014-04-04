@@ -200,3 +200,6 @@ History
 
    .. automethod:: deap.tools.History.getGenealogy(individual[, max_depth])
 
+Constraints
+-----------
+.. autoclass:: deap.tools.Penality
