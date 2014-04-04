@@ -380,10 +380,10 @@ class StrategyMultiObjective(object):
         d, ptarg, pthresh = self.d, self.ptarg, self.pthresh
 
         # Make copies for offspring only
-        sigmas = [self.sigmas[ind._ps[1]] for ind in chosen if ind._ps[0] == "o" else None]
-        C = [self.C[ind._ps[1]].copy() for ind in chosen if ind._ps[0] == "o" else None]
-        pc = [self.pc[ind._ps[1]].copy() for ind in chosen if ind._ps[0] == "o" else None]
-        psucc = [self.psucc[ind._ps[1]] for ind in chosen if ind._ps[0] == "o" else None]
+        sigmas = [self.sigmas[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
+        C = [self.C[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
+        pc = [self.pc[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
+        psucc = [self.psucc[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
 
         # Update the appropriate internal parameters
         for i, ind in enumerate(chosen):
@@ -420,10 +420,10 @@ class StrategyMultiObjective(object):
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents
         self.parents = chosen
-        self.sigmas = [sigmas[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.sigmas[ind._ps[1]]
-        self.C = [C[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.C[ind._ps[1]]
-        self.pc = [pc[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.pc[ind._ps[1]]
-        self.psucc = [psucc[i] for i, ind in enumerate(chosen) if ind._ps[0] == "o" else self.psucc[ind._ps[1]]
+        self.sigmas = [sigmas[i] if ind._ps[0] == "o" else self.sigmas[ind._ps[1]] for i, ind in enumerate(chosen)]
+        self.C = [C[i] if ind._ps[0] == "o" else self.C[ind._ps[1]] for i, ind in enumerate(chosen)]
+        self.pc = [pc[i] if ind._ps[0] == "o" else self.pc[ind._ps[1]] for i, ind in enumerate(chosen)]
+        self.psucc = [psucc[i] if ind._ps[0] == "o" else self.psucc[ind._ps[1]] for i, ind in enumerate(chosen)]
 
         # We use Cholesky since for now we have no use of eigen decomposition
         # Basically, Cholesky returns a matrix A as C = A*A.T

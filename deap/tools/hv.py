@@ -27,7 +27,7 @@ def hypervolume_kmax(front, k):
         return range(len(front))
 
     # Must use wvalues * -1 since _HyperVolume use implicit minimization
-    wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
+    wobj = numpy.array([-ind.fitness.wvalues for ind in front])
     ref = numpy.max(wobj, axis=0) + 1
 
     hv = _HyperVolume(ref)
@@ -49,7 +49,7 @@ def hypervolume_kmax(front, k):
 def hypervolume(population):
     """Compute the absolute hypervolume of a *population*."""
     # Must use (wvalues * -1) since _HyperVolume use implicit minimization
-    wobj = numpy.array([ind.fitness.wvalues for ind in population]) * -1
+    wobj = numpy.array([-ind.fitness.wvalues for ind in population])
     ref = numpy.max(wobj, axis=0) + 1
 
     hv = _HyperVolume(ref)
