@@ -35,8 +35,32 @@ class Penality(object):
 
         return wrapper
 
+class ClosestPenality(object):
+    def __init__(self, feasibility, feasible, alpha, distance=None):
+        self.fbty_fct = feasibility
+        self.fbl_fct = feasible
+        self.alpha = alpha
+        self.dist_fct = distance
+
+    def __call__(self, func):
+        @wraps(func)
+        def wrapper(individual, *args, **kwargs):
+            if self.fbty_fct(individual):
+                return func(individual, *args, **kwargs)
+
+            f_ind = self.fbl_fct(individual)
+            f_fbl = func(f_ind, *args, **kwargs)
+
+            dist = 0
+            if self.dist_fct is not None:
+                dist = self.dist_fct(f_ind, individual)
+            
+            return tuple(f + self.alpha * dist for f in f_fbl)
+
+        return wrapper
+
 # List of exported function names.
-__all__ = ['Penality']
+__all__ = ['Penality', 'ClosestPenality']
 
 if __name__ == "__main__":
     def feasible(individual):
