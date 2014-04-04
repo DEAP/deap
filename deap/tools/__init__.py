@@ -21,6 +21,7 @@ also contains utility tools to enhance the basic algorithms with
 :class:`History`.
 """
 
+from .constraint import *
 from .crossover import *
 from .emo import *
 from .init import *
