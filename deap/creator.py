@@ -23,6 +23,7 @@ programming, evolution strategies, particle swarm optimizers, and many more.
 
 import array
 import copy
+import warnings
 
 class_replacers = {}
 """Some classes in Python's standard library as well as third party library
@@ -123,6 +124,13 @@ def create(classname, baseclass, **kargs):
     The :ref:`creating-types` tutorial gives more examples of the creator
     usage.
     """
+
+    if classname in globals():
+        warnings.warn("A class named '{0}' has already been created and it "
+                      "will be overwritten. Consider deleting previous "
+                      "creation of that class or rename it.".format(classname),
+                      RuntimeWarning)
+
     dict_inst = {}
     dict_cls = {}
     for obj_name, obj in kargs.iteritems():

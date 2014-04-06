@@ -28,17 +28,25 @@ from deap import tools
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", numpy.ndarray, fitness=creator.FitnessMin) 
 
-class EDA(object):
+class EMNA(object):
+    """Estimation of Multivariate Normal Algorithm (EMNA) as described 
+    by Algorithm 1 in: 
+
+    Fabien Teytaud and Olivier Teytaud. 2009. 
+    Why one must use reweighting in estimation of distribution algorithms. 
+    In Proceedings of the 11th Annual conference on Genetic and 
+    evolutionary computation (GECCO '09). ACM, New York, NY, USA, 453-460.
+    """
     def __init__(self, centroid, sigma, mu, lambda_):
         self.dim = len(centroid)
-        self.loc = numpy.array(centroid)
+        self.centroid = numpy.array(centroid)
         self.sigma = numpy.array(sigma)
         self.lambda_ = lambda_
         self.mu = mu
     
     def generate(self, ind_init):
         # Generate lambda_ individuals and put them into the provided class
-        arz = self.sigma * numpy.random.randn(self.lambda_, self.dim) + self.loc
+        arz = self.centroid + self.sigma * numpy.random.randn(self.lambda_, self.dim)
         return list(map(ind_init, arz))
     
     def update(self, population):
@@ -46,20 +54,21 @@ class EDA(object):
         sorted_pop = sorted(population, key=attrgetter("fitness"), reverse=True)
         
         # Compute the average of the mu best individuals
-        z = sorted_pop[:self.mu] - self.loc
+        z = sorted_pop[:self.mu] - self.centroid
         avg = numpy.mean(z, axis=0)
-        
-        # Adjust variances of the distribution
-        self.sigma = numpy.sqrt(numpy.sum((z - avg)**2, axis=0) / (self.mu - 1.0))
-        self.loc = self.loc + avg
+
+        # Adjust variance of the distribution
+        self.sigma = numpy.sqrt(numpy.sum(numpy.sum((z - avg)**2, axis=1)) / (self.mu*self.dim))
+        self.centroid = self.centroid + avg
+
 
 def main():
     N, LAMBDA = 30, 1000
     MU = int(LAMBDA/4)
-    strategy = EDA(centroid=[5.0]*N, sigma=[5.0]*N, mu=MU, lambda_=LAMBDA)
+    strategy = EMNA(centroid=[5.0]*N, sigma=5.0, mu=MU, lambda_=LAMBDA)
     
     toolbox = base.Toolbox()
-    toolbox.register("evaluate", benchmarks.rastrigin)
+    toolbox.register("evaluate", benchmarks.sphere)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
     
