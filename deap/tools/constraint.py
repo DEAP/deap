@@ -15,6 +15,8 @@ class Penality(object):
     :param distance: Distance between the individual and a given valid point.
     :returns: A decorator for evaluation function.
 
+    This function relies on the individual weights to  the distance 
+
     See the :doc:`/tutorials/advanced/constraints` for an example.
     """
     def __init__(self, feasibility, delta, distance=None):
@@ -28,14 +30,19 @@ class Penality(object):
             if self.fbty_fct(individual):
                 return func(individual, *args, **kwargs)
 
+            weights = tuple(1 if w >= 0 else -1 for w in individual.fitness.weights)
+
             dist = 0
             if self.dist_fct is not None:
                 dist = self.dist_fct(individual)
-            return self.delta + dist,
+            return tuple(self.delta - w * dist for w in weights)
 
         return wrapper
 
-class ClosestPenality(object):
+class ClosestValidPenality(object):
+    """
+    """
+    
     def __init__(self, feasibility, feasible, alpha, distance=None):
         self.fbty_fct = feasibility
         self.fbl_fct = feasible
@@ -51,16 +58,18 @@ class ClosestPenality(object):
             f_ind = self.fbl_fct(individual)
             f_fbl = func(f_ind, *args, **kwargs)
 
+            weights = tuple(1.0 if w >= 0 else -1.0 for w in individual.fitness.weights)
+
             dist = 0
             if self.dist_fct is not None:
                 dist = self.dist_fct(f_ind, individual)
             
-            return tuple(f + self.alpha * dist for f in f_fbl)
+            return tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights))
 
         return wrapper
 
 # List of exported function names.
-__all__ = ['Penality', 'ClosestPenality']
+__all__ = ['Penality', 'ClosestValidPenality']
 
 if __name__ == "__main__":
     def feasible(individual):
