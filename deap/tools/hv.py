@@ -39,18 +39,24 @@ def hypervolume_kmax(front, k):
             indices_j = indices[numpy.where(indices != j)]
             s_a_j = hv.compute(wobj[indices_j])
             contrib[j] = s_a - s_a_j
-        # The argmin does not need to break ties at random
-        # since the individuals shouldn't have any order
-        less_cont = numpy.argmin(contrib)
-        indices = indices[numpy.where(indices != less_cont)]
-        contrib[less_cont] = numpy.inf
+        
+        # Select randomly from equaly contributing
+        # Need the comma because nonzero (and where) returns a tuple!?
+        less_cont, = numpy.nonzero(numpy.isclose(contrib, contrib.min()))
+        less_idx = numpy.random.choice(less_cont)
+        indices = indices[numpy.where(indices != less_idx)]
+        contrib[less_idx] = numpy.inf
+        # print "====="
+        # print contrib
+        # print indices
     return indices
 
-def hypervolume(population):
+def hypervolume(population, ref=None):
     """Compute the absolute hypervolume of a *population*."""
     # Must use (wvalues * -1) since _HyperVolume use implicit minimization
     wobj = numpy.array([-ind.fitness.wvalues for ind in population]) * -1
-    ref = numpy.max(wobj, axis=0) + 1
+    if ref is None:
+        ref = numpy.max(wobj, axis=0) + 1
 
     hv = _HyperVolume(ref)
     return hv.compute(wobj)
@@ -331,12 +337,3 @@ class _MultiList:
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
             
-
-
-if __name__ == "__main__":
-
-    # Example:
-    referencePoint = [2, 2, 2]
-    hv = _HyperVolume(referencePoint)
-    front = [[1,0,1], [0,1,0]]
-    volume = hv.compute(front)

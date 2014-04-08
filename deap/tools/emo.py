@@ -259,7 +259,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
         for i, front in enumerate(pareto_fronts):
             count += len(front)
             if count >= k:
-                return pareto_fronts[:i]
+                return pareto_fronts[:i+1]
         return pareto_fronts
     else:
         return pareto_fronts[0]

@@ -317,21 +317,32 @@ class StrategyMultiObjective(object):
         self.mu = params.get("mu", len(self.parents))
         
         # Step size control :
-        self.d = params.get("d", 1.0 + self.dim/(2.0*self.lambda_))
-        self.ptarg = params.get("ptarg", 1.0/(5+sqrt(self.lambda_)/2.0))
-        self.cp = params.get("cp", self.ptarg*self.lambda_/(2+self.ptarg*self.lambda_))
+        self.d = params.get("d", 1.0 + self.dim / (2.0))
+        self.ptarg = params.get("ptarg", 1.0 / (5 + sqrt(0.5)))
+        self.cp = params.get("cp", self.ptarg / (2 + self.ptarg))
         
         # Covariance matrix adaptation
-        self.cc = params.get("cc", 2.0/(self.dim+2.0))
-        self.ccov = params.get("ccov", 2.0/(self.dim**2 + 6.0))
+        self.cc = params.get("cc", 2.0 / (self.dim + 2.0))
+        self.ccov = params.get("ccov", 2.0 / (self.dim**2 + 6.0))
         self.pthresh = params.get("pthresh", 0.44)
 
     def generate(self, ind_init):
+        for i, p in enumerate(self.parents):
+            p._ps = "p", i
+
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         individuals = list()
         if self.lambda_ == self.mu:
             for i in range(self.lambda_):
-                z = self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i].T)
+                z = self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i])
+                # print "parent"
+                # print self.parents[i]
+                # print "sigma"
+                # print self.sigmas[i]
+                # print "arz"
+                # print arz[i]
+                # print "z"
+                # print z
                 individuals.append(ind_init(z))
                 individuals[-1]._ps = "o", i
             numpy.random.shuffle(individuals)
@@ -339,42 +350,59 @@ class StrategyMultiObjective(object):
             ndom = tools.sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
             for i in range(self.lambda_):
                 j = numpy.random.randint(0, len(ndom))
-                z = self.parents[j] + self.sigmas[j] * numpy.dot(arz[i], self.A[j].T)
+                _, p_idx = ndom[j]._ps
+                z = self.parents[p_idx] + self.sigmas[p_idx] * numpy.dot(arz[i], self.A[p_idx].T)
                 individuals.append(ind_init(z))
-                individuals[-1]._ps = "o", j
+                individuals[-1]._ps = "o", p_idx
         
-        for i, p in enumerate(self.parents):
-            p._ps = "p", i
+        
 
         return individuals
 
     def update(self, population):
         candidates = population + self.parents
-        pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
+        # print len(candidates)
+        
+        if len(candidates) <= self.mu:
+            chosen = candidates
+        else:
+            # print candidates
+            pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
 
-        chosen = list()
-        mid_front = None
-        not_chosen = list()
+            chosen = list()
+            mid_front = None
+            not_chosen = list()
 
-        # Fill the next population (chosen) witht the fronts until there is not enouch space
-        # When an entire front does not fit in the space left we rely on the hypervolume
-        # for this front
-        # The remaining front is explicitely not chosen
-        for front in pareto_fronts:
-            if len(chosen) + len(front) <= self.mu:
-                chosen += front
-            elif mid_front is None and len(chosen) < self.mu:
-                mid_front = front
-            else:
-                not_chosen += front
+            # print "Num Fronts", len(pareto_fronts)
 
-        # Separate the mid front to accept only k individuals
-        k = self.mu - len(chosen)
-        if k > 0:
-            keep_idx = hv.hypervolume_kmax(mid_front, k)
-            rm_idx = set(range(len(mid_front))) - set(keep_idx)
-            chosen += [mid_front[i] for i in keep_idx]
-            not_chosen += [mid_front[i] for i in rm_idx]
+            # Fill the next population (chosen) witht the fronts until there is not enouch space
+            # When an entire front does not fit in the space left we rely on the hypervolume
+            # for this front
+            # The remaining fronts are explicitely not chosen
+            full = False
+            for i, front in enumerate(pareto_fronts):
+                # print len(front)
+                if len(chosen) + len(front) <= self.mu and not full:
+                    # print "chosen"
+                    chosen += front
+                elif mid_front is None and len(chosen) < self.mu:
+                    # print "mid_front"
+                    # print len(front)
+                    mid_front = front
+                else:
+                    # print "not chosen"
+                    not_chosen += front
+                    full = True
+
+            # print len(chosen)
+            # print len(not_chosen)
+            # Separate the mid front to accept only k individuals
+            k = self.mu - len(chosen)
+            if k > 0:
+                keep_idx = hv.hypervolume_kmax(mid_front, k)
+                rm_idx = set(range(len(mid_front))) - set(keep_idx)
+                chosen += [mid_front[i] for i in keep_idx]
+                not_chosen += [mid_front[i] for i in rm_idx]
 
         cp, cc, ccov = self.cp, self.cc, self.ccov
         d, ptarg, pthresh = self.d, self.ptarg, self.pthresh
@@ -396,7 +424,7 @@ class StrategyMultiObjective(object):
                 sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1 - ptarg)))
 
                 if psucc[i] < pthresh:
-                    x_p = numpy.array(ind)
+                    xp = numpy.array(ind)
                     x = numpy.array(self.parents[p_idx])
                     pc[i] = (1 - cc) * pc[i] + sqrt(cc * (2 - cc)) * (xp - x) / self.sigmas[p_idx]
                     C[i] = (1 - ccov) * C[i] + ccov * numpy.dot(pc[i], pc[i])

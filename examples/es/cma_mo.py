@@ -23,21 +23,26 @@ from deap import creator
 from deap import tools
 
 # Problem size
-N = 3
+N = 30
 
 # ZDT1, ZDT2, 
-# MIN_BOUND = numpy.zeros(N)
-# MAX_BOUND = numpy.ones(N)
+MIN_BOUND = numpy.zeros(N)
+MAX_BOUND = numpy.ones(N)
 
 # Kursawe
-MIN_BOUND = numpy.zeros(N) - 5
-MAX_BOUND = numpy.zeros(N) + 5
+# MIN_BOUND = numpy.zeros(N) - 5
+# MAX_BOUND = numpy.zeros(N) + 5
+
+invalid_count = 0
+distances = list()
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 def distance(feasible_ind, original_ind):
     """A distance function to the feasability region."""
+    global distances
+    distances.append(sum((f - o)**2 for f, o in zip(feasible_ind, original_ind)))
     return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
 
 def feasible(individual):
@@ -49,47 +54,95 @@ def feasible(individual):
 
 def feasiblility(individual):
     """Determines if the individual is valid or not."""
+    global invalid_count
     if any(individual < MIN_BOUND) or any(individual > MAX_BOUND):
+        # print individual
+        invalid_count += 1
         return False
     return True
 
 toolbox = base.Toolbox()
-toolbox.register("evaluate", benchmarks.kursawe)
+toolbox.register("evaluate", benchmarks.zdt1)
 toolbox.decorate("evaluate", tools.ClosestPenality(feasiblility, feasible, 1.0e-6, distance))
 
 def main():
     # The cma module uses the numpy random number generator
     # numpy.random.seed(128)
 
+    global distances
+
     MU, LAMBDA = 100, 100
+    NGEN = 25000
+    verbose = True
 
     # The MO-CMA-ES algorithm takes a full population as argument
-    pop = [creator.Individual(x) for x in numpy.random.rand(MU, N)]
-    for ind in pop:
+    population = [creator.Individual(x) for x in numpy.random.rand(MU, N)]
+    for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
-    strategy = cma.StrategyMultiObjective(pop, sigma=0.6, mu=MU, lambda_=LAMBDA)
+    strategy = cma.StrategyMultiObjective(population, sigma=0.6, mu=MU, lambda_=LAMBDA)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
-    hof = tools.ParetoFront()
+    halloffame = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean, axis=0)
-    stats.register("std", numpy.std, axis=0)
+    # stats.register("avg", numpy.mean, axis=0)
+    # stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
    
     # The CMA-ES algorithm converge with good probability with those settings
-    algorithms.eaGenerateUpdate(toolbox, ngen=250, stats=stats, halloffame=hof)
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    sigmas = numpy.zeros((MU, NGEN))
+
+    for gen in xrange(NGEN):
+        # Generate a new population
+        population = toolbox.generate()
+        # Evaluate the individuals
+        fitnesses = toolbox.map(toolbox.evaluate, population)
+        for ind, fit in zip(population, fitnesses):
+            ind.fitness.values = fit
+        
+        if halloffame is not None:
+            halloffame.update(population)
+        
+        # Update the strategy with the evaluated individuals
+        toolbox.update(population)
+
+        sigmas[:, gen] = strategy.sigmas
+        
+        record = stats.compile(population) if stats is not None else {}
+        logbook.record(gen=gen, nevals=len(population), **record)
+        if verbose:
+            print logbook.stream
+
+        print invalid_count
+        # print numpy.average(distances)
+        # distances = list()
+        print numpy.average(sigmas[:, gen])
+
+
+    import matplotlib.pyplot as plt
+
+    front = numpy.array([ind.fitness.values for ind in halloffame])
     
-    return hof
+    plt.figure()
+    plt.scatter(front[:,0], front[:,1], c="b")
+    plt.axis("tight")
+
+    plt.figure()
+    sigmas = numpy.mean(sigmas, axis=0)
+    plt.plot(sigmas)
+
+    plt.show()
+    
+    return halloffame
 
 if __name__ == "__main__":
     hof = main()
 
-    import matplotlib.pyplot as plt
+    
 
-    front = numpy.array([ind.fitness.values for ind in hof])
-    plt.scatter(front[:,0], front[:,1], c="b")
-    plt.axis("tight")
-    plt.show()
+    
