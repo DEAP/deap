@@ -337,3 +337,4 @@ class _MultiList:
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
             
+__all__ = ["hypervolume_kmax", "hypervolume"]

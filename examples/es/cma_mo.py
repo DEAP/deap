@@ -56,14 +56,14 @@ def feasiblility(individual):
     """Determines if the individual is valid or not."""
     global invalid_count
     if any(individual < MIN_BOUND) or any(individual > MAX_BOUND):
-        # print individual
+        # print(individual)
         invalid_count += 1
         return False
     return True
 
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.zdt1)
-toolbox.decorate("evaluate", tools.ClosestPenality(feasiblility, feasible, 1.0e-6, distance))
+toolbox.decorate("evaluate", tools.ClosestValidPenality(feasiblility, feasible, 1.0e-6, distance))
 
 def main():
     # The cma module uses the numpy random number generator
@@ -72,7 +72,7 @@ def main():
     global distances
 
     MU, LAMBDA = 100, 100
-    NGEN = 25000
+    NGEN = 250
     verbose = True
 
     # The MO-CMA-ES algorithm takes a full population as argument
@@ -93,11 +93,11 @@ def main():
    
     # The CMA-ES algorithm converge with good probability with those settings
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+    logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
 
     sigmas = numpy.zeros((MU, NGEN))
 
-    for gen in xrange(NGEN):
+    for gen in range(NGEN):
         # Generate a new population
         population = toolbox.generate()
         # Evaluate the individuals
@@ -116,12 +116,12 @@ def main():
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
-            print logbook.stream
+            print(logbook.stream)
 
-        print invalid_count
-        # print numpy.average(distances)
+        print("invalids", invalid_count)
+        print("distance", numpy.average(distances))
         # distances = list()
-        print numpy.average(sigmas[:, gen])
+        print("sigma", numpy.average(sigmas[:, gen]))
 
 
     import matplotlib.pyplot as plt

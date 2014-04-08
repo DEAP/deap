@@ -25,7 +25,6 @@ import copy
 from math import sqrt, log, exp
 
 import tools
-import tools.hv as hv
 
 class Strategy(object):
     """
@@ -334,7 +333,7 @@ class StrategyMultiObjective(object):
         individuals = list()
         if self.lambda_ == self.mu:
             for i in range(self.lambda_):
-                z = self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i])
+                z = self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i].T)
                 # print "parent"
                 # print self.parents[i]
                 # print "sigma"
@@ -399,7 +398,7 @@ class StrategyMultiObjective(object):
             # Separate the mid front to accept only k individuals
             k = self.mu - len(chosen)
             if k > 0:
-                keep_idx = hv.hypervolume_kmax(mid_front, k)
+                keep_idx = tools.hypervolume_kmax(mid_front, k)
                 rm_idx = set(range(len(mid_front))) - set(keep_idx)
                 chosen += [mid_front[i] for i in keep_idx]
                 not_chosen += [mid_front[i] for i in rm_idx]
