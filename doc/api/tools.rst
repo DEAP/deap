@@ -202,4 +202,6 @@ History
 
 Constraints
 -----------
-.. autoclass:: deap.tools.Penality
+.. autoclass:: deap.tools.DeltaPenality(feasibility, delta[, distance])
+
+.. autoclass:: deap.tools.ClosestValidPenality(feasibility, feasible, alpha[, distance])

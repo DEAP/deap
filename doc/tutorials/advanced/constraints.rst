@@ -32,7 +32,7 @@ bowl :math:`h(x) = \Delta + (x-x_0)^2`, where :math:`x_0` is the approximate
 center of the valid zone.
 
 In DEAP, a penality function can be added to any evaluation function using  the
-:class:`~deap.tools.Penality` decorator provided in the :mod:`~deap.tools`
+:class:`~deap.tools.DeltaPenality` decorator provided in the :mod:`~deap.tools`
 module. ::
 
 	from math import sin
@@ -57,7 +57,7 @@ module. ::
 
 	toolbox = base.Toolbox()
 	toolbox.register("evaluate", evalFct)
-	toolbox.decorate("evaluate", tools.Penality(feasible, 7.0, distance))
+	toolbox.decorate("evaluate", tools.DeltaPenality(feasible, 7.0, distance))
 
 The penality decorator takes 2 mandatory arguments and an optional one. The
 first argument is a function returning the validity of an individual according
