@@ -102,6 +102,9 @@ class ClosestValidPenality(object):
 
             weights = tuple(1.0 if w >= 0 else -1.0 for w in individual.fitness.weights)
 
+            if len(weights) != len(f_fbl):
+                raise IndexError("Fitness weights and computed fitness are of different size.")
+
             dist = 0
             if self.dist_fct is not None:
                 dist = self.dist_fct(f_ind, individual)
