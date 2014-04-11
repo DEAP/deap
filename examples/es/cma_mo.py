@@ -25,7 +25,7 @@ from deap import tools
 # Problem size
 N = 30
 
-# ZDT1, ZDT2, 
+# ZDT1, ZDT2, DTLZ2
 MIN_BOUND = numpy.zeros(N)
 MAX_BOUND = numpy.ones(N)
 
@@ -76,7 +76,10 @@ def main():
     verbose = True
 
     # The MO-CMA-ES algorithm takes a full population as argument
-    population = [creator.Individual(x) for x in numpy.random.rand(MU, N)]
+    population = [creator.Individual(x) for x in (numpy.random.randn(MU, N) * 0.6 + 0.5)]
+    # init = numpy.zeros((MU, N))
+    # init[:, 0] = numpy.linspace(0, 1, 100)
+    # population = [creator.Individual(x) for x in init]
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
@@ -125,12 +128,15 @@ def main():
 
 
     import matplotlib.pyplot as plt
-
-    front = numpy.array([ind.fitness.values for ind in halloffame])
+    # from mpl_toolkits.mplot3d import Axes3D
     
-    plt.figure()
+    front = numpy.array([ind.fitness.values for ind in population])
+    
+    fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.scatter(front[:,0], front[:,1], front[:,2], c="b")
     plt.scatter(front[:,0], front[:,1], c="b")
-    plt.axis("tight")
+    
 
     plt.figure()
     sigmas = numpy.mean(sigmas, axis=0)
