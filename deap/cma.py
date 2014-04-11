@@ -317,8 +317,8 @@ class StrategyMultiObjective(object):
         
         # Step size control :
         self.d = params.get("d", 1.0 + self.dim / (2.0))
-        self.ptarg = params.get("ptarg", 1.0 / (5 + sqrt(0.5)))
-        self.cp = params.get("cp", self.ptarg / (2 + self.ptarg))
+        self.ptarg = params.get("ptarg", 1.0 / (5.0 + sqrt(0.5)))
+        self.cp = params.get("cp", self.ptarg / (2.0 + self.ptarg))
         
         # Covariance matrix adaptation
         self.cc = params.get("cc", 2.0 / (self.dim + 2.0))
@@ -366,7 +366,7 @@ class StrategyMultiObjective(object):
             chosen = candidates
         else:
             # print candidates
-            pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
+            pareto_fronts = tools.sortNondominated(candidates, len(candidates))
 
             chosen = list()
             mid_front = None
@@ -393,12 +393,14 @@ class StrategyMultiObjective(object):
                     not_chosen += front
                     full = True
 
-            # print len(chosen)
-            # print len(not_chosen)
             # Separate the mid front to accept only k individuals
             k = self.mu - len(chosen)
             if k > 0:
-                keep_idx = tools.hypervolume_kmax(mid_front, k)
+                # reference point is chosen in the complete population
+                # as the worst in each dimension +1
+                ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
+                ref = numpy.max(ref, axis=0) + 1
+                keep_idx = tools.hypervolume_kmax(mid_front, k, ref)
                 rm_idx = set(range(len(mid_front))) - set(keep_idx)
                 chosen += [mid_front[i] for i in keep_idx]
                 not_chosen += [mid_front[i] for i in rm_idx]
@@ -406,7 +408,7 @@ class StrategyMultiObjective(object):
         cp, cc, ccov = self.cp, self.cc, self.ccov
         d, ptarg, pthresh = self.d, self.ptarg, self.pthresh
 
-        # Make copies for offspring only
+        # Make copies for chosen offsprings only
         sigmas = [self.sigmas[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
         C = [self.C[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         pc = [self.pc[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
@@ -419,20 +421,21 @@ class StrategyMultiObjective(object):
             # Only the offsprings update the parameter set
             if t == "o":
                 # Update (Success = 1 since it is chosen)
-                psucc[i] = (1 - cp) * psucc[i] + cp
-                sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1 - ptarg)))
+                psucc[i] = (1.0 - cp) * psucc[i] + cp
+                sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
 
                 if psucc[i] < pthresh:
                     xp = numpy.array(ind)
                     x = numpy.array(self.parents[p_idx])
-                    pc[i] = (1 - cc) * pc[i] + sqrt(cc * (2 - cc)) * (xp - x) / self.sigmas[p_idx]
-                    C[i] = (1 - ccov) * C[i] + ccov * numpy.dot(pc[i], pc[i])
+                    # print(self.parents[p_idx]._ps, ind._ps)
+                    pc[i] = (1.0 - cc) * pc[i] + sqrt(cc * (2.0 - cc)) * (xp - x) / self.sigmas[p_idx]
+                    C[i] = (1.0 - ccov) * C[i] + ccov * numpy.outer(pc[i], pc[i])
                 else:
-                    pc[i] = (1 - cc) * pc[i]
-                    C[i] = (1 - ccov) * C[i] + ccov * (numpy.dot(pc[i], pc[i]) + cc * (2 - cc) * C[i])
+                    pc[i] = (1.0 - cc) * pc[i]
+                    C[i] = (1.0 - ccov) * C[i] + ccov * (numpy.outer(pc[i], pc[i]) + cc * (2.0 - cc) * C[i])
 
-                self.psucc[p_idx] = (1 - cp) * self.psucc[p_idx]
-                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1 - ptarg)))
+                self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx] + cp
+                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
 
         # It is unnecessary to update the entire parameter set for not chosen individuals
         # The parameter will not make it to the next generation
@@ -441,8 +444,8 @@ class StrategyMultiObjective(object):
             
             # Only the offsprings update the parameter set
             if t == "o":
-                self.psucc[p_idx] = (1 - cp) * self.psucc[p_idx]
-                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1 - ptarg)))
+                self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx]
+                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
             
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents
@@ -462,4 +465,4 @@ class StrategyMultiObjective(object):
         # the squareroot of D^2, and multiply B and D in order to get A, we directly get A.
         # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
-        self.A = [numpy.linalg.cholesky(C) for C in self.C]
+        self.A = [numpy.linalg.cholesky(self.C[i]) if ind._ps[0] == "o" else self.A[ind._ps[1]] for i, ind in enumerate(chosen)]

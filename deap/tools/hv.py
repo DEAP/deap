@@ -19,7 +19,7 @@ import numpy
 __author__ = "Simon Wessing"
 # Wrapped by Francois-Michel De Rainville
 
-def hypervolume_kmax(front, k):
+def hypervolume_kmax(front, k, ref=None):
     """Find the *k* individuals index contributing the most to
     the hypervolume among *front*.
     """
@@ -28,13 +28,18 @@ def hypervolume_kmax(front, k):
 
     # Must use wvalues * -1 since _HyperVolume use implicit minimization
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
-    ref = numpy.max(wobj, axis=0) + 1
+    if ref is None:
+        ref = numpy.max(wobj, axis=0) + 1
 
     hv = _HyperVolume(ref)
     indices = numpy.arange(0, len(front))
     contrib = numpy.zeros(len(front))
     for i in range(len(front) - k):
-        s_a = hv.compute(wobj[indices])
+        try:
+            s_a = hv.compute(wobj[indices])
+        except TypeError:
+            print wobj[indices]
+            raise
         for j in indices:
             indices_j = indices[numpy.where(indices != j)]
             s_a_j = hv.compute(wobj[indices_j])
@@ -42,10 +47,10 @@ def hypervolume_kmax(front, k):
         
         # Select randomly from equaly contributing
         # Need the comma because nonzero (and where) returns a tuple!?
-        less_cont, = numpy.nonzero(numpy.isclose(contrib, contrib.min()))
-        less_idx = numpy.random.choice(less_cont)
-        indices = indices[numpy.where(indices != less_idx)]
-        contrib[less_idx] = numpy.inf
+        least_contributers, = numpy.nonzero(numpy.isclose(contrib, contrib.min()))
+        idx = numpy.random.choice(least_contributers)
+        indices = indices[numpy.where(indices != idx)]
+        contrib[idx] = numpy.inf
         # print "====="
         # print contrib
         # print indices
@@ -245,7 +250,9 @@ class _MultiList:
     
         def __str__(self): 
             return str(self.cargo)
-        
+
+        def __lt__(self, other):
+            return all(self.cargo < other.cargo)
         
     def __init__(self, numberLists):  
         """Constructor. 
