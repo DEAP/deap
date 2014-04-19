@@ -33,57 +33,50 @@ MAX_BOUND = numpy.ones(N)
 # MIN_BOUND = numpy.zeros(N) - 5
 # MAX_BOUND = numpy.zeros(N) + 5
 
-invalid_count = 0
-distances = list()
-
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 def distance(feasible_ind, original_ind):
     """A distance function to the feasability region."""
-    global distances
-    distances.append(sum((f - o)**2 for f, o in zip(feasible_ind, original_ind)))
     return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
 
-def feasible(individual):
-    """A function return a valid individual from an invalid one."""
+def closest_feasible(individual):
+    """A function returning a valid individual from an invalid one."""
     feasible_ind = numpy.array(individual)
     feasible_ind = numpy.maximum(MIN_BOUND, feasible_ind)
     feasible_ind = numpy.minimum(MAX_BOUND, feasible_ind)
     return feasible_ind
 
-def feasiblility(individual):
+def valid(individual):
     """Determines if the individual is valid or not."""
-    global invalid_count
     if any(individual < MIN_BOUND) or any(individual > MAX_BOUND):
-        # print(individual)
-        invalid_count += 1
         return False
     return True
 
 toolbox = base.Toolbox()
-toolbox.register("evaluate", benchmarks.zdt1)
-toolbox.decorate("evaluate", tools.ClosestValidPenality(feasiblility, feasible, 1.0e-6, distance))
+toolbox.register("evaluate", benchmarks.dtlz2, obj=2)
+toolbox.decorate("evaluate", tools.ClosestValidPenality(valid, closest_feasible, 1.0e-6, distance))
 
 def main():
     # The cma module uses the numpy random number generator
     # numpy.random.seed(128)
 
-    global distances
+    invalid_count = 0
+    distances = list()
 
     MU, LAMBDA = 100, 100
-    NGEN = 250
-    verbose = True
+    NGEN = 500
+    verbose = False
 
     # The MO-CMA-ES algorithm takes a full population as argument
-    population = [creator.Individual(x) for x in (numpy.random.randn(MU, N) * 0.6 + 0.5)]
+    population = [creator.Individual(x) for x in (numpy.random.uniform(0, 1, (MU + LAMBDA, N)))]
     # init = numpy.zeros((MU, N))
     # init[:, 0] = numpy.linspace(0, 1, 100)
     # population = [creator.Individual(x) for x in init]
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
-    strategy = cma.StrategyMultiObjective(population, sigma=0.6, mu=MU, lambda_=LAMBDA)
+    strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
@@ -106,6 +99,12 @@ def main():
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
+            if not valid(ind):
+                invalid_count += 1
+                f_ind = closest_feasible(ind)
+                distances.append(distance(f_ind, ind))
+                # print("Valid fitness:", toolbox.evaluate(f_ind))
+                # print("Invalid fitness:", fit)
             ind.fitness.values = fit
         
         if halloffame is not None:
@@ -123,20 +122,23 @@ def main():
 
         print("invalids", invalid_count)
         print("distance", numpy.average(distances))
-        # distances = list()
-        print("sigma", numpy.average(sigmas[:, gen]))
+        distances = list()
+        # print("sigma", numpy.average(sigmas[:, gen]))
 
+        print("success", strategy.success_count)
 
     import matplotlib.pyplot as plt
     # from mpl_toolkits.mplot3d import Axes3D
     
-    front = numpy.array([ind.fitness.values for ind in population])
+    valid_front = numpy.array([ind.fitness.values for ind in population if valid(ind)])
+    invalid_front = numpy.array([ind.fitness.values for ind in population if not valid(ind)])
     
     fig = plt.figure()
     # ax = fig.add_subplot(111, projection='3d')
     # ax.scatter(front[:,0], front[:,1], front[:,2], c="b")
-    plt.scatter(front[:,0], front[:,1], c="b")
     
+    plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
+    plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
 
     plt.figure()
     sigmas = numpy.mean(sigmas, axis=0)

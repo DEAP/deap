@@ -98,7 +98,9 @@ class ClosestValidPenality(object):
                 return func(individual, *args, **kwargs)
 
             f_ind = self.fbl_fct(individual)
+            # print("individual", f_ind)
             f_fbl = func(f_ind, *args, **kwargs)
+            # print("feasible", f_fbl)
 
             weights = tuple(1.0 if w >= 0 else -1.0 for w in individual.fitness.weights)
 
@@ -106,6 +108,7 @@ class ClosestValidPenality(object):
             if self.dist_fct is not None:
                 dist = self.dist_fct(f_ind, individual)
             
+            # print("returned", tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights)))
             return tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights))
 
         return wrapper

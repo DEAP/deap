@@ -31,29 +31,36 @@ def hypervolume_kmax(front, k, ref=None):
     if ref is None:
         ref = numpy.max(wobj, axis=0) + 1
 
+    # print "ref", ref
+
     hv = _HyperVolume(ref)
     indices = numpy.arange(0, len(front))
     contrib = numpy.zeros(len(front))
+
+    # import matplotlib.pyplot as plt
+    # plt.scatter(wobj[:, 0], wobj[:, 1])
+    # plt.show()
+
     for i in range(len(front) - k):
-        try:
-            s_a = hv.compute(wobj[indices])
-        except TypeError:
-            print wobj[indices]
-            raise
         for j in indices:
             indices_j = indices[numpy.where(indices != j)]
             s_a_j = hv.compute(wobj[indices_j])
-            contrib[j] = s_a - s_a_j
+            contrib[j] = s_a_j
         
         # Select randomly from equaly contributing
-        # Need the comma because nonzero (and where) returns a tuple!?
-        least_contributers, = numpy.nonzero(numpy.isclose(contrib, contrib.min()))
+        ## Retreive the indices
+        least_contributers = numpy.flatnonzero(numpy.isclose(contrib, contrib.max()))
         idx = numpy.random.choice(least_contributers)
         indices = indices[numpy.where(indices != idx)]
-        contrib[idx] = numpy.inf
+        contrib[idx] = 0
         # print "====="
+        # print s_a
         # print contrib
-        # print indices
+        # print indices, idx, contrib.min()
+
+        # plt.scatter(wobj[:, 0], wobj[:, 1], c="r")
+        # plt.scatter(wobj[indices, 0], wobj[indices, 1], c="b")
+        # plt.show()
     return indices
 
 def hypervolume(population, ref=None):

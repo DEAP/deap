@@ -305,6 +305,8 @@ class StrategyMultiObjective(object):
         self.computeParams(params)
         self.psucc = [self.ptarg] * len(population)
 
+        self.success_count = 0
+
     def computeParams(self, params):
         """Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
@@ -316,8 +318,8 @@ class StrategyMultiObjective(object):
         self.mu = params.get("mu", len(self.parents))
         
         # Step size control :
-        self.d = params.get("d", 1.0 + self.dim / (2.0))
-        self.ptarg = params.get("ptarg", 1.0 / (5.0 + sqrt(0.5)))
+        self.d = params.get("d", 1.0 + self.dim / 2.0)
+        self.ptarg = params.get("ptarg", 1.0 / (5.0 + 0.5))
         self.cp = params.get("cp", self.ptarg / (2.0 + self.ptarg))
         
         # Covariance matrix adaptation
@@ -333,25 +335,14 @@ class StrategyMultiObjective(object):
         individuals = list()
         if self.lambda_ == self.mu:
             for i in range(self.lambda_):
-                z = self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i].T)
-                # print "parent"
-                # print self.parents[i]
-                # print "sigma"
-                # print self.sigmas[i]
-                # print "arz"
-                # print arz[i]
-                # print "z"
-                # print z
-                individuals.append(ind_init(z))
+                individuals.append(ind_init(self.parents[i] + self.sigmas[i] * numpy.dot(arz[i], self.A[i])))
                 individuals[-1]._ps = "o", i
-            numpy.random.shuffle(individuals)
         else:
             ndom = tools.sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
             for i in range(self.lambda_):
                 j = numpy.random.randint(0, len(ndom))
                 _, p_idx = ndom[j]._ps
-                z = self.parents[p_idx] + self.sigmas[p_idx] * numpy.dot(arz[i], self.A[p_idx].T)
-                individuals.append(ind_init(z))
+                individuals.append(ind_init(self.parents[p_idx] + self.sigmas[p_idx] * numpy.dot(arz[i], self.A[p_idx].T)))
                 individuals[-1]._ps = "o", p_idx
         
         
@@ -366,7 +357,7 @@ class StrategyMultiObjective(object):
             chosen = candidates
         else:
             # print candidates
-            pareto_fronts = tools.sortNondominated(candidates, len(candidates))
+            pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
 
             chosen = list()
             mid_front = None
@@ -405,21 +396,29 @@ class StrategyMultiObjective(object):
                 chosen += [mid_front[i] for i in keep_idx]
                 not_chosen += [mid_front[i] for i in rm_idx]
 
+        print(len(chosen))
+
         cp, cc, ccov = self.cp, self.cc, self.ccov
         d, ptarg, pthresh = self.d, self.ptarg, self.pthresh
 
         # Make copies for chosen offsprings only
+        last_steps = [self.sigmas[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
         sigmas = [self.sigmas[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
         C = [self.C[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         pc = [self.pc[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         psucc = [self.psucc[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
 
+        step_size = 0
+
         # Update the appropriate internal parameters
         for i, ind in enumerate(chosen):
             t, p_idx = ind._ps
-
+            
             # Only the offsprings update the parameter set
             if t == "o":
+                step_size += sigmas[i]
+                self.success_count += 1
+
                 # Update (Success = 1 since it is chosen)
                 psucc[i] = (1.0 - cp) * psucc[i] + cp
                 sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
@@ -428,7 +427,7 @@ class StrategyMultiObjective(object):
                     xp = numpy.array(ind)
                     x = numpy.array(self.parents[p_idx])
                     # print(self.parents[p_idx]._ps, ind._ps)
-                    pc[i] = (1.0 - cc) * pc[i] + sqrt(cc * (2.0 - cc)) * (xp - x) / self.sigmas[p_idx]
+                    pc[i] = (1.0 - cc) * pc[i] + sqrt(cc * (2.0 - cc)) * (xp - x) / last_steps[i]
                     C[i] = (1.0 - ccov) * C[i] + ccov * numpy.outer(pc[i], pc[i])
                 else:
                     pc[i] = (1.0 - cc) * pc[i]
@@ -437,16 +436,20 @@ class StrategyMultiObjective(object):
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx] + cp
                 self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
 
+
         # It is unnecessary to update the entire parameter set for not chosen individuals
-        # The parameter will not make it to the next generation
+        # These parameters will not make it to the next generation
         for ind in not_chosen:
             t, p_idx = ind._ps
             
             # Only the offsprings update the parameter set
             if t == "o":
+                step_size += self.sigmas[p_idx]
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx]
                 self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
-            
+        
+        print "Step size", step_size / self.lambda_
+
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents
         self.parents = chosen
