@@ -31,7 +31,8 @@ coev/coop_niche
 coev/coop_adapt
 de/basic
 de/sphere
-eda/fctmin
+eda/emna
+eda/emnag
 eda/pbil
 pso/basic
 pso/speciation
