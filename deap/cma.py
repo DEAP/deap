@@ -295,6 +295,9 @@ class StrategyOnePlusLambda(object):
 class StrategyMultiObjective(object):
     def __init__(self, population, sigma, **params):
         self.parents = population
+        for i, p in enumerate(self.parents):
+            p._ps = "p", i
+
         self.dim = len(self.parents[0])
 
         self.sigmas = [sigma] * len(population)
@@ -328,9 +331,6 @@ class StrategyMultiObjective(object):
         self.pthresh = params.get("pthresh", 0.44)
 
     def generate(self, ind_init):
-        for i, p in enumerate(self.parents):
-            p._ps = "p", i
-
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         individuals = list()
         if self.lambda_ == self.mu:
