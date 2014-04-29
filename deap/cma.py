@@ -311,6 +311,8 @@ class StrategyMultiObjective(object):
         self.indicator = params.get("indicator", tools.indicator.hypervolume)
 
         self.success_count = 0
+        self.mid_front_size = 0
+        self.num_fronts = 0
 
     def computeParams(self, params):
         """Computes the parameters depending on :math:`\lambda`. It needs to
@@ -363,6 +365,9 @@ class StrategyMultiObjective(object):
         else:
             # print candidates
             pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
+            self.num_fronts += len(pareto_fronts)
+            print("num fronts", self.num_fronts)
+            print("fronts length", [len(f) for f in reversed(pareto_fronts)])
 
             chosen = list()
             mid_front = None
@@ -392,6 +397,8 @@ class StrategyMultiObjective(object):
             # Separate the mid front to accept only k individuals
             k = self.mu - len(chosen)
             if k > 0:
+                self.mid_front_size += len(mid_front)
+
                 # reference point is chosen in the complete population
                 # as the worst in each dimension +1
                 ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
