@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 import sys
-from distutils.core import setup
+from distutils.core import setup, Extension
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
     from distutils.command.build_py import build_py
 
 import deap
+
+hv_module = Extension("deap.tools.hv", sources=["deap/tools/_hv.c", "deap/tools/hv.cpp"])
 
 setup(name='deap',
       version=deap.__revision__,
@@ -30,6 +32,6 @@ setup(name='deap',
         'Topic :: Scientific/Engineering',
         'Topic :: Software Development',
         ],
-     ext_modules = [],
+     ext_modules = [hv_module],
      cmdclass = {'build_py': build_py}
 )

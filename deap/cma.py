@@ -308,6 +308,8 @@ class StrategyMultiObjective(object):
         self.computeParams(params)
         self.psucc = [self.ptarg] * len(population)
 
+        self.indicator = params.get("indicator", tools.indicator.hypervolume)
+
         self.success_count = 0
 
     def computeParams(self, params):
@@ -394,12 +396,20 @@ class StrategyMultiObjective(object):
                 # as the worst in each dimension +1
                 ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
                 ref = numpy.max(ref, axis=0) + 1
-                keep_idx = tools.hypervolume_kmax(mid_front, k, ref)
-                rm_idx = set(range(len(mid_front))) - set(keep_idx)
-                chosen += [mid_front[i] for i in keep_idx]
-                not_chosen += [mid_front[i] for i in rm_idx]
 
-        print(len(chosen))
+                for i in range(len(mid_front) - k):
+                    idx = self.indicator(mid_front, ref)
+                    not_chosen.append(mid_front.pop(idx))
+
+                chosen += mid_front
+                
+                # rm_idx = set(range(len(mid_front))) - set(keep_idx)
+                # print keep_idx
+                # print rm_idx
+                # chosen += [mid_front[i] for i in keep_idx]
+                # not_chosen += [mid_front[i] for i in rm_idx]
+
+        print("mid front size", self.mid_front_size)
 
         cp, cc, ccov = self.cp, self.cc, self.ccov
         d, ptarg, pthresh = self.d, self.ptarg, self.pthresh
