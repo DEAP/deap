@@ -16,7 +16,12 @@
 
 import numpy
 
-import deap.tools.hv
+try:
+    # try importing the C version
+    from . import hv as hv
+except ImportError:
+    # fallback on python version
+    from . import pyhv as hv
 
 def hypervolume(front, ref=None):
     """Returns the index of the individual with the least the hypervolume
@@ -29,7 +34,7 @@ def hypervolume(front, ref=None):
         ref = numpy.max(wobj, axis=0) + 1
     
     def contribution(i):
-        return deap.tools.hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
+        return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
     # TODO: Parallelize this?
     contrib_value = map(contribution, range(len(front)))

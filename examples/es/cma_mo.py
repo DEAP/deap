@@ -22,6 +22,8 @@ from deap import cma
 from deap import creator
 from deap import tools
 
+import cma_mo_debug
+
 # Problem size
 N = 30
 
@@ -65,14 +67,16 @@ def main():
     distances = list()
 
     MU, LAMBDA = 100, 100
-    NGEN = 500
+    NGEN = 1
     verbose = False
 
     # The MO-CMA-ES algorithm takes a full population as argument
-    population = [creator.Individual(x) for x in (numpy.random.uniform(0, 1, (MU + LAMBDA, N)))]
+    # population = [creator.Individual(x) for x in (numpy.random.uniform(0, 1, (MU + LAMBDA, N)))]
     # init = numpy.zeros((MU, N))
     # init[:, 0] = numpy.linspace(0, 1, 100)
     # population = [creator.Individual(x) for x in init]
+    population = [creator.Individual(z) for z in cma_mo_debug.parents]
+
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
@@ -95,7 +99,11 @@ def main():
 
     for gen in range(NGEN):
         # Generate a new population
-        population = toolbox.generate()
+        # population = toolbox.generate()
+        population = [creator.Individual(z) for z in cma_mo_debug.offspring]
+        for i, ind in enumerate(population):
+            ind._ps = "o", i
+
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
@@ -127,24 +135,24 @@ def main():
 
         print("success", strategy.success_count)
 
-    import matplotlib.pyplot as plt
-    # from mpl_toolkits.mplot3d import Axes3D
+    # import matplotlib.pyplot as plt
+    # # from mpl_toolkits.mplot3d import Axes3D
     
-    valid_front = numpy.array([ind.fitness.values for ind in population if valid(ind)])
-    invalid_front = numpy.array([ind.fitness.values for ind in population if not valid(ind)])
+    # valid_front = numpy.array([ind.fitness.values for ind in population if valid(ind)])
+    # invalid_front = numpy.array([ind.fitness.values for ind in population if not valid(ind)])
     
-    fig = plt.figure()
-    # ax = fig.add_subplot(111, projection='3d')
-    # ax.scatter(front[:,0], front[:,1], front[:,2], c="b")
+    # fig = plt.figure()
+    # # ax = fig.add_subplot(111, projection='3d')
+    # # ax.scatter(front[:,0], front[:,1], front[:,2], c="b")
     
-    plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
-    plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
+    # plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
+    # plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
 
-    plt.figure()
-    sigmas = numpy.mean(sigmas, axis=0)
-    plt.plot(sigmas)
+    # plt.figure()
+    # sigmas = numpy.mean(sigmas, axis=0)
+    # plt.plot(sigmas)
 
-    plt.show()
+    # plt.show()
     
     return halloffame
 

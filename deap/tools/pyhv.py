@@ -19,59 +19,13 @@ import numpy
 __author__ = "Simon Wessing"
 # Wrapped by Francois-Michel De Rainville
 
-def hypervolume_kmax(front, k, ref=None):
-    """Find the *k* individuals index contributing the most to
-    the hypervolume among *front*.
+
+def hypervolume(pointset, ref):
+    """Compute the absolute hypervolume of a *pointset* according to the
+    reference point *ref*.
     """
-    if k >= len(front):
-        return range(len(front))
-
-    # Must use wvalues * -1 since _HyperVolume use implicit minimization
-    wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
-    if ref is None:
-        ref = numpy.max(wobj, axis=0) + 1
-
-    # print "ref", ref
-
     hv = _HyperVolume(ref)
-    indices = numpy.arange(0, len(front))
-    contrib = numpy.zeros(len(front))
-
-    # import matplotlib.pyplot as plt
-    # plt.scatter(wobj[:, 0], wobj[:, 1])
-    # plt.show()
-
-    for i in range(len(front) - k):
-        for j in indices:
-            indices_j = indices[numpy.where(indices != j)]
-            s_a_j = hv.compute(wobj[indices_j])
-            contrib[j] = s_a_j
-        
-        # Select randomly from equaly contributing
-        ## Retreive the indices
-        least_contributers = numpy.flatnonzero(numpy.isclose(contrib, contrib.max()))
-        idx = numpy.random.choice(least_contributers)
-        indices = indices[numpy.where(indices != idx)]
-        contrib[idx] = 0
-        # print "====="
-        # print s_a
-        # print contrib
-        # print indices, idx, contrib.min()
-
-        # plt.scatter(wobj[:, 0], wobj[:, 1], c="r")
-        # plt.scatter(wobj[indices, 0], wobj[indices, 1], c="b")
-        # plt.show()
-    return indices
-
-def hypervolume(population, ref=None):
-    """Compute the absolute hypervolume of a *population*."""
-    # Must use (wvalues * -1) since _HyperVolume use implicit minimization
-    wobj = numpy.array([-ind.fitness.wvalues for ind in population]) * -1
-    if ref is None:
-        ref = numpy.max(wobj, axis=0) + 1
-
-    hv = _HyperVolume(ref)
-    return hv.compute(wobj)
+    return hv.compute(pointset)
 
 
 class _HyperVolume:
