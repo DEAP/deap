@@ -350,6 +350,9 @@ class StrategyMultiObjective(object):
         return individuals
 
     def update(self, population):
+        for i, p in enumerate(self.parents):
+            p._ps = "p", i
+
         candidates = population + self.parents
         # print len(candidates)
         
