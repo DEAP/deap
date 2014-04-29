@@ -18,7 +18,7 @@ import numpy
 
 try:
     # try importing the C version
-    from . import hvi as hv
+    from . import hv as hv
 except ImportError:
     # fallback on python version
     from . import pyhv as hv
@@ -27,7 +27,6 @@ def hypervolume(front, ref=None):
     """Returns the index of the individual with the least the hypervolume
     contribution.
     """
-    
     # Must use wvalues * -1 since hypervolume use implicit minimization
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
     if ref is None:
@@ -37,7 +36,7 @@ def hypervolume(front, ref=None):
         return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
     # TODO: Parallelize this?
-    contrib_value = map(contribution, range(len(front)))
-    return numpy.argmax(contrib_value)
+    contrib_values = map(contribution, range(len(front)))
+    return numpy.argmax(contrib_values)
 
 __all__ = ["hypervolume"]

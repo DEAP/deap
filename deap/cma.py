@@ -295,13 +295,9 @@ class StrategyOnePlusLambda(object):
 class StrategyMultiObjective(object):
     def __init__(self, population, sigma, **params):
         self.parents = population
-        for i, p in enumerate(self.parents):
-            p._ps = "p", i
-
         self.dim = len(self.parents[0])
 
         self.sigmas = [sigma] * len(population)
-        # self.C = [numpy.identity(self.dim) for _ in range(len(population))]
         # Lower Cholesky matrix
         self.A = [numpy.identity(self.dim) for _ in range(len(population))]
         # Inverse Cholesky matrix
@@ -338,15 +334,20 @@ class StrategyMultiObjective(object):
         self.pthresh = params.get("pthresh", 0.44)
 
     def generate(self, ind_init):
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
+        arz = numpy.random.randn(self.lambda_, self.dim)
         individuals = list()
         
+        # Make sure every parent has a parent tag and index
+        for i, p in enumerate(self.parents):
+            p._ps = "p", i
+
         # Each parent produce an offspring
         if self.lambda_ == self.mu:
             for i in range(self.lambda_):
+                # print "Z", list(arz[i])
                 individuals.append(ind_init(self.parents[i] + self.sigmas[i] * numpy.dot(self.A[i], arz[i])))
                 individuals[-1]._ps = "o", i
-        
+
         # Parents producing an offspring are chosen at random from the first front
         else:
             ndom = tools.sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
@@ -364,10 +365,6 @@ class StrategyMultiObjective(object):
             
         pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
 
-        self.num_fronts += len(pareto_fronts)
-        print("num fronts", self.num_fronts)
-        print("fronts length", [len(f) for f in reversed(pareto_fronts)])
-
         chosen = list()
         mid_front = None
         not_chosen = list()
@@ -382,15 +379,14 @@ class StrategyMultiObjective(object):
                 chosen += front
             elif mid_front is None and len(chosen) < self.mu:
                 mid_front = front
+                # With this front, we selected enough individuals
+                full = True
             else:
                 not_chosen += front
-                full = True
 
         # Separate the mid front to accept only k individuals
         k = self.mu - len(chosen)
         if k > 0:
-            self.mid_front_size += len(mid_front)
-
             # reference point is chosen in the complete population
             # as the worst in each dimension +1
             ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
@@ -402,27 +398,25 @@ class StrategyMultiObjective(object):
 
             chosen += mid_front
 
-        print("mid front size", self.mid_front_size)
-
         return chosen, not_chosen
 
     def _rankOneUpdate(self, invCholesky, A, alpha, beta, v):
         w = numpy.dot(invCholesky, v)
-        w_inv = numpy.dot(w, invCholesky)
-        norm_w2 = numpy.sum(w**2)
-        a = sqrt(alpha)
-        root = numpy.sqrt(1 + beta/alpha * norm_w2)
-        b = a / norm_w2 * (root - 1)
+        
+        # Under this threshold, the update is mostly noise
+        if w.max() > 1e-20:
+            w_inv = numpy.dot(w, invCholesky)
+            norm_w2 = numpy.sum(w**2)
+            a = sqrt(alpha)
+            root = numpy.sqrt(1 + beta/alpha * norm_w2)
+            b = a / norm_w2 * (root - 1)
 
-        A = a * A + b * numpy.outer(v, w)
-        invCholesky = 1.0 / a * invCholesky - b / (a**2 + a * b * norm_w2) * numpy.outer(w, w_inv)
+            A = a * A + b * numpy.outer(v, w)
+            invCholesky = 1.0 / a * invCholesky - b / (a**2 + a * b * norm_w2) * numpy.outer(w, w_inv)
 
         return invCholesky, A
 
     def update(self, population):
-        for i, p in enumerate(self.parents):
-            p._ps = "p", i
-
         chosen, not_chosen = self._select(population + self.parents)
 
         cp, cc, ccov = self.cp, self.cc, self.ccov
@@ -431,13 +425,10 @@ class StrategyMultiObjective(object):
         # Make copies for chosen offspring only
         last_steps = [self.sigmas[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
         sigmas = [self.sigmas[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
-        # C = [self.C[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         invCholesky = [self.invCholesky[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         A = [self.A[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         pc = [self.pc[ind._ps[1]].copy() if ind._ps[0] == "o" else None for ind in chosen]
         psucc = [self.psucc[ind._ps[1]] if ind._ps[0] == "o" else None for ind in chosen]
-
-        step_size = 0
 
         # Update the internal parameters for successful offspring
         for i, ind in enumerate(chosen):
@@ -445,29 +436,26 @@ class StrategyMultiObjective(object):
 
             # Only the offspring update the parameter set
             if t == "o":
-                step_size += sigmas[i]
                 self.success_count += 1
 
                 # Update (Success = 1 since it is chosen)
                 psucc[i] = (1.0 - cp) * psucc[i] + cp
                 sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
+                
 
                 if psucc[i] < pthresh:
                     xp = numpy.array(ind)
                     x = numpy.array(self.parents[p_idx])
-                    # print(self.parents[p_idx]._ps, ind._ps)
                     pc[i] = (1.0 - cc) * pc[i] + sqrt(cc * (2.0 - cc)) * (xp - x) / last_steps[i]
-                    #C[i] = (1.0 - ccov) * C[i] + ccov * numpy.outer(pc[i], pc[i])
                     invCholesky[i], A[i] = self._rankOneUpdate(invCholesky[i], A[i], 1 - ccov, ccov, pc[i])
                 else:
                     pc[i] = (1.0 - cc) * pc[i]
-                    # C[i] = (1.0 - ccov) * C[i] + ccov * (numpy.outer(pc[i], pc[i]) + cc * (2.0 - cc) * C[i])
                     pc_weight = cc * (2.0 - cc)
                     invCholesky[i], A[i] = self._rankOneUpdate(invCholesky[i], A[i], 1 - ccov + pc_weight, ccov, pc[i])
 
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx] + cp
                 self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
-
+                
 
         # It is unnecessary to update the entire parameter set for not chosen individuals
         # Their parameters will not make it to the next generation
@@ -476,30 +464,15 @@ class StrategyMultiObjective(object):
             
             # Only the offspring update the parameter set
             if t == "o":
-                step_size += self.sigmas[p_idx]
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx]
                 self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
-        
-        print "Step size", step_size / self.lambda_
+
 
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents
         self.parents = chosen
         self.sigmas = [sigmas[i] if ind._ps[0] == "o" else self.sigmas[ind._ps[1]] for i, ind in enumerate(chosen)]
-        # self.C = [C[i] if ind._ps[0] == "o" else self.C[ind._ps[1]] for i, ind in enumerate(chosen)]
         self.invCholesky = [invCholesky[i] if ind._ps[0] == "o" else self.invCholesky[ind._ps[1]] for i, ind in enumerate(chosen)]
         self.A = [A[i] if ind._ps[0] == "o" else self.A[ind._ps[1]] for i, ind in enumerate(chosen)]
         self.pc = [pc[i] if ind._ps[0] == "o" else self.pc[ind._ps[1]] for i, ind in enumerate(chosen)]
         self.psucc = [psucc[i] if ind._ps[0] == "o" else self.psucc[ind._ps[1]] for i, ind in enumerate(chosen)]
-
-        # We use Cholesky since for now we have no use of eigen decomposition
-        # Basically, Cholesky returns a matrix A as C = A*A.T
-        # Eigen decomposition returns two matrix B and D^2 as C = B*D^2*B.T = B*D*D*B.T
-        # So A == B*D
-        # To compute the new individual we need to multiply each vector z by A
-        # as y = centroid + sigma * A*z
-        # So the Cholesky is more straightforward as we don't need to compute 
-        # the squareroot of D^2, and multiply B and D in order to get A, we directly get A.
-        # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
-        # to compute covariance matrix inverse in the step-size evolutionary path computation.
-        # self.A = [numpy.linalg.cholesky(self.C[i]) if ind._ps[0] == "o" else self.A[ind._ps[1]] for i, ind in enumerate(chosen)]
