@@ -18,7 +18,7 @@ import numpy
 
 try:
     # try importing the C version
-    from . import hv as hv
+    from . import hvi as hv
 except ImportError:
     # fallback on python version
     from . import pyhv as hv
