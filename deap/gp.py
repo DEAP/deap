@@ -495,7 +495,8 @@ def genFull(pset, min_, max_, type_=None):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: A full tree with all leaves at the same depth.
     """
     def condition(height, depth):
@@ -511,7 +512,8 @@ def genGrow(pset, min_, max_, type_=None):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: A grown tree with leaves at possibly different depths.
     """
     def condition(height, depth):
@@ -531,7 +533,8 @@ def genHalfAndHalf(pset, min_, max_, type_=None):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: Either, a full or a grown tree.
     """
     method = random.choice((genGrow, genFull))
@@ -558,7 +561,8 @@ def generate(pset, min_, max_, condition, type_=None):
                       the height of the tree to build and the current
                       depth in the tree.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: A grown tree with leaves at possibly different depths
               dependending on the condition function.
     """
