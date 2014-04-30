@@ -293,6 +293,40 @@ class StrategyOnePlusLambda(object):
         self.A = numpy.linalg.cholesky(self.C)
         
 class StrategyMultiObjective(object):
+    """Multiobjective CMA-ES strategy based on the paper [Voss2010]_. It
+    is used similarly as the standard CMA-ES strategy with a generate-update
+    scheme.
+
+    :param population: An initial population of individual.
+    :param sigma: The initial step size of the complete system.
+    :param mu: The number of parents to use in the evolution. When not
+               provided it defaults to the len of *population*. (optional)
+    :param lambda_: The number of offspring to produce at each generation.
+                    (optional, defaults to 1)
+
+    Other parameters can be provided as described in the next table
+
+    +----------------+---------------------------+----------------------------+
+    | Parameter      | Default                   | Details                    |
+    +================+===========================+============================+
+    | ``d``          | ``1.0 + N / 2.0``         | Damping for step-size.     |
+    +----------------+---------------------------+----------------------------+
+    | ``ptarg``      | ``1.0 / (5 + sqrt(0.5))`` | Taget success rate.        |
+    +----------------+---------------------------+----------------------------+
+    | ``cp``         | ``ptarg / (2.0 + ptarg)`` | Step size learning rate.   |
+    +----------------+---------------------------+----------------------------+
+    | ``cc``         | ``2.0 / (N + 2.0)``       | Cumulation time horizon.   |
+    +----------------+---------------------------+----------------------------+
+    | ``ccov``       | ``2.0 / (N**2 + 6.0)``    | Covariance matrix learning |
+    |                |                           | rate.                      |
+    +----------------+---------------------------+----------------------------+
+    | ``pthresh``    | ``0.44``                  | Threshold success rate.    |
+    +----------------+---------------------------+----------------------------+
+
+    .. [Voss2010] Voss, Hansen, Igel, "Improved Step Size Adaptation
+       for the MO-CMA-ES", 2010.
+
+    """
     def __init__(self, population, sigma, **params):
         self.parents = population
         self.dim = len(self.parents[0])
@@ -323,9 +357,9 @@ class StrategyMultiObjective(object):
         self.lambda_ = params.get("lambda_", 1)
         self.mu = params.get("mu", len(self.parents))
         
-        # Step size control :
+        # Step size control
         self.d = params.get("d", 1.0 + self.dim / 2.0)
-        self.ptarg = params.get("ptarg", 1.0 / (5.0 + 0.5))
+        self.ptarg = params.get("ptarg", 1.0 / (5.0 + sqrt(0.5)))
         self.cp = params.get("cp", self.ptarg / (2.0 + self.ptarg))
         
         # Covariance matrix adaptation
