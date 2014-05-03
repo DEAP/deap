@@ -8,6 +8,13 @@ try:
 except ImportError:
     numpy = False
 
+try:
+    # try importing the C version
+    from ..tools import hv as hv
+except ImportError:
+    # fallback on python version
+    from ..tools import pyhv as hv
+
 class translate(object):
     """Decorator for evaluation functions, it translates the objective
     function by *vector* which should be the same length as the individual
@@ -280,3 +287,6 @@ def convergence(first_front, optimal_front):
         distances[-1] = sqrt(distances[-1])
         
     return sum(distances) / len(distances)
+
+
+hypervolume = hv.hypervolume
