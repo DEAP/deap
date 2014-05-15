@@ -125,10 +125,10 @@ def create(name, base, **kargs):
     usage.
     """
 
-    if classname in globals():
+    if name in globals():
         warnings.warn("A class named '{0}' has already been created and it "
                       "will be overwritten. Consider deleting previous "
-                      "creation of that class or rename it.".format(classname),
+                      "creation of that class or rename it.".format(name),
                       RuntimeWarning)
 
     dict_inst = {}
