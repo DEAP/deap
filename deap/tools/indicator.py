@@ -28,15 +28,28 @@ def hypervolume(front, ref=None):
     contribution.
     """
     # Must use wvalues * -1 since hypervolume use implicit minimization
+    # And minimization in deap use max on -obj
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
     if ref is None:
         ref = numpy.max(wobj, axis=0) + 1
+
+    # Ensure the extreme points get highest rank
+    # Don't compute the hypervolume for them
+    max_obj = set(numpy.argmin(wobj, axis=0))
+    indices = [x for x in range(len(front)) if x not in max_obj]
+    # indices = range(len(front))
     
     def contribution(i):
         return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
     # TODO: Parallelize this?
-    contrib_values = map(contribution, range(len(front)))
+    contrib_values = map(contribution, indices)
+    
+    # Reinsert the extreme points with minimal value
+    for i in sorted(max_obj):
+        contrib_values.insert(i, 0)
+
+    # Select the maximum hypervolume value
     return numpy.argmax(contrib_values)
 
 __all__ = ["hypervolume"]

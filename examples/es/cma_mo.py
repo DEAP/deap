@@ -18,6 +18,7 @@ import numpy
 from deap import algorithms
 from deap import base
 from deap import benchmarks
+from deap.benchmarks.tools import hypervolume
 from deap import cma
 from deap import creator
 from deap import tools
@@ -106,12 +107,11 @@ def main():
 
     
     import matplotlib.pyplot as plt
-    from deap.tools import hv
     
     valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if valid(ind)])
     invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not valid(ind)])
 
-    print(hv.hypervolume(numpy.concatenate((valid_front, invalid_front)), [11.0, 11.0]))
+    print(hypervolume(numpy.concatenate((valid_front, invalid_front)), [11.0, 11.0]))
     
     fig = plt.figure()
     

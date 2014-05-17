@@ -14,6 +14,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from math import log, floor
+
+import random
+
 import numpy
 
 __author__ = "Simon Wessing"
@@ -26,6 +30,60 @@ def hypervolume(pointset, ref):
     """
     hv = _HyperVolume(ref)
     return hv.compute(pointset)
+
+def hypervolume_approximation(pointset, ref, delta=0.1, epsilon=1e-2):
+    # Assumes minimization
+
+    ref = numpy.asarray(ref)
+    if len(pointset) == 0:
+        return -1
+
+    max_samples = int(floor(12. * log(1. / delta) / log(2.) * len(pointset) / epsilon / epsilon))
+    
+    # Compute volume of each box
+    volume = numpy.prod(ref - pointset, axis=1)
+
+    # Compute the total volume and partial sums
+    T = 0
+    for i in xrange(len(pointset)):
+        volume[i] += T
+        T += volume[i] - T
+
+    samples = 0
+    round = 0
+
+    while True:
+        r = T * random.random()
+
+        # Chose point according to probability proportional to volume
+        i = 0
+        while r > volume[i]:
+            i += 1
+
+        # Compute the random point
+        rand_p = [random.random() for _ in xrange(len(ref))]
+        rand_p = pointset[i] + rand_p * (ref - pointset[i])
+
+        weakly_dominated = True
+        while weakly_dominated:
+            if samples >= max_samples:
+                return float(max_samples) * T / float(len(pointset)) / float(round)
+
+            i = int(floor(len(pointset) * random.random()))
+            samples += 1
+
+            # While pointset[i] is domited or equal by/to rand_p
+            # tested faster than any(p < r for p, r in zip(pointset[i], rand_p))
+            for p, r in zip(pointset[i], rand_p):
+                # Assume minimization
+                if p < r:
+                    weakly_dominated = False
+                    break
+
+
+        round += 1
+
+
 
 
 class _HyperVolume:
@@ -299,10 +357,28 @@ class _MultiList:
         nodes of the node that is reinserted are in the list.
 
         """
-        for i in xrange(index): 
+        for i in xrange(index):
             node.prev[i].next[i] = node
             node.next[i].prev[i] = node
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
             
 __all__ = ["hypervolume_kmax", "hypervolume"]
+
+if __name__ == "__main__":
+    try:
+        from deap.tools import hv
+    except ImportError:
+        hv = None
+        print("Cannot import C version of hypervolume")
+
+    from deap.tools import sortLogNondominated
+
+    pointset = [(a, a) for a in numpy.arange(1, 0, -0.01)]
+    ref = numpy.array([2, 2])
+
+    print("Python version: %f" % hypervolume(pointset, ref))
+    if hv:
+        print("C version: %f" % hv.hypervolume(pointset, ref))
+    print("Approximated: %f" % hypervolume_approximation(pointset, ref))
+
