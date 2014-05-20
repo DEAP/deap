@@ -271,10 +271,10 @@ class StrategyOnePlusLambda(object):
             self.parent = copy.deepcopy(population[0])
             if self.psucc < self.pthresh:
                 self.pc = (1 - self.cc)*self.pc + sqrt(self.cc * (2 - self.cc)) * x_step
-                self.C = (1-self.ccov)*self.C + self.ccov * numpy.dot(self.pc, self.pc.T)
+                self.C = (1-self.ccov)*self.C + self.ccov * numpy.outer(self.pc, self.pc)
             else:
                 self.pc = (1 - self.cc)*self.pc
-                self.C = (1-self.ccov)*self.C + self.ccov * (numpy.dot(self.pc, self.pc.T) + self.cc*(2-self.cc)*self.C)
+                self.C = (1-self.ccov)*self.C + self.ccov * (numpy.outer(self.pc, self.pc) + self.cc*(2-self.cc)*self.C)
 
         self.sigma = self.sigma * exp(1.0/self.d * (self.psucc - self.ptarg)/(1.0-self.ptarg))
         
