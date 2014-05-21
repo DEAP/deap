@@ -67,6 +67,8 @@ Documentation enhancements
 Bug fixes
 +++++++++
 
+**Release 1.0.0**
+
 - creator: Issue 23: error in creator when using unicode source.
 - creator: create does not handle proper slicing of created classes inheriting
   from ``numpy.ndarray`` anymore. This was bug prone and extremely hard to maintain.
