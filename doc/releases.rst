@@ -81,8 +81,11 @@ Bug fixes
 - gp: issue #32: :meth:`~deap.gp.PrimitiveTree.from_string` used incorrect argument order with STGP. rev: `58c1a0711e1f`.
 
 **Release 1.0.2**:
+
 - benchmarks: fix computation of DTLZ2, DTLZ3 and DTLZ4.
 - cma 1+Lambda: fix the computation of the rank-one update.
 - gp: replace the generate functions default value for the argument `type_` from `object` to `None`. 
   This removes the obligation to define the type_ argument for the individual generation function when doing STGP.
+- gp: fix a bug with OOGP when calling addPrimitive and addTerminal in arbitrary order.
+- 
 
