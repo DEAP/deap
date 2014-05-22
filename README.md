@@ -1,7 +1,7 @@
 # DEAP
 
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
-ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [http://scoop.googlecode.com][SCOOP].
+ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [SCOOP](http://scoop.googlecode.com).
 
 DEAP includes the following features:
   * Genetic algorithm using any imaginable representation
@@ -16,22 +16,22 @@ DEAP includes the following features:
   * Hall of Fame of the best individuals that lived in the population
   * Checkpoints that take snapshots of a system regularly
   * Benchmarks module containing most common test functions
-  * Genealogy of an evolution (that is compatible with [http://networkx.lanl.gov NetworkX])
+  * Genealogy of an evolution (that is compatible with [NetworkX](http://networkx.lanl.gov))
   * Examples of alternative algorithms : Particle Swarm Optimization, Differential Evolution, Estimation of Distribution Algorithm
 
 ## Downloads
 
-Following acceptation of [http://www.python.org/dev/peps/pep-0438/][PEP 438] by the Python community, we have moved DEAP's source releases on [https://pypi.python.org][PyPI].
+Following acceptation of [PEP 438](http://www.python.org/dev/peps/pep-0438/) by the Python community, we have moved DEAP's source releases on [PyPI](https://pypi.python.org).
 
 You can find the most recent releases at: https://pypi.python.org/pypi/deap/.
 
 ## Documentation
-See the [http://deap.gel.ulaval.ca/doc/default/index.html DEAP User's Guide] for DEAP documentation.
+See the [DEAP User's Guide](http://deap.gel.ulaval.ca/doc/default/index.html) for DEAP documentation.
 
-In order to get the tip documentation, change directory to the `doc` subfolder and type in `make html`, the documentation will be under `_build/html`. You will need [http://sphinx.pocoo.org][Sphinx] to build the documentation.
+In order to get the tip documentation, change directory to the `doc` subfolder and type in `make html`, the documentation will be under `_build/html`. You will need [Sphinx](http://sphinx.pocoo.org) to build the documentation.
 
 ### Notebooks
-Also checkout our new [https://github.com/DEAP/notebook][notebook examples]. Using [http://ipython.org/][IPython's] notebook feature you'll be able to navigate and execute each block of code individually and fell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
+Also checkout our new [notebook examples](https://github.com/DEAP/notebook). Using [IPython's](http://ipython.org/) notebook feature you'll be able to navigate and execute each block of code individually and fell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
 
 ```bash
 ipython notebook --pylab inline
@@ -57,7 +57,7 @@ Since version 0.8, DEAP is compatible out of the box with Python 3. The installa
 
 ## Example
 
-The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [http://deap.gel.ulaval.ca/doc/default/examples/index.html][here].
+The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [here](http://deap.gel.ulaval.ca/doc/default/examples/index.html).
 
 ```python
 import array, random
@@ -108,9 +108,9 @@ Authors of scientific papers including results generated using DEAP are encourag
 
 ## Publications on DEAP
 
-  * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP -- Enabling Nimbler Evolutions", SIGEVOlution, vol. 6, no 2, pp. 17-26, February 2014. [http://goo.gl/tOrXTp][Paper]
-  * Félix-Antoine Fortin, François-Michel De Rainville, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: Evolutionary Algorithms Made Easy", Journal of Machine Learning Research, vol. 13, pp. 2171-2175, jul 2012. [http://goo.gl/amJ3x][Paper]
-  * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in !EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012. [http://goo.gl/pXXug][Paper]
+  * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP -- Enabling Nimbler Evolutions", SIGEVOlution, vol. 6, no 2, pp. 17-26, February 2014. [Paper](http://goo.gl/tOrXTp)
+  * Félix-Antoine Fortin, François-Michel De Rainville, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: Evolutionary Algorithms Made Easy", Journal of Machine Learning Research, vol. 13, pp. 2171-2175, jul 2012. [Paper](http://goo.gl/amJ3x)
+  * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in !EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012. [Paper](http://goo.gl/pXXug)
 
 ## Projects using DEAP
   * Macret, M. and Pasquier, P. (2013). Automatic Tuning of the OP-1 Synthesizer Using a Multi-objective Genetic Algorithm. In Proceedings of the 10th Sound and Music Computing Conference (SMC). (pp 614-621).
@@ -126,6 +126,6 @@ Authors of scientific papers including results generated using DEAP are encourag
   * Marc-André Gardner, Christian Gagné, and Marc Parizeau, "Bloat Control in Genetic Programming with Histogram-based Accept-Reject Method", in Proc. Genetic and Evolutionary Computation Conference (GECCO 2011), 2011.
   * Vahab Akbarzadeh, Albert Ko, Christian Gagné, and Marc Parizeau, "Topography-Aware Sensor Deployment Optimization with CMA-ES", in Proc. of Parallel Problem Solving from Nature (PPSN 2010), Springer, 2010.
   * DEAP is also used in ROS as an optimization package http://www.ros.org/wiki/deap.
-  * DEAP is an optional dependency for [https://github.com/mathijs-dumon/PyXRD][PyXRD], a Python implementation of the matrix algorithm developed for the X-ray diffraction analysis of disordered lamellar structures.
+  * DEAP is an optional dependency for [PyXRD](https://github.com/mathijs-dumon/PyXRD), a Python implementation of the matrix algorithm developed for the X-ray diffraction analysis of disordered lamellar structures.
 
 If you want your project listed here, send us a link and a brief description and we'll be glad to add it.
