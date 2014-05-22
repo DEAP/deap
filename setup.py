@@ -11,7 +11,7 @@ import deap
 setup(name='deap',
       version=deap.__revision__,
       description='Distributed Evolutionary Algorithms in Python',
-      long_description=open('README.txt').read(),
+      long_description=open('README.md').read(),
       author='deap Development Team',
       author_email='deap-users@googlegroups.com',
       url='http://deap.googlecode.com',
