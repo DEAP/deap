@@ -37,7 +37,7 @@ Also checkout our new [https://github.com/DEAP/notebooks notebook examples]. Usi
 ipython notebook --pylab inline
 ```
 
-==Installation==
+## Installation
 We encourage you to use easy_install or pip to install DEAP on your system. Other installation procedure like apt-get, yum, etc. usually provide an outdated version.
 
 ```bash
@@ -50,16 +50,16 @@ If you wish to build from sources, download or clone the repository and type
 python setup.py install
 ```
 
-==Requirements==
+## Requirements
 The most basic features of DEAP requires Python2.6. In order to combine the toolbox and the multiprocessing module Python2.7 is needed for its support to pickle partial functions. CMA-ES requires Numpy, and we recommend matplotlib for visualization of results as it is fully compatible with DEAP's API.
 
 Since version 0.8, DEAP is compatible out of the box with Python 3. The installation procedure automatically translates the source to Python 3 with 2to3.
 
-==Example==
+## Example
 
 The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [http://deap.gel.ulaval.ca/doc/default/examples/index.html here].
 
-```bash
+```python
 import array, random
 from deap import creator, base, tools, algorithms
 
