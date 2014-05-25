@@ -24,7 +24,7 @@ from deap import creator
 from deap import tools
 
 # Problem size
-N = 5
+N = 30
 
 # ZDT1, ZDT2, DTLZ2
 MIN_BOUND = numpy.zeros(N)
@@ -55,15 +55,15 @@ def valid(individual):
     return True
 
 toolbox = base.Toolbox()
-toolbox.register("evaluate", benchmarks.dtlz2, obj=2)
+toolbox.register("evaluate", benchmarks.zdt1)
 toolbox.decorate("evaluate", tools.ClosestValidPenality(valid, closest_feasible, 1.0e-6, distance))
 
 def main():
     # The cma module uses the numpy random number generator
     # numpy.random.seed(128)
 
-    MU, LAMBDA = 10, 10
-    NGEN = 1000
+    MU, LAMBDA = 100, 100
+    NGEN = 500
     verbose = True
 
     # The MO-CMA-ES algorithm takes a full population as argument
@@ -72,7 +72,7 @@ def main():
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
-    strategy = cma.StrategyMultiObjective(population, sigma=0.6, mu=MU, lambda_=LAMBDA)
+    strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
@@ -80,11 +80,8 @@ def main():
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
    
-    # The CMA-ES algorithm converge with good probability with those settings
     logbook = tools.Logbook()
     logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
-
-    sigmas = numpy.zeros((MU, NGEN))
 
     for gen in range(NGEN):
         # Generate a new population
@@ -97,38 +94,36 @@ def main():
         
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
-
-        sigmas[:, gen] = strategy.sigmas
         
         record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(population), **record)
+        logbook.record(gen=gen, nevals=len(population), sigmas=strategy.sigmas, **record)
         if verbose:
             print(logbook.stream)
 
+    print(hypervolume(strategy.parents))
     
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
     
-    valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if valid(ind)])
-    invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not valid(ind)])
+    # valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if valid(ind)])
+    # invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not valid(ind)])
 
-    print(hypervolume(numpy.concatenate((valid_front, invalid_front)), [11.0, 11.0]))
-    
-    fig = plt.figure()
-    
-    plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
-    plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
+    # fig = plt.figure()
 
-    plt.figure()
-    sigmas = numpy.mean(sigmas, axis=0)
-    plt.plot(sigmas)
+    # if len(valid_front) > 0:
+    #     plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
 
-    plt.show()
+    # if len(invalid_front) > 0:
+    #     plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
+    
+    # sigmas = logbook.select("sigmas")
+    # sigmas = numpy.mean(sigmas, axis=0)
+
+    # plt.figure()
+    # plt.plot(sigmas)
+
+    # plt.show()
     
     return strategy.parents
 
 if __name__ == "__main__":
     solutions = main()
-
-    
-
-    
