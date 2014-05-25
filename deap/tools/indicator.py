@@ -18,38 +18,61 @@ import numpy
 
 try:
     # try importing the C version
-    from . import hv as hv
+    from . import hv
 except ImportError:
     # fallback on python version
     from . import pyhv as hv
 
-def hypervolume(front, ref=None):
+def hypervolume(front, **kargs):
     """Returns the index of the individual with the least the hypervolume
-    contribution.
+    contribution. The provided *front* should be a set of non-dominated
+    individuals having each a :attr:`fitness` attribute. 
     """
     # Must use wvalues * -1 since hypervolume use implicit minimization
     # And minimization in deap use max on -obj
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
+    ref = kargs.get("ref", None)
     if ref is None:
         ref = numpy.max(wobj, axis=0) + 1
-
-    # Ensure the extreme points get highest rank
-    # Don't compute the hypervolume for them
-    max_obj = set(numpy.argmin(wobj, axis=0))
-    indices = [x for x in range(len(front)) if x not in max_obj]
-    # indices = range(len(front))
     
     def contribution(i):
+        # The contribution of point p_i in point set P
+        # is the hypervolume of P without p_i
         return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
     # TODO: Parallelize this?
-    contrib_values = map(contribution, indices)
-    
-    # Reinsert the extreme points with minimal value
-    for i in sorted(max_obj):
-        contrib_values.insert(i, 0)
+    contrib_values = map(contribution, range(len(front)))
 
-    # Select the maximum hypervolume value
+    # Select the maximum hypervolume value (correspond to the minimum difference)
     return numpy.argmax(contrib_values)
 
-__all__ = ["hypervolume"]
+def additive_epsilon(front, **kargs):
+    wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
+
+    def contribution(i):
+        mwobj = numpy.ma.array(wobj)
+        mwobj[i] = numpy.ma.masked
+        return numpy.min(numpy.max(wobj[i] - mwobj, axis=1))
+        
+    contrib_values = map(contribution, range(len(front)))
+
+    # Select the minimum contribution value
+    return numpy.argmin(contrib_values)
+
+
+def multiplicative_epsilon(front, **kargs):
+    wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
+
+    def contribution(i):
+        mwobj = numpy.ma.array(wobj)
+        mwobj[i] = numpy.ma.masked
+        return numpy.min(numpy.max(wobj[i] / mwobj, axis=1))
+        
+    contrib_values = map(contribution, range(len(front)))
+
+    # Select the minimum contribution value
+    return numpy.argmin(contrib_values)
+
+
+
+__all__ = ["hypervolume", "additive_epsilon", "multiplicative_epsilon"]

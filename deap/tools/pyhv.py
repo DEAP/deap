@@ -1,18 +1,20 @@
+#    This file is part of DEAP.
+#
 #    Copyright (C) 2010 Simon Wessing
 #    TU Dortmund University
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
+#    DEAP is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as
+#    published by the Free Software Foundation, either version 3 of
+#    the License, or (at your option) any later version.
 #
-#    This program is distributed in the hope that it will be useful,
+#    DEAP is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
 #
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 from math import log, floor
 
@@ -30,60 +32,6 @@ def hypervolume(pointset, ref):
     """
     hv = _HyperVolume(ref)
     return hv.compute(pointset)
-
-def hypervolume_approximation(pointset, ref, delta=0.1, epsilon=1e-2):
-    # Assumes minimization
-
-    ref = numpy.asarray(ref)
-    if len(pointset) == 0:
-        return -1
-
-    max_samples = int(floor(12. * log(1. / delta) / log(2.) * len(pointset) / epsilon / epsilon))
-    
-    # Compute volume of each box
-    volume = numpy.prod(ref - pointset, axis=1)
-
-    # Compute the total volume and partial sums
-    T = 0
-    for i in xrange(len(pointset)):
-        volume[i] += T
-        T += volume[i] - T
-
-    samples = 0
-    round = 0
-
-    while True:
-        r = T * random.random()
-
-        # Chose point according to probability proportional to volume
-        i = 0
-        while r > volume[i]:
-            i += 1
-
-        # Compute the random point
-        rand_p = [random.random() for _ in xrange(len(ref))]
-        rand_p = pointset[i] + rand_p * (ref - pointset[i])
-
-        weakly_dominated = True
-        while weakly_dominated:
-            if samples >= max_samples:
-                return float(max_samples) * T / float(len(pointset)) / float(round)
-
-            i = int(floor(len(pointset) * random.random()))
-            samples += 1
-
-            # While pointset[i] is domited or equal by/to rand_p
-            # tested faster than any(p < r for p, r in zip(pointset[i], rand_p))
-            for p, r in zip(pointset[i], rand_p):
-                # Assume minimization
-                if p < r:
-                    weakly_dominated = False
-                    break
-
-
-        round += 1
-
-
 
 
 class _HyperVolume:
