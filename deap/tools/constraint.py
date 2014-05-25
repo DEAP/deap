@@ -120,24 +120,41 @@ class ClosestValidPenality(object):
 __all__ = ['DeltaPenality', 'ClosestValidPenality']
 
 if __name__ == "__main__":
-    def feasible(individual):
-        """A user defined function that returns :data:`True` for
-        a valid *individual* and :data:`False` otherwise.
-        """
-        if individual[0] > 1.0:
+    from deap import base
+    from deap import benchmarks
+    from deap import creator
+    from deap import tools
+
+    import numpy
+
+    MIN_BOUND = numpy.array([0] * 30)
+    MAX_BOUND = numpy.array([1] * 30)
+
+    creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+    creator.create("Individual", list, fitness=creator.FitnessMin)
+
+    def distance(feasible_ind, original_ind):
+        """A distance function to the feasability region."""
+        return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
+
+    def closest_feasible(individual):
+        """A function returning a valid individual from an invalid one."""
+        feasible_ind = numpy.array(individual)
+        feasible_ind = numpy.maximum(MIN_BOUND, feasible_ind)
+        feasible_ind = numpy.minimum(MAX_BOUND, feasible_ind)
+        return feasible_ind
+
+    def valid(individual):
+        """Determines if the individual is valid or not."""
+        if any(individual < MIN_BOUND) or any(individual > MAX_BOUND):
             return False
         return True
 
-    @DeltaPenality(feasible, 100, lambda ind: ind[0]**2)
-    def evaluate(individual):
-        """A standard evaluation function decorated with the
-        :class:`DeltaPenality` decorator, for which *delta* is set to
-        100 and the distance is set quadratic on the first variable.
-        """
-        return sum(individual),
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", benchmarks.zdt2)
+    toolbox.decorate("evaluate", ClosestValidPenality(valid, closest_feasible, 1.0e-6, distance))
 
-    ind1 = [0.5, 1.0, 1.0, 1.0]
-    print evaluate(ind1)
+    ind1 = creator.Individual((-5.6468535666e-01,2.2483050478e+00,-1.1087909644e+00,-1.2710112861e-01,1.1682438733e+00,-1.3642007438e+00,-2.1916417835e-01,-5.9137308999e-01,-1.0870160336e+00,6.0515070232e-01,2.1532075914e+00,-2.6164718271e-01,1.5244071578e+00,-1.0324305612e+00,1.2858152343e+00,-1.2584683962e+00,1.2054392372e+00,-1.7429571973e+00,-1.3517256013e-01,-2.6493429355e+00,-1.3051320798e-01,2.2641961090e+00,-2.5027232340e+00,-1.2844874148e+00,1.9955852925e+00,-1.2942218834e+00,3.1340109155e+00,1.6440111097e+00,-1.7750105857e+00,7.7610242710e-01))
+    print(toolbox.evaluate(ind1))
+    print("Individuals is valid: %s" % ("True" if valid(ind1) else "False"))
 
-    ind2 = [3.0, 1.0, 1.0, 1.0]
-    print evaluate(ind2)
