@@ -208,8 +208,32 @@ class StrategyOnePlusLambda(object):
     :param parent: An iterable object that indicates where to start the
                    evolution. The parent requires a fitness attribute.
     :param sigma: The initial standard deviation of the distribution.
+    :param lambda_: Number of offspring to produce from the parent.
+                    (optional, defaults to 1)
     :param parameter: One or more parameter to pass to the strategy as
-                      described in the following table, optional.
+                      described in the following table. (optional)
+
+    Other parameters can be provided as described in the next table
+
+    +----------------+---------------------------+----------------------------+
+    | Parameter      | Default                   | Details                    |
+    +================+===========================+============================+
+    | ``d``          | ``1.0 + N / (2.0 *        | Damping for step-size.     |
+    |                | lambda_)``                |                            |
+    +----------------+---------------------------+----------------------------+
+    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Taget success rate.        |
+    |                | / 2.0)``                  |                            |
+    +----------------+---------------------------+----------------------------+
+    | ``cp``         | ``ptarg * lambda_ / (2.0 +| Step size learning rate.   |
+    |                | ptarg * lambda_)``        |                            |
+    +----------------+---------------------------+----------------------------+
+    | ``cc``         | ``2.0 / (N + 2.0)``       | Cumulation time horizon.   |
+    +----------------+---------------------------+----------------------------+
+    | ``ccov``       | ``2.0 / (N**2 + 6.0)``    | Covariance matrix learning |
+    |                |                           | rate.                      |
+    +----------------+---------------------------+----------------------------+
+    | ``pthresh``    | ``0.44``                  | Threshold success rate.    |
+    +----------------+---------------------------+----------------------------+
     """
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
@@ -300,7 +324,7 @@ class StrategyMultiObjective(object):
     :param population: An initial population of individual.
     :param sigma: The initial step size of the complete system.
     :param mu: The number of parents to use in the evolution. When not
-               provided it defaults to the len of *population*. (optional)
+               provided it defaults to the length of *population*. (optional)
     :param lambda_: The number of offspring to produce at each generation.
                     (optional, defaults to 1)
 
@@ -311,7 +335,7 @@ class StrategyMultiObjective(object):
     +================+===========================+============================+
     | ``d``          | ``1.0 + N / 2.0``         | Damping for step-size.     |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + sqrt(0.5))`` | Taget success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Taget success rate.        |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg / (2.0 + ptarg)`` | Step size learning rate.   |
     +----------------+---------------------------+----------------------------+
@@ -331,35 +355,13 @@ class StrategyMultiObjective(object):
         self.parents = population
         self.dim = len(self.parents[0])
 
-        self.sigmas = [sigma] * len(population)
-        # Lower Cholesky matrix
-        self.A = [numpy.identity(self.dim) for _ in range(len(population))]
-        # Inverse Cholesky matrix
-        self.invCholesky = [numpy.identity(self.dim) for _ in range(len(population))]
-        
-        self.pc = [numpy.zeros(self.dim) for _ in range(len(population))]
-        self.computeParams(params)
-        self.psucc = [self.ptarg] * len(population)
-
-        self.indicator = params.get("indicator", tools.indicator.hypervolume)
-
-        self.success_count = 0
-        self.mid_front_size = 0
-        self.num_fronts = 0
-
-    def computeParams(self, params):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
-        be called again if :math:`\lambda` changes during evolution.
-        
-        :param params: A dictionary of the manually set parameters.
-        """
-        # Selection :
-        self.lambda_ = params.get("lambda_", 1)
+        # Selection
         self.mu = params.get("mu", len(self.parents))
+        self.lambda_ = params.get("lambda_", 1)
         
         # Step size control
         self.d = params.get("d", 1.0 + self.dim / 2.0)
-        self.ptarg = params.get("ptarg", 1.0 / (5.0 + sqrt(0.5)))
+        self.ptarg = params.get("ptarg", 1.0 / (5.0 + 0.5))
         self.cp = params.get("cp", self.ptarg / (2.0 + self.ptarg))
         
         # Covariance matrix adaptation
@@ -367,7 +369,28 @@ class StrategyMultiObjective(object):
         self.ccov = params.get("ccov", 2.0 / (self.dim**2 + 6.0))
         self.pthresh = params.get("pthresh", 0.44)
 
+        # Internal parameters associated to the mu parent
+        self.sigmas = [sigma] * len(population)
+        # Lower Cholesky matrix (Sampling matrix)
+        self.A = [numpy.identity(self.dim) for _ in range(len(population))]
+        # Inverse Cholesky matrix (Used in the update of A)
+        self.invCholesky = [numpy.identity(self.dim) for _ in range(len(population))]
+        self.pc = [numpy.zeros(self.dim) for _ in range(len(population))]
+        self.psucc = [self.ptarg] * len(population)
+
+        self.indicator = params.get("indicator", tools.hypervolume)
+
     def generate(self, ind_init):
+        """Generate a population of :math:`\lambda` individuals of type
+        *ind_init* from the current strategy.
+        
+        :param ind_init: A function object that is able to initialize an
+                         individual from a list.
+        :returns: A list of individuals with a private attribute :attr:`_ps`.
+                  This last attribute is essential to the update function, it
+                  indicates that the individual is an offspring and the index
+                  of its parent.
+        """
         arz = numpy.random.randn(self.lambda_, self.dim)
         individuals = list()
         
@@ -408,7 +431,7 @@ class StrategyMultiObjective(object):
         # for this front
         # The remaining fronts are explicitely not chosen
         full = False
-        for i, front in enumerate(pareto_fronts):
+        for front in pareto_fronts:
             if len(chosen) + len(front) <= self.mu and not full:
                 chosen += front
             elif mid_front is None and len(chosen) < self.mu:
@@ -427,7 +450,7 @@ class StrategyMultiObjective(object):
             ref = numpy.max(ref, axis=0) + 1
 
             for i in range(len(mid_front) - k):
-                idx = self.indicator(mid_front, ref)
+                idx = self.indicator(mid_front, ref=ref)
                 not_chosen.append(mid_front.pop(idx))
 
             chosen += mid_front
@@ -470,12 +493,9 @@ class StrategyMultiObjective(object):
 
             # Only the offspring update the parameter set
             if t == "o":
-                self.success_count += 1
-
                 # Update (Success = 1 since it is chosen)
                 psucc[i] = (1.0 - cp) * psucc[i] + cp
                 sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
-                
 
                 if psucc[i] < pthresh:
                     xp = numpy.array(ind)
