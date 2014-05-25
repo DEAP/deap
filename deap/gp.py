@@ -487,7 +487,7 @@ def compileADF(expr, psets):
 ######################################
 # GP Program generation functions    #
 ######################################
-def genFull(pset, min_, max_, type_=__type__):
+def genFull(pset, min_, max_, type_=None):
     """Generate an expression where each leaf has a the same depth
     between *min* and *max*.
 
@@ -495,7 +495,8 @@ def genFull(pset, min_, max_, type_=__type__):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: A full tree with all leaves at the same depth.
     """
     def condition(height, depth):
@@ -503,7 +504,7 @@ def genFull(pset, min_, max_, type_=__type__):
         return depth == height
     return generate(pset, min_, max_, condition, type_)
 
-def genGrow(pset, min_, max_, type_=__type__):
+def genGrow(pset, min_, max_, type_=None):
     """Generate an expression where each leaf might have a different depth
     between *min* and *max*.
 
@@ -511,7 +512,8 @@ def genGrow(pset, min_, max_, type_=__type__):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: A grown tree with leaves at possibly different depths.
     """
     def condition(height, depth):
@@ -522,7 +524,7 @@ def genGrow(pset, min_, max_, type_=__type__):
                (depth >= min_ and random.random() < pset.terminalRatio)
     return generate(pset, min_, max_, condition, type_)
 
-def genHalfAndHalf(pset, min_, max_, type_=__type__):
+def genHalfAndHalf(pset, min_, max_, type_=None):
     """Generate an expression with a PrimitiveSet *pset*.
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
     the other half, the expression is generated with :func:`~deap.gp.genFull`.
@@ -531,13 +533,14 @@ def genHalfAndHalf(pset, min_, max_, type_=__type__):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: Either, a full or a grown tree.
     """
     method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
 
-def genRamped(pset, min_, max_, type_=__type__):
+def genRamped(pset, min_, max_, type_=None):
     """
     .. deprecated:: 1.0
         The function has been renamed. Use :func:`~deap.gp.genHalfAndHalf` instead.
@@ -546,7 +549,7 @@ def genRamped(pset, min_, max_, type_=__type__):
                   FutureWarning)
     return genHalfAndHalf(pset, min_, max_, type_)
 
-def generate(pset, min_, max_, condition, type_=__type__):
+def generate(pset, min_, max_, condition, type_=None):
     """Generate a Tree as a list of list. The tree is build
     from the root to the leaves, and it stop growing when the
     condition is fulfilled.
@@ -558,10 +561,13 @@ def generate(pset, min_, max_, condition, type_=__type__):
                       the height of the tree to build and the current
                       depth in the tree.
     :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) no return type is enforced.
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
     :returns: A grown tree with leaves at possibly different depths
               dependending on the condition function.
     """
+    if type_ is None:
+        type_ = pset.ret
     expr = []
     height = random.randint(min_, max_)
     stack = [(0, type_)]

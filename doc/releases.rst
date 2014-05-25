@@ -23,6 +23,7 @@ API enhancements
 - gp: Added a :func:`~deap.gp.PrimitiveTree.from_string` function to :class:`~deap.gp.PrimitiveTree`.
 - gp: Added the possibility to name primitives added to a PrimitiveSet in :func:`~deap.gp.PrimitiveSet.addPrimitive`.
 - gp: Added object oriented inheritance to strongly typed genetic programming.
+- gp: :class:`~deap.gp.PrimitiveSetTyped` now requires real classes as type instead of string. See the :doc:`Spambase example <examples/gp_spambase>`.
 - gp: Replaced :func:`~deap.gp.evaluate` and :func:`~deap.gp.lambdify` by a single function :func:`~deap.gp.compile`.
 - gp: Replaced :func:`~deap.gp.lambdifyADF` by :func:`~deap.gp.compileADF`.
 - gp: New :func:`~deap.gp.graph` function that returns a list of nodes, edges and a
@@ -71,3 +72,12 @@ Bug fixes
   from ``numpy.ndarray`` anymore. This was bug prone and extremely hard to maintain.
   Users are now requested to include ``numpy.copy()`` operation in their
   operators. A tutorial on inheriting from numpy is on its way.
+
+**Release 1.0.1**:
+
+- tools: issue #26: Operators with bounds do not work correctly when 
+  bounds are provided as list instead of iterator. rev: `b172432515af`, `9d4718a8cf2a`.
+- tools: add missing arguments to sortLogNondominated  (`k`, `first_front_only`). rev: `f60a6520b666`, `4de7df29dd0f`.
+- gp: issue #32: :meth:`~deap.gp.PrimitiveTree.from_string` used incorrect argument order with STGP. rev: `58c1a0711e1f`.
+
+
