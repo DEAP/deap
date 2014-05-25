@@ -10,7 +10,7 @@ except ImportError:
 
 try:
     # try importing the C version
-    from ..tools import hv as hv
+    from ..tools import hv
 except ImportError:
     # fallback on python version
     from ..tools import pyhv as hv
@@ -289,4 +289,9 @@ def convergence(first_front, optimal_front):
     return sum(distances) / len(distances)
 
 
-hypervolume = hv.hypervolume
+def hypervolume(front, ref=None):
+    # Must use wvalues * -1 since hypervolume use implicit minimization
+    wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
+    if ref is None:
+        ref = numpy.max(wobj, axis=0) + 1
+    return hv.hypervolume(wobj, ref)
