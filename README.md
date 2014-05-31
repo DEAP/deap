@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/fmder/deap.svg?branch=master)](https://travis-ci.org/fmder/deap)
 # DEAP
 
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
