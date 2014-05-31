@@ -1,14 +1,15 @@
 language: python
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "pypy"
+matrix:
+  include:
+    - python: "2.7"
+      env: NUMPY=numpy
+    - python: "3.4"
+      env: NUMPY=numpy
+    - python: "pypy"
+      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 # command to install dependencies
 install:
   - pip install .
-  - pip install numpy
+  - pip install $NUMPY
 # command to run tests
 script: nosetests 
