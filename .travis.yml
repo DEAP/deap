@@ -1,14 +1,17 @@
 language: python
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "pypy"
+matrix:
+  include:
+    - python: "2.7"
+      env: NUMPY=numpy
+    - python: "3.4"
+      env: NUMPY=numpy
+    - python: "pypy"
+      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 # command to install dependencies
 install:
-  - pip install .
-  - pip install numpy
+  - python setup.py install
+  - pip install $NUMPY
 # command to run tests
-script: nosetests 
+script:
+  # run python3 tests from build/lib because the 2to3 from setup.py does not modify files in-place
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests --where=build/lib; else nosetests; fi
