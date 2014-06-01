@@ -13,8 +13,4 @@ install:
   - pip install $NUMPY
 # command to run tests
 script:
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then
-      nosetests --where=build/lib
-    else
-      nosetests
-    fi
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests --where=build/lib; else nosetests; fi
