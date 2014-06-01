@@ -9,7 +9,7 @@ matrix:
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 # command to install dependencies
 install:
-  - pip install .
+  - python setup.py install
   - pip install $NUMPY
 # command to run tests
 script: nosetests 
