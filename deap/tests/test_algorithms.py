@@ -14,6 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 from nose import with_setup
+import platform
 import unittest
 
 from deap import algorithms
