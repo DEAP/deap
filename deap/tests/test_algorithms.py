@@ -35,6 +35,7 @@ def teardown_func():
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
 
+@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func, teardown_func)
 def test_cma():
     N = 5

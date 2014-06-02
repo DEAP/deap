@@ -33,7 +33,6 @@ class Pickling(unittest.TestCase):
         del creator.IndList
         del creator.IndArray
         del creator.IndTree
-        del self.toolbox
     
     def test_pickle_fitness(self):
         fitness = creator.FitnessMax()
