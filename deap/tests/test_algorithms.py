@@ -15,12 +15,13 @@
 
 from nose import with_setup
 import platform
+import random
 import unittest
 
 from deap import algorithms
 from deap import base
 from deap import benchmarks
-from deap import benchmarks.tools
+#from deap.benchmarks.tools import hypervolume
 from deap import cma
 from deap import creator
 from deap import tools
@@ -38,6 +39,7 @@ def setup_func_multi_obj():
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
 
 def teardown_func():
+    # Messy way to remove a class from the creator
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
 
@@ -64,8 +66,9 @@ def test_nsga2():
     BOUND_LOW, BOUND_UP = 0.0, 1.0
     MU = 16
 
-    toolbox.register("attr_float", uniform, BOUND_LOW, BOUND_UP, NDIM)
-    toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.attr_float)
+    toolbox = base.Toolbox()
+    toolbox.register("attr_float", random.uniform, BOUND_LOW, BOUND_UP)
+    toolbox.register("individual", tools.initRepeat, creator.__dict__[INDCLSNAME], toolbox.attr_float, NDIM)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
     toolbox.register("evaluate", benchmarks.zdt1)
@@ -78,11 +81,8 @@ def test_nsga2():
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
 
-    # This is just to assign the crowding distance to the individuals
-    # no actual selection is done
     pop = toolbox.select(pop, len(pop))
     for gen in range(1, 100):
-        # Vary the population
         offspring = tools.selTournamentDCD(pop, len(pop))
         offspring = [toolbox.clone(ind) for ind in offspring]
         
@@ -94,13 +94,11 @@ def test_nsga2():
             toolbox.mutate(ind2)
             del ind1.fitness.values, ind2.fitness.values
         
-        # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        # Select the next generation population
         pop = toolbox.select(pop + offspring, MU)
 
     #hv = benchmarks.tools.hypervolume(pop, [11.0, 11.0])
