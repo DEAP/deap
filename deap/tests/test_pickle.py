@@ -135,7 +135,7 @@ class Pickling(unittest.TestCase):
 
         self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
 
-    @unittest.skipIf(platform.python_implementation() != "PyPy", "Skipping test because Python version < 2.7")
+    @unittest.skipIf(platform.python_implementation() != "PyPy", "Skipping test because PyPy doesn't pickle numpy.ndarrays")
     def test_pickle_logbook_pypy(self):
         stats = tools.Statistics()
         logbook = tools.Logbook()
