@@ -182,9 +182,9 @@ toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 def main():
     random.seed(69)
-
-    trail_file = open("ant/santafe_trail.txt")
-    ant.parse_matrix(trail_file)
+    
+    with  open("ant/santafe_trail.txt") as trail_file:
+      ant.parse_matrix(trail_file)
     
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
