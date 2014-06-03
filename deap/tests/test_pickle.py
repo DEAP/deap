@@ -121,22 +121,7 @@ class Pickling(unittest.TestCase):
         self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
     
-    @unittest.skipIf(platform.python_implementation() == "PyPy", "Skipping test because PyPy does not implement pickling of numpy arrays")
     def test_pickle_logbook(self):
-        stats = tools.Statistics()
-        logbook = tools.Logbook()
-
-        stats.register("mean", numpy.mean)
-        record = stats.compile([1,2,3,4,5,6,8,9,10])
-        logbook.record(**record)
-
-        stats_s = pickle.dumps(logbook)
-        logbook_r = pickle.loads(stats_s)
-
-        self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
-
-    @unittest.skipIf(platform.python_implementation() != "PyPy", "Skipping test because PyPy doesn't pickle numpy.ndarrays")
-    def test_pickle_logbook_pypy(self):
         stats = tools.Statistics()
         logbook = tools.Logbook()
 
@@ -151,10 +136,12 @@ class Pickling(unittest.TestCase):
         except pickle.PicklingError:
             pickled = False
 
-        self.assertFalse(pickled, "In PyPy pickling of numpy arrays should fail. Otherwise, change the doc.")
+        if platform.python_implementation() != "PyPy":
+            self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
+        else:
+            self.assertFalse(pickled, "In PyPy pickling of numpy arrays should fail. Otherwise, change the doc and this test.")
 
-
-    @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7")
+    @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7 does not pickle partials.")
     def test_pickle_partial(self):
         func_s = pickle.dumps(self.toolbox.func)
         func_l = pickle.loads(func_s)
