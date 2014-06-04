@@ -11,7 +11,8 @@ print(logbook)
 
 gen, avg = logbook.select("gen", "avg")
 
-pickle.dump(logbook, open("logbook.pkl", "w"))
+with open("logbook.pkl", "w") as lb_file:
+	pickle.dump(logbook, lb_file)
 
 # Cleaning the pickle file ...
 import os
