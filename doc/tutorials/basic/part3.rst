@@ -93,7 +93,7 @@ The :meth:`~deap.tools.Logbook.select` method provides a way to retrieve all the
 A logbook is a picklable object (as long as all inserted objects are picklable) providing a very nice way to save the statistics of an evolution on disk.
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
-   :lines: 1,14
+   :lines: 1,15
 
 .. note::
    
@@ -104,7 +104,7 @@ Printing to Screen
 A logbook can be printed to screen or file. Its :meth:`~deap.tools.Logbook.__str__` method returns a header of each key inserted in the first record and the complete logbook for each of these keys. The row are in chronological order of insertion while the columns are in an undefined order. The easiest way to specify an order is to set the :attr:`~deap.tools.Logbook.header` attribute to a list of strings specifying the order of the columns.
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
-   :lines: 20
+   :lines: 21
 
 The result is::
 
@@ -129,12 +129,12 @@ Dealing with Multi-statistics
 The logbook is able to cope with the dictionary of dictionaries return by the :class:`~deap.tools.MultiStatistics` object. In fact, it will log the data in :attr:`~deap.tools.Logbook.chapters` for each sub dictionary contained in the record. Thus, a *multi* record can be used exactly as a record.
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
-   :lines: 29-30
+   :lines: 30-31
 
 One difference is the column ordering, where we can specify an order for the chapters and their content as follows:
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
-   :lines: 32-34
+   :lines: 33-35
 
 The resulting output is::
 
@@ -147,7 +147,7 @@ The resulting output is::
 Retrieving the data is also done through the chapters. 
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
-   :lines: 38-40
+   :lines: 39-41
 
 The generations, minimum fitness and average size are obtained, chronologically ordered. If some data is not available, a :data:`None` appears in the vector.
 
@@ -156,7 +156,7 @@ Some Plotting Sugar
 One of the most common operation when an optimization is finished is to plot the data during the evolution. The :class:`~deap.tools.Logbook` allows to do this very efficiently. Using the select method, one can retrieve the desired data and plot it using matplotlib.
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
-   :lines: 38-41,42-61
+   :lines: 39-62
 
 When added to the symbolic regression example, it gives the following graphic:
 
