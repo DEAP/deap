@@ -60,12 +60,9 @@ argument containing the path of the checkpoint file to restore. ::
                 # Fill the dictionary using the dict(key=value[, ...]) constructor
                 cp = dict(population=population, generation=gen, halloffame=halloffame,
                           logbook=logbook, rndstate=random.getstate())
-<<<<<<< HEAD
-                pickle.dump(cp, open("checkpoint_name.pkl", "w"))
-=======
+
                 with open("checkpoint_name.pkl", "wb") as cp_file:
                     pickle.dump(cp, cp_file)
->>>>>>> 1a1bb57... Added with statement to checkpoint example
 
 Now, the whole data will be written in a pickled dictionary every *FREQ*
 generations. Loading the checkpoint is done if the main function is given a path
