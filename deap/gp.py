@@ -38,7 +38,7 @@ from operator import eq, lt
 __type__ = object
 
 class PrimitiveTree(list):
-    """Tree spefically formated for optimization of genetic
+    """Tree specifically formated for optimization of genetic
     programming operations. The tree is represented with a
     list where the nodes are appended in a depth-first order.
     The nodes appended to the tree are required to
