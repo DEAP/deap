@@ -224,12 +224,6 @@ class Ephemeral(Terminal):
     def __init__(self):
         Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
 
-    def regen(self):
-        """Regenerate the ephemeral value.
-        """
-        self.value = self.func()
-        self.name = str(self.value)
-
     @staticmethod
     def func():
         """Return a random value used to define the ephemeral state.
@@ -768,7 +762,7 @@ def mutEphemeral(individual, mode):
             ephemerals_idx = (random.choice(ephemerals_idx),)
 
         for i in ephemerals_idx:
-            individual[i].regen()
+            individual[i] = type(individual[i])()
 
     return individual,
 
