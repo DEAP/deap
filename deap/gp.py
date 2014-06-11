@@ -120,7 +120,7 @@ class PrimitiveTree(list):
             if token in pset.mapping:
                 primitive = pset.mapping[token]
 
-                if len(ret_types) != 0 and primitive.ret != type_:
+                if type_ is not None and not issubclass(primitive.ret, type_):
                     raise TypeError("Primitive {} return type {} does not "
                                     "match the expected one: {}."
                                     .format(primitive, primitive.ret, type_))
@@ -137,7 +137,7 @@ class PrimitiveTree(list):
                 if type_ is None:
                     type_ = type(token)
 
-                if type(token) != type_:
+                if not issubclass(type(token), type_):
                     raise TypeError("Terminal {} type {} does not "
                                     "match the expected one: {}."
                                     .format(token, type(token), type_))
