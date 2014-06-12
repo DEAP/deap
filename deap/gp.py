@@ -197,6 +197,9 @@ class Primitive(object):
     def format(self, *args):
         return self.seq.format(*args)
 
+    def __eq__(self, other):
+        return self.name == other.name and self.args == other.args and self.ret == other.ret
+
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
@@ -214,6 +217,9 @@ class Terminal(object):
 
     def format(self):
         return self.conv_fct(self.value)
+
+    def __eq__(self, other):
+        return self.value == other.value and self.ret == other.ret
 
 class Ephemeral(Terminal):
     """Class that encapsulates a terminal which value is set when the
