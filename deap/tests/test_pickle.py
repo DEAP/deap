@@ -5,15 +5,14 @@ import array
 import pickle
 import operator
 from test import test_support
-
-sys.path.append("..")
+import platform
 
 import numpy
 
-import creator
-import base
-import gp
-import tools
+from deap import creator
+from deap import base
+from deap import gp
+from deap import tools
 
 def func():
     return "True"
@@ -28,40 +27,80 @@ class Pickling(unittest.TestCase):
         self.toolbox = base.Toolbox()
         self.toolbox.register("func", func)
         self.toolbox.register("lambda_func", lambda: "True")
+
+    def tearDown(self):
+        del creator.FitnessMax
+        del creator.IndList
+        del creator.IndArray
+        del creator.IndTree
     
     def test_pickle_fitness(self):
         fitness = creator.FitnessMax()
         fitness.values = (1.0,)
         fitness_s = pickle.dumps(fitness)
         fitness_l = pickle.loads(fitness_s)
-        self.failUnlessEqual(fitness, fitness_l, "Unpickled fitness != pickled fitness")
+        self.assertEqual(fitness, fitness_l, "Unpickled fitness != pickled fitness")
 
     def test_pickle_ind_list(self):
         ind = creator.IndList([1.0, 2.0, 3.0])
         ind.fitness.values = (4.0,)
         ind_s = pickle.dumps(ind)
         ind_l = pickle.loads(ind_s)
-        self.failUnlessEqual(ind, ind_l, "Unpickled individual list != pickled individual list")
-        self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.assertEqual(ind, ind_l, "Unpickled individual list != pickled individual list")
+        self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
          
     def test_pickle_ind_array(self):
         ind = creator.IndArray([1.0, 2.0, 3.0])
         ind.fitness.values = (4.0,)
         ind_s = pickle.dumps(ind)
         ind_l = pickle.loads(ind_s)
-        self.failUnlessEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
-        self.failUnlessEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.assertEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
+        self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
     
-    def test_pickle_tree(self):
-        ind = creator.IndTree([operator.add, 1, 2])
+    def test_pickle_tree_input(self):
+        pset = gp.PrimitiveSetTyped("MAIN", [int], int, "IN")
+        pset.addPrimitive(operator.add, [int, int], int)
+
+        expr = gp.genFull(pset, min_=1, max_=1)
+        ind = creator.IndTree(expr)
         ind.fitness.values = (1.0,)
-        ind_s = pickle.dumps(ind)
+        ind_s = pickle.dumps(ind, pickle.HIGHEST_PROTOCOL)
         ind_l = pickle.loads(ind_s)
         msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
-        self.failUnlessEqual(ind, ind_l, msg)
+        self.assertEqual(ind, ind_l, msg)
         msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
-        self.failUnlessEqual(ind.fitness, ind_l.fitness, msg)
-    
+        self.assertEqual(ind.fitness, ind_l.fitness, msg)
+
+    def test_pickle_tree_term(self):
+        pset = gp.PrimitiveSetTyped("MAIN", [], int, "IN")
+        pset.addPrimitive(operator.add, [int, int], int)
+        pset.addTerminal(1, int)
+
+        expr = gp.genFull(pset, min_=1, max_=1)
+        ind = creator.IndTree(expr)
+        ind.fitness.values = (1.0,)
+        ind_s = pickle.dumps(ind, pickle.HIGHEST_PROTOCOL)
+        ind_l = pickle.loads(ind_s)
+        msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
+        self.assertEqual(ind, ind_l, msg)
+        msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
+        self.assertEqual(ind.fitness, ind_l.fitness, msg)
+
+    def test_pickle_tree_ephemeral(self):
+        pset = gp.PrimitiveSetTyped("MAIN", [], int, "IN")
+        pset.addPrimitive(operator.add, [int, int], int)
+        pset.addEphemeralConstant("E1", lambda: 2, int)
+
+        expr = gp.genFull(pset, min_=1, max_=1)
+        ind = creator.IndTree(expr)
+        ind.fitness.values = (1.0,)
+        ind_s = pickle.dumps(ind, pickle.HIGHEST_PROTOCOL)
+        ind_l = pickle.loads(ind_s)
+        msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
+        self.assertEqual(ind, ind_l, msg)
+        msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
+        self.assertEqual(ind.fitness, ind_l.fitness, msg)
+
     def test_pickle_population(self):
         ind1 = creator.IndList([1.0,2.0,3.0])
         ind1.fitness.values = (1.0,)
@@ -75,12 +114,12 @@ class Pickling(unittest.TestCase):
         pop_s = pickle.dumps(pop)
         pop_l = pickle.loads(pop_s)
         
-        self.failUnlessEqual(pop[0], pop_l[0], "Unpickled individual list != pickled individual list")
-        self.failUnlessEqual(pop[0].fitness, pop_l[0].fitness, "Unpickled individual fitness != pickled individual fitness")
-        self.failUnlessEqual(pop[1], pop_l[1], "Unpickled individual list != pickled individual list")
-        self.failUnlessEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
-        self.failUnlessEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
-        self.failUnlessEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.assertEqual(pop[0], pop_l[0], "Unpickled individual list != pickled individual list")
+        self.assertEqual(pop[0].fitness, pop_l[0].fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.assertEqual(pop[1], pop_l[1], "Unpickled individual list != pickled individual list")
+        self.assertEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
+        self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
+        self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
     
     def test_pickle_logbook(self):
         stats = tools.Statistics()
@@ -90,25 +129,25 @@ class Pickling(unittest.TestCase):
         record = stats.compile([1,2,3,4,5,6,8,9,10])
         logbook.record(**record)
 
-        stats_s = pickle.dumps(logbook)
-        logbook_r = pickle.loads(stats_s)
+        pickled = True
+        try:
+            stats_s = pickle.dumps(logbook)
+            logbook_r = pickle.loads(stats_s)
+        except pickle.PicklingError:
+            pickled = False
 
-        self.failUnlessEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
+        if platform.python_implementation() != "PyPy":
+            self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
+        else:
+            self.assertFalse(pickled, "In PyPy pickling of numpy arrays should fail. Otherwise, change the doc and this test.")
 
+    @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7 does not pickle partials.")
+    def test_pickle_partial(self):
+        func_s = pickle.dumps(self.toolbox.func)
+        func_l = pickle.loads(func_s)
 
-    if not sys.version_info < (2, 7):
-        def test_pickle_partial(self):
-            func_s = pickle.dumps(self.toolbox.func)
-            func_l = pickle.loads(func_s)
-
-            self.failUnlessEqual(self.toolbox.func(), func_l())
+        self.assertEqual(self.toolbox.func(), func_l())
         
-        @unittest.expectedFailure
-        def test_pickle_lambda(self):
-            func_s = pickle.dumps(self.toolbox.lambda_func)
-            func_l = pickle.loads(func_s)
-        
-            self.failUnlessEqual(self.toolbox.lambda_func(), func_l())
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)

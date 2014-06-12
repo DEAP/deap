@@ -1,9 +1,7 @@
 import sys
 import unittest
 
-sys.path.append("..")
-
-import tools
+from deap import tools
 
 class LogbookTest(unittest.TestCase):
 
