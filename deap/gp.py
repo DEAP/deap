@@ -198,7 +198,12 @@ class Primitive(object):
         return self.seq.format(*args)
 
     def __eq__(self, other):
-        return self.name == other.name and self.args == other.args and self.ret == other.ret
+        try:
+            return self.name == other.name and self.args == other.args and self.ret == other.ret
+        except AttributeError:
+            # Case where comparing two objects not having all preceeding
+            # attributes. They are obviously different.
+            return False
 
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
@@ -219,7 +224,12 @@ class Terminal(object):
         return self.conv_fct(self.value)
 
     def __eq__(self, other):
-        return self.value == other.value and self.ret == other.ret
+        try:
+            return self.value == other.value and self.ret == other.ret
+        except AttributeError:
+            # Case where comparing two objects not having all preceeding
+            # attributes. They are obviously different.
+            return False
 
 class Ephemeral(Terminal):
     """Class that encapsulates a terminal which value is set when the
