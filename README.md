@@ -51,7 +51,7 @@ python setup.py install
 ```
 
 ## Build Status
-DEAP build status is available on on Travis-CI https://travis-ci.org/DEAP/deap.
+DEAP build status is available on Travis-CI https://travis-ci.org/DEAP/deap.
 
 ## Requirements
 The most basic features of DEAP requires Python2.6. In order to combine the toolbox and the multiprocessing module Python2.7 is needed for its support to pickle partial functions. CMA-ES requires Numpy, and we recommend matplotlib for visualization of results as it is fully compatible with DEAP's API.
