@@ -26,7 +26,7 @@ Following acceptation of [PEP 438](http://www.python.org/dev/peps/pep-0438/) by 
 You can find the most recent releases at: https://pypi.python.org/pypi/deap/.
 
 ## Documentation
-See the [DEAP User's Guide](http://deap.gel.ulaval.ca/doc/default/index.html) for DEAP documentation.
+See the [DEAP User's Guide](http://deap.readthedocs.org/en/1.0.x/) for DEAP documentation.
 
 In order to get the tip documentation, change directory to the `doc` subfolder and type in `make html`, the documentation will be under `_build/html`. You will need [Sphinx](http://sphinx.pocoo.org) to build the documentation.
 
