@@ -458,10 +458,10 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     each generation and the statistics if a :class:`~deap.tools.Statistics` is
     given as argument. The pseudocode goes as follow ::
 
-    for g in range(ngen):
-        population = toolbox.generate()
-        evaluate(population)
-        toolbox.update(population)
+        for g in range(ngen):
+            population = toolbox.generate()
+            evaluate(population)
+            toolbox.update(population)
 
     .. [Colette2010] Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and
        R. Le Riche (2010). On Object-Oriented Programming of Optimizers -
