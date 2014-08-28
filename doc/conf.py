@@ -126,24 +126,10 @@ plot_include_source = False
 plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
-
 import subprocess
-import re
-# branch = str(subprocess.check_output(["hg", "branch"])[:-1])
-# extlinks = {'example': ('https://code.google.com/p/deap/source/browse/examples/%s.py?name='+branch,
-                      # 'examples/')}
+tree = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
 
-branches = str(subprocess.check_output(["git", "branch", "-l"])).split("\n")
-for branch in branches:
-  m = re.search("(?<=\*\s)\w+", branch)
-  if m is not None:
-    branch_name = m.group(0)
-
-try:
-  extlinks = {'example': ('https://github.com/DEAP/deap/blob/%s/examples/%%s.py' % branch_name, "examples/")}
-except NameError:
-  print("WARNING: Not currently on any branch cannot link to original example files.")
-
+extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/")}
 # -- Options for HTML output ---------------------------------------------------
 
 # Add any paths that contain custom themes here, relative to this directory.
