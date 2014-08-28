@@ -128,11 +128,19 @@ plot_html_show_formats = True
 # -- Options for extlinks extension ----------------------------------------------
 
 with open("../.git/HEAD", 'r') as git_head:
-  line = git_head.readline()
-  print(line)
-  branch_name = line.split('/')[2].strip()
+  head_content = git_head.readline().strip()
+  head_split = head_content.split('/')
+  # The head is fixed to a commit hash
+  if len(head_split) == 1:
+    tree = head_split
+  # The head corresponds to a branch
+  elif len(head_split) == 3:
+    tree = head_split[2]
+  # No idea what is going on here...
+  else:
+    tree = 'master'
 
-extlinks = {'example': ('https://github.com/DEAP/deap/blob/%s/examples/%%s.py' % branch_name, "examples/")}
+extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/")}
 # -- Options for HTML output ---------------------------------------------------
 
 # Add any paths that contain custom themes here, relative to this directory.
