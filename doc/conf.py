@@ -126,19 +126,8 @@ plot_include_source = False
 plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
-
-with open("../.git/HEAD", 'r') as git_head:
-  head_content = git_head.readline().strip()
-  head_split = head_content.split('/')
-  # The head is fixed to a commit hash
-  if len(head_split) == 1:
-    tree = head_split
-  # The head corresponds to a branch
-  elif len(head_split) == 3:
-    tree = head_split[2]
-  # No idea what is going on here...
-  else:
-    tree = 'master'
+import subprocess
+tree = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
 
 extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/")}
 # -- Options for HTML output ---------------------------------------------------
