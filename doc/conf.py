@@ -126,23 +126,12 @@ plot_include_source = False
 plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
+with open("../.git/HEAD", 'r') as git_head:
+  line = git_head.readline()
+  branch_name = line.split('/')[2].strip()
 
-import subprocess
-import re
-# branch = str(subprocess.check_output(["hg", "branch"])[:-1])
-# extlinks = {'example': ('https://code.google.com/p/deap/source/browse/examples/%s.py?name='+branch,
-                      # 'examples/')}
-
-branches = str(subprocess.check_output(["git", "branch", "-l"])).split("\n")
-for branch in branches:
-  m = re.search("(?<=\*\s)\w+", branch)
-  if m is not None:
-    branch_name = m.group(0)
-
-try:
-  extlinks = {'example': ('https://github.com/DEAP/deap/blob/%s/examples/%%s.py' % branch_name, "examples/")}
-except NameError:
-  print("WARNING: Not currently on any branch cannot link to original example files.")
+extlinks = {'example': ('https://github.com/DEAP/deap/blob/%s/examples/%%s.py' % branch_name, "examples/")}
+print("Building doc of branch : {branch}".format(branch=branch_name))
 
 # -- Options for HTML output ---------------------------------------------------
 
