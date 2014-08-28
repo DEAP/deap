@@ -126,6 +126,8 @@ plot_include_source = False
 plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
+import os
+print(os.getcwd())
 with open("../.git/HEAD", 'r') as git_head:
   line = git_head.readline()
   branch_name = line.split('/')[2].strip()
