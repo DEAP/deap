@@ -231,7 +231,7 @@ def rastrigin(individual):
        * - Global optima
          - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         - :math:`f(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
+         - :math:`f(\\mathbf{x}) = 10N + \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
 
     .. plot:: code/benchmarks/rastrigin.py
        :width: 67 %
