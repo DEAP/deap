@@ -129,18 +129,12 @@ class Pickling(unittest.TestCase):
         record = stats.compile([1,2,3,4,5,6,8,9,10])
         logbook.record(**record)
 
-        pickled = True
-        try:
-            stats_s = pickle.dumps(logbook)
-            logbook_r = pickle.loads(stats_s)
-        except pickle.PicklingError:
-            pickled = False
+        logbook_s = pickle.dumps(logbook)
+        logbook_r = pickle.loads(logbook_s)
 
-        if platform.python_implementation() != "PyPy":
-            self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
-        else:
-            self.assertFalse(pickled, "In PyPy pickling of numpy arrays should fail. Otherwise, change the doc and this test.")
+        self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
 
+        
     @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7 does not pickle partials.")
     def test_pickle_partial(self):
         func_s = pickle.dumps(self.toolbox.func)
