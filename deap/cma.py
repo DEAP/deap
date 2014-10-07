@@ -161,7 +161,11 @@ class Strategy(object):
         
         self.cond = self.diagD[indx[-1]]/self.diagD[indx[0]]
         
-        self.diagD = self.diagD[indx]**0.5
+        if not numpy.iscomplexobj(self.diagD):
+            self.diagD = numpy.abs(self.diagD[indx]) ** 0.5
+        else:
+            self.diagD = self.diagD ** 0.5
+            
         self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
 
