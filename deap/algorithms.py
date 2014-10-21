@@ -46,7 +46,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     The variation goes as follow. First, the parental population
     :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
     and the result is put into the offspring population :math:`P_\mathrm{o}`.
-    A first loop over :math:`P_\mathrm{o}` is executed to mate consecutive
+    A first loop over :math:`P_\mathrm{o}` is executed to mate pairs of consecutive
     individuals. According to the crossover probability *cxpb*, the
     individuals :math:`\mathbf{x}_i` and :math:`\mathbf{x}_{i+1}` are mated
     using the :meth:`toolbox.mate` method. The resulting children
@@ -95,30 +95,44 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
-    :returns: The final population.
+    :returns: The final population
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution
     
-    It uses :math:`\lambda = \kappa = \mu` and goes as follow.
-    It first initializes the population (:math:`P(0)`) by evaluating
-    every individual presenting an invalid fitness. Then, it enters the
-    evolution loop that begins by the selection of the :math:`P(g+1)`
-    population. Then the crossover operator is applied on a proportion of
-    :math:`P(g+1)` according to the *cxpb* probability, the resulting and the
-    untouched individuals are placed in :math:`P'(g+1)`. Thereafter, a
-    proportion of :math:`P'(g+1)`, determined by *mutpb*, is 
-    mutated and placed in :math:`P''(g+1)`, the untouched individuals are
-    transferred :math:`P''(g+1)`. Finally, those new individuals are evaluated
-    and the evolution loop continues until *ngen* generations are completed.
-    Briefly, the operators are applied in the following order ::
-    
+    The algorithm takes in a population and evolves it in place using the
+    :meth:`varAnd` method. It returns the optimized population and a
+    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
+    logbook will contain the generation number, the number of evalutions for
+    each generation and the statistics if a :class:`~deap.tools.Statistics` is
+    given as argument. The *cxpb* and *mutpb* arguments are passed to the
+    :func:`varAnd` function. The pseudocode goes as follow ::
+
         evaluate(population)
-        for i in range(ngen):
-            offspring = select(population)
-            offspring = mate(offspring)
-            offspring = mutate(offspring)
+        for g in range(ngen):
+            population = select(population, len(population))
+            offspring = varAnd(population, toolbox, cxpb, mutpb)
             evaluate(offspring)
             population = offspring
+
+    As stated in the pseudocode above, the algorithm goes as follow. First, it
+    evaluates the individuals with an invalid fitness. Second, it enters the
+    generational loop where the selection procedure is applied to entirely
+    replace the parental population. The 1:1 replacement ratio of this
+    algorithm **requires** the selection procedure to be stochastic and to
+    select multiple times the same individual, for example,
+    :func:`~deap.tools.selTournament` and :func:`~deap.tools.selRoulette`.
+    Third, it applies the :func:`varAnd` function to produce the next
+    generation population. Fourth, it evaluates the new individuals and
+    compute the statistics on this population. Finally, when *ngen*
+    generations are done, the algorithm returns a tuple with the final
+    population and a :class:`~deap.tools.Logbook` of the evolution.
+
+    .. note::
+
+        Using a non-stochastic selection method will result in no selection as
+        the operator selects *n* individuals from a pool of *n*.
     
-    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
     
@@ -183,8 +197,9 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :param lambda\_: The number of children to produce
     :param cxpb: The probability of mating two individuals.
     :param mutpb: The probability of mutating an individual.
-    :returns: A list of varied individuals that are independent of their
-              parents.
+    :returns: The final population
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution
     
     The variation goes as follow. On each of the *lambda_* iteration, it
     selects one of the three operations; crossover, mutation or reproduction.
@@ -243,22 +258,32 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
-    :returns: The final population.
+    :returns: The final population
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution.
     
-    First, the individuals having an invalid fitness are evaluated. Then, the
-    evolutionary loop begins by producing *lambda_* offspring from the
-    population, the offspring are generated by a crossover, a mutation or a
-    reproduction proportionally to the probabilities *cxpb*, *mutpb* and 1 -
-    (cxpb + mutpb). The offspring are then evaluated and the next generation
-    population is selected from both the offspring **and** the population.
-    Briefly, the operators are applied as following ::
-    
+    The algorithm takes in a population and evolves it in place using the
+    :func:`varOr` function. It returns the optimized population and a
+    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
+    logbook will contain the generation number, the number of evalutions for
+    each generation and the statistics if a :class:`~deap.tools.Statistics` is
+    given as argument. The *cxpb* and *mutpb* arguments are passed to the
+    :func:`varOr` function. The pseudocode goes as follow ::
+
         evaluate(population)
-        for i in range(ngen):
+        for g in range(ngen):
             offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
             evaluate(offspring)
             population = select(population + offspring, mu)
-    
+
+    First, the individuals having an invalid fitness are evaluated. Second,
+    the evolutionary loop begins by producing *lambda_* offspring from the
+    population, the offspring are generated by the :func:`varOr` function. The
+    offspring are then evaluated and the next generation population is
+    selected from both the offspring **and** the population. Finally, when
+    *ngen* generations are done, the algorithm returns a tuple with the final
+    population and a :class:`~deap.tools.Logbook` of the evolution.
+
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox. This algorithm uses the :func:`varOr`
@@ -324,21 +349,38 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
-    :returns: The final population.
+    :returns: The final population
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution
     
-    First, the individuals having an invalid fitness are evaluated. Then, the
-    evolutionary loop begins by producing *lambda_* offspring from the
-    population, the offspring are generated by a crossover, a mutation or a
-    reproduction proportionally to the probabilities *cxpb*, *mutpb* and 1 -
-    (cxpb + mutpb). The offspring are then evaluated and the next generation
-    population is selected **only** from the offspring. Briefly, the operators
-    are applied as following ::
-    
+    The algorithm takes in a population and evolves it in place using the
+    :func:`varOr` function. It returns the optimized population and a
+    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
+    logbook will contain the generation number, the number of evalutions for
+    each generation and the statistics if a :class:`~deap.tools.Statistics` is
+    given as argument. The *cxpb* and *mutpb* arguments are passed to the
+    :func:`varOr` function. The pseudocode goes as follow ::
+
         evaluate(population)
-        for i in range(ngen):
+        for g in range(ngen):
             offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
             evaluate(offspring)
             population = select(offspring, mu)
+
+    First, the individuals having an invalid fitness are evaluated. Second,
+    the evolutionary loop begins by producing *lambda_* offspring from the
+    population, the offspring are generated by the :func:`varOr` function. The
+    offspring are then evaluated and the next generation population is
+    selected from both the offspring **and** the population. Finally, when
+    *ngen* generations are done, the algorithm returns a tuple with the final
+    population and a :class:`~deap.tools.Logbook` of the evolution.
+
+    .. note::
+
+        Care must be taken when the lambda:mu ratio is 1 to 1 as a non-stochastic
+        selection will result in no selection at all as
+        the operator selects *lambda* individuals from a pool of *mu*.
+
     
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
@@ -404,11 +446,22 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
+    :returns: The final population
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution
 
-    :returns: The final population.
-    
-    The toolbox should contain a reference to the generate and the update method 
-    of the chosen strategy.
+    The algorithm generates the individuals using the :func:`toolbox.generate`
+    function and updates the generation method with the :func:`toolbox.update`
+    function. It returns the optimized population and a
+    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
+    logbook will contain the generation number, the number of evalutions for
+    each generation and the statistics if a :class:`~deap.tools.Statistics` is
+    given as argument. The pseudocode goes as follow ::
+
+        for g in range(ngen):
+            population = toolbox.generate()
+            evaluate(population)
+            toolbox.update(population)
 
     .. [Colette2010] Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and
        R. Le Riche (2010). On Object-Oriented Programming of Optimizers -

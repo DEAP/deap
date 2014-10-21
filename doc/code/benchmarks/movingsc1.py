@@ -24,11 +24,7 @@ ax = Axes3D(fig)
 X = np.arange(0, 100, 1.0)
 Y = np.arange(0, 100, 1.0)
 X, Y = np.meshgrid(X, Y)
-Z = np.zeros(X.shape)
-
-for i in xrange(X.shape[0]):
-    for j in xrange(X.shape[1]):
-        Z[i,j] = mp((X[i,j],Y[i,j]))[0]
+Z = np.fromiter(map(lambda x: mp(x)[0], zip(X.flat,Y.flat)), dtype=np.float, count=X.shape[0]*X.shape[1]).reshape(X.shape)
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
 

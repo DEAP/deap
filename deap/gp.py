@@ -38,7 +38,7 @@ from operator import eq, lt
 __type__ = object
 
 class PrimitiveTree(list):
-    """Tree spefically formated for optimization of genetic
+    """Tree specifically formated for optimization of genetic
     programming operations. The tree is represented with a
     list where the nodes are appended in a depth-first order.
     The nodes appended to the tree are required to
@@ -120,7 +120,7 @@ class PrimitiveTree(list):
             if token in pset.mapping:
                 primitive = pset.mapping[token]
 
-                if len(ret_types) != 0 and primitive.ret != type_:
+                if type_ is not None and not issubclass(primitive.ret, type_):
                     raise TypeError("Primitive {} return type {} does not "
                                     "match the expected one: {}."
                                     .format(primitive, primitive.ret, type_))
@@ -137,7 +137,7 @@ class PrimitiveTree(list):
                 if type_ is None:
                     type_ = type(token)
 
-                if type(token) != type_:
+                if not issubclass(type(token), type_):
                     raise TypeError("Terminal {} type {} does not "
                                     "match the expected one: {}."
                                     .format(token, type(token), type_))
@@ -197,6 +197,13 @@ class Primitive(object):
     def format(self, *args):
         return self.seq.format(*args)
 
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return all(getattr(self, slot) == getattr(other, slot)
+                       for slot in self.__slots__)
+        else:
+            return NotImplemented
+
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
@@ -215,6 +222,13 @@ class Terminal(object):
     def format(self):
         return self.conv_fct(self.value)
 
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return all(getattr(self, slot) == getattr(other, slot)
+                       for slot in self.__slots__)
+        else:
+            return NotImplemented
+
 class Ephemeral(Terminal):
     """Class that encapsulates a terminal which value is set when the
     object is created. To mutate the value, a new object has to be
@@ -223,12 +237,6 @@ class Ephemeral(Terminal):
     """
     def __init__(self):
         Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
-
-    def regen(self):
-        """Regenerate the ephemeral value.
-        """
-        self.value = self.func()
-        self.name = str(self.value)
 
     @staticmethod
     def func():
@@ -277,10 +285,13 @@ class PrimitiveSetTyped(object):
     def _add(self, prim):
         def addType(dict_, ret_type):
             if not ret_type in dict_:
-                dict_[ret_type]
+                new_list = []
                 for type_, list_ in dict_.items():
                     if issubclass(type_, ret_type):
-                        dict_[ret_type].extend(list_)
+                        for item in list_:
+                            if not item in new_list:
+                                new_list.append(item)
+                dict_[ret_type] = new_list
 
         addType(self.primitives, prim.ret)
         addType(self.terminals, prim.ret)
@@ -765,7 +776,7 @@ def mutEphemeral(individual, mode):
             ephemerals_idx = (random.choice(ephemerals_idx),)
 
         for i in ephemerals_idx:
-            individual[i].regen()
+            individual[i] = type(individual[i])()
 
     return individual,
 

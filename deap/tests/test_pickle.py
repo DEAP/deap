@@ -4,7 +4,7 @@ import unittest
 import array
 import pickle
 import operator
-from test import test_support
+import platform
 
 import numpy
 
@@ -32,7 +32,6 @@ class Pickling(unittest.TestCase):
         del creator.IndList
         del creator.IndArray
         del creator.IndTree
-        del self.toolbox
     
     def test_pickle_fitness(self):
         fitness = creator.FitnessMax()
@@ -57,16 +56,50 @@ class Pickling(unittest.TestCase):
         self.assertEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
         self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
     
-    def test_pickle_tree(self):
-        ind = creator.IndTree([operator.add, 1, 2])
+    def test_pickle_tree_input(self):
+        pset = gp.PrimitiveSetTyped("MAIN", [int], int, "IN")
+        pset.addPrimitive(operator.add, [int, int], int)
+
+        expr = gp.genFull(pset, min_=1, max_=1)
+        ind = creator.IndTree(expr)
         ind.fitness.values = (1.0,)
-        ind_s = pickle.dumps(ind)
+        ind_s = pickle.dumps(ind, pickle.HIGHEST_PROTOCOL)
         ind_l = pickle.loads(ind_s)
         msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
         self.assertEqual(ind, ind_l, msg)
         msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
         self.assertEqual(ind.fitness, ind_l.fitness, msg)
-    
+
+    def test_pickle_tree_term(self):
+        pset = gp.PrimitiveSetTyped("MAIN", [], int, "IN")
+        pset.addPrimitive(operator.add, [int, int], int)
+        pset.addTerminal(1, int)
+
+        expr = gp.genFull(pset, min_=1, max_=1)
+        ind = creator.IndTree(expr)
+        ind.fitness.values = (1.0,)
+        ind_s = pickle.dumps(ind, pickle.HIGHEST_PROTOCOL)
+        ind_l = pickle.loads(ind_s)
+        msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
+        self.assertEqual(ind, ind_l, msg)
+        msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
+        self.assertEqual(ind.fitness, ind_l.fitness, msg)
+
+    def test_pickle_tree_ephemeral(self):
+        pset = gp.PrimitiveSetTyped("MAIN", [], int, "IN")
+        pset.addPrimitive(operator.add, [int, int], int)
+        pset.addEphemeralConstant("E1", lambda: 2, int)
+
+        expr = gp.genFull(pset, min_=1, max_=1)
+        ind = creator.IndTree(expr)
+        ind.fitness.values = (1.0,)
+        ind_s = pickle.dumps(ind, pickle.HIGHEST_PROTOCOL)
+        ind_l = pickle.loads(ind_s)
+        msg =  "Unpickled individual %s != pickled individual %s" % (str(ind), str(ind_l))
+        self.assertEqual(ind, ind_l, msg)
+        msg =  "Unpickled fitness %s != pickled fitness %s" % (str(ind.fitness), str(ind_l.fitness))
+        self.assertEqual(ind.fitness, ind_l.fitness, msg)
+
     def test_pickle_population(self):
         ind1 = creator.IndList([1.0,2.0,3.0])
         ind1.fitness.values = (1.0,)
@@ -95,29 +128,19 @@ class Pickling(unittest.TestCase):
         record = stats.compile([1,2,3,4,5,6,8,9,10])
         logbook.record(**record)
 
-        stats_s = pickle.dumps(logbook)
-        logbook_r = pickle.loads(stats_s)
+        logbook_s = pickle.dumps(logbook)
+        logbook_r = pickle.loads(logbook_s)
 
         self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
 
-
-    @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7")
+        
+    @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7 does not pickle partials.")
     def test_pickle_partial(self):
         func_s = pickle.dumps(self.toolbox.func)
         func_l = pickle.loads(func_s)
 
         self.assertEqual(self.toolbox.func(), func_l())
         
-    @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7")
-    def test_pickle_lambda(self):
-        pickled = True
-        try:
-            func_s = pickle.dumps(self.toolbox.lambda_func)
-            func_l = pickle.loads(func_s)
-        except pickle.PicklingError:
-            pickled = False
-    
-        self.assertFalse(pickled, "Surprisingly you just pickled a lambda function! Congratulations!")
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)

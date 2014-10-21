@@ -73,10 +73,12 @@ FILE="heart_scale.csv"
 N_TRAIN=175
 K=1
 
-data_csv = csv.reader(open(FILE, "r"))
-trainset = list()
-trainlabels = list()
-rows = [row for row in data_csv]
+with open(FILE, "r") as data_csv:
+    data = csv.reader(data_csv)
+    trainset = list()
+    trainlabels = list()
+    rows = [row for row in data]
+
 random.shuffle(rows)
 for row in rows:
     trainlabels.append(float(row[0]))

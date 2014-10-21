@@ -119,7 +119,8 @@ def main(seed=None):
     return pop, logbook
         
 if __name__ == "__main__":
-    # optimal_front = json.load(open("pareto_front/zdt1_front.json"))
+    with open("pareto_front/zdt1_front.json") as optimal_front_data:
+        optimal_front = json.load(optimal_front_data)
     # Use 500 of the 1000 points in the json file
     # optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
     

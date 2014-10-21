@@ -126,13 +126,14 @@ plot_include_source = False
 plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
-
 import subprocess
-branch = str(subprocess.check_output(["hg", "branch"])[:-1])
-extlinks = {'example': ('https://code.google.com/p/deap/source/browse/examples/%s.py?name='+branch,
-                      'examples/')}
-
-
+try:
+    tree = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
+except OSError:
+    import warnings
+    warnings.warn("Cannot link examples because we cannot retrieve the git version", Warning)
+else:
+    extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/")}
 # -- Options for HTML output ---------------------------------------------------
 
 # Add any paths that contain custom themes here, relative to this directory.
