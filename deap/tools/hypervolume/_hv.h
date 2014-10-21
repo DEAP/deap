@@ -4,15 +4,20 @@
 
  ---------------------------------------------------------------------
 
-                       Copyright (c) 2010
-                  Carlos M. Fonseca <cmfonsec@dei.uc.pt>
-             Manuel Lopez-Ibanez <manuel.lopez-ibanez@ulb.ac.be>
-                    Luis Paquete <paquete@dei.uc.pt>
-
+                          Copyright (c) 2010
+                Carlos M. Fonseca <cmfonsec@dei.uc.pt>
+         Manuel Lopez-Ibanez <manuel.lopez-ibanez@ulb.ac.be>
+                   Luis Paquete <paquete@dei.uc.pt>
+         Andreia P. Guerreiro <andreia.guerreiro@ist.utl.pt>
+                                   
  This program is free software (software libre); you can redistribute
  it and/or modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 2 of the
- License, or (at your option) any later version.
+ License, or (at your option) any later version. As a particular
+ exception, the contents of this file (hv.h) may also be redistributed
+ and/or modified under the terms of the GNU Lesser General Public
+ License (LGPL) as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
 
  This program is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -40,6 +45,11 @@ extern "C" {
 
 extern int stop_dimension;
 double fpli_hv(double *data, int d, int n, const double *ref);
+
+#ifdef EXPERIMENTAL
+double fpli_hv_order(double *data, int d, int n, const double *ref, int *order,
+                     double *order_time, double *hv_time);
+#endif
 
 #ifdef __cplusplus
 }

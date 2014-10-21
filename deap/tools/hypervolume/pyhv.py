@@ -3,6 +3,12 @@
 #    Copyright (C) 2010 Simon Wessing
 #    TU Dortmund University
 #
+#    In personal communication, the original authors authorized DEAP team
+#    to use this file under the Lesser General Public License.
+#
+#    You can find the original library here :
+#    http://ls11-www.cs.uni-dortmund.de/_media/rudolph/hypervolume/hv_python.zip
+#
 #    DEAP is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Lesser General Public License as
 #    published by the Free Software Foundation, either version 3 of
@@ -21,9 +27,6 @@ from math import log, floor
 import random
 
 import numpy
-
-__author__ = "Simon Wessing"
-# Wrapped by Francois-Michel De Rainville
 
 
 def hypervolume(pointset, ref):
