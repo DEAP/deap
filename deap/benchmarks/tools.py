@@ -290,6 +290,13 @@ def convergence(first_front, optimal_front):
 
 
 def hypervolume(front, ref=None):
+    """Return the hypervolume of a *front*. If the *ref* point is not
+    given, the worst value for each objective +1 is used.
+
+    :param front: The population (usually a list of undominated individuals)
+                  on which to compute the hypervolume.
+    :param ref: A point of the same dimensionality as the individuals in *front*.
+    """
     # Must use wvalues * -1 since hypervolume use implicit minimization
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
     if ref is None:
