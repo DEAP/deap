@@ -8,6 +8,13 @@ try:
 except ImportError:
     numpy = False
 
+try:
+    # try importing the C version
+    from ..tools._hypervolume import hv
+except ImportError:
+    # fallback on python version
+    from ..tools._hypervolume import pyhv as hv
+
 class translate(object):
     """Decorator for evaluation functions, it translates the objective
     function by *vector* which should be the same length as the individual
@@ -280,3 +287,18 @@ def convergence(first_front, optimal_front):
         distances[-1] = sqrt(distances[-1])
         
     return sum(distances) / len(distances)
+
+
+def hypervolume(front, ref=None):
+    """Return the hypervolume of a *front*. If the *ref* point is not
+    given, the worst value for each objective +1 is used.
+
+    :param front: The population (usually a list of undominated individuals)
+                  on which to compute the hypervolume.
+    :param ref: A point of the same dimensionality as the individuals in *front*.
+    """
+    # Must use wvalues * -1 since hypervolume use implicit minimization
+    wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
+    if ref is None:
+        ref = numpy.max(wobj, axis=0) + 1
+    return hv.hypervolume(wobj, ref)
