@@ -10,7 +10,7 @@ DEAP includes the following features:
     * Loosely typed, Strongly typed
     * Automatically defined functions
   * Evolution strategies (including CMA-ES)
-  * Multi-objective optimisation (NSGA-II, SPEA-II)
+  * Multi-objective optimisation (NSGA-II, SPEA-II, MO-CMA-ES)
   * Co-evolution (cooperative and competitive) of multiple populations
   * Parallelization of the evaluations (and more)
   * Hall of Fame of the best individuals that lived in the population

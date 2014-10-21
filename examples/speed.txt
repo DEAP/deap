@@ -23,6 +23,7 @@ es/onefifth
 es/cma_minfct
 es/cma_1+l_minfct
 es/cma_bipop
+es/cma_mo
 coev/hillis
 coev/symbreg
 coev/coop_evol
