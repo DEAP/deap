@@ -24,7 +24,7 @@ from deap import creator
 from deap import tools
 
 # Problem size
-N = 30
+N = 5
 
 # ZDT1, ZDT2, DTLZ2
 MIN_BOUND = numpy.zeros(N)
@@ -62,7 +62,7 @@ def main():
     # The cma module uses the numpy random number generator
     # numpy.random.seed(128)
 
-    MU, LAMBDA = 100, 100
+    MU, LAMBDA = 10, 10
     NGEN = 500
     verbose = True
 
@@ -96,11 +96,12 @@ def main():
         toolbox.update(population)
         
         record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(population), sigmas=strategy.sigmas, **record)
+        logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
             print(logbook.stream)
 
-    print(hypervolume(strategy.parents))
+    if verbose:
+        print("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0]))
     
     # import matplotlib.pyplot as plt
     
@@ -114,12 +115,6 @@ def main():
 
     # if len(invalid_front) > 0:
     #     plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
-    
-    # sigmas = logbook.select("sigmas")
-    # sigmas = numpy.mean(sigmas, axis=0)
-
-    # plt.figure()
-    # plt.plot(sigmas)
 
     # plt.show()
     
