@@ -22,6 +22,7 @@ class Pickling(unittest.TestCase):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("IndList", list, fitness=creator.FitnessMax)
         creator.create("IndArray", array.array,  typecode='f', fitness=creator.FitnessMax)
+        creator.create("IndNDArray", numpy.ndarray,  typecode='f', fitness=creator.FitnessMax)
         creator.create("IndTree", gp.PrimitiveTree, fitness=creator.FitnessMax)
         self.toolbox = base.Toolbox()
         self.toolbox.register("func", func)
@@ -31,6 +32,7 @@ class Pickling(unittest.TestCase):
         del creator.FitnessMax
         del creator.IndList
         del creator.IndArray
+        del creator.IndNDArray
         del creator.IndTree
     
     def test_pickle_fitness(self):
@@ -54,6 +56,15 @@ class Pickling(unittest.TestCase):
         ind_s = pickle.dumps(ind)
         ind_l = pickle.loads(ind_s)
         self.assertEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
+        self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
+
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays is very unstable.")
+    def test_pickle_ind_ndarray(self):
+        ind = creator.IndNDArray([1.0, 2.0, 3.0])
+        ind.fitness.values = (4.0,)
+        ind_s = pickle.dumps(ind)
+        ind_l = pickle.loads(ind_s)
+        self.assertTrue(all(ind == ind_l), "Unpickled individual numpy.ndarray != pickled individual numpy.ndarray")
         self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
     
     def test_pickle_tree_input(self):
@@ -120,6 +131,7 @@ class Pickling(unittest.TestCase):
         self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
     
+    @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays (thus stats) is very unstable.")
     def test_pickle_logbook(self):
         stats = tools.Statistics()
         logbook = tools.Logbook()
