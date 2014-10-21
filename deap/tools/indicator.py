@@ -40,13 +40,21 @@ def hypervolume(front, **kargs):
         # is the hypervolume of P without p_i
         return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
-    # TODO: Parallelize this?
+    # Parallelization note: Cannot pickle local function
     contrib_values = map(contribution, range(len(front)))
 
     # Select the maximum hypervolume value (correspond to the minimum difference)
     return numpy.argmax(contrib_values)
 
 def additive_epsilon(front, **kargs):
+    """Returns the index of the individual with the least the additive epsilon
+    contribution. The provided *front* should be a set of non-dominated
+    individuals having each a :attr:`fitness` attribute.
+
+    .. warning::
+
+       This function has not been tested.
+    """
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
 
     def contribution(i):
@@ -61,6 +69,14 @@ def additive_epsilon(front, **kargs):
 
 
 def multiplicative_epsilon(front, **kargs):
+    """Returns the index of the individual with the least the multiplicative epsilon
+    contribution. The provided *front* should be a set of non-dominated
+    individuals having each a :attr:`fitness` attribute.
+
+    .. warning::
+
+       This function has not been tested.
+    """
     wobj = numpy.array([ind.fitness.wvalues for ind in front]) * -1
 
     def contribution(i):

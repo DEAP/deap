@@ -327,6 +327,8 @@ class StrategyMultiObjective(object):
                provided it defaults to the length of *population*. (optional)
     :param lambda_: The number of offspring to produce at each generation.
                     (optional, defaults to 1)
+    :param indicator: The indicator function to use. (optional, default to
+                      :func:~deap.tools.hypervolume)
 
     Other parameters can be provided as described in the next table
 
