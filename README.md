@@ -1,3 +1,5 @@
+** WARNING ** this branch contains GPL liscenced code
+
 # DEAP
 
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
