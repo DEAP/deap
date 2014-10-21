@@ -14,5 +14,4 @@ install:
   - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 -w --output-dir=py3k -W -n deap; fi
 # command to run tests
 script:
-  # run python3 tests from build/lib because the 2to3 from setup.py does not modify files in-place
-  - nosetests -v
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests -v --where=py3k; else nosetests -v; fi
