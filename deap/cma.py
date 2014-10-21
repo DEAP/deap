@@ -328,7 +328,7 @@ class StrategyMultiObjective(object):
     :param lambda_: The number of offspring to produce at each generation.
                     (optional, defaults to 1)
     :param indicator: The indicator function to use. (optional, default to
-                      :func:~deap.tools.hypervolume)
+                      :func:`~deap.tools.hypervolume`)
 
     Other parameters can be provided as described in the next table
 
@@ -476,6 +476,12 @@ class StrategyMultiObjective(object):
         return invCholesky, A
 
     def update(self, population):
+        """Update the current covariance matrix strategies from the
+        *population*.
+        
+        :param population: A list of individuals from which to update the
+                           parameters.
+        """
         chosen, not_chosen = self._select(population + self.parents)
 
         cp, cc, ccov = self.cp, self.cc, self.ccov
