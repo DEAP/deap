@@ -113,6 +113,7 @@ def test_nsga2():
 
     assert hv > 120.0, "Hypervolume is lower than expected %f < 120.0" % hv
 
+@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_multi_obj_numpy, teardown_func)
 def test_mo_cma_es():
 
