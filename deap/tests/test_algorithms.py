@@ -31,6 +31,8 @@ from deap import tools
 FITCLSNAME = "FIT_TYPE"
 INDCLSNAME = "IND_TYPE"
 
+HV_THRESHOLD = 119.0
+
     
 def setup_func_single_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
@@ -111,7 +113,7 @@ def test_nsga2():
     hv = hypervolume(pop, [11.0, 11.0])
     # hv = 120.777 # Optimal value
 
-    assert hv > 120.0, "Hypervolume is lower than expected %f < 120.0" % hv
+    assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
 
 @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_multi_obj_numpy, teardown_func)
@@ -167,4 +169,4 @@ def test_mo_cma_es():
         toolbox.update(population)
     
     hv = hypervolume(strategy.parents, [11.0, 11.0])
-    assert hv > 120.0, "Hypervolume is lower than expected %f < 120.0" % hv
+    assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
