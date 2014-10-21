@@ -24,7 +24,7 @@ from math import sqrt
 from deap import algorithms
 from deap import base
 from deap import benchmarks
-from deap.benchmarks.tools import diversity, convergence
+from deap.benchmarks.tools import diversity, convergence, hypervolume
 from deap import creator
 from deap import tools
 
@@ -116,27 +116,29 @@ def main(seed=None):
         logbook.record(gen=gen, evals=len(invalid_ind), **record)
         print(logbook.stream)
 
+    print("Final population hypervolume is %f" % hypervolume(pop, [11.0, 11.0]))
+
     return pop, logbook
         
 if __name__ == "__main__":
-    with open("pareto_front/zdt1_front.json") as optimal_front_data:
-        optimal_front = json.load(optimal_front_data)
+    # with open("pareto_front/zdt1_front.json") as optimal_front_data:
+    #     optimal_front = json.load(optimal_front_data)
     # Use 500 of the 1000 points in the json file
     # optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
     
     pop, stats = main()
-    pop.sort(key=lambda x: x.fitness.values)
+    # pop.sort(key=lambda x: x.fitness.values)
     
     # print(stats)
     # print("Convergence: ", convergence(pop, optimal_front))
     # print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
     
-    import matplotlib.pyplot as plt
-    import numpy
+    # import matplotlib.pyplot as plt
+    # import numpy
     
-    front = numpy.array([ind.fitness.values for ind in pop])
+    # front = numpy.array([ind.fitness.values for ind in pop])
     # optimal_front = numpy.array(optimal_front)
     # plt.scatter(optimal_front[:,0], optimal_front[:,1], c="r")
-    plt.scatter(front[:,0], front[:,1], c="b")
-    plt.axis("tight")
-    plt.show()
+    # plt.scatter(front[:,0], front[:,1], c="b")
+    # plt.axis("tight")
+    # plt.show()
