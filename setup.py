@@ -44,7 +44,7 @@ def run_setup(build_ext):
     if build_ext:
         extra_modules = list()
 
-        hv_module = Extension("deap.tools.hv", sources=["deap/tools/_hv.c", "deap/tools/hv.cpp"])
+        hv_module = Extension("deap.tools.hypervolume.hv", sources=["deap/tools/hypervolume/_hv.c", "deap/tools/hypervolume/hv.cpp"])
         extra_modules.append(hv_module)
 
     setup(name='deap',
