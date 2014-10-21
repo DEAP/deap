@@ -10,10 +10,10 @@ except ImportError:
 
 try:
     # try importing the C version
-    from ..tools.hypervolume import hv
+    from ..tools._hypervolume import hv
 except ImportError:
     # fallback on python version
-    from ..tools.hypervolume import pyhv as hv
+    from ..tools._hypervolume import pyhv as hv
 
 class translate(object):
     """Decorator for evaluation functions, it translates the objective

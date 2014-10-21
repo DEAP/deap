@@ -18,10 +18,10 @@ import numpy
 
 try:
     # try importing the C version
-    from .hypervolume import hv as hv
+    from ._hypervolume import hv as hv
 except ImportError:
     # fallback on python version
-    from .hypervolume import pyhv as hv
+    from ._hypervolume import pyhv as hv
 
 def hypervolume(front, **kargs):
     """Returns the index of the individual with the least the hypervolume

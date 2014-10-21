@@ -44,7 +44,7 @@ def run_setup(build_ext):
     if build_ext:
         extra_modules = list()
 
-        hv_module = Extension("deap.tools.hypervolume.hv", sources=["deap/tools/hypervolume/_hv.c", "deap/tools/hypervolume/hv.cpp"])
+        hv_module = Extension("deap.tools._hypervolume.hv", sources=["deap/tools/_hypervolume/_hv.c", "deap/tools/_hypervolume/hv.cpp"])
         extra_modules.append(hv_module)
 
     setup(name='deap',
@@ -54,7 +54,7 @@ def run_setup(build_ext):
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
           url='http://deap.googlecode.com',
-          packages=['deap', 'deap.tools', 'deap.tools.hypervolume', 'deap.benchmarks', 'deap.tests'],
+          packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
           keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
           license='LGPL',
