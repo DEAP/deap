@@ -54,7 +54,7 @@ def run_setup(build_ext):
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
           url='http://deap.googlecode.com',
-          packages=['deap', 'deap.tools', 'deap.benchmarks', 'deap.tests'],
+          packages=['deap', 'deap.tools', 'deap.tools.hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
           keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
           license='LGPL',
