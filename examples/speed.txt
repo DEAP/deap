@@ -33,7 +33,6 @@ coev/coop_adapt
 de/basic
 de/sphere
 eda/emna
-eda/emnag
 eda/pbil
 pso/basic
 pso/speciation
