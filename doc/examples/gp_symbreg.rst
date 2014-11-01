@@ -115,8 +115,10 @@ method (a tournament of size 3), the mate method (one point crossover with
 uniform probability over all the nodes), the mutation method (an uniform
 probability mutation which may append a new full sub-tree to a node).
 
-We decorate the mate and mutate method to limit the depth of generated individuals
-to be 50.
+Then, we decorate the mate and mutate method to limit the height of generated
+individuals. This is done to avoid an important draw back of genetic
+programming : bloat. Koza in his book on genetic programming suggest to use a
+max depth of 17.
 
 At this point, any structure with an access to the toolbox instance will also
 have access to all of those registered parameters. Of course, the user could
