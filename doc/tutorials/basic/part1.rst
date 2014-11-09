@@ -24,7 +24,7 @@ As specified in the :class:`~deap.base.Fitness` documentation, the :attr:`~deap.
 .. literalinclude:: /code/tutorials/part_2/2_1_fitness.py
    :lines: 9
 
-This code produces a fitness that minimize the first objective and maximize the
+This code produces a fitness that minimizes the first objective and maximize the
 second one. The weights can also be used to vary the importance of each
 objective one against another. This means that the weights can be any real
 number and only the sign is used to determine if a maximization or minimization
@@ -105,7 +105,7 @@ the individual.
 The first registered function ``indices`` redirects to the :func:`random.sample` function with its arguments fixed to sample ``IND_SIZE`` numbers from the given range. The second registered function ``individual`` is a shortcut to the :func:`~deap.tools.initIterate` function, with its :data:`container` argument set to the :class:`creator.Individual` class and its :data:`generator` argument to the :func:`toolbox.indices` alias.
 
 Calling :func:`toolbox.individual` will call :func:`~deap.tools.initIterate` with the fixed arguments and return a complete :class:`creator.Individual`
-composed of permutation with a maximizing single
+composed of a permutation with a maximizing single
 objective :attr:`fitness` attribute.
 
 .. _arithmetic-expr:
@@ -173,7 +173,7 @@ a speed vector and a maximizing two objectives fitness attribute.
 
 A Funky One
 +++++++++++
-Supposing your problem have very specific needs. It is also possible to build
+Supposing your problem has very specific needs, it is also possible to build
 custom individuals very easily. The next individual created is a list of
 alternating integers and floating point numbers, using the
 :func:`~deap.tools.initCycle` function.
@@ -189,8 +189,8 @@ objectives fitness attribute.
 
 Population
 ----------
-Population are much like individuals. Instead of being initialized with
-attributes, it is filled with individuals, strategies or particles.
+Populations are much like individuals. Instead of being initialized with
+attributes, they are filled with individuals, strategies or particles.
 
 Bag
 +++
@@ -215,9 +215,9 @@ Grid
 ++++
 A grid population is a special case of structured population where neighbouring
 individuals have a direct effect on each other. The individuals are distributed
-in grid where each cell contains a single individual. However, its
-implementation is no different than the list of the bag
-population, other that it is composed of lists of individuals.
+in the grid where each cell contains a single individual. However, its
+implementation only differs from the list of the bag population, in that it is
+composed of lists of individuals.
 
 .. literalinclude:: /code/tutorials/part_2/2_3_2_grid.py
    :lines: 20-21
@@ -225,13 +225,13 @@ population, other that it is composed of lists of individuals.
 Calling :func:`toolbox.population` will readily return a complete population
 where the individuals are accessible using two indices, for example
 ``pop[r][c]``. For the moment, there is no algorithm specialized for structured
-population, we are awaiting your submissions.
+populations, we are awaiting your submissions.
 
 Swarm
 +++++
 A swarm is used in particle swarm optimization. It is different in the sense
-that it contains a communication network. The simplest network is the complete
-connection, where each particle knows the best position that have ever been
+that it contains a communication network. The simplest network is the completely
+connected one, where each particle knows the best position that have ever been
 visited by any particle. This is generally implemented by copying that global
 best position to a :attr:`gbest` attribute and the global best fitness to a
 :attr:`gbestfit` attribute.
@@ -245,9 +245,9 @@ algorithm to reflect the best found position and fitness.
 
 Demes
 +++++
-A deme is a sub-population that is contained in a population. It is similar has
-an island in the island model. Demes, being only sub-populations, are in fact no
-different than populations, aside from their names. Here, we create a population
+A deme is a sub-population that is contained in a population. It is similar to
+an island in the island model. Demes, being only sub-populations, are in fact not
+different from populations, aside from their names. Here, we create a population
 containing 3 demes, each having a different number of individuals using the *n*
 argument of the :func:`~deap.tools.initRepeat` function.
 
