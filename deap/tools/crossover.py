@@ -284,9 +284,9 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     :param eta: Crowding degree of the crossover. A high eta will produce
                 children resembling to their parents, while a small eta will
                 produce solutions much more different.
-    :param low: A value or an :term:`python:sequence` of values that is the lower
+    :param low: A value or a :term:`python:sequence` of values that is the lower
                 bound of the search space.
-    :param up: A value or an :term:`python:sequence` of values that is the upper
+    :param up: A value or a :term:`python:sequence` of values that is the upper
                bound of the search space.
     :returns: A tuple of two individuals.
 
