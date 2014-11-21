@@ -10,7 +10,7 @@ Penality Function
 Penality function are the most basic way of handling constrains for individuals
 that cannot be evaluated or are forbiden for problem specific reasons, when
 falling in a given region. The penality function gives a fitness disavantage to
-theses individuals based on the amount of constraint violation in the solution.
+these individuals based on the amount of constraint violation in the solution.
 For example, instead of evaluating an individual violating a constraint one can
 assings a desired value to its fitness. The assigned value can be constant or
 increasing (decreasing for maximization) as the distance to a valid solution
@@ -27,7 +27,7 @@ The figure on the left use a constant offset :math:`h(x) = \Delta` when a
 constraint is not respected. The center plot use the euclidean distance in
 addition to the offset to create a bowl like fitness function :math:`h(x) =
 \Delta + \sqrt{(x-x_0)^2}`. Finally, the
-left plot use a quadratic distance funtion to increase the attraction of the
+right plot use a quadratic distance funtion to increase the attraction of the
 bowl :math:`h(x) = \Delta + (x-x_0)^2`, where :math:`x_0` is the approximate
 center of the valid zone.
 
@@ -66,10 +66,6 @@ to user defined constraints. The second argument is a constant value
 is a distance function between an invalid individual and the valid region. This
 last argument takes on the default value of 0. The last example shows how the
 right plot of the top image was obtained.
-
-Examples
-++++++++
-
 
 
 

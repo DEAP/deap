@@ -15,8 +15,8 @@ X, Y = np.meshgrid(X, Y)
 Z1 = np.zeros(X.shape)
 Z2 = np.zeros(X.shape)
 
-for i in xrange(X.shape[0]):
-    for j in xrange(X.shape[1]):
+for i in range(X.shape[0]):
+    for j in range(X.shape[1]):
         Z1[i,j],  Z2[i,j] = benchmarks.kursawe((X[i,j],Y[i,j]))
         
 fig = plt.figure(figsize=(12,5))

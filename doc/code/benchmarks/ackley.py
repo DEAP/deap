@@ -19,11 +19,7 @@ ax = Axes3D(fig)
 X = np.arange(-30, 30, 0.5)
 Y = np.arange(-30, 30, 0.5)
 X, Y = np.meshgrid(X, Y)
-Z = np.zeros(X.shape)
-
-for i in xrange(X.shape[0]):
-    for j in xrange(X.shape[1]):
-        Z[i,j] = ackley_arg0((X[i,j],Y[i,j]))
+Z = np.fromiter(map(ackley_arg0, zip(X.flat,Y.flat)), dtype=np.float, count=X.shape[0]*X.shape[1]).reshape(X.shape)
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1,  norm=LogNorm(), cmap=cm.jet, linewidth=0.2)
  

@@ -231,7 +231,7 @@ def rastrigin(individual):
        * - Global optima
          - :math:`x_i = 0, \\forall i \in \\lbrace 1 \\ldots N\\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         - :math:`f(\\mathbf{x}) = 10N \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
+         - :math:`f(\\mathbf{x}) = 10N + \sum_{i=1}^N x_i^2 - 10 \\cos(2\\pi x_i)`
 
     .. plot:: code/benchmarks/rastrigin.py
        :width: 67 %
@@ -343,8 +343,6 @@ def shekel(individual, a, c):
     of maxima is given by the length of any of the arguments *a* or *c*, *a*
     is a matrix of size :math:`M\\times N`, where *M* is the number of maxima
     and *N* the number of dimensions and *c* is a :math:`M\\times 1` vector.
-    The matrix :math:`\\mathcal{A}` can be seen as the position of the maxima
-    and the vector :math:`\\mathbf{c}`, the width of the maxima.
     
     :math:`f_\\text{Shekel}(\mathbf{x}) = \\sum_{i = 1}^{M} \\frac{1}{c_{i} + 
     \\sum_{j = 1}^{N} (x_{j} - a_{ij})^2 }`
@@ -360,7 +358,7 @@ def shekel(individual, a, c):
     .. plot:: code/benchmarks/shekel.py
         :width: 67 %
     """
-    return sum((1. / (c[i] + sum((x - a[i][j])**2 for j, x in enumerate(individual)))) for i in range(len(c))),
+    return sum((1. / (c[i] + sum((individual[j] - aij)**2 for j, aij in enumerate(a[i])))) for i in range(len(c))),
 
 # Multiobjectives
 def kursawe(individual):

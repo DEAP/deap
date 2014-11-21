@@ -67,6 +67,8 @@ Documentation enhancements
 Bug fixes
 +++++++++
 
+**Release 1.0.0**
+
 - creator: Issue 23: error in creator when using unicode source.
 - creator: create does not handle proper slicing of created classes inheriting
   from ``numpy.ndarray`` anymore. This was bug prone and extremely hard to maintain.
@@ -79,5 +81,13 @@ Bug fixes
   bounds are provided as list instead of iterator. rev: `b172432515af`, `9d4718a8cf2a`.
 - tools: add missing arguments to sortLogNondominated  (`k`, `first_front_only`). rev: `f60a6520b666`, `4de7df29dd0f`.
 - gp: issue #32: :meth:`~deap.gp.PrimitiveTree.from_string` used incorrect argument order with STGP. rev: `58c1a0711e1f`.
+
+**Release 1.0.2**:
+
+- benchmarks: fix computation of DTLZ2, DTLZ3 and DTLZ4.
+- cma 1+Lambda: fix the computation of the rank-one update.
+- gp: replace the generate functions default value for the argument `type_` from `object` to `None`. 
+  This removes the obligation to define the type_ argument for the individual generation function when doing STGP.
+- gp: fix a bug with OOGP when calling addPrimitive and addTerminal in arbitrary order.
 
 

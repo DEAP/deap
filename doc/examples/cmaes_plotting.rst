@@ -53,3 +53,5 @@ Which gives the following result.
 
 .. plot:: ../examples/es/cma_plotting.py
    :width: 67%
+
+The complete example : :example:`es/cma_plotting`.

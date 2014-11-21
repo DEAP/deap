@@ -23,6 +23,7 @@ es/onefifth
 es/cma_minfct
 es/cma_1+l_minfct
 es/cma_bipop
+es/cma_mo
 coev/hillis
 coev/symbreg
 coev/coop_evol
@@ -32,7 +33,6 @@ coev/coop_adapt
 de/basic
 de/sphere
 eda/emna
-eda/emnag
 eda/pbil
 pso/basic
 pso/speciation

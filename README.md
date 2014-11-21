@@ -10,7 +10,7 @@ DEAP includes the following features:
     * Loosely typed, Strongly typed
     * Automatically defined functions
   * Evolution strategies (including CMA-ES)
-  * Multi-objective optimisation (NSGA-II, SPEA-II)
+  * Multi-objective optimisation (NSGA-II, SPEA2, MO-CMA-ES)
   * Co-evolution (cooperative and competitive) of multiple populations
   * Parallelization of the evaluations (and more)
   * Hall of Fame of the best individuals that lived in the population
@@ -26,12 +26,12 @@ Following acceptation of [PEP 438](http://www.python.org/dev/peps/pep-0438/) by 
 You can find the most recent releases at: https://pypi.python.org/pypi/deap/.
 
 ## Documentation
-See the [DEAP User's Guide](http://deap.gel.ulaval.ca/doc/default/index.html) for DEAP documentation.
+See the [DEAP User's Guide](http://deap.readthedocs.org/) for DEAP documentation.
 
 In order to get the tip documentation, change directory to the `doc` subfolder and type in `make html`, the documentation will be under `_build/html`. You will need [Sphinx](http://sphinx.pocoo.org) to build the documentation.
 
 ### Notebooks
-Also checkout our new [notebook examples](https://github.com/DEAP/notebook). Using [IPython's](http://ipython.org/) notebook feature you'll be able to navigate and execute each block of code individually and fell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
+Also checkout our new [notebook examples](https://github.com/DEAP/notebooks). Using [IPython's](http://ipython.org/) notebook feature you'll be able to navigate and execute each block of code individually and fell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
 
 ```bash
 ipython notebook --pylab inline
@@ -49,6 +49,9 @@ If you wish to build from sources, download or clone the repository and type
 ```bash
 python setup.py install
 ```
+
+## Build Status
+DEAP build status is available on Travis-CI https://travis-ci.org/DEAP/deap.
 
 ## Requirements
 The most basic features of DEAP requires Python2.6. In order to combine the toolbox and the multiprocessing module Python2.7 is needed for its support to pickle partial functions. CMA-ES requires Numpy, and we recommend matplotlib for visualization of results as it is fully compatible with DEAP's API.
@@ -113,6 +116,7 @@ Authors of scientific papers including results generated using DEAP are encourag
   * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in !EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012. [Paper](http://goo.gl/pXXug)
 
 ## Projects using DEAP
+  * Lara-Cabrera, R., Cotta, C. and Fernández-Leiva, A.J. (2014). Geometrical vs topological measures for the evolution of aesthetic maps in a rts game, Entertainment Computing,
   * Macret, M. and Pasquier, P. (2013). Automatic Tuning of the OP-1 Synthesizer Using a Multi-objective Genetic Algorithm. In Proceedings of the 10th Sound and Music Computing Conference (SMC). (pp 614-621).
   * Fortin, F. A., Grenier, S., & Parizeau, M. (2013, July). Generalizing the improved run-time complexity algorithm for non-dominated sorting. In Proceeding of the fifteenth annual conference on Genetic and evolutionary computation conference (pp. 615-622). ACM.
   * Fortin, F. A., & Parizeau, M. (2013, July). Revisiting the NSGA-II crowding-distance computation. In Proceeding of the fifteenth annual conference on Genetic and evolutionary computation conference (pp. 623-630). ACM.

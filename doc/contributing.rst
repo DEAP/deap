@@ -7,24 +7,52 @@ Reporting a bug
 
 You can report a bug on the issue list on google code.
 
-`<http://code.google.com/p/deap/issues/list>`_
+`<https://github.com/deap/deap/issues>`_
 
 Retrieving the latest code
 --------------------------
 
 You can check the latest sources with the command::
 
-    hg clone https://deap.googlecode.com/hg
+    git clone https://github.com/DEAP/deap.git
 
-If you want to use the development version, you have to update the repository
-to the developing branch with the command::
-
-    hg update dev
 
 Contributing code
 -----------------
 
-Contact us on the deap users list at `<http://groups.google.com/group/deap-users>`_.
+The preferred way to contribute to deap is to fork the `main
+repository <http://github.com/deap/deap/>`__ on GitHub,
+then submit a "pull request" (PR):
+
+ 1. Fork the `project repository
+    <http://github.com/deap/deap>`__: click on the 'Fork'
+    button near the top of the page. This creates a copy of the code under your
+    account on the GitHub server.
+
+ 2. Clone your fork locally::
+
+        $ git clone git@github.com:YourLogin/deap.git
+
+ 3. Create a branch to hold your changes::
+
+        $ git checkout -b my-feature
+
+    and start making changes. Never work in the ``master`` branch!
+
+ 4. When you're done editing, do::
+
+        $ git add modified_files
+        $ git commit
+
+    to record your changes in Git, then push them to GitHub with::
+
+        $ git push -u origin my-feature
+
+Finally, go to the web page of your fork of the deap repo,
+and click 'Pull request' to send your changes for review.
+
+You can also contact us on the deap users 
+list at `<http://groups.google.com/group/deap-users>`_.
 
 Coding guidelines
 -----------------

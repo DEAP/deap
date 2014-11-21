@@ -7,11 +7,11 @@ matrix:
       env: NUMPY=numpy
     - python: "pypy"
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
-# command to install dependencies
+# command to install dependencies and translate deap in py3k
 install:
   - python setup.py install
   - pip install $NUMPY
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 --output-dir=py3k/deap -W -n deap; fi
 # command to run tests
 script:
-  # run python3 tests from build/lib because the 2to3 from setup.py does not modify files in-place
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests --where=build/lib; else nosetests; fi
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests -v --where=py3k; else nosetests -v; fi

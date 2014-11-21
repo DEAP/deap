@@ -24,7 +24,7 @@ from math import sqrt
 from deap import algorithms
 from deap import base
 from deap import benchmarks
-from deap.benchmarks.tools import diversity, convergence
+from deap.benchmarks.tools import diversity, convergence, hypervolume
 from deap import creator
 from deap import tools
 
@@ -66,8 +66,8 @@ def main(seed=None):
     CXPB = 0.9
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", numpy.mean, axis=0)
-    stats.register("std", numpy.std, axis=0)
+    # stats.register("avg", numpy.mean, axis=0)
+    # stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
     
@@ -116,23 +116,26 @@ def main(seed=None):
         logbook.record(gen=gen, evals=len(invalid_ind), **record)
         print(logbook.stream)
 
+    print("Final population hypervolume is %f" % hypervolume(pop, [11.0, 11.0]))
+
     return pop, logbook
         
 if __name__ == "__main__":
-    optimal_front = json.load(open("pareto_front/zdt1_front.json"))
+    # with open("pareto_front/zdt1_front.json") as optimal_front_data:
+    #     optimal_front = json.load(optimal_front_data)
     # Use 500 of the 1000 points in the json file
-    optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
+    # optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
     
     pop, stats = main()
-    pop.sort(key=lambda x: x.fitness.values)
+    # pop.sort(key=lambda x: x.fitness.values)
     
-    print(stats)
-    print("Convergence: ", convergence(pop, optimal_front))
-    print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
+    # print(stats)
+    # print("Convergence: ", convergence(pop, optimal_front))
+    # print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
     
     # import matplotlib.pyplot as plt
     # import numpy
-    # 
+    
     # front = numpy.array([ind.fitness.values for ind in pop])
     # optimal_front = numpy.array(optimal_front)
     # plt.scatter(optimal_front[:,0], optimal_front[:,1], c="r")
