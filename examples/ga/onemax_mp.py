@@ -30,29 +30,28 @@ from deap import base
 from deap import creator
 from deap import tools
 
-
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
-
-toolbox = base.Toolbox()
-
-# Attribute generator
-toolbox.register("attr_bool", random.randint, 0, 1)
-
-# Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-
 def evalOneMax(individual):
     return sum(individual),
 
-toolbox.register("evaluate", evalOneMax)
-toolbox.register("mate", tools.cxTwoPoint)
-toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
-toolbox.register("select", tools.selTournament, tournsize=3)
+def main(seed):
+    random.seed(seed)
 
-if __name__ == "__main__":
-    random.seed(64)
+    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+    creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+
+    toolbox = base.Toolbox()
+
+    # Attribute generator
+    toolbox.register("attr_bool", random.randint, 0, 1)
+
+    # Structure initializers
+    toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    toolbox.register("evaluate", evalOneMax)
+    toolbox.register("mate", tools.cxTwoPoint)
+    toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
+    toolbox.register("select", tools.selTournament, tournsize=3)
     
     # Process Pool of 4 workers
     pool = multiprocessing.Pool(processes=4)
@@ -70,3 +69,6 @@ if __name__ == "__main__":
                         stats=stats, halloffame=hof)
 
     pool.close()
+
+if __name__ == "__main__":
+    main(64)
