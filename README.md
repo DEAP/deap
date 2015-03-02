@@ -1,5 +1,7 @@
 # DEAP
 
+[![Join the chat at https://gitter.im/DEAP/deap](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DEAP/deap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
 ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [SCOOP](http://scoop.googlecode.com).
 
