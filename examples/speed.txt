@@ -17,6 +17,7 @@ gp/ant
 gp/parity
 gp/spambase
 gp/symbreg
+gp/symbreg_harm
 gp/symbreg_numpy
 es/fctmin
 es/onefifth
