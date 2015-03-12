@@ -948,7 +948,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
        model the natural distribution and the minimum cutoff point are less
        important, their default value being effective in most cases.
 
-    .. [Gardner2015] M.-A. Gardner, C. Gagné, and M. Parizeau, Controlling 
+    .. [Gardner2015] M.-A. Gardner, C. Gagne, and M. Parizeau, Controlling 
         Code Growth by Dynamically Shaping the Genotype Size Distribution,
         Genetic Programming and Evolvable Machines, 2015,
         DOI 10.1007/s10710-015-9242-8
