@@ -6,12 +6,20 @@ try:
 except ImportError:
     from distutils.command.build_py import build_py
 
+try:
+    from pypandoc import convert
+except ImportError:
+    print("warning: pypandoc module not found, could not convert Markdown to RST")
+    read_md = lambda f: open(f, 'r').read()
+else:
+    read_md = lambda f: convert(f, 'rst')
+
 import deap
 
 setup(name='deap',
       version=deap.__revision__,
       description='Distributed Evolutionary Algorithms in Python',
-      long_description=open('README.md').read(),
+      long_description=read_md('README.md'),
       author='deap Development Team',
       author_email='deap-users@googlegroups.com',
       url='http://deap.googlecode.com',
