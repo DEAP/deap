@@ -61,7 +61,7 @@ def run_setup(build_ext):
           long_description=read_md('README.md'),
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
-          url='http://deap.googlecode.com',
+          url='https://www.github.com/deap',
           packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
           keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
