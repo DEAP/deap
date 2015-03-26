@@ -1,7 +1,7 @@
 # DEAP
 
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
-ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [SCOOP](http://scoop.googlecode.com).
+ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [SCOOP](http://pyscoop.org).
 
 DEAP includes the following features:
 
