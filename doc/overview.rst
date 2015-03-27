@@ -14,7 +14,7 @@ Types
 The first thing to do is to think of the appropriate type for your problem.
 Then, instead of looking in the list of available types, DEAP enables you to
 build your own. This is done with
-the :mod:`~deap.creator` module. Creating an appropriate type might seems
+the :mod:`~deap.creator` module. Creating an appropriate type might seem
 overwhelming but the creator makes it very easy. In fact, this is usually done
 in a single line. For example, the following creates a :class:`FitnessMin` class
 for a minimization problem and an :class:`Individual` class that is derived
@@ -51,8 +51,8 @@ are found in the :doc:`tutorials/basic/part1` tutorial and the various
 Operators
 ---------
 Operators are just like initalizers, excepted that some are already
-implemented in the :mod:`~deap.tools` module. Once you've chose the perfect
-ones simply register them in the toolbox. In addition you must create your
+implemented in the :mod:`~deap.tools` module. Once you've chosen the perfect
+ones, simply register them in the toolbox. In addition you must create your
 evaluation function. This is how it is done in DEAP.
 
 .. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
