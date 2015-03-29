@@ -41,7 +41,7 @@ run your program, use scoop as the main module.
 That is it, your program has been run in parallel on all available processors
 on your computer.
 
-.. _SCOOP: http://scoop.googlecode.com/
+.. _SCOOP: http://pyscoop.org/
 
 Multiprocessing Module
 ----------------------
