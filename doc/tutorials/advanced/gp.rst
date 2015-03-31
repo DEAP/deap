@@ -5,7 +5,7 @@ Genetic Programming
 
 Genetic programming is a special field of evolutionary computation that aims at
 building programs automatically to solve problems independently of their domain.
-Although there exists diverse representations used to evolve programs, the most
+Although there exist diverse representations used to evolve programs, the most
 common is the syntax tree.
 
 .. image:: /_images/gptree.png
