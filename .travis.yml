@@ -15,3 +15,10 @@ install:
 # command to run tests
 script:
   - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests -v --where=py3k; else nosetests -v; fi
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/f17745fc250ffb09c0e9
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: false     # default: false
