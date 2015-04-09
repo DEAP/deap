@@ -63,19 +63,19 @@ Since version 0.8, DEAP is compatible out of the box with Python 3. The installa
 
 ## Example
 
-The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [here](http://deap.gel.ulaval.ca/doc/default/examples/index.html).
+The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [here](http://deap.readthedocs.org/en/master/examples/index.html).
 
 ```python
-import array, random
+import random
 from deap import creator, base, tools, algorithms
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 
 toolbox.register("attr_bool", random.randint, 0, 1)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, n=100)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
@@ -94,7 +94,8 @@ for gen in range(NGEN):
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit
-    population = offspring
+    population = toolbox.select(offspring, k=len(population))
+top10 = tools.selBest(population, k=10)
 ```
 
 ## How to cite DEAP
