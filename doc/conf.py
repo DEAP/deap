@@ -27,7 +27,8 @@ import deap
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks'] 
+              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
+              'sphinx.ext.viewcode'] 
 
 try:
     import matplotlib
