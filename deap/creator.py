@@ -123,6 +123,13 @@ def create(name, base, **kargs):
 
     The :ref:`creating-types` tutorial gives more examples of the creator
     usage.
+    
+    .. warning::
+       
+       If your are inheriting from :class:`numpy.ndarray` see the
+       :doc:`tutorials/advanced/numpy` tutorial and the
+       :doc:`/examples/ga_onemax_numpy` example.
+
     """
 
     if name in globals():

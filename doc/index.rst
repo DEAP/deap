@@ -11,12 +11,6 @@ in perfect harmony with parallelisation mechanism such as multiprocessing and `S
 <http://pyscoop.org/>`_. The following documentation presents the key concepts
 and many features to build your own evolutions.
 
-.. warning::
-   
-   If your are inheriting from :class:`numpy.ndarray` see the
-   :doc:`tutorials/advanced/numpy` tutorial and the
-   :doc:`/examples/ga_onemax_numpy` example.
-
 .. sidebar:: Getting Help
     
     Having trouble? We’d like to help!
