@@ -19,6 +19,8 @@ import random
 
 import numpy
 
+from functools import partial
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -40,7 +42,7 @@ pset.addPrimitive(protectedDiv, 2)
 pset.addPrimitive(operator.neg, 1)
 pset.addPrimitive(math.cos, 1)
 pset.addPrimitive(math.sin, 1)
-pset.addEphemeralConstant("rand101", lambda: random.randint(-1,1))
+pset.addEphemeralConstant("rand101", partial(random.randint, -1, 1))
 pset.renameArguments(ARG0='x')
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
