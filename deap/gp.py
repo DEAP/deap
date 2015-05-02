@@ -25,6 +25,7 @@ import copy_reg
 import random
 import re
 import sys
+import types
 import warnings
 
 from collections import defaultdict, deque
@@ -241,6 +242,12 @@ class MetaEphemeral(type):
     def __new__(meta, name, func, ret=__type__, id_=None):
         if id_ in MetaEphemeral.cache:
             return MetaEphemeral.cache[id_]
+
+        if isinstance(func, types.LambdaType) and func.__name__ == '<lambda>':
+            warnings.warn("Ephemeral {name} function cannot be "
+                          "pickled because its generating function "
+                          "is a lambda function. Use functools.partial "
+                          "instead.".format(name=name), RuntimeWarning)
 
         def __init__(self):
             self.value = func()
