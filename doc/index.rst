@@ -19,7 +19,7 @@ and many features to build your own evolutions.
       <https://groups.google.com/forum/?fromgroups#!forum/deap-users>`_,
       or post a question.
     * Report bugs with DEAP in our `issue tracker 
-      <https://code.google.com/p/deap/issues/list>`_.
+      <https://www.github.com/deap/deap/issues>`_.
 
 * **First steps:** 
 

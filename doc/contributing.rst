@@ -5,7 +5,7 @@ Contributing
 Reporting a bug
 ---------------
 
-You can report a bug on the issue list on google code.
+You can report a bug on deap Github issues page.
 
 `<https://github.com/deap/deap/issues>`_
 

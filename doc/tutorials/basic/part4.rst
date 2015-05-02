@@ -83,8 +83,8 @@ toolbox.
 .. multiprocessing module into the built-in :mod:`~deap.algorithms`, the only
 .. thing to do is to replace the map operation by a parallel one. Then the
 .. difference between the `Multiprocessing One Max Example
-.. <http://deap.googlecode.com/hg/examples/mpga_onemax.py>`_ and the `Regular One
-.. Max Example <http://deap.googlecode.com/hg/examples/ga_onemax.py>`_ is the
+.. <https://www.github.com/deap/deap/examples/mpga_onemax.py>`_ and the `Regular One
+.. Max Example <https://www.github.com/deap/deap/examples/ga_onemax.py>`_ is the
 .. addition of these two lines 
 .. ::
 .. 
