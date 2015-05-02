@@ -141,13 +141,13 @@ else:
 html_theme_path = ["_themes"]
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
-# Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'pydoctheme'
+# Sphinx are currently 'classic' and 'alabaster'.
+html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'collapsiblesidebar': True}
+#html_theme_options = {'collapsiblesidebar': True}
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
