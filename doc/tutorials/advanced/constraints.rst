@@ -47,7 +47,7 @@ module. ::
 	def feasible(individual):
 	    """Feasability function for the individual. Returns True if feasible False
 	    otherwise."""
-	    if 3 < individual[0] < 5:
+	    if 3 < individual[0] < 7:
 	        return True
 	    return False
 
