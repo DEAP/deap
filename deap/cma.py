@@ -26,6 +26,7 @@ from math import sqrt, log, exp
 
 import tools
 
+
 class Strategy(object):
     """
     A strategy that will keep track of the basic parameters of the CMA-ES
@@ -154,7 +155,6 @@ class Strategy(object):
                 + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
                 / self.sigma ** 2
 
-
         self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) \
                                 * self.cs / self.damps)
 
@@ -200,6 +200,7 @@ class Strategy(object):
         self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.) / \
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
+
 
 class StrategyOnePlusLambda(object):
     """
@@ -315,6 +316,7 @@ class StrategyOnePlusLambda(object):
         # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
         self.A = numpy.linalg.cholesky(self.C)
+
 
 class StrategyMultiObjective(object):
     """Multiobjective CMA-ES strategy based on the paper [Voss2010]_. It
@@ -518,7 +520,6 @@ class StrategyMultiObjective(object):
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx] + cp
                 self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
 
-
         # It is unnecessary to update the entire parameter set for not chosen individuals
         # Their parameters will not make it to the next generation
         for ind in not_chosen:
@@ -528,7 +529,6 @@ class StrategyMultiObjective(object):
             if t == "o":
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx]
                 self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
-
 
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents

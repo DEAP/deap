@@ -40,6 +40,7 @@ import tools        # Needed by HARM-GP
 # Define the name of type for any types.
 __type__ = object
 
+
 class PrimitiveTree(list):
     """Tree specifically formatted for optimization of genetic
     programming operations. The tree is represented with a
@@ -189,6 +190,7 @@ class Primitive(object):
         'mul(1, 2)'
     """
     __slots__ = ('name', 'arity', 'args', 'ret', 'seq')
+
     def __init__(self, name, args, ret):
         self.name = name
         self.arity = len(args)
@@ -207,11 +209,13 @@ class Primitive(object):
         else:
             return NotImplemented
 
+
 class Terminal(object):
     """Class that encapsulates terminal primitive in expression. Terminals can
     be values or 0-arity functions.
     """
     __slots__ = ('name', 'value', 'ret', 'conv_fct')
+
     def __init__(self, terminal, symbolic, ret):
         self.ret = ret
         self.value = terminal
@@ -232,6 +236,7 @@ class Terminal(object):
         else:
             return NotImplemented
 
+
 class Ephemeral(Terminal):
     """Class that encapsulates a terminal which value is set when the
     object is created. To mutate the value, a new object has to be
@@ -246,6 +251,7 @@ class Ephemeral(Terminal):
         """Return a random value used to define the ephemeral state.
         """
         raise NotImplementedError
+
 
 class PrimitiveSetTyped(object):
     """Class that contains the primitives that can be used to solve a
@@ -417,6 +423,7 @@ class PrimitiveSetTyped(object):
         """
         return self.terms_count / float(self.terms_count + self.prims_count)
 
+
 class PrimitiveSet(PrimitiveSetTyped):
     """Class same as :class:`~deap.gp.PrimitiveSetTyped`, except there is no
     definition of type.
@@ -473,6 +480,7 @@ def compile(expr, pset):
         "operators. See the DEAP documentation for more information. "
         "DEAP will now abort."), traceback
 
+
 def compileADF(expr, psets):
     """Compile the expression represented by a list of trees. The first
     element of the list is the main tree, and the following elements are
@@ -498,6 +506,7 @@ def compileADF(expr, psets):
         adfdict.update({pset.name: func})
     return func
 
+
 ######################################
 # GP Program generation functions    #
 ######################################
@@ -517,6 +526,7 @@ def genFull(pset, min_, max_, type_=None):
         """Expression generation stops when the depth is equal to height."""
         return depth == height
     return generate(pset, min_, max_, condition, type_)
+
 
 def genGrow(pset, min_, max_, type_=None):
     """Generate an expression where each leaf might have a different depth
@@ -538,6 +548,7 @@ def genGrow(pset, min_, max_, type_=None):
                (depth >= min_ and random.random() < pset.terminalRatio)
     return generate(pset, min_, max_, condition, type_)
 
+
 def genHalfAndHalf(pset, min_, max_, type_=None):
     """Generate an expression with a PrimitiveSet *pset*.
     Half the time, the expression is generated with :func:`~deap.gp.genGrow`,
@@ -554,6 +565,7 @@ def genHalfAndHalf(pset, min_, max_, type_=None):
     method = random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
 
+
 def genRamped(pset, min_, max_, type_=None):
     """
     .. deprecated:: 1.0
@@ -562,6 +574,7 @@ def genRamped(pset, min_, max_, type_=None):
     warnings.warn("gp.genRamped has been renamed. Use genHalfAndHalf instead.",
                   FutureWarning)
     return genHalfAndHalf(pset, min_, max_, type_)
+
 
 def generate(pset, min_, max_, condition, type_=None):
     """Generate a Tree as a list of list. The tree is build
@@ -756,6 +769,7 @@ def mutNodeReplacement(individual, pset):
 
     return individual,
 
+
 def mutEphemeral(individual, mode):
     """This operator works on the constants of the tree *individual*. In
     *mode* ``"one"``, it will change the value of one of the individual
@@ -782,6 +796,7 @@ def mutEphemeral(individual, mode):
             individual[i] = type(individual[i])()
 
     return individual,
+
 
 def mutInsert(individual, pset):
     """Inserts a new branch at a random position in *individual*. The subtree
@@ -822,6 +837,7 @@ def mutInsert(individual, pset):
     individual[slice_] = new_subtree
     return individual,
 
+
 def mutShrink(individual):
     """This operator shrinks the *individual* by chosing randomly a branch and
     replacing it with one of the branch's arguments (also randomly chosen).
@@ -855,6 +871,7 @@ def mutShrink(individual):
 ######################################
 # GP bloat control decorators        #
 ######################################
+
 
 def staticLimit(key, max_value):
     """Implement a static limit on some measurement on a GP tree, as defined
@@ -1006,7 +1023,6 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
             return producedpop, producedpopsizes
         else:
             return producedpop
-
 
     halflifefunc = lambda x: (x * float(alpha) + beta)
     if nbrindsmodel == -1:

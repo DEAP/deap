@@ -72,6 +72,7 @@ else:
 
     class_replacers[numpy.ndarray] = _numpy_array
 
+
 class _array(array.array):
     @staticmethod
     def __new__(cls, seq=()):
@@ -90,6 +91,7 @@ class _array(array.array):
     def __reduce__(self):
         return (self.__class__, (list(self),), self.__dict__)
 class_replacers[array.array] = _array
+
 
 def create(name, base, **kargs):
     """Creates a new class named *name* inheriting from *base* in the

@@ -29,6 +29,7 @@ import random
 
 import tools
 
+
 def varAnd(population, toolbox, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover **and** mutation). The modified individuals have their
@@ -78,6 +79,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
             del offspring[i].fitness.values
 
     return offspring
+
 
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
              halloffame=None, verbose=__debug__):
@@ -185,6 +187,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
     return population, logbook
 
+
 def varOr(population, toolbox, lambda_, cxpb, mutpb):
     """Part of an evolutionary algorithm applying only the variation part
     (crossover, mutation **or** reproduction). The modified individuals have
@@ -240,6 +243,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
             offspring.append(random.choice(population))
 
     return offspring
+
 
 def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, verbose=__debug__):
@@ -331,6 +335,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
             print logbook.stream
 
     return population, logbook
+
 
 def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                     stats=None, halloffame=None, verbose=__debug__):
@@ -429,9 +434,8 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
             print logbook.stream
-
-
     return population, logbook
+
 
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                      verbose=__debug__):

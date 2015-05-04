@@ -25,6 +25,7 @@ from copy import deepcopy
 from functools import partial
 from operator import mul, truediv
 
+
 class Toolbox(object):
     """A toolbox for evolution that contains the evolutionary operators. At
     first the toolbox contains a :meth:`~deap.toolbox.clone` method that
@@ -261,4 +262,3 @@ class Fitness(object):
         """Return the Python code to build a copy of the object."""
         return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
             self.values if self.valid else tuple())
-
