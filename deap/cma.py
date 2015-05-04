@@ -88,7 +88,7 @@ class Strategy(object):
         self.sigma = sigma
         self.pc = numpy.zeros(self.dim)
         self.ps = numpy.zeros(self.dim)
-        self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) + \
+        self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) +
                                       1. / (21. * self.dim ** 2))
 
         self.C = self.params.get("cmatrix", numpy.identity(self.dim))
@@ -134,7 +134,7 @@ class Strategy(object):
         # Cumulation : update evolution path
         self.ps = (1 - self.cs) * self.ps \
              + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
-             * numpy.dot(self.B, (1. / self.diagD) \
+             * numpy.dot(self.B, (1. / self.diagD)
                           * numpy.dot(self.B.T, c_diff))
 
         hsig = float((numpy.linalg.norm(self.ps) /
@@ -149,13 +149,13 @@ class Strategy(object):
 
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
-        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) \
+        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig)
                    * self.ccov1 * self.cc * (2 - self.cc)) * self.C \
                 + self.ccov1 * numpy.outer(self.pc, self.pc) \
                 + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
                 / self.sigma ** 2
 
-        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) \
+        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.)
                                 * self.cs / self.damps)
 
         self.diagD, self.B = numpy.linalg.eigh(self.C)
@@ -177,7 +177,7 @@ class Strategy(object):
         rweights = params.get("weights", "superlinear")
         if rweights == "superlinear":
             self.weights = log(self.mu + 0.5) - \
-                        numpy.log(numpy.arange(1, self.mu + 1))
+                numpy.log(numpy.arange(1, self.mu + 1))
         elif rweights == "linear":
             self.weights = self.mu + 0.5 - numpy.arange(1, self.mu + 1)
         elif rweights == "equal":
@@ -191,13 +191,13 @@ class Strategy(object):
         self.cc = params.get("ccum", 4. / (self.dim + 4.))
         self.cs = params.get("cs", (self.mueff + 2.) /
                                    (self.dim + self.mueff + 3.))
-        self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3) ** 2 + \
+        self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3) ** 2 +
                                          self.mueff))
-        self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2. +  \
-                                                 1. / self.mueff) / \
+        self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2. +
+                                                 1. / self.mueff) /
                                            ((self.dim + 2.) ** 2 + self.mueff))
         self.ccovmu = min(1 - self.ccov1, self.ccovmu)
-        self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.) / \
+        self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.) /
                                             (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
 

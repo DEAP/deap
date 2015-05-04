@@ -1071,10 +1071,10 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         cutoffsize = max(mincutoff, len(min(cutoffcandidates, key=len)))
 
         # Compute the target distribution
-        targetfunc = lambda x: (gamma * len(population) * math.log(2) / \
-                        halflifefunc(x)) * math.exp(-math.log(2) * \
+        targetfunc = lambda x: (gamma * len(population) * math.log(2) /
+                        halflifefunc(x)) * math.exp(-math.log(2) *
                         (x - cutoffsize) / halflifefunc(x))
-        targethist = [naturalhist[binidx] if binidx <= cutoffsize else \
+        targethist = [naturalhist[binidx] if binidx <= cutoffsize else
                         targetfunc(binidx) for binidx in range(len(naturalhist))]
 
         # Compute the probabilities distribution
