@@ -158,7 +158,7 @@ class PrimitiveTree(list):
         for elem in self:
             depth = stack.pop()
             max_depth = max(max_depth, depth)
-            stack.extend([depth+1] * elem.arity)
+            stack.extend([depth + 1] * elem.arity)
         return max_depth
 
     @property
@@ -259,7 +259,7 @@ class PrimitiveSetTyped(object):
         # setting "__builtins__" to None avoid the context
         # being polluted by builtins function when evaluating
         # GP expression.
-        self.context = {"__builtins__" : None}
+        self.context = {"__builtins__": None}
         self.mapping = dict()
         self.terms_count = 0
         self.prims_count = 0
@@ -381,8 +381,8 @@ class PrimitiveSetTyped(object):
         """
         module_gp = globals()
         if not name in module_gp:
-            class_ = type(name, (Ephemeral,), {'func' : staticmethod(ephemeral),
-                                               'ret' : ret_type})
+            class_ = type(name, (Ephemeral,), {'func': staticmethod(ephemeral),
+                                               'ret': ret_type})
             module_gp[name] = class_
         else:
             class_ = module_gp[name]
@@ -396,7 +396,7 @@ class PrimitiveSetTyped(object):
             else:
                 raise Exception("Ephemerals should be named differently "
                                 "than classes defined in the gp module.")
-        
+
         self._add(class_)
         self.terms_count += 1
 
@@ -422,7 +422,7 @@ class PrimitiveSet(PrimitiveSetTyped):
     definition of type.
     """
     def __init__(self, name, arity, prefix="ARG"):
-        args = [__type__]*arity
+        args = [__type__] * arity
         PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
 
     def addPrimitive(self, primitive, arity, name=None):
@@ -495,7 +495,7 @@ def compileADF(expr, psets):
     for pset, subexpr in reversed(zip(psets, expr)):
         pset.context.update(adfdict)
         func = compile(subexpr, pset)
-        adfdict.update({pset.name : func})
+        adfdict.update({pset.name: func})
     return func
 
 ######################################
@@ -608,7 +608,7 @@ def generate(pset, min_, max_, condition, type_=None):
                                   "none available." % (type_,), traceback
             expr.append(prim)
             for arg in reversed(prim.args):
-                stack.append((depth+1, arg))
+                stack.append((depth + 1, arg))
     return expr
 
 
@@ -745,7 +745,7 @@ def mutNodeReplacement(individual, pset):
     index = random.randrange(1, len(individual))
     node = individual[index]
 
-    if node.arity == 0: # Terminal
+    if node.arity == 0:  # Terminal
         term = random.choice(pset.terminals[node.ret])
         if isclass(term):
             term = term()
@@ -817,7 +817,7 @@ def mutInsert(individual, pset):
                 term = term()
             new_subtree[i] = term
 
-    new_subtree[position:position+1] = individual[slice_]
+    new_subtree[position:position + 1] = individual[slice_]
     new_subtree.insert(0, new_node)
     individual[slice_] = new_subtree
     return individual,
@@ -841,8 +841,8 @@ def mutShrink(individual):
     if len(iprims) != 0:
         index, prim = random.choice(iprims)
         arg_idx = random.choice([i for i, type_ in enumerate(prim.args) if type_ == prim.ret])
-        rindex = index+1
-        for _ in range(arg_idx+1):
+        rindex = index + 1
+        for _ in range(arg_idx + 1):
             rslice = individual.searchSubtree(rindex)
             subtree = individual[rslice]
             rindex += len(subtree)
@@ -867,8 +867,8 @@ def staticLimit(key, max_value):
     depth), because it can ensure that no tree higher than this limit will ever
     be accepted in the population, except if it was generated at initialization
     time.
-    
-    :param key: The function to use in order the get the wanted value. For 
+
+    :param key: The function to use in order the get the wanted value. For
                 instance, on a GP tree, ``operator.attrgetter('height')`` may
                 be used to set a depth limit, and ``len`` to set a size limit.
     :param max_value: The maximum value allowed for the given measurement.
@@ -920,9 +920,9 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
     :param rho: The HARM *rho* parameter.
     :param nbrindsmodel: The number of individuals to generate in order to
                             model the natural distribution. -1 is a special
-                            value which uses the equation proposed in 
+                            value which uses the equation proposed in
                             [Gardner2015] to set the value of this parameter :
-                            max(2000, len(population)) 
+                            max(2000, len(population))
     :param mincutoff: The absolute minimum value for the cutoff point. It is
                         used to ensure that HARM does not shrink the population
                         too much at the beginning of the evolution. The default
@@ -948,7 +948,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
        model the natural distribution and the minimum cutoff point are less
        important, their default value being effective in most cases.
 
-    .. [Gardner2015] M.-A. Gardner, C. Gagne, and M. Parizeau, Controlling 
+    .. [Gardner2015] M.-A. Gardner, C. Gagne, and M. Parizeau, Controlling
         Code Growth by Dynamically Shaping the Genotype Size Distribution,
         Genetic Programming and Evolvable Machines, 2015,
         DOI 10.1007/s10710-015-9242-8
@@ -968,7 +968,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         producedpopsizes = []
         while len(producedpop) < n:
             if len(pickfrom) > 0:
-                # If possible, use the already generated 
+                # If possible, use the already generated
                 # individuals (more efficient)
                 aspirant = pickfrom.pop()
                 if acceptfunc(len(aspirant)):
@@ -979,7 +979,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                 opRandom = random.random()
                 if opRandom < cxpb:
                     # Crossover
-                    aspirant1, aspirant2 = toolbox.mate(*map(toolbox.clone, 
+                    aspirant1, aspirant2 = toolbox.mate(*map(toolbox.clone,
                                                 toolbox.select(population, 2)))
                     del aspirant1.fitness.values, aspirant2.fitness.values
                     if acceptfunc(len(aspirant1)):
@@ -1008,7 +1008,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
             return producedpop
 
 
-    halflifefunc = lambda x:(x*float(alpha) + beta)
+    halflifefunc = lambda x: (x * float(alpha) + beta)
     if nbrindsmodel == -1:
         nbrindsmodel = max(2000, len(population))
 
@@ -1030,25 +1030,25 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         print logbook.stream
 
     # Begin the generational process
-    for gen in range(1, ngen+1):
+    for gen in range(1, ngen + 1):
         # Estimation population natural distribution of sizes
         naturalpop, naturalpopsizes = _genpop(nbrindsmodel, producesizes=True)
 
-        naturalhist = [0] * (max(naturalpopsizes)+3)
+        naturalhist = [0] * (max(naturalpopsizes) + 3)
         for indsize in naturalpopsizes:
             # Kernel density estimation application
             naturalhist[indsize] += 0.4
-            naturalhist[indsize-1] += 0.2
-            naturalhist[indsize+1] += 0.2
-            naturalhist[indsize+2] += 0.1        
+            naturalhist[indsize - 1] += 0.2
+            naturalhist[indsize + 1] += 0.2
+            naturalhist[indsize + 2] += 0.1
             if indsize - 2 >= 0:
-                naturalhist[indsize-2] += 0.1
+                naturalhist[indsize - 2] += 0.1
 
         # Normalization
-        naturalhist = [val*len(population)/nbrindsmodel for val in naturalhist]
-        
+        naturalhist = [val * len(population) / nbrindsmodel for val in naturalhist]
+
         # Cutoff point selection
-        sortednatural = sorted(naturalpop, key=lambda ind:ind.fitness)
+        sortednatural = sorted(naturalpop, key=lambda ind: ind.fitness)
         cutoffcandidates = sortednatural[int(len(population) * rho - 1):]
         # Select the cutoff point, with an absolute minimum applied
         # to avoid weird cases in the first generations
@@ -1057,20 +1057,20 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         # Compute the target distribution
         targetfunc = lambda x: (gamma * len(population) * math.log(2) / \
                         halflifefunc(x)) * math.exp(-math.log(2) * \
-                        (x - cutoffsize) / halflifefunc(x)) 
+                        (x - cutoffsize) / halflifefunc(x))
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else \
                         targetfunc(binidx) for binidx in range(len(naturalhist))]
 
         # Compute the probabilities distribution
-        probhist = [t/n if n > 0 else t for n,t in zip(naturalhist, targethist)]
+        probhist = [t / n if n > 0 else t for n, t in zip(naturalhist, targethist)]
         probfunc = lambda s: probhist[s] if s < len(probhist) else targetfunc(s)
         acceptfunc = lambda s: random.random() <= probfunc(s)
 
         # Generate offspring using the acceptance probabilities
         # previously computed
-        offspring = _genpop(len(population), pickfrom=naturalpop, 
+        offspring = _genpop(len(population), pickfrom=naturalpop,
                                 acceptfunc=acceptfunc, producesizes=False)
-        
+
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -1080,15 +1080,15 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
             halloffame.update(offspring)
-            
+
         # Replace the current population by the offspring
         population[:] = offspring
-        
+
         # Append the current generation statistics to the logbook
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream        
+            print logbook.stream
 
     return population, logbook
 

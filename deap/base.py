@@ -22,7 +22,7 @@ import sys
 
 from collections import Sequence
 from copy import deepcopy
-from functools import partial 
+from functools import partial
 from operator import mul, truediv
 
 class Toolbox(object):
@@ -45,11 +45,11 @@ class Toolbox(object):
         self.register("map", map)
 
     def register(self, alias, function, *args, **kargs):
-        """Register a *function* in the toolbox under the name *alias*. You 
-        may provide default arguments that will be passed automatically when 
-        calling the registered function. Fixed arguments can then be overriden 
+        """Register a *function* in the toolbox under the name *alias*. You
+        may provide default arguments that will be passed automatically when
+        calling the registered function. Fixed arguments can then be overriden
         at function call time.
-        
+
         :param alias: The name the operator will take in the toolbox. If the
                       alias already exist it will overwrite the the operator
                       already present.
@@ -57,17 +57,17 @@ class Toolbox(object):
         :param argument: One or more argument (and keyword argument) to pass
                          automatically to the registered function when called,
                          optional.
-        
+
         The following code block is an example of how the toolbox is used. ::
 
             >>> def func(a, b, c=3):
             ...     print a, b, c
-            ... 
+            ...
             >>> tools = Toolbox()
             >>> tools.register("myFunc", func, 2, c=4)
             >>> tools.myFunc(3)
             2 3 4
-        
+
         The registered function will be given the attributes :attr:`__name__`
         set to the alias and :attr:`__doc__` set to the original function's
         documentation. The :attr:`__dict__` attribute will also be updated
@@ -76,18 +76,18 @@ class Toolbox(object):
         pfunc = partial(function, *args, **kargs)
         pfunc.__name__ = alias
         pfunc.__doc__ = function.__doc__
-        
+
         if hasattr(function, "__dict__") and not isinstance(function, type):
-            # Some functions don't have a dictionary, in these cases 
+            # Some functions don't have a dictionary, in these cases
             # simply don't copy it. Moreover, if the function is actually
             # a class, we do not want to copy the dictionary.
             pfunc.__dict__.update(function.__dict__.copy())
-        
+
         setattr(self, alias, pfunc)
 
     def unregister(self, alias):
         """Unregister *alias* from the toolbox.
-        
+
         :param alias: The name of the operator to remove from the toolbox.
         """
         delattr(self, alias)
@@ -95,13 +95,13 @@ class Toolbox(object):
     def decorate(self, alias, *decorators):
         """Decorate *alias* with the specified *decorators*, *alias*
         has to be a registered function in the current toolbox.
-        
+
         :param alias: The name of the operator to decorate.
         :param decorator: One or more function decorator. If multiple
                           decorators are provided they will be applied in
                           order, with the last decorator decorating all the
                           others.
-        
+
         .. note::
             Decorate a function using the toolbox makes it unpicklable, and
             will produce an error on pickling. Although this limitation is not
@@ -121,7 +121,7 @@ class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
     provided as a tuple, the fitness is initalized using those values,
     otherwise it is empty (or invalid).
-    
+
     :param values: The initial values of the fitness as a tuple, optional.
 
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
@@ -139,7 +139,7 @@ class Fitness(object):
        When comparing fitness values that are **minimized**, ``a > b`` will
        return :data:`True` if *a* is **smaller** than *b*.
     """
-    
+
     weights = None
     """The weights are used in the fitness comparison. They are shared among
     all fitnesses of the same type. When subclassing :class:`Fitness`, the
@@ -148,37 +148,37 @@ class Fitness(object):
     the associated objective and positive weight to the maximization.
 
     .. note::
-        If weights is not defined during subclassing, the following error will 
-        occur at instantiation of a subclass fitness object: 
-        
+        If weights is not defined during subclassing, the following error will
+        occur at instantiation of a subclass fitness object:
+
         ``TypeError: Can't instantiate abstract <class Fitness[...]> with
         abstract attribute weights.``
     """
-    
+
     wvalues = ()
     """Contains the weighted values of the fitness, the multiplication with the
     weights is made when the values are set via the property :attr:`values`.
     Multiplication is made on setting of the values for efficiency.
-    
+
     Generally it is unnecessary to manipulate wvalues as it is an internal
     attribute of the fitness used in the comparison operators.
     """
-    
+
     def __init__(self, values=()):
         if self.weights is None:
             raise TypeError("Can't instantiate abstract %r with abstract "
                 "attribute weights." % (self.__class__))
-        
+
         if not isinstance(self.weights, Sequence):
-            raise TypeError("Attribute weights of %r must be a sequence." 
+            raise TypeError("Attribute weights of %r must be a sequence."
                 % self.__class__)
-        
+
         if len(values) > 0:
             self.values = values
-        
+
     def getValues(self):
         return tuple(map(truediv, self.wvalues, self.weights))
-            
+
     def setValues(self, values):
         try:
             self.wvalues = tuple(map(mul, values, self.weights))
@@ -189,7 +189,7 @@ class Fitness(object):
             "%r. Currently assigning value(s) %r of %r to a fitness with "
             "weights %s."
             % (self.__class__, values, type(values), self.weights)), traceback
-            
+
     def delValues(self):
         self.wvalues = ()
 
@@ -198,13 +198,13 @@ class Fitness(object):
          "in order to set the fitness and ``del individual.fitness.values`` "
          "in order to clear (invalidate) the fitness. The (unweighted) fitness "
          "can be directly accessed via ``individual.fitness.values``."))
-    
+
     def dominates(self, other, obj=slice(None)):
-        """Return true if each objective of *self* is not strictly worse than 
-        the corresponding objective of *other* and at least one objective is 
+        """Return true if each objective of *self* is not strictly worse than
+        the corresponding objective of *other* and at least one objective is
         strictly better.
 
-        :param obj: Slice indicating on which objectives the domination is 
+        :param obj: Slice indicating on which objectives the domination is
                     tested. The default value is `slice(None)`, representing
                     every objectives.
         """
@@ -213,20 +213,20 @@ class Fitness(object):
             if self_wvalue > other_wvalue:
                 not_equal = True
             elif self_wvalue < other_wvalue:
-                return False                
+                return False
         return not_equal
 
     @property
     def valid(self):
         """Assess if a fitness is valid or not."""
         return len(self.wvalues) != 0
-        
+
     def __hash__(self):
         return hash(self.wvalues)
 
     def __gt__(self, other):
         return not self.__le__(other)
-        
+
     def __ge__(self, other):
         return not self.__lt__(other)
 
@@ -238,15 +238,15 @@ class Fitness(object):
 
     def __eq__(self, other):
         return self.wvalues == other.wvalues
-    
+
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __deepcopy__(self, memo):
         """Replace the basic deepcopy function with a faster one.
-        
-        It assumes that the elements in the :attr:`values` tuple are 
-        immutable and the fitness does not contain any other object 
+
+        It assumes that the elements in the :attr:`values` tuple are
+        immutable and the fitness does not contain any other object
         than :attr:`values` and :attr:`weights`.
         """
         copy_ = self.__class__()

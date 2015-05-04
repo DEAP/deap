@@ -15,8 +15,8 @@
 
 """The :mod:`algorithms` module is intended to contain some specific algorithms
 in order to execute very common evolutionary algorithms. The method used here
-are more for convenience than reference as the implementation of every 
-evolutionary algorithm may vary infinitely. Most of the algorithms in this 
+are more for convenience than reference as the implementation of every
+evolutionary algorithm may vary infinitely. Most of the algorithms in this
 module use operators registered in the toolbox. Generally, the keyword used are
 :meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~deap.select`
 for selection and :meth:`evaluate` for evaluation.
@@ -34,7 +34,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     (crossover **and** mutation). The modified individuals have their
     fitness invalidated. The individuals are cloned so returned population is
     independent of the input population.
-    
+
     :param population: A list of individuals to vary.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
@@ -42,7 +42,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     :param mutpb: The probability of mutating an individual.
     :returns: A list of varied individuals that are independent of their
               parents.
-    
+
     The variation goes as follow. First, the parental population
     :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
     and the result is put into the offspring population :math:`P_\mathrm{o}`.
@@ -56,7 +56,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
     probability *mutpb*. When an individual is mutated it replaces its not
     mutated version in :math:`P_\mathrm{o}`. The resulting
     :math:`P_\mathrm{o}` is returned.
-    
+
     This variation is named *And* beceause of its propention to apply both
     crossover and mutation on the individuals. Note that both operators are
     not applied systematicaly, the resulting individuals can be generated from
@@ -65,25 +65,25 @@ def varAnd(population, toolbox, cxpb, mutpb):
     :math:`[0, 1]`.
     """
     offspring = [toolbox.clone(ind) for ind in population]
-    
+
     # Apply crossover and mutation on the offspring
     for i in range(1, len(offspring), 2):
         if random.random() < cxpb:
-            offspring[i-1], offspring[i] = toolbox.mate(offspring[i-1], offspring[i])
-            del offspring[i-1].fitness.values, offspring[i].fitness.values
-    
+            offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1], offspring[i])
+            del offspring[i - 1].fitness.values, offspring[i].fitness.values
+
     for i in range(len(offspring)):
         if random.random() < mutpb:
             offspring[i], = toolbox.mutate(offspring[i])
             del offspring[i].fitness.values
-    
+
     return offspring
 
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
              halloffame=None, verbose=__debug__):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
-    
+
     :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
@@ -98,7 +98,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
-    
+
     The algorithm takes in a population and evolves it in place using the
     :meth:`varAnd` method. It returns the optimized population and a
     :class:`~deap.tools.Logbook` with the statistics of the evolution. The
@@ -131,11 +131,11 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
         Using a non-stochastic selection method will result in no selection as
         the operator selects *n* individuals from a pool of *n*.
-    
+
     This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
-    
+
     .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
        Basic Algorithms and Operators", 2000.
     """
@@ -157,31 +157,31 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         print logbook.stream
 
     # Begin the generational process
-    for gen in range(1, ngen+1):
+    for gen in range(1, ngen + 1):
         # Select the next generation individuals
         offspring = toolbox.select(population, len(population))
-        
+
         # Vary the pool of individuals
         offspring = varAnd(offspring, toolbox, cxpb, mutpb)
-        
+
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        
+
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
             halloffame.update(offspring)
-            
+
         # Replace the current population by the offspring
         population[:] = offspring
-        
+
         # Append the current generation statistics to the logbook
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream        
+            print logbook.stream
 
     return population, logbook
 
@@ -190,7 +190,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     (crossover, mutation **or** reproduction). The modified individuals have
     their fitness invalidated. The individuals are cloned so returned
     population is independent of the input population.
-    
+
     :param population: A list of individuals to vary.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
@@ -200,7 +200,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
-    
+
     The variation goes as follow. On each of the *lambda_* iteration, it
     selects one of the three operations; crossover, mutation or reproduction.
     In the case of a crossover, two individuals are selected at random from
@@ -214,7 +214,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :math:`P_\mathrm{o}`. In the case of a reproduction, one individual is
     selected at random from :math:`P_\mathrm{p}`, cloned and appended to
     :math:`P_\mathrm{o}`.
-    
+
     This variation is named *Or* beceause an offspring will never result from
     both operations crossover and mutation. The sum of both probabilities
     shall be in :math:`[0, 1]`, the reproduction probability is
@@ -222,7 +222,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     """
     assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
         "probabilities must be smaller or equal to 1.0.")
-    
+
     offspring = []
     for _ in xrange(lambda_):
         op_choice = random.random()
@@ -238,13 +238,13 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
             offspring.append(ind)
         else:                           # Apply reproduction
             offspring.append(random.choice(population))
-    
+
     return offspring
 
 def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu + \lambda)` evolutionary algorithm.
-    
+
     :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
@@ -261,7 +261,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution.
-    
+
     The algorithm takes in a population and evolves it in place using the
     :func:`varOr` function. It returns the optimized population and a
     :class:`~deap.tools.Logbook` with the statistics of the evolution. The
@@ -307,16 +307,16 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         print logbook.stream
 
     # Begin the generational process
-    for gen in range(1, ngen+1):
+    for gen in range(1, ngen + 1):
         # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
-        
+
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        
+
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
             halloffame.update(offspring)
@@ -331,12 +331,12 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
             print logbook.stream
 
     return population, logbook
-    
+
 def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                     stats=None, halloffame=None, verbose=__debug__):
     """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
-    
-    :param population: A list of individuals.    
+
+    :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
     :param mu: The number of individuals to select for the next generation.
@@ -352,7 +352,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
-    
+
     The algorithm takes in a population and evolves it in place using the
     :func:`varOr` function. It returns the optimized population and a
     :class:`~deap.tools.Logbook` with the statistics of the evolution. The
@@ -381,7 +381,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         selection will result in no selection at all as
         the operator selects *lambda* individuals from a pool of *mu*.
 
-    
+
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox. This algorithm uses the :func:`varOr`
@@ -407,7 +407,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         print logbook.stream
 
     # Begin the generational process
-    for gen in range(1, ngen+1):
+    for gen in range(1, ngen + 1):
         # Vary the population
         offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
 
@@ -433,11 +433,11 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     return population, logbook
 
-def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None, 
+def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
                      verbose=__debug__):
-    """This is algorithm implements the ask-tell model proposed in 
+    """This is algorithm implements the ask-tell model proposed in
     [Colette2010]_, where ask is called `generate` and tell is called `update`.
-    
+
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
                     operators.
     :param ngen: The number of generation.
@@ -480,13 +480,13 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
-        
+
         if halloffame is not None:
             halloffame.update(population)
-        
+
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
-        
+
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
