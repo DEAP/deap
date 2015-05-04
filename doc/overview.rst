@@ -14,7 +14,7 @@ Types
 The first thing to do is to think of the appropriate type for your problem.
 Then, instead of looking in the list of available types, DEAP enables you to
 build your own. This is done with
-the :mod:`~deap.creator` module. Creating an appropriate type might seem
+the :mod:`~neap.creator` module. Creating an appropriate type might seem
 overwhelming but the creator makes it very easy. In fact, this is usually done
 in a single line. For example, the following creates a :class:`FitnessMin` class
 for a minimization problem and an :class:`Individual` class that is derived
@@ -50,7 +50,7 @@ are found in the :doc:`tutorials/basic/part1` tutorial and the various
 
 Operators
 ---------
-Operators are just like initalizers, excepted that some are already
+Operators are just like initializers, excepted that some are already
 implemented in the :mod:`~deap.tools` module. Once you've chosen the perfect
 ones, simply register them in the toolbox. In addition you must create your
 evaluation function. This is how it is done in DEAP.
@@ -58,7 +58,7 @@ evaluation function. This is how it is done in DEAP.
 .. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 19-25
 
-The registered functions are renamed by the toolbox to allow genericity so
+The registered functions are renamed by the toolbox to allow generality so
 that the algorithm does not depend on operator names. Note also that fitness
 values must be iterable, that is why we return a tuple in the evaluate function.
 More on this in the :doc:`tutorials/basic/part2` tutorial and :doc:`examples/index`.

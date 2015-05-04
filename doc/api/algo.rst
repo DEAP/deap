@@ -11,7 +11,7 @@ basic evolutionary computation concepts. All algorithms accept, in addition to
 their arguments, an initialized :class:`~deap.tools.Statistics` object to
 maintain stats of the evolution, an initialized
 :class:`~deap.tools.HallOfFame` to hold the best individual(s) to appear in
-the population, and a boolean `verbose` to specify wether to
+the population, and a boolean `verbose` to specify whether to
 log what is happening during the evolution or not.
 
 .. autofunction:: deap.algorithms.eaSimple(population, toolbox, cxpb, mutpb, ngen[, stats, halloffame, verbose])
