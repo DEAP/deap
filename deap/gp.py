@@ -63,22 +63,22 @@ class PrimitiveTree(list):
         if isinstance(key, slice):
             if key.start >= len(self):
                 raise IndexError("Invalid slice object (try to assign a %s"
-                    " in a tree of size %d). Even if this is allowed by the"
-                    " list object slice setter, this should not be done in"
-                    " the PrimitiveTree context, as this may lead to an"
-                    " unpredictable behavior for searchSubtree or evaluate."
-                     % (key, len(self)))
+                                 " in a tree of size %d). Even if this is allowed by the"
+                                 " list object slice setter, this should not be done in"
+                                 " the PrimitiveTree context, as this may lead to an"
+                                 " unpredictable behavior for searchSubtree or evaluate."
+                                 % (key, len(self)))
             total = val[0].arity
             for node in val[1:]:
                 total += node.arity - 1
             if total != 0:
                 raise ValueError("Invalid slice assignation : insertion of"
-                    " an incomplete subtree is not allowed in PrimitiveTree."
-                    " A tree is defined as incomplete when some nodes cannot"
-                    " be mapped to any position in the tree, considering the"
-                    " primitives' arity. For instance, the tree [sub, 4, 5,"
-                    " 6] is incomplete if the arity of sub is 2, because it"
-                    " would produce an orphan node (the 6).")
+                                 " an incomplete subtree is not allowed in PrimitiveTree."
+                                 " A tree is defined as incomplete when some nodes cannot"
+                                 " be mapped to any position in the tree, considering the"
+                                 " primitives' arity. For instance, the tree [sub, 4, 5,"
+                                 " 6] is incomplete if the arity of sub is 2, because it"
+                                 " would produce an orphan node (the 6).")
         elif val.arity != self[key].arity:
             raise ValueError("Invalid node replacement with a node of a"
                              " different arity.")
@@ -332,10 +332,10 @@ class PrimitiveSetTyped(object):
         prim = Primitive(name, in_types, ret_type)
 
         assert name not in self.context or \
-               self.context[name] is primitive, \
-               "Primitives are required to have a unique name. " \
-               "Consider using the argument 'name' to rename your "\
-               "second '%s' primitive." % (name,)
+            self.context[name] is primitive, \
+            "Primitives are required to have a unique name. " \
+            "Consider using the argument 'name' to rename your "\
+            "second '%s' primitive." % (name,)
 
         self._add(prim)
         self.context[prim.name] = primitive
@@ -359,9 +359,9 @@ class PrimitiveSetTyped(object):
             name = terminal.__name__
 
         assert name not in self.context, \
-               "Terminals are required to have a unique name. " \
-               "Consider using the argument 'name' to rename your "\
-               "second %s terminal." % (name,)
+            "Terminals are required to have a unique name. " \
+            "Consider using the argument 'name' to rename your "\
+            "second %s terminal." % (name,)
 
         if name is not None:
             self.context[name] = terminal
@@ -475,10 +475,10 @@ def compile(expr, pset):
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError, ("DEAP : Error in tree evaluation :"
-        " Python cannot evaluate a tree higher than 90. "
-        "To avoid this problem, you should use bloat control on your "
-        "operators. See the DEAP documentation for more information. "
-        "DEAP will now abort."), traceback
+                            " Python cannot evaluate a tree higher than 90. "
+                            "To avoid this problem, you should use bloat control on your "
+                            "operators. See the DEAP documentation for more information. "
+                            "DEAP will now abort."), traceback
 
 
 def compileADF(expr, psets):
@@ -545,7 +545,7 @@ def genGrow(pset, min_, max_, type_=None):
         or when it is randomly determined that a a node should be a terminal.
         """
         return depth == height or \
-               (depth >= min_ and random.random() < pset.terminalRatio)
+            (depth >= min_ and random.random() < pset.terminalRatio)
     return generate(pset, min_, max_, condition, type_)
 
 
@@ -919,8 +919,8 @@ def staticLimit(key, max_value):
 ######################################
 
 def harm(population, toolbox, cxpb, mutpb, ngen,
-            alpha, beta, gamma, rho, nbrindsmodel=-1, mincutoff=20,
-            stats=None, halloffame=None, verbose=__debug__):
+         alpha, beta, gamma, rho, nbrindsmodel=-1, mincutoff=20,
+         stats=None, halloffame=None, verbose=__debug__):
     """Implement bloat control on a GP evolution using HARM-GP, as defined in
     [Gardner2015]. It is implemented in the form of an evolution algorithm
     (similar to :func:`~deap.algorithms.eaSimple`).
@@ -997,7 +997,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                 if opRandom < cxpb:
                     # Crossover
                     aspirant1, aspirant2 = toolbox.mate(*map(toolbox.clone,
-                                                toolbox.select(population, 2)))
+                                                             toolbox.select(population, 2)))
                     del aspirant1.fitness.values, aspirant2.fitness.values
                     if acceptfunc(len(aspirant1)):
                         producedpop.append(aspirant1)
@@ -1072,10 +1072,10 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
 
         # Compute the target distribution
         targetfunc = lambda x: (gamma * len(population) * math.log(2) /
-                        halflifefunc(x)) * math.exp(-math.log(2) *
-                        (x - cutoffsize) / halflifefunc(x))
+                                halflifefunc(x)) * math.exp(-math.log(2) *
+                                                            (x - cutoffsize) / halflifefunc(x))
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else
-                        targetfunc(binidx) for binidx in range(len(naturalhist))]
+                      targetfunc(binidx) for binidx in range(len(naturalhist))]
 
         # Compute the probabilities distribution
         probhist = [t / n if n > 0 else t for n, t in zip(naturalhist, targethist)]
@@ -1085,7 +1085,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         # Generate offspring using the acceptance probabilities
         # previously computed
         offspring = _genpop(len(population), pickfrom=naturalpop,
-                                acceptfunc=acceptfunc, producesizes=False)
+                            acceptfunc=acceptfunc, producesizes=False)
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]

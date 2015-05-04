@@ -168,11 +168,11 @@ class Fitness(object):
     def __init__(self, values=()):
         if self.weights is None:
             raise TypeError("Can't instantiate abstract %r with abstract "
-                "attribute weights." % (self.__class__))
+                            "attribute weights." % (self.__class__))
 
         if not isinstance(self.weights, Sequence):
             raise TypeError("Attribute weights of %r must be a sequence."
-                % self.__class__)
+                            % self.__class__)
 
         if len(values) > 0:
             self.values = values
@@ -186,19 +186,19 @@ class Fitness(object):
         except TypeError:
             _, _, traceback = sys.exc_info()
             raise TypeError, ("Both weights and assigned values must be a "
-            "sequence of numbers when assigning to values of "
-            "%r. Currently assigning value(s) %r of %r to a fitness with "
-            "weights %s."
-            % (self.__class__, values, type(values), self.weights)), traceback
+                              "sequence of numbers when assigning to values of "
+                              "%r. Currently assigning value(s) %r of %r to a fitness with "
+                              "weights %s."
+                              % (self.__class__, values, type(values), self.weights)), traceback
 
     def delValues(self):
         self.wvalues = ()
 
     values = property(getValues, setValues, delValues,
-        ("Fitness values. Use directly ``individual.fitness.values = values`` "
-         "in order to set the fitness and ``del individual.fitness.values`` "
-         "in order to clear (invalidate) the fitness. The (unweighted) fitness "
-         "can be directly accessed via ``individual.fitness.values``."))
+                      ("Fitness values. Use directly ``individual.fitness.values = values`` "
+                       "in order to set the fitness and ``del individual.fitness.values`` "
+                       "in order to clear (invalidate) the fitness. The (unweighted) fitness "
+                       "can be directly accessed via ``individual.fitness.values``."))
 
     def dominates(self, other, obj=slice(None)):
         """Return true if each objective of *self* is not strictly worse than
@@ -261,4 +261,4 @@ class Fitness(object):
     def __repr__(self):
         """Return the Python code to build a copy of the object."""
         return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
-            self.values if self.valid else tuple())
+                              self.values if self.valid else tuple())

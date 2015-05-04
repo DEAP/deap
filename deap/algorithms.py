@@ -224,7 +224,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     1 - *cxpb* - *mutpb*.
     """
     assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
-        "probabilities must be smaller or equal to 1.0.")
+                                   "probabilities must be smaller or equal to 1.0.")
 
     offspring = []
     for _ in xrange(lambda_):
