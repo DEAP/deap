@@ -17,7 +17,7 @@
 in order to execute very common evolutionary algorithms. The method used here
 are more for convenience than reference as the implementation of every 
 evolutionary algorithm may vary infinitely. Most of the algorithms in this 
-module use operators registered in the toolbox. Generaly, the keyword used are
+module use operators registered in the toolbox. Generally, the keyword used are
 :meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~deap.select`
 for selection and :meth:`evaluate` for evaluation.
 

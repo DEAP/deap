@@ -71,7 +71,7 @@ class Toolbox(object):
         The registered function will be given the attributes :attr:`__name__`
         set to the alias and :attr:`__doc__` set to the original function's
         documentation. The :attr:`__dict__` attribute will also be updated
-        with the original function's instance dictionnary, if any.
+        with the original function's instance dictionary, if any.
         """
         pfunc = partial(function, *args, **kargs)
         pfunc.__name__ = alias

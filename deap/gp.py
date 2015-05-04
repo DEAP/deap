@@ -41,7 +41,7 @@ import tools        # Needed by HARM-GP
 __type__ = object
 
 class PrimitiveTree(list):
-    """Tree specifically formated for optimization of genetic
+    """Tree specifically formatted for optimization of genetic
     programming operations. The tree is represented with a
     list where the nodes are appended in a depth-first order.
     The nodes appended to the tree are required to
