@@ -58,10 +58,11 @@ evaluation function. This is how it is done in DEAP.
 .. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 19-25
 
-The registered functions are renamed by the toolbox to allow generality so
-that the algorithm does not depend on operator names. Note also that fitness
-values must be iterable, that is why we return a tuple in the evaluate function.
-More on this in the :doc:`tutorials/basic/part2` tutorial and :doc:`examples/index`.
+The registered functions are renamed by the toolbox, allowing generic
+algorithms that do not depend on operator names. Note also that
+fitness values must be iterable, that is why we return a tuple in the
+evaluate function.  More on this in the :doc:`tutorials/basic/part2`
+tutorial and :doc:`examples/index`.
 
 Algorithms
 ----------
