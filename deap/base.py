@@ -117,6 +117,21 @@ class Toolbox(object):
         self.register(alias, function, *args, **kargs)
 
 
+class MetaFitness(type):
+    """Metaclass to verify Fitness derived classes creation and
+    optimized their methods in function of the creation arguments.
+    """
+    def __init__(cls, name, bases, dct):
+        if not "weights" in dct:
+            raise TypeError("Cannot create %r without "
+                            "attribute weights." % cls)
+
+        if not isinstance(dct['weights'], Sequence):
+            raise TypeError("Attribute weights of %r "
+                            "must be a sequence." % cls)
+
+        super(MetaFitness, cls).__init__(name, bases, dct)
+
 class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
     provided as a tuple, the fitness is initalized using those values,
@@ -140,7 +155,7 @@ class Fitness(object):
        return :data:`True` if *a* is **smaller** than *b*.
     """
     
-    weights = None
+    weights = (1.0,)
     """The weights are used in the fitness comparison. They are shared among
     all fitnesses of the same type. When subclassing :class:`Fitness`, the
     weights must be defined as a tuple where each element is associated to an
@@ -151,8 +166,7 @@ class Fitness(object):
         If weights is not defined during subclassing, the following error will 
         occur at instantiation of a subclass fitness object: 
         
-        ``TypeError: Can't instantiate abstract <class Fitness[...]> with
-        abstract attribute weights.``
+        ``TypeError: Cannot create <class [...]> without attribute weights.``
     """
     
     wvalues = ()
@@ -163,16 +177,8 @@ class Fitness(object):
     Generally it is unnecessary to manipulate wvalues as it is an internal
     attribute of the fitness used in the comparison operators.
     """
-    
+    __metaclass__ = MetaFitness
     def __init__(self, values=()):
-        if self.weights is None:
-            raise TypeError("Can't instantiate abstract %r with abstract "
-                "attribute weights." % (self.__class__))
-        
-        if not isinstance(self.weights, Sequence):
-            raise TypeError("Attribute weights of %r must be a sequence." 
-                % self.__class__)
-        
         if len(values) > 0:
             self.values = values
         
