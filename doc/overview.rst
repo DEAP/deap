@@ -14,7 +14,7 @@ Types
 The first thing to do is to think of the appropriate type for your problem.
 Then, instead of looking in the list of available types, DEAP enables you to
 build your own. This is done with
-the :mod:`~neap.creator` module. Creating an appropriate type might seem
+the :mod:`~deap.creator` module. Creating an appropriate type might seem
 overwhelming but the creator makes it very easy. In fact, this is usually done
 in a single line. For example, the following creates a :class:`FitnessMin` class
 for a minimization problem and an :class:`Individual` class that is derived
