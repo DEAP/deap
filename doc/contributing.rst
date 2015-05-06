@@ -48,7 +48,7 @@ then submit a "pull request" (PR):
 
         $ git push -u origin my-feature
 
-Finally, go to the web page of your fork of the deap repo,
+Finally, go to the web page of your fork of the deap repository,
 and click 'Pull request' to send your changes for review.
 
 You can also contact us on the deap users 
