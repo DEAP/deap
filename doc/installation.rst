@@ -31,7 +31,7 @@ version. ::
 
 or ::
 
-   pip deap
+   pip install deap
 
 If you wish to build from sources, download_ or clone_ the repository and type::
 
