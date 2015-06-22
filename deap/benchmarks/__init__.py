@@ -576,6 +576,56 @@ def dtlz4(individual, obj, alpha):
     f.extend((1.0+g) * reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]**alpha*pi) for m in range(obj-2, -1, -1))
     return f
 
+def dtlz5(ind, n_objs):
+    """DTLZ5 mutliobjective function. It returns a tuple of *obj* values. The
+    individual must have at least *obj* elements.
+    From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
+    Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
+    """
+    g = lambda x: sum([(a - 0.5)**2 for a in x])
+    gval = g(ind[n_objs-1:])
+    
+    theta = lambda x: math.pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
+    fit = [(1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
+           reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:]])]
+           
+    for m in reversed(range(1, n_objs)):
+        if m == 1:
+            fit.append((1 + gval) * math.sin(math.pi / 2.0 * ind[0]))
+        else:
+            fit.append((1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
+                       reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:m-1]], 1) * math.sin(theta(ind[m-1])))
+    return fit
+
+def dtlz6(ind, n_objs):
+    """DTLZ6 mutliobjective function. It returns a tuple of *obj* values. The
+    individual must have at least *obj* elements.
+    From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
+    Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
+    """
+    gval = sum([a**0.1 for a in ind[n_objs-1:]])
+    theta = lambda x: math.pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
+    fit = [(1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
+           reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:]])]
+    for m in reversed(range(1, n_objs)):
+        if m == 1:
+            fit.append((1 + gval) * math.sin(math.pi / 2.0 * ind[0]))
+        else:
+            fit.append((1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
+                       reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:m-1]], 1) * math.sin(theta(ind[m-1])))
+    return fit
+
+def dtlz7(ind, n_objs):
+    """DTLZ7 mutliobjective function. It returns a tuple of *obj* values. The
+    individual must have at least *obj* elements.
+    From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
+    Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
+    """
+    gval = 1 + 9.0 / len(ind[n_objs-1:]) * sum([a for a in ind[n_objs-1:]])
+    fit = [ind for ind in ind[:n_objs-1]]
+    fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + math.sin(3 * math.pi * a)) for a in ind[:n_objs-1]])))
+    return fit
+
 def fonseca(individual):
     """Fonseca and Fleming's multiobjective function.
     From: C. M. Fonseca and P. J. Fleming, "Multiobjective optimization and
@@ -615,4 +665,23 @@ def poloni(individual):
     B_1 = 0.5 * sin(x_1) - 2 * cos(x_1) + sin(x_2) - 1.5 * cos(x_2)
     B_2 = 1.5 * sin(x_1) - cos(x_1) + 2 * sin(x_2) - 0.5 * cos(x_2)
     return 1 + (A_1 - B_1)**2 + (A_2 - B_2)**2, (x_1 + 3)**2 + (x_2 + 1)**2
+
+def dent(individual, lambda_ = 0.85):
+    """Test problem Dent. Two-objective problem with a "dent". *individual* has
+    two attributes that take values in [-1.5, 1.5].
+    From: Schuetze, O., Laumanns, M., Tantar, E., Coello, C. a C., & Talbi, E.-G. (2010).
+    Computing gap free Pareto front approximations with stochastic search algorithms.
+    Evolutionary Computation, 18(1), 65–96. doi:10.1162/evco.2010.18.1.18103
+    
+    Note that in the previous paper Dent source is stated as:
+    K. Witting and M. Hessel von Molo. Private communication, 2006.
+    """
+    d  = lambda_ * math.exp(-(individual[0] - individual[1]) ** 2)
+    f1 = 0.5 * (math.sqrt(1 + (individual[0] + individual[1]) ** 2) + \
+                math.sqrt(1 + (individual[0] - individual[1]) ** 2) + \
+                individual[0] - individual[1]) + d
+                f2 = 0.5 * (math.sqrt(1 + (individual[0] + individual[1]) ** 2) + \
+                            math.sqrt(1 + (individual[0] - individual[1]) ** 2) - \
+                            individual[0] + individual[1]) + d
+                return f1, f2
 
