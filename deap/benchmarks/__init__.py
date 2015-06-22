@@ -585,16 +585,15 @@ def dtlz5(ind, n_objs):
     g = lambda x: sum([(a - 0.5)**2 for a in x])
     gval = g(ind[n_objs-1:])
     
-    theta = lambda x: math.pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
-    fit = [(1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
-           reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:]])]
+    theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
+    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
            
     for m in reversed(range(1, n_objs)):
         if m == 1:
-            fit.append((1 + gval) * math.sin(math.pi / 2.0 * ind[0]))
+            fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
-            fit.append((1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
-                       reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:m-1]], 1) * math.sin(theta(ind[m-1])))
+            fit.append((1 + gval) * cos(pi / 2.0 * ind[0]) *
+                       reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
     return fit
 
 def dtlz6(ind, n_objs):
@@ -604,15 +603,17 @@ def dtlz6(ind, n_objs):
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
     """
     gval = sum([a**0.1 for a in ind[n_objs-1:]])
-    theta = lambda x: math.pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
-    fit = [(1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
-           reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:]])]
+    theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
+    
+    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) *
+           reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+
     for m in reversed(range(1, n_objs)):
         if m == 1:
-            fit.append((1 + gval) * math.sin(math.pi / 2.0 * ind[0]))
+            fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
-            fit.append((1 + gval) * math.cos(math.pi / 2.0 * ind[0]) *
-                       reduce(lambda x,y: x*y, [math.cos(theta(a)) for a in ind[1:m-1]], 1) * math.sin(theta(ind[m-1])))
+            fit.append((1 + gval) * cos(pi / 2.0 * ind[0]) *
+                       reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
     return fit
 
 def dtlz7(ind, n_objs):
@@ -623,7 +624,7 @@ def dtlz7(ind, n_objs):
     """
     gval = 1 + 9.0 / len(ind[n_objs-1:]) * sum([a for a in ind[n_objs-1:]])
     fit = [ind for ind in ind[:n_objs-1]]
-    fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + math.sin(3 * math.pi * a)) for a in ind[:n_objs-1]])))
+    fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + sin(3 * pi * a)) for a in ind[:n_objs-1]])))
     return fit
 
 def fonseca(individual):
@@ -676,12 +677,12 @@ def dent(individual, lambda_ = 0.85):
     Note that in the previous paper Dent source is stated as:
     K. Witting and M. Hessel von Molo. Private communication, 2006.
     """
-    d  = lambda_ * math.exp(-(individual[0] - individual[1]) ** 2)
-    f1 = 0.5 * (math.sqrt(1 + (individual[0] + individual[1]) ** 2) + \
-                math.sqrt(1 + (individual[0] - individual[1]) ** 2) + \
+    d  = lambda_ * exp(-(individual[0] - individual[1]) ** 2)
+    f1 = 0.5 * (sqrt(1 + (individual[0] + individual[1]) ** 2) + \
+                sqrt(1 + (individual[0] - individual[1]) ** 2) + \
                 individual[0] - individual[1]) + d
-                f2 = 0.5 * (math.sqrt(1 + (individual[0] + individual[1]) ** 2) + \
-                            math.sqrt(1 + (individual[0] - individual[1]) ** 2) - \
-                            individual[0] + individual[1]) + d
-                return f1, f2
+    f2 = 0.5 * (sqrt(1 + (individual[0] + individual[1]) ** 2) + \
+                sqrt(1 + (individual[0] - individual[1]) ** 2) - \
+                individual[0] + individual[1]) + d
+    return f1, f2
 
