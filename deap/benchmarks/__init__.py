@@ -465,7 +465,7 @@ def zdt6(individual):
     return f1, f2
 
 def dtlz1(individual, obj):
-    """DTLZ1 mutliobjective function. It returns a tuple of *obj* values. 
+    """DTLZ1 multiobjective function. It returns a tuple of *obj* values. 
     The individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
@@ -493,7 +493,7 @@ def dtlz1(individual, obj):
     return f
 
 def dtlz2(individual, obj):
-    """DTLZ2 mutliobjective function. It returns a tuple of *obj* values. 
+    """DTLZ2 multiobjective function. It returns a tuple of *obj* values. 
     The individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
@@ -521,7 +521,7 @@ def dtlz2(individual, obj):
     return f
 
 def dtlz3(individual, obj):
-    """DTLZ3 mutliobjective function. It returns a tuple of *obj* values. 
+    """DTLZ3 multiobjective function. It returns a tuple of *obj* values. 
     The individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective 
     Optimization Test Problems. CEC 2002, p. 825 - 830, IEEE Press, 2002.
@@ -548,7 +548,7 @@ def dtlz3(individual, obj):
     return f
 
 def dtlz4(individual, obj, alpha):
-    """DTLZ4 mutliobjective function. It returns a tuple of *obj* values. The
+    """DTLZ4 multiobjective function. It returns a tuple of *obj* values. The
     individual must have at least *obj* elements. The *alpha* parameter allows
     for a meta-variable mapping in :func:`dtlz2` :math:`x_i \\rightarrow
     x_i^\\alpha`, the authors suggest :math:`\\alpha = 100`.
@@ -577,7 +577,7 @@ def dtlz4(individual, obj, alpha):
     return f
 
 def dtlz5(ind, n_objs):
-    """DTLZ5 mutliobjective function. It returns a tuple of *obj* values. The
+    """DTLZ5 multiobjective function. It returns a tuple of *obj* values. The
     individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
@@ -597,7 +597,7 @@ def dtlz5(ind, n_objs):
     return fit
 
 def dtlz6(ind, n_objs):
-    """DTLZ6 mutliobjective function. It returns a tuple of *obj* values. The
+    """DTLZ6 multiobjective function. It returns a tuple of *obj* values. The
     individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
@@ -617,7 +617,7 @@ def dtlz6(ind, n_objs):
     return fit
 
 def dtlz7(ind, n_objs):
-    """DTLZ7 mutliobjective function. It returns a tuple of *obj* values. The
+    """DTLZ7 multiobjective function. It returns a tuple of *obj* values. The
     individual must have at least *obj* elements.
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
@@ -674,10 +674,10 @@ def dent(individual, lambda_ = 0.85):
     Computing gap free Pareto front approximations with stochastic search algorithms.
     Evolutionary Computation, 18(1), 65–96. doi:10.1162/evco.2010.18.1.18103
     
-    Note that in the previous paper Dent source is stated as:
+    Note that in that paper Dent source is stated as:
     K. Witting and M. Hessel von Molo. Private communication, 2006.
     """
-    d  = lambda_ * exp(-(individual[0] - individual[1]) ** 2)
+    d = lambda_ * exp(-(individual[0] - individual[1]) ** 2)
     f1 = 0.5 * (sqrt(1 + (individual[0] + individual[1]) ** 2) + \
                 sqrt(1 + (individual[0] - individual[1]) ** 2) + \
                 individual[0] - individual[1]) + d
