@@ -82,7 +82,7 @@ functions. The generator :meth:`toolbox.attr_bool` when called, will draw a
 random integer between 0 and 1. The two initializers for their part will
 produce respectively initialized individuals and populations.
 
-Again, looking a little closer shows that their is no magic. The registration
+Again, looking a little closer shows that there is no magic. The registration
 of tools in the toolbox only associates an *alias* to an already existing
 function and freezes part of its arguments. This allows to call the alias as
 if the majority of the (or every) arguments have already been given. For
