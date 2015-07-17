@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 import sys
-from distutils.core import setup, Extension
+
+warnings = list()
+
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
+    from disutils.core import setup, Extension
+
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
@@ -13,7 +21,7 @@ from distutils.errors import CCompilerError, DistutilsExecError, \
 try:
     from pypandoc import convert
 except ImportError:
-    print("warning: pypandoc module not found, could not convert Markdown to RST")
+    warnings.append("warning: pypandoc module not found, could not convert Markdown to RST")
     read_md = lambda f: open(f, 'r').read()
 else:
     read_md = lambda f: convert(f, 'rst')
@@ -97,3 +105,5 @@ except BuildFailed:
           "speedups won't be available.")
     print("Plain-Python installation succeeded.")
     print("*" * 75)
+
+print("\n".join(warnings))
