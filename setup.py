@@ -22,7 +22,8 @@ try:
     from pypandoc import convert
 except ImportError:
     warnings.append("warning: pypandoc module not found, could not convert Markdown to RST")
-    read_md = lambda f: open(f, 'r').read()
+    import codecs
+    read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
 else:
     read_md = lambda f: convert(f, 'rst')
 
