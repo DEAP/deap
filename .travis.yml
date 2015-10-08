@@ -1,3 +1,4 @@
+sudo: false
 language: python
 matrix:
   include:
@@ -6,7 +7,13 @@ matrix:
     - python: "3.4"
       env: NUMPY=numpy
     - python: "pypy"
-      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
+      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git@pypy-2.6.0#egg=numpy"
+addons:
+  apt:
+    packages:
+      - gfortran
+      - libblas-dev
+      - liblapack-dev
 # command to install dependencies and translate deap in py3k
 install:
   - python setup.py install
