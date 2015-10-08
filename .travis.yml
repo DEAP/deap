@@ -7,7 +7,7 @@ matrix:
     - python: "3.4"
       env: NUMPY=numpy
     - python: "pypy"
-      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git@0208abed#egg=numpy"
+      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git@pypy-2.6.0#egg=numpy"
 addons:
   apt:
     packages:
