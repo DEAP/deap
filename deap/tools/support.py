@@ -18,6 +18,7 @@ def identity(obj):
     """
     return obj
 
+
 class History(object):
     """The :class:`History` class helps to build a genealogy of all the
     individuals produced in the evolution. It contains two attributes,
@@ -67,11 +68,12 @@ class History(object):
        number of generation is large.
         
     """
+
     def __init__(self):
         self.genealogy_index = 0
         self.genealogy_history = dict()
         self.genealogy_tree = dict()
-        
+
     def update(self, individuals):
         """Update the history with the new *individuals*. The index present in
         their :attr:`history_index` attribute will be used to locate their
@@ -95,13 +97,13 @@ class History(object):
             parent_indices = tuple(ind.history_index for ind in individuals)
         except AttributeError:
             parent_indices = tuple()
-        
+
         for ind in individuals:
             self.genealogy_index += 1
             ind.history_index = self.genealogy_index
             self.genealogy_history[self.genealogy_index] = deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = parent_indices
-    
+
     @property
     def decorator(self):
         """Property that returns an appropriate decorator to enhance the
@@ -112,12 +114,15 @@ class History(object):
         individuals with their history parameters modified according to the
         update function.
         """
+
         def decFunc(func):
             def wrapFunc(*args, **kargs):
                 individuals = func(*args, **kargs)
                 self.update(individuals)
                 return individuals
+
             return wrapFunc
+
         return decFunc
 
     def getGenealogy(self, individual, max_depth=float("inf")):
@@ -135,10 +140,11 @@ class History(object):
                   values are a tuple corresponding to the index of the parents.
         """
         gtree = {}
-        visited = set()     # Adds memory to the breadth first search
+        visited = set()  # Adds memory to the breadth first search
+
         def genealogy(index, depth):
             if index not in self.genealogy_tree:
-                return             
+                return
             depth += 1
             if depth > max_depth:
                 return
@@ -148,8 +154,10 @@ class History(object):
                 if ind not in visited:
                     genealogy(ind, depth)
                 visited.add(ind)
+
         genealogy(individual.history_index, 0)
         return gtree
+
 
 class Statistics(object):
     """Object that compiles statistics on a list of arbitrary objects. 
@@ -175,6 +183,7 @@ class Statistics(object):
         >>> s.compile([5, 6, 7, 8])
         {'max': 8, 'mean': 6.5}
     """
+
     def __init__(self, key=identity):
         self.key = key
         self.functions = dict()
@@ -191,7 +200,7 @@ class Statistics(object):
         :param argument: One or more argument (and keyword argument) to pass
                          automatically to the registered function when called,
                          optional.
-        """        
+        """
         self.functions[name] = partial(function, *args, **kargs)
         self.fields.append(name)
 
@@ -202,11 +211,12 @@ class Statistics(object):
         :param data: Sequence of objects on which the statistics are computed.
         """
         values = tuple(self.key(elem) for elem in data)
-        
+
         entry = dict()
         for key, func in self.functions.iteritems():
             entry[key] = func(values)
         return entry
+
 
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
@@ -225,7 +235,8 @@ class MultiStatistics(dict):
         >>> mstats.register("max", numpy.max, axis=0)
         >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
         {'length': {'max': 4, 'mean': 3.0}, 'item': {'max': 2.0, 'mean': 1.0}}
-    """ 
+    """
+
     def compile(self, data):
         """Calls :meth:`Statistics.compile` with *data* of each
         :class:`Statistics` object.
@@ -255,6 +266,7 @@ class MultiStatistics(dict):
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
 
+
 class Logbook(list):
     """Evolution records as a chronological list of dictionaries.
 
@@ -268,7 +280,7 @@ class Logbook(list):
     chapters can be used to distinguish the average fitness and the average
     size.
     """
-    
+
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
@@ -322,7 +334,7 @@ class Logbook(list):
         on insertion of the first data. The header can be removed by setting
         it to :data:`None`.
         """
-        
+
         self.log_header = True
         """Tells the log book to output or not the header when streaming the
         first line or getting its entire string representation. This defaults
@@ -402,7 +414,7 @@ class Logbook(list):
             self.pop(key)
             for chapter in self.chapters.values():
                 chapter.pop(key)
-        
+
     def pop(self, index=0):
         """Retrieve and delete element *index*. The header and stream will be
         adjusted to follow the modification.
@@ -439,7 +451,7 @@ class Logbook(list):
             str_line = []
             for j, name in enumerate(columns):
                 if name in chapters_txt:
-                    column = chapters_txt[name][i+offsets[name]]
+                    column = chapters_txt[name][i + offsets[name]]
                 else:
                     value = line.get(name, "")
                     string = "{0:n}" if isinstance(value, float) else "{0}"
@@ -461,9 +473,9 @@ class Logbook(list):
                     for i in xrange(blanks):
                         header[i].append(" " * length)
                     header[blanks].append(name.center(length))
-                    header[blanks+1].append("-" * length)
+                    header[blanks + 1].append("-" * length)
                     for i in xrange(offsets[name]):
-                        header[blanks+2+i].append(chapters_txt[name][i])
+                        header[blanks + 2 + i].append(chapters_txt[name][i])
                 else:
                     length = max(len(line[j].expandtabs()) for line in str_matrix)
                     for line in header[:-1]:
@@ -502,12 +514,13 @@ class HallOfFame(object):
     (without being one completely). It is possible to retrieve its length, to
     iterate on it forward and backward and to get an item or a slice from it.
     """
+
     def __init__(self, maxsize, similar=eq):
         self.maxsize = maxsize
         self.keys = list()
         self.items = list()
         self.similar = similar
-    
+
     def update(self, population):
         """Update the hall of fame with the *population* by replacing the
         worst individuals in it by the best individuals present in
@@ -517,11 +530,11 @@ class HallOfFame(object):
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
         """
-        if len(self) == 0 and self.maxsize !=0:
+        if len(self) == 0 and self.maxsize != 0:
             # Working on an empty hall of fame is problematic for the
             # "for else"
             self.insert(population[0])
-        
+
         for ind in population:
             if ind.fitness > self[-1].fitness or len(self) < self.maxsize:
                 for hofer in self:
@@ -535,7 +548,7 @@ class HallOfFame(object):
                     if len(self) >= self.maxsize:
                         self.remove(-1)
                     self.insert(ind)
-    
+
     def insert(self, item):
         """Insert a new individual in the hall of fame using the
         :func:`~bisect.bisect_right` function. The inserted individual is
@@ -552,7 +565,7 @@ class HallOfFame(object):
         i = bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
         self.keys.insert(i, item.fitness)
-    
+
     def remove(self, index):
         """Remove the specified *index* from the hall of fame.
         
@@ -560,7 +573,7 @@ class HallOfFame(object):
         """
         del self.keys[len(self) - (index % len(self) + 1)]
         del self.items[index]
-    
+
     def clear(self):
         """Clear the hall of fame."""
         del self.items[:]
@@ -577,7 +590,7 @@ class HallOfFame(object):
 
     def __reversed__(self):
         return reversed(self.items)
-    
+
     def __str__(self):
         return str(self.items)
 
@@ -600,9 +613,10 @@ class ParetoFront(HallOfFame):
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
     it is sorted lexicographically at every moment.
     """
+
     def __init__(self, similar=eq):
         HallOfFame.__init__(self, None, similar)
-    
+
     def update(self, population):
         """Update the Pareto front hall of fame with the *population* by adding 
         the individuals from the population that are not dominated by the hall
@@ -616,7 +630,7 @@ class ParetoFront(HallOfFame):
             is_dominated = False
             has_twin = False
             to_remove = []
-            for i, hofer in enumerate(self):    # hofer = hall of famer
+            for i, hofer in enumerate(self):  # hofer = hall of famer
                 if hofer.fitness.dominates(ind.fitness):
                     is_dominated = True
                     break
@@ -625,11 +639,12 @@ class ParetoFront(HallOfFame):
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
                     break
-            
-            for i in reversed(to_remove):       # Remove the dominated hofer
+
+            for i in reversed(to_remove):  # Remove the dominated hofer
                 self.remove(i)
             if not is_dominated and not has_twin:
                 self.insert(ind)
+
 
 __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
@@ -638,6 +653,7 @@ if __name__ == "__main__":
     from operator import itemgetter
 
     import numpy
+
     doctest.run_docstring_examples(Statistics, globals())
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.compile, globals())

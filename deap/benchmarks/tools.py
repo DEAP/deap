@@ -3,6 +3,7 @@
 from math import hypot, sqrt
 from functools import wraps
 from itertools import repeat
+
 try:
     import numpy
 except ImportError:
@@ -15,6 +16,7 @@ except ImportError:
     # fallback on python version
     from ..tools._hypervolume import pyhv as hv
 
+
 class translate(object):
     """Decorator for evaluation functions, it translates the objective
     function by *vector* which should be the same length as the individual
@@ -26,20 +28,22 @@ class translate(object):
     
     This decorator adds a :func:`translate` method to the decorated function.
     """
+
     def __init__(self, vector):
         self.vector = vector
-    
+
     def __call__(self, func):
         # wraps is used to combine stacked decorators that would add functions
         @wraps(func)
         def wrapper(individual, *args, **kargs):
             # A subtraction is applied since the translation is applied to the
             # individual and not the function
-            return func([v - t for v, t in zip(individual, self.vector)], 
-                *args, **kargs)
+            return func([v - t for v, t in zip(individual, self.vector)],
+                        *args, **kargs)
+
         wrapper.translate = self.translate
         return wrapper
-    
+
     def translate(self, vector):
         """Set the current translation to *vector*. After decorating the
         evaluation function, this function will be available directly from
@@ -53,6 +57,7 @@ class translate(object):
             evaluate.translate([0.0, 0.0, ..., 0.0])
         """
         self.vector = vector
+
 
 class rotate(object):
     """Decorator for evaluation functions, it rotates the objective function
@@ -73,10 +78,11 @@ class rotate(object):
            A = numpy.random.random((n,n))
            Q, _ = numpy.linalg.qr(A)
     """
+
     def __init__(self, matrix):
         if not numpy:
             raise RuntimeError("Numpy is required for using the rotation "
-                "decorator")
+                               "decorator")
         # The inverse is taken since the rotation is applied to the individual
         # and not the function which is the inverse
         self.matrix = numpy.linalg.inv(matrix)
@@ -86,6 +92,7 @@ class rotate(object):
         @wraps(func)
         def wrapper(individual, *args, **kargs):
             return func(numpy.dot(self.matrix, individual), *args, **kargs)
+
         wrapper.rotate = self.rotate
         return wrapper
 
@@ -107,6 +114,7 @@ class rotate(object):
         """
         self.matrix = numpy.linalg.inv(matrix)
 
+
 class noise(object):
     """Decorator for evaluation functions, it evaluates the objective function
     and adds noise by calling the function(s) provided in the *noise*
@@ -121,6 +129,7 @@ class noise(object):
     This decorator adds a :func:`noise` method to the decorated
     function.
     """
+
     def __init__(self, noise):
         try:
             self.rand_funcs = tuple(noise)
@@ -139,9 +148,10 @@ class noise(object):
                 else:
                     noisy.append(r + f())
             return tuple(noisy)
+
         wrapper.noise = self.noise
         return wrapper
-    
+
     def noise(self, noise):
         """Set the current noise to *noise*. After decorating the
         evaluation function, this function will be available directly from
@@ -160,7 +170,8 @@ class noise(object):
             self.rand_funcs = tuple(noise)
         except TypeError:
             self.rand_funcs = repeat(noise)
-            
+
+
 class scale(object):
     """Decorator for evaluation functions, it scales the objective function by
     *factor* which should be the same length as the individual size. When
@@ -172,17 +183,19 @@ class scale(object):
     
     This decorator adds a :func:`scale` method to the decorated function.
     """
+
     def __init__(self, factor):
         # Factor is inverted since it is aplied to the individual and not the
         # objective function
-        self.factor = tuple(1.0/f for f in factor)
+        self.factor = tuple(1.0 / f for f in factor)
 
     def __call__(self, func):
         # wraps is used to combine stacked decorators that would add functions
         @wraps(func)
         def wrapper(individual, *args, **kargs):
-            return func([v * f for v, f in zip(individual, self.factor)], 
-                *args, **kargs)
+            return func([v * f for v, f in zip(individual, self.factor)],
+                        *args, **kargs)
+
         wrapper.scale = self.scale
         return wrapper
 
@@ -200,7 +213,8 @@ class scale(object):
         """
         # Factor is inverted since it is aplied to the individual and not the
         # objective function
-        self.factor = tuple(1.0/f for f in factor)
+        self.factor = tuple(1.0 / f for f in factor)
+
 
 class bound(object):
     """Decorator for crossover and mutation functions, it changes the
@@ -216,6 +230,7 @@ class bound(object):
     
     This decorator adds a :func:`bound` method to the decorated function.
     """
+
     def _clip(self, individual):
         return individual
 
@@ -230,6 +245,7 @@ class bound(object):
         def wrapper(*args, **kargs):
             individuals = func(*args, **kargs)
             return self.bound(individuals)
+
         wrapper.bound = self.bound
         return wrapper
 
@@ -245,7 +261,8 @@ class bound(object):
             self.bound = self._wrap
         elif type == "clip":
             self.bound = self._clip
-        
+
+
 def diversity(first_front, first, last):
     """Given a Pareto front `first_front` and the two extreme points of the 
     optimal Pareto front, this function returns a metric of the diversity 
@@ -263,10 +280,11 @@ def diversity(first_front, first, last):
     if len(first_front) == 1:
         return df + dl
 
-    dm = sum(dt)/len(dt)
+    dm = sum(dt) / len(dt)
     di = sum(abs(d_i - dm) for d_i in dt)
-    delta = (df + dl + di)/(df + dl + len(dt) * dm )
+    delta = (df + dl + di) / (df + dl + len(dt) * dm)
     return delta
+
 
 def convergence(first_front, optimal_front):
     """Given a Pareto front `first_front` and the optimal Pareto front, 
@@ -275,17 +293,17 @@ def convergence(first_front, optimal_front):
     The smaller the value is, the closer the front is to the optimal one.
     """
     distances = []
-    
+
     for ind in first_front:
         distances.append(float("inf"))
         for opt_ind in optimal_front:
             dist = 0.
             for i in xrange(len(opt_ind)):
-                dist += (ind.fitness.values[i] - opt_ind[i])**2
+                dist += (ind.fitness.values[i] - opt_ind[i]) ** 2
             if dist < distances[-1]:
                 distances[-1] = dist
         distances[-1] = sqrt(distances[-1])
-        
+
     return sum(distances) / len(distances)
 
 
