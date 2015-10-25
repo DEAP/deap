@@ -474,7 +474,7 @@ def compile(expr, pset):
         return eval(code, pset.context, {})
     except MemoryError:
         _, _, traceback = sys.exc_info()
-        raise MemoryError, ("DEAP : Error in tree evaluation :"
+        raise MemoryError "DEAP : Error in tree evaluation :"
                             " Python cannot evaluate a tree higher than 90. "
                             "To avoid this problem, you should use bloat control on your "
                             "operators. See the DEAP documentation for more information. "
@@ -605,9 +605,9 @@ def generate(pset, min_, max_, condition, type_=None):
                 term = random.choice(pset.terminals[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
-                raise IndexError, "The gp.generate function tried to add "\
+                raise IndexError("The gp.generate function tried to add "\
                                   "a terminal of type '%s', but there is "\
-                                  "none available." % (type_,), traceback
+                                  "none available." % (type_,), traceback)
             if isclass(term):
                 term = term()
             expr.append(term)
@@ -616,9 +616,9 @@ def generate(pset, min_, max_, condition, type_=None):
                 prim = random.choice(pset.primitives[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
-                raise IndexError, "The gp.generate function tried to add "\
+                raise IndexError("The gp.generate function tried to add "\
                                   "a primitive of type '%s', but there is "\
-                                  "none available." % (type_,), traceback
+                                  "none available." % (type_,), traceback)
             expr.append(prim)
             for arg in reversed(prim.args):
                 stack.append((depth + 1, arg))
