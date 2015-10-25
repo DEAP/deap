@@ -34,7 +34,6 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
         migarray = range(1, nbr_demes) + [0]
     
     immigrants = [[] for i in xrange(nbr_demes)]
-    emigrants = [[] for i in xrange(nbr_demes)]
 
     for from_deme in xrange(nbr_demes):
         emigrants[from_deme].extend(selection(populations[from_deme], k))
