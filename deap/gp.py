@@ -603,8 +603,10 @@ def generate(pset, min_, max_, condition, type_=None):
         if condition(height, depth):
             try:
                 term = random.choice(pset.terminals[type_])
-                if type_ is int or type_ is bool:
-                    print("Terminal", type_, isinstance(type_, bool))
+                if type_ is int:
+                    print("Terminal int", type_, isinstance(type_, bool))
+                elif type_ is bool:
+                    print("Terminal bool", type_, isinstance(type_, bool))
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError, "The gp.generate function tried to add "\
@@ -616,8 +618,10 @@ def generate(pset, min_, max_, condition, type_=None):
         else:
             try:
                 prim = random.choice(pset.primitives[type_])
-                if type_ is int or type_ is bool:
-                    print("Primative", type_, isinstance(type_, bool))
+                if type_ is int:
+                    print("Primative int", type_, isinstance(type_, bool))
+                elif type_ is bool:
+                    print("Primative bool", type_, isinstance(type_, bool))
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError, "The gp.generate function tried to add "\
