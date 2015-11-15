@@ -296,7 +296,7 @@ class PrimitiveSetTyped(object):
             if not ret_type in dict_:
                 new_list = []
                 for type_, list_ in dict_.items():
-                    if issubclass(type_, ret_type):
+                    if issubclass(type_, ret_type) and type_ is not bool:
                         for item in list_:
                             if not item in new_list:
                                 new_list.append(item)
