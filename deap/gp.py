@@ -315,7 +315,7 @@ class PrimitiveSetTyped(object):
             dict_ = self.terminals
 
         for type_ in dict_:
-            if issubclass(prim.ret, type_):
+            if issubclass(prim.ret, type_) and type_ is not bool:
                 dict_[type_].append(prim)
 
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
