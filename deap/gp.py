@@ -316,7 +316,6 @@ class PrimitiveSetTyped(object):
 
         for type_ in dict_:
             if issubclass(prim.ret, type_):
-                print(prim.ret, type_)
                 dict_[type_].append(prim)
 
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
