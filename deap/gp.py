@@ -296,7 +296,7 @@ class PrimitiveSetTyped(object):
             if not ret_type in dict_:
                 new_list = []
                 for type_, list_ in dict_.items():
-                    if issubclass(type_, ret_type) and type_ is not bool:
+                    if (type_, ret_type) != (bool, int) and issubclass(type_, ret_type):
                         for item in list_:
                             if not item in new_list:
                                 new_list.append(item)
@@ -315,7 +315,7 @@ class PrimitiveSetTyped(object):
             dict_ = self.terminals
 
         for type_ in dict_:
-            if issubclass(prim.ret, type_):
+            if (prim.ret, type_) != (bool, int) and issubclass(prim.ret, type_):
                 dict_[type_].append(prim)
 
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
