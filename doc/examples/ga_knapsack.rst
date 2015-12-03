@@ -4,17 +4,17 @@ Knapsack Problem: Inheriting from Set
 
 Again for this example we will use a very simple problem, the 0-1 Knapsack.
 The purpose of this example is to show the simplicity of DEAP and the ease to
-inherit from anyting else than a simple list or array.
+inherit from anything else than a simple list or array.
 
 Many evolutionary algorithm textbooks mention that the best way to have an
-efficient algorithm to have a representation close the problem. Here, what can
+efficient algorithm is to have a representation close the problem. Here, what can
 be closer to a bag than a set? Lets make our individuals inherit from the
 :class:`set` class.
 
 .. literalinclude:: /../examples/ga/knapsack.py
    :lines: 41-42
 
-That's it. You now have individuals that are in fact sets, they have the usual
+That's it. You now have individuals that are, in fact sets, they have the usual
 attribute :attr:`fitness`. The fitness is a
 minimization of the first objective (the weight of the bag) and a maximization
 of the second objective (the value of the bag). We will now create a
@@ -23,7 +23,7 @@ dictionary of 100 random items to map the values and weights.
 .. literalinclude:: /../examples/ga/knapsack.py
    :lines: 34-39
 
-We now need to initialize a population and the individuals therein. For this
+We now need to initialize a population and the individuals therein. For this,
 we will need a :class:`~deap.base.Toolbox` to register our generators since
 sets can also be created with an input iterable. 
 
@@ -58,7 +58,7 @@ problem, we have selected the SPEA-II selection scheme :
 .. literalinclude:: /../examples/ga/knapsack.py
    :lines: 83-86
 
-From here, everything left to do is either write the algorithm or use 
+From here, all that is left to do is either write the algorithm or use 
 provided in :mod:`~deap.algorithms`. Here we will use the 
 :func:`~deap.algorithms.eaMuPlusLambda` algorithm.
 
