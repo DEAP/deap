@@ -68,7 +68,7 @@ else:
             self.__dict__.update(state)
 
         def __reduce__(self):
-            return (self.__class__, (list(self),), self.__dict__)
+            return self.__class__, (list(self),), self.__dict__
 
     class_replacers[numpy.ndarray] = _numpy_array
 
@@ -89,7 +89,7 @@ class _array(array.array):
         return copy_
 
     def __reduce__(self):
-        return (self.__class__, (list(self),), self.__dict__)
+        return self.__class__, (list(self),), self.__dict__
 class_replacers[array.array] = _array
 
 

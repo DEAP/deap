@@ -37,11 +37,13 @@ def cone(individual, position, height, width):
         value += (x - p)**2
     return height - width * math.sqrt(value)
 
+
 def sphere(individual, position, height, width):
     value = 0.0
     for x, p in zip(individual, position):
         value += (x - p)**2
     return height * value
+
 
 def function1(individual, position, height, width):
     """The function1 peak function to be used with scenario 1.
@@ -53,6 +55,7 @@ def function1(individual, position, height, width):
     for x, p in zip(individual, position):
         value += (x - p)**2
     return height / (1 + width * value)
+
 
 class MovingPeaks:
     """The Moving Peaks Benchmark is a fitness function changing over time. It
@@ -327,8 +330,8 @@ class MovingPeaks:
 
         self._optimum = None
 
-SCENARIO_1 = {"pfunc" : function1,
-              "npeaks" : 5,
+SCENARIO_1 = {"pfunc": function1,
+              "npeaks": 5,
               "bfunc": None,
               "min_coord": 0.0,
               "max_coord": 100.0,

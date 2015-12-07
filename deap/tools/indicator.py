@@ -23,6 +23,7 @@ except ImportError:
     # fallback on python version
     from ._hypervolume import pyhv as hv
 
+
 def hypervolume(front, **kargs):
     """Returns the index of the individual with the least the hypervolume
     contribution. The provided *front* should be a set of non-dominated
@@ -34,17 +35,18 @@ def hypervolume(front, **kargs):
     ref = kargs.get("ref", None)
     if ref is None:
         ref = numpy.max(wobj, axis=0) + 1
-    
+
     def contribution(i):
         # The contribution of point p_i in point set P
         # is the hypervolume of P without p_i
-        return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
+        return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i + 1:])), ref)
 
     # Parallelization note: Cannot pickle local function
     contrib_values = map(contribution, range(len(front)))
 
     # Select the maximum hypervolume value (correspond to the minimum difference)
     return numpy.argmax(contrib_values)
+
 
 def additive_epsilon(front, **kargs):
     """Returns the index of the individual with the least the additive epsilon
@@ -61,7 +63,7 @@ def additive_epsilon(front, **kargs):
         mwobj = numpy.ma.array(wobj)
         mwobj[i] = numpy.ma.masked
         return numpy.min(numpy.max(wobj[i] - mwobj, axis=1))
-        
+
     contrib_values = map(contribution, range(len(front)))
 
     # Select the minimum contribution value
@@ -83,12 +85,11 @@ def multiplicative_epsilon(front, **kargs):
         mwobj = numpy.ma.array(wobj)
         mwobj[i] = numpy.ma.masked
         return numpy.min(numpy.max(wobj[i] / mwobj, axis=1))
-        
+
     contrib_values = map(contribution, range(len(front)))
 
     # Select the minimum contribution value
     return numpy.argmin(contrib_values)
-
 
 
 __all__ = ["hypervolume", "additive_epsilon", "multiplicative_epsilon"]

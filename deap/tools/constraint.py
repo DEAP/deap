@@ -1,7 +1,7 @@
-
 from functools import wraps
 from itertools import repeat
 from collections import Sequence
+
 
 class DeltaPenality(object):
     """This decorator returns penalized fitness for invalid individuals and the
@@ -32,6 +32,7 @@ class DeltaPenality(object):
 
     See the :doc:`/tutorials/advanced/constraints` for an example.
     """
+
     def __init__(self, feasibility, delta, distance=None):
         self.fbty_fct = feasibility
         if not isinstance(delta, Sequence):
@@ -54,6 +55,7 @@ class DeltaPenality(object):
             return tuple(d - w * dist for d, w in zip(self.delta, weights))
 
         return wrapper
+
 
 class ClosestValidPenality(object):
     """This decorator returns penalized fitness for invalid individuals and the
@@ -84,7 +86,7 @@ class ClosestValidPenality(object):
     valid individual to :math:`\mathbf{x}`, :math:`\\alpha` is the distance
     multiplicative factor and :math:`w_i` is the weight of the ith objective.
     """
-    
+
     def __init__(self, feasibility, feasible, alpha, distance=None):
         self.fbty_fct = feasibility
         self.fbl_fct = feasible
@@ -110,11 +112,12 @@ class ClosestValidPenality(object):
             dist = 0
             if self.dist_fct is not None:
                 dist = self.dist_fct(f_ind, individual)
-            
+
             # print("returned", tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights)))
             return tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights))
 
         return wrapper
+
 
 # List of exported function names.
 __all__ = ['DeltaPenality', 'ClosestValidPenality']
@@ -133,9 +136,11 @@ if __name__ == "__main__":
     creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
     creator.create("Individual", list, fitness=creator.FitnessMin)
 
+
     def distance(feasible_ind, original_ind):
         """A distance function to the feasability region."""
-        return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
+        return sum((f - o) ** 2 for f, o in zip(feasible_ind, original_ind))
+
 
     def closest_feasible(individual):
         """A function returning a valid individual from an invalid one."""
@@ -144,17 +149,25 @@ if __name__ == "__main__":
         feasible_ind = numpy.minimum(MAX_BOUND, feasible_ind)
         return feasible_ind
 
+
     def valid(individual):
         """Determines if the individual is valid or not."""
         if any(individual < MIN_BOUND) or any(individual > MAX_BOUND):
             return False
         return True
 
+
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.zdt2)
     toolbox.decorate("evaluate", ClosestValidPenality(valid, closest_feasible, 1.0e-6, distance))
 
-    ind1 = creator.Individual((-5.6468535666e-01,2.2483050478e+00,-1.1087909644e+00,-1.2710112861e-01,1.1682438733e+00,-1.3642007438e+00,-2.1916417835e-01,-5.9137308999e-01,-1.0870160336e+00,6.0515070232e-01,2.1532075914e+00,-2.6164718271e-01,1.5244071578e+00,-1.0324305612e+00,1.2858152343e+00,-1.2584683962e+00,1.2054392372e+00,-1.7429571973e+00,-1.3517256013e-01,-2.6493429355e+00,-1.3051320798e-01,2.2641961090e+00,-2.5027232340e+00,-1.2844874148e+00,1.9955852925e+00,-1.2942218834e+00,3.1340109155e+00,1.6440111097e+00,-1.7750105857e+00,7.7610242710e-01))
+    ind1 = creator.Individual((-5.6468535666e-01, 2.2483050478e+00, -1.1087909644e+00, -1.2710112861e-01,
+                               1.1682438733e+00, -1.3642007438e+00, -2.1916417835e-01, -5.9137308999e-01,
+                               -1.0870160336e+00, 6.0515070232e-01, 2.1532075914e+00, -2.6164718271e-01,
+                               1.5244071578e+00, -1.0324305612e+00, 1.2858152343e+00, -1.2584683962e+00,
+                               1.2054392372e+00, -1.7429571973e+00, -1.3517256013e-01, -2.6493429355e+00,
+                               -1.3051320798e-01, 2.2641961090e+00, -2.5027232340e+00, -1.2844874148e+00,
+                               1.9955852925e+00, -1.2942218834e+00, 3.1340109155e+00, 1.6440111097e+00,
+                               -1.7750105857e+00, 7.7610242710e-01))
     print(toolbox.evaluate(ind1))
     print("Individuals is valid: %s" % ("True" if valid(ind1) else "False"))
-

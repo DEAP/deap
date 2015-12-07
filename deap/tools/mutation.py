@@ -5,6 +5,7 @@ import random
 from itertools import repeat
 from collections import Sequence
 
+
 ######################################
 # GA Mutations                       #
 ######################################
@@ -35,12 +36,13 @@ def mutGaussian(individual, mu, sigma, indpb):
         sigma = repeat(sigma, size)
     elif len(sigma) < size:
         raise IndexError("sigma must be at least the size of individual: %d < %d" % (len(sigma), size))
-    
+
     for i, m, s in zip(xrange(size), mu, sigma):
         if random.random() < indpb:
             individual[i] += random.gauss(m, s)
-    
+
     return individual,
+
 
 def mutPolynomialBounded(individual, eta, low, up, indpb):
     """Polynomial mutation as implemented in original NSGA-II algorithm in
@@ -65,7 +67,7 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
         up = repeat(up, size)
     elif len(up) < size:
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
-    
+
     for i, xl, xu in zip(xrange(size), low, up):
         if random.random() <= indpb:
             x = individual[i]
@@ -76,17 +78,18 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
 
             if rand < 0.5:
                 xy = 1.0 - delta_1
-                val = 2.0 * rand + (1.0 - 2.0 * rand) * xy**(eta + 1)
-                delta_q = val**mut_pow - 1.0
+                val = 2.0 * rand + (1.0 - 2.0 * rand) * xy ** (eta + 1)
+                delta_q = val ** mut_pow - 1.0
             else:
                 xy = 1.0 - delta_2
-                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy**(eta + 1)
-                delta_q = 1.0 - val**mut_pow
+                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy ** (eta + 1)
+                delta_q = 1.0 - val ** mut_pow
 
             x = x + delta_q * (xu - xl)
             x = min(max(x, xl), xu)
             individual[i] = x
     return individual,
+
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -110,8 +113,9 @@ def mutShuffleIndexes(individual, indpb):
                 swap_indx += 1
             individual[i], individual[swap_indx] = \
                 individual[swap_indx], individual[i]
-    
+
     return individual,
+
 
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
@@ -130,8 +134,9 @@ def mutFlipBit(individual, indpb):
     for i in xrange(len(individual)):
         if random.random() < indpb:
             individual[i] = type(individual[i])(not individual[i])
-    
+
     return individual,
+
 
 def mutUniformInt(individual, low, up, indpb):
     """Mutate an individual by replacing attributes, with probability *indpb*,
@@ -156,11 +161,11 @@ def mutUniformInt(individual, low, up, indpb):
         up = repeat(up, size)
     elif len(up) < size:
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
-    
+
     for i, xl, xu in zip(xrange(size), low, up):
         if random.random() < indpb:
             individual[i] = random.randint(xl, xu)
-    
+
     return individual,
 
 
@@ -197,13 +202,14 @@ def mutESLogNormal(individual, c, indpb):
     t0 = c / math.sqrt(2. * size)
     n = random.gauss(0, 1)
     t0_n = t0 * n
-    
+
     for indx in xrange(size):
         if random.random() < indpb:
             individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
             individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
-    
+
     return individual,
 
-__all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes', 
+
+__all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',
            'mutFlipBit', 'mutUniformInt', 'mutESLogNormal']

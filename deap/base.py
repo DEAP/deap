@@ -168,7 +168,7 @@ class Fitness(object):
     def __init__(self, values=()):
         if self.weights is None:
             raise TypeError("Can't instantiate abstract %r with abstract "
-                            "attribute weights." % (self.__class__))
+                            "attribute weights." % self.__class__)
 
         if not isinstance(self.weights, Sequence):
             raise TypeError("Attribute weights of %r must be a sequence."

@@ -4,6 +4,7 @@ import random
 from functools import partial
 from operator import attrgetter
 
+
 ######################################
 # Selections                         #
 ######################################
@@ -64,6 +65,7 @@ def selTournament(individuals, k, tournsize):
         chosen.append(max(aspirants, key=attrgetter("fitness")))
     return chosen
 
+
 def selRoulette(individuals, k):
     """Select *k* individuals from the input *individuals* using *k*
     spins of a roulette. The selection is made by looking only at the first
@@ -83,7 +85,7 @@ def selRoulette(individuals, k):
     """
     s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)
     sum_fits = sum(ind.fitness.values[0] for ind in individuals)
-    
+
     chosen = []
     for i in xrange(k):
         u = random.random() * sum_fits
@@ -93,7 +95,7 @@ def selRoulette(individuals, k):
             if sum_ > u:
                 chosen.append(ind)
                 break
-    
+
     return chosen
 
 
@@ -158,20 +160,21 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
             chosen.append(ind1 if random.random() < prob else ind2)
 
         return chosen
-    
+
     def _fitTournament(individuals, k, select):
         chosen = []
         for i in xrange(k):
             aspirants = select(individuals, k=fitness_size)
             chosen.append(max(aspirants, key=attrgetter("fitness")))
         return chosen
-    
+
     if fitness_first:
         tfit = partial(_fitTournament, select=selRandom)
         return _sizeTournament(individuals, k, tfit)
     else:
         tsize = partial(_sizeTournament, select=selRandom)
         return _fitTournament(individuals, k, tsize)
+
 
 __all__ = ['selRandom', 'selBest', 'selWorst', 'selRoulette',
            'selTournament', 'selDoubleTournament']
