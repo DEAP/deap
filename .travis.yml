@@ -9,7 +9,6 @@ matrix:
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 # command to install dependencies and translate deap in py3k
 install:
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 deap; fi
   - |
       if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
         export PYENV_ROOT="$HOME/.pyenv"
@@ -30,4 +29,4 @@ install:
   
 # command to run tests
 script:
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests -v --where=py3k; else nosetests -v; fi
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then python setup.py nosetests -v; else nosetests -v; fi
