@@ -29,4 +29,4 @@ install:
   
 # command to run tests
 script:
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then python setup.py nosetests -v; else nosetests -v; fi
+  - nosetests -v
