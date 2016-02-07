@@ -70,7 +70,8 @@ def run_setup(build_ext):
             'Topic :: Software Development',
             ],
          ext_modules = extra_modules,
-         cmdclass = {'build_py': build_py, "build_ext" : ve_build_ext}
+         cmdclass = {'build_py': build_py, "build_ext" : ve_build_ext},
+         use_2to3=True
     )
 
 try:
