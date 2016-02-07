@@ -9,7 +9,7 @@ matrix:
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 # command to install dependencies and translate deap in py3k
 install:
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 --output-dir=py3k/deap -W -n deap; fi
+  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 -o py3k/deap -W -n deap; fi
   - |
       if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
         export PYENV_ROOT="$HOME/.pyenv"
