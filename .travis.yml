@@ -23,6 +23,7 @@ install:
         virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
         NUMPY=$NUMPY"@pypy-4.0.1"
+        pip install nose
       fi
   - python setup.py install
   - pip install $NUMPY
