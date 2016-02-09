@@ -204,7 +204,7 @@ class Strategy(object):
 
 class StrategyOnePlusLambda(object):
     """
-    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigme.
+    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm.
 
     :param parent: An iterable object that indicates where to start the
                    evolution. The parent requires a fitness attribute.
