@@ -50,7 +50,7 @@ are found in the :doc:`tutorials/basic/part1` tutorial and the various
 
 Operators
 ---------
-Operators are just like initializers, excepted that some are already
+Operators are just like initializers, except that some are already
 implemented in the :mod:`~deap.tools` module. Once you've chosen the perfect
 ones, simply register them in the toolbox. In addition you must create your
 evaluation function. This is how it is done in DEAP.
