@@ -28,18 +28,20 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 
-# Attribute generator: define 'attr_bool' to be an attribute ('gene')
+# Attribute generator 
+#                      define 'attr_bool' to be an attribute ('gene')
 #                      which corresponds to integers sampled uniformly
 #                      from the range [0,1] (i.e. 0 or 1 with equal
 #                      probability)
 toolbox.register("attr_bool", random.randint, 0, 1)
 
-# Structure initializers: define 'individual' to be an individual
+# Structure initializers
+#                         define 'individual' to be an individual
 #                         consisting of 100 'attr_bool' elements ('genes')
 toolbox.register("individual", tools.initRepeat, creator.Individual, 
     toolbox.attr_bool, 100)
 
-# define the population to be a list of 'individual's
+# define the population to be a list of individuals
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # the goal ('fitness') function to be maximized
