@@ -29,7 +29,7 @@ Here is a list of the implemented operators in DEAP,
  ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`            ..             
  ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`    ..             
  ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament` ..             
- ..                           :func:`cxSimulatedBinary`                   ..                                        ..                          ..             
+ ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selStochasticUniversalSampling` ..             
  ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                          ..             
  ..                           :func:`cxMessyOnePoint`                     ..                                        ..                          ..             
 ============================ =========================================== ========================================= ============================ ================
@@ -142,6 +142,8 @@ Selection
 .. autofunction:: deap.tools.selWorst
 
 .. autofunction:: deap.tools.selDoubleTournament
+
+.. autofunction:: deap.tools.selStochasticUniversalSampling
 
 .. autofunction:: deap.tools.selTournamentDCD
 
