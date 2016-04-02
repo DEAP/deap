@@ -27,7 +27,8 @@ import deap
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks'] 
+              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
+              'sphinx.ext.viewcode'] 
 
 try:
     import matplotlib
@@ -140,13 +141,15 @@ else:
 html_theme_path = ["_themes"]
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
-# Sphinx are currently 'default' and 'sphinxdoc'.
+# Sphinx are currently 'classic' and 'alabaster'.
 html_theme = 'pydoctheme'
+#RTFD.org does not support sphinx 1.3.1 yet. 
+#html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'collapsiblesidebar': True}
+#html_theme_options = {'collapsiblesidebar': True}
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -162,7 +165,7 @@ html_theme_options = {'collapsiblesidebar': True}
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = "deap_orange_icon_16x16.ico"
+html_favicon = "deap_orange_icon_32.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

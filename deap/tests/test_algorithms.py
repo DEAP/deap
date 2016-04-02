@@ -120,7 +120,7 @@ def test_nsga2():
 def test_mo_cma_es():
 
     def distance(feasible_ind, original_ind):
-        """A distance function to the feasability region."""
+        """A distance function to the feasibility region."""
         return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
 
     def closest_feasible(individual):

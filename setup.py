@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 import sys
-from distutils.core import setup, Extension
+
+warnings = list()
+
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
+    from disutils.core import setup, Extension
+
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
@@ -9,6 +17,15 @@ except ImportError:
 from distutils.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
+
+try:
+    from pypandoc import convert
+except ImportError:
+    warnings.append("warning: pypandoc module not found, could not convert Markdown to RST")
+    import codecs
+    read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
+else:
+    read_md = lambda f: convert(f, 'rst')
 
 import deap
 
@@ -50,10 +67,10 @@ def run_setup(build_ext):
     setup(name='deap',
           version=deap.__revision__,
           description='Distributed Evolutionary Algorithms in Python',
-          long_description=open('README.md').read(),
+          long_description=read_md('README.md'),
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
-          url='http://deap.googlecode.com',
+          url='https://www.github.com/deap',
           packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
           keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
@@ -90,3 +107,5 @@ except BuildFailed:
           "speedups won't be available.")
     print("Plain-Python installation succeeded.")
     print("*" * 75)
+
+print("\n".join(warnings))

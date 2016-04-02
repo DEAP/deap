@@ -24,7 +24,7 @@ provides a convenient method for creating types called the creator.
 First of all, we need to import some modules.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 16-20
+   :lines: 20-24
 
 -------
 Creator
@@ -48,7 +48,7 @@ from. Finally the optional arguments are members to add to the new type, for
 example a :attr:`fitness` for an individual or :attr:`speed` for a particle.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 22-23
+   :lines: 26-27
 
 The first line creates a maximizing fitness by replacing, in the base type
 :class:`~deap.base.Fitness`, the pure virtual
@@ -75,14 +75,14 @@ methods, :meth:`~deap.base.Toolbox.register` and
 :meth:`~deap.base.Toolbox.unregister` that are used to do the tricks.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 25-31
+   :lines: 29,31,36,38,41-42,45
 
 In this code block we registered a generation function and two initialization
 functions. The generator :meth:`toolbox.attr_bool` when called, will draw a
 random integer between 0 and 1. The two initializers for their part will
 produce respectively initialized individuals and populations.
 
-Again, looking a little closer shows that their is no magic. The registration
+Again, looking a little closer shows that there is no magic. The registration
 of tools in the toolbox only associates an *alias* to an already existing
 function and freezes part of its arguments. This allows to call the alias as
 if the majority of the (or every) arguments have already been given. For
@@ -108,7 +108,7 @@ The evaluation function is pretty simple in this case, we need to count the
 number of ones in the individual. This is done by the following lines of code. 
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 33-34
+   :lines: 48-49
 
 The returned value must be an iterable of length equal to the number of
 objectives (weights).
@@ -127,7 +127,7 @@ Registering the operators and their default arguments in the toolbox is done
 as follow. 
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 37-40
+   :lines: 55,58,62,68
 
 The evaluation is given the alias evaluate. Having a single argument being the
 individual to evaluate we don't need to fix any, the individual will be given
@@ -155,7 +155,7 @@ Before evolving it, we need to instantiate a population. This step is done
 effortless using the method we registered in the toolbox. 
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 42, 45
+   :lines: 72,77
 
 
 ``pop`` will be a :class:`list` composed of 300 individuals, *n* is the
@@ -163,7 +163,7 @@ parameter left open earlier in the toolbox. The next thing to do is to
 evaluate this brand new population.
 	
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 50-53
+   :lines: 90-93
 
 We first :func:`map` the evaluation function to every individual, then assign
 their respective fitness. Note that the order in ``fitnesses`` and
@@ -178,7 +178,7 @@ we want to evolve for a fixed number of generation :data:`NGEN`, the
 evolution will then begin with a simple for statement.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 57-59
+   :lines: 97-99
 
 Is that simple enough? Lets continue with more complicated things, selecting,
 mating and mutating the population. The crossover and mutation operators
@@ -189,7 +189,7 @@ individuals.
 In a simple GA, the first step is to select the next generation.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 61-64
+   :lines: 101-104
 
 This step creates an offspring list that is an exact copy of the selected
 individuals. The :meth:`toolbox.clone` method ensure that we don't own a
@@ -202,19 +202,19 @@ mutation with probability :data:`MUTPB`. The ``del`` statement simply
 invalidate the fitness of the modified individuals.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 66-76
+   :lines: 106-107,110-111,115-118,121-123
 
 The population now needs to be re-evaluated, we then apply the evaluation as
 seen earlier, but this time only on the individuals with an invalid fitness. 
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 78-82
+   :lines: 125-129
 
 And finally, last but not least, we replace the old population by the
 offspring. 
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 87
+   :lines: 134
 
 This is the end of the evolution part, it will continue until the predefined
 number of generation are accomplished.
@@ -223,7 +223,7 @@ Although, some statistics may be gathered on the population, the following
 lines print the min, max, mean and standard deviation of the population.
 
 .. literalinclude:: /../examples/ga/onemax.py
-   :lines: 89-100
+   :lines: 136-147
 
 A :class:`~deap.tools.Statistics` object has been defined to facilitate how
 statistics are gathered. It is not presented here so that we can focus on the
