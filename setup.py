@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 import sys
-<<<<<<< HEAD
-from setuptools import setup, Extension
-# try:
-#     from distutils.command.build_py import build_py_2to3 as build_py
-# except ImportError:
-#     from distutils.command.build_py import build_py
-=======
 
 warnings = list()
 
@@ -15,12 +8,6 @@ try:
 except ImportError:
     warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
     from disutils.core import setup, Extension
-
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    from distutils.command.build_py import build_py
->>>>>>> fmder-pypy-unskip
 
 from setuptools.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
