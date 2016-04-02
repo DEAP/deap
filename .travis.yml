@@ -24,7 +24,7 @@ install:
         NUMPY=$NUMPY"@pypy-4.0.1"
         pip install nose
       fi
-  - python setup.py install
+#  - python setup.py install
   - pip install $NUMPY
   
 # command to run tests
