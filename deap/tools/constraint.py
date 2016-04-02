@@ -134,7 +134,7 @@ if __name__ == "__main__":
     creator.create("Individual", list, fitness=creator.FitnessMin)
 
     def distance(feasible_ind, original_ind):
-        """A distance function to the feasability region."""
+        """A distance function to the feasibility region."""
         return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
 
     def closest_feasible(individual):

@@ -105,7 +105,7 @@ def create(name, base, **kargs):
 
     :param name: The name of the class to create.
     :param base: A base class from which to inherit.
-    :param attribute: One or more attributes to add on instanciation of this
+    :param attribute: One or more attributes to add on instantiation of this
                       class, optional.
 
     The following is used to create a class :class:`Foo` inheriting from the
