@@ -105,7 +105,7 @@ the individual.
 The first registered function ``indices`` redirects to the :func:`random.sample` function with its arguments fixed to sample ``IND_SIZE`` numbers from the given range. The second registered function ``individual`` is a shortcut to the :func:`~deap.tools.initIterate` function, with its :data:`container` argument set to the :class:`creator.Individual` class and its :data:`generator` argument to the :func:`toolbox.indices` alias.
 
 Calling :func:`toolbox.individual` will call :func:`~deap.tools.initIterate` with the fixed arguments and return a complete :class:`creator.Individual`
-composed of a permutation with a maximizing single
+composed of a permutation with a minimizing single
 objective :attr:`fitness` attribute.
 
 .. _arithmetic-expr:

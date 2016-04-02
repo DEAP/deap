@@ -89,5 +89,6 @@ Bug fixes
 - gp: replace the generate functions default value for the argument `type_` from `object` to `None`. 
   This removes the obligation to define the type_ argument for the individual generation function when doing STGP.
 - gp: fix a bug with OOGP when calling addPrimitive and addTerminal in arbitrary order.
-
-
+- gp: fix Ephemeral regeneration with mutEphemeral. rev: `ae46705`.
+- gp: fix issue #35 - from_string had issues with OOGP.
+- Fix issue #26: in four examples, files are opened but never closed.

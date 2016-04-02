@@ -173,5 +173,37 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
         tsize = partial(_sizeTournament, select=selRandom)
         return _fitTournament(individuals, k, tsize)
 
+def selStochasticUniversalSampling(individuals, k):
+    """Select the *k* individuals among the input *individuals*.
+    The selection is made by using a single random value to sample all of the
+    individuals by choosing them at evenly spaced intervals. The list returned
+    contains references to the input *individuals*.
+
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :return: A list of selected individuals.
+
+    This function uses the :func:`~random.uniform` function from the python base
+    :mod:`random` module.
+    """
+    s_inds = sorted(individuals, key=attrgetter("fitness"), reverse=True)
+    sum_fits = sum(ind.fitness.values[0] for ind in individuals)
+
+    distance = sum_fits / float(k)
+    start = random.uniform(0, distance)
+    points = [start + i*distance for i in xrange(k)]
+
+    chosen = []
+    for p in points:
+        i = 0
+        sum_ = s_inds[i].fitness.values[0]
+        while sum_ < p:
+            i += 1
+            sum_ += s_inds[i].fitness.values[0]
+        chosen.append(s_inds[i])
+
+    return chosen
+
 __all__ = ['selRandom', 'selBest', 'selWorst', 'selRoulette',
-           'selTournament', 'selDoubleTournament']
+           'selTournament', 'selDoubleTournament', 'selStochasticUniversalSampling']
+

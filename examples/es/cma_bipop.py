@@ -165,7 +165,9 @@ def main(verbose=True):
                 # All components of pc and sqrt(diag(C)) are smaller than the threshold
                 conditions["TolX"] = True
             
-            if strategy.sigma / sigma > strategy.diagD[-1]**2 * TOLUPSIGMA:
+            # Need to transfor strategy.diagD[-1]**2 from pyp/numpy.float64 to python
+            # float to avoid OverflowError
+            if strategy.sigma / sigma > float(strategy.diagD[-1]**2) * TOLUPSIGMA:
                 # The sigma ratio is bigger than a threshold
                 conditions["TolUpSigma"] = True
             

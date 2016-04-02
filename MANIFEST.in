@@ -1,4 +1,5 @@
 include *.txt
+include *.md
 recursive-include deap *.cpp
 recursive-include examples *.py *.csv *.json *.txt *.cpp *.hpp
 recursive-include doc *
