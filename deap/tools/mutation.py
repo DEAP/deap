@@ -77,9 +77,9 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
         up = repeat(up, size)
     elif len(up) < size:
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
-
-    for i, xl, xu in zip(xrange(size), low, up):
-        if random.random() <= indpb[i]:
+    
+    for i, xl, xu, mp in zip(xrange(size), low, up, indpb):
+        if random.random() <= mp:
             x = individual[i]
             delta_1 = (x - xl) / (xu - xl)
             delta_2 = (xu - x) / (xu - xl)
