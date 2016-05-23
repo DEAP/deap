@@ -60,9 +60,15 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
                 is the lower bound of the search space.
     :param up: A value or a :term:`python:sequence` of values that
                is the upper bound of the search space.
+    :param indpb: A value or a :term:`python:sequence` of values that
+               is the probability of mutation (per parameter).
     :returns: A tuple of one individual.
     """
     size = len(individual)
+    if not isinstance(indpb, Sequence):
+        indpb = repeat(indpb, size)
+    elif len(indpb) < size:
+        raise IndexError("indpb must be at least the size of individual: %d < %d" % (len(indpb), size))
     if not isinstance(low, Sequence):
         low = repeat(low, size)
     elif len(low) < size:
@@ -73,7 +79,7 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
 
     for i, xl, xu in zip(xrange(size), low, up):
-        if random.random() <= indpb:
+        if random.random() <= indpb[i]:
             x = individual[i]
             delta_1 = (x - xl) / (xu - xl)
             delta_2 = (xu - x) / (xu - xl)
