@@ -21,6 +21,7 @@ Engelbrecht, 2013, Self-Adaptive Environment with Fluctuating Number of
 Optima.*
 """
 
+from __future__ import print_function
 import math
 import itertools
 import numpy
@@ -389,6 +390,6 @@ def diversity(population):
 
 if __name__ == "__main__":
     mpb = MovingPeaks(dim=2, npeaks=[1,1,10], number_severity=0.1)
-    print mpb.maximums()
+    print(mpb.maximums())
     mpb.changePeaks()
-    print mpb.maximums()
+    print(mpb.maximums())
