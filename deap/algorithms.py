@@ -25,7 +25,7 @@ You are encouraged to write your own algorithms in order to make them do what
 you really want them to do.
 """
 
-import random
+import numpy
 
 import tools
 
@@ -69,12 +69,12 @@ def varAnd(population, toolbox, cxpb, mutpb):
 
     # Apply crossover and mutation on the offspring
     for i in range(1, len(offspring), 2):
-        if random.random() < cxpb:
+        if numpy.random.random() < cxpb:
             offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1], offspring[i])
             del offspring[i - 1].fitness.values, offspring[i].fitness.values
 
     for i in range(len(offspring)):
-        if random.random() < mutpb:
+        if numpy.random.random() < mutpb:
             offspring[i], = toolbox.mutate(offspring[i])
             del offspring[i].fitness.values
 
@@ -228,19 +228,19 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
 
     offspring = []
     for _ in xrange(lambda_):
-        op_choice = random.random()
+        op_choice = numpy.random.random()
         if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
+            ind1, ind2 = map(toolbox.clone, numpy.random.choice(population, 2))
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             offspring.append(ind1)
         elif op_choice < cxpb + mutpb:  # Apply mutation
-            ind = toolbox.clone(random.choice(population))
+            ind = toolbox.clone(numpy.random.choice(population))
             ind, = toolbox.mutate(ind)
             del ind.fitness.values
             offspring.append(ind)
         else:                           # Apply reproduction
-            offspring.append(random.choice(population))
+            offspring.append(numpy.random.choice(population))
 
     return offspring
 
