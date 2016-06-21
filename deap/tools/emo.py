@@ -171,8 +171,8 @@ def selTournamentDCD(individuals, k):
             return ind1
         return ind2
 
-    individuals_1 = numpy.random.permutation(individuals)
-    individuals_2 = numpy.random.permutation(individuals)
+    individuals_1 = numpy.random.permutation(individuals).tolist()
+    individuals_2 = numpy.random.permutation(individuals).tolist()
 
     chosen = []
     for i in xrange(0, k, 4):

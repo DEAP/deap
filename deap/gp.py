@@ -597,7 +597,10 @@ def generate(pset, min_, max_, condition, type_=None):
     if type_ is None:
         type_ = pset.ret
     expr = []
-    height = numpy.random.randint(min_, max_)
+    if min_ == max_:
+        height = min_
+    else:
+        height = numpy.random.randint(min_, max_)
     stack = [(0, type_)]
     while len(stack) != 0:
         depth, type_ = stack.pop()
