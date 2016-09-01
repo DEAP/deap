@@ -259,7 +259,6 @@ def selEpsilonLexicase(individuals, k, epsilon):
         random.shuffle(cases)
         
         while len(cases) > 0 and len(candidates) > 1:
-            #print(':')      
             if fit_weights[cases[0]] > 0:
                 best_val_for_case = max(map(lambda x: x.fitness.values[cases[0]], candidates)) 
                 min_val_to_survive_case = best_val_for_case - epsilon
@@ -296,14 +295,15 @@ def selAutomaticEpsilonLexicase(individuals, k):
         random.shuffle(cases)
 
         while len(cases) > 0 and len(candidates) > 1: 
-            median_val = np.median(map(lambda x: x.fitness.values[cases[0]], individuals))
-            median_absolute_deviation = np.median(map(lambda x: x.fitness.values[cases[0]] - median_val, individuals))
+            errors_for_this_case = [x.fitness.values[cases[0] for x in candidates]
+            median_val = np.median(errors_for_this_case)
+            median_absolute_deviation = np.median([abs(x - median_val) for x in candidates])
             if fit_weights[cases[0]] > 0:
-                best_val_for_case = max(map(lambda x: x.fitness.values[cases[0]], candidates)) 
+                best_val_for_case = max(errors_for_this_case) 
                 min_val_to_survive = best_val_for_case - median_absolute_deviation
                 candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive, candidates))
             else :
-                best_val_for_case = min(map(lambda x: x.fitness.values[cases[0]], candidates)) 
+                best_val_for_case = min(errors_for_this_case) 
                 max_val_to_survive = best_val_for_case + median_absolute_deviation
                 candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive, candidates))
             
