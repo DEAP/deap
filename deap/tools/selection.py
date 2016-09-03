@@ -295,9 +295,9 @@ def selAutomaticEpsilonLexicase(individuals, k):
         random.shuffle(cases)
 
         while len(cases) > 0 and len(candidates) > 1: 
-            errors_for_this_case = [x.fitness.values[cases[0] for x in candidates]
+            errors_for_this_case = [x.fitness.values[cases[0]] for x in candidates]
             median_val = np.median(errors_for_this_case)
-            median_absolute_deviation = np.median([abs(x - median_val) for x in candidates])
+            median_absolute_deviation = np.median([abs(x - median_val) for x in errors_for_this_case])
             if fit_weights[cases[0]] > 0:
                 best_val_for_case = max(errors_for_this_case) 
                 min_val_to_survive = best_val_for_case - median_absolute_deviation
