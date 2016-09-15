@@ -30,7 +30,7 @@ import tools
 class Strategy(object):
     """
     A strategy that will keep track of the basic parameters of the CMA-ES
-    algorithm.
+    algorithm ([Hansen2001]_).
 
     :param centroid: An iterable object that indicates where to start the
                      evolution.
@@ -76,6 +76,9 @@ class Strategy(object):
     |                | mueff) / ((N + 2)^2 +     | update.                    |
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
+
+    .. [Hansen2001] Hansen and Ostermeier, 2001. Completely Derandomized
+       Self-Adaptation in Evolution Strategies. *Evolutionary Computation*
 
     """
     def __init__(self, centroid, sigma, **kargs):
@@ -204,7 +207,7 @@ class Strategy(object):
 
 class StrategyOnePlusLambda(object):
     """
-    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm.
+    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm ([Igel2007]_).
 
     :param parent: An iterable object that indicates where to start the
                    evolution. The parent requires a fitness attribute.
@@ -235,6 +238,10 @@ class StrategyOnePlusLambda(object):
     +----------------+---------------------------+----------------------------+
     | ``pthresh``    | ``0.44``                  | Threshold success rate.    |
     +----------------+---------------------------+----------------------------+
+
+    .. [Igel2007] Igel, Hansen, Roth, 2007. Covariance matrix adaptation for
+    multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
+
     """
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
