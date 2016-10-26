@@ -18,16 +18,20 @@ import platform
 import random
 import unittest
 
+import numpy
+
 from deap import algorithms
 from deap import base
 from deap import benchmarks
-#from deap.benchmarks.tools import hypervolume
+from deap.benchmarks.tools import hypervolume
 from deap import cma
 from deap import creator
 from deap import tools
 
 FITCLSNAME = "FIT_TYPE"
 INDCLSNAME = "IND_TYPE"
+
+HV_THRESHOLD = 119.0
 
     
 def setup_func_single_obj():
@@ -37,6 +41,10 @@ def setup_func_single_obj():
 def setup_func_multi_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
+
+def setup_func_multi_obj_numpy():
+    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
+    creator.create(INDCLSNAME, numpy.ndarray, fitness=creator.__dict__[FITCLSNAME])
 
 def teardown_func():
     # Messy way to remove a class from the creator
@@ -65,6 +73,7 @@ def test_nsga2():
     NDIM = 5
     BOUND_LOW, BOUND_UP = 0.0, 1.0
     MU = 16
+    NGEN = 100
 
     toolbox = base.Toolbox()
     toolbox.register("attr_float", random.uniform, BOUND_LOW, BOUND_UP)
@@ -82,7 +91,7 @@ def test_nsga2():
         ind.fitness.values = fit
 
     pop = toolbox.select(pop, len(pop))
-    for gen in range(1, 100):
+    for gen in range(1, NGEN):
         offspring = tools.selTournamentDCD(pop, len(pop))
         offspring = [toolbox.clone(ind) for ind in offspring]
         
@@ -101,7 +110,63 @@ def test_nsga2():
 
         pop = toolbox.select(pop + offspring, MU)
 
-    #hv = benchmarks.tools.hypervolume(pop, [11.0, 11.0])
-    hv = 120.777 # Optimal value
+    hv = hypervolume(pop, [11.0, 11.0])
+    # hv = 120.777 # Optimal value
 
-    assert hv > 120.0, "Waiting on the hypervolume measure!"
+    assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
+
+@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
+@with_setup(setup_func_multi_obj_numpy, teardown_func)
+def test_mo_cma_es():
+
+    def distance(feasible_ind, original_ind):
+        """A distance function to the feasibility region."""
+        return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
+
+    def closest_feasible(individual):
+        """A function returning a valid individual from an invalid one."""
+        feasible_ind = numpy.array(individual)
+        feasible_ind = numpy.maximum(BOUND_LOW, feasible_ind)
+        feasible_ind = numpy.minimum(BOUND_UP, feasible_ind)
+        return feasible_ind
+
+    def valid(individual):
+        """Determines if the individual is valid or not."""
+        if any(individual < BOUND_LOW) or any(individual > BOUND_UP):
+            return False
+        return True
+
+    NDIM = 5
+    BOUND_LOW, BOUND_UP = 0.0, 1.0
+    MU, LAMBDA = 10, 10
+    NGEN = 500
+
+    # The MO-CMA-ES algorithm takes a full population as argument
+    population = [creator.__dict__[INDCLSNAME](x) for x in numpy.random.uniform(BOUND_LOW, BOUND_UP, (MU, NDIM))]
+
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", benchmarks.zdt1)
+    toolbox.decorate("evaluate", tools.ClosestValidPenality(valid, closest_feasible, 1.0e-6, distance))
+
+    for ind in population:
+        ind.fitness.values = toolbox.evaluate(ind)
+
+    strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
+    
+    toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
+    toolbox.register("update", strategy.update)
+
+    for gen in range(NGEN):
+        # Generate a new population
+        population = toolbox.generate()
+
+        # Evaluate the individuals
+        fitnesses = toolbox.map(toolbox.evaluate, population)
+        for ind, fit in zip(population, fitnesses):
+            ind.fitness.values = fit
+        
+        # Update the strategy with the evaluated individuals
+        toolbox.update(population)
+    
+    hv = hypervolume(strategy.parents, [11.0, 11.0])
+    assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)

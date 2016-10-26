@@ -39,7 +39,7 @@ def salustowicz_1d(data):
        * - Range
          - :math:`x \in [0, 10]`
        * - Function
-         - :math:`f(x) = e^x x^3 \cos(x) \sin(x) (\cos(x) \sin^2(x) - 1)`
+         - :math:`f(x) = e^{-x} x^3 \cos(x) \sin(x) (\cos(x) \sin^2(x) - 1)`
     """
     return exp(-data[0]) * data[0]**3 * cos(data[0]) * sin(data[0]) * (cos(data[0]) * sin(data[0])**2 - 1)
     
@@ -53,7 +53,7 @@ def salustowicz_2d(data):
        * - Range
          - :math:`\mathbf{x} \in [0, 7]^2`
        * - Function
-         - :math:`f(\mathbf{x}) = e^{x_1} x_1^3 \cos(x_1) \sin(x_1) (\cos(x_1) \sin^2(x_1) - 1) (x_2 -5)`
+         - :math:`f(\mathbf{x}) = e^{-x_1} x_1^3 \cos(x_1) \sin(x_1) (\cos(x_1) \sin^2(x_1) - 1) (x_2 -5)`
     """
     return exp(-data[0]) * data[0]**3 * cos(data[0]) * sin(data[0]) * (cos(data[0]) * sin(data[0])**2 - 1) * (data[1] - 5)
 

@@ -11,7 +11,7 @@ General
 =======
 
 #. The algorithms from the :mod:`~deap.gp.algorithms` module now return a tuple of 2-elements : the population and a :class:`~deap.tools.Logbook`.
-#. Replace every call to DTM by calls to  `SCOOP <http://scoop.googlecode.com>`_.
+#. Replace every call to DTM by calls to  `SCOOP <http://www.pyscoop.org>`_.
 #. Statistics and logging of data are accomplished by two distinct objects: :class:`~deap.tools.Statistics` and :class:`~deap.tools.Logbook`. Read the tutorial on :doc:`logging statistics <tutorials/basic/part3>`. 
 #. Replace :class:`~deap.tools.EvolutionLogger` by :class:`~deap.tools.Logbook`.
 #. Replace usage of :func:`tools.mean`, :func:`tools.var`, :func:`tools.std`, and :func:`tools.median` by their Numpy equivalent.

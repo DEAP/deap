@@ -17,22 +17,22 @@ invalidate it.
 
 Here is a list of the implemented operators in DEAP,
 
-============================ =========================================== ========================================= ============================ ================
- Initialization               Crossover                                   Mutation                                  Selection                   Migration 
-============================ =========================================== ========================================= ============================ ================
- :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`       :func:`migRing`
- :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`         ..             
- :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`            ..             
- ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`            ..             
- ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`           ..             
- ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`             ..             
- ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`            ..             
- ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`    ..             
- ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament` ..             
- ..                           :func:`cxSimulatedBinary`                   ..                                        ..                          ..             
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                          ..             
- ..                           :func:`cxMessyOnePoint`                     ..                                        ..                          ..             
-============================ =========================================== ========================================= ============================ ================
+============================ =========================================== ========================================= ========================================= ================
+ Initialization               Crossover                                   Mutation                                  Selection                                 Migration 
+============================ =========================================== ========================================= ========================================= ================
+ :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`                     :func:`migRing`
+ :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`                       ..             
+ :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`                          ..             
+ ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`                          ..             
+ ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`                         ..             
+ ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`                           ..             
+ ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`                          ..             
+ ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`                  ..             
+ ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament`               ..             
+ ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selStochasticUniversalSampling`    ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                                        ..             
+ ..                           :func:`cxMessyOnePoint`                     ..                                        ..                                        ..             
+============================ =========================================== ========================================= ========================================= ================
 
 and genetic programming specific operators.
 
@@ -143,6 +143,8 @@ Selection
 
 .. autofunction:: deap.tools.selDoubleTournament
 
+.. autofunction:: deap.tools.selStochasticUniversalSampling
+
 .. autofunction:: deap.tools.selTournamentDCD
 
 .. autofunction:: deap.tools.sortNondominated
@@ -162,10 +164,10 @@ Migration
 Statistics
 ----------
 .. autoclass:: deap.tools.Statistics([key])
-	:members:
+   :members:
 
 .. autoclass:: deap.tools.MultiStatistics(**kargs)
-	:members:
+   :members:
 
 Logbook
 -------

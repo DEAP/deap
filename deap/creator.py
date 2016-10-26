@@ -63,7 +63,7 @@ else:
             """Creates a new instance of a numpy.ndarray from a function call.
             Adds the possibility to instanciate from an iterable."""
             return numpy.array(list(iterable)).view(cls)
-            
+
         def __setstate__(self, state):
             self.__dict__.update(state)
 
@@ -72,11 +72,12 @@ else:
 
     class_replacers[numpy.ndarray] = _numpy_array
 
+
 class _array(array.array):
     @staticmethod
     def __new__(cls, seq=()):
         return super(_array, cls).__new__(cls, cls.typecode, seq)
-    
+
     def __deepcopy__(self, memo):
         """Overrides the deepcopy from array.array that does not copy
         the object's attributes and class type.
@@ -91,6 +92,7 @@ class _array(array.array):
         return (self.__class__, (list(self),), self.__dict__)
 class_replacers[array.array] = _array
 
+
 def create(name, base, **kargs):
     """Creates a new class named *name* inheriting from *base* in the
     :mod:`~deap.creator` module. The new class can have attributes defined by
@@ -100,29 +102,36 @@ def create(name, base, **kargs):
     returned instance is added as an attribute of the class' instance.
     Otherwise, if the argument is not a class, (for example an :class:`int`),
     it is added as a "static" attribute of the class.
-    
+
     :param name: The name of the class to create.
     :param base: A base class from which to inherit.
-    :param attribute: One or more attributes to add on instanciation of this
+    :param attribute: One or more attributes to add on instantiation of this
                       class, optional.
-    
+
     The following is used to create a class :class:`Foo` inheriting from the
     standard :class:`list` and having an attribute :attr:`bar` being an empty
     dictionary and a static attribute :attr:`spam` initialized to 1. ::
-    
+
         create("Foo", list, bar=dict, spam=1)
-        
+
     This above line is exactly the same as defining in the :mod:`creator`
     module something like the following. ::
-    
+
         class Foo(list):
             spam = 1
-            
+
             def __init__(self):
                 self.bar = dict()
 
     The :ref:`creating-types` tutorial gives more examples of the creator
     usage.
+
+    .. warning::
+
+       If your are inheriting from :class:`numpy.ndarray` see the
+       :doc:`tutorials/advanced/numpy` tutorial and the
+       :doc:`/examples/ga_onemax_numpy` example.
+
     """
 
     if name in globals():
@@ -143,7 +152,7 @@ def create(name, base, **kargs):
     if base in class_replacers:
         base = class_replacers[base]
 
-    # A DeprecationWarning is raised when the object inherits from the 
+    # A DeprecationWarning is raised when the object inherits from the
     # class "object" which leave the option of passing arguments, but
     # raise a warning stating that it will eventually stop permitting
     # this option. Usually this happens when the base class does not

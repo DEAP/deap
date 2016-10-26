@@ -1,16 +1,19 @@
 # DEAP
 
+[![Build status](https://travis-ci.org/DEAP/deap.svg?branch=master)](https://travis-ci.org/DEAP/deap) [![Download](https://img.shields.io/pypi/dm/deap.svg)](https://pypi.python.org/pypi/deap) [![Join the chat at https://gitter.im/DEAP/deap](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DEAP/deap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
-ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [SCOOP](http://scoop.googlecode.com).
+ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanism such as multiprocessing and [SCOOP](http://pyscoop.org).
 
 DEAP includes the following features:
+
   * Genetic algorithm using any imaginable representation
     * List, Array, Set, Dictionary, Tree, Numpy Array, etc.
   * Genetic programing using prefix trees
     * Loosely typed, Strongly typed
     * Automatically defined functions
   * Evolution strategies (including CMA-ES)
-  * Multi-objective optimisation (NSGA-II, SPEA-II)
+  * Multi-objective optimisation (NSGA-II, SPEA2, MO-CMA-ES)
   * Co-evolution (cooperative and competitive) of multiple populations
   * Parallelization of the evaluations (and more)
   * Hall of Fame of the best individuals that lived in the population
@@ -60,19 +63,19 @@ Since version 0.8, DEAP is compatible out of the box with Python 3. The installa
 
 ## Example
 
-The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [here](http://deap.gel.ulaval.ca/doc/default/examples/index.html).
+The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [here](http://deap.readthedocs.org/en/master/examples/index.html).
 
 ```python
-import array, random
+import random
 from deap import creator, base, tools, algorithms
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessMax)
+creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 
 toolbox.register("attr_bool", random.randint, 0, 1)
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, n=100)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalOneMax(individual):
@@ -91,7 +94,8 @@ for gen in range(NGEN):
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit
-    population = offspring
+    population = toolbox.select(offspring, k=len(population))
+top10 = tools.selBest(population, k=10)
 ```
 
 ## How to cite DEAP
@@ -116,6 +120,8 @@ Authors of scientific papers including results generated using DEAP are encourag
   * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in !EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012. [Paper](http://goo.gl/pXXug)
 
 ## Projects using DEAP
+  * Van Geit, W., M. Gevaert, G. Chindemi, C. Rössert, J.-D. Courcol, E. Muller, F. Schürmann, I. Segev, and H. Markram (2016, March). BluePyOpt: Leveraging open source software and cloud infrastructure to optimise model parameters in neuroscience. ArXiv e-prints.
+http://arxiv.org/abs/1603.00500
   * Lara-Cabrera, R., Cotta, C. and Fernández-Leiva, A.J. (2014). Geometrical vs topological measures for the evolution of aesthetic maps in a rts game, Entertainment Computing,
   * Macret, M. and Pasquier, P. (2013). Automatic Tuning of the OP-1 Synthesizer Using a Multi-objective Genetic Algorithm. In Proceedings of the 10th Sound and Music Computing Conference (SMC). (pp 614-621).
   * Fortin, F. A., Grenier, S., & Parizeau, M. (2013, July). Generalizing the improved run-time complexity algorithm for non-dominated sorting. In Proceeding of the fifteenth annual conference on Genetic and evolutionary computation conference (pp. 615-622). ACM.

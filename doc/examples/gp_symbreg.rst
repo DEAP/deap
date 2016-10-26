@@ -81,7 +81,7 @@ Now, we want to register some parameters specific to the evolution process.
 In DEAP, this is done through the toolbox :
    
 .. literalinclude:: /../examples/gp/symbreg.py
-   :lines: 49-67
+   :lines: 49-70
 
 First, a toolbox instance is created (in some problem types like coevolution,
 you may consider creating more than one toolbox). Then, we can register any
@@ -115,6 +115,11 @@ method (a tournament of size 3), the mate method (one point crossover with
 uniform probability over all the nodes), the mutation method (an uniform
 probability mutation which may append a new full sub-tree to a node).
 
+Then, we decorate the mate and mutate method to limit the height of generated
+individuals. This is done to avoid an important draw back of genetic
+programming : bloat. Koza in his book on genetic programming suggest to use a
+max depth of 17.
+
 At this point, any structure with an access to the toolbox instance will also
 have access to all of those registered parameters. Of course, the user could
 register other parameters basing on his needs.
@@ -130,7 +135,7 @@ maximum of both the individuals fitness and size. For that we'll use a
 :class:`~deap.tools.MultiStatistics` object.
     
 	.. literalinclude:: /../examples/gp/symbreg.py
-	   :lines: 75-81
+	   :lines: 78-84
 
 Note that a simple :class:`~deap.tools.Statistics` object can be used, as in
 previous examples when statistics over a single key are desired.
@@ -144,7 +149,7 @@ creating the population and then calling a complete algorithm. In this case,
 we'll use :func:`~deap.algorithms.eaSimple`.
 
 .. literalinclude:: /../examples/gp/symbreg.py
-   :lines: 72,73,83-84
+   :lines: 75,76,86-87
 
 
 The hall of fame is a specific structure which contains the *n* best

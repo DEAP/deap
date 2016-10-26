@@ -1,11 +1,11 @@
 Overview
 ========
-If your are used to an other evolutionary algorithm framework, you'll notice
+If you are used to any other evolutionary algorithm framework, you'll notice
 we do things differently with DEAP. Instead of limiting you with predefined
 types, we provide ways of creating the appropriate ones. Instead of providing
 closed initializers, we enable you to customize them as you wish. Instead of
 suggesting unfit operators, we explicitly ask you to choose them wisely.
-Instead of implementing many sealed algorithms, we allow you to write the one
+Instead of implementing many sealed algorithms, we allow you to write the ones
 that fit all your needs. This tutorial will present a quick overview of what
 DEAP is all about along with what every DEAP program is made of.
 
@@ -14,7 +14,7 @@ Types
 The first thing to do is to think of the appropriate type for your problem.
 Then, instead of looking in the list of available types, DEAP enables you to
 build your own. This is done with
-the :mod:`~deap.creator` module. Creating an appropriate type might seems
+the :mod:`~deap.creator` module. Creating an appropriate type might seem
 overwhelming but the creator makes it very easy. In fact, this is usually done
 in a single line. For example, the following creates a :class:`FitnessMin` class
 for a minimization problem and an :class:`Individual` class that is derived
@@ -41,7 +41,7 @@ them.
 
 This creates functions to initialize populations from individuals that are
 themselves initialized with random float numbers. The functions are registered
-in the toolbox with there default arguments under the given name. For example,
+in the toolbox with their default arguments under the given name. For example,
 it will be possible to call the function :func:`toolbox.population` to
 instantly create a population.
 More initialization methods
@@ -50,18 +50,19 @@ are found in the :doc:`tutorials/basic/part1` tutorial and the various
 
 Operators
 ---------
-Operators are just like initalizers, excepted that some are already
-implemented in the :mod:`~deap.tools` module. Once you've chose the perfect
-ones simply register them in the toolbox. In addition you must create your
+Operators are just like initializers, except that some are already
+implemented in the :mod:`~deap.tools` module. Once you've chosen the perfect
+ones, simply register them in the toolbox. In addition you must create your
 evaluation function. This is how it is done in DEAP.
 
 .. literalinclude:: /code/tutorials/part_1/1_where_to_start.py
    :lines: 19-25
 
-The registered functions are renamed by the toolbox to allows genericity so
-that the algorithm does not depend on operators name. Note also that fitness
-values must be iterable, that is why we return tuple in the evaluate function.
-More on this in the :doc:`tutorials/basic/part2` tutorial and :doc:`examples/index`.
+The registered functions are renamed by the toolbox, allowing generic
+algorithms that do not depend on operator names. Note also that
+fitness values must be iterable, that is why we return a tuple in the
+evaluate function.  More on this in the :doc:`tutorials/basic/part2`
+tutorial and :doc:`examples/index`.
 
 Algorithms
 ----------
