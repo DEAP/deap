@@ -48,10 +48,12 @@ class DeltaPenality(object):
 
             weights = tuple(1 if w >= 0 else -1 for w in individual.fitness.weights)
 
-            dist = 0
+            dists = tuple(0 for w in individual.fitness.weights)
             if self.dist_fct is not None:
-                dist = self.dist_fct(individual)
-            return tuple(d - w * dist for d, w in zip(self.delta, weights))
+                dists = self.dist_fct(individual)
+                if not isinstance(dists, Sequence):
+                    self.dists = repeat(dists)
+            return tuple(d - w * dist for d, w, dist in zip(self.delta, weights, dists))
 
         return wrapper
 
@@ -84,7 +86,7 @@ class ClosestValidPenality(object):
     valid individual to :math:`\mathbf{x}`, :math:`\\alpha` is the distance
     multiplicative factor and :math:`w_i` is the weight of the ith objective.
     """
-    
+
     def __init__(self, feasibility, feasible, alpha, distance=None):
         self.fbty_fct = feasibility
         self.fbl_fct = feasible
@@ -110,7 +112,7 @@ class ClosestValidPenality(object):
             dist = 0
             if self.dist_fct is not None:
                 dist = self.dist_fct(f_ind, individual)
-            
+
             # print("returned", tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights)))
             return tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights))
 
