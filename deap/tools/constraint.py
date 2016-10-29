@@ -14,7 +14,9 @@ class DeltaPenality(object):
                         individual.
     :param delta: Constant or array of constants returned for an invalid individual.
     :param distance: A function returning the distance between the individual
-                     and a given valid point (optional, defaults to 0).
+                     and a given valid point. The distance function can also return a sequence
+                     of length equal to the number of objectives to affect multi-objective
+                     fitnesses differently (optional, defaults to 0).
     :returns: A decorator for evaluation function.
 
     This function relies on the fitness weights to add correctly the distance.
@@ -22,7 +24,7 @@ class DeltaPenality(object):
 
     .. math::
 
-       f^\mathrm{penality}_i(\mathbf{x}) = \Delta_i - w_i d(\mathbf{x})
+       f^\mathrm{penality}_i(\mathbf{x}) = \Delta_i - w_i d_i(\mathbf{x})
 
     where :math:`\mathbf{x}` is the individual, :math:`\Delta_i` is a user defined
     constant and :math:`w_i` is the weight of the ith objective. :math:`\Delta`
@@ -71,7 +73,9 @@ class ClosestValidPenality(object):
     :param alpha: Multiplication factor on the distance between the valid and
                   invalid individual.
     :param distance: A function returning the distance between the individual
-                     and a given valid point (optional, defaults to 0).
+                     and a given valid point. The distance function can also return a sequence
+                     of length equal to the number of objectives to affect multi-objective
+                     fitnesses differently (optional, defaults to 0).
     :returns: A decorator for evaluation function.
 
     This function relies on the fitness weights to add correctly the distance.
@@ -79,7 +83,7 @@ class ClosestValidPenality(object):
 
     .. math::
 
-       f^\mathrm{penality}_i(\mathbf{x}) = f_i(\operatorname{valid}(\mathbf{x})) - \\alpha w_i d(\operatorname{valid}(\mathbf{x}), \mathbf{x})
+       f^\mathrm{penality}_i(\mathbf{x}) = f_i(\operatorname{valid}(\mathbf{x})) - \\alpha w_i d_i(\operatorname{valid}(\mathbf{x}), \mathbf{x})
 
     where :math:`\mathbf{x}` is the individual,
     :math:`\operatorname{valid}(\mathbf{x})` is a function returning the closest
