@@ -52,7 +52,7 @@ class DeltaPenality(object):
             if self.dist_fct is not None:
                 dists = self.dist_fct(individual)
                 if not isinstance(dists, Sequence):
-                    self.dists = repeat(dists)
+                    dists = repeat(dists)
             return tuple(d - w * dist for d, w, dist in zip(self.delta, weights, dists))
 
         return wrapper
@@ -109,12 +109,14 @@ class ClosestValidPenality(object):
             if len(weights) != len(f_fbl):
                 raise IndexError("Fitness weights and computed fitness are of different size.")
 
-            dist = 0
+            dists = tuple(0 for w in individual.fitness.weights)
             if self.dist_fct is not None:
                 dist = self.dist_fct(f_ind, individual)
+                if not isinstance(dists, Sequence):
+                    dists = repeat(dists)
 
             # print("returned", tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights)))
-            return tuple(f - w * self.alpha * dist for f, w in zip(f_fbl, weights))
+            return tuple(f - w * self.alpha * d for f, w, d in zip(f_fbl, weights, dists))
 
         return wrapper
 
