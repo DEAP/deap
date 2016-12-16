@@ -59,7 +59,7 @@ def selTournament(individuals, k, tournsize):
     :mod:`random` module.
     """
     chosen = []
-    for i in xrange(k):
+    for _ in xrange(k):
         aspirants = selRandom(individuals, tournsize)
         chosen.append(max(aspirants, key=attrgetter("fitness")))
     return chosen
@@ -85,7 +85,7 @@ def selRoulette(individuals, k):
     sum_fits = sum(ind.fitness.values[0] for ind in individuals)
     
     chosen = []
-    for i in xrange(k):
+    for _ in xrange(k):
         u = random.random() * sum_fits
         sum_ = 0
         for ind in s_inds:
@@ -141,7 +141,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _sizeTournament(individuals, k, select):
         chosen = []
-        for i in xrange(k):
+        for _ in xrange(k):
             # Select two individuals from the population
             # The first individual has to be the shortest
             prob = parsimony_size / 2.
@@ -161,7 +161,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
     
     def _fitTournament(individuals, k, select):
         chosen = []
-        for i in xrange(k):
+        for _ in xrange(k):
             aspirants = select(individuals, k=fitness_size)
             chosen.append(max(aspirants, key=attrgetter("fitness")))
         return chosen

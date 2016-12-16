@@ -13,10 +13,11 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from nose import with_setup
+import array
+
 from unittest import skipIf
 
-import array
+from nose import with_setup
 
 try:
     import numpy

@@ -115,6 +115,7 @@ class MovingPeaks:
         pfunc = sc.get("pfunc")
         npeaks = sc.get("npeaks")
         self.dim = dim
+        self.random = random
 
         self.minpeaks, self.maxpeaks = None, None
         if hasattr(npeaks, "__getitem__"):
@@ -131,7 +132,6 @@ class MovingPeaks:
             self.peaks_function = list(itertools.repeat(pfunc, npeaks))
             self.pfunc_pool = (pfunc,)
         
-        self.random = random
         self.basis_function = sc.get("bfunc")
         
         self.min_coord = sc.get("min_coord")

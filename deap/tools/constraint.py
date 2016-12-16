@@ -115,7 +115,7 @@ class ClosestValidPenality(object):
 
             dists = tuple(0 for w in individual.fitness.weights)
             if self.dist_fct is not None:
-                dist = self.dist_fct(f_ind, individual)
+                dists = self.dist_fct(f_ind, individual)
                 if not isinstance(dists, Sequence):
                     dists = repeat(dists)
 

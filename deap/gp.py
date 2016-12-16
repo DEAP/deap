@@ -971,7 +971,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         DOI 10.1007/s10710-015-9242-8
 
     """
-    def _genpop(n, pickfrom=[], acceptfunc=lambda s: True, producesizes=False):
+    def _genpop(n, pickfrom=None, acceptfunc=lambda s: True, producesizes=False):
         # Generate a population of n individuals, using individuals in
         # *pickfrom* if possible, with a *acceptfunc* acceptance function.
         # If *producesizes* is true, also return a list of the produced
@@ -981,6 +981,8 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         # default values) and 2) to generate the final population, in which
         # case pickfrom should be the natural population previously generated
         # and acceptfunc a function implementing the HARM-GP algorithm.
+        if pickfrom is None:
+            pickfrom = []
         producedpop = []
         producedpopsizes = []
         while len(producedpop) < n:
