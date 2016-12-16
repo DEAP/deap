@@ -1,5 +1,6 @@
 from __future__ import division
 import random
+import copy
 
 from functools import partial
 from operator import attrgetter
@@ -91,7 +92,7 @@ def selRoulette(individuals, k):
         for ind in s_inds:
             sum_ += ind.fitness.values[0]
             if sum_ > u:
-                chosen.append(ind)
+                chosen.append(copy.deepcopy(ind))  # other selection-functions like this should be changed too , 
                 break
     
     return chosen
