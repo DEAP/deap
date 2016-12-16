@@ -148,15 +148,15 @@ Selection
 
 .. autofunction:: deap.tools.selTournamentDCD
 
-.. autofunction:: deap.tools.sortNondominated
-
-.. autofunction:: deap.tools.sortLogNondominated
-
 .. autofunction:: deap.tools.selLexicase
 
 .. autofunction:: deap.tools.selEpsilonLexicase
 
 .. autofunction:: deap.tools.selAutomaticEpsilonLexicase
+
+.. autofunction:: deap.tools.sortNondominated
+
+.. autofunction:: deap.tools.sortLogNondominated
 
 Bloat control
 +++++++++++++
