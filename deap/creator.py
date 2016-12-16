@@ -49,6 +49,7 @@ except AttributeError:
     pass
 else:
     class _numpy_array(numpy.ndarray):
+
         def __deepcopy__(self, memo):
             """Overrides the deepcopy from numpy.ndarray that does not copy
             the object's attributes. This one will deepcopy the array and its
@@ -74,6 +75,7 @@ else:
 
 
 class _array(array.array):
+
     @staticmethod
     def __new__(cls, seq=()):
         return super(_array, cls).__new__(cls, cls.typecode, seq)

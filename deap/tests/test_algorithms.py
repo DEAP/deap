@@ -34,31 +34,35 @@ INDCLSNAME = "IND_TYPE"
 
 HV_THRESHOLD = 119.0
 
-    
+
 def setup_func_single_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
+
 
 def setup_func_multi_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
 
+
 def setup_func_multi_obj_numpy():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
     creator.create(INDCLSNAME, numpy.ndarray, fitness=creator.__dict__[FITCLSNAME])
+
 
 def teardown_func():
     # Messy way to remove a class from the creator
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
 
+
 @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_single_obj, teardown_func)
 def test_cma():
     NDIM = 5
 
-    strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
-    
+    strategy = cma.Strategy(centroid=[0.0] * NDIM, sigma=1.0)
+
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
     toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
@@ -68,6 +72,7 @@ def test_cma():
     best, = tools.selBest(pop, k=1)
 
     assert best.fitness.values < (1e-8,), "CMA algorithm did not converged properly."
+
 
 @with_setup(setup_func_multi_obj, teardown_func)
 def test_nsga2():
@@ -83,7 +88,7 @@ def test_nsga2():
 
     toolbox.register("evaluate", benchmarks.zdt1)
     toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
     toolbox.register("select", tools.selNSGA2)
 
     pop = toolbox.population(n=MU)
@@ -95,15 +100,15 @@ def test_nsga2():
     for _ in range(1, NGEN):
         offspring = tools.selTournamentDCD(pop, len(pop))
         offspring = [toolbox.clone(ind) for ind in offspring]
-        
+
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
             if random.random() <= 0.9:
                 toolbox.mate(ind1, ind2)
-            
+
             toolbox.mutate(ind1)
             toolbox.mutate(ind2)
             del ind1.fitness.values, ind2.fitness.values
-        
+
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
@@ -115,6 +120,7 @@ def test_nsga2():
     # hv = 120.777 # Optimal value
 
     assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
+
 
 @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_multi_obj_numpy, teardown_func)
@@ -153,7 +159,7 @@ def test_mo_cma_es():
         ind.fitness.values = toolbox.evaluate(ind)
 
     strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
-    
+
     toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
     toolbox.register("update", strategy.update)
 
@@ -165,9 +171,9 @@ def test_mo_cma_es():
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
-        
+
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
-    
+
     hv = hypervolume(strategy.parents, [11.0, 11.0])
     assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
