@@ -152,6 +152,12 @@ Selection
 
 .. autofunction:: deap.tools.sortLogNondominated
 
+.. autofunction:: deap.tools.selLexicase
+
+.. autofunction:: deap.tools.selEpsilonLexicase
+
+.. autofunction:: deap.tools.selAutomaticEpsilonLexicase
+
 Bloat control
 +++++++++++++
 
