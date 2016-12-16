@@ -92,9 +92,7 @@ def selRoulette(individuals, k):
         for ind in s_inds:
             sum_ += ind.fitness.values[0]
             if sum_ > u:
-                chosen.append(copy.deepcopy(ind))  # others like this should be changed too , 
-                # if you have anything want to say ,please tell me : ss1992@126.com ,thank you
-                # forgive my poor english , i'm chinese...
+                chosen.append(copy.deepcopy(ind))  # other selection-functions like this should be changed too , 
                 break
     
     return chosen
