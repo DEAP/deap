@@ -30,8 +30,9 @@ Here is a list of the implemented operators in DEAP,
  ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`                  ..             
  ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament`               ..             
  ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selStochasticUniversalSampling`    ..             
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                                        ..             
- ..                           :func:`cxMessyOnePoint`                     ..                                        ..                                        ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        :func:`selLexicase`                      ..             
+ ..                           :func:`cxMessyOnePoint`                     ..                                        :func:`selEpsilonLexicase`                ..             
+ ..                           ..                                          ..                                        :func:`selAutomaticEpsilonLexicase`       ..             
 ============================ =========================================== ========================================= ========================================= ================
 
 and genetic programming specific operators.
