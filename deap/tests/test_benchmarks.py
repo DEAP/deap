@@ -1,21 +1,19 @@
 """Test functions from deap/benchmarks."""
-from nose import with_setup
+import sys
 import platform
 import random
 import unittest
+from nose import with_setup
+from past.builtins import xrange
 
 import numpy
 
 from deap import algorithms
 from deap import base
 from deap import benchmarks
-from deap.benchmarks.tools import hypervolume
 from deap import cma
 from deap import creator
 from deap import tools
-
-from past.builtins import xrange
-from deap import creator, base
 from deap.benchmarks import binary
 
 
@@ -38,18 +36,20 @@ class BenchmarkTest(unittest.TestCase):
         del creator.FitnessMin
 
     def test_bin2float(self):
-        """Test deap/benchmarks/binary.py bin2float decorator function."""
 
         zero_individual = creator.Individual([0 for x in xrange(10)])
         full_individual = creator.Individual([1 for x in xrange(10)])
+        two_individiual = creator.Individual(8*[0] + [1, 0])
 
-        population = [zero_individual, full_individual]
+        population = [zero_individual, full_individual, two_individiual]
+
         fitnesses = map(self.toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
 
         assert population[0].fitness.values == (0.0, )
         assert population[1].fitness.values == (1023.0, )
+        assert population[2].fitness.values == (2.0, )
 
 
 if __name__ == "__main__":
