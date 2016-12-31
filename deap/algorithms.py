@@ -46,17 +46,17 @@ def varAnd(population, toolbox, cxpb, mutpb):
 
     The variation goes as follow. First, the parental population
     :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
-    and the result is put into the offspring population :math:`P_\mathrm{o}`.
-    A first loop over :math:`P_\mathrm{o}` is executed to mate pairs of consecutive
-    individuals. According to the crossover probability *cxpb*, the
+    and the result is put into the offspring population :math:`P_\mathrm{o}`.  A
+    first loop over :math:`P_\mathrm{o}` is executed to mate pairs of
+    consecutive individuals. According to the crossover probability *cxpb*, the
     individuals :math:`\mathbf{x}_i` and :math:`\mathbf{x}_{i+1}` are mated
     using the :meth:`toolbox.mate` method. The resulting children
     :math:`\mathbf{y}_i` and :math:`\mathbf{y}_{i+1}` replace their respective
     parents in :math:`P_\mathrm{o}`. A second loop over the resulting
     :math:`P_\mathrm{o}` is executed to mutate every individual with a
     probability *mutpb*. When an individual is mutated it replaces its not
-    mutated version in :math:`P_\mathrm{o}`. The resulting
-    :math:`P_\mathrm{o}` is returned.
+    mutated version in :math:`P_\mathrm{o}`. The resulting :math:`P_\mathrm{o}`
+    is returned.
 
     This variation is named *And* beceause of its propention to apply both
     crossover and mutation on the individuals. Note that both operators are
@@ -70,7 +70,8 @@ def varAnd(population, toolbox, cxpb, mutpb):
     # Apply crossover and mutation on the offspring
     for i in range(1, len(offspring), 2):
         if random.random() < cxpb:
-            offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1], offspring[i])
+            offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
+                                                          offspring[i])
             del offspring[i - 1].fitness.values, offspring[i].fitness.values
 
     for i in range(len(offspring)):
@@ -223,8 +224,9 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     shall be in :math:`[0, 1]`, the reproduction probability is
     1 - *cxpb* - *mutpb*.
     """
-    assert (cxpb + mutpb) <= 1.0, ("The sum of the crossover and mutation "
-                                   "probabilities must be smaller or equal to 1.0.")
+    assert (cxpb + mutpb) <= 1.0, (
+        "The sum of the crossover and mutation probabilities must be smaller "
+        "or equal to 1.0.")
 
     offspring = []
     for _ in xrange(lambda_):
@@ -382,9 +384,9 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
     .. note::
 
-        Care must be taken when the lambda:mu ratio is 1 to 1 as a non-stochastic
-        selection will result in no selection at all as
-        the operator selects *lambda* individuals from a pool of *mu*.
+        Care must be taken when the lambda:mu ratio is 1 to 1 as a
+        non-stochastic selection will result in no selection at all as the
+        operator selects *lambda* individuals from a pool of *mu*.
 
 
     This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
