@@ -13,8 +13,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
-import math
 
 def bin2float(min_, max_, nbits):
     """Convert a binary array into an array of float where each
@@ -27,13 +25,9 @@ def bin2float(min_, max_, nbits):
     """
     def wrap(function):
         def wrapped_function(individual, *args, **kargs):
-            nelem = len(individual)/nbits
-            if nelem.is_integer():
-                nelem = int(nelem)
-            else:
-                raise ValueError(
-                    "Got an array of size %s to divide into %s parts" % (
-                        nbits, nelem))
+            # // Forces the division behavior to be the same in python2 and
+            # python3; user must take care to make nelem an integer.
+            nelem = len(individual)//nbits
             decoded = [0] * nelem
             for i in xrange(nelem):
                 gene = int("".join(map(str,
@@ -45,6 +39,7 @@ def bin2float(min_, max_, nbits):
         return wrapped_function
     return wrap
 
+
 def trap(individual):
     u = sum(individual)
     k = len(individual)
@@ -53,6 +48,7 @@ def trap(individual):
     else:
         return k - 1 - u
 
+
 def inv_trap(individual):
     u = sum(individual)
     k = len(individual)
@@ -60,6 +56,7 @@ def inv_trap(individual):
         return k
     else:
         return u - 1
+
 
 def chuang_f1(individual):
     """Binary deceptive function from : Multivariate Multi-Model Approach for
@@ -70,12 +67,13 @@ def chuang_f1(individual):
     """
     total = 0
     if individual[-1] == 0:
-        for i in xrange(0,len(individual)-1,4):
+        for i in xrange(0, len(individual)-1, 4):
             total += inv_trap(individual[i:i+4])
     else:
-        for i in xrange(0,len(individual)-1,4):
+        for i in xrange(0, len(individual)-1, 4):
             total += trap(individual[i:i+4])
     return total,
+
 
 def chuang_f2(individual):
     """Binary deceptive function from : Multivariate Multi-Model Approach for
@@ -86,18 +84,19 @@ def chuang_f2(individual):
     """
     total = 0
     if individual[-2] == 0 and individual[-1] == 0:
-        for i in xrange(0,len(individual)-2,8):
+        for i in xrange(0, len(individual)-2, 8):
             total += inv_trap(individual[i:i+4]) + inv_trap(individual[i+4:i+8])
     elif individual[-2] == 0 and individual[-1] == 1:
-        for i in xrange(0,len(individual)-2,8):
+        for i in xrange(0, len(individual)-2, 8):
             total += inv_trap(individual[i:i+4]) + trap(individual[i+4:i+8])
     elif individual[-2] == 1 and individual[-1] == 0:
-        for i in xrange(0,len(individual)-2,8):
+        for i in xrange(0, len(individual)-2, 8):
             total += trap(individual[i:i+4]) + inv_trap(individual[i+4:i+8])
     else:
-        for i in xrange(0,len(individual)-2,8):
+        for i in xrange(0, len(individual)-2, 8):
             total += trap(individual[i:i+4]) + trap(individual[i+4:i+8])
     return total,
+
 
 def chuang_f3(individual):
     """Binary deceptive function from : Multivariate Multi-Model Approach for
@@ -108,26 +107,28 @@ def chuang_f3(individual):
     """
     total = 0
     if individual[-1] == 0:
-        for i in xrange(0,len(individual)-1,4):
+        for i in xrange(0, len(individual)-1, 4):
             total += inv_trap(individual[i:i+4])
     else:
-        for i in xrange(2,len(individual)-3,4):
+        for i in xrange(2, len(individual)-3, 4):
             total += inv_trap(individual[i:i+4])
         total += trap(individual[-2:]+individual[:2])
     return total,
+
 
 # Royal Road Functions
 def royal_road1(individual, order):
     """Royal Road Function R1 as presented by Melanie Mitchell in :
     "An introduction to Genetic Algorithms".
     """
-    nelem = len(individual) / order
+    nelem = len(individual) // order
     max_value = int(2**order - 1)
     total = 0
     for i in xrange(nelem):
         value = int("".join(map(str, individual[i*order:i*order+order])), 2)
         total += int(order) * int(value/max_value)
     return total,
+
 
 def royal_road2(individual, order):
     """Royal Road Function R2 as presented by Melanie Mitchell in :
@@ -139,4 +140,3 @@ def royal_road2(individual, order):
         total += royal_road1(norder, individual)[0]
         norder *= 2
     return total,
-
