@@ -1,19 +1,11 @@
 """Test functions from deap/benchmarks."""
-import sys
-import platform
-import random
 import unittest
 from nose import with_setup
 from past.builtins import xrange
 
-import numpy
-
-from deap import algorithms
 from deap import base
 from deap import benchmarks
-from deap import cma
 from deap import creator
-from deap import tools
 from deap.benchmarks import binary
 
 
@@ -53,5 +45,5 @@ class BenchmarkTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestBenchmark)
+    suite = unittest.TestLoader().loadTestsFromTestCase(BenchmarkTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
