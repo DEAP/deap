@@ -13,8 +13,8 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-import math
 from __future__ import division
+import math
 
 def bin2float(min_, max_, nbits):
     """Convert a binary array into an array of float where each
