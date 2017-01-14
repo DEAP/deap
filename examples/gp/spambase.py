@@ -44,20 +44,28 @@ pset.addPrimitive(operator.not_, [bool], bool)
 
 # floating point operators
 # Define a protected division function
-def protectedDiv(left, right):
-    try: return left / right
-    except ZeroDivisionError: return 1
 
-pset.addPrimitive(operator.add, [float,float], float)
-pset.addPrimitive(operator.sub, [float,float], float)
-pset.addPrimitive(operator.mul, [float,float], float)
-pset.addPrimitive(protectedDiv, [float,float], float)
+
+def protectedDiv(left, right):
+    try:
+        return left / right
+    except ZeroDivisionError:
+        return 1
+
+pset.addPrimitive(operator.add, [float, float], float)
+pset.addPrimitive(operator.sub, [float, float], float)
+pset.addPrimitive(operator.mul, [float, float], float)
+pset.addPrimitive(protectedDiv, [float, float], float)
 
 # logic operators
 # Define a new if-then-else function
+
+
 def if_then_else(input, output1, output2):
-    if input: return output1
-    else: return output2
+    if input:
+        return output1
+    else:
+        return output2
 
 pset.addPrimitive(operator.lt, [float, float], bool)
 pset.addPrimitive(operator.eq, [float, float], bool)
@@ -77,6 +85,7 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ex
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("compile", gp.compile, pset=pset)
 
+
 def evalSpambase(individual):
     # Transform the tree expression in a callable function
     func = toolbox.compile(expr=individual)
@@ -85,12 +94,13 @@ def evalSpambase(individual):
     # Evaluate the sum of correctly identified mail as spam
     result = sum(bool(func(*mail[:57])) is bool(mail[57]) for mail in spam_samp)
     return result,
-    
+
 toolbox.register("evaluate", evalSpambase)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
+
 
 def main():
     random.seed(10)
@@ -101,7 +111,7 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof)
 
     return pop, stats, hof

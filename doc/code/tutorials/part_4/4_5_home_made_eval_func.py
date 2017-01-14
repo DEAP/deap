@@ -31,25 +31,31 @@ import sortingnetwork as sn
 
 INPUTS = 11
 
+
 def evalEvoSN(individual, dimension):
-    fit,depth,length= snc.evalNetwork(dimension, individual)
+    fit, depth, length = snc.evalNetwork(dimension, individual)
     return fit, length, depth
+
 
 def genWire(dimension):
     return (random.randrange(dimension), random.randrange(dimension))
-    
+
+
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
     return [genWire(dimension) for i in xrange(size)]
-    
+
+
 def mutWire(individual, dimension, indpb):
     for index, elem in enumerate(individual):
         if random.random() < indpb:
-            individual[index] = genWire(dimension)      
+            individual[index] = genWire(dimension)
+
 
 def mutAddWire(individual, dimension):
     index = random.randint(0, len(individual))
     individual.insert(index, genWire(dimension))
+
 
 def mutDelWire(individual):
     index = random.randrange(len(individual))
@@ -74,12 +80,13 @@ toolbox.register("addwire", mutAddWire, dimension=INPUTS)
 toolbox.register("delwire", mutDelWire)
 toolbox.register("select", tools.selNSGA2)
 
+
 def main():
     random.seed(64)
 
     population = toolbox.population(n=500)
     hof = tools.ParetoFront()
-    
+
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
     stats.register("Std", tools.std)
@@ -87,15 +94,15 @@ def main():
     stats.register("Max", max)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 10
-    
+
     # Evaluate every individuals
     fitnesses = toolbox.map(toolbox.evaluate, population)
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
-    
+
     hof.update(population)
     stats.update(population)
-    
+
     # Begin the evolution
     for g in xrange(NGEN):
         t1 = time.time()
@@ -127,31 +134,30 @@ def main():
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        
+
         print "  Evaluated %i individuals" % len(invalid_ind)
         t5 = time.time()
-        population = toolbox.select(population+offspring, len(offspring))
+        population = toolbox.select(population + offspring, len(offspring))
         t6 = time.time()
-        #hof.update(population)
+        # hof.update(population)
         stats.update(population)
         t7 = time.time()
         print stats
-        
+
         print("Times :")
-        print("Clone : " + str(t2-t1) + " (" + str((t2-t1)/(t7-t1)) +"%)")
-        print("Cx : " + str(t3-t2) + " (" + str((t3-t2)/(t7-t1)) +"%)")
-        print("Mut : " + str(t4-t3) + " (" + str((t4-t3)/(t7-t1)) +"%)")
-        print("Eval : " + str(t5-t4) + " (" + str((t5-t4)/(t7-t1)) +"%)")
-        print("Select : " + str(t6-t5) + " (" + str((t6-t5)/(t7-t1)) +"%)")
-        print("HOF + stats : " + str(t7-t6) + " (" + str((t7-t6)/(t7-t1)) +"%)")
-        print("TOTAL : " + str(t7-t1))
-        
+        print("Clone : " + str(t2 - t1) + " (" + str((t2 - t1) / (t7 - t1)) + "%)")
+        print("Cx : " + str(t3 - t2) + " (" + str((t3 - t2) / (t7 - t1)) + "%)")
+        print("Mut : " + str(t4 - t3) + " (" + str((t4 - t3) / (t7 - t1)) + "%)")
+        print("Eval : " + str(t5 - t4) + " (" + str((t5 - t4) / (t7 - t1)) + "%)")
+        print("Select : " + str(t6 - t5) + " (" + str((t6 - t5) / (t7 - t1)) + "%)")
+        print("HOF + stats : " + str(t7 - t6) + " (" + str((t7 - t6) / (t7 - t1)) + "%)")
+        print("TOTAL : " + str(t7 - t1))
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print best_network
     print best_network.draw()
     print "%i errors, length %i, depth %i" % hof[0].fitness.values
-    
+
     return population, stats, hof
 
 if __name__ == "__main__":

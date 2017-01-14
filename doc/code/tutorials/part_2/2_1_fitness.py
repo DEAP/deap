@@ -1,9 +1,9 @@
-## 2.1 Fitness
+# 2.1 Fitness
 from deap import base
 from deap import creator
 
-## FitnessMin
+# FitnessMin
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 
-## FitnessMulti
+# FitnessMulti
 creator.create("FitnessMulti", base.Fitness, weights=(-1.0, 1.0))

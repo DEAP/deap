@@ -1,4 +1,4 @@
-## 2.3.2 Grid
+# 2.3.2 Grid
 import random
 
 from deap import base

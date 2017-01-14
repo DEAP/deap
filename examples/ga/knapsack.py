@@ -31,7 +31,7 @@ NBR_ITEMS = 20
 # dict initialization. It is also seeded in main().
 random.seed(64)
 
-# Create the item dictionary: item name is an integer, and value is 
+# Create the item dictionary: item name is an integer, and value is
 # a (weight, value) 2-uple.
 items = {}
 # Create random items and store them in the items' dictionary.
@@ -47,9 +47,10 @@ toolbox = base.Toolbox()
 toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual, 
-    toolbox.attr_item, IND_INIT_SIZE)
+toolbox.register("individual", tools.initRepeat, creator.Individual,
+                 toolbox.attr_item, IND_INIT_SIZE)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
 
 def evalKnapsack(individual):
     weight = 0.0
@@ -61,6 +62,7 @@ def evalKnapsack(individual):
         return 10000, 0             # Ensure overweighted bags are dominated
     return weight, value
 
+
 def cxSet(ind1, ind2):
     """Apply a crossover operation on input sets. The first child is the
     intersection of the two sets, the second child is the difference of the
@@ -70,7 +72,8 @@ def cxSet(ind1, ind2):
     ind1 &= ind2                    # Intersection (inplace)
     ind2 ^= temp                    # Symmetric Difference (inplace)
     return ind1, ind2
-    
+
+
 def mutSet(individual):
     """Mutation that pops or add an element."""
     if random.random() < 0.5:
@@ -85,6 +88,7 @@ toolbox.register("mate", cxSet)
 toolbox.register("mutate", mutSet)
 toolbox.register("select", tools.selNSGA2)
 
+
 def main():
     random.seed(64)
     NGEN = 50
@@ -92,7 +96,7 @@ def main():
     LAMBDA = 100
     CXPB = 0.7
     MUTPB = 0.2
-    
+
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -100,11 +104,11 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
+
     algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
                               halloffame=hof)
-    
+
     return pop, stats, hof
-                 
+
 if __name__ == "__main__":
-    main()                 
+    main()

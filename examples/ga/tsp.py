@@ -44,6 +44,7 @@ toolbox.register("indices", random.sample, range(IND_SIZE), IND_SIZE)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+
 def evalTSP(individual):
     distance = distance_map[individual[-1]][individual[0]]
     for gene1, gene2 in zip(individual[0:-1], individual[1:]):
@@ -54,6 +55,7 @@ toolbox.register("mate", tools.cxPartialyMatched)
 toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evalTSP)
+
 
 def main():
     random.seed(169)
@@ -66,10 +68,10 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats, 
+
+    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats,
                         halloffame=hof)
-    
+
     return pop, stats, hof
 
 if __name__ == "__main__":

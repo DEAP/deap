@@ -24,6 +24,7 @@ from deap import creator
 from deap import tools
 from deap import gp
 
+
 def if_then_else(condition, out1, out2):
     return out1 if condition else out2
 
@@ -46,7 +47,7 @@ for i in range(2 ** MUX_TOTAL_LINES):
         if value >= divisor:
             inputs[i][j] = 1
             value -= divisor
-    
+
     # Determine the corresponding output
     indexOutput = MUX_SELECT_LINES
     for j, k in enumerate(inputs[i][:MUX_SELECT_LINES]):
@@ -70,6 +71,7 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ex
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 toolbox.register("compile", gp.compile, pset=pset)
 
+
 def evalMultiplexer(individual):
     func = toolbox.compile(expr=individual)
     return sum(func(*in_) == out for in_, out in zip(inputs, outputs)),
@@ -80,8 +82,9 @@ toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
+
 def main():
-#    random.seed(10)
+    #    random.seed(10)
     pop = toolbox.population(n=40)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -89,11 +92,10 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     algorithms.eaSimple(pop, toolbox, 0.8, 0.1, 40, stats, halloffame=hof)
-    
+
     return pop, stats, hof
 
 if __name__ == "__main__":
     main()
-

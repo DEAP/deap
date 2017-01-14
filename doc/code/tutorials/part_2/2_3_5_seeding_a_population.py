@@ -7,8 +7,10 @@ from deap import creator
 creator.create("FitnessMax", base.Fitness, weights=(1.0, 1.0))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
+
 def initIndividual(icls, content):
     return icls(content)
+
 
 def initPopulation(pcls, ind_init, filename):
     with open(filename, "r") as pop_file:

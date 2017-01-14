@@ -32,11 +32,13 @@ NDIM = 10
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
+
 def mutDE(y, a, b, c, f):
     size = len(y)
     for i in range(len(y)):
-        y[i] = a[i] + f*(b[i]-c[i])
+        y[i] = a[i] + f * (b[i] - c[i])
     return y
+
 
 def cxBinomial(x, y, cr):
     size = len(x)
@@ -45,6 +47,7 @@ def cxBinomial(x, y, cr):
         if i == index or random.random() < cr:
             x[i] = y[i]
     return x
+
 
 def cxExponential(x, y, cr):
     size = len(x)
@@ -65,27 +68,28 @@ toolbox.register("mate", cxExponential, cr=0.8)
 toolbox.register("select", tools.selRandom, k=3)
 toolbox.register("evaluate", benchmarks.griewank)
 
+
 def main():
     # Differential evolution parameters
     MU = NDIM * 10
-    NGEN = 200    
-    
-    pop = toolbox.population(n=MU);
+    NGEN = 200
+
+    pop = toolbox.population(n=MU)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
-    
+
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
-    
+
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)
     print(logbook.stream)
@@ -101,21 +105,21 @@ def main():
             z = toolbox.mate(x, y)
             del z.fitness.values
             children.append(z)
-            
+
         fitnesses = toolbox.map(toolbox.evaluate, children)
         for (i, ind), fit in zip(enumerate(children), fitnesses):
             ind.fitness.values = fit
             if ind.fitness > pop[i].fitness:
                 pop[i] = ind
-        
+
         hof.update(pop)
         record = stats.compile(pop)
         logbook.record(gen=g, evals=len(pop), **record)
         print(logbook.stream)
-    
+
     print("Best individual is ", hof[0])
     print("with fitness", hof[0].fitness.values[0])
     return logbook
-            
+
 if __name__ == "__main__":
     main()

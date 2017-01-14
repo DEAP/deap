@@ -27,9 +27,9 @@ from deap import tools
 
 # kNN parameters
 import knn
-FILE="heart_scale.csv"
-N_TRAIN=175
-K=1
+FILE = "heart_scale.csv"
+N_TRAIN = 175
+K = 1
 
 # Read data from file
 with open(FILE, "r") as data_csv:
@@ -46,10 +46,11 @@ for row in rows:
 classifier = knn.KNN(K)
 classifier.train(trainset[:N_TRAIN], trainlabels[:N_TRAIN])
 
+
 def evalClassifier(individual):
     labels = classifier.predict(trainset[N_TRAIN:], individual)
     return sum(x == y for x, y in zip(labels, trainlabels[N_TRAIN:]))  / float(len(trainlabels[N_TRAIN:])), \
-           sum(individual) / float(classifier.ndim)
+        sum(individual) / float(classifier.ndim)
 
 creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMulti)
@@ -78,11 +79,11 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
+
     pop, logbook = algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA,
-                                             cxpb=0.7, mutpb=0.3, ngen=40, 
+                                             cxpb=0.7, mutpb=0.3, ngen=40,
                                              stats=stats, halloffame=hof)
-    
+
     return pop, logbook, hof
 
 if __name__ == "__main__":

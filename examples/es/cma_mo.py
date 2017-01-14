@@ -37,9 +37,11 @@ MAX_BOUND = numpy.ones(N)
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
+
 def distance(feasible_ind, original_ind):
     """A distance function to the feasibility region."""
     return sum((f - o)**2 for f, o in zip(feasible_ind, original_ind))
+
 
 def closest_feasible(individual):
     """A function returning a valid individual from an invalid one."""
@@ -47,6 +49,7 @@ def closest_feasible(individual):
     feasible_ind = numpy.maximum(MIN_BOUND, feasible_ind)
     feasible_ind = numpy.minimum(MAX_BOUND, feasible_ind)
     return feasible_ind
+
 
 def valid(individual):
     """Determines if the individual is valid or not."""
@@ -57,6 +60,7 @@ def valid(individual):
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.zdt1)
 toolbox.decorate("evaluate", tools.ClosestValidPenalty(valid, closest_feasible, 1.0e-6, distance))
+
 
 def main():
     # The cma module uses the numpy random number generator
@@ -79,7 +83,7 @@ def main():
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-   
+
     logbook = tools.Logbook()
     logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
 
@@ -91,10 +95,10 @@ def main():
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
-        
+
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
-        
+
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
@@ -102,9 +106,9 @@ def main():
 
     if verbose:
         print("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0]))
-    
+
     # import matplotlib.pyplot as plt
-    
+
     # valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if valid(ind)])
     # invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not valid(ind)])
 
@@ -117,7 +121,7 @@ def main():
     #     plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
 
     # plt.show()
-    
+
     return strategy.parents
 
 if __name__ == "__main__":

@@ -43,6 +43,7 @@ toolbox.register("attr_bool", random.randint, 0, 1)
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+
 def evalOneMax(individual):
     return sum(individual),
 
@@ -53,11 +54,11 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 
 if __name__ == "__main__":
     random.seed(64)
-    
+
     # Process Pool of 4 workers
     pool = multiprocessing.Pool(processes=4)
     toolbox.register("map", pool.map)
-    
+
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, 
+    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40,
                         stats=stats, halloffame=hof)
 
     pool.close()

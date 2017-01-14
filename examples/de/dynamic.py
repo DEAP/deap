@@ -38,6 +38,7 @@ BOUNDS = [scenario["min_coord"], scenario["max_coord"]]
 
 mpb = movingpeaks.MovingPeaks(dim=NDIM, **scenario)
 
+
 def brown_ind(iclass, best, sigma):
     return iclass(random.gauss(x, sigma) for x in best)
 
@@ -53,6 +54,7 @@ toolbox.register("select", random.sample, k=4)
 toolbox.register("best", tools.selBest, k=1)
 toolbox.register("evaluate", mpb)
 
+
 def main(verbose=True):
     NPOP = 10   # Should be equal to the number of peaks
     CR = 0.6
@@ -64,7 +66,7 @@ def main(verbose=True):
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "error", "offline_error", "avg", "max"
 
@@ -92,7 +94,7 @@ def main(verbose=True):
                 del individual.fitness.values
 
         # Apply exclusion
-        rexcl = (BOUNDS[1] - BOUNDS[0]) / (2 * NPOP**(1.0/NDIM))
+        rexcl = (BOUNDS[1] - BOUNDS[0]) / (2 * NPOP**(1.0 / NDIM))
         for i, j in itertools.combinations(range(NPOP), 2):
             if bests[i].fitness.valid and bests[j].fitness.valid:
                 d = sum((bests[i][k] - bests[j][k])**2 for k in range(NDIM))
@@ -105,7 +107,7 @@ def main(verbose=True):
                         k = j
 
                     populations[k] = toolbox.population(n=regular + brownian)
-        
+
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in itertools.chain(*populations) if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
@@ -143,7 +145,7 @@ def main(verbose=True):
             for individual in newpop[-brownian:]:
                 individual.fitness.value = toolbox.evaluate(individual)
 
-            # Replace the population 
+            # Replace the population
             populations[idx] = newpop
 
         g += 1

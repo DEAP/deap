@@ -39,6 +39,7 @@ toolbox.register("attr_bool", random.randint, 0, 1)
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, 100)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+
 def evalOneMax(individual):
     return sum(individual),
 
@@ -47,6 +48,7 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("map", futures.map)
+
 
 def main():
     random.seed(64)
@@ -59,7 +61,7 @@ def main():
     toolbox.unregister("population")
 
     NGEN, FREQ = 40, 5
-    toolbox.register("algorithm", algorithms.eaSimple, toolbox=toolbox, 
+    toolbox.register("algorithm", algorithms.eaSimple, toolbox=toolbox,
                      cxpb=0.5, mutpb=0.2, ngen=FREQ, verbose=False)
     for i in range(0, NGEN, FREQ):
         results = toolbox.map(toolbox.algorithm, islands)

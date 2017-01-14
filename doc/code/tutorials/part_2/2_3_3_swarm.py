@@ -1,4 +1,4 @@
-## 2.2.6 Particle
+# 2.2.6 Particle
 import random
 
 from deap import base
@@ -9,6 +9,7 @@ creator.create("FitnessMax", base.Fitness, weights=(1.0, 1.0))
 creator.create("Particle", list, fitness=creator.FitnessMax, speed=None,
                smin=None, smax=None, best=None)
 creator.create("Swarm", list, gbest=None, gbestfit=creator.FitnessMax)
+
 
 def initParticle(pcls, size, pmin, pmax, smin, smax):
     part = pcls(random.uniform(pmin, pmax) for _ in xrange(size))

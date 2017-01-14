@@ -1,4 +1,4 @@
-## 2.2.1 List of floats
+# 2.2.1 List of floats
 import random
 import array
 import numpy
@@ -10,7 +10,7 @@ from deap import tools
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
-IND_SIZE=10
+IND_SIZE = 10
 
 toolbox = base.Toolbox()
 toolbox.register("attr_float", random.random)
