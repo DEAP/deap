@@ -17,7 +17,7 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     **different** individuals. For example, using a traditional tournament for
     replacement strategy will thus give undesirable effects, two individuals
     will most likely try to enter the same slot.
-    
+
     :param populations: A list of (sub-)populations on which to operate
                         migration.
     :param k: The number of individuals to migrate.
@@ -25,14 +25,14 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     :param replacement: The function to use to select which individuals will
                         be replaced. If :obj:`None` (default) the individuals
                         that leave the population are directly replaced.
-    :param migarray: A list of indices indicating where the individuals from 
+    :param migarray: A list of indices indicating where the individuals from
                      a particular position in the list goes. This defaults
                      to a ring migration.
     """
     nbr_demes = len(populations)
     if migarray is None:
         migarray = range(1, nbr_demes) + [0]
-    
+
     immigrants = [[] for i in xrange(nbr_demes)]
     emigrants = [[] for i in xrange(nbr_demes)]
 

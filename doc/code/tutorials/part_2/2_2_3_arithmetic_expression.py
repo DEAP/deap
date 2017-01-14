@@ -1,4 +1,4 @@
-## 2.2.3 Arithmetic expression
+# 2.2.3 Arithmetic expression
 import operator
 
 from deap import base

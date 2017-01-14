@@ -24,15 +24,17 @@ from deap import creator
 from deap import tools
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Particle", list, fitness=creator.FitnessMax, speed=list, 
-    smin=None, smax=None, best=None)
+creator.create("Particle", list, fitness=creator.FitnessMax, speed=list,
+               smin=None, smax=None, best=None)
+
 
 def generate(size, pmin, pmax, smin, smax):
-    part = creator.Particle(random.uniform(pmin, pmax) for _ in range(size)) 
+    part = creator.Particle(random.uniform(pmin, pmax) for _ in range(size))
     part.speed = [random.uniform(smin, smax) for _ in range(size)]
     part.smin = smin
     part.smax = smax
     return part
+
 
 def updateParticle(part, best, phi1, phi2):
     u1 = (random.uniform(0, phi1) for _ in range(len(part)))
@@ -52,6 +54,7 @@ toolbox.register("particle", generate, size=2, pmin=-6, pmax=6, smin=-3, smax=3)
 toolbox.register("population", tools.initRepeat, list, toolbox.particle)
 toolbox.register("update", updateParticle, phi1=2.0, phi2=2.0)
 toolbox.register("evaluate", benchmarks.h1)
+
 
 def main():
     pop = toolbox.population(n=5)
@@ -82,9 +85,8 @@ def main():
         # Gather all the fitnesses in one list and print the stats
         logbook.record(gen=g, evals=len(pop), **stats.compile(pop))
         print(logbook.stream)
-    
+
     return pop, logbook, best
 
 if __name__ == "__main__":
     main()
-

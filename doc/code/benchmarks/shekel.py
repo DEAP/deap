@@ -17,6 +17,7 @@ from deap import benchmarks
 A = [[0.5, 0.5], [0.25, 0.25], [0.25, 0.75], [0.75, 0.25], [0.75, 0.75]]
 C = [0.002, 0.005, 0.005, 0.005, 0.005]
 
+
 def shekel_arg0(sol):
     return benchmarks.shekel(sol, A, C)[0]
 
@@ -26,10 +27,10 @@ ax = Axes3D(fig)
 X = np.arange(0, 1, 0.01)
 Y = np.arange(0, 1, 0.01)
 X, Y = np.meshgrid(X, Y)
-Z = np.fromiter(map(shekel_arg0, zip(X.flat,Y.flat)), dtype=np.float, count=X.shape[0]*X.shape[1]).reshape(X.shape)
+Z = np.fromiter(map(shekel_arg0, zip(X.flat, Y.flat)), dtype=np.float, count=X.shape[0] * X.shape[1]).reshape(X.shape)
 
-ax.plot_surface(X, Y, Z, rstride=1, cstride=1,  norm=LogNorm(), cmap=cm.jet, linewidth=0.2)
- 
+ax.plot_surface(X, Y, Z, rstride=1, cstride=1, norm=LogNorm(), cmap=cm.jet, linewidth=0.2)
+
 plt.xlabel("x")
 plt.ylabel("y")
 

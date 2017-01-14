@@ -81,6 +81,7 @@ class Strategy(object):
        Self-Adaptation in Evolution Strategies. *Evolutionary Computation*
 
     """
+
     def __init__(self, centroid, sigma, **kargs):
         self.params = kargs
 
@@ -243,6 +244,7 @@ class StrategyOnePlusLambda(object):
     multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
 
     """
+
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
         self.sigma = sigma
@@ -362,6 +364,7 @@ class StrategyMultiObjective(object):
        for the MO-CMA-ES", 2010.
 
     """
+
     def __init__(self, population, sigma, **params):
         self.parents = population
         self.dim = len(self.parents[0])
@@ -460,7 +463,7 @@ class StrategyMultiObjective(object):
             ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
             ref = numpy.max(ref, axis=0) + 1
 
-            for i in range(len(mid_front) - k):
+            for _ in range(len(mid_front) - k):
                 idx = self.indicator(mid_front, ref=ref)
                 not_chosen.append(mid_front.pop(idx))
 

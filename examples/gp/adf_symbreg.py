@@ -25,6 +25,8 @@ from deap import gp
 from deap import tools
 
 # Define new functions
+
+
 def protectedDiv(left, right):
     try:
         return left / right
@@ -98,13 +100,14 @@ func_cycle = [toolbox.MAIN, toolbox.ADF0, toolbox.ADF1, toolbox.ADF2]
 toolbox.register('individual', tools.initCycle, creator.Individual, func_cycle)
 toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
+
 def evalSymbReg(individual):
     # Transform the tree expression in a callable function
     func = toolbox.compile(individual)
     # Evaluate the sum of squared difference between the expression
     # and the real function : x**4 + x**3 + x**2 + x
-    values = (x/10. for x in range(-10, 10))
-    diff_func = lambda x: (func(x)-(x**4 + x**3 + x**2 + x))**2
+    values = (x / 10. for x in range(-10, 10))
+    diff_func = lambda x: (func(x) - (x**4 + x**3 + x**2 + x))**2
     diff = sum(map(diff_func, values))
     return diff,
 
@@ -115,10 +118,11 @@ toolbox.register('mate', gp.cxOnePoint)
 toolbox.register('expr', gp.genFull, min_=1, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr)
 
+
 def main():
     random.seed(1024)
     ind = toolbox.individual()
-    
+
     pop = toolbox.population(n=100)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -126,12 +130,12 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
-    
+
     CXPB, MUTPB, NGEN = 0.5, 0.2, 40
-    
+
     # Evaluate the entire population
     for ind in pop:
         ind.fitness.values = toolbox.evaluate(ind)
@@ -140,13 +144,13 @@ def main():
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)
     print(logbook.stream)
-    
+
     for g in range(1, NGEN):
         # Select the offspring
         offspring = toolbox.select(pop, len(pop))
         # Clone the offspring
         offspring = [toolbox.clone(ind) for ind in offspring]
-    
+
         # Apply crossover and mutation
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
             for tree1, tree2 in zip(ind1, ind2):
@@ -160,23 +164,22 @@ def main():
                 if random.random() < MUTPB:
                     toolbox.mutate(individual=tree, pset=pset)
                     del ind.fitness.values
-                            
+
         # Evaluate the individuals with an invalid fitness
         invalids = [ind for ind in offspring if not ind.fitness.valid]
         for ind in invalids:
             ind.fitness.values = toolbox.evaluate(ind)
-                
+
         # Replacement of the population by the offspring
         pop = offspring
         hof.update(pop)
         record = stats.compile(pop)
         logbook.record(gen=g, evals=len(invalids), **record)
         print(logbook.stream)
-    
+
     print('Best individual : ', hof[0][0], hof[0].fitness)
-    
+
     return pop, stats, hof
-    
+
 if __name__ == "__main__":
     main()
-

@@ -49,6 +49,7 @@ class PrimitiveTree(list):
     have an attribute *arity* which defines the arity of the
     primitive. An arity of 0 is expected from terminals nodes.
     """
+
     def __init__(self, content):
         list.__init__(self, content)
 
@@ -203,7 +204,7 @@ class Primitive(object):
         return self.seq.format(*args)
 
     def __eq__(self, other):
-        if type(self) is type(other):
+        if isinstance(self, type(other)):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
         else:
@@ -230,7 +231,7 @@ class Terminal(object):
         return self.conv_fct(self.value)
 
     def __eq__(self, other):
-        if type(self) is type(other):
+        if isinstance(self, type(other)):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
         else:
@@ -243,6 +244,7 @@ class Ephemeral(Terminal):
     generated. This is an abstract base class. When subclassing, a
     staticmethod 'func' must be defined.
     """
+
     def __init__(self):
         Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
 
@@ -258,6 +260,7 @@ class PrimitiveSetTyped(object):
     Strongly Typed GP problem. The set also defined the researched
     function return type, and input arguments type and number.
     """
+
     def __init__(self, name, in_types, ret_type, prefix="ARG"):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
@@ -293,12 +296,12 @@ class PrimitiveSetTyped(object):
 
     def _add(self, prim):
         def addType(dict_, ret_type):
-            if not ret_type in dict_:
+            if ret_type not in dict_:
                 new_list = []
                 for type_, list_ in dict_.items():
                     if issubclass(type_, ret_type):
                         for item in list_:
-                            if not item in new_list:
+                            if item not in new_list:
                                 new_list.append(item)
                 dict_[ret_type] = new_list
 
@@ -386,7 +389,7 @@ class PrimitiveSetTyped(object):
         :param ret_type: type of the object returned by *ephemeral*.
         """
         module_gp = globals()
-        if not name in module_gp:
+        if name not in module_gp:
             class_ = type(name, (Ephemeral,), {'func': staticmethod(ephemeral),
                                                'ret': ret_type})
             module_gp[name] = class_
@@ -428,6 +431,7 @@ class PrimitiveSet(PrimitiveSetTyped):
     """Class same as :class:`~deap.gp.PrimitiveSetTyped`, except there is no
     definition of type.
     """
+
     def __init__(self, name, arity, prefix="ARG"):
         args = [__type__] * arity
         PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
@@ -971,7 +975,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         DOI 10.1007/s10710-015-9242-8
 
     """
-    def _genpop(n, pickfrom=[], acceptfunc=lambda s: True, producesizes=False):
+    def _genpop(n, pickfrom=None, acceptfunc=lambda s: True, producesizes=False):
         # Generate a population of n individuals, using individuals in
         # *pickfrom* if possible, with a *acceptfunc* acceptance function.
         # If *producesizes* is true, also return a list of the produced
@@ -981,6 +985,8 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         # default values) and 2) to generate the final population, in which
         # case pickfrom should be the natural population previously generated
         # and acceptfunc a function implementing the HARM-GP algorithm.
+        if pickfrom is None:
+            pickfrom = []
         producedpop = []
         producedpopsizes = []
         while len(producedpop) < n:

@@ -15,6 +15,7 @@ stats.register("std", numpy.std)
 stats.register("min", numpy.min)
 stats.register("max", numpy.max)
 
+
 def evalOneMax(individual):
     return sum(individual),
 
@@ -47,5 +48,5 @@ stats.register("max", numpy.max, axis=0)
 record = stats.compile(pop)
 print(record)
 
-pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=0, 
+pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=0,
                                    stats=stats, verbose=True)

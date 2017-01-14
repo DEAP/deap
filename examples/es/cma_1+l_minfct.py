@@ -22,7 +22,7 @@ from deap import cma
 from deap import creator
 from deap import tools
 
-N=5
+N = 5
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
@@ -31,24 +31,25 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.sphere)
 
+
 def main():
     numpy.random.seed()
 
     # The CMA-ES One Plus Lambda algorithm takes a initialized parent as argument
     parent = creator.Individual((numpy.random.rand() * 5) - 1 for _ in range(N))
     parent.fitness.values = toolbox.evaluate(parent)
-    
+
     strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=10)
     toolbox.register("generate", strategy.generate, ind_init=creator.Individual)
     toolbox.register("update", strategy.update)
 
-    hof = tools.HallOfFame(1)    
+    hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-   
+
     algorithms.eaGenerateUpdate(toolbox, ngen=200, halloffame=hof, stats=stats)
 
 if __name__ == "__main__":

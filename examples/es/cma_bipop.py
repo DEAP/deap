@@ -36,6 +36,7 @@ N = 30
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
+
 def main(verbose=True):
     NRESTARTS = 10  # Initialization + 9 I-POP restarts
     SIGMA0 = 2.0    # 1/5th of the domain [-5 5]
@@ -49,9 +50,9 @@ def main(verbose=True):
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbooks = list()
-    
+
     nsmallpopruns = 0
     smallbudget = list()
     largebudget = list()
@@ -74,9 +75,9 @@ def main(verbose=True):
             sigma = SIGMA0
             regime = 1
             largebudget += [0]
-        
+
         t = 0
-        
+
         # Set the termination criterion constants
         if regime == 1:
             MAXITER = 100 + 50 * (N + 3)**2 / numpy.sqrt(lambda_)
@@ -101,25 +102,25 @@ def main(verbose=True):
         strategy = cma.Strategy(centroid=numpy.random.uniform(-4, 4, N), sigma=sigma, lambda_=lambda_)
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
-        
+
         logbooks.append(tools.Logbook())
         logbooks[-1].header = "gen", "evals", "restart", "regime", "std", "min", "avg", "max"
-        
-        conditions = {"MaxIter" : False, "TolHistFun" : False, "EqualFunVals" : False,
-                      "TolX" : False, "TolUpSigma" : False, "Stagnation" : False,
-                      "ConditionCov" : False, "NoEffectAxis" : False, "NoEffectCoor" : False}
+
+        conditions = {"MaxIter": False, "TolHistFun": False, "EqualFunVals": False,
+                      "TolX": False, "TolUpSigma": False, "Stagnation": False,
+                      "ConditionCov": False, "NoEffectAxis": False, "NoEffectCoor": False}
 
         # Run the current regime until one of the following is true:
-        ## Note that the algorithm won't stop by itself on the optimum (0.0 on rastrigin).
+        # Note that the algorithm won't stop by itself on the optimum (0.0 on rastrigin).
         while not any(conditions.values()):
             # Generate a new population
             population = toolbox.generate()
-            
+
             # Evaluate the individuals
             fitnesses = toolbox.map(toolbox.evaluate, population)
             for ind, fit in zip(population, fitnesses):
                 ind.fitness.values = fit
-            
+
             halloffame.update(population)
             record = stats.compile(population)
             logbooks[-1].record(gen=t, evals=lambda_, restart=i, regime=regime, **record)
@@ -128,15 +129,15 @@ def main(verbose=True):
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
-                
+
             # Count the number of times the k'th best solution is equal to the best solution
             # At this point the population is sorted (method update)
             if population[-1].fitness == population[-EQUALFUNVALS_K].fitness:
                 equalfunvalues.append(1)
-            
+
             # Log the best and median value of this population
             bestvalues.append(population[-1].fitness.values)
-            medianvalues.append(population[int(round(len(population)/2.))].fitness.values)
+            medianvalues.append(population[int(round(len(population) / 2.))].fitness.values)
 
             # First run does not count into the budget
             if regime == 1 and i > 0:
@@ -151,7 +152,7 @@ def main(verbose=True):
             if t >= MAXITER:
                 # The maximum number of iteration per CMA-ES ran
                 conditions["MaxIter"] = True
-            
+
             mins.append(record["min"])
             if (len(mins) == mins.maxlen) and max(mins) - min(mins) < TOLHISTFUN:
                 # The range of the best values is smaller than the threshold
@@ -164,13 +165,13 @@ def main(verbose=True):
             if all(strategy.pc < TOLX) and all(numpy.sqrt(numpy.diag(strategy.C)) < TOLX):
                 # All components of pc and sqrt(diag(C)) are smaller than the threshold
                 conditions["TolX"] = True
-            
+
             # Need to transfor strategy.diagD[-1]**2 from pyp/numpy.float64 to python
             # float to avoid OverflowError
             if strategy.sigma / sigma > float(strategy.diagD[-1]**2) * TOLUPSIGMA:
                 # The sigma ratio is bigger than a threshold
                 conditions["TolUpSigma"] = True
-            
+
             if len(bestvalues) > STAGNATION_ITER and len(medianvalues) > STAGNATION_ITER and \
                numpy.median(bestvalues[-20:]) >= numpy.median(bestvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]) and \
                numpy.median(medianvalues[-20:]) >= numpy.median(medianvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]):

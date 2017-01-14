@@ -33,7 +33,7 @@ from deap import tools
 
 IND_INIT_SIZE = 3
 
-# Create the item dictionary: item id is an integer, and value is 
+# Create the item dictionary: item id is an integer, and value is
 # a (name, weight, value) 3-uple. Since the comic didn't specified a time for
 # each menu item, random was called to generate a time.
 ITEMS_NAME = "Mixed Fruit", "French Fries", "Side Salad", "Hot Wings", "Mozzarella Sticks", "Sampler Plate"
@@ -48,6 +48,7 @@ toolbox.register("attr_item", random.choice, ITEMS_NAME)
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_item, IND_INIT_SIZE)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
+
 def evalXKCD(individual, target_price):
     """Evaluates the fitness and return the error on the price and the time
     taken by the order if the chef can cook everything in parallel."""
@@ -58,12 +59,14 @@ def evalXKCD(individual, target_price):
         times.append(ITEMS[item][1])
     return abs(price - target_price), max(times)
 
+
 def cxCounter(ind1, ind2, indpb):
     """Swaps the number of perticular items between two individuals"""
     for key in ITEMS.keys():
         if random.random() < indpb:
             ind1[key], ind2[key] = ind2[key], ind1[key]
     return ind1, ind2
+
 
 def mutCounter(individual):
     """Adds or remove an item from an individual"""
@@ -81,6 +84,7 @@ toolbox.register("mate", cxCounter, indpb=0.5)
 toolbox.register("mutate", mutCounter)
 toolbox.register("select", tools.selNSGA2)
 
+
 def main():
     NGEN = 40
     MU = 100
@@ -90,7 +94,7 @@ def main():
 
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
-    
+
     price_stats = tools.Statistics(key=lambda ind: ind.fitness.values[0])
     time_stats = tools.Statistics(key=lambda ind: ind.fitness.values[1])
     stats = tools.MultiStatistics(price=price_stats, time=time_stats)

@@ -1,8 +1,9 @@
-## 3.6 Using the Toolbox
+# 3.6 Using the Toolbox
 from deap import base
 from deap import tools
 
 toolbox = base.Toolbox()
+
 
 def evaluateInd(individual):
     # Do some computation
@@ -14,7 +15,7 @@ toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evaluateInd)
 
-## Data structure and initializer creation
+# Data structure and initializer creation
 import random
 from deap import creator
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -24,9 +25,9 @@ toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.att
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 pop = toolbox.population(n=100)
-CXPB, MUTPB, NGEN= 0.7, 0.3, 25
+CXPB, MUTPB, NGEN = 0.7, 0.3, 25
 
-## 3.6.1 Using the Tools
+# 3.6.1 Using the Tools
 for g in range(NGEN):
     # Select the next generation individuals
     offspring = toolbox.select(pop, len(pop))

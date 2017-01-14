@@ -9,6 +9,7 @@ except:
 
 from deap import benchmarks
 
+
 def schwefel_arg0(sol):
     return benchmarks.schwefel(sol)[0]
 
@@ -18,10 +19,10 @@ ax = Axes3D(fig)
 X = np.arange(-500, 500, 10)
 Y = np.arange(-500, 500, 10)
 X, Y = np.meshgrid(X, Y)
-Z = np.fromiter(map(schwefel_arg0, zip(X.flat,Y.flat)), dtype=np.float, count=X.shape[0]*X.shape[1]).reshape(X.shape)
+Z = np.fromiter(map(schwefel_arg0, zip(X.flat, Y.flat)), dtype=np.float, count=X.shape[0] * X.shape[1]).reshape(X.shape)
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
- 
+
 plt.xlabel("x")
 plt.ylabel("y")
 

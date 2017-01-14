@@ -5,6 +5,7 @@ from deap import tools
 toolbox = base.Toolbox()
 MIN, MAX = -5, 5
 
+
 def checkBounds(min, max):
     def decorator(func):
         def wrapper(*args, **kargs):

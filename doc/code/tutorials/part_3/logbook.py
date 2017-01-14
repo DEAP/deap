@@ -12,7 +12,7 @@ print(logbook)
 gen, avg = logbook.select("gen", "avg")
 
 with open("logbook.pkl", "w") as lb_file:
-	pickle.dump(logbook, lb_file)
+    pickle.dump(logbook, lb_file)
 
 # Cleaning the pickle file ...
 import os

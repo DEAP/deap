@@ -25,8 +25,9 @@ creator.create("Individual", gp.PrimitiveTree, fitness=creator.FitnessMin)
 pset = gp.PrimitiveSet("MAIN", 1)
 pset.addPrimitive(operator.add, 2)
 pset.addPrimitive(operator.mul, 2)
-pset.addEphemeralConstant("rand101", lambda: random.randint(-1,1))
+pset.addEphemeralConstant("rand101", lambda: random.randint(-1, 1))
 pset.renameArguments(ARG0='x')
+
 
 def evalSymbReg(individual, points):
     # Transform the tree expression in a callable function
@@ -41,7 +42,7 @@ toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-toolbox.register("evaluate", evalSymbReg, points=[x/10. for x in range(-10,10)])
+toolbox.register("evaluate", evalSymbReg, points=[x / 10. for x in range(-10, 10)])
 toolbox.register("compile", gp.compile, pset=pset)
 
 pop = toolbox.population(n=100)
