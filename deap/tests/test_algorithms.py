@@ -153,7 +153,7 @@ def test_mo_cma_es():
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.zdt1)
-    toolbox.decorate("evaluate", tools.ClosestValidPenality(valid, closest_feasible, 1.0e-6, distance))
+    toolbox.decorate("evaluate", tools.ClosestValidPenalty(valid, closest_feasible, 1.0e-6, distance))
 
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
