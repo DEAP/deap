@@ -13,15 +13,13 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import division
 
 def bin2float(min_, max_, nbits):
     """Convert a binary array into an array of float where each
     float is composed of *nbits* and is between *min_* and *max_*
     and return the result of the decorated function.
 
-    .. note::
-        This decorator requires the first argument of
-        the evaluation function to be named *individual*.
     """
     def wrap(function):
         def wrapped_function(individual, *args, **kargs):
@@ -31,9 +29,10 @@ def bin2float(min_, max_, nbits):
             decoded = [0] * nelem
             for i in xrange(nelem):
                 gene = int("".join(map(str,
-                                       individual[i*nbits:i*nbits+nbits])), 2)
+                                       individual[i*nbits:i*nbits+nbits])),
+                           2)
                 div = 2**nbits - 1
-                temp = float(gene)/float(div)
+                temp = gene/div
                 decoded[i] = min_ + (temp * (max_ - min_))
             return function(decoded, *args, **kargs)
         return wrapped_function
