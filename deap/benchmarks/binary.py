@@ -14,6 +14,8 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import division
+from functools import wraps
+import math
 
 def bin2float(min_, max_, nbits):
     """Convert a binary array into an array of float where each
@@ -22,9 +24,9 @@ def bin2float(min_, max_, nbits):
 
     """
     def wrap(function):
+        @wraps(function)
         def wrapped_function(individual, *args, **kargs):
-            # // Forces the division behavior to be the same in python2 and
-            # python3; user must take care to make nelem an integer.
+            # User must take care to make nelem an integer.
             nelem = len(individual)//nbits
             decoded = [0] * nelem
             for i in xrange(nelem):
