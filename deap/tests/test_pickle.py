@@ -34,7 +34,7 @@ class Pickling(unittest.TestCase):
         del creator.IndArray
         del creator.IndNDArray
         del creator.IndTree
-    
+
     def test_pickle_fitness(self):
         fitness = creator.FitnessMax()
         fitness.values = (1.0,)
@@ -49,7 +49,7 @@ class Pickling(unittest.TestCase):
         ind_l = pickle.loads(ind_s)
         self.assertEqual(ind, ind_l, "Unpickled individual list != pickled individual list")
         self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
-         
+
     def test_pickle_ind_array(self):
         ind = creator.IndArray([1.0, 2.0, 3.0])
         ind.fitness.values = (4.0,)
@@ -66,7 +66,7 @@ class Pickling(unittest.TestCase):
         ind_l = pickle.loads(ind_s)
         self.assertTrue(all(ind == ind_l), "Unpickled individual numpy.ndarray != pickled individual numpy.ndarray")
         self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
-    
+
     def test_pickle_tree_input(self):
         pset = gp.PrimitiveSetTyped("MAIN", [int], int, "IN")
         pset.addPrimitive(operator.add, [int, int], int)
@@ -118,19 +118,19 @@ class Pickling(unittest.TestCase):
         ind2.fitness.values = (2.0,)
         ind3 = creator.IndList([7.0,8.0,9.0])
         ind3.fitness.values = (3.0,)
-        
+
         pop = [ind1, ind2, ind3]
-        
+
         pop_s = pickle.dumps(pop)
         pop_l = pickle.loads(pop_s)
-        
+
         self.assertEqual(pop[0], pop_l[0], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[0].fitness, pop_l[0].fitness, "Unpickled individual fitness != pickled individual fitness")
         self.assertEqual(pop[1], pop_l[1], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
         self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
-    
+
     @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays (thus stats) is very unstable.")
     def test_pickle_logbook(self):
         stats = tools.Statistics()
@@ -145,14 +145,13 @@ class Pickling(unittest.TestCase):
 
         self.assertEqual(logbook, logbook_r, "Unpickled logbook != pickled logbook")
 
-        
     @unittest.skipIf(sys.version_info < (2, 7), "Skipping test because Python version < 2.7 does not pickle partials.")
     def test_pickle_partial(self):
         func_s = pickle.dumps(self.toolbox.func)
         func_l = pickle.loads(func_s)
 
         self.assertEqual(self.toolbox.func(), func_l())
-        
+
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(Pickling)
