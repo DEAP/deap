@@ -657,7 +657,7 @@ def cxOnePoint(ind1, ind2):
         common_types = set(types1.keys()).intersection(set(types2.keys()))
 
     if len(common_types) > 0:
-        type_ = random.choice(list(common_types))
+        type_ = random.choice(sorted(common_types))
 
         index1 = random.choice(types1[type_])
         index2 = random.choice(types2[type_])
@@ -713,7 +713,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
 
     if len(common_types) > 0:
         # Set does not support indexing
-        type_ = random.sample(common_types, 1)[0]
+        type_ = random.sample(sorted(common_types), 1)[0]
         index1 = random.choice(types1[type_])
         index2 = random.choice(types2[type_])
 
