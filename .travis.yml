@@ -1,5 +1,10 @@
 sudo: false
 language: python
+branches:
+  only:
+    - master
+    - develop
+        
 matrix:
   include:
     - python: "2.7"
@@ -18,6 +23,7 @@ addons:
 install:
   - python setup.py install
   - pip install $NUMPY
+  - pip install future
   - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 --output-dir=py3k/deap -W -n deap; fi
 # command to run tests
 script:
