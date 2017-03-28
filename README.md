@@ -120,6 +120,8 @@ Authors of scientific papers including results generated using DEAP are encourag
   * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in !EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012. [Paper](http://goo.gl/pXXug)
 
 ## Projects using DEAP
+  * S. Chardon, B. Brangeon, E. Bozonnet, C. Inard (2016), Construction cost and energy performance of single family houses : From integrated design to automated optimization, Automation in Construction, Volume 70, p.1-13.
+  * B. Brangeon, E. Bozonnet, C. Inard (2016), Integrated refurbishment of collective housing and optimization process with real products databases, Building Simulation Optimization, pp. 531–538 Newcastle, England.
   * Randal S. Olson, Ryan J. Urbanowicz, Peter C. Andrews, Nicole A. Lavender, La Creis Kidd, and Jason H. Moore (2016). Automating biomedical data science through tree-based pipeline optimization. Applications of Evolutionary Computation, pages 123-137.
   * Randal S. Olson, Nathan Bartley, Ryan J. Urbanowicz, and Jason H. Moore (2016). Evaluation of a Tree-based Pipeline Optimization Tool for Automating Data Science. Proceedings of GECCO 2016, pages 485-492.
   * Van Geit W, Gevaert M, Chindemi G, Rössert C, Courcol J, Muller EB, Schürmann F, Segev I and Markram H (2016). BluePyOpt: Leveraging open source software and cloud infrastructure to optimise model parameters in neuroscience. Front. Neuroinform. 10:17. doi: 10.3389/fninf.2016.00017 https://github.com/BlueBrain/BluePyOpt
