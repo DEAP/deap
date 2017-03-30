@@ -243,15 +243,16 @@ def selLexicase(individuals, k):
     return selected_individuals
 
 def selEpsilonLexicase(individuals, k, epsilon='dynamic'):
-    """
-    Returns an individual that does the best on the fitness cases when 
+    """Returns an individual that does the best on the fitness cases when 
     considered one at a time in random order. Requires a epsilon parameter.
     https://push-language.hampshire.edu/uploads/default/original/1X/35c30e47ef6323a0a949402914453f277fb1b5b0.pdf
-    Implemented epsilon_y implementation.
 
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
-    :param epsilon: WRITE ME!
+    :param epsilon: If an individual is within epsilon of being elite, it will \
+    remain in the selection pool. If 'dynamic', epsilon is set at the start of \
+    each selection even. If 'super-dynamic', epsilon is set realtive to the \
+    current selection pool at each iteration of lexicase selection.
     :returns: A list of selected individuals.
     """
 
