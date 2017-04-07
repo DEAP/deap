@@ -639,12 +639,14 @@ def cxOnePoint(ind1, ind2):
     else:
         for idx, node in enumerate(ind1[1:], 1):
             types1[node.ret].append(idx)
+        common_types = []
         for idx, node in enumerate(ind2[1:], 1):
+            if node.ret in types1 and not node.ret in types2:
+                common_types.append(node.ret)
             types2[node.ret].append(idx)
-        common_types = set(types1.keys()).intersection(set(types2.keys()))
 
     if len(common_types) > 0:
-        type_ = random.choice(list(common_types))
+        type_ = random.choice(common_types)
 
         index1 = random.choice(types1[type_])
         index2 = random.choice(types2[type_])
