@@ -689,6 +689,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
     # List all available primitive or terminal types in each individual
     types1 = defaultdict(list)
     types2 = defaultdict(list)
+    common_types = []
 
     for idx, node in enumerate(ind1[1:], 1):
         if arity_op1(node.arity):
@@ -696,13 +697,13 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
 
     for idx, node in enumerate(ind2[1:], 1):
         if arity_op2(node.arity):
+            if node.ret in types1 and not node.ret in types2:
+                common_types.append(node.ret)
             types2[node.ret].append(idx)
 
-    common_types = set(types1.keys()).intersection(set(types2.keys()))
-
     if len(common_types) > 0:
-        # Set does not support indexing
-        type_ = random.sample(common_types, 1)[0]
+        type_ = random.choice(common_types)
+
         index1 = random.choice(types1[type_])
         index2 = random.choice(types2[type_])
 
