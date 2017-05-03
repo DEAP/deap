@@ -34,7 +34,7 @@ See the [DEAP User's Guide](http://deap.readthedocs.org/) for DEAP documentation
 In order to get the tip documentation, change directory to the `doc` subfolder and type in `make html`, the documentation will be under `_build/html`. You will need [Sphinx](http://sphinx.pocoo.org) to build the documentation.
 
 ### Notebooks
-Also checkout our new [notebook examples](https://github.com/DEAP/notebooks). Using [IPython's](http://ipython.org/) notebook feature you'll be able to navigate and execute each block of code individually and fell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
+Also checkout our new [notebook examples](https://github.com/DEAP/notebooks). Using [IPython's](http://ipython.org/) notebook feature you'll be able to navigate and execute each block of code individually and tell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
 
 ```bash
 ipython notebook --pylab inline
