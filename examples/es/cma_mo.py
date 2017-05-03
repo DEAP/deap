@@ -76,6 +76,7 @@ def main():
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
+    hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
@@ -94,6 +95,7 @@ def main():
         
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
+        hof.update(population)
         
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
@@ -103,22 +105,12 @@ def main():
     if verbose:
         print("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0]))
     
-    # import matplotlib.pyplot as plt
-    
-    # valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if valid(ind)])
-    # invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not valid(ind)])
-
-    # fig = plt.figure()
-
-    # if len(valid_front) > 0:
-    #     plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
-
-    # if len(invalid_front) > 0:
-    #     plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
-
-    # plt.show()
-    
-    return strategy.parents
+    return hof
 
 if __name__ == "__main__":
-    solutions = main()
+    hof = main()
+    from matplotlib import pyplot as plt
+    xseries = [i.fitness.values[0] for i in hof]
+    yseries = [i.fitness.values[1] for i in hof]
+    plt.plot(xseries, yseries, 'bo')
+    plt.show()
