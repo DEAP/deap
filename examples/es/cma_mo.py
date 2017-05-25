@@ -56,7 +56,7 @@ def valid(individual):
 
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.zdt1)
-toolbox.decorate("evaluate", tools.ClosestValidPenalty(valid, closest_feasible, 1.0e-6, distance))
+toolbox.decorate("evaluate", tools.ClosestValidPenalty(valid, closest_feasible, 1.0e+6, distance))
 
 def main():
     # The cma module uses the numpy random number generator
@@ -102,6 +102,20 @@ def main():
 
     if verbose:
         print("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0]))
+
+        # Note that we use a penalty to guide the search to feasible solutions,
+        # but there is no guarantee that individuals are valid.
+        # We expect the best individuals will be within bounds or very close.
+        num_valid = 0
+        for ind in strategy.parents:
+            dist = distance(closest_feasible(ind), ind)
+            if numpy.isclose(dist, 0.0, rtol=1.e-5, atol=1.e-5):
+                num_valid += 1
+        print("Number of valid individuals is %d/%d" % (num_valid, len(strategy.parents)))
+
+        #for ind in strategy.parents:
+        print("Final population:")
+        print(numpy.asarray(strategy.parents))
     
     # import matplotlib.pyplot as plt
     
