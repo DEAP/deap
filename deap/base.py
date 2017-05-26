@@ -195,7 +195,7 @@ class Fitness(object):
                                  self.weights)), traceback
 
     def delValues(self):
-        """Deleted weighted values."""
+        """Delete weighted values."""
         self.wvalues = ()
 
     values = property(getValues, setValues, delValues,
