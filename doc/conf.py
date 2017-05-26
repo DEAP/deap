@@ -28,7 +28,7 @@ import deap
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
               'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
-              'sphinx.ext.viewcode'] 
+              'sphinx.ext.viewcode']
 
 try:
     import matplotlib
@@ -119,7 +119,7 @@ plot_include_source = False
 #plot_pre_code
 
 # Base directory, to which ``plot::`` file names are relative
-# to.  (If None or empty, file names are relative to the 
+# to.  (If None or empty, file names are relative to the
 # directory where the file containing the directive is.)
 #plot_basedir
 
@@ -143,7 +143,7 @@ html_theme_path = ["_themes"]
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'classic' and 'alabaster'.
 html_theme = 'pydoctheme'
-#RTFD.org does not support sphinx 1.3.1 yet. 
+#RTFD.org does not support sphinx 1.3.1 yet.
 #html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
