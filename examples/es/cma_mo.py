@@ -29,6 +29,7 @@ N = 5
 # ZDT1, ZDT2, DTLZ2
 MIN_BOUND = numpy.zeros(N)
 MAX_BOUND = numpy.ones(N)
+EPS_BOUND = 2.e-5
 
 # Kursawe
 # MIN_BOUND = numpy.zeros(N) - 5
@@ -54,6 +55,12 @@ def valid(individual):
         return False
     return True
 
+def close_valid(individual):
+    """Determines if the individual is close to valid."""
+    if any(individual < MIN_BOUND-EPS_BOUND) or any(individual > MAX_BOUND+EPS_BOUND):
+        return False
+    return True
+
 toolbox = base.Toolbox()
 toolbox.register("evaluate", benchmarks.zdt1)
 toolbox.decorate("evaluate", tools.ClosestValidPenalty(valid, closest_feasible, 1.0e+6, distance))
@@ -65,6 +72,7 @@ def main():
     MU, LAMBDA = 10, 10
     NGEN = 500
     verbose = True
+    create_plot = False
 
     # The MO-CMA-ES algorithm takes a full population as argument
     population = [creator.Individual(x) for x in (numpy.random.uniform(0, 1, (MU, N)))]
@@ -83,6 +91,8 @@ def main():
     logbook = tools.Logbook()
     logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
 
+    fitness_history = []
+
     for gen in range(NGEN):
         # Generate a new population
         population = toolbox.generate()
@@ -91,6 +101,7 @@ def main():
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
+            fitness_history.append(fit)
         
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
@@ -113,25 +124,44 @@ def main():
                 num_valid += 1
         print("Number of valid individuals is %d/%d" % (num_valid, len(strategy.parents)))
 
-        #for ind in strategy.parents:
         print("Final population:")
         print(numpy.asarray(strategy.parents))
-    
-    # import matplotlib.pyplot as plt
-    
-    # valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if valid(ind)])
-    # invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not valid(ind)])
 
-    # fig = plt.figure()
+    if create_plot:
+        interactive = 0
+        if not interactive:
+            import matplotlib as mpl_tmp
+            mpl_tmp.use('Agg')   # Force matplotlib to not use any Xwindows backend.
+        import matplotlib.pyplot as plt
 
-    # if len(valid_front) > 0:
-    #     plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
+        fig = plt.figure()
+        plt.title("Multi-objective minimization via MO-CMA-ES")
+        plt.xlabel("First objective (function) to minimize")
+        plt.ylabel("Second objective (function) to minimize")
 
-    # if len(invalid_front) > 0:
-    #     plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
+        # Limit the scale because our history values include the penalty.
+        plt.xlim((-0.1, 1.20))
+        plt.ylim((-0.1, 1.20))
 
-    # plt.show()
-    
+        # Plot all history. Note the values include the penalty.
+        fitness_history = numpy.asarray(fitness_history)
+        plt.scatter(fitness_history[:,0], fitness_history[:,1],
+            facecolors='none', edgecolors="lightblue")
+
+        valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if close_valid(ind)])
+        invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not close_valid(ind)])
+
+        if len(valid_front) > 0:
+            plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
+        if len(invalid_front) > 0:
+            plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
+
+        if interactive:
+            plt.show()
+        else:
+            print("Writing cma_mo.png")
+            plt.savefig("cma_mo.png")
+
     return strategy.parents
 
 if __name__ == "__main__":
