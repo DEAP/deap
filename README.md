@@ -141,5 +141,6 @@ Authors of scientific papers including results generated using DEAP are encourag
   * DEAP is used in [TPOT](https://github.com/rhiever/tpot), an open source tool that uses genetic programming to optimize machine learning pipelines.
   * DEAP is also used in ROS as an optimization package http://www.ros.org/wiki/deap.
   * DEAP is an optional dependency for [PyXRD](https://github.com/mathijs-dumon/PyXRD), a Python implementation of the matrix algorithm developed for the X-ray diffraction analysis of disordered lamellar structures.
+  * DEAP is used in [glyph](https://github.com/Ambrosys/glyph), a library for symbolic regression with applications to [MLC](https://en.wikipedia.org/wiki/Machine_learning_control).
 
 If you want your project listed here, send us a link and a brief description and we'll be glad to add it.
