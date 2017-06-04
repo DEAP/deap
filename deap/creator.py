@@ -39,7 +39,7 @@ replacing classes.
 
 try:
     import numpy
-    (numpy.ndarray, numpy.array)
+    (_, _) = (numpy.ndarray, numpy.array)
 except ImportError:
     # Numpy is not present, skip the definition of the replacement class.
     pass

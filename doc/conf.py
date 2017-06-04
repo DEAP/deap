@@ -11,15 +11,16 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, time
+import sys
+import time
+
+import deap
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append("..")
 #sys.path.append(os.path.abspath('_ext/'))
-
-import deap
 
 # -- General configuration -----------------------------------------------------
 
@@ -28,15 +29,15 @@ import deap
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
               'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
-              'sphinx.ext.viewcode'] 
+              'sphinx.ext.viewcode']
 
 try:
     import matplotlib
 except:
     pass
 else:
-      extensions += ['matplotlib.sphinxext.only_directives',
-                     'matplotlib.sphinxext.plot_directive']
+    extensions += ['matplotlib.sphinxext.only_directives',
+                   'matplotlib.sphinxext.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -119,7 +120,7 @@ plot_include_source = False
 #plot_pre_code
 
 # Base directory, to which ``plot::`` file names are relative
-# to.  (If None or empty, file names are relative to the 
+# to.  (If None or empty, file names are relative to the
 # directory where the file containing the directive is.)
 #plot_basedir
 
@@ -143,7 +144,7 @@ html_theme_path = ["_themes"]
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'classic' and 'alabaster'.
 html_theme = 'pydoctheme'
-#RTFD.org does not support sphinx 1.3.1 yet. 
+#RTFD.org does not support sphinx 1.3.1 yet.
 #html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -224,8 +225,8 @@ htmlhelp_basename = 'DEAP-doc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'DEAP.tex', u'DEAP Documentation',
-   u'DEAP Project', 'manual'),
+    ('contents', 'DEAP.tex', u'DEAP Documentation',
+     u'DEAP Project', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

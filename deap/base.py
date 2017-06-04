@@ -178,9 +178,11 @@ class Fitness(object):
             self.values = values
 
     def getValues(self):
+        """Get weighted values."""
         return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
+        """Set weighted values."""
         try:
             self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
@@ -193,6 +195,7 @@ class Fitness(object):
                                  self.weights)), traceback
 
     def delValues(self):
+        """Delete weighted values."""
         self.wvalues = ()
 
     values = property(getValues, setValues, delValues,

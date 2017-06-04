@@ -27,7 +27,7 @@ you really want them to do.
 
 import random
 
-import tools
+from deap import tools
 
 
 def varAnd(population, toolbox, cxpb, mutpb):
@@ -74,9 +74,9 @@ def varAnd(population, toolbox, cxpb, mutpb):
                                                           offspring[i])
             del offspring[i - 1].fitness.values, offspring[i].fitness.values
 
-    for i in range(len(offspring)):
+    for i, offspr in enumerate(offspring):
         if random.random() < mutpb:
-            offspring[i], = toolbox.mutate(offspring[i])
+            offspring[i], = toolbox.mutate(offspr)
             del offspring[i].fitness.values
 
     return offspring
