@@ -11,15 +11,16 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, time
+import sys
+import time
+
+import deap
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.append("..")
 #sys.path.append(os.path.abspath('_ext/'))
-
-import deap
 
 # -- General configuration -----------------------------------------------------
 
@@ -35,8 +36,8 @@ try:
 except:
     pass
 else:
-      extensions += ['matplotlib.sphinxext.only_directives',
-                     'matplotlib.sphinxext.plot_directive']
+    extensions += ['matplotlib.sphinxext.only_directives',
+                   'matplotlib.sphinxext.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -224,8 +225,8 @@ htmlhelp_basename = 'DEAP-doc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'DEAP.tex', u'DEAP Documentation',
-   u'DEAP Project', 'manual'),
+    ('contents', 'DEAP.tex', u'DEAP Documentation',
+     u'DEAP Project', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
