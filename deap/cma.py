@@ -137,12 +137,12 @@ class Strategy(object):
         # Cumulation : update evolution path
         self.ps = (1 - self.cs) * self.ps \
             + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
-            * numpy.dot(self.B, (1. / self.diagD)
-                        * numpy.dot(self.B.T, c_diff))
+            * numpy.dot(self.B, (1. / self.diagD) *
+                        numpy.dot(self.B.T, c_diff))
 
         hsig = float((numpy.linalg.norm(self.ps) /
-                      sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN
-                      < (1.4 + 2. / (self.dim + 1.))))
+                      sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN <
+                      (1.4 + 2. / (self.dim + 1.))))
 
         self.update_count += 1
 
@@ -152,14 +152,14 @@ class Strategy(object):
 
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
-        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig)
-                  * self.ccov1 * self.cc * (2 - self.cc)) * self.C \
+        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) *
+                  self.ccov1 * self.cc * (2 - self.cc)) * self.C \
             + self.ccov1 * numpy.outer(self.pc, self.pc) \
             + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
             / self.sigma ** 2
 
-        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.)
-                                * self.cs / self.damps)
+        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) *
+                                self.cs / self.damps)
 
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
