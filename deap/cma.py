@@ -20,9 +20,9 @@
 """A module that provides support for the Covariance Matrix Adaptation
 Evolution Strategy.
 """
-import numpy
 import copy
 from math import sqrt, log, exp
+import numpy
 
 import tools
 
@@ -193,7 +193,7 @@ class Strategy(object):
 
         self.cc = params.get("ccum", 4. / (self.dim + 4.))
         self.cs = params.get("cs", (self.mueff + 2.) /
-                                   (self.dim + self.mueff + 3.))
+                             (self.dim + self.mueff + 3.))
         self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3) ** 2 +
                                                self.mueff))
         self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2. +
@@ -460,7 +460,7 @@ class StrategyMultiObjective(object):
             ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
             ref = numpy.max(ref, axis=0) + 1
 
-            for i in range(len(mid_front) - k):
+            for _ in range(len(mid_front) - k):
                 idx = self.indicator(mid_front, ref=ref)
                 not_chosen.append(mid_front.pop(idx))
 
