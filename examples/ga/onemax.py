@@ -98,7 +98,7 @@ def main():
     g = 0
     
     # Begin the evolution
-    while max(fits) < 100:
+    while max(fits) < 100 and g < 1000:
         # A new generation
         g = g + 1
         print("-- Generation %i --" % g)
