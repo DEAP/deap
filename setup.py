@@ -9,12 +9,7 @@ except ImportError:
     warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
     from disutils.core import setup, Extension
 
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    from distutils.command.build_py import build_py
-
-from distutils.command.build_ext import build_ext
+from setuptools.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
 
@@ -87,7 +82,7 @@ def run_setup(build_ext):
             'Topic :: Software Development',
             ],
          ext_modules = extra_modules,
-         cmdclass = {'build_py': build_py, "build_ext" : ve_build_ext},
+         cmdclass = {"build_ext" : ve_build_ext},
          use_2to3=True
     )
 

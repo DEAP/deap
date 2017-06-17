@@ -12,7 +12,7 @@ matrix:
     - python: "3.4"
       env: NUMPY=numpy
     - python: "pypy"
-      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git@pypy-2.6.0#egg=numpy"
+      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 addons:
   apt:
     packages:
@@ -21,13 +21,25 @@ addons:
       - liblapack-dev
 # command to install dependencies and translate deap in py3k
 install:
-  - python setup.py install
+  - |
+      if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
+        export PYENV_ROOT="$HOME/.pyenv"
+        if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
+          cd "$PYENV_ROOT" && git pull
+        else
+          rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
+        fi
+        export PYPY_VERSION="4.0.1"
+        "$PYENV_ROOT/bin/pyenv" install "pypy-$PYPY_VERSION"
+        virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
+        source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
+        NUMPY=$NUMPY"@pypy-4.0.1"
+        pip install nose
+      fi
   - pip install $NUMPY
-  - pip install future
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then 2to3 --output-dir=py3k/deap -W -n deap; fi
 # command to run tests
 script:
-  - if [[ ${TRAVIS_PYTHON_VERSION%%.*} == '3' ]]; then nosetests -v --where=py3k; else nosetests -v; fi
+  - python setup.py nosetests --verbosity=3
 notifications:
   webhooks:
     urls:

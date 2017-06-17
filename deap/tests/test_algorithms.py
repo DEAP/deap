@@ -51,7 +51,7 @@ def teardown_func():
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
 
-@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
+#@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_single_obj, teardown_func)
 def test_cma():
     NDIM = 5
@@ -119,7 +119,7 @@ def test_nsga2():
         assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
 
 
-@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
+#@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_multi_obj_numpy, teardown_func)
 def test_mo_cma_es():
 
