@@ -293,12 +293,12 @@ class PrimitiveSetTyped(object):
 
     def _add(self, prim):
         def addType(dict_, ret_type):
-            if not ret_type in dict_:
+            if ret_type not in dict_:
                 new_list = []
                 for type_, list_ in dict_.items():
                     if issubclass(type_, ret_type):
                         for item in list_:
-                            if not item in new_list:
+                            if item not in new_list:
                                 new_list.append(item)
                 dict_[ret_type] = new_list
 
@@ -386,7 +386,7 @@ class PrimitiveSetTyped(object):
         :param ret_type: type of the object returned by *ephemeral*.
         """
         module_gp = globals()
-        if not name in module_gp:
+        if name not in module_gp:
             class_ = type(name, (Ephemeral,), {'func': staticmethod(ephemeral),
                                                'ret': ret_type})
             module_gp[name] = class_
@@ -1024,7 +1024,9 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         else:
             return producedpop
 
-    halflifefunc = lambda x: (x * float(alpha) + beta)
+    def halflifefunc(x):
+        return x * float(alpha) + beta
+
     if nbrindsmodel == -1:
         nbrindsmodel = max(2000, len(population))
 
@@ -1071,16 +1073,21 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         cutoffsize = max(mincutoff, len(min(cutoffcandidates, key=len)))
 
         # Compute the target distribution
-        targetfunc = lambda x: (gamma * len(population) * math.log(2) /
-                                halflifefunc(x)) * math.exp(-math.log(2) *
-                                                            (x - cutoffsize) / halflifefunc(x))
+        def targetfunc(x):
+            return (gamma * len(population) * math.log(2) /
+                    halflifefunc(x)) * math.exp(-math.log(2) *
+                                                (x - cutoffsize) / halflifefunc(x))
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else
                       targetfunc(binidx) for binidx in range(len(naturalhist))]
 
         # Compute the probabilities distribution
         probhist = [t / n if n > 0 else t for n, t in zip(naturalhist, targethist)]
-        probfunc = lambda s: probhist[s] if s < len(probhist) else targetfunc(s)
-        acceptfunc = lambda s: random.random() <= probfunc(s)
+
+        def probfunc(s):
+            return probhist[s] if s < len(probhist) else targetfunc(s)
+
+        def acceptfunc(s):
+            return random.random() <= probfunc(s)
 
         # Generate offspring using the acceptance probabilities
         # previously computed
