@@ -30,8 +30,9 @@ Here is a list of the implemented operators in DEAP,
  ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`                  ..             
  ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament`               ..             
  ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selStochasticUniversalSampling`    ..             
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        ..                                        ..             
- ..                           :func:`cxMessyOnePoint`                     ..                                        ..                                        ..             
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        :func:`selLexicase`                      ..             
+ ..                           :func:`cxMessyOnePoint`                     ..                                        :func:`selEpsilonLexicase`                ..             
+ ..                           ..                                          ..                                        :func:`selAutomaticEpsilonLexicase`       ..             
 ============================ =========================================== ========================================= ========================================= ================
 
 and genetic programming specific operators.
@@ -147,6 +148,12 @@ Selection
 
 .. autofunction:: deap.tools.selTournamentDCD
 
+.. autofunction:: deap.tools.selLexicase
+
+.. autofunction:: deap.tools.selEpsilonLexicase
+
+.. autofunction:: deap.tools.selAutomaticEpsilonLexicase
+
 .. autofunction:: deap.tools.sortNondominated
 
 .. autofunction:: deap.tools.sortLogNondominated
@@ -204,6 +211,6 @@ History
 
 Constraints
 -----------
-.. autoclass:: deap.tools.DeltaPenality(feasibility, delta[, distance])
+.. autoclass:: deap.tools.DeltaPenalty(feasibility, delta[, distance])
 
-.. autoclass:: deap.tools.ClosestValidPenality(feasibility, feasible, alpha[, distance])
+.. autoclass:: deap.tools.ClosestValidPenalty(feasibility, feasible, alpha[, distance])

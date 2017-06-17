@@ -20,9 +20,9 @@
 """A module that provides support for the Covariance Matrix Adaptation
 Evolution Strategy.
 """
-import numpy
 import copy
 from math import sqrt, log, exp
+import numpy
 
 import tools
 
@@ -30,7 +30,7 @@ import tools
 class Strategy(object):
     """
     A strategy that will keep track of the basic parameters of the CMA-ES
-    algorithm.
+    algorithm ([Hansen2001]_).
 
     :param centroid: An iterable object that indicates where to start the
                      evolution.
@@ -76,6 +76,9 @@ class Strategy(object):
     |                | mueff) / ((N + 2)^2 +     | update.                    |
     |                | mueff)``                  |                            |
     +----------------+---------------------------+----------------------------+
+
+    .. [Hansen2001] Hansen and Ostermeier, 2001. Completely Derandomized
+       Self-Adaptation in Evolution Strategies. *Evolutionary Computation*
 
     """
     def __init__(self, centroid, sigma, **kargs):
@@ -134,12 +137,12 @@ class Strategy(object):
         # Cumulation : update evolution path
         self.ps = (1 - self.cs) * self.ps \
             + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
-            * numpy.dot(self.B, (1. / self.diagD)
-                        * numpy.dot(self.B.T, c_diff))
+            * numpy.dot(self.B, (1. / self.diagD) *
+                        numpy.dot(self.B.T, c_diff))
 
         hsig = float((numpy.linalg.norm(self.ps) /
-                      sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN
-                      < (1.4 + 2. / (self.dim + 1.))))
+                      sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN <
+                      (1.4 + 2. / (self.dim + 1.))))
 
         self.update_count += 1
 
@@ -149,14 +152,14 @@ class Strategy(object):
 
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
-        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig)
-                  * self.ccov1 * self.cc * (2 - self.cc)) * self.C \
+        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) *
+                  self.ccov1 * self.cc * (2 - self.cc)) * self.C \
             + self.ccov1 * numpy.outer(self.pc, self.pc) \
             + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
             / self.sigma ** 2
 
-        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.)
-                                * self.cs / self.damps)
+        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) *
+                                self.cs / self.damps)
 
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
@@ -190,7 +193,7 @@ class Strategy(object):
 
         self.cc = params.get("ccum", 4. / (self.dim + 4.))
         self.cs = params.get("cs", (self.mueff + 2.) /
-                                   (self.dim + self.mueff + 3.))
+                             (self.dim + self.mueff + 3.))
         self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3) ** 2 +
                                                self.mueff))
         self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2. +
@@ -204,7 +207,7 @@ class Strategy(object):
 
 class StrategyOnePlusLambda(object):
     """
-    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm.
+    A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm ([Igel2007]_).
 
     :param parent: An iterable object that indicates where to start the
                    evolution. The parent requires a fitness attribute.
@@ -235,6 +238,10 @@ class StrategyOnePlusLambda(object):
     +----------------+---------------------------+----------------------------+
     | ``pthresh``    | ``0.44``                  | Threshold success rate.    |
     +----------------+---------------------------+----------------------------+
+
+    .. [Igel2007] Igel, Hansen, Roth, 2007. Covariance matrix adaptation for
+    multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
+
     """
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
@@ -453,7 +460,7 @@ class StrategyMultiObjective(object):
             ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
             ref = numpy.max(ref, axis=0) + 1
 
-            for i in range(len(mid_front) - k):
+            for _ in range(len(mid_front) - k):
                 idx = self.indicator(mid_front, ref=ref)
                 not_chosen.append(mid_front.pop(idx))
 
