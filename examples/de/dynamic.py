@@ -31,27 +31,10 @@ from deap.benchmarks import movingpeaks
 from deap import creator
 from deap import tools
 
-scenario = movingpeaks.SCENARIO_2
 
-NDIM = 5
-BOUNDS = [scenario["min_coord"], scenario["max_coord"]]
-
-mpb = movingpeaks.MovingPeaks(dim=NDIM, **scenario)
 
 def brown_ind(iclass, best, sigma):
     return iclass(random.gauss(x, sigma) for x in best)
-
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMax)
-
-toolbox = base.Toolbox()
-toolbox.register("attr_float", random.uniform, BOUNDS[0], BOUNDS[1])
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, NDIM)
-toolbox.register("brownian_individual", brown_ind, creator.Individual, sigma=0.3)
-toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-toolbox.register("select", random.sample, k=4)
-toolbox.register("best", tools.selBest, k=1)
-toolbox.register("evaluate", mpb)
 
 def main(verbose=True):
     NPOP = 10   # Should be equal to the number of peaks
@@ -151,4 +134,23 @@ def main(verbose=True):
     return logbook
 
 if __name__ == "__main__":
-    main()
+  scenario = movingpeaks.SCENARIO_2
+
+  NDIM = 5
+  BOUNDS = [scenario["min_coord"], scenario["max_coord"]]
+  
+  mpb = movingpeaks.MovingPeaks(dim=NDIM, **scenario)
+  
+  creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+  creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMax)
+  
+  toolbox = base.Toolbox()
+  toolbox.register("attr_float", random.uniform, BOUNDS[0], BOUNDS[1])
+  toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, NDIM)
+  toolbox.register("brownian_individual", brown_ind, creator.Individual, sigma=0.3)
+  toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+  toolbox.register("select", random.sample, k=4)
+  toolbox.register("best", tools.selBest, k=1)
+  toolbox.register("evaluate", mpb)
+  
+  main()
