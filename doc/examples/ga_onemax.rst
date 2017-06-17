@@ -175,7 +175,8 @@ of the individuals
 .. literalinclude:: /../examples/ga/onemax.py
    :lines: 94-95
 
-and evolve our population until one of them reaches ``100``.
+and evolve our population until one of them reaches ``100`` or the number of
+generations reaches ``1000``.
 
 .. literalinclude:: /../examples/ga/onemax.py
    :lines: 97-99,100-104
