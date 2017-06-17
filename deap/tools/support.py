@@ -614,13 +614,15 @@ class ParetoFront(HallOfFame):
         """
         for ind in population:
             is_dominated = False
+            dominates_one = False
             has_twin = False
             to_remove = []
             for i, hofer in enumerate(self):    # hofer = hall of famer
-                if hofer.fitness.dominates(ind.fitness):
+                if not dominates_one and hofer.fitness.dominates(ind.fitness):
                     is_dominated = True
                     break
                 elif ind.fitness.dominates(hofer.fitness):
+                    dominates_one = True
                     to_remove.append(i)
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
