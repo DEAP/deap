@@ -11,6 +11,10 @@ matrix:
       env: NUMPY=numpy
     - python: "3.4"
       env: NUMPY=numpy
+    - python: "3.5"
+      env: NUMPY=numpy
+    - python: "3.6"
+      env: NUMPY=numpy
     - python: "pypy"
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 addons:
