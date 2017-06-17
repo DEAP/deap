@@ -49,7 +49,7 @@ pip install deap
 The latest version can be installed with 
 ```bash
 pip install git+https://github.com/DEAP/deap@master
-``
+```
 
 If you wish to build from sources, download or clone the repository and type
 
