@@ -1,11 +1,12 @@
 from __future__ import division
 import bisect
 import math
-import numpy
-
-from itertools import chain
+from itertools import chain, izip_longest
 from operator import attrgetter, itemgetter
 from collections import defaultdict
+
+import numpy
+
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
@@ -140,6 +141,12 @@ def assignCrowdingDist(individuals):
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
 
+def _grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
+    args = [iter(iterable)] * n
+    return izip_longest(*args, fillvalue=fillvalue)
+
 def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
     the two individuals do not interdominate the selection is made
@@ -171,15 +178,17 @@ def selTournamentDCD(individuals, k):
             return ind1
         return ind2
 
-    individuals_1 = numpy.random.permutation(individuals).tolist()
-    individuals_2 = numpy.random.permutation(individuals).tolist()
+    idx_1 = numpy.random.permutation(len(individuals))
+    idx_2 = numpy.random.permutation(len(individuals))
+    # individuals_1 = numpy.random.permutation(individuals)
+    # individuals_2 = numpy.random.permutation(individuals)
 
     chosen = []
-    for i in xrange(0, k, 4):
-        chosen.append(tourn(individuals_1[i],   individuals_1[i+1]))
-        chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
-        chosen.append(tourn(individuals_2[i],   individuals_2[i+1]))
-        chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
+    for (i1, i2, i3, i4), (j1, j2, j3, j4) in zip(_grouper(idx_1, 4), _grouper(idx_2, 4)):
+        chosen.append(tourn(individuals[i1], individuals[i2]))
+        chosen.append(tourn(individuals[i3], individuals[i4]))
+        chosen.append(tourn(individuals[j1], individuals[j2]))
+        chosen.append(tourn(individuals[j3], individuals[j4]))
 
     return chosen
 
