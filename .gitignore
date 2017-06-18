@@ -2,6 +2,7 @@
 build/
 dist/
 doc/_build/
+.vscode
 
 # files to ignore
 MANIFEST
@@ -12,3 +13,4 @@ MANIFEST
 *.orig
 .DS_Store
 *.so
+*.egg-info/

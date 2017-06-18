@@ -15,7 +15,6 @@
 
 from nose import with_setup
 import platform
-import random
 import unittest
 
 import numpy
@@ -76,7 +75,7 @@ def test_nsga2():
     NGEN = 100
 
     toolbox = base.Toolbox()
-    toolbox.register("attr_float", random.uniform, BOUND_LOW, BOUND_UP)
+    toolbox.register("attr_float", numpy.random.uniform, BOUND_LOW, BOUND_UP)
     toolbox.register("individual", tools.initRepeat, creator.__dict__[INDCLSNAME], toolbox.attr_float, NDIM)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
@@ -96,7 +95,7 @@ def test_nsga2():
         offspring = [toolbox.clone(ind) for ind in offspring]
 
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() <= 0.9:
+            if numpy.random.random() <= 0.9:
                 toolbox.mate(ind1, ind2)
 
             toolbox.mutate(ind1)

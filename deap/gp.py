@@ -19,9 +19,10 @@ build a Genetic Program Tree, and the functions to evaluate it.
 
 This module support both strongly and loosely typed GP.
 """
+from __future__ import print_function
 import copy
 import math
-import random
+import numpy
 import re
 import sys
 import warnings
@@ -545,7 +546,7 @@ def genGrow(pset, min_, max_, type_=None):
         or when it is randomly determined that a a node should be a terminal.
         """
         return depth == height or \
-            (depth >= min_ and random.random() < pset.terminalRatio)
+            (depth >= min_ and numpy.random.random() < pset.terminalRatio)
     return generate(pset, min_, max_, condition, type_)
 
 
@@ -562,7 +563,7 @@ def genHalfAndHalf(pset, min_, max_, type_=None):
                   is assumed.
     :returns: Either, a full or a grown tree.
     """
-    method = random.choice((genGrow, genFull))
+    method = numpy.random.choice((genGrow, genFull))
     return method(pset, min_, max_, type_)
 
 
@@ -596,13 +597,16 @@ def generate(pset, min_, max_, condition, type_=None):
     if type_ is None:
         type_ = pset.ret
     expr = []
-    height = random.randint(min_, max_)
+    if min_ == max_:
+        height = min_
+    else:
+        height = numpy.random.randint(min_, max_)
     stack = [(0, type_)]
     while len(stack) != 0:
         depth, type_ = stack.pop()
         if condition(height, depth):
             try:
-                term = random.choice(pset.terminals[type_])
+                term = numpy.random.choice(pset.terminals[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError, "The gp.generate function tried to add "\
@@ -613,7 +617,7 @@ def generate(pset, min_, max_, condition, type_=None):
             expr.append(term)
         else:
             try:
-                prim = random.choice(pset.primitives[type_])
+                prim = numpy.random.choice(pset.primitives[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError, "The gp.generate function tried to add "\
@@ -657,10 +661,10 @@ def cxOnePoint(ind1, ind2):
         common_types = set(types1.keys()).intersection(set(types2.keys()))
 
     if len(common_types) > 0:
-        type_ = random.choice(list(common_types))
+        type_ = numpy.random.choice(list(common_types))
 
-        index1 = random.choice(types1[type_])
-        index2 = random.choice(types2[type_])
+        index1 = numpy.random.choice(types1[type_])
+        index2 = numpy.random.choice(types2[type_])
 
         slice1 = ind1.searchSubtree(index1)
         slice2 = ind2.searchSubtree(index2)
@@ -694,8 +698,8 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
     # Determine wether we keep terminals or primitives for each individual
     terminal_op = partial(eq, 0)
     primitive_op = partial(lt, 0)
-    arity_op1 = terminal_op if random.random() < termpb else primitive_op
-    arity_op2 = terminal_op if random.random() < termpb else primitive_op
+    arity_op1 = terminal_op if numpy.random.random() < termpb else primitive_op
+    arity_op2 = terminal_op if numpy.random.random() < termpb else primitive_op
 
     # List all available primitive or terminal types in each individual
     types1 = defaultdict(list)
@@ -713,9 +717,9 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
 
     if len(common_types) > 0:
         # Set does not support indexing
-        type_ = random.sample(common_types, 1)[0]
-        index1 = random.choice(types1[type_])
-        index2 = random.choice(types2[type_])
+        type_ = numpy.random.choice(common_types, 1)[0]
+        index1 = numpy.random.choice(types1[type_])
+        index2 = numpy.random.choice(types2[type_])
 
         slice1 = ind1.searchSubtree(index1)
         slice2 = ind2.searchSubtree(index2)
@@ -737,7 +741,7 @@ def mutUniform(individual, expr, pset):
                  called.
     :returns: A tuple of one tree.
     """
-    index = random.randrange(len(individual))
+    index = numpy.random.choice(range(len(individual)))
     slice_ = individual.searchSubtree(index)
     type_ = individual[index].ret
     individual[slice_] = expr(pset=pset, type_=type_)
@@ -755,17 +759,17 @@ def mutNodeReplacement(individual, pset):
     if len(individual) < 2:
         return individual,
 
-    index = random.randrange(1, len(individual))
+    index = numpy.random.choice(range(1, len(individual)))
     node = individual[index]
 
     if node.arity == 0:  # Terminal
-        term = random.choice(pset.terminals[node.ret])
+        term = numpy.random.choice(pset.terminals[node.ret])
         if isclass(term):
             term = term()
         individual[index] = term
     else:   # Primitive
         prims = [p for p in pset.primitives[node.ret] if p.args == node.args]
-        individual[index] = random.choice(prims)
+        individual[index] = numpy.random.choice(prims)
 
     return individual,
 
@@ -790,7 +794,7 @@ def mutEphemeral(individual, mode):
 
     if len(ephemerals_idx) > 0:
         if mode == "one":
-            ephemerals_idx = (random.choice(ephemerals_idx),)
+            ephemerals_idx = (numpy.random.choice(ephemerals_idx),)
 
         for i in ephemerals_idx:
             individual[i] = type(individual[i])()
@@ -809,10 +813,10 @@ def mutInsert(individual, pset):
     :param individual: The normal or typed tree to be mutated.
     :returns: A tuple of one tree.
     """
-    index = random.randrange(len(individual))
+    index = numpy.random.choice(range(len(individual)))
     node = individual[index]
     slice_ = individual.searchSubtree(index)
-    choice = random.choice
+    choice = numpy.random.choice
 
     # As we want to keep the current node as children of the new one,
     # it must accept the return value of the current node
@@ -855,8 +859,8 @@ def mutShrink(individual):
             iprims.append((i, node))
 
     if len(iprims) != 0:
-        index, prim = random.choice(iprims)
-        arg_idx = random.choice([i for i, type_ in enumerate(prim.args) if type_ == prim.ret])
+        index, prim = numpy.random.choice(iprims)
+        arg_idx = numpy.random.choice([i for i, type_ in enumerate(prim.args) if type_ == prim.ret])
         rindex = index + 1
         for _ in range(arg_idx + 1):
             rslice = individual.searchSubtree(rindex)
@@ -908,7 +912,7 @@ def staticLimit(key, max_value):
             new_inds = list(func(*args, **kwargs))
             for i, ind in enumerate(new_inds):
                 if key(ind) > max_value:
-                    new_inds[i] = random.choice(keep_inds)
+                    new_inds[i] = numpy.random.choice(keep_inds)
             return new_inds
         return wrapper
     return decorator
@@ -993,7 +997,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                     if producesizes:
                         producedpopsizes.append(len(aspirant))
             else:
-                opRandom = random.random()
+                opRandom = numpy.random.random()
                 if opRandom < cxpb:
                     # Crossover
                     aspirant1, aspirant2 = toolbox.mate(*map(toolbox.clone,
@@ -1045,7 +1049,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print(logbook.stream)
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -1087,7 +1091,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
             return probhist[s] if s < len(probhist) else targetfunc(s)
 
         def acceptfunc(s):
-            return random.random() <= probfunc(s)
+            return numpy.random.random() <= probfunc(s)
 
         # Generate offspring using the acceptance probabilities
         # previously computed
@@ -1111,7 +1115,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print(logbook.stream)
 
     return population, logbook
 

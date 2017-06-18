@@ -3,10 +3,7 @@
 from math import hypot, sqrt
 from functools import wraps
 from itertools import repeat
-try:
-    import numpy
-except ImportError:
-    numpy = False
+import numpy
 
 try:
     # try importing the C version
@@ -23,32 +20,32 @@ class translate(object):
     applied to the individual and the resulting list is given to the
     evaluation function. Thus, the evaluation function shall not be expecting
     an individual as it will receive a plain list.
-    
+
     This decorator adds a :func:`translate` method to the decorated function.
     """
     def __init__(self, vector):
         self.vector = vector
-    
+
     def __call__(self, func):
         # wraps is used to combine stacked decorators that would add functions
         @wraps(func)
         def wrapper(individual, *args, **kargs):
             # A subtraction is applied since the translation is applied to the
             # individual and not the function
-            return func([v - t for v, t in zip(individual, self.vector)], 
+            return func([v - t for v, t in zip(individual, self.vector)],
                 *args, **kargs)
         wrapper.translate = self.translate
         return wrapper
-    
+
     def translate(self, vector):
         """Set the current translation to *vector*. After decorating the
         evaluation function, this function will be available directly from
         the function object. ::
-            
+
             @translate([0.25, 0.5, ..., 0.1])
             def evaluate(individual):
                 return sum(individual),
-            
+
             # This will cancel the translation
             evaluate.translate([0.0, 0.0, ..., 0.0])
         """
@@ -63,20 +60,17 @@ class rotate(object):
     list is given to the evaluation function. Thus, the evaluation function
     shall not be expecting an individual as it will receive a plain list
     (numpy.array). The multiplication is done using numpy.
-    
+
     This decorator adds a :func:`rotate` method to the decorated function.
-    
+
     .. note::
-    
+
        A random orthogonal matrix Q can be created via QR decomposition. ::
-           
+
            A = numpy.random.random((n,n))
            Q, _ = numpy.linalg.qr(A)
     """
     def __init__(self, matrix):
-        if not numpy:
-            raise RuntimeError("Numpy is required for using the rotation "
-                "decorator")
         # The inverse is taken since the rotation is applied to the individual
         # and not the function which is the inverse
         self.matrix = numpy.linalg.inv(matrix)
@@ -93,15 +87,15 @@ class rotate(object):
         """Set the current rotation to *matrix*. After decorating the
         evaluation function, this function will be available directly from
         the function object. ::
-            
+
             # Create a random orthogonal matrix
             A = numpy.random.random((n,n))
             Q, _ = numpy.linalg.qr(A)
-            
+
             @rotate(Q)
             def evaluate(individual):
                 return sum(individual),
-            
+
             # This will reset rotation to identity
             evaluate.rotate(numpy.identity(n))
         """
@@ -141,18 +135,18 @@ class noise(object):
             return tuple(noisy)
         wrapper.noise = self.noise
         return wrapper
-    
+
     def noise(self, noise):
         """Set the current noise to *noise*. After decorating the
         evaluation function, this function will be available directly from
         the function object. ::
-        
-            prand = functools.partial(random.gauss, mu=0.0, sigma=1.0)
-        
+
+            prand = functools.partial(numpy.random.normal, mu=0.0, sigma=1.0)
+
             @noise(prand)
             def evaluate(individual):
                 return sum(individual),
-        
+
             # This will remove noise from the evaluation function
             evaluate.noise(None)
         """
@@ -160,7 +154,7 @@ class noise(object):
             self.rand_funcs = tuple(noise)
         except TypeError:
             self.rand_funcs = repeat(noise)
-            
+
 class scale(object):
     """Decorator for evaluation functions, it scales the objective function by
     *factor* which should be the same length as the individual size. When
@@ -169,7 +163,7 @@ class scale(object):
     individual and the resulting list is given to the evaluation function.
     Thus, the evaluation function shall not be expecting an individual as it
     will receive a plain list.
-    
+
     This decorator adds a :func:`scale` method to the decorated function.
     """
     def __init__(self, factor):
@@ -181,7 +175,7 @@ class scale(object):
         # wraps is used to combine stacked decorators that would add functions
         @wraps(func)
         def wrapper(individual, *args, **kargs):
-            return func([v * f for v, f in zip(individual, self.factor)], 
+            return func([v * f for v, f in zip(individual, self.factor)],
                 *args, **kargs)
         wrapper.scale = self.scale
         return wrapper
@@ -190,11 +184,11 @@ class scale(object):
         """Set the current scale to *factor*. After decorating the
         evaluation function, this function will be available directly from
         the function object. ::
-            
+
             @scale([0.25, 2.0, ..., 0.1])
             def evaluate(individual):
                 return sum(individual),
-            
+
             # This will cancel the scaling
             evaluate.scale([1.0, 1.0, ..., 1.0])
         """
@@ -213,7 +207,7 @@ class bound(object):
 
     The *type* determines how the attributes are brought back into the valid
     range
-    
+
     This decorator adds a :func:`bound` method to the decorated function.
     """
     def _clip(self, individual):
@@ -245,10 +239,10 @@ class bound(object):
             self.bound = self._wrap
         elif type == "clip":
             self.bound = self._clip
-        
+
 def diversity(first_front, first, last):
-    """Given a Pareto front `first_front` and the two extreme points of the 
-    optimal Pareto front, this function returns a metric of the diversity 
+    """Given a Pareto front `first_front` and the two extreme points of the
+    optimal Pareto front, this function returns a metric of the diversity
     of the front as explained in the original NSGA-II article by K. Deb.
     The smaller the value is, the better the front is.
     """
@@ -269,13 +263,13 @@ def diversity(first_front, first, last):
     return delta
 
 def convergence(first_front, optimal_front):
-    """Given a Pareto front `first_front` and the optimal Pareto front, 
+    """Given a Pareto front `first_front` and the optimal Pareto front,
     this function returns a metric of convergence
     of the front as explained in the original NSGA-II article by K. Deb.
     The smaller the value is, the closer the front is to the optimal one.
     """
     distances = []
-    
+
     for ind in first_front:
         distances.append(float("inf"))
         for opt_ind in optimal_front:
@@ -285,7 +279,7 @@ def convergence(first_front, optimal_front):
             if dist < distances[-1]:
                 distances[-1] = dist
         distances[-1] = sqrt(distances[-1])
-        
+
     return sum(distances) / len(distances)
 
 
