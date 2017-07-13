@@ -48,6 +48,57 @@ def selWorst(individuals, k, fit_attr="fitness"):
     return sorted(individuals, key=attrgetter(fit_attr))[:k]
 
 
+def selVCH(individuals, k, fit_attr="fitness"):
+    """Select the *k* best individuals among the input *individuals*. The
+    list returned contains references to the input *individuals*.
+
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param fit_attr: The attribute of individuals to use as selection criterion
+    :returns: A list containing the k best individuals.
+
+    This method is particularly suitable when there are feasiblity constraints
+    alongside fitness. Fitness is not penalized but simply a different way of
+    sorting is used.
+
+    Important: Evaluation function need to produce a tuple of (fitness, NV, CV)
+    where 'fitness' is the usual fitness, 'NV' is number of violated constraints,
+    and 'CV' is the amount od constraint violation (look into the publication for
+    more details)
+
+    .. [Chehouri2016] Cheehouri, Younes, Perron and Ilinca, 2016, A Constraint-handling
+    Technique for Genetic Algorithms using a Violation Factor
+    """
+
+    def _vch_compare(ind1, ind2):
+        """
+        Compare two individuals based on Violation Factor stepwise approach.
+
+        Note:
+            ind.values[0] -> fitness
+            ind.values[1] -> NV
+            ind.values[2] -> CV
+        """
+        f1 = True if ind1.values[1] == 0 else False
+        f2 = True if ind2.values[1] == 0 else False
+        if f1 and f2:
+            # both are feasible (individual with higher fitness wins)
+            value = ind1.values[0] - ind2.values[0]
+        elif f1 or f2:
+            # only one is feasible (the feasible individual wins)
+            value = 1 if f1 else -1
+        elif ind1.values[1] != ind2.values[1]:
+            # both infeasible (individual with lower number of violations wins)
+            value = ind2.values[1] - ind1.values[1]
+        else:
+            # both infeasible with same number of violations (individual with
+            # lower constraint violation wins)
+            value = ind2.values[2] - ind1.values[2]
+        return int(value)
+
+    return sorted(individuals, cmp=_vch_compare, key=attrgetter(fit_attr))[:k]
+
+
 def selTournament(individuals, k, tournsize, fit_attr="fitness"):
     """Select *k* individuals from the input *individuals* using *k*
     tournaments of *tournsize* individuals. The list returned contains
@@ -320,7 +371,7 @@ def selAutomaticEpsilonLexicase(individuals, k):
     return selected_individuals
 
 
-__all__ = ['selRandom', 'selBest', 'selWorst', 'selRoulette',
+__all__ = ['selRandom', 'selBest', 'selWorst', 'selVCH', 'selRoulette',
            'selTournament', 'selDoubleTournament', 'selStochasticUniversalSampling',
            'selLexicase', 'selEpsilonLexicase', 'selAutomaticEpsilonLexicase']
 
