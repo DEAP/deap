@@ -19,7 +19,7 @@ import numpy
 try:
     # try importing the C version
     from ._hypervolume import hv as hv
-except ImportError:
+except:
     # fallback on python version
     from ._hypervolume import pyhv as hv
 
