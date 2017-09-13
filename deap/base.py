@@ -122,9 +122,7 @@ class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
     provided as a tuple, the fitness is initalized using those values,
     otherwise it is empty (or invalid).
-
     :param values: The initial values of the fitness as a tuple, optional.
-
     Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
     ``!=``. The comparison of those operators is made lexicographically.
     Maximization and minimization are taken care off by a multiplication
@@ -132,10 +130,8 @@ class Fitness(object):
     can be made between fitnesses of different size, if the fitnesses are
     equal until the extra elements, the longer fitness will be superior to the
     shorter.
-
     Different types of fitnesses are created in the :ref:`creating-types`
     tutorial.
-
     .. note::
        When comparing fitness values that are **minimized**, ``a > b`` will
        return :data:`True` if *a* is **smaller** than *b*.
@@ -147,11 +143,9 @@ class Fitness(object):
     weights must be defined as a tuple where each element is associated to an
     objective. A negative weight element corresponds to the minimization of
     the associated objective and positive weight to the maximization.
-
     .. note::
         If weights is not defined during subclassing, the following error will
         occur at instantiation of a subclass fitness object:
-
         ``TypeError: Can't instantiate abstract <class Fitness[...]> with
         abstract attribute weights.``
     """
@@ -160,7 +154,6 @@ class Fitness(object):
     """Contains the weighted values of the fitness, the multiplication with the
     weights is made when the values are set via the property :attr:`values`.
     Multiplication is made on setting of the values for efficiency.
-
     Generally it is unnecessary to manipulate wvalues as it is an internal
     attribute of the fitness used in the comparison operators.
     """
@@ -170,27 +163,33 @@ class Fitness(object):
             raise TypeError("Can't instantiate abstract %r with abstract "
                             "attribute weights." % (self.__class__))
 
-        if not isinstance(self.weights, Sequence):
-            raise TypeError("Attribute weights of %r must be a sequence."
-                            % self.__class__)
+        #if not isinstance(self.weights, Sequence):
+            #raise TypeError("Attribute weights of %r must be a sequence."
+                            #% self.__class__)
 
         if len(values) > 0:
             self.values = values
 
     def getValues(self):
-        return tuple(map(truediv, self.wvalues, self.weights))
+        if (isinstance((self.wvalues), (int,float)) and isinstance(self.weights, (int,float))):
+            return (self.wvalues/self.weights)
+        else:
+            return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
         try:
-            self.wvalues = tuple(map(mul, values, self.weights))
+            if (isinstance((values), (int,float)) and isinstance(self.weights, (int,float))):
+                self.wvalues=values*self.weights
+            else:
+                self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
             _, _, traceback = sys.exc_info()
-            raise TypeError, ("Both weights and assigned values must be a "
+            raise TypeError("Both weights and assigned values must be a "
                               "sequence of numbers when assigning to values of "
                               "%r. Currently assigning value(s) %r of %r to a "
                               "fitness with weights %s."
                               % (self.__class__, values, type(values),
-                                 self.weights)), traceback
+                                 self.weights))
 
     def delValues(self):
         self.wvalues = ()
@@ -205,7 +204,6 @@ class Fitness(object):
         """Return true if each objective of *self* is not strictly worse than
         the corresponding objective of *other* and at least one objective is
         strictly better.
-
         :param obj: Slice indicating on which objectives the domination is
                     tested. The default value is `slice(None)`, representing
                     every objectives.
@@ -221,7 +219,12 @@ class Fitness(object):
     @property
     def valid(self):
         """Assess if a fitness is valid or not."""
-        return len(self.wvalues) != 0
+        if isinstance(self.wvalues, (tuple,list)):
+            return len(self.wvalues) != 0
+        elif isinstance(self.wvalues, (int,float)):
+            return True
+        else:
+            return False
 
     def __hash__(self):
         return hash(self.wvalues)
@@ -246,7 +249,6 @@ class Fitness(object):
 
     def __deepcopy__(self, memo):
         """Replace the basic deepcopy function with a faster one.
-
         It assumes that the elements in the :attr:`values` tuple are
         immutable and the fitness does not contain any other object
         than :attr:`values` and :attr:`weights`.
@@ -261,5 +263,5 @@ class Fitness(object):
 
     def __repr__(self):
         """Return the Python code to build a copy of the object."""
-        return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
+        return "{}.{}({})".format(self.__module__, self.__class__.__name__,
                               self.values if self.valid else tuple())
