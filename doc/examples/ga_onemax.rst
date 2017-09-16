@@ -53,7 +53,7 @@ We can't repeat it enough, in DEAP single objectives is a special case of
 multi objectives.
 
 Next we will create the class :class:`Individual`, which will inherit the
-class :class:`list` and contain the our previously defined :class:`FitnessMax`
+class :class:`list` and contain our previously defined :class:`FitnessMax`
 class in its *fitness* attribute. Note that upon creation all our defined
 classes will be part of the ``creator`` container and can be called directly.
 
