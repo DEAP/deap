@@ -166,19 +166,28 @@ class Fitness(object):
         #if not isinstance(self.weights, Sequence):
             #raise TypeError("Attribute weights of %r must be a sequence."
                             #% self.__class__)
-
+        self.wet=None
+        self.wvt=None
         if len(values) > 0:
             self.values = values
+        
 
     def getValues(self):
-        if (isinstance((self.wvalues), (int,float)) and isinstance(self.weights, (int,float))):
+        if not(self.wvt):
+            self.wvt=self.tcheck(self.wvalues)
+        if not(self.wet):
+            self.wet=self.tcheck(self.weights)
+        if (self.wvt==1 and self.wet==1):
             return (self.wvalues/self.weights)
         else:
             return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
+        vt=self.tcheck(values)
+        if not(self.wet):
+            self.wet=self.tcheck(self.weights)
         try:
-            if (isinstance((values), (int,float)) and isinstance(self.weights, (int,float))):
+            if (vt==1 and self.wet==1):
                 self.wvalues=values*self.weights
             else:
                 self.wvalues = tuple(map(mul, values, self.weights))
@@ -256,7 +265,19 @@ class Fitness(object):
         copy_ = self.__class__()
         copy_.wvalues = self.wvalues
         return copy_
-
+    def tcheck(self,val):
+        try:
+            val.__len__()#list and tuples and dicts
+            t=2
+        except:
+            try:
+                if len(val.shape)==0:#numpy types
+                    t=1
+                else:#numpy types that are not a single value
+                    t=3
+            except:
+                t=1
+        return(t)
     def __str__(self):
         """Return the values of the Fitness object."""
         return str(self.values if self.valid else tuple())
