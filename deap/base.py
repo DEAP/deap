@@ -157,6 +157,8 @@ class Fitness(object):
     """
 
     wvalues = ()
+    _values = ()
+
     """Contains the weighted values of the fitness, the multiplication with the
     weights is made when the values are set via the property :attr:`values`.
     Multiplication is made on setting of the values for efficiency.
@@ -177,12 +179,16 @@ class Fitness(object):
         if len(values) > 0:
             self.values = values
 
-    def getValues(self):
-        return tuple(map(truediv, self.wvalues, self.weights))
+    @property
+    def values(self):
 
-    def setValues(self, values):
+        return self._values
+
+    @values.setter
+    def values(self, values):
         try:
-            self.wvalues = tuple(map(mul, values, self.weights))
+            self._values = values
+            self.wvalues = tuple(map(mul, self.values, self.weights))
         except TypeError:
             _, _, traceback = sys.exc_info()
             raise TypeError, ("Both weights and assigned values must be a "
@@ -192,14 +198,11 @@ class Fitness(object):
                               % (self.__class__, values, type(values),
                                  self.weights)), traceback
 
-    def delValues(self):
-        self.wvalues = ()
+    @values.deleter
+    def weights(self):
 
-    values = property(getValues, setValues, delValues,
-                      ("Fitness values. Use directly ``individual.fitness.values = values`` "
-                       "in order to set the fitness and ``del individual.fitness.values`` "
-                       "in order to clear (invalidate) the fitness. The (unweighted) fitness "
-                       "can be directly accessed via ``individual.fitness.values``."))
+        self.values = ()
+        self.wvalues = ()
 
     def dominates(self, other, obj=slice(None)):
         """Return true if each objective of *self* is not strictly worse than
