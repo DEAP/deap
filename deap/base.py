@@ -166,28 +166,29 @@ class Fitness(object):
         #if not isinstance(self.weights, Sequence):
             #raise TypeError("Attribute weights of %r must be a sequence."
                             #% self.__class__)
-        self.wet=None
-        self.wvt=None
+        
+        self.weighttype=None
+        self.wvaluetype=None
         if len(values) > 0:
             self.values = values
         
 
     def getValues(self):
-        if not(self.wvt):
-            self.wvt=self.tcheck(self.wvalues)
-        if not(self.wet):
-            self.wet=self.tcheck(self.weights)
-        if (self.wvt==1 and self.wet==1):
+        if not(self.wvaluetype):
+            self.wvaluetype=self.tcheck(self.wvalues)
+        if not(self.weighttype):
+            self.weighttype=self.tcheck(self.weights)
+        if (self.wvaluetype==1 and self.weighttype==1):
             return (self.wvalues/self.weights)
         else:
             return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
-        vt=self.tcheck(values)
-        if not(self.wet):
+        valuetype=self.tcheck(values)
+        if not(self.weighttype):
             self.wet=self.tcheck(self.weights)
         try:
-            if (vt==1 and self.wet==1):
+            if (valuetype==1 and self.weighttype==1):
                 self.wvalues=values*self.weights
             else:
                 self.wvalues = tuple(map(mul, values, self.weights))
@@ -266,18 +267,23 @@ class Fitness(object):
         copy_.wvalues = self.wvalues
         return copy_
     def tcheck(self,val):
+        """returns an int indicating the type of val using common methods associated to each.
+        a value of 1 indicate a single value i.e.: a single int, float or any numpy variant)
+        a value of 2 indicate a default container i.e.: tuple, dict, list
+        a value of 3 indicate a numpy container i.e.: array, ndarray
+        """
         try:
             val.__len__()#list and tuples and dicts
-            t=2
+            Type=2
         except:
             try:
                 if len(val.shape)==0:#numpy types
-                    t=1
+                    Type=1
                 else:#numpy types that are not a single value
-                    t=3
+                    Type=3
             except:
-                t=1
-        return(t)
+                Type=1
+        return(Type)
     def __str__(self):
         """Return the values of the Fitness object."""
         return str(self.values if self.valid else tuple())
