@@ -163,43 +163,42 @@ class Fitness(object):
             raise TypeError("Can't instantiate abstract %r with abstract "
                             "attribute weights." % (self.__class__))
 
-        #if not isinstance(self.weights, Sequence):
-            #raise TypeError("Attribute weights of %r must be a sequence."
-                            #% self.__class__)
-        
-        self.weighttype=None
-        self.wvaluetype=None
+        # if not isinstance(self.weights, Sequence):
+            # raise TypeError("Attribute weights of %r must be a sequence."
+            #% self.__class__)
+
+        self.weighttype = None  # set type value to None
+        self.wvaluetype = None  # set type value to None
         if len(values) > 0:
             self.values = values
-        
 
     def getValues(self):
         if not(self.wvaluetype):
-            self.wvaluetype=self.tcheck(self.wvalues)
+            self.wvaluetype = self.tcheck(self.wvalues)
         if not(self.weighttype):
-            self.weighttype=self.tcheck(self.weights)
-        if (self.wvaluetype==1 and self.weighttype==1):
-            return (self.wvalues/self.weights)
+            self.weighttype = self.tcheck(self.weights)
+        if (self.wvaluetype == 1 and self.weighttype == 1):
+            return (self.wvalues / self.weights)
         else:
             return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
-        valuetype=self.tcheck(values)
+        valuetype = self.tcheck(values)
         if not(self.weighttype):
-            self.wet=self.tcheck(self.weights)
+            self.wet = self.tcheck(self.weights)
         try:
-            if (valuetype==1 and self.weighttype==1):
-                self.wvalues=values*self.weights
+            if (valuetype == 1 and self.weighttype == 1):
+                self.wvalues = values * self.weights
             else:
                 self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
             _, _, traceback = sys.exc_info()
             raise TypeError("Both weights and assigned values must be a "
-                              "sequence of numbers when assigning to values of "
-                              "%r. Currently assigning value(s) %r of %r to a "
-                              "fitness with weights %s."
-                              % (self.__class__, values, type(values),
-                                 self.weights))
+                            "sequence of numbers when assigning to values of "
+                            "%r. Currently assigning value(s) %r of %r to a "
+                            "fitness with weights %s."
+                            % (self.__class__, values, type(values),
+                               self.weights))
 
     def delValues(self):
         self.wvalues = ()
@@ -229,9 +228,9 @@ class Fitness(object):
     @property
     def valid(self):
         """Assess if a fitness is valid or not."""
-        if isinstance(self.wvalues, (tuple,list)):
+        if isinstance(self.wvalues, (tuple, list)):
             return len(self.wvalues) != 0
-        elif isinstance(self.wvalues, (int,float)):
+        elif isinstance(self.wvalues, (int, float)):
             return True
         else:
             return False
@@ -266,29 +265,31 @@ class Fitness(object):
         copy_ = self.__class__()
         copy_.wvalues = self.wvalues
         return copy_
-    def tcheck(self,val):
+
+    def tcheck(self, val):
         """returns an int indicating the type of val using common methods associated to each.
         a value of 1 indicate a single value i.e.: a single int, float or any numpy variant)
         a value of 2 indicate a default container i.e.: tuple, dict, list
         a value of 3 indicate a numpy container i.e.: array, ndarray
         """
         try:
-            val.__len__()#list and tuples and dicts
-            Type=2
+            val.__len__()  # list and tuples and dicts
+            Type = 2
         except:
             try:
-                if len(val.shape)==0:#numpy types
-                    Type=1
-                else:#numpy types that are not a single value
-                    Type=3
+                if len(val.shape) == 0:  # numpy types
+                    Type = 1
+                else:  # numpy types that are not a single value
+                    Type = 3
             except:
-                Type=1
+                Type = 1
         return(Type)
+
     def __str__(self):
         """Return the values of the Fitness object."""
         return str(self.values if self.valid else tuple())
 
     def __repr__(self):
         """Return the Python code to build a copy of the object."""
-        return "{}.{}({})".format(self.__module__, self.__class__.__name__,
+        return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
                               self.values if self.valid else tuple())
