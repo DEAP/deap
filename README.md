@@ -19,7 +19,7 @@ DEAP includes the following features:
   * Hall of Fame of the best individuals that lived in the population
   * Checkpoints that take snapshots of a system regularly
   * Benchmarks module containing most common test functions
-  * Genealogy of an evolution (that is compatible with [NetworkX](http://networkx.lanl.gov))
+  * Genealogy of an evolution (that is compatible with [NetworkX](https://github.com/networkx/networkx))
   * Examples of alternative algorithms : Particle Swarm Optimization, Differential Evolution, Estimation of Distribution Algorithm
 
 ## Downloads
