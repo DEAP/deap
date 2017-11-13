@@ -517,7 +517,7 @@ class HallOfFame(object):
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
         """
-        if len(self) == 0 and self.maxsize !=0:
+        if len(self) == 0 and self.maxsize !=0 and len(population) > 0:
             # Working on an empty hall of fame is problematic for the
             # "for else"
             self.insert(population[0])
