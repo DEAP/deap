@@ -23,10 +23,10 @@ the standard library and from DEAP.
 Representation
 ==============
 
-The particle's goal is to maximize the return value of the fonction at its
+The particle's goal is to maximize the return value of the function at its
 position.
 
-PSO particles are essentially described as a positions in a search-space of D
+PSO particles are essentially described as positions in a search-space of D
 dimensions. Each particle also has a vector representing the speed of the
 particle in each dimension. Finally, each particle keeps a reference to the
 best state in which it has been so far.
@@ -42,10 +42,10 @@ create a :class:`FitnessMax` object, and we specify the
 maximise the value of the fitness of our particles. The second object we
 create represent our particle. We defined it as a :class:`list` to which we
 add five attributes. The first attribute is the fitness of the particle, the
-second is the speed of the particle which is also goind to be a list, the
+second is the speed of the particle which is also going to be a list, the
 third and fourth are the limit of the speed value, and the fifth attribute
 will be a reference to a copy of the best state the particle has been so far.
-Since the particle has no final state until at has been evaluated, the
+Since the particle has no final state until it has been evaluated, the
 reference is set to ``None``. The speed limits are also set to ``None`` to
 allow configuration via the function :func:`generate` presented in the next
 section.
@@ -53,10 +53,10 @@ section.
 Operators
 =========
 
-PSO original algorithm use three operators : initializer, updater and
+PSO original algorithm uses three operators : initializer, updater and
 evaluator. The initialization consist in generating a random position and a
-random speed for a particle. The next function create a particle and
-initialize its attributes, except for the attribute :attr:`best`, which will
+random speed for a particle. The next function creates a particle and
+initializes its attributes, except for the attribute :attr:`best`, which will
 be set only after evaluation :
 
 .. literalinclude:: /../examples/pso/basic.py
@@ -86,7 +86,7 @@ Algorithm
 
 Once the operators are registered in the toolbox, we can fire up the
 algorithm by firstly creating a new population, and then apply the original
-PSO algorithm. The variable `best` contains the best particle ever found (it
+PSO algorithm. The variable `best` contains the best particle ever found (it is
 known as gbest in the original algorithm).
 
 .. literalinclude:: /../examples/pso/basic.py
