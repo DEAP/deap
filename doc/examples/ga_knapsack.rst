@@ -52,8 +52,8 @@ input individual.
 
 
 We then register these operators in the toolbox. Since it is a multi-objective
-problem, we have selected the SPEA-II selection scheme : 
-:func:`~deap.tools.selSPEA2`
+problem, we have selected the NSGA-II selection scheme : 
+:func:`~deap.tools.selNSGA2`
 
 .. literalinclude:: /../examples/ga/knapsack.py
    :lines: 83-86

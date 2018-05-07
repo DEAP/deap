@@ -4,24 +4,21 @@ import sys
 warnings = list()
 
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, find_packages
+    modules = find_packages(exclude=['examples'])
 except ImportError:
     warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
     from disutils.core import setup, Extension
+    modules = ['deap', 'deap.benchmarks', 'deap.tests', 'deap.tools', 'deap.tools._hypervolume']
 
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    from distutils.command.build_py import build_py
-
-from distutils.command.build_ext import build_ext
+from setuptools.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
 
 try:
     from pypandoc import convert
 except ImportError:
-    warnings.append("warning: pypandoc module not found, could not convert Markdown to RST")
+    warnings.append("warning: pypandoc module not found, could not convert ReadMe Markdown to RST")
     import codecs
     read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
 else:
@@ -71,7 +68,8 @@ def run_setup(build_ext):
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
           url='https://www.github.com/deap',
-          packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
+          packages=find_packages(exclude=['examples']),
+        #   packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
           keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
           license='LGPL',
@@ -87,7 +85,7 @@ def run_setup(build_ext):
             'Topic :: Software Development',
             ],
          ext_modules = extra_modules,
-         cmdclass = {'build_py': build_py, "build_ext" : ve_build_ext},
+         cmdclass = {"build_ext" : ve_build_ext},
          use_2to3=True
     )
 

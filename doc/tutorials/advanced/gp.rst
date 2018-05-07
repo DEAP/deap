@@ -175,13 +175,13 @@ Evaluation of Trees
 
 In DEAP, trees can be translated to readable Python code and compiled to Python
 code objects using functions provided by the :py:mod:`~deap.gp` module. The first
-function, :func:`~deap.gp.stringify` takes an expression or a PrimitiveTree and
+function, :func:`str` takes an expression or a PrimitiveTree and
 translates it into readable Python code. For example, the following lines
 generate a tree and output the code from the first example primitive set. ::
 
 	>>> expr = genFull(pset, min_=1, max_=3)
 	>>> tree = PrimitiveTree(expr)
-	>>> stringify(tree)
+	>>> str(tree)
 	'mul(add(x, x), max(y, x))'
 
 Now, this string represents the program we just generated, but it cannot yet be

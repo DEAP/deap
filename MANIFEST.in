@@ -1,7 +1,7 @@
 include *.txt
 include *.md
-recursive-include deap *.cpp
-recursive-include examples *.py *.csv *.json *.txt *.cpp *.hpp
+recursive-include deap *.cpp *.c *.hpp *.h
+recursive-include examples *.py *.csv *.json *.txt *.cpp *.hpp *.h
 recursive-include doc *
 prune doc/_build
 global-exclude .DS_Store
