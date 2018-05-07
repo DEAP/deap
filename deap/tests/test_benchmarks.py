@@ -2,7 +2,6 @@
 import sys
 import unittest
 from nose import with_setup
-from past.builtins import xrange
 
 from deap import base
 from deap import benchmarks
@@ -31,8 +30,8 @@ class BenchmarkTest(unittest.TestCase):
     def test_bin2float(self):
 
         # Correct evaluation of bin2float.
-        zero_individual = creator.Individual([0 for x in xrange(10)])
-        full_individual = creator.Individual([1 for x in xrange(10)])
+        zero_individual = creator.Individual([0] * 10)
+        full_individual = creator.Individual([1] * 10)
         two_individiual = creator.Individual(8*[0] + [1, 0])
         population = [zero_individual, full_individual, two_individiual]
         fitnesses = map(self.toolbox.evaluate, population)

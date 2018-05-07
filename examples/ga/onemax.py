@@ -80,10 +80,7 @@ def main():
     #       are crossed
     #
     # MUTPB is the probability for mutating an individual
-    #
-    # NGEN  is the number of generations for which the
-    #       evolution runs
-    CXPB, MUTPB, NGEN = 0.5, 0.2, 40
+    CXPB, MUTPB = 0.5, 0.2
     
     print("Start of evolution")
     
@@ -93,9 +90,17 @@ def main():
         ind.fitness.values = fit
     
     print("  Evaluated %i individuals" % len(pop))
+
+    # Extracting all the fitnesses of 
+    fits = [ind.fitness.values[0] for ind in pop]
+
+    # Variable keeping track of the number of generations
+    g = 0
     
     # Begin the evolution
-    for g in range(NGEN):
+    while max(fits) < 100 and g < 1000:
+        # A new generation
+        g = g + 1
         print("-- Generation %i --" % g)
         
         # Select the next generation individuals

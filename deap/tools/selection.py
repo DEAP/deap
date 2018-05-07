@@ -49,8 +49,8 @@ def selWorst(individuals, k, fit_attr="fitness"):
 
 
 def selTournament(individuals, k, tournsize, fit_attr="fitness"):
-    """Select *k* individuals from the input *individuals* using *k*
-    tournaments of *tournsize* individuals. The list returned contains
+    """Select the best individual among *tournsize* randomly chosen
+    individuals, *k* times. The list returned contains
     references to the input *individuals*.
     
     :param individuals: A list of individuals to select from.

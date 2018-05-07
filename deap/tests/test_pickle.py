@@ -58,7 +58,7 @@ class Pickling(unittest.TestCase):
         self.assertEqual(ind, ind_l, "Unpickled individual array != pickled individual array")
         self.assertEqual(ind.fitness, ind_l.fitness, "Unpickled individual fitness != pickled individual fitness")
 
-    @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays is very unstable.")
+    # @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays is very unstable.")
     def test_pickle_ind_ndarray(self):
         ind = creator.IndNDArray([1.0, 2.0, 3.0])
         ind.fitness.values = (4.0,)
@@ -131,7 +131,8 @@ class Pickling(unittest.TestCase):
         self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
 
-    @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays (thus stats) is very unstable.")
+    
+    # @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays (thus stats) is very unstable.")
     def test_pickle_logbook(self):
         stats = tools.Statistics()
         logbook = tools.Logbook()

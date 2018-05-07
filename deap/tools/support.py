@@ -517,7 +517,7 @@ class HallOfFame(object):
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
         """
-        if len(self) == 0 and self.maxsize !=0:
+        if len(self) == 0 and self.maxsize !=0 and len(population) > 0:
             # Working on an empty hall of fame is problematic for the
             # "for else"
             self.insert(population[0])
@@ -614,13 +614,15 @@ class ParetoFront(HallOfFame):
         """
         for ind in population:
             is_dominated = False
+            dominates_one = False
             has_twin = False
             to_remove = []
             for i, hofer in enumerate(self):    # hofer = hall of famer
-                if hofer.fitness.dominates(ind.fitness):
+                if not dominates_one and hofer.fitness.dominates(ind.fitness):
                     is_dominated = True
                     break
                 elif ind.fitness.dominates(hofer.fitness):
+                    dominates_one = True
                     to_remove.append(i)
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
