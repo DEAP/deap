@@ -25,68 +25,68 @@ class History(object):
     individual, the list contain the indices of the parents. The second
     attribute :attr:`genealogy_history` contains every individual indexed
     by their individual number as in the genealogy tree.
-    
+
     The produced genealogy tree is compatible with `NetworkX
     <http://networkx.lanl.gov/index.html>`_, here is how to plot the genealogy
     tree ::
-    
+
         history = History()
-        
+
         # Decorate the variation operators
         toolbox.decorate("mate", history.decorator)
         toolbox.decorate("mutate", history.decorator)
-        
+
         # Create the population and populate the history
         population = toolbox.population(n=POPSIZE)
         history.update(population)
-        
+
         # Do the evolution, the decorators will take care of updating the
         # history
         # [...]
-        
+
         import matplotlib.pyplot as plt
         import networkx
-        
+
         graph = networkx.DiGraph(history.genealogy_tree)
         graph = graph.reverse()     # Make the grah top-down
         colors = [toolbox.evaluate(history.genealogy_history[i])[0] for i in graph]
         networkx.draw(graph, node_color=colors)
         plt.show()
-    
+
     Using NetworkX in combination with `pygraphviz
     <http://networkx.lanl.gov/pygraphviz/>`_ (dot layout) this amazing
     genealogy tree can be obtained from the OneMax example with a population
     size of 20 and 5 generations, where the color of the nodes indicate there
     fitness, blue is low and red is high.
-    
+
     .. image:: /_images/genealogy.png
        :width: 67%
-     
+
     .. note::
-       The genealogy tree might get very big if your population and/or the 
+       The genealogy tree might get very big if your population and/or the
        number of generation is large.
-        
+
     """
     def __init__(self):
         self.genealogy_index = 0
         self.genealogy_history = dict()
         self.genealogy_tree = dict()
-        
+
     def update(self, individuals):
         """Update the history with the new *individuals*. The index present in
         their :attr:`history_index` attribute will be used to locate their
         parents, it is then modified to a unique one to keep track of those
         new individuals. This method should be called on the individuals after
         each variation.
-        
+
         :param individuals: The list of modified individuals that shall be
                             inserted in the history.
-        
-        If the *individuals* do not have a :attr:`history_index` attribute, 
+
+        If the *individuals* do not have a :attr:`history_index` attribute,
         the attribute is added and this individual is considered as having no
         parent. This method should be called with the initial population to
         initialize the history.
-        
+
         Modifying the internal :attr:`genealogy_index` of the history or the
         :attr:`history_index` of an individual may lead to unpredictable
         results and corruption of the history.
@@ -95,13 +95,13 @@ class History(object):
             parent_indices = tuple(ind.history_index for ind in individuals)
         except AttributeError:
             parent_indices = tuple()
-        
+
         for ind in individuals:
             self.genealogy_index += 1
             ind.history_index = self.genealogy_index
             self.genealogy_history[self.genealogy_index] = deepcopy(ind)
             self.genealogy_tree[self.genealogy_index] = parent_indices
-    
+
     @property
     def decorator(self):
         """Property that returns an appropriate decorator to enhance the
@@ -138,7 +138,7 @@ class History(object):
         visited = set()     # Adds memory to the breadth first search
         def genealogy(index, depth):
             if index not in self.genealogy_tree:
-                return             
+                return
             depth += 1
             if depth > max_depth:
                 return
@@ -152,9 +152,9 @@ class History(object):
         return gtree
 
 class Statistics(object):
-    """Object that compiles statistics on a list of arbitrary objects. 
-    When created the statistics object receives a *key* argument that 
-    is used to get the values on which the function will be computed. 
+    """Object that compiles statistics on a list of arbitrary objects.
+    When created the statistics object receives a *key* argument that
+    is used to get the values on which the function will be computed.
     If not provided the *key* argument defaults to the identity function.
 
     The value returned by the key may be a multi-dimensional object, i.e.:
@@ -164,9 +164,9 @@ class Statistics(object):
 
     :param key: A function to access the values on which to compute the
                 statistics, optional.
-        
+
     ::
-    
+
         >>> s = Statistics()
         >>> s.register("mean", numpy.mean)
         >>> s.register("max", max)
@@ -191,18 +191,18 @@ class Statistics(object):
         :param argument: One or more argument (and keyword argument) to pass
                          automatically to the registered function when called,
                          optional.
-        """        
+        """
         self.functions[name] = partial(function, *args, **kargs)
         self.fields.append(name)
 
     def compile(self, data):
-        """Apply to the input sequence *data* each registered function 
+        """Apply to the input sequence *data* each registered function
         and return the results as a dictionnary.
-        
+
         :param data: Sequence of objects on which the statistics are computed.
         """
         values = tuple(self.key(elem) for elem in data)
-        
+
         entry = dict()
         for key, func in self.functions.iteritems():
             entry[key] = func(values)
@@ -225,11 +225,11 @@ class MultiStatistics(dict):
         >>> mstats.register("max", numpy.max, axis=0)
         >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
         {'length': {'max': 4, 'mean': 3.0}, 'item': {'max': 2.0, 'mean': 1.0}}
-    """ 
+    """
     def compile(self, data):
         """Calls :meth:`Statistics.compile` with *data* of each
         :class:`Statistics` object.
-        
+
         :param data: Sequence of objects on which the statistics are computed.
         """
         record = {}
@@ -243,7 +243,7 @@ class MultiStatistics(dict):
 
     def register(self, name, function, *args, **kargs):
         """Register a *function* in each :class:`Statistics` object.
-        
+
         :param name: The name of the statistics function as it would appear
                      in the dictionnary of the statistics object.
         :param function: A function that will compute the desired statistics
@@ -261,14 +261,14 @@ class Logbook(list):
     Data can be retrieved via the :meth:`select` method given the appropriate
     names.
 
-    The :class:`Logbook` class may also contain other logbooks refered to 
+    The :class:`Logbook` class may also contain other logbooks refered to
     as chapters. Chapters are used to store information associated to a
     specific part of the evolution. For example when computing statistics
     on different components of individuals (namely :class:`MultiStatistics`),
     chapters can be used to distinguish the average fitness and the average
     size.
     """
-    
+
     def __init__(self):
         self.buffindex = 0
         self.chapters = defaultdict(Logbook)
@@ -292,7 +292,7 @@ class Logbook(list):
         logbook using the keyword argument unpacking operator (**), chapters
         will be automatically added to the logbook.
         ::
-            
+
             >>> fit_stats = Statistics(key=attrgetter("fitness.values"))
             >>> size_stats = Statistics(key=len)
             >>> mstats = MultiStatistics(fitness=fit_stats, size=size_stats)
@@ -317,12 +317,12 @@ class Logbook(list):
         ::
 
             logbook.header = ("gen", "mean", "max")
-        
+
         If not set the header is built with all fields, in arbritrary order
         on insertion of the first data. The header can be removed by setting
         it to :data:`None`.
         """
-        
+
         self.log_header = True
         """Tells the log book to output or not the header when streaming the
         first line or getting its entire string representation. This defaults
@@ -361,9 +361,9 @@ class Logbook(list):
         ::
 
             >>> log = Logbook()
-            >>> log.record(**{'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5}, 
+            >>> log.record(**{'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5},
             ... 'size' : {'mean' : 25.4, 'max' : 67}})
-            >>> log.record(**{'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7}, 
+            >>> log.record(**{'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7},
             ... 'size' : {'mean' : 28.1, 'max' : 71}})
             >>> log.chapters['size'].select("mean")
             [25.4, 28.1]
@@ -376,7 +376,7 @@ class Logbook(list):
 
     @property
     def stream(self):
-        """Retrieve the formatted not streamed yet entries of the database 
+        """Retrieve the formatted not streamed yet entries of the database
         including the headers.
         ::
 
@@ -402,17 +402,17 @@ class Logbook(list):
             self.pop(key)
             for chapter in self.chapters.values():
                 chapter.pop(key)
-        
+
     def pop(self, index=0):
         """Retrieve and delete element *index*. The header and stream will be
         adjusted to follow the modification.
 
         :param item: The index of the element to remove, optional. It defaults
                      to the first element.
-        
+
         You can also use the following syntax to delete elements.
         ::
-        
+
             del log[0]
             del log[1::5]
         """
@@ -487,7 +487,7 @@ class HallOfFame(object):
     time so that the first element of the hall of fame is the individual that
     has the best first fitness value ever seen, according to the weights
     provided to the fitness at creation time.
-    
+
     The insertion is made so that old individuals have priority on new
     individuals. A single copy of each individual is kept at all time, the
     equivalence between two individuals is made by the operator passed to the
@@ -497,7 +497,7 @@ class HallOfFame(object):
                     fame.
     :param similar: An equivalence operator between two individuals, optional.
                     It defaults to operator :func:`operator.eq`.
-    
+
     The class :class:`HallOfFame` provides an interface similar to a list
     (without being one completely). It is possible to retrieve its length, to
     iterate on it forward and backward and to get an item or a slice from it.
@@ -507,13 +507,13 @@ class HallOfFame(object):
         self.keys = list()
         self.items = list()
         self.similar = similar
-    
+
     def update(self, population):
         """Update the hall of fame with the *population* by replacing the
         worst individuals in it by the best individuals present in
         *population* (if they are better). The size of the hall of fame is
         kept constant.
-        
+
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
         """
@@ -521,9 +521,18 @@ class HallOfFame(object):
             # Working on an empty hall of fame is problematic for the
             # "for else"
             self.insert(population[0])
-        
+
         for ind in population:
-            if ind.fitness > self[-1].fitness or len(self) < self.maxsize:
+            if isinstance(ind.fitness, (tuple, list)):
+                # Lexicase selection algorithms require fitness to be a
+                # collection of errors on individual "test cases".
+                canidate_tot_fitness = sum(ind.fitness.wvalues)
+                hofer_tot_fitness = sum(self[-1].fitness.wvalues)
+            else:
+                canidate_tot_fitness = ind.fitness
+                hofer_tot_fitness = self[-1].fitness
+
+            if canidate_tot_fitness > hofer_tot_fitness or len(self) < self.maxsize:
                 for hofer in self:
                     # Loop through the hall of fame to check for any
                     # similar individual
@@ -535,16 +544,16 @@ class HallOfFame(object):
                     if len(self) >= self.maxsize:
                         self.remove(-1)
                     self.insert(ind)
-    
+
     def insert(self, item):
         """Insert a new individual in the hall of fame using the
         :func:`~bisect.bisect_right` function. The inserted individual is
-        inserted on the right side of an equal individual. Inserting a new 
+        inserted on the right side of an equal individual. Inserting a new
         individual in the hall of fame also preserve the hall of fame's order.
         This method **does not** check for the size of the hall of fame, in a
         way that inserting a new individual in a full hall of fame will not
         remove the worst individual to maintain a constant size.
-        
+
         :param item: The individual with a fitness attribute to insert in the
                      hall of fame.
         """
@@ -552,15 +561,15 @@ class HallOfFame(object):
         i = bisect_right(self.keys, item.fitness)
         self.items.insert(len(self) - i, item)
         self.keys.insert(i, item.fitness)
-    
+
     def remove(self, index):
         """Remove the specified *index* from the hall of fame.
-        
+
         :param index: An integer giving which item to remove.
         """
         del self.keys[len(self) - (index % len(self) + 1)]
         del self.items[index]
-    
+
     def clear(self):
         """Clear the hall of fame."""
         del self.items[:]
@@ -577,7 +586,7 @@ class HallOfFame(object):
 
     def __reversed__(self):
         return reversed(self.items)
-    
+
     def __str__(self):
         return str(self.items)
 
@@ -586,29 +595,29 @@ class ParetoFront(HallOfFame):
     """The Pareto front hall of fame contains all the non-dominated individuals
     that ever lived in the population. That means that the Pareto front hall of
     fame can contain an infinity of different individuals.
-    
+
     :param similar: A function that tels the Pareto front whether or not two
                     individuals are similar, optional.
-    
+
     The size of the front may become very large if it is used for example on
     a continuous function with a continuous domain. In order to limit the number
     of individuals, it is possible to specify a similarity function that will
     return :data:`True` if the genotype of two individuals are similar. In that
     case only one of the two individuals will be added to the hall of fame. By
     default the similarity function is :func:`operator.eq`.
-    
-    Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`, 
+
+    Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`,
     it is sorted lexicographically at every moment.
     """
     def __init__(self, similar=eq):
         HallOfFame.__init__(self, None, similar)
-    
+
     def update(self, population):
-        """Update the Pareto front hall of fame with the *population* by adding 
+        """Update the Pareto front hall of fame with the *population* by adding
         the individuals from the population that are not dominated by the hall
         of fame. If any individual in the hall of fame is dominated it is
         removed.
-        
+
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
         """
@@ -627,7 +636,7 @@ class ParetoFront(HallOfFame):
                 elif ind.fitness == hofer.fitness and self.similar(ind, hofer):
                     has_twin = True
                     break
-            
+
             for i in reversed(to_remove):       # Remove the dominated hofer
                 self.remove(i)
             if not is_dominated and not has_twin:
