@@ -212,15 +212,16 @@ def selStochasticUniversalSampling(individuals, k, fit_attr="fitness"):
     return chosen
 
 def lexicasePreselection(individuals):
-    """WRITE ME!"""
+    """Preselects one individual per distinct error vector. This is crucial
+    for avoiding the worst case runtime of lexicase selection but does not
+    impact the behavior of which indiviudal gets selected."""
 
     unique_error_vectors = np.unique(
         [i.fitness.wvalues for i in individuals],
-        axis=0).tolist()
-
+        axis=0)
     one_individual_per_err_vec = []
     for error_vec in unique_error_vectors:
-        individuals_w_err_vec = [i for i in individuals if i.fitness.wvalues == error_vec]
+        individuals_w_err_vec = [i for i in individuals if np.array_equal(i.fitness.wvalues, error_vec)]
         one_individual_per_err_vec.append(random.choice(individuals_w_err_vec))
 
     return one_individual_per_err_vec
