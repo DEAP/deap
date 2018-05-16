@@ -5,6 +5,7 @@ import array
 import pickle
 import operator
 import platform
+import functools
 
 import numpy
 
@@ -99,7 +100,7 @@ class Pickling(unittest.TestCase):
     def test_pickle_tree_ephemeral(self):
         pset = gp.PrimitiveSetTyped("MAIN", [], int, "IN")
         pset.addPrimitive(operator.add, [int, int], int)
-        pset.addEphemeralConstant("E1", lambda: 2, int)
+        pset.addEphemeralConstant("E1", functools.partial(int, 2), int)
 
         expr = gp.genFull(pset, min_=1, max_=1)
         ind = creator.IndTree(expr)

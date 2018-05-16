@@ -21,14 +21,15 @@ This module support both strongly and loosely typed GP.
 """
 import copy
 import math
+import copy_reg
 import random
 import re
 import sys
+import types
 import warnings
 
 from collections import defaultdict, deque
 from functools import partial, wraps
-from inspect import isclass
 from operator import eq, lt
 
 import tools        # Needed by HARM-GP
@@ -237,20 +238,44 @@ class Terminal(object):
             return NotImplemented
 
 
-class Ephemeral(Terminal):
-    """Class that encapsulates a terminal which value is set when the
+class MetaEphemeral(type):
+    """Meta-Class that creates a terminal which value is set when the
     object is created. To mutate the value, a new object has to be
-    generated. This is an abstract base class. When subclassing, a
-    staticmethod 'func' must be defined.
+    generated.
     """
-    def __init__(self):
-        Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
+    cache = {}
 
-    @staticmethod
-    def func():
-        """Return a random value used to define the ephemeral state.
-        """
-        raise NotImplementedError
+    def __new__(meta, name, func, ret=__type__, id_=None):
+        if id_ in MetaEphemeral.cache:
+            return MetaEphemeral.cache[id_]
+
+        if isinstance(func, types.LambdaType) and func.__name__ == '<lambda>':
+            warnings.warn("Ephemeral {name} function cannot be "
+                          "pickled because its generating function "
+                          "is a lambda function. Use functools.partial "
+                          "instead.".format(name=name), RuntimeWarning)
+
+        def __init__(self):
+            self.value = func()
+
+        attr = {'__init__' : __init__,
+                'name' : name,
+                'func' : func,
+                'ret' : ret,
+                'conv_fct' : repr}
+
+        cls = super(MetaEphemeral, meta).__new__(meta, name, (Terminal,), attr)
+        MetaEphemeral.cache[id(cls)] = cls
+        return cls
+
+    def __init__(cls, name, func, ret=__type__, id_=None):
+        super(MetaEphemeral, cls).__init__(name, (Terminal,), {})
+
+    def __reduce__(cls):
+        return (MetaEphemeral, (cls.name, cls.func, cls.ret, id(cls)))
+
+
+copy_reg.pickle(MetaEphemeral, MetaEphemeral.__reduce__)
 
 
 class PrimitiveSetTyped(object):
@@ -385,23 +410,16 @@ class PrimitiveSetTyped(object):
         :param ephemeral: function with no arguments returning a random value.
         :param ret_type: type of the object returned by *ephemeral*.
         """
-        module_gp = globals()
-        if name not in module_gp:
-            class_ = type(name, (Ephemeral,), {'func': staticmethod(ephemeral),
-                                               'ret': ret_type})
-            module_gp[name] = class_
+        if not name in self.mapping:
+            class_ = MetaEphemeral(name, ephemeral, ret_type)
         else:
-            class_ = module_gp[name]
-            if issubclass(class_, Ephemeral):
-                if class_.func is not ephemeral:
-                    raise Exception("Ephemerals with different functions should "
-                                    "be named differently, even between psets.")
-                elif class_.ret is not ret_type:
-                    raise Exception("Ephemerals with the same name and function "
-                                    "should have the same type, even between psets.")
-            else:
-                raise Exception("Ephemerals should be named differently "
-                                "than classes defined in the gp module.")
+            class_ = self.mapping[name]
+            if class_.func is not ephemeral:
+                raise Exception("Ephemerals with different functions should "
+                                "be named differently, even between psets.")
+            if class_.ret is not ret_type:
+                raise Exception("Ephemerals with the same name and function "
+                                "should have the same type, even between psets.")
 
         self._add(class_)
         self.terms_count += 1
@@ -608,7 +626,7 @@ def generate(pset, min_, max_, condition, type_=None):
                 raise IndexError, "The gp.generate function tried to add "\
                                   "a terminal of type '%s', but there is "\
                                   "none available." % (type_,), traceback
-            if isclass(term):
+            if type(term) is MetaEphemeral:
                 term = term()
             expr.append(term)
         else:
@@ -760,7 +778,7 @@ def mutNodeReplacement(individual, pset):
 
     if node.arity == 0:  # Terminal
         term = random.choice(pset.terminals[node.ret])
-        if isclass(term):
+        if type(term) is MetaEphemeral:
             term = term()
         individual[index] = term
     else:   # Primitive
@@ -786,7 +804,7 @@ def mutEphemeral(individual, mode):
 
     ephemerals_idx = [index
                       for index, node in enumerate(individual)
-                      if isinstance(node, Ephemeral)]
+                      if isinstance(type(node), MetaEphemeral)]
 
     if len(ephemerals_idx) > 0:
         if mode == "one":
@@ -828,7 +846,7 @@ def mutInsert(individual, pset):
     for i, arg_type in enumerate(new_node.args):
         if i != position:
             term = choice(pset.terminals[arg_type])
-            if isclass(term):
+            if type(term) is MetaEphemeral:
                 term = term()
             new_subtree[i] = term
 
