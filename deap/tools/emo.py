@@ -19,12 +19,12 @@ def selNSGA2(individuals, k, nd='standard'):
     than sorting the population according to their front rank. The
     list returned contains references to the input *individuals*. For more
     details on the NSGA-II operator see [Deb2002]_.
-    
+
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
     :param nd: Specify the non-dominated algorithm to use: 'standard' or 'log'.
     :returns: A list of selected individuals.
-    
+
     .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
        non-dominated sorting genetic algorithm for multi-objective
        optimization: NSGA-II", 2002.
@@ -39,27 +39,27 @@ def selNSGA2(individuals, k, nd='standard'):
 
     for front in pareto_fronts:
         assignCrowdingDist(front)
-    
+
     chosen = list(chain(*pareto_fronts[:-1]))
     k = k - len(chosen)
     if k > 0:
         sorted_front = sorted(pareto_fronts[-1], key=attrgetter("fitness.crowding_dist"), reverse=True)
         chosen.extend(sorted_front[:k])
-        
+
     return chosen
 
 def sortNondominated(individuals, k, first_front_only=False):
-    """Sort the first *k* *individuals* into different nondomination levels 
+    """Sort the first *k* *individuals* into different nondomination levels
     using the "Fast Nondominated Sorting Approach" proposed by Deb et al.,
-    see [Deb2002]_. This algorithm has a time complexity of :math:`O(MN^2)`, 
-    where :math:`M` is the number of objectives and :math:`N` the number of 
+    see [Deb2002]_. This algorithm has a time complexity of :math:`O(MN^2)`,
+    where :math:`M` is the number of objectives and :math:`N` the number of
     individuals.
-    
+
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
     :param first_front_only: If :obj:`True` sort only the first front and
                              exit.
-    :returns: A list of Pareto fronts (lists), the first list includes 
+    :returns: A list of Pareto fronts (lists), the first list includes
               nondominated individuals.
 
     .. [Deb2002] Deb, Pratab, Agarwal, and Meyarivan, "A fast elitist
@@ -73,12 +73,12 @@ def sortNondominated(individuals, k, first_front_only=False):
     for ind in individuals:
         map_fit_ind[ind.fitness].append(ind)
     fits = map_fit_ind.keys()
-    
+
     current_front = []
     next_front = []
     dominating_fits = defaultdict(int)
     dominated_fits = defaultdict(list)
-    
+
     # Rank first Pareto front
     for i, fit_i in enumerate(fits):
         for fit_j in fits[i+1:]:
@@ -90,13 +90,13 @@ def sortNondominated(individuals, k, first_front_only=False):
                 dominated_fits[fit_j].append(fit_i)
         if dominating_fits[fit_i] == 0:
             current_front.append(fit_i)
-    
+
     fronts = [[]]
     for fit in current_front:
         fronts[-1].extend(map_fit_ind[fit])
     pareto_sorted = len(fronts[-1])
 
-    # Rank the next front until all individuals are sorted or 
+    # Rank the next front until all individuals are sorted or
     # the given number of individual are sorted.
     if not first_front_only:
         N = min(len(individuals), k)
@@ -111,22 +111,22 @@ def sortNondominated(individuals, k, first_front_only=False):
                         fronts[-1].extend(map_fit_ind[fit_d])
             current_front = next_front
             next_front = []
-    
+
     return fronts
 
 def assignCrowdingDist(individuals):
-    """Assign a crowding distance to each individual's fitness. The 
-    crowding distance can be retrieve via the :attr:`crowding_dist` 
+    """Assign a crowding distance to each individual's fitness. The
+    crowding distance can be retrieve via the :attr:`crowding_dist`
     attribute of each individual's fitness.
     """
     if len(individuals) == 0:
         return
-    
+
     distances = [0.0] * len(individuals)
     crowd = [(ind.fitness.values, i) for i, ind in enumerate(individuals)]
-    
+
     nobj = len(individuals[0].fitness.values)
-    
+
     for i in xrange(nobj):
         crowd.sort(key=lambda element: element[0][i])
         distances[crowd[0][1]] = float("inf")
@@ -148,14 +148,18 @@ def selTournamentDCD(individuals, k):
     individuals, two consecutive individuals will be different (assuming all
     individuals in the input list are unique). Each individual from the input
     list won't be selected more than twice.
-    
+
     This selection requires the individuals to have a :attr:`crowding_dist`
     attribute, which can be set by the :func:`assignCrowdingDist` function.
-    
+
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
     :returns: A list of selected individuals.
     """
+
+    if len(individuals)%4 !=0:
+        raise Exception("selTournamentDCD: individuals length must be a multiple of 4")
+
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
             return ind1
@@ -194,7 +198,7 @@ def identity(obj):
 
 def isDominated(wvalues1, wvalues2):
     """Returns whether or not *wvalues1* dominates *wvalues2*.
-    
+
     :param wvalues1: The weighted fitness values that would be dominated.
     :param wvalues2: The weighted fitness values of the dominant.
     :returns: :obj:`True` if wvalues2 dominates wvalues1, :obj:`False`
@@ -209,8 +213,8 @@ def isDominated(wvalues1, wvalues2):
     return not_equal
 
 def median(seq, key=identity):
-    """Returns the median of *seq* - the numeric value separating the higher 
-    half of a sample from the lower half. If there is an even number of 
+    """Returns the median of *seq* - the numeric value separating the higher
+    half of a sample from the lower half. If there is an even number of
     elements in *seq*, it returns the mean of the two middle values.
     """
     sseq = sorted(seq, key=key)
@@ -224,19 +228,19 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     """Sort *individuals* in pareto non-dominated fronts using the Generalized
     Reduced Run-Time Complexity Non-Dominated Sorting Algorithm presented by
     Fortin et al. (2013).
-    
+
     :param individuals: A list of individuals to select from.
     :returns: A list of Pareto fronts (lists), with the first list being the
               true Pareto front.
     """
     if k == 0:
         return []
-    
+
     #Separate individuals according to unique fitnesses
     unique_fits = defaultdict(list)
     for i, ind in enumerate(individuals):
         unique_fits[ind.fitness.wvalues].append(ind)
-    
+
     #Launch the sorting algorithm
     obj = len(individuals[0].fitness.wvalues)-1
     fitnesses = unique_fits.keys()
@@ -244,8 +248,8 @@ def sortLogNondominated(individuals, k, first_front_only=False):
 
     # Sort the fitnesses lexicographically.
     fitnesses.sort(reverse=True)
-    sortNDHelperA(fitnesses, obj, front)    
-    
+    sortNDHelperA(fitnesses, obj, front)
+
     #Extract individuals from front list here
     nbfronts = max(front.values())+1
     pareto_fronts = [[] for i in range(nbfronts)]
@@ -318,7 +322,7 @@ def sweepA(fitnesses, front):
     to the first two objectives using a geometric sweep procedure.
     """
     stairs = [-fitnesses[0][1]]
-    fstairs = [fitnesses[0]]  
+    fstairs = [fitnesses[0]]
     for fit in fitnesses[1:]:
         idx = bisect.bisect_right(stairs, -fit[1])
         if 0 < idx <= len(stairs):
@@ -333,11 +337,11 @@ def sweepA(fitnesses, front):
         fstairs.insert(idx, fit)
 
 def sortNDHelperB(best, worst, obj, front):
-    """Assign front numbers to the solutions in H according to the solutions 
-    in L. The solutions in L are assumed to have correct front numbers and the 
-    solutions in H are not compared with each other, as this is supposed to 
+    """Assign front numbers to the solutions in H according to the solutions
+    in L. The solutions in L are assumed to have correct front numbers and the
+    solutions in H are not compared with each other, as this is supposed to
     happen after sortNDHelperB is called."""
-    key = itemgetter(obj)    
+    key = itemgetter(obj)
     if len(worst) == 0 or len(best) == 0:
         #One of the lists is empty: nothing to do
         return
@@ -351,7 +355,7 @@ def sortNDHelperB(best, worst, obj, front):
         sweepB(best, worst, front)
     elif key(min(best, key=key)) >= key(max(worst, key=key)):
         #All individuals from L dominate H for objective M:
-        #Also supports the case where every individuals in L and H 
+        #Also supports the case where every individuals in L and H
         #has the same value for the current objective
         #Skip to objective M-1
         sortNDHelperB(best, worst, obj-1, front)
@@ -364,7 +368,7 @@ def sortNDHelperB(best, worst, obj, front):
 def splitB(best, worst, obj):
     """Split both best individual and worst sets of fitnesses according
     to the median of objective *obj* computed on the set containing the
-    most elements. The values equal to the median are attributed so as 
+    most elements. The values equal to the median are attributed so as
     to balance the four resulting sets as much as possible.
     """
     median_ = median(best if len(best) > len(worst) else worst, itemgetter(obj))
@@ -379,8 +383,8 @@ def splitB(best, worst, obj):
         else:
             best1_a.append(fit)
             best2_b.append(fit)
-    
-    worst1_a, worst2_a, worst1_b, worst2_b = [], [], [], []        
+
+    worst1_a, worst2_a, worst1_b, worst2_b = [], [], [], []
     for fit in worst:
         if fit[obj] > median_:
             worst1_a.append(fit)
@@ -391,7 +395,7 @@ def splitB(best, worst, obj):
         else:
             worst1_a.append(fit)
             worst2_b.append(fit)
-    
+
     balance_a = abs(len(best1_a) - len(best2_a) + len(worst1_a) - len(worst2_a))
     balance_b = abs(len(best1_b) - len(best2_b) + len(worst1_b) - len(worst2_b))
 
@@ -441,11 +445,11 @@ def selSPEA2(individuals, k):
     than sorting the population according to a strength Pareto scheme. The
     list returned contains references to the input *individuals*. For more
     details on the SPEA-II operator see [Zitzler2001]_.
-    
+
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
     :returns: A list of selected individuals.
-    
+
     .. [Zitzler2001] Zitzler, Laumanns and Thiele, "SPEA 2: Improving the
        strength Pareto evolutionary algorithm", 2001.
     """
@@ -455,7 +459,7 @@ def selSPEA2(individuals, k):
     strength_fits = [0] * N
     fits = [0] * N
     dominating_inds = [list() for i in xrange(N)]
-    
+
     for i, ind_i in enumerate(individuals):
         for j, ind_j in enumerate(individuals[i+1:], i+1):
             if ind_i.fitness.dominates(ind_j.fitness):
@@ -464,14 +468,14 @@ def selSPEA2(individuals, k):
             elif ind_j.fitness.dominates(ind_i.fitness):
                 strength_fits[j] += 1
                 dominating_inds[i].append(j)
-    
+
     for i in xrange(N):
         for j in dominating_inds[i]:
             fits[i] += strength_fits[j]
-    
+
     # Choose all non-dominated individuals
     chosen_indices = [i for i in xrange(N) if fits[i] < 1]
-    
+
     if len(chosen_indices) < k:     # The archive is too small
         for i in xrange(N):
             distances = [0.0] * N
@@ -485,13 +489,13 @@ def selSPEA2(individuals, k):
             kth_dist = _randomizedSelect(distances, 0, N - 1, K)
             density = 1.0 / (kth_dist + 2.0)
             fits[i] += density
-            
+
         next_indices = [(fits[i], i) for i in xrange(N)
                         if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
         chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
-                
+
     elif len(chosen_indices) > k:   # The archive is too large
         N = len(chosen_indices)
         distances = [[0.0] * N for i in xrange(N)]
@@ -506,7 +510,7 @@ def selSPEA2(individuals, k):
                 distances[i][j] = dist
                 distances[j][i] = dist
             distances[i][i] = -1
-        
+
         # Insert sort is faster than quick sort for short arrays
         for i in xrange(N):
             for j in xrange(1, N):
@@ -515,7 +519,7 @@ def selSPEA2(individuals, k):
                     sorted_indices[i][l] = sorted_indices[i][l - 1]
                     l -= 1
                 sorted_indices[i][l] = j
-        
+
         size = N
         to_remove = []
         while size > k:
@@ -525,32 +529,32 @@ def selSPEA2(individuals, k):
                 for j in xrange(1, size):
                     dist_i_sorted_j = distances[i][sorted_indices[i][j]]
                     dist_min_sorted_j = distances[min_pos][sorted_indices[min_pos][j]]
-                    
+
                     if dist_i_sorted_j < dist_min_sorted_j:
                         min_pos = i
                         break
                     elif dist_i_sorted_j > dist_min_sorted_j:
                         break
-            
+
             # Remove minimal distance from sorted_indices
             for i in xrange(N):
                 distances[i][min_pos] = float("inf")
                 distances[min_pos][i] = float("inf")
-                
+
                 for j in xrange(1, size - 1):
                     if sorted_indices[i][j] == min_pos:
                         sorted_indices[i][j] = sorted_indices[i][j + 1]
                         sorted_indices[i][j + 1] = min_pos
-            
+
             # Remove corresponding individual from chosen_indices
             to_remove.append(min_pos)
             size -= 1
-        
+
         for index in reversed(sorted(to_remove)):
             del chosen_indices[index]
-    
+
     return [individuals[i] for i in chosen_indices]
-    
+
 def _randomizedSelect(array, begin, end, i):
     """Allows to select the ith smallest element from array without sorting it.
     Runtime is expected to be O(n).
@@ -568,7 +572,7 @@ def _randomizedPartition(array, begin, end):
     i = random.randint(begin, end)
     array[begin], array[i] = array[i], array[begin]
     return _partition(array, begin, end)
-    
+
 def _partition(array, begin, end):
     x = array[begin]
     i = begin - 1
