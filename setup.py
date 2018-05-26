@@ -15,14 +15,11 @@ from setuptools.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
 
-try:
-    from pypandoc import convert
-except ImportError:
-    warnings.append("warning: pypandoc module not found, could not convert ReadMe Markdown to RST")
-    import codecs
-    read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
-else:
-    read_md = lambda f: convert(f, 'rst')
+from codecs import open
+from os import path
+
+with open('README.rst', encoding='utf-8') as f:
+    long_description = f.read()
 
 import deap
 
@@ -64,7 +61,7 @@ def run_setup(build_ext):
     setup(name='deap',
           version=deap.__revision__,
           description='Distributed Evolutionary Algorithms in Python',
-          long_description=read_md('README.md'),
+          long_description=long_description,
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
           url='https://www.github.com/deap',
