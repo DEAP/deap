@@ -162,6 +162,11 @@ We :func:`map` the evaluation function to every individual and then assign
 their respective fitness. Note that the order in ``fitnesses`` and
 ``population`` is the same.
 
+Before we go on, this is the time to define some constants we will use later on.
+
+.. literalinclude:: /../examples/ga/onemax.py
+   :lines: 79-83
+
 -----------------------
 Performing the Evolution
 -----------------------
