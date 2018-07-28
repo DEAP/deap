@@ -137,13 +137,13 @@ a given function at run time. Ephemeral constants allow to have terminals that
 don't have all the same values. For example, to create an ephemeral constant
 that takes its value in :math:`[-1, 1)` we use ::
 
-	pset.addEphemeralConstant(lambda: random.uniform(-1, 1))
+	pset.addEphemeralConstant("small_random_number", lambda: random.uniform(-1, 1))
 
 The ephemeral constant value is determined when it is inserted in the tree and
 never changes unless it is replaced by another ephemeral constant. Since it is a
 terminal, ephemeral constant can also be typed. ::
 
-	pset.addEphemeralConstant(lambda: random.randint(-10, 10), int)
+	pset.addEphemeralConstant("slightly_bigger_random_integer", lambda: random.randint(-10, 10), int)
 
 Generation of Tree Individuals
 ------------------------------
