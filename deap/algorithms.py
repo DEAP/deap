@@ -202,7 +202,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :param cxpb: The probability of mating two individuals.
     :param mutpb: The probability of mutating an individual.
     :returns: The final population
-    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+    :returns: A :class:`~deap.tools.Logbook` with the statistics of the
               evolution
 
     The variation goes as follow. On each of the *lambda_* iteration, it
