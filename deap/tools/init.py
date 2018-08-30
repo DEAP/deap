@@ -10,7 +10,7 @@ def initRepeat(container, func, n):
     :param n: The number of times to repeat func.
     :returns: An instance of the container filled with data from func.
 
-    This helper function can can be used in conjunction with a Toolbox
+    This helper function can be used in conjunction with a Toolbox
     to register a generator of filled containers, as individuals or
     population.
 
@@ -33,7 +33,7 @@ def initIterate(container, generator):
     :returns: An instance of the container filled with data from the
               generator.
 
-    This helper function can can be used in conjunction with a Toolbox
+    This helper function can be used in conjunction with a Toolbox
     to register a generator of filled containers, as individuals or
     population.
 
@@ -59,7 +59,7 @@ def initCycle(container, seq_func, n=1):
     :returns: An instance of the container filled with data from the
               returned by the functions.
 
-    This helper function can can be used in conjunction with a Toolbox
+    This helper function can be used in conjunction with a Toolbox
     to register a generator of filled containers, as individuals or
     population.
 
