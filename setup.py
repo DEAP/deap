@@ -16,13 +16,13 @@ from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
 
 try:
-    from pypandoc import convert
+    from pypandoc import convert_file
 except ImportError:
     warnings.append("warning: pypandoc module not found, could not convert ReadMe Markdown to RST")
     import codecs
     read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
 else:
-    read_md = lambda f: convert(f, 'rst')
+    read_md = lambda f: convert_file(f, 'rst')
 
 import deap
 
