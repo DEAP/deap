@@ -102,7 +102,7 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     return chosen
 
 
-def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_first, fit_attr="fitness"):
+def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_first, fit_attr="fitness", size=len):
     """Tournament selection which use the size of the individuals in order
     to discriminate good solutions. This kind of tournament is obviously
     useless with fixed-length representation, but has been shown to
@@ -138,6 +138,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
     shown that this parameter does not have a significant effect in most cases\
     (see [Luke2002fighting]_).
     :param fit_attr: The attribute of individuals to use as selection criterion
+    :param size: Function taking an individual as argument and returning a positive real number. Default len.
     :returns: A list of selected individuals.
 
     .. [Luke2002fighting] Luke and Panait, 2002, Fighting bloat with
@@ -153,9 +154,13 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
             prob = parsimony_size / 2.
             ind1, ind2 = select(individuals, k=2)
 
-            if len(ind1) > len(ind2):
+            # Compute sizes.
+            size1 = size(ind1)
+            size2 = size(ind2)
+
+            if size1 > size2:
                 ind1, ind2 = ind2, ind1
-            elif len(ind1) == len(ind2):
+            elif size1 == size2:
                 # random selection in case of a tie
                 prob = 0.5
 
@@ -323,4 +328,3 @@ def selAutomaticEpsilonLexicase(individuals, k):
 __all__ = ['selRandom', 'selBest', 'selWorst', 'selRoulette',
            'selTournament', 'selDoubleTournament', 'selStochasticUniversalSampling',
            'selLexicase', 'selEpsilonLexicase', 'selAutomaticEpsilonLexicase']
-
