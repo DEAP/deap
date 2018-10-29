@@ -435,11 +435,37 @@ def cxESTwoPoints(ind1, ind2):
     """
     return cxESTwoPoints(ind1, ind2)
 
+def cxCycle(ind1, ind2):
+    cycle_1 = list()
+    cycle_2 = list()
+    idx = 0
+    while 1:
+        if idx in cycle_1:
+            break
+        cycle_1.append(idx)
+        idx = ind2.index(ind1[idx])
+    left = [i for i in range(len(ind2)) if i not in cycle_1]
+    if len(left) != 0:
+        start = min(left)
+    else:
+        return ind1, ind2
+    idx = start
+    while 1:
+        if idx in cycle_2:
+            break
+        cycle_2.append(idx)
+        idx = ind2.index(ind1[idx])
+    for i in cycle_2:
+        temp = ind2[i]
+        ind2[i] = ind1[i]
+        ind1[i] = temp
+    return ind1, ind2
+
 # List of exported function names.
 __all__ = ['cxOnePoint', 'cxTwoPoint', 'cxUniform', 'cxPartialyMatched',
            'cxUniformPartialyMatched', 'cxOrdered', 'cxBlend',
            'cxSimulatedBinary','cxSimulatedBinaryBounded', 'cxMessyOnePoint', 
-           'cxESBlend', 'cxESTwoPoint']
+           'cxESBlend', 'cxESTwoPoint', 'cxCycle']
 
 # Deprecated functions
 __all__.extend(['cxTwoPoints', 'cxESTwoPoints'])
