@@ -17,6 +17,7 @@ import operator
 import random
 
 import numpy
+import math
 
 from deap import base
 from deap import benchmarks
@@ -41,11 +42,10 @@ def updateParticle(part, best, phi1, phi2):
     v_u2 = map(operator.mul, u2, map(operator.sub, best, part))
     part.speed = list(map(operator.add, part.speed, map(operator.add, v_u1, v_u2)))
     for i, speed in enumerate(part.speed):
-        sign = speed/abs(speed)
         if abs(speed) < part.smin:
-            part.speed[i] = part.smin * sign
+            part.speed[i] = math.copysign(part.smin, speed)
         elif abs(speed) > part.smax:
-            part.speed[i] = part.smax * sign
+            part.speed[i] = math.copysign(part.smax, speed)
     part[:] = list(map(operator.add, part, part.speed))
 
 toolbox = base.Toolbox()

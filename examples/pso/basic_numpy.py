@@ -41,11 +41,10 @@ def updateParticle(part, best, phi1, phi2):
     v_u2 = u2 * (best - part)
     part.speed += v_u1 + v_u2
     for i, speed in enumerate(part.speed):
-        sign = speed / abs(speed)
         if abs(speed) < part.smin:
-            part.speed[i] = part.smin * sign
+            part.speed[i] = math.copysign(part.smin, speed)
         elif abs(speed) > part.smax:
-            part.speed[i] = part.smax * sign
+            part.speed[i] = math.copysign(part.smax, speed)
     part += part.speed
 
 toolbox = base.Toolbox()
