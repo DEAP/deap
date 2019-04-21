@@ -433,7 +433,7 @@ def cxESTwoPoints(ind1, ind2):
     .. deprecated:: 1.0
         The function has been renamed. Use :func:`cxESTwoPoint` instead.
     """
-    return cxESTwoPoints(ind1, ind2)
+    return cxESTwoPoint(ind1, ind2)
 
 # List of exported function names.
 __all__ = ['cxOnePoint', 'cxTwoPoint', 'cxUniform', 'cxPartialyMatched',
