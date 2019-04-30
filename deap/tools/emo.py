@@ -157,9 +157,12 @@ def selTournamentDCD(individuals, k):
     :returns: A list of selected individuals.
     """
 
-    if len(individuals)%4 !=0:
-        raise Exception("selTournamentDCD: individuals length must be a multiple of 4")
+    if len(individuals) % 4 != 0:
+        raise ValueError("selTournamentDCD: individuals length must be a multiple of 4")
 
+    if k % 4 != 0:
+        raise ValueError("selTournamentDCD: number of individuals to select must be a multiple of 4")
+        
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
             return ind1
