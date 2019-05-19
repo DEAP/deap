@@ -1058,8 +1058,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print
-        logbook.stream
+        print logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -1126,8 +1125,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print
-            logbook.stream
+            print logbook.stream
 
     return population, logbook
 
