@@ -1211,7 +1211,7 @@ def graph(expr):
 
 def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     """
-    Implementation of the Semantic Mutation operator.
+    Implementation of the Semantic Mutation operator. [Geometric semantic genetic programming, Moraglio et al., 2012]
     mutated_individual = individual + logistic * (random_tree1 - random_tree2)
 
     :param individual: individual to mutate
@@ -1265,7 +1265,7 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
 
 def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
     """
-    Implementation of the Semantic Crossover operator
+    Implementation of the Semantic Crossover operator [Geometric semantic genetic programming, Moraglio et al., 2012]
     offspring1 = random_tree1 * ind1 + (1 - random_tree1) * ind2
     offspring2 = random_tree1 * ind2 + (1 - random_tree1) * ind1
 
