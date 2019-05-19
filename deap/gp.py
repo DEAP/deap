@@ -1266,6 +1266,9 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
 def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
     """
     Implementation of the Semantic Crossover operator
+    offspring1 = random_tree1 * ind1 + (1 - random_tree1) * ind2
+    offspring2 = random_tree1 * ind2 + (1 - random_tree1) * ind1
+
     :param ind1: first parent
     :param ind2: second parent
     :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
