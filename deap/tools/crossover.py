@@ -5,13 +5,15 @@ import warnings
 from collections import Sequence
 from itertools import repeat
 
+import sys
+sys.path.append("..")
+from gp import Terminal, genGrow
+
 
 ######################################
 # GA Crossovers                      #
 ######################################
-from deap.gp import Terminal
 
-from deap import gp
 
 
 def cxOnePoint(ind1, ind2):
@@ -456,7 +458,7 @@ def cxESTwoPoints(ind1, ind2):
 # ES Crossovers                      #
 ######################################
 
-def semantic_crossover(ind1, ind2, gen_func=gp.genGrow, pset=None, min=2, max=6):
+def semantic_crossover(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
     """
     Implementation of the Semantic Crossover operator
     :param ind1: first parent

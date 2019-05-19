@@ -5,11 +5,13 @@ import random
 from itertools import repeat
 from collections import Sequence
 
+import sys
+sys.path.append("..")
+from gp import Terminal, genGrow
+
 ######################################
 # GA Mutations                       #
 ######################################
-from deap import gp
-from deap.gp import Terminal
 
 
 def mutGaussian(individual, mu, sigma, indpb):
@@ -217,7 +219,7 @@ def mutESLogNormal(individual, c, indpb):
 # GSGP Mutation                      #
 ######################################
 
-def semantic_mutation(individual, gen_func=gp.genGrow, pset=None, ms=None, min=2, max=6):
+def semantic_mutation(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     """
     Implementation of the Semantic Mutation operator.
 
