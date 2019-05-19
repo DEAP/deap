@@ -8,6 +8,9 @@ from collections import Sequence
 ######################################
 # GA Mutations                       #
 ######################################
+from deap import gp
+from deap.gp import Terminal
+
 
 def mutGaussian(individual, mu, sigma, indpb):
     """This function applies a gaussian mutation of mean *mu* and standard
@@ -41,6 +44,7 @@ def mutGaussian(individual, mu, sigma, indpb):
             individual[i] += random.gauss(m, s)
 
     return individual,
+
 
 def mutPolynomialBounded(individual, eta, low, up, indpb):
     """Polynomial mutation as implemented in original NSGA-II algorithm in
@@ -76,17 +80,18 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
 
             if rand < 0.5:
                 xy = 1.0 - delta_1
-                val = 2.0 * rand + (1.0 - 2.0 * rand) * xy**(eta + 1)
-                delta_q = val**mut_pow - 1.0
+                val = 2.0 * rand + (1.0 - 2.0 * rand) * xy ** (eta + 1)
+                delta_q = val ** mut_pow - 1.0
             else:
                 xy = 1.0 - delta_2
-                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy**(eta + 1)
-                delta_q = 1.0 - val**mut_pow
+                val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy ** (eta + 1)
+                delta_q = 1.0 - val ** mut_pow
 
             x = x + delta_q * (xu - xl)
             x = min(max(x, xl), xu)
             individual[i] = x
     return individual,
+
 
 def mutShuffleIndexes(individual, indpb):
     """Shuffle the attributes of the input individual and return the mutant.
@@ -113,6 +118,7 @@ def mutShuffleIndexes(individual, indpb):
 
     return individual,
 
+
 def mutFlipBit(individual, indpb):
     """Flip the value of the attributes of the input individual and return the
     mutant. The *individual* is expected to be a :term:`sequence` and the values of the
@@ -132,6 +138,7 @@ def mutFlipBit(individual, indpb):
             individual[i] = type(individual[i])(not individual[i])
 
     return individual,
+
 
 def mutUniformInt(individual, low, up, indpb):
     """Mutate an individual by replacing attributes, with probability *indpb*,
@@ -204,6 +211,49 @@ def mutESLogNormal(individual, c, indpb):
             individual[indx] += individual.strategy[indx] * random.gauss(0, 1)
 
     return individual,
+
+
+######################################
+# GSGP Mutation                      #
+######################################
+
+def semantic_mutation(individual, gen_func=gp.genGrow, pset=None, ms=None, min=2, max=6):
+    """
+    Implementation of the Semantic Mutation operator.
+
+    :param individual: individual to mutate
+    :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
+    :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
+    :param ms: Mutation Step
+    :param min: min depth of the random tree
+    :param max: max depth of the random tree
+    :return: mutated individual
+    """
+    for p in ['lf', 'mul', 'add', 'sub']:
+        assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic mutation"
+
+    tr1 = gen_func(pset, min, max)
+    tr2 = gen_func(pset, min, max)
+    # Wrap mutation with a logistic function
+    tr1.insert(0, pset.mapping['lf'])
+    tr2.insert(0, pset.mapping['lf'])
+    if ms is None:
+        ms = random.uniform(0, 2)
+    mutation_step = Terminal(ms, False, object)
+    # Create the root
+
+    new_ind = individual
+    new_ind.insert(0, pset.mapping["add"])
+    # Append the left branch
+    new_ind.append(pset.mapping["mul"])
+    new_ind.append(mutation_step)
+    new_ind.append(pset.mapping["sub"])
+    # Append the right branch
+    new_ind.extend(tr1)
+    new_ind.extend(tr2)
+
+    return new_ind,
+
 
 __all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',
            'mutFlipBit', 'mutUniformInt', 'mutESLogNormal']

@@ -5,9 +5,14 @@ import warnings
 from collections import Sequence
 from itertools import repeat
 
+
 ######################################
 # GA Crossovers                      #
 ######################################
+from deap.gp import Terminal
+
+from deap import gp
+
 
 def cxOnePoint(ind1, ind2):
     """Executes a one point crossover on the input :term:`sequence` individuals.
@@ -27,6 +32,7 @@ def cxOnePoint(ind1, ind2):
 
     return ind1, ind2
 
+
 def cxTwoPoint(ind1, ind2):
     """Executes a two-point crossover on the input :term:`sequence`
     individuals. The two individuals are modified in place and both keep
@@ -44,13 +50,14 @@ def cxTwoPoint(ind1, ind2):
     cxpoint2 = random.randint(1, size - 1)
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
-    else: # Swap the two cx points
+    else:  # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
         = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
 
     return ind1, ind2
+
 
 def cxTwoPoints(ind1, ind2):
     """
@@ -60,6 +67,7 @@ def cxTwoPoints(ind1, ind2):
     warnings.warn("tools.cxTwoPoints has been renamed. Use cxTwoPoint instead.",
                   FutureWarning)
     return cxTwoPoint(ind1, ind2)
+
 
 def cxUniform(ind1, ind2, indpb):
     """Executes a uniform crossover that modify in place the two
@@ -80,6 +88,7 @@ def cxUniform(ind1, ind2, indpb):
             ind1[i], ind2[i] = ind2[i], ind1[i]
 
     return ind1, ind2
+
 
 def cxPartialyMatched(ind1, ind2):
     """Executes a partially matched crossover (PMX) on the input individuals.
@@ -102,7 +111,7 @@ def cxPartialyMatched(ind1, ind2):
        salesman problem", 1985.
     """
     size = min(len(ind1), len(ind2))
-    p1, p2 = [0]*size, [0]*size
+    p1, p2 = [0] * size, [0] * size
 
     # Initialize the position of each indices in the individuals
     for i in xrange(size):
@@ -113,7 +122,7 @@ def cxPartialyMatched(ind1, ind2):
     cxpoint2 = random.randint(0, size - 1)
     if cxpoint2 >= cxpoint1:
         cxpoint2 += 1
-    else: # Swap the two cx points
+    else:  # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
     # Apply crossover between cx points
@@ -129,6 +138,7 @@ def cxPartialyMatched(ind1, ind2):
         p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
     return ind1, ind2
+
 
 def cxUniformPartialyMatched(ind1, ind2, indpb):
     """Executes a uniform partially matched crossover (UPMX) on the input
@@ -152,7 +162,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
        control parameter optimization", 2000.
     """
     size = min(len(ind1), len(ind2))
-    p1, p2 = [0]*size, [0]*size
+    p1, p2 = [0] * size, [0] * size
 
     # Initialize the position of each indices in the individuals
     for i in xrange(size):
@@ -172,6 +182,7 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
             p2[temp1], p2[temp2] = p2[temp2], p2[temp1]
 
     return ind1, ind2
+
 
 def cxOrdered(ind1, ind2):
     """Executes an ordered crossover (OX) on the input
@@ -201,7 +212,7 @@ def cxOrdered(ind1, ind2):
     if a > b:
         a, b = b, a
 
-    holes1, holes2 = [True]*size, [True]*size
+    holes1, holes2 = [True] * size, [True] * size
     for i in range(size):
         if i < a or i > b:
             holes1[ind2[i]] = False
@@ -209,7 +220,7 @@ def cxOrdered(ind1, ind2):
 
     # We must keep the original values somewhere before scrambling everything
     temp1, temp2 = ind1, ind2
-    k1 , k2 = b + 1, b + 1
+    k1, k2 = b + 1, b + 1
     for i in range(size):
         if not holes1[temp1[(i + b + 1) % size]]:
             ind1[k1 % size] = temp1[(i + b + 1) % size]
@@ -224,6 +235,7 @@ def cxOrdered(ind1, ind2):
         ind1[i], ind2[i] = ind2[i], ind1[i]
 
     return ind1, ind2
+
 
 def cxBlend(ind1, ind2, alpha):
     """Executes a blend crossover that modify in-place the input individuals.
@@ -245,6 +257,7 @@ def cxBlend(ind1, ind2, alpha):
         ind2[i] = gamma * x1 + (1. - gamma) * x2
 
     return ind1, ind2
+
 
 def cxSimulatedBinary(ind1, ind2, eta):
     """Executes a simulated binary crossover that modify in-place the input
@@ -317,20 +330,20 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                 rand = random.random()
 
                 beta = 1.0 + (2.0 * (x1 - xl) / (x2 - x1))
-                alpha = 2.0 - beta**-(eta + 1)
+                alpha = 2.0 - beta ** -(eta + 1)
                 if rand <= 1.0 / alpha:
-                    beta_q = (rand * alpha)**(1.0 / (eta + 1))
+                    beta_q = (rand * alpha) ** (1.0 / (eta + 1))
                 else:
-                    beta_q = (1.0 / (2.0 - rand * alpha))**(1.0 / (eta + 1))
+                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
 
                 c1 = 0.5 * (x1 + x2 - beta_q * (x2 - x1))
 
                 beta = 1.0 + (2.0 * (xu - x2) / (x2 - x1))
-                alpha = 2.0 - beta**-(eta + 1)
+                alpha = 2.0 - beta ** -(eta + 1)
                 if rand <= 1.0 / alpha:
-                    beta_q = (rand * alpha)**(1.0 / (eta + 1))
+                    beta_q = (rand * alpha) ** (1.0 / (eta + 1))
                 else:
-                    beta_q = (1.0 / (2.0 - rand * alpha))**(1.0 / (eta + 1))
+                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
                 c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
 
                 c1 = min(max(c1, xl), xu)
@@ -368,6 +381,7 @@ def cxMessyOnePoint(ind1, ind2):
 
     return ind1, ind2
 
+
 ######################################
 # ES Crossovers                      #
 ######################################
@@ -400,6 +414,7 @@ def cxESBlend(ind1, ind2, alpha):
 
     return ind1, ind2
 
+
 def cxESTwoPoint(ind1, ind2):
     """Executes a classical two points crossover on both the individuals and their
     strategy. The individuals shall be a :term:`sequence` and must have a
@@ -419,7 +434,7 @@ def cxESTwoPoint(ind1, ind2):
     pt2 = random.randint(1, size - 1)
     if pt2 >= pt1:
         pt2 += 1
-    else: # Swap the two cx points
+    else:  # Swap the two cx points
         pt1, pt2 = pt2, pt1
 
     ind1[pt1:pt2], ind2[pt1:pt2] = ind2[pt1:pt2], ind1[pt1:pt2]
@@ -428,6 +443,7 @@ def cxESTwoPoint(ind1, ind2):
 
     return ind1, ind2
 
+
 def cxESTwoPoints(ind1, ind2):
     """
     .. deprecated:: 1.0
@@ -435,10 +451,54 @@ def cxESTwoPoints(ind1, ind2):
     """
     return cxESTwoPoint(ind1, ind2)
 
+
+######################################
+# ES Crossovers                      #
+######################################
+
+def semantic_crossover(ind1, ind2, gen_func=gp.genGrow, pset=None, min=2, max=6):
+    """
+    Implementation of the Semantic Crossover operator
+    :param ind1: first parent
+    :param ind2: second parent
+    :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
+    :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
+    :param min: min depth of the random tree
+    :param max: max depth of the random tree
+    :return: offsprings
+    """
+    for p in ['lf', 'mul', 'add', 'sub']:
+        assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic crossover"
+
+    tr = gen_func(pset, min, max)
+    tr.insert(0, pset.mapping['lf'])
+    new_ind1 = ind1
+    new_ind1.insert(0, pset.mapping["mul"])
+    new_ind1.insert(0, pset.mapping["add"])
+    new_ind1.extend(tr)
+    new_ind1.append(pset.mapping["mul"])
+    new_ind1.append(pset.mapping["sub"])
+    new_ind1.append(Terminal(1.0, False, object))
+    new_ind1.extend(tr)
+    new_ind1.extend(ind2)
+
+    new_ind2 = ind2
+    new_ind2.insert(0, pset.mapping["mul"])
+    new_ind2.insert(0, pset.mapping["add"])
+    new_ind2.extend(tr)
+    new_ind2.append(pset.mapping["mul"])
+    new_ind2.append(pset.mapping["sub"])
+    new_ind2.append(Terminal(1.0, False, object))
+    new_ind2.extend(tr)
+    new_ind2.extend(ind1)
+
+    return new_ind1, new_ind2
+
+
 # List of exported function names.
 __all__ = ['cxOnePoint', 'cxTwoPoint', 'cxUniform', 'cxPartialyMatched',
            'cxUniformPartialyMatched', 'cxOrdered', 'cxBlend',
-           'cxSimulatedBinary','cxSimulatedBinaryBounded', 'cxMessyOnePoint',
+           'cxSimulatedBinary', 'cxSimulatedBinaryBounded', 'cxMessyOnePoint',
            'cxESBlend', 'cxESTwoPoint']
 
 # Deprecated functions
