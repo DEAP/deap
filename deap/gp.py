@@ -31,7 +31,7 @@ from functools import partial, wraps
 from inspect import isclass
 from operator import eq, lt
 
-import tools        # Needed by HARM-GP
+import tools  # Needed by HARM-GP
 
 ######################################
 # GP Data structure                  #
@@ -49,6 +49,7 @@ class PrimitiveTree(list):
     have an attribute *arity* which defines the arity of the
     primitive. An arity of 0 is expected from terminals nodes.
     """
+
     def __init__(self, content):
         list.__init__(self, content)
 
@@ -95,7 +96,7 @@ class PrimitiveTree(list):
                 prim, args = stack.pop()
                 string = prim.format(*args)
                 if len(stack) == 0:
-                    break   # If stack is empty, all nodes should have been seen
+                    break  # If stack is empty, all nodes should have been seen
                 stack[-1][1].append(string)
 
         return string
@@ -243,6 +244,7 @@ class Ephemeral(Terminal):
     generated. This is an abstract base class. When subclassing, a
     staticmethod 'func' must be defined.
     """
+
     def __init__(self):
         Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
 
@@ -258,6 +260,7 @@ class PrimitiveSetTyped(object):
     Strongly Typed GP problem. The set also defined the researched
     function return type, and input arguments type and number.
     """
+
     def __init__(self, name, in_types, ret_type, prefix="ARG"):
         self.terminals = defaultdict(list)
         self.primitives = defaultdict(list)
@@ -332,9 +335,9 @@ class PrimitiveSetTyped(object):
         prim = Primitive(name, in_types, ret_type)
 
         assert name not in self.context or \
-            self.context[name] is primitive, \
+               self.context[name] is primitive, \
             "Primitives are required to have a unique name. " \
-            "Consider using the argument 'name' to rename your "\
+            "Consider using the argument 'name' to rename your " \
             "second '%s' primitive." % (name,)
 
         self._add(prim)
@@ -360,7 +363,7 @@ class PrimitiveSetTyped(object):
 
         assert name not in self.context, \
             "Terminals are required to have a unique name. " \
-            "Consider using the argument 'name' to rename your "\
+            "Consider using the argument 'name' to rename your " \
             "second %s terminal." % (name,)
 
         if name is not None:
@@ -428,6 +431,7 @@ class PrimitiveSet(PrimitiveSetTyped):
     """Class same as :class:`~deap.gp.PrimitiveSetTyped`, except there is no
     definition of type.
     """
+
     def __init__(self, name, arity, prefix="ARG"):
         args = [__type__] * arity
         PrimitiveSetTyped.__init__(self, name, args, __type__, prefix)
@@ -522,9 +526,11 @@ def genFull(pset, min_, max_, type_=None):
                   is assumed.
     :returns: A full tree with all leaves at the same depth.
     """
+
     def condition(height, depth):
         """Expression generation stops when the depth is equal to height."""
         return depth == height
+
     return generate(pset, min_, max_, condition, type_)
 
 
@@ -540,12 +546,14 @@ def genGrow(pset, min_, max_, type_=None):
                   is assumed.
     :returns: A grown tree with leaves at possibly different depths.
     """
+
     def condition(height, depth):
         """Expression generation stops when the depth is equal to height
         or when it is randomly determined that a a node should be a terminal.
         """
         return depth == height or \
-            (depth >= min_ and random.random() < pset.terminalRatio)
+               (depth >= min_ and random.random() < pset.terminalRatio)
+
     return generate(pset, min_, max_, condition, type_)
 
 
@@ -605,8 +613,8 @@ def generate(pset, min_, max_, condition, type_=None):
                 term = random.choice(pset.terminals[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
-                raise IndexError, "The gp.generate function tried to add "\
-                                  "a terminal of type '%s', but there is "\
+                raise IndexError, "The gp.generate function tried to add " \
+                                  "a terminal of type '%s', but there is " \
                                   "none available." % (type_,), traceback
             if isclass(term):
                 term = term()
@@ -616,8 +624,8 @@ def generate(pset, min_, max_, condition, type_=None):
                 prim = random.choice(pset.primitives[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
-                raise IndexError, "The gp.generate function tried to add "\
-                                  "a primitive of type '%s', but there is "\
+                raise IndexError, "The gp.generate function tried to add " \
+                                  "a primitive of type '%s', but there is " \
                                   "none available." % (type_,), traceback
             expr.append(prim)
             for arg in reversed(prim.args):
@@ -763,7 +771,7 @@ def mutNodeReplacement(individual, pset):
         if isclass(term):
             term = term()
         individual[index] = term
-    else:   # Primitive
+    else:  # Primitive
         prims = [p for p in pset.primitives[node.ret] if p.args == node.args]
         individual[index] = random.choice(prims)
 
@@ -868,6 +876,7 @@ def mutShrink(individual):
 
     return individual,
 
+
 ######################################
 # GP bloat control decorators        #
 ######################################
@@ -901,6 +910,7 @@ def staticLimit(key, max_value):
         Cambridge, MA, 1992)
 
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -910,7 +920,9 @@ def staticLimit(key, max_value):
                 if key(ind) > max_value:
                     new_inds[i] = random.choice(keep_inds)
             return new_inds
+
         return wrapper
+
     return decorator
 
 
@@ -971,6 +983,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         DOI 10.1007/s10710-015-9242-8
 
     """
+
     def _genpop(n, pickfrom=[], acceptfunc=lambda s: True, producesizes=False):
         # Generate a population of n individuals, using individuals in
         # *pickfrom* if possible, with a *acceptfunc* acceptance function.
@@ -1045,7 +1058,8 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print
+        logbook.stream
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -1077,6 +1091,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
             return (gamma * len(population) * math.log(2) /
                     halflifefunc(x)) * math.exp(-math.log(2) *
                                                 (x - cutoffsize) / halflifefunc(x))
+
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else
                       targetfunc(binidx) for binidx in range(len(naturalhist))]
 
@@ -1111,7 +1126,8 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print
+            logbook.stream
 
     return population, logbook
 
@@ -1188,6 +1204,89 @@ def graph(expr):
 
     return nodes, edges, labels
 
+
+######################################
+# GSGP Mutation                      #
+######################################
+
+def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
+    """
+    Implementation of the Semantic Mutation operator.
+
+    :param individual: individual to mutate
+    :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
+    :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
+    :param ms: Mutation Step
+    :param min: min depth of the random tree
+    :param max: max depth of the random tree
+    :return: mutated individual
+    """
+    for p in ['lf', 'mul', 'add', 'sub']:
+        assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic mutation"
+
+    tr1 = gen_func(pset, min, max)
+    tr2 = gen_func(pset, min, max)
+    # Wrap mutation with a logistic function
+    tr1.insert(0, pset.mapping['lf'])
+    tr2.insert(0, pset.mapping['lf'])
+    if ms is None:
+        ms = random.uniform(0, 2)
+    mutation_step = Terminal(ms, False, object)
+    # Create the root
+
+    new_ind = individual
+    new_ind.insert(0, pset.mapping["add"])
+    # Append the left branch
+    new_ind.append(pset.mapping["mul"])
+    new_ind.append(mutation_step)
+    new_ind.append(pset.mapping["sub"])
+    # Append the right branch
+    new_ind.extend(tr1)
+    new_ind.extend(tr2)
+
+    return new_ind,
+
+
+def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
+    """
+    Implementation of the Semantic Crossover operator
+    :param ind1: first parent
+    :param ind2: second parent
+    :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
+    :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
+    :param min: min depth of the random tree
+    :param max: max depth of the random tree
+    :return: offsprings
+    """
+    for p in ['lf', 'mul', 'add', 'sub']:
+        assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic crossover"
+
+    tr = gen_func(pset, min, max)
+    tr.insert(0, pset.mapping['lf'])
+    new_ind1 = ind1
+    new_ind1.insert(0, pset.mapping["mul"])
+    new_ind1.insert(0, pset.mapping["add"])
+    new_ind1.extend(tr)
+    new_ind1.append(pset.mapping["mul"])
+    new_ind1.append(pset.mapping["sub"])
+    new_ind1.append(Terminal(1.0, False, object))
+    new_ind1.extend(tr)
+    new_ind1.extend(ind2)
+
+    new_ind2 = ind2
+    new_ind2.insert(0, pset.mapping["mul"])
+    new_ind2.insert(0, pset.mapping["add"])
+    new_ind2.extend(tr)
+    new_ind2.append(pset.mapping["mul"])
+    new_ind2.append(pset.mapping["sub"])
+    new_ind2.append(Terminal(1.0, False, object))
+    new_ind2.extend(tr)
+    new_ind2.extend(ind1)
+
+    return new_ind1, new_ind2
+
+
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

@@ -5,9 +5,6 @@ import random
 from itertools import repeat
 from collections import Sequence
 
-import sys
-sys.path.append("..")
-from gp import Terminal, genGrow
 
 ######################################
 # GA Mutations                       #
@@ -215,46 +212,6 @@ def mutESLogNormal(individual, c, indpb):
     return individual,
 
 
-######################################
-# GSGP Mutation                      #
-######################################
-
-def semantic_mutation(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
-    """
-    Implementation of the Semantic Mutation operator.
-
-    :param individual: individual to mutate
-    :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
-    :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
-    :param ms: Mutation Step
-    :param min: min depth of the random tree
-    :param max: max depth of the random tree
-    :return: mutated individual
-    """
-    for p in ['lf', 'mul', 'add', 'sub']:
-        assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic mutation"
-
-    tr1 = gen_func(pset, min, max)
-    tr2 = gen_func(pset, min, max)
-    # Wrap mutation with a logistic function
-    tr1.insert(0, pset.mapping['lf'])
-    tr2.insert(0, pset.mapping['lf'])
-    if ms is None:
-        ms = random.uniform(0, 2)
-    mutation_step = Terminal(ms, False, object)
-    # Create the root
-
-    new_ind = individual
-    new_ind.insert(0, pset.mapping["add"])
-    # Append the left branch
-    new_ind.append(pset.mapping["mul"])
-    new_ind.append(mutation_step)
-    new_ind.append(pset.mapping["sub"])
-    # Append the right branch
-    new_ind.extend(tr1)
-    new_ind.extend(tr2)
-
-    return new_ind,
 
 
 __all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',

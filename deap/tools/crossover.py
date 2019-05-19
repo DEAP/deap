@@ -5,15 +5,10 @@ import warnings
 from collections import Sequence
 from itertools import repeat
 
-import sys
-sys.path.append("..")
-from gp import Terminal, genGrow
-
 
 ######################################
 # GA Crossovers                      #
 ######################################
-
 
 
 def cxOnePoint(ind1, ind2):
@@ -452,49 +447,6 @@ def cxESTwoPoints(ind1, ind2):
         The function has been renamed. Use :func:`cxESTwoPoint` instead.
     """
     return cxESTwoPoint(ind1, ind2)
-
-
-######################################
-# ES Crossovers                      #
-######################################
-
-def semantic_crossover(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
-    """
-    Implementation of the Semantic Crossover operator
-    :param ind1: first parent
-    :param ind2: second parent
-    :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
-    :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
-    :param min: min depth of the random tree
-    :param max: max depth of the random tree
-    :return: offsprings
-    """
-    for p in ['lf', 'mul', 'add', 'sub']:
-        assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic crossover"
-
-    tr = gen_func(pset, min, max)
-    tr.insert(0, pset.mapping['lf'])
-    new_ind1 = ind1
-    new_ind1.insert(0, pset.mapping["mul"])
-    new_ind1.insert(0, pset.mapping["add"])
-    new_ind1.extend(tr)
-    new_ind1.append(pset.mapping["mul"])
-    new_ind1.append(pset.mapping["sub"])
-    new_ind1.append(Terminal(1.0, False, object))
-    new_ind1.extend(tr)
-    new_ind1.extend(ind2)
-
-    new_ind2 = ind2
-    new_ind2.insert(0, pset.mapping["mul"])
-    new_ind2.insert(0, pset.mapping["add"])
-    new_ind2.extend(tr)
-    new_ind2.append(pset.mapping["mul"])
-    new_ind2.append(pset.mapping["sub"])
-    new_ind2.append(Terminal(1.0, False, object))
-    new_ind2.extend(tr)
-    new_ind2.extend(ind1)
-
-    return new_ind1, new_ind2
 
 
 # List of exported function names.
