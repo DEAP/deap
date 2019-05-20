@@ -342,7 +342,9 @@ class Logbook(list):
         apply_to_all = {k: v for k, v in infos.items() if not isinstance(v, dict)}
         for key, value in infos.items():
             if isinstance(value, dict):
-                self.chapters[key].record(**value, **apply_to_all)
+                chapter_infos = value.copy()
+                chapter_infos.update(apply_to_all)
+                self.chapters[key].record(**chapter_infos)
                 del infos[key]
         self.append(infos)
 
