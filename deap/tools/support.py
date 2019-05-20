@@ -171,9 +171,9 @@ class Statistics(object):
         >>> s = Statistics()
         >>> s.register("mean", numpy.mean)
         >>> s.register("max", max)
-        >>> s.compile([1, 2, 3, 4])
-        {'mean': 2.5, 'max': 4}
-        >>> s.compile([5, 6, 7, 8])
+        >>> s.compile([1, 2, 3, 4])     # doctest: +SKIP
+        {'max': 4, 'mean': 2.5}
+        >>> s.compile([5, 6, 7, 8])     # doctest: +SKIP
         {'mean': 6.5, 'max': 8}
     """
     def __init__(self, key=identity):
