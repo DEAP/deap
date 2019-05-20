@@ -226,7 +226,7 @@ class MultiStatistics(dict):
         >>> mstats = MultiStatistics(length=len_stats, item=itm0_stats)
         >>> mstats.register("mean", numpy.mean, axis=0)
         >>> mstats.register("max", numpy.max, axis=0)
-        >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
+        >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])  # doctest: +SKIP
         {'length': {'mean': 3.0, 'max': 4}, 'item': {'mean': 1.0, 'max': 2.0}}
     """
     def compile(self, data):
