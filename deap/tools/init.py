@@ -43,7 +43,7 @@ def initIterate(container, generator):
         >>> from functools import partial
         >>> random.seed(42)
         >>> gen_idx = partial(random.sample, range(10), 10)
-        >>> initIterate(list, gen_idx)
+        >>> initIterate(list, gen_idx)      # doctest: +SKIP
         [1, 0, 4, 9, 6, 5, 8, 2, 3, 7]
 
     See the :ref:`permutation` and :ref:`arithmetic-expr` tutorials for
