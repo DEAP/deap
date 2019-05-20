@@ -167,13 +167,14 @@ class Statistics(object):
 
     ::
 
+        >>> import numpy
         >>> s = Statistics()
         >>> s.register("mean", numpy.mean)
         >>> s.register("max", max)
-        >>> s.compile([1, 2, 3, 4])
+        >>> s.compile([1, 2, 3, 4])     # doctest: +SKIP
         {'max': 4, 'mean': 2.5}
-        >>> s.compile([5, 6, 7, 8])
-        {'max': 8, 'mean': 6.5}
+        >>> s.compile([5, 6, 7, 8])     # doctest: +SKIP
+        {'mean': 6.5, 'max': 8}
     """
     def __init__(self, key=identity):
         self.key = key
@@ -218,13 +219,15 @@ class MultiStatistics(dict):
     the first value of the provided objects.
     ::
 
+        >>> from operator import itemgetter
+        >>> import numpy
         >>> len_stats = Statistics(key=len)
         >>> itm0_stats = Statistics(key=itemgetter(0))
         >>> mstats = MultiStatistics(length=len_stats, item=itm0_stats)
         >>> mstats.register("mean", numpy.mean, axis=0)
         >>> mstats.register("max", numpy.max, axis=0)
-        >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])
-        {'length': {'max': 4, 'mean': 3.0}, 'item': {'max': 2.0, 'mean': 1.0}}
+        >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])  # doctest: +SKIP
+        {'length': {'mean': 3.0, 'max': 4}, 'item': {'mean': 1.0, 'max': 2.0}}
     """
     def compile(self, data):
         """Calls :meth:`Statistics.compile` with *data* of each
@@ -336,9 +339,12 @@ class Logbook(list):
         in the dictionnary are recorded in a chapter entitled as the name of the
         key part of the pair. Chapters are also Logbook.
         """
+        apply_to_all = {k: v for k, v in infos.items() if not isinstance(v, dict)}
         for key, value in infos.items():
             if isinstance(value, dict):
-                self.chapters[key].record(**value)
+                chapter_infos = value.copy()
+                chapter_infos.update(apply_to_all)
+                self.chapters[key].record(**chapter_infos)
                 del infos[key]
         self.append(infos)
 
@@ -349,8 +355,8 @@ class Logbook(list):
         ::
 
             >>> log = Logbook()
-            >>> log.record(gen = 0, mean = 5.4, max = 10.0)
-            >>> log.record(gen = 1, mean = 9.4, max = 15.0)
+            >>> log.record(gen=0, mean=5.4, max=10.0)
+            >>> log.record(gen=1, mean=9.4, max=15.0)
             >>> log.select("mean")
             [5.4, 9.4]
             >>> log.select("gen", "max")
@@ -361,10 +367,10 @@ class Logbook(list):
         ::
 
             >>> log = Logbook()
-            >>> log.record(**{'gen' : 0, 'fit' : {'mean' : 0.8, 'max' : 1.5},
-            ... 'size' : {'mean' : 25.4, 'max' : 67}})
-            >>> log.record(**{'gen' : 1, 'fit' : {'mean' : 0.95, 'max' : 1.7},
-            ... 'size' : {'mean' : 28.1, 'max' : 71}})
+            >>> log.record(**{'gen': 0, 'fit': {'mean': 0.8, 'max': 1.5},
+            ... 'size': {'mean': 25.4, 'max': 67}})
+            >>> log.record(**{'gen': 1, 'fit': {'mean': 0.95, 'max': 1.7},
+            ... 'size': {'mean': 28.1, 'max': 71}})
             >>> log.chapters['size'].select("mean")
             [25.4, 28.1]
             >>> log.chapters['fit'].select("gen", "max")
@@ -382,12 +388,12 @@ class Logbook(list):
 
             >>> log = Logbook()
             >>> log.append({'gen' : 0})
-            >>> print log.stream
+            >>> print log.stream  # doctest: +NORMALIZE_WHITESPACE
             gen
-              0
+            0
             >>> log.append({'gen' : 1})
-            >>> print log.stream
-              1
+            >>> print log.stream  # doctest: +NORMALIZE_WHITESPACE
+            1
         """
         startindex, self.buffindex = self.buffindex, len(self)
         return self.__str__(startindex)
