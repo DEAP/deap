@@ -237,7 +237,7 @@ class bound(object):
         try:
             self.bounds = tuple(bounds)
         except TypeError:
-            self.bounds = itertools.repeat(bounds)
+            self.bounds = repeat(bounds)
 
         if type == "mirror":
             self.bound = self._mirror
