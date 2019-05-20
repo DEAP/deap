@@ -11,11 +11,11 @@ class LogbookTest(unittest.TestCase):
 
     def test_multi_chapters(self):
         self.logbook.record(gen=0, evals=100, fitness={'obj 1' : {'avg' : 1.0, 'max' : 10},
-                                          'avg' : 1.0, 'max' : 10},
+                                          'obj 2' : {'avg' : 1.0, 'max' : 10}},
                             length={'avg' : 1.0, 'max' : 30},
                             test={'avg' : 1.0, 'max' : 20})
         self.logbook.record(gen=0, evals=100, fitness={'obj 1' : {'avg' : 1.0, 'max' : 10},
-                                          'avg' : 1.0, 'max' : 10},
+                                          'obj 2' : {'avg' : 1.0, 'max' : 10}},
                             length={'avg' : 1.0, 'max' : 30},
                             test={'avg' : 1.0, 'max' : 20})
         print(self.logbook.stream)

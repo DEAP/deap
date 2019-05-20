@@ -14,9 +14,11 @@ def initRepeat(container, func, n):
     to register a generator of filled containers, as individuals or
     population.
 
+        >>> import random
+        >>> random.seed(42)
         >>> initRepeat(list, random.random, 2) # doctest: +ELLIPSIS,
         ...                                    # doctest: +NORMALIZE_WHITESPACE
-        [0.4761..., 0.6302...]
+        [0.6394..., 0.0250...]
 
     See the :ref:`list-of-floats` and :ref:`population` tutorials for more examples.
     """
@@ -37,11 +39,12 @@ def initIterate(container, generator):
     to register a generator of filled containers, as individuals or
     population.
 
-        >>> from random import sample
+        >>> import random
         >>> from functools import partial
-        >>> gen_idx = partial(sample, range(10), 10)
+        >>> random.seed(42)
+        >>> gen_idx = partial(random.sample, range(10), 10)
         >>> initIterate(list, gen_idx)
-        [4, 5, 3, 6, 0, 9, 2, 7, 1, 8]
+        [1, 0, 4, 9, 6, 5, 8, 2, 3, 7]
 
     See the :ref:`permutation` and :ref:`arithmetic-expr` tutorials for
     more examples.
