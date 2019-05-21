@@ -35,7 +35,7 @@ does strongly depend on the task at hand, DEAP does not contain any explicit
 structure. It will rather provide a convenient method for creating containers
 of attributes, associated with fitnesses, called the :mod:`deap.creator`.
 Using this method we can create custom individuals in a very simple way.
-     
+
 The ``creator`` is a class factory that can build new classes at run-time.
 It will be called with first the desired *name* of the new class, second
 the *base class* it will inherit, and in addition any subsequent arguments
@@ -106,7 +106,7 @@ number of ones in an individual.
 
 The returned value must be an iterable of a length equal to the number of
 objectives (weights).
-   
+
 The Genetic Operators
 =====================
 
@@ -119,7 +119,7 @@ when working with the :mod:`algorithms` module. See the :ref:`short-ga-onemax`
 for an example.
 
 Registering the genetic operators required for the evolution in our One Max problem
-and their default arguments in the toolbox is done as follows. 
+and their default arguments in the toolbox is done as follows.
 
 .. literalinclude:: /../examples/ga/onemax.py
    :lines: 55,58,62,68
@@ -154,7 +154,7 @@ parameter *n* open during the registration of the :meth:`population` method in o
 toolbox, we are free to create populations of arbitrary size.
 
 The next thing to do is to evaluate our brand new population.
-	
+
 .. literalinclude:: /../examples/ga/onemax.py
    :lines: 87-90
 
@@ -167,9 +167,9 @@ Before we go on, this is the time to define some constants we will use later on.
 .. literalinclude:: /../examples/ga/onemax.py
    :lines: 79-83
 
------------------------
+------------------------
 Performing the Evolution
------------------------
+------------------------
 
 The evolution of the population is the final step we have to accomplish.
 Recall, our individuals consist of 100 integer numbers and we want to evolve
@@ -187,7 +187,7 @@ generations reaches ``1000``.
    :lines: 97-99,100-104
 
 The evolution itself will be performed by selecting, mating, and mutating
-the individuals in our population. 
+the individuals in our population.
 
 In our simple example of a genetic algorithm, the first step is to select the
 next generation.
@@ -212,7 +212,7 @@ The crossover (or mating) and mutation operators, provided within DEAP,
 usually take respectively 2 or 1 individual(s) as input
 and return 2 or 1 modified individual(s). In addition they modify those
 individuals within the toolbox container and we do not need to reassign their results.
-	   
+
 Since the content of some of our offspring changed during the last step, we now need
 to re-evaluate their fitnesses. To save time and resources, we just map those
 offspring which fitnesses were marked invalid.
@@ -221,7 +221,7 @@ offspring which fitnesses were marked invalid.
    :lines: 130-134
 
 And last but not least, we replace the old population by the
-offspring. 
+offspring.
 
 .. literalinclude:: /../examples/ga/onemax.py
    :lines: 139
