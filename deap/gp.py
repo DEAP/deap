@@ -1220,20 +1220,21 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     :param max: max depth of the random tree
     :return: mutated individual
 
-    check that mutated contains the original individual
-    >>> import operator
-    >>> def lf(x): return 1 / (1 + math.exp(-x));
-    >>> pset = PrimitiveSet("main", 2)
-    >>> pset.addPrimitive(operator.sub, 2)
-    >>> pset.addTerminal(3)
-    >>> pset.addPrimitive(lf, 1, name="lf")
-    >>> pset.addPrimitive(operator.add, 2)
-    >>> pset.addPrimitive(operator.mul, 2)
-    >>> individual = genGrow(pset, 1, 3)
-    >>> mutated = mutSemantic(individual, pset=pset, max=2)
-    >>> ctr = sum([m.name == individual[i].name for i, m in enumerate(mutated[0])])
-    >>> ctr == len(individual)
-    True
+    The mutated contains the original individual
+
+        >>> import operator
+        >>> def lf(x): return 1 / (1 + math.exp(-x));
+        >>> pset = PrimitiveSet("main", 2)
+        >>> pset.addPrimitive(operator.sub, 2)
+        >>> pset.addTerminal(3)
+        >>> pset.addPrimitive(lf, 1, name="lf")
+        >>> pset.addPrimitive(operator.add, 2)
+        >>> pset.addPrimitive(operator.mul, 2)
+        >>> individual = genGrow(pset, 1, 3)
+        >>> mutated = mutSemantic(individual, pset=pset, max=2)
+        >>> ctr = sum([m.name == individual[i].name for i, m in enumerate(mutated[0])])
+        >>> ctr == len(individual)
+        True
     """
     for p in ['lf', 'mul', 'add', 'sub']:
         assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic mutation"
@@ -1275,24 +1276,25 @@ def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
     :param max: max depth of the random tree
     :return: offsprings
 
-    Check that offspring contains parents
-    >>> import operator
-    >>> def lf(x): return 1 / (1 + math.exp(-x));
-    >>> pset = PrimitiveSet("main", 2)
-    >>> pset.addPrimitive(operator.sub, 2)
-    >>> pset.addTerminal(3)
-    >>> pset.addPrimitive(lf, 1, name="lf")
-    >>> pset.addPrimitive(operator.add, 2)
-    >>> pset.addPrimitive(operator.mul, 2)
-    >>> ind1 = genGrow(pset, 1, 3)
-    >>> ind2 = genGrow(pset, 1, 3)
-    >>> new_ind1, new_ind2 = cxSemantic(ind1, ind2, pset=pset, max=2)
-    >>> ctr = sum([n.name == ind1[i].name for i, n in enumerate(new_ind1)])
-    >>> ctr == len(ind1)
-    True
-    >>> ctr = sum([n.name == ind2[i].name for i, n in enumerate(new_ind2)])
-    >>> ctr == len(ind2)
-    True
+    The mutated offspring contains parents
+
+        >>> import operator
+        >>> def lf(x): return 1 / (1 + math.exp(-x));
+        >>> pset = PrimitiveSet("main", 2)
+        >>> pset.addPrimitive(operator.sub, 2)
+        >>> pset.addTerminal(3)
+        >>> pset.addPrimitive(lf, 1, name="lf")
+        >>> pset.addPrimitive(operator.add, 2)
+        >>> pset.addPrimitive(operator.mul, 2)
+        >>> ind1 = genGrow(pset, 1, 3)
+        >>> ind2 = genGrow(pset, 1, 3)
+        >>> new_ind1, new_ind2 = cxSemantic(ind1, ind2, pset=pset, max=2)
+        >>> ctr = sum([n.name == ind1[i].name for i, n in enumerate(new_ind1)])
+        >>> ctr == len(ind1)
+        True
+        >>> ctr = sum([n.name == ind2[i].name for i, n in enumerate(new_ind2)])
+        >>> ctr == len(ind2)
+        True
     """
     for p in ['lf', 'mul', 'add', 'sub']:
         assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic crossover"
