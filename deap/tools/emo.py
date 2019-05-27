@@ -1,11 +1,12 @@
 from __future__ import division
 import bisect
+from collections import defaultdict
+from itertools import chain
 import math
+from operator import attrgetter, itemgetter
 import random
 
-from itertools import chain
-from operator import attrgetter, itemgetter
-from collections import defaultdict
+from ._nsga_3_support import selNiching
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
@@ -47,6 +48,40 @@ def selNSGA2(individuals, k, nd='standard'):
         chosen.extend(sorted_front[:k])
 
     return chosen
+
+
+def selNSGA3(individuals, k):
+    """Implements NSGA-III selection as described in
+    Deb, K., & Jain, H. (2014). An Evolutionary Many-Objective Optimization
+    Algorithm Using Reference-Point-Based Nondominated Sorting Approach,
+    Part I: Solving Problems With Box Constraints. IEEE Transactions on
+    Evolutionary Computation, 18(4), 577–601. doi:10.1109/TEVC.2013.2281535.
+    """
+    assert len(individuals) >= k
+
+    if len(individuals) == k:
+        return individuals
+
+    # Algorithm 1 steps 4--8
+    fronts = sortLogNondominated(individuals, len(individuals))
+
+    limit = 0
+    res = []
+    for f, front in enumerate(fronts):
+        res += front
+        if len(res) > k:
+            limit = f
+            break
+    # Algorithm 1 steps
+    selection = []
+    if limit > 0:
+        for f in range(limit):
+            selection += fronts[f]
+
+    # complete selected inividuals using the referece point based approach
+    selection += selNiching(fronts[limit], k - len(selection))
+    return selection
+
 
 def sortNondominated(individuals, k, first_front_only=False):
     """Sort the first *k* *individuals* into different nondomination levels
@@ -162,7 +197,7 @@ def selTournamentDCD(individuals, k):
 
     if k % 4 != 0:
         raise ValueError("selTournamentDCD: number of individuals to select must be a multiple of 4")
-        
+
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
             return ind1
@@ -592,6 +627,5 @@ def _partition(array, begin, end):
         else:
             return j
 
-
-__all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated', 'sortLogNondominated',
+__all__ = ['selNSGA2', 'selNSGA3', 'selSPEA2', 'sortNondominated', 'sortLogNondominated',
            'selTournamentDCD']
