@@ -8,7 +8,7 @@ try:
 except ImportError:
     numpy = False
 
-import scipy
+from scipy.spatial import distance
 
 try:
     # try importing the C version
@@ -306,4 +306,7 @@ def hypervolume(front, ref=None):
     return hv.hypervolume(wobj, ref)
 
 def igd(A, Z):
-    pass
+    """Inverse generational distance.
+    """
+    distances = distance.cdist(A, Z)
+    return numpy.average(numpy.min(distances, axis=0))
