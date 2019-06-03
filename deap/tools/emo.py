@@ -443,19 +443,41 @@ def sweepB(best, worst, front):
 ######################################
 
 def selNSGA3(individuals, k, ref_points, nd="log"):
-    """Implements NSGA-III selection as described in
-    Deb, K., & Jain, H. (2014). An Evolutionary Many-Objective Optimization
-    Algorithm Using Reference-Point-Based Nondominated Sorting Approach,
-    Part I: Solving Problems With Box Constraints. IEEE Transactions on
-    Evolutionary Computation, 18(4), 577–601. doi:10.1109/TEVC.2013.2281535.
+    """Implementation of NSGA-III selection as presented in [Deb2014]_.
+
+    This implementation is based on (lmarti/nsgaiii)
+    [https://github.com/lmarti/nsgaiii]. It departs slightly from the
+    original implementation in that it does not use memory to keep track
+    of ideal and extreme points. This choice has been made to fit the
+    functional api of DEAP.
+
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param ref_points: Reference points to use for niching.
+    :param nd: Specify the non-dominated algorithm to use: 'standard' or 'log'.
+    :returns: A list of selected individuals.
+
+
+    Example
+    -------
+    You can generate the reference points using the :func:`uniform_reference_points`
+    function::
+
+        >>> ref_points = tools.uniform_reference_points(nobj=3, p=12)   # doctest: +SKIP
+        >>> selected = selNSGA3(population, k, ref_points)              # doctest: +SKIP
+
+    .. [Deb2014] Deb, K., & Jain, H. (2014). An Evolutionary Many-Objective Optimization
+        Algorithm Using Reference-Point-Based Nondominated Sorting Approach,
+        Part I: Solving Problems With Box Constraints. IEEE Transactions on
+        Evolutionary Computation, 18(4), 577-601. doi:10.1109/TEVC.2013.2281535.
     """
-    if nd == 'standard':
+    if nd == "standard":
         pareto_fronts = sortNondominated(individuals, k)
-    elif nd == 'log':
+    elif nd == "log":
         pareto_fronts = sortLogNondominated(individuals, k)
     else:
-        raise Exception('selNSGA3: The choice of non-dominated sorting '
-                        'method "{0}" is invalid.'.format(nd))
+        raise Exception("selNSGA3: The choice of non-dominated sorting "
+                        "method '{0}' is invalid.".format(nd))
 
     # Extract fitnesses as a numpy array in the nd-sort order
     fitnesses = numpy.array([ind.fitness.values for f in pareto_fronts for ind in f])
@@ -463,8 +485,8 @@ def selNSGA3(individuals, k, ref_points, nd="log"):
     # Get best and worst point of population, contrary to pymoo
     # we don't use memory
     best_point = numpy.min(fitnesses, axis=0)
-    # worst_point = numpy.max(fitnesses, axis=0)
 
+    # TODO: We should use memory in extreme points too as they should increase spreading
     extreme_points = find_extreme_points(fitnesses, best_point, None)
     intercepts = find_intercepts(extreme_points, best_point)
     niches, dist = associate_to_niche(fitnesses, ref_points, best_point, intercepts)
@@ -510,7 +532,7 @@ def find_intercepts(extreme_points, best_point):
     # Construct hyperplane
     b = numpy.ones(extreme_points.shape[1])
     A = extreme_points - best_point
-    x = numpy.linalg.solve(A,b)
+    x = numpy.linalg.solve(A, b)
     intercepts = 1 / x
     return intercepts
 
@@ -570,9 +592,11 @@ def niching(individuals, k, niches, distances, niche_counts):
     return selected
 
 
-def uniform_reference_points(nobj, p=4, scaling=None, ndim=None):
-    assert scaling is None or (scaling is not None and ndim is not None), "Must provide both scaling and ndim."
-
+def uniform_reference_points(nobj, p=4, scaling=None):
+    """Generate reference points uniformly on the hyperplane intersecting
+    each axis at 1. The scaling factor is used to combine multiple layers of
+    reference points.
+    """
     def gen_refs_recursive(ref, nobj, left, total, depth):
         points = []
         if depth == nobj - 1:
@@ -587,7 +611,7 @@ def uniform_reference_points(nobj, p=4, scaling=None, ndim=None):
     ref_points = numpy.array(gen_refs_recursive(numpy.zeros(nobj), nobj, p, p, 0))
     if scaling is not None:
         ref_points *= scaling
-        ref_points += (1 - scaling) / ndim
+        ref_points += (1 - scaling) / nobj
 
     return ref_points
 
@@ -604,9 +628,11 @@ def selSPEA2(individuals, k):
     than sorting the population according to a strength Pareto scheme. The
     list returned contains references to the input *individuals*. For more
     details on the SPEA-II operator see [Zitzler2001]_.
+
     :param individuals: A list of individuals to select from.
     :param k: The number of individuals to select.
     :returns: A list of selected individuals.
+
     .. [Zitzler2001] Zitzler, Laumanns and Thiele, "SPEA 2: Improving the
        strength Pareto evolutionary algorithm", 2001.
     """

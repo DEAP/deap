@@ -23,15 +23,16 @@ Here is a list of the implemented operators in DEAP,
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`                     :func:`migRing`
  :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`                       ..
  :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`                          ..
- ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`                          ..
- ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`                         ..
- ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`                           ..
- ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`                          ..
- ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`                  ..
- ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament`               ..
- ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selStochasticUniversalSampling`    ..
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        :func:`selLexicase`                      ..
- ..                           :func:`cxMessyOnePoint`                     ..                                        :func:`selEpsilonLexicase`                ..
+ ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selNSGA3`                          ..
+ ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selSPEA2`                          ..
+ ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selRandom`                         ..
+ ..                           :func:`cxBlend`                             ..                                        :func:`selBest`                           ..
+ ..                           :func:`cxESBlend`                           ..                                        :func:`selWorst`                          ..
+ ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selTournamentDCD`                  ..
+ ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selDoubleTournament`               ..
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        :func:`selStochasticUniversalSampling`    ..
+ ..                           :func:`cxMessyOnePoint`                     ..                                        :func:`selLexicase`                       ..
+ ..                           ..                                          ..                                        :func:`selEpsilonLexicase`                ..
  ..                           ..                                          ..                                        :func:`selAutomaticEpsilonLexicase`       ..
 ============================ =========================================== ========================================= ========================================= ================
 
@@ -138,6 +139,10 @@ Selection
 .. autofunction:: deap.tools.selRoulette
 
 .. autofunction:: deap.tools.selNSGA2
+
+.. autofunction:: deap.tools.selNSGA3
+
+.. autofunction:: deap.tools.uniform_reference_points
 
 .. autofunction:: deap.tools.selSPEA2
 
