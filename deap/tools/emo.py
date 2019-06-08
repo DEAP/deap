@@ -480,15 +480,18 @@ def selNSGA3(individuals, k, ref_points, nd="log"):
                         "method '{0}' is invalid.".format(nd))
 
     # Extract fitnesses as a numpy array in the nd-sort order
-    fitnesses = numpy.array([ind.fitness.values for f in pareto_fronts for ind in f])
+    # Use wvalues * -1 to tackle always as a minimization problem
+    fitnesses = numpy.array([ind.fitness.wvalues for f in pareto_fronts for ind in f])
+    fitnesses *= -1
 
     # Get best and worst point of population, contrary to pymoo
     # we don't use memory
     best_point = numpy.min(fitnesses, axis=0)
+    worst_point = numpy.max(fitnesses, axis=0)
 
     # TODO: We should use memory in extreme points too as they should increase spreading
     extreme_points = find_extreme_points(fitnesses, best_point, None)
-    intercepts = find_intercepts(extreme_points, best_point)
+    intercepts = find_intercepts(extreme_points, best_point, worst_point)
     niches, dist = associate_to_niche(fitnesses, ref_points, best_point, intercepts)
 
     # Get counts per niche for individuals in all front but the last
@@ -526,14 +529,18 @@ def find_extreme_points(fitnesses, best_point, extreme_points=None):
     return fitnesses[min_asf_idx, :]
 
 
-def find_intercepts(extreme_points, best_point):
+def find_intercepts(extreme_points, best_point, current_worst):
     """Find intercepts between the hyperplane and each axis with
     the ideal point as origin."""
     # Construct hyperplane
     b = numpy.ones(extreme_points.shape[1])
     A = extreme_points - best_point
-    x = numpy.linalg.solve(A, b)
-    intercepts = 1 / x
+    try:
+        x = numpy.linalg.solve(A, b)
+    except numpy.linalg.LinAlgError:
+        intercepts = current_worst
+    else:
+        intercepts = 1 / x
     return intercepts
 
 
@@ -541,13 +548,15 @@ def associate_to_niche(fitnesses, reference_points, best_point, intercepts):
     """Associates individuals to reference points and calculates niche number.
     Corresponds to Algorithm 3 of Deb & Jain (2014)."""
     # Normalize by ideal point and intercepts
-    fn = (fitnesses - best_point) / intercepts
+    fn = (fitnesses - best_point) / (intercepts - best_point)
 
     # Create distance matrix
-    distances = numpy.zeros((fn.shape[0], len(reference_points)))
-    for i, rp in enumerate(reference_points):
-        k = numpy.dot(fn, rp) / numpy.sum(fn**2, axis=1)
-        distances[:, i] = numpy.sqrt(numpy.sum(((fn * k.reshape(-1, 1)) - rp)**2, axis=1))
+    fn = numpy.repeat(numpy.expand_dims(fn, axis=1), len(reference_points), axis=1)
+    norm = numpy.linalg.norm(reference_points, axis=1)
+
+    distances = numpy.sum(fn * reference_points, axis=2) / norm.reshape(1, -1)
+    distances = distances[:, :, numpy.newaxis] * reference_points[numpy.newaxis, :, :] / norm[numpy.newaxis, :, numpy.newaxis]
+    distances = numpy.linalg.norm(distances - fn, axis=2)
 
     # Retrieve min distance niche index
     niches = numpy.argmin(distances, axis=1)
