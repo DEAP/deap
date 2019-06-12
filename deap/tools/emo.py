@@ -532,7 +532,7 @@ def find_extreme_points(fitnesses, best_point, extreme_points=None):
 def find_intercepts(extreme_points, best_point, current_worst):
     """Find intercepts between the hyperplane and each axis with
     the ideal point as origin."""
-    # Construct hyperplane
+    # Construct hyperplane sum(f_i^n) = 1
     b = numpy.ones(extreme_points.shape[1])
     A = extreme_points - best_point
     try:
