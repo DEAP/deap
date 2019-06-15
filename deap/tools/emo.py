@@ -451,7 +451,8 @@ class selNSGA3WithMemory(object):
     than classical operators, it requires to instanciate the class instead
     of just registering the function::
 
-        >>> ref_points = tools.uniform_reference_points(nobj=3, p=12)   # doctest: +SKIP
+        >>> from deap import base
+        >>> ref_points = uniform_reference_points(nobj=3, p=12)
         >>> toolbox = base.Toolbox()
         >>> toolbox.register("select", selNSGA3WithMemory(ref_points))
 

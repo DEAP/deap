@@ -40,7 +40,7 @@ install:
         NUMPY=$NUMPY"@pypy-4.0.1"
         pip install nose
       fi
-  - pip install $NUMPY scipy
+  - pip install $NUMPY
 # command to run tests
 script:
   - python setup.py nosetests --verbosity=3 --with-doctest
