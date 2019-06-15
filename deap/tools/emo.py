@@ -1,11 +1,12 @@
 from __future__ import division
 import bisect
+from collections import defaultdict, namedtuple
+from itertools import chain
 import math
+from operator import attrgetter, itemgetter
 import random
 
-from itertools import chain
-from operator import attrgetter, itemgetter
-from collections import defaultdict
+import numpy
 
 ######################################
 # Non-Dominated Sorting   (NSGA-II)  #
@@ -47,6 +48,7 @@ def selNSGA2(individuals, k, nd='standard'):
         chosen.extend(sorted_front[:k])
 
     return chosen
+
 
 def sortNondominated(individuals, k, first_front_only=False):
     """Sort the first *k* *individuals* into different nondomination levels
@@ -162,7 +164,7 @@ def selTournamentDCD(individuals, k):
 
     if k % 4 != 0:
         raise ValueError("selTournamentDCD: number of individuals to select must be a multiple of 4")
-        
+
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
             return ind1
@@ -437,6 +439,248 @@ def sweepB(best, worst, front):
             front[h] = max(front[h], front[fstair]+1)
 
 ######################################
+# Non-Dominated Sorting  (NSGA-III)  #
+######################################
+
+NSGA3Memory = namedtuple("NSGA3Memory", ["best_point", "worst_point", "extreme_points"])
+
+
+class selNSGA3WithMemory(object):
+    """Class version of NSGA-III selection including memory for best, worst and
+    extreme points. Registering this operator in a toolbox is a bit different
+    than classical operators, it requires to instanciate the class instead
+    of just registering the function::
+
+        >>> from deap import base
+        >>> ref_points = uniform_reference_points(nobj=3, p=12)
+        >>> toolbox = base.Toolbox()
+        >>> toolbox.register("select", selNSGA3WithMemory(ref_points))
+
+    """
+    def __init__(self, ref_points, nd="log"):
+        self.ref_points = ref_points
+        self.nd = nd
+        self.best_point = numpy.full((1, ref_points.shape[1]), numpy.inf)
+        self.worst_point = numpy.full((1, ref_points.shape[1]), -numpy.inf)
+        self.extreme_points = None
+
+    def __call__(self, individuals, k):
+        chosen, memory = selNSGA3(individuals, k, self.ref_points, self.nd,
+                                  self.best_point, self.worst_point,
+                                  self.extreme_points, True)
+        self.best_point = memory.best_point.reshape((1, -1))
+        self.worst_point = memory.worst_point.reshape((1, -1))
+        self.extreme_points = memory.extreme_points
+        return chosen
+
+
+def selNSGA3(individuals, k, ref_points, nd="log", best_point=None,
+             worst_point=None, extreme_points=None, return_memory=False):
+    """Implementation of NSGA-III selection as presented in [Deb2014]_.
+
+    This implementation is partly based on `lmarti/nsgaiii
+    <https://github.com/lmarti/nsgaiii>`_. It departs slightly from the
+    original implementation in that it does not use memory to keep track
+    of ideal and extreme points. This choice has been made to fit the
+    functional api of DEAP. For a version of NSGA-III see
+    :class:`~deap.tools.selNSGA3WithMemory`.
+
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param ref_points: Reference points to use for niching.
+    :param nd: Specify the non-dominated algorithm to use: 'standard' or 'log'.
+    :param best_point: Best point found at previous generation. If not provided
+        find the best point only from current individuals.
+    :param worst_point: Worst point found at previous generation. If not provided
+        find the worst point only from current individuals.
+    :param extreme_points: Extreme points found at previous generation. If not provided
+        find the extreme points only from current individuals.
+    :param return_memory: If :data:`True`, return the best, worst and extreme points
+        in addition to the chosen individuals.
+    :returns: A list of selected individuals.
+    :returns: If `return_memory` is :data:`True`, a namedtuple with the
+        `best_point`, `worst_point`, and `extreme_points`.
+
+
+    You can generate the reference points using the :func:`uniform_reference_points`
+    function::
+
+        >>> ref_points = tools.uniform_reference_points(nobj=3, p=12)   # doctest: +SKIP
+        >>> selected = selNSGA3(population, k, ref_points)              # doctest: +SKIP
+
+    .. [Deb2014] Deb, K., & Jain, H. (2014). An Evolutionary Many-Objective Optimization
+        Algorithm Using Reference-Point-Based Nondominated Sorting Approach,
+        Part I: Solving Problems With Box Constraints. IEEE Transactions on
+        Evolutionary Computation, 18(4), 577-601. doi:10.1109/TEVC.2013.2281535.
+    """
+    if nd == "standard":
+        pareto_fronts = sortNondominated(individuals, k)
+    elif nd == "log":
+        pareto_fronts = sortLogNondominated(individuals, k)
+    else:
+        raise Exception("selNSGA3: The choice of non-dominated sorting "
+                        "method '{0}' is invalid.".format(nd))
+
+    # Extract fitnesses as a numpy array in the nd-sort order
+    # Use wvalues * -1 to tackle always as a minimization problem
+    fitnesses = numpy.array([ind.fitness.wvalues for f in pareto_fronts for ind in f])
+    fitnesses *= -1
+
+    # Get best and worst point of population, contrary to pymoo
+    # we don't use memory
+    if best_point is not None and worst_point is not None:
+        best_point = numpy.min(numpy.concatenate((fitnesses, best_point), axis=0), axis=0)
+        worst_point = numpy.max(numpy.concatenate((fitnesses, worst_point), axis=0), axis=0)
+    else:
+        best_point = numpy.min(fitnesses, axis=0)
+        worst_point = numpy.max(fitnesses, axis=0)
+
+    extreme_points = find_extreme_points(fitnesses, best_point, extreme_points)
+    front_worst = numpy.max(fitnesses[:sum(len(f) for f in pareto_fronts), :], axis=0)
+    intercepts = find_intercepts(extreme_points, best_point, worst_point, front_worst)
+    niches, dist = associate_to_niche(fitnesses, ref_points, best_point, intercepts)
+
+    # Get counts per niche for individuals in all front but the last
+    niche_counts = numpy.zeros(len(ref_points), dtype=numpy.int64)
+    index, counts = numpy.unique(niches[:-len(pareto_fronts[-1])], return_counts=True)
+    niche_counts[index] = counts
+
+    # Choose individuals from all fronts but the last
+    chosen = list(chain(*pareto_fronts[:-1]))
+
+    # Use niching to select the remaining individuals
+    sel_count = len(chosen)
+    n = k - sel_count
+    selected = niching(pareto_fronts[-1], n, niches[sel_count:], dist[sel_count:], niche_counts)
+    chosen.extend(selected)
+
+    if return_memory:
+        return chosen, NSGA3Memory(best_point, worst_point, extreme_points)
+    return chosen
+
+
+def find_extreme_points(fitnesses, best_point, extreme_points=None):
+    'Finds the individuals with extreme values for each objective function.'
+    # Keep track of last generation extreme points
+    if extreme_points is not None:
+        fitnesses = numpy.concatenate((fitnesses, extreme_points), axis=0)
+
+    # Translate objectives
+    ft = fitnesses - best_point
+
+    # Find achievement scalarizing function (asf)
+    asf = numpy.eye(best_point.shape[0])
+    asf[asf == 0] = 1e6
+    asf = numpy.max(ft * asf[:, numpy.newaxis, :], axis=2)
+
+    # Extreme point are the fitnesses with minimal asf
+    min_asf_idx = numpy.argmin(asf, axis=1)
+    return fitnesses[min_asf_idx, :]
+
+
+def find_intercepts(extreme_points, best_point, current_worst, front_worst):
+    """Find intercepts between the hyperplane and each axis with
+    the ideal point as origin."""
+    # Construct hyperplane sum(f_i^n) = 1
+    b = numpy.ones(extreme_points.shape[1])
+    A = extreme_points - best_point
+    try:
+        x = numpy.linalg.solve(A, b)
+    except numpy.linalg.LinAlgError:
+        intercepts = current_worst
+    else:
+        intercepts = 1 / x
+
+        if (not numpy.allclose(numpy.dot(A, x), b) or
+                numpy.any(intercepts <= 1e-6) or
+                numpy.any((intercepts + best_point) > current_worst)):
+            intercepts = front_worst
+
+    return intercepts
+
+
+def associate_to_niche(fitnesses, reference_points, best_point, intercepts):
+    """Associates individuals to reference points and calculates niche number.
+    Corresponds to Algorithm 3 of Deb & Jain (2014)."""
+    # Normalize by ideal point and intercepts
+    fn = (fitnesses - best_point) / (intercepts - best_point)
+
+    # Create distance matrix
+    fn = numpy.repeat(numpy.expand_dims(fn, axis=1), len(reference_points), axis=1)
+    norm = numpy.linalg.norm(reference_points, axis=1)
+
+    distances = numpy.sum(fn * reference_points, axis=2) / norm.reshape(1, -1)
+    distances = distances[:, :, numpy.newaxis] * reference_points[numpy.newaxis, :, :] / norm[numpy.newaxis, :, numpy.newaxis]
+    distances = numpy.linalg.norm(distances - fn, axis=2)
+
+    # Retrieve min distance niche index
+    niches = numpy.argmin(distances, axis=1)
+    distances = distances[range(niches.shape[0]), niches]
+    return niches, distances
+
+
+def niching(individuals, k, niches, distances, niche_counts):
+    selected = []
+    available = numpy.ones(len(individuals), dtype=numpy.bool)
+    while len(selected) < k:
+        # Maximum number of individuals (niches) to select in that round
+        n = k - len(selected)
+
+        # Find the available niches and the minimum niche count in them
+        available_niches = numpy.zeros(len(niche_counts), dtype=numpy.bool)
+        available_niches[numpy.unique(niches[available])] = True
+        min_count = numpy.min(niche_counts[available_niches])
+
+        # Select at most n niches with the minimum count
+        selected_niches = numpy.flatnonzero(numpy.logical_and(available_niches, niche_counts == min_count))
+        numpy.random.shuffle(selected_niches)
+        selected_niches = selected_niches[:n]
+
+        for niche in selected_niches:
+            # Find the individuals associated with this niche
+            niche_individuals = numpy.flatnonzero(niches == niche)
+            numpy.random.shuffle(niche_individuals)
+
+            # If no individual in that niche, select the closest to reference
+            # Else select randomly
+            if niche_counts[niche] == 0:
+                sel_index = niche_individuals[numpy.argmin(distances[niche_individuals])]
+            else:
+                sel_index = niche_individuals[0]
+
+            # Update availability, counts and selection
+            available[sel_index] = False
+            niche_counts[niche] += 1
+            selected.append(individuals[sel_index])
+
+    return selected
+
+
+def uniform_reference_points(nobj, p=4, scaling=None):
+    """Generate reference points uniformly on the hyperplane intersecting
+    each axis at 1. The scaling factor is used to combine multiple layers of
+    reference points.
+    """
+    def gen_refs_recursive(ref, nobj, left, total, depth):
+        points = []
+        if depth == nobj - 1:
+            ref[depth] = left / total
+            points.append(ref)
+        else:
+            for i in range(left + 1):
+                ref[depth] = i / total
+                points.extend(gen_refs_recursive(ref.copy(), nobj, left - i, total, depth + 1))
+        return points
+
+    ref_points = numpy.array(gen_refs_recursive(numpy.zeros(nobj), nobj, p, p, 0))
+    if scaling is not None:
+        ref_points *= scaling
+        ref_points += (1 - scaling) / nobj
+
+    return ref_points
+
+
+######################################
 # Strength Pareto         (SPEA-II)  #
 ######################################
 
@@ -593,5 +837,5 @@ def _partition(array, begin, end):
             return j
 
 
-__all__ = ['selNSGA2', 'selSPEA2', 'sortNondominated', 'sortLogNondominated',
-           'selTournamentDCD']
+__all__ = ['selNSGA2', 'selNSGA3', 'selNSGA3WithMemory', 'selSPEA2', 'sortNondominated', 'sortLogNondominated',
+           'selTournamentDCD', 'uniform_reference_points']

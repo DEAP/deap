@@ -19,6 +19,7 @@ Genetic Algorithm (GA)
 	ga_onemax_numpy
 	ga_knapsack
 	coev_coop
+	nsga3
 
 .. _gpexamples:
 
@@ -60,6 +61,6 @@ Estimation of Distribution Algorithms (EDA)
 
 .. toctree::
    :maxdepth: 1
-   
+
    eda
 

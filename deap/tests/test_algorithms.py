@@ -14,9 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 from nose import with_setup
-import platform
 import random
-import unittest
 
 import numpy
 
@@ -51,7 +49,6 @@ def teardown_func():
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
 
-#@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_single_obj, teardown_func)
 def test_cma():
     NDIM = 5
@@ -119,7 +116,6 @@ def test_nsga2():
         assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
 
 
-#@unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy has no support for eigen decomposition.")
 @with_setup(setup_func_multi_obj_numpy, teardown_func)
 def test_mo_cma_es():
 
@@ -188,3 +184,50 @@ def test_mo_cma_es():
     # but not 119. More generations would help but would slow down testing.
     hv = hypervolume(strategy.parents, [11.0, 11.0])
     assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
+
+
+@with_setup(setup_func_multi_obj, teardown_func)
+def test_nsga3():
+    NDIM = 5
+    BOUND_LOW, BOUND_UP = 0.0, 1.0
+    MU = 16
+    NGEN = 100
+
+    ref_points = tools.uniform_reference_points(2, p=12)
+
+    toolbox = base.Toolbox()
+    toolbox.register("attr_float", random.uniform, BOUND_LOW, BOUND_UP)
+    toolbox.register("individual", tools.initRepeat, creator.__dict__[INDCLSNAME], toolbox.attr_float, NDIM)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    toolbox.register("evaluate", benchmarks.zdt1)
+    toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+    toolbox.register("select", tools.selNSGA3, ref_points=ref_points)
+
+    pop = toolbox.population(n=MU)
+    fitnesses = toolbox.map(toolbox.evaluate, pop)
+    for ind, fit in zip(pop, fitnesses):
+        ind.fitness.values = fit
+
+    pop = toolbox.select(pop, len(pop))
+     # Begin the generational process
+    for gen in range(1, NGEN):
+        offspring = algorithms.varAnd(pop, toolbox, 1.0, 1.0)
+
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        # Select the next generation population
+        pop = toolbox.select(pop + offspring, MU)
+
+    hv = hypervolume(pop, [11.0, 11.0])
+    # hv = 120.777 # Optimal value
+
+    assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
+
+    for ind in pop:
+        assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
