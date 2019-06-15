@@ -110,3 +110,24 @@ if __name__ == "__main__":
 
     pf = problem.pareto_front(ref_points)
     print(igd(pop_fit, pf))
+
+    import matplotlib.pyplot as plt
+    import mpl_toolkits.mplot3d as Axes3d
+
+    fig = plt.figure(figsize=(7, 7))
+    ax = fig.add_subplot(111, projection="3d")
+
+    p = numpy.array([ind.fitness.values for ind in pop])
+    ax.scatter(p[:, 0], p[:, 1], p[:, 2], marker="o", s=24, label="Final Population")
+
+    ax.scatter(pf[:, 0], pf[:, 1], pf[:, 2], marker="x", c="k", s=32, label="Ideal Pareto Front")
+
+    ref_points = tools.uniform_reference_points(NOBJ, P)
+
+    ax.scatter(ref_points[:, 0], ref_points[:, 1], ref_points[:, 2], marker="o", s=24, label="Reference Points")
+
+    ax.view_init(elev=11, azim=-25)
+    ax.autoscale(tight=True)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("nsga3.png")

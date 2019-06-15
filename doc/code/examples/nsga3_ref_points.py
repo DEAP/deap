@@ -14,8 +14,8 @@ ax.scatter(0, 0, 0, c="k", marker="+", s=100)
 
 # reference points (gray)
 ref_points = tools.uniform_reference_points(NOBJ, P)
-for rp in ref_points:
-    ax.scatter(rp[0], rp[1], rp[2], marker="o", color="darkblue", s=48)
+
+ax.scatter(ref_points[:, 0], ref_points[:, 1], ref_points[:, 2], marker="o", s=48)
 
 # final figure details
 ax.set_xlabel("$f_1(\mathbf{x})$", fontsize=15)

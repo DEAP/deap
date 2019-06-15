@@ -81,8 +81,8 @@ Conclusion
 ----------
 That's it for the NSGA-III algorithm using DEAP, now you can leverage
 the power of many-objective optimization with DEAP. If you're interrested,
-you can now change the evaluation function and try applying it to
-your own problem.
+you can copy the `example <https://github.com/DEAP/deap/blob/nsga-3/examples/ga/nsga3.py>`_
+change the evaluation function and try applying it to your own problem.
 
 .. [Deb2014] Deb, K., & Jain, H. (2014). An Evolutionary Many-Objective Optimization
    Algorithm Using Reference-Point-Based Nondominated Sorting Approach,
