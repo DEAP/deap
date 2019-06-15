@@ -77,6 +77,28 @@ Finally, we can have a look at the final population
 .. image:: /_images/nsga3.png
    :align: center
 
+Higher Dimensional Objective Space
+----------------------------------
+NSGA-III requires a reference point set that depends on the number
+of objective. This point set can become quite big for even relatively
+low dimensional objective space. For example, a 15 dimensional
+objective space with a uniform reference point set with ``p = 4``
+would have 3060 points. To avoid this situation and reduce the
+algorithms runtime [Deb2014]_ suggest to combine reference point
+set with lower p value. To do this in DEAP, we can combine multiple
+uniform point set using:
+
+.. literalinclude:: ../code/examples/nsga3_ref_points_combined.py
+   :start-after: # reference points
+   :end-before: ##
+
+This would give the following reference point set with two underlying
+uniform distribution: one at full scale, and the other at half scale.
+
+.. plot:: code/examples/nsga3_ref_points_combined_plot.py
+
+
+
 Conclusion
 ----------
 That's it for the NSGA-III algorithm using DEAP, now you can leverage
