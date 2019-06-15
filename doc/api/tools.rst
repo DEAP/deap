@@ -142,6 +142,8 @@ Selection
 
 .. autofunction:: deap.tools.selNSGA3
 
+.. autofunction:: deap.tools.selNSGA3WithMemory
+
 .. autofunction:: deap.tools.uniform_reference_points
 
 .. autofunction:: deap.tools.selSPEA2

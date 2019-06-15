@@ -4,7 +4,7 @@ branches:
   only:
     - master
     - develop
-        
+
 matrix:
   include:
     - python: "2.7"
@@ -40,7 +40,7 @@ install:
         NUMPY=$NUMPY"@pypy-4.0.1"
         pip install nose
       fi
-  - pip install $NUMPY
+  - pip install $NUMPY scipy
 # command to run tests
 script:
   - python setup.py nosetests --verbosity=3 --with-doctest
