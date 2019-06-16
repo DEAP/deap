@@ -9,12 +9,12 @@ pool:
   vmImage: 'vs2017-win2016'
 strategy:
   matrix:
-#     Python27:
-#       python.version: '2.7'
-#     Python35:
-#       python.version: '3.5'
-#     Python36:
-#       python.version: '3.6'
+    Python27:
+      python.version: '2.7'
+    Python35:
+      python.version: '3.5'
+    Python36:
+      python.version: '3.6'
     Python37:
       python.version: '3.7'
 
@@ -35,5 +35,5 @@ steps:
 
 - script: |
     python setup.py sdist bdist_wheel
-    twine upload -r pypi -u $(twineUsername) -p $(twinePassword) dist/*
+    twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
   displayName: 'Publish wheel to PyPi'
