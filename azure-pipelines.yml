@@ -34,9 +34,9 @@ strategy:
 #     Python36_macOS1013:
 #       python.version: '3.6'
 #       imageName: 'macOS-10.13'
-    Python37_VS2017:
-      python.version: '3.7'
-      imageName: 'vs2017-win2016'
+#     Python37_VS2017:
+#       python.version: '3.7'
+#       imageName: 'vs2017-win2016'
 #     Python37_macOS1014:
 #       python.version: '3.7'
 #       imageName: 'macOS-10.14'
