@@ -20,7 +20,7 @@ try:
 except ImportError:
     warnings.append("warning: pypandoc module not found, could not convert ReadMe Markdown to RST")
     import codecs
-    read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
+    read_md = lambda f: "See https://github.com/DEAP/deap"
 else:
     read_md = lambda f: convert_file(f, 'rst')
 
