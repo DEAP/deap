@@ -5,18 +5,29 @@
 
 trigger: none
 
-pool:
-  vmImage: 'vs2017-win2016'
 strategy:
   matrix:
-    Python27:
+    Python27_VS2015:
       python.version: '2.7'
-    Python35:
+      imageName: 'vs2015-win2012r2'
+    Python35_VS2017:
       python.version: '3.5'
-    Python36:
+      imageName: 'vs2017-win2016'
+    Python36_VS2017:
       python.version: '3.6'
-    Python37:
+      imageName: 'vs2017-win2016'
+    Python37_VS2017:
       python.version: '3.7'
+      imageName: 'vs2017-win2016'
+    Python37_macOS1014:
+      python.version: '3.7'
+      imageName: 'macOS-10.14'
+    Python37_macOS1013:
+      python.version: '3.7'
+      imageName: 'macOS-10.13'
+
+pool:
+  vmImage: $(imageName)
 
 steps:
 - task: UsePythonVersion@0
