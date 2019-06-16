@@ -35,5 +35,5 @@ steps:
 
 - script: |
     python setup.py sdist bdist_wheel
-    twine upload -r pypi -u $(twineUsername) -p $(twinePassword) deap/dist/*
+    twine upload -r pypi -u $(twineUsername) -p $(twinePassword) dist/*
   displayName: 'Publish wheel to PyPi'
