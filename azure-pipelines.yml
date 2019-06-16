@@ -28,3 +28,12 @@ steps:
     python -m pip install --upgrade pip
     pip install numpy
   displayName: 'Install dependencies'
+
+- script: |
+    pip install wheel twine
+  displayName: 'Install build tools'
+
+- script: |
+    python setup.py sdist bdist_wheel
+    twine -r pypi -u $(twineUsername) -p $(twinePassword) deap/dist/*
+  displayName: 'Publish wheel to PyPi'
