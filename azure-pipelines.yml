@@ -7,27 +7,51 @@ trigger: none
 
 strategy:
   matrix:
-    Python27_VS2015:
-      python.version: '2.7'
-      imageName: 'vs2017-win2016'
+#     Python27_VS2017:
+#       python.version: '2.7'
+#       imageName: 'vs2017-win2016'
+#     Python27_macOS1014:
+#       python.version: '2.7'
+#       imageName: 'macOS-10.14'
+#     Python27_macOS1013:
+#       python.version: '2.7'
+#       imageName: 'macOS-10.13'
 #     Python35_VS2017:
 #       python.version: '3.5'
 #       imageName: 'vs2017-win2016'
+#     Python35_macOS1014:
+#       python.version: '3.5'
+#       imageName: 'macOS-10.14'
+#     Python35_macOS1013:
+#       python.version: '3.5'
+#       imageName: 'macOS-10.13'
 #     Python36_VS2017:
 #       python.version: '3.6'
 #       imageName: 'vs2017-win2016'
-#     Python37_VS2017:
-#       python.version: '3.7'
-#       imageName: 'vs2017-win2016'
+#     Python36_macOS1014:
+#       python.version: '3.6'
+#       imageName: 'macOS-10.14'
+#     Python36_macOS1013:
+#       python.version: '3.6'
+#       imageName: 'macOS-10.13'
+    Python37_VS2017:
+      python.version: '3.7'
+      imageName: 'vs2017-win2016'
 #     Python37_macOS1014:
 #       python.version: '3.7'
 #       imageName: 'macOS-10.14'
 #     Python37_macOS1013:
 #       python.version: '3.7'
 #       imageName: 'macOS-10.13'
+    Python37_manylinux:
+      python.version: '3.7'
+      imageName: 'ubuntu-16.04'
+      containerImage: dockcross:manylinux-x64
 
 pool:
   vmImage: $(imageName)
+
+container: $[ variables['containerImage'] ]
 
 steps:
 - task: UsePythonVersion@0
@@ -37,7 +61,7 @@ steps:
 
 - script: |
     choco install vcpython27 --yes
-  condition: eq(variables['python.version'], '2.7')
+  condition: and(eq(variables['python.version'], '2.7'), eq(variables['imageName'], 'vs2017-win2016'))
   displayName: 'Install vcpython27'
 
 - script: |
