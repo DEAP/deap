@@ -104,6 +104,8 @@ jobs:
     pool:
       vmImage: 'ubuntu-16.04'
     container: quay.io/pypa/manylinux2010_x86_64:latest
+    variables:
+      python: /opt/python/cp37-cp37m/bin/python
     steps:
     - script: |
         for PYBIN in /opt/python/*/bin; do
@@ -121,5 +123,5 @@ jobs:
         done
       displayName: 'Audit wheels'
     - script: |
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse/*
+        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse/*
       displayName: 'Publish wheel to PyPi'
