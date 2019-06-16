@@ -9,12 +9,12 @@ pool:
   vmImage: 'ubuntu-latest'
 strategy:
   matrix:
-    Python27:
-      python.version: '2.7'
-    Python35:
-      python.version: '3.5'
-    Python36:
-      python.version: '3.6'
+#     Python27:
+#       python.version: '2.7'
+#     Python35:
+#       python.version: '3.5'
+#     Python36:
+#       python.version: '3.6'
     Python37:
       python.version: '3.7'
 
@@ -35,5 +35,5 @@ steps:
 
 - script: |
     python setup.py sdist bdist_wheel
-    twine -r pypi -u $(twineUsername) -p $(twinePassword) deap/dist/*
+    twine upload -r pypi -u $(twineUsername) -p $(twinePassword) deap/dist/*
   displayName: 'Publish wheel to PyPi'
