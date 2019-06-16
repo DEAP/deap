@@ -9,22 +9,22 @@ strategy:
   matrix:
     Python27_VS2015:
       python.version: '2.7'
-      imageName: 'vs2015-win2012r2'
-    Python35_VS2017:
-      python.version: '3.5'
       imageName: 'vs2017-win2016'
-    Python36_VS2017:
-      python.version: '3.6'
-      imageName: 'vs2017-win2016'
-    Python37_VS2017:
-      python.version: '3.7'
-      imageName: 'vs2017-win2016'
-    Python37_macOS1014:
-      python.version: '3.7'
-      imageName: 'macOS-10.14'
-    Python37_macOS1013:
-      python.version: '3.7'
-      imageName: 'macOS-10.13'
+#     Python35_VS2017:
+#       python.version: '3.5'
+#       imageName: 'vs2017-win2016'
+#     Python36_VS2017:
+#       python.version: '3.6'
+#       imageName: 'vs2017-win2016'
+#     Python37_VS2017:
+#       python.version: '3.7'
+#       imageName: 'vs2017-win2016'
+#     Python37_macOS1014:
+#       python.version: '3.7'
+#       imageName: 'macOS-10.14'
+#     Python37_macOS1013:
+#       python.version: '3.7'
+#       imageName: 'macOS-10.13'
 
 pool:
   vmImage: $(imageName)
@@ -34,6 +34,11 @@ steps:
   inputs:
     versionSpec: '$(python.version)'
   displayName: 'Use Python $(python.version)'
+
+- script: |
+    choco install vcpython27 --yes
+  condition: eq('$(python.version)', '2.7')
+  displayName: 'Install vcpython27'
 
 - script: |
     python -m pip install --upgrade pip
