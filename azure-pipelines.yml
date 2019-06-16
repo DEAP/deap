@@ -6,7 +6,7 @@
 trigger: none
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'vs2017-win2016'
 strategy:
   matrix:
 #     Python27:
