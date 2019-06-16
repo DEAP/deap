@@ -44,13 +44,15 @@ class ve_build_ext(build_ext):
     def run(self):
         try:
             build_ext.run(self)
-        except DistutilsPlatformError:
+        except DistutilsPlatformError as e:
+            print(e)
             raise BuildFailed()
 
     def build_extension(self, ext):
         try:
             build_ext.build_extension(self, ext)
-        except ext_errors:
+        except ext_errors as e:
+            print(e)
             raise BuildFailed()
 
 def run_setup(build_ext):
