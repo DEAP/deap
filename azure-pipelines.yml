@@ -37,7 +37,7 @@ steps:
 
 - script: |
     choco install vcpython27 --yes
-  condition: eq($(python.version), '2.7')
+  condition: $[eq('$(python.version)', '2.7')]
   displayName: 'Install vcpython27'
 
 - script: |
