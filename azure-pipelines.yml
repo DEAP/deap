@@ -6,127 +6,120 @@
 trigger: none
 
 jobs:
-  - job: WindowsBuild
-    pool:
-      vmImage: 'vs2017-win2016'
-    strategy:
-      matrix:
-        Python27_VS2017:
-          python.version: '2.7'
-        Python35_VS2017:
-          python.version: '3.5'
-        Python36_VS2017:
-          python.version: '3.6'
-        Python37_VS2017:
-          python.version: '3.7'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
-    - script: |
-        choco install vcpython27 --yes
-      condition: eq(variables['python.version'], '2.7')
-      displayName: 'Install vcpython27'
-    - script: |
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
-    - script: |
-        pip install wheel twine
-      displayName: 'Install build tools'
-    - script: |
-        python setup.py sdist bdist_wheel
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
-      displayName: 'Publish wheel to PyPi'
+#   - job: WindowsBuild
+#     pool:
+#       vmImage: 'vs2017-win2016'
+#     strategy:
+#       matrix:
+#         Python27_VS2017:
+#           python.version: '2.7'
+#         Python35_VS2017:
+#           python.version: '3.5'
+#         Python36_VS2017:
+#           python.version: '3.6'
+#         Python37_VS2017:
+#           python.version: '3.7'
+#     steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#       displayName: 'Use Python $(python.version)'
+#     - script: |
+#         choco install vcpython27 --yes
+#       condition: eq(variables['python.version'], '2.7')
+#       displayName: 'Install vcpython27'
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install numpy
+#       displayName: 'Install dependencies'
+#     - script: |
+#         pip install wheel twine
+#       displayName: 'Install build tools'
+#     - script: |
+#         python setup.py sdist bdist_wheel
+#         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+#       displayName: 'Publish wheel to PyPi'
   
-  - job: macOS10_14Build
-    pool:
-      vmImage: 'macOS-10.14'
-    strategy:
-      matrix:
-        Python27_macOS1014:
-          python.version: '2.7'
-        Python35_macOS1014:
-          python.version: '3.5'
-        Python36_macOS1014:
-          python.version: '3.6'
-        Python37_macOS1014:
-          python.version: '3.7'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
-    - script: |
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
-    - script: |
-        pip install wheel twine
-      displayName: 'Install build tools'
-    - script: |
-        python setup.py sdist bdist_wheel
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
-      displayName: 'Publish wheel to PyPi'
+#   - job: macOS10_14Build
+#     pool:
+#       vmImage: 'macOS-10.14'
+#     strategy:
+#       matrix:
+#         Python27_macOS1014:
+#           python.version: '2.7'
+#         Python35_macOS1014:
+#           python.version: '3.5'
+#         Python36_macOS1014:
+#           python.version: '3.6'
+#         Python37_macOS1014:
+#           python.version: '3.7'
+#     steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#       displayName: 'Use Python $(python.version)'
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install numpy
+#       displayName: 'Install dependencies'
+#     - script: |
+#         pip install wheel twine
+#       displayName: 'Install build tools'
+#     - script: |
+#         python setup.py sdist bdist_wheel
+#         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+#       displayName: 'Publish wheel to PyPi'
     
-  - job: macOS10_13Build
-    pool:
-      vmImage: 'macOS-10.13'
-    strategy:
-      matrix:
-        Python27_macOS1013:
-          python.version: '2.7'
-        Python35_macOS1013:
-          python.version: '3.5'
-        Python36_macOS1013:
-          python.version: '3.6'
-        Python37_macOS1013:
-          python.version: '3.7'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
-    - script: |
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
-    - script: |
-        pip install wheel twine
-      displayName: 'Install build tools'
-    - script: |
-        python setup.py sdist bdist_wheel
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
-      displayName: 'Publish wheel to PyPi'
+#   - job: macOS10_13Build
+#     pool:
+#       vmImage: 'macOS-10.13'
+#     strategy:
+#       matrix:
+#         Python27_macOS1013:
+#           python.version: '2.7'
+#         Python35_macOS1013:
+#           python.version: '3.5'
+#         Python36_macOS1013:
+#           python.version: '3.6'
+#         Python37_macOS1013:
+#           python.version: '3.7'
+#     steps:
+#     - task: UsePythonVersion@0
+#       inputs:
+#         versionSpec: '$(python.version)'
+#       displayName: 'Use Python $(python.version)'
+#     - script: |
+#         python -m pip install --upgrade pip
+#         pip install numpy
+#       displayName: 'Install dependencies'
+#     - script: |
+#         pip install wheel twine
+#       displayName: 'Install build tools'
+#     - script: |
+#         python setup.py sdist bdist_wheel
+#         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+#       displayName: 'Publish wheel to PyPi'
   
-  - job: ManylinuxBuild
+  - job: Manylinux2010Build
     pool:
       vmImage: 'ubuntu-16.04'
     container: quay.io/pypa/manylinux2010_x86_64:latest
-    strategy:
-      matrix:
-        Python27_manylinux:
-          python: '/opt/python/cp27-cp27m/bin/python'
-          pip: '/opt/python/cp27-cp27m/bin/pip'
-        Python35_manylinux:
-          python: '/opt/python/cp35-cp35m/bin/python'
-          pip: '/opt/python/cp35-cp35m/bin/pip'
-        Python36_manylinux:
-          python: '/opt/python/cp36-cp36m/bin/python'
-          pip: '/opt/python/cp36-cp36m/bin/pip'
-        Python37_manylinux:
-          python: '/opt/python/cp37-cp37m/bin/python'
-          pip: '/opt/python/cp37-cp37m/bin/pip'
     steps:
     - script: |
-        $(python) -m pip install --upgrade pip
-        $(pip) install --user numpy
-      displayName: 'Install dependencies'
+        for PYBIN in /opt/python/*/bin; do
+          "${PYBIN}/pip" install -U --user numpy wheel twine auditwheel
+        done
+      displayName: 'Install dependencies and build tools'
     - script: |
-        $(pip) install --user wheel twine
-      displayName: 'Install build tools'
+        for PYBIN in /opt/python/*/bin; do
+          "${PYBIN}/pip" wheel . -w wheelhouse/
+        done
+      displayName: 'Build wheels'
     - script: |
-        $(python) setup.py sdist bdist_wheel
-        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+        for whl in wheelhouse/*.whl; do
+          auditwheel repair "$whl" --plat manylinux2010_x86_64 -w wheelhouse/
+        done
+      displayName: 'Audit wheels'
+    - script: |
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse/*
       displayName: 'Publish wheel to PyPi'
