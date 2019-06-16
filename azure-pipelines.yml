@@ -125,10 +125,10 @@ jobs:
     steps:
     - script: |
         $(python) -m pip install --upgrade pip
-        $(pip) install numpy
+        $(pip) install --user numpy
       displayName: 'Install dependencies'
     - script: |
-        $(pip) install wheel twine
+        $(pip) install --user wheel twine
       displayName: 'Install build tools'
     - script: |
         $(python) setup.py sdist bdist_wheel
