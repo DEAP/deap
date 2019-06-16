@@ -118,10 +118,10 @@ jobs:
         done
       displayName: 'Build wheels'
     - script: |
-        for whl in wheelhouse/*.whl; do
-          auditwheel repair "$whl" --plat manylinux2010_x86_64 -w wheelhouse/
+        for whl in wheelhouse/deap*.whl; do
+          auditwheel repair "$whl" --plat manylinux2010_x86_64 -w wheelhouse-manylinux/
         done
       displayName: 'Audit wheels'
     - script: |
-        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse/*
+        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
       displayName: 'Publish wheel to PyPi'
