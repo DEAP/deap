@@ -28,9 +28,6 @@ strategy:
 
 pool:
   vmImage: $(imageName)
- 
-variables:
-  install_vcpy27: $[eq('$(python.version)', '2.7')]
 
 steps:
 - task: UsePythonVersion@0
@@ -40,7 +37,7 @@ steps:
 
 - script: |
     choco install vcpython27 --yes
-  condition: '$(install_vcpy27)'
+  condition: eq('$(python.version)', '2.7')
   displayName: 'Install vcpython27'
 
 - script: |
