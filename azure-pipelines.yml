@@ -107,19 +107,15 @@ jobs:
     strategy:
       matrix:
         Python27_manylinux:
-          bin: '/opt/python/cp27-cp27m/bin'
           python: '/opt/python/cp27-cp27m/bin/python'
           pip: '/opt/python/cp27-cp27m/bin/pip'
         Python35_manylinux:
-          bin: '/opt/python/cp35-cp35m/bin'
           python: '/opt/python/cp35-cp35m/bin/python'
           pip: '/opt/python/cp35-cp35m/bin/pip'
         Python36_manylinux:
-          bin: '/opt/python/cp36-cp36m/bin'
           python: '/opt/python/cp36-cp36m/bin/python'
           pip: '/opt/python/cp36-cp36m/bin/pip'
         Python37_manylinux:
-          bin: '/opt/python/cp37-cp37m/bin'
           python: '/opt/python/cp37-cp37m/bin/python'
           pip: '/opt/python/cp37-cp37m/bin/pip'
     steps:
@@ -132,5 +128,5 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         $(python) setup.py sdist bdist_wheel
-        $(bin)/twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
