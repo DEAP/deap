@@ -40,7 +40,7 @@ steps:
 
 - script: |
     choco install vcpython27 --yes
-  condition: $(install_vcpy27)
+  condition: '$(install_vcpy27)'
   displayName: 'Install vcpython27'
 
 - script: |
