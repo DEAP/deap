@@ -17,9 +17,9 @@ from distutils.errors import CCompilerError, DistutilsExecError, \
 
 # read the contents of README file
 from os import path
+import codecs
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+long_description = codecs.open(path.join(this_directory, 'README.md'), 'r', 'utf-8').read()
 
 import deap
 
