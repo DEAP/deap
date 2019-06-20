@@ -15,14 +15,11 @@ from setuptools.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
 
-try:
-    from pypandoc import convert_file
-except ImportError:
-    warnings.append("warning: pypandoc module not found, could not convert ReadMe Markdown to RST")
-    import codecs
-    read_md = lambda f: "See https://github.com/DEAP/deap"
-else:
-    read_md = lambda f: convert_file(f, 'rst')
+# read the contents of README file
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 import deap
 
@@ -66,14 +63,15 @@ def run_setup(build_ext):
     setup(name='deap',
           version=deap.__revision__,
           description='Distributed Evolutionary Algorithms in Python',
-          long_description=read_md('README.md'),
+          long_description=long_description,
+          long_description_content_type="text/markdown",
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
           url='https://www.github.com/deap',
           packages=find_packages(exclude=['examples']),
         #   packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
-          keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
+          keywords=['evolutionary algorithms', 'genetic algorithms', 'genetic programming', 'cma-es', 'ga', 'gp', 'es', 'pso'],
           license='LGPL',
           classifiers=[
             'Development Status :: 4 - Beta',
@@ -86,9 +84,9 @@ def run_setup(build_ext):
             'Topic :: Scientific/Engineering',
             'Topic :: Software Development',
             ],
-         ext_modules = extra_modules,
-         cmdclass = {"build_ext" : ve_build_ext},
-         install_requires = ['numpy'],
+         ext_modules=extra_modules,
+         cmdclass={"build_ext": ve_build_ext},
+         install_requires=['numpy'],
          use_2to3=True
     )
 
