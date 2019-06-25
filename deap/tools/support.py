@@ -186,7 +186,7 @@ class Statistics(object):
         time :meth:`record` is called.
 
         :param name: The name of the statistics function as it would appear
-                     in the dictionnary of the statistics object.
+                     in the dictionary of the statistics object.
         :param function: A function that will compute the desired statistics
                          on the data as preprocessed by the key.
         :param argument: One or more argument (and keyword argument) to pass
@@ -198,7 +198,7 @@ class Statistics(object):
 
     def compile(self, data):
         """Apply to the input sequence *data* each registered function
-        and return the results as a dictionnary.
+        and return the results as a dictionary.
 
         :param data: Sequence of objects on which the statistics are computed.
         """
@@ -248,7 +248,7 @@ class MultiStatistics(dict):
         """Register a *function* in each :class:`Statistics` object.
 
         :param name: The name of the statistics function as it would appear
-                     in the dictionnary of the statistics object.
+                     in the dictionary of the statistics object.
         :param function: A function that will compute the desired statistics
                          on the data as preprocessed by the key.
         :param argument: One or more argument (and keyword argument) to pass
@@ -278,14 +278,14 @@ class Logbook(list):
         """Dictionary containing the sub-sections of the logbook which are also
         :class:`Logbook`. Chapters are automatically created when the right hand
         side of a keyworded argument, provided to the *record* function, is a
-        dictionnary. The keyword determines the chapter's name. For example, the
+        dictionary. The keyword determines the chapter's name. For example, the
         following line adds a new chapter "size" that will contain the fields
         "max" and "mean". ::
 
             logbook.record(gen=0, size={'max' : 10.0, 'mean' : 7.5})
 
         To access a specific chapter, use the name of the chapter as a
-        dictionnary key. For example, to access the size chapter and select
+        dictionary key. For example, to access the size chapter and select
         the mean use ::
 
             logbook.chapters["size"].select("mean")
@@ -334,9 +334,9 @@ class Logbook(list):
 
     def record(self, **infos):
         """Enter a record of event in the logbook as a list of key-value pairs.
-        The informations are appended chronogically to a list as a dictionnary.
-        When the value part of a pair is a dictionnary, the informations contained
-        in the dictionnary are recorded in a chapter entitled as the name of the
+        The informations are appended chronogically to a list as a dictionary.
+        When the value part of a pair is a dictionary, the informations contained
+        in the dictionary are recorded in a chapter entitled as the name of the
         key part of the pair. Chapters are also Logbook.
         """
         apply_to_all = {k: v for k, v in infos.items() if not isinstance(v, dict)}
