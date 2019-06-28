@@ -23,6 +23,28 @@ def and_variation(population, toolbox, cxpb, mutpb):
         yield i1, i2
 
 
+def or_variation(population, toolbox, cxpb, mutpb):
+    assert (cxpb + mutpb) <= 1.0, (
+        "The sum of the crossover and mutation probabilities must be smaller "
+        "or equal to 1.0."
+    )
+
+    while True:
+        op_choice = random.random()
+        if op_choice < cxpb:  # Apply crossover
+            i1, i2 = deepcopy(random.sample(population, 2))
+            i1, _ = toolbox.mate(i1, i2)
+            del i1.fitness.values
+        elif op_choice < cxpb + mutpb:  # Apply mutation
+            i1 = deepcopy(random.choice(population))
+            i1, = toolbox.mutate(i1)
+            del i1.fitness.values
+        else:  # Apply reproduction
+            i1 = deepcopy(random.choice(population))
+
+        yield i1
+
+
 class SimpleAlgorithm:
     def __init__(self, population, toolbox, cxpb, mutpb):
         self.population = population
