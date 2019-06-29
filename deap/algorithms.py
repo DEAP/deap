@@ -29,6 +29,7 @@ def or_variation(population, toolbox, cxpb, mutpb):
         "or equal to 1.0."
     )
 
+    # TODO: Replace with infinite for?
     while True:
         op_choice = random.random()
         if op_choice < cxpb:  # Apply crossover
