@@ -79,6 +79,8 @@ def varAnd(population, toolbox, cxpb, mutpb):
             offspring[i], = toolbox.mutate(offspring[i])
             del offspring[i].fitness.values
 
+    test = 1
+
     return offspring
 
 
