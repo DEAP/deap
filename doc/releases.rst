@@ -27,7 +27,7 @@ API enhancements
 - gp: Replaced :func:`~deap.gp.evaluate` and :func:`~deap.gp.lambdify` by a single function :func:`~deap.gp.compile`.
 - gp: Replaced :func:`~deap.gp.lambdifyADF` by :func:`~deap.gp.compileADF`.
 - gp: New :func:`~deap.gp.graph` function that returns a list of nodes, edges and a
-  labels dictionnary that can then be feeded directly to networkx to
+  labels dictionary that can then be feeded directly to networkx to
   draw the tree.
 - gp: Renamed :func:`deap.gp.genRamped` as :func:`deap.gp.genHalfAndHalf`.
 - gp: Merged :func:`~deap.gp.staticDepthLimit` and :func:`~deap.gp.staticSizeLimit` in a 
