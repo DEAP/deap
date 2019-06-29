@@ -3,7 +3,7 @@ language: python
 branches:
   only:
     - master
-    - develop
+    - devel
 
 matrix:
   include:
