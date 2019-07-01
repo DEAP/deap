@@ -20,7 +20,7 @@ matrix:
       env: NUMPY=numpy
     - python: "pypy"
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
-  allow_failure:
+  allow_failures:
     - python: "3.7"
       name: "Flake8"
       dist: xenial
