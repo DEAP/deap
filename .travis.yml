@@ -5,6 +5,10 @@ branches:
     - master
     - devel
 
+stages:
+  - lint
+  - test
+
 matrix:
   include:
     - python: "2.7"
