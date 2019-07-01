@@ -24,8 +24,6 @@ matrix:
     name: "Flake8"
     dist: xenial
     env: NUMPY=numpy; FLAKE8=1
-  allow_failures:
-    - env: FLAKE8=1
 
 addons:
   apt:
