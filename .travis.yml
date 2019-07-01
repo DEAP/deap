@@ -9,8 +9,6 @@ stages:
   - lint
   - test
 
-stage: test
-
 matrix:
   include:
     - python: "2.7"
@@ -34,29 +32,6 @@ addons:
       - libblas-dev
       - liblapack-dev
 
-# command to install dependencies and translate deap in py3k
-install:
-  - |
-      if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
-        export PYENV_ROOT="$HOME/.pyenv"
-        if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
-          cd "$PYENV_ROOT" && git pull
-        else
-          rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
-        fi
-        export PYPY_VERSION="4.0.1"
-        "$PYENV_ROOT/bin/pyenv" install "pypy-$PYPY_VERSION"
-        virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
-        source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
-        NUMPY=$NUMPY"@pypy-4.0.1"
-        pip install nose
-      fi
-  - pip install $NUMPY
-
-# command to run tests
-script:
-  - python setup.py nosetests --verbosity=3 --with-doctest
-
 notifications:
   webhooks:
     urls:
@@ -72,3 +47,22 @@ jobs:
       env: xenial
       install: pip install flake8
       script: flake8
+    - stage: test
+      install:
+        - |
+            if [ "$TRAVIS_PYTHON_VERSION" = "pypy" ]; then
+              export PYENV_ROOT="$HOME/.pyenv"
+              if [ -f "$PYENV_ROOT/bin/pyenv" ]; then
+                cd "$PYENV_ROOT" && git pull
+              else
+                rm -rf "$PYENV_ROOT" && git clone --depth 1 https://github.com/yyuu/pyenv.git "$PYENV_ROOT"
+              fi
+              export PYPY_VERSION="4.0.1"
+              "$PYENV_ROOT/bin/pyenv" install "pypy-$PYPY_VERSION"
+              virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
+              source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
+              NUMPY=$NUMPY"@pypy-4.0.1"
+              pip install nose
+            fi
+        - pip install $NUMPY
+      script: python setup.py nosetests --verbosity=3 --with-doctest
