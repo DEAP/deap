@@ -9,6 +9,8 @@ stages:
   - lint
   - test
 
+stage: test
+
 matrix:
   include:
     - python: "2.7"
@@ -24,12 +26,14 @@ matrix:
       env: NUMPY=numpy
     - python: "pypy"
       env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
+
 addons:
   apt:
     packages:
       - gfortran
       - libblas-dev
       - liblapack-dev
+
 # command to install dependencies and translate deap in py3k
 install:
   - |
@@ -48,6 +52,7 @@ install:
         pip install nose
       fi
   - pip install $NUMPY
+
 # command to run tests
 script:
   - python setup.py nosetests --verbosity=3 --with-doctest
