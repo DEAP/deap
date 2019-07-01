@@ -47,7 +47,18 @@ install:
 # command to run tests
 script:
   - python setup.py nosetests --verbosity=3 --with-doctest
-notifications:
+
+# Supplementary job
+jobs:
+  include:
+    - stage: lint
+      install: pip install flake8
+      script: flake8
+      python: "3.7"
+      dist: xenial
+
+
+  notifications:
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/f17745fc250ffb09c0e9
