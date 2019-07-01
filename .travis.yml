@@ -2,36 +2,36 @@ sudo: false
 language: python
 branches:
   only:
-    - master
-    - devel
+  - master
+  - devel
 
 matrix:
   include:
-    - python: "2.7"
-      env: NUMPY=numpy
-    - python: "3.4"
-      env: NUMPY=numpy
-    - python: "3.5"
-      env: NUMPY=numpy
-    - python: "3.6"
-      env: NUMPY=numpy
-    - python: "3.7"
-      dist: xenial
-      env: NUMPY=numpy
-    - python: "pypy"
-      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
+  - python: "2.7"
+    env: NUMPY=numpy
+  - python: "3.4"
+    env: NUMPY=numpy
+  - python: "3.5"
+    env: NUMPY=numpy
+  - python: "3.6"
+    env: NUMPY=numpy
+  - python: "3.7"
+    dist: xenial
+    env: NUMPY=numpy
+  - python: "pypy"
+    env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
   allow_failures:
-    - python: "3.7"
-      name: "Flake8"
-      dist: xenial
-      env: NUMPY=numpy; FLAKE8=1
+  - python: "3.7"
+    name: "Flake8"
+    dist: xenial
+    env: NUMPY=numpy; FLAKE8=1
 
 addons:
   apt:
     packages:
-      - gfortran
-      - libblas-dev
-      - liblapack-dev
+    - gfortran
+    - libblas-dev
+    - liblapack-dev
 
 # command to install dependencies and translate deap in py3k
 install:
