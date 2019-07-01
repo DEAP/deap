@@ -18,12 +18,13 @@ matrix:
     - python: "3.7"
       dist: xenial
       env: NUMPY=numpy
+    - python: "pypy"
+      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
+  allow_failure:
     - python: "3.7"
       name: "Flake8"
       dist: xenial
       env: NUMPY=numpy; FLAKE8=1
-    - python: "pypy"
-      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
 
 addons:
   apt:
