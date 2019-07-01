@@ -51,7 +51,8 @@ install:
 # command to run tests
 script:
   - python setup.py nosetests --verbosity=3 --with-doctest
-  notifications:
+
+notifications:
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/f17745fc250ffb09c0e9
