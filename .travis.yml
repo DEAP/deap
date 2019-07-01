@@ -54,11 +54,12 @@ install:
 
 # command to run tests
 script:
-  - if [[ -z "${FLAKE8}" ]]; then
-      flake8
-    else
-      python setup.py nosetests --verbosity=3 --with-doctest
-    fi
+  - |
+      if [[ -z "${FLAKE8}" ]]; then
+        flake8
+      else
+        python setup.py nosetests --verbosity=3 --with-doctest
+      fi
 
 notifications:
   webhooks:
