@@ -3,10 +3,18 @@ from itertools import cycle, islice
 import random
 
 
+def _evaluate_invalids(individuals, eval_func, map):
+    invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
+    fitnesses = map(eval_func, invalid_ind)
+    for ind, fit in zip(invalid_ind, fitnesses):
+        ind.fitness.values = fit
+
+
 def and_variation(population, toolbox, cxpb, mutpb):
     individuals = cycle(population)
-    left, right = individuals, individuals
-    for i1, i2 in zip(left, right):
+
+    # zip(iter, iter) produces l[i], l[i+1]
+    for i1, i2 in zip(individuals, individuals):
         # TODO: put deepcopy in operators
         i1, i2 = deepcopy([i1, i2])
         if random.random() < cxpb:
@@ -29,7 +37,6 @@ def or_variation(population, toolbox, cxpb, mutpb):
         "or equal to 1.0."
     )
 
-    # TODO: Replace with infinite for?
     while True:
         op_choice = random.random()
         if op_choice < cxpb:  # Apply crossover
@@ -69,12 +76,67 @@ class SimpleAlgorithm:
         ]
 
         # Evaluate the new individuals
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = self.toolbox.map(self.toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+        _evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
         # Replace the current population by the offspring
         self.population[:] = offspring
+
+        return self
+
+
+class MuLambdaAlgorithm:
+    def __init__(self, population, selection_type, lambda_, toolbox, cxpb, mutpb):
+        self.population = population
+        self.selection_type = selection_type
+        self.lambda_ = lambda_
+        self.toolbox = toolbox
+        self.cxpb = cxpb
+        self.mutpb = mutpb
+
+        assert selection_type in {"plus", "comma", "+", ","}, (
+            "Selection type must be in {'plus', 'comma'}, "
+            f" {selection_type} provided"
+        )
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # Vary the population
+        offspring = [
+            islice(
+                or_variation(self.population, self.toolbox, self.cxpb, self.mutpb),
+                self.lambda_
+            )
+        ]
+
+        # Evaluate the new individuals
+        _evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
+
+        if self.selection_type in {"plus", "+"}:
+            offspring = self.population + offspring
+
+        # Select the next generation population
+        self.population[:] = self.toolbox.select(offspring, len(self.population))
+
+        return self
+
+
+class GenerateUpdateAlgorithm:
+    def __init__(self, toolbox):
+        self.toolbox = toolbox
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # Generate a new population
+        self.population = self.toolbox.generate()
+
+        # Evaluate the new individuals
+        _evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+
+        # Update the strategy with the evaluated individuals
+        self.toolbox.update(self.population)
 
         return self
