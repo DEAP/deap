@@ -56,9 +56,9 @@ install:
 script:
   - |
       if [[ -z "${FLAKE8}" ]]; then
-        flake8
-      else
         python setup.py nosetests --verbosity=3 --with-doctest
+      else
+        flake8
       fi
 
 notifications:
