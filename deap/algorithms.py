@@ -2,6 +2,8 @@ from copy import deepcopy
 from itertools import cycle, islice
 import random
 
+from .base import Toolbox
+
 
 def _evaluate_invalids(individuals, eval_func, map):
     invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
@@ -28,7 +30,8 @@ def and_variation(population, toolbox, cxpb, mutpb):
 
         del i1.fitness.values, i2.fitness.values
 
-        yield i1, i2
+        yield i1
+        yield i2
 
 
 def or_variation(population, toolbox, cxpb, mutpb):
@@ -68,18 +71,16 @@ class SimpleAlgorithm:
         offspring = self.toolbox.select(self.population, len(self.population))
 
         # Vary the pool of individuals
-        offspring = [
-            islice(
-                and_variation(offspring, self.toolbox, self.cxpb, self.mutpb),
-                len(self.population)
-            )
-        ]
+        offspring = list(islice(
+            and_variation(offspring, self.toolbox, self.cxpb, self.mutpb),
+            len(self.population)
+        ))
 
         # Evaluate the new individuals
         _evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
         # Replace the current population by the offspring
-        self.population[:] = offspring
+        self.population = offspring
 
         return self
 
@@ -95,20 +96,18 @@ class MuLambdaAlgorithm:
 
         assert selection_type in {"plus", "comma", "+", ","}, (
             "Selection type must be in {'plus', 'comma'}, "
-            f" {selection_type} provided"
-        )
+            " {} provided"
+        ).format(selection_type)
 
     def __iter__(self):
         return self
 
     def __next__(self):
         # Vary the population
-        offspring = [
-            islice(
-                or_variation(self.population, self.toolbox, self.cxpb, self.mutpb),
-                self.lambda_
-            )
-        ]
+        offspring = list(islice(
+            or_variation(self.population, self.toolbox, self.cxpb, self.mutpb),
+            self.lambda_
+        ))
 
         # Evaluate the new individuals
         _evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
