@@ -2,10 +2,8 @@ from copy import deepcopy
 from itertools import cycle, islice
 import random
 
-from .base import Toolbox
 
-
-def _evaluate_invalids(individuals, eval_func, map):
+def evaluate_invalids(individuals, eval_func, map):
     invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
     fitnesses = map(eval_func, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
@@ -77,7 +75,7 @@ class SimpleAlgorithm:
         ))
 
         # Evaluate the new individuals
-        _evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
+        evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
         # Replace the current population by the offspring
         self.population = offspring
@@ -110,7 +108,7 @@ class MuLambdaAlgorithm:
         ))
 
         # Evaluate the new individuals
-        _evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
+        evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
         if self.selection_type in {"plus", "+"}:
             offspring = self.population + offspring
@@ -133,7 +131,7 @@ class GenerateUpdateAlgorithm:
         self.population = self.toolbox.generate()
 
         # Evaluate the new individuals
-        _evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+        evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
 
         # Update the strategy with the evaluated individuals
         self.toolbox.update(self.population)

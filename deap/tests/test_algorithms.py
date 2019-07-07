@@ -84,7 +84,7 @@ class TestAlgorithms(unittest.TestCase):
         self.tb.register("select", self.sel_mock)
         self.tb.register("evaluate", self.eval_mock)
 
-    def test_simple_algorithm_population_updated(self):
+    def test_simple_algorithm_step(self):
         pop = [Ind([0] * 4) for i in range(5)]
 
         with mock.patch("deap.algorithms.and_variation") as mock_var, \
