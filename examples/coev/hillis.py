@@ -13,6 +13,7 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
+from itertools import islice
 import random
 import sys
 
@@ -79,7 +80,7 @@ ptoolbox.register("population", tools.initRepeat, list, ptoolbox.individual)
 
 htoolbox.register("evaluate", evalNetwork, dimension=INPUTS)
 htoolbox.register("mate", tools.cxTwoPoint)
-htoolbox.register("mutate", mutNetwork, dimension=INPUTS, mutpb=0.2, addpb=0.01, 
+htoolbox.register("mutate", mutNetwork, dimension=INPUTS, mutpb=0.2, addpb=0.01,
     delpb=0.01, indpb=0.05)
 htoolbox.register("select", tools.selTournament, tournsize=3)
 
@@ -109,50 +110,53 @@ ptoolbox.register("clone", cloneParasite)
 
 def main():
     random.seed(64)
-    
+
     hosts = htoolbox.population(n=300)
     parasites = ptoolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    
+
     hstats = tools.Statistics(lambda ind: ind.fitness.values)
     hstats.register("avg", numpy.mean)
     hstats.register("std", numpy.std)
     hstats.register("min", numpy.min)
     hstats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
-    
+
     MAXGEN = 50
     H_CXPB, H_MUTPB = 0.5, 0.3
     P_CXPB, P_MUTPB = 0.5, 0.3
-    
+
     fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
     for host, parasite, fit in zip(hosts, parasites, fits):
         host.fitness.values = parasite.fitness.values = fit
-    
+
     hof.update(hosts)
     record = hstats.compile(hosts)
     logbook.record(gen=0, evals=len(hosts), **record)
     print(logbook.stream)
-    
+
     for g in range(1, MAXGEN):
-        
+
         hosts = htoolbox.select(hosts, len(hosts))
         parasites = ptoolbox.select(parasites, len(parasites))
-        
-        hosts = algorithms.varAnd(hosts, htoolbox, H_CXPB, H_MUTPB)
-        parasites = algorithms.varAnd(parasites, ptoolbox, P_CXPB, P_MUTPB)
-        
+
+        hosts = list(islice(algorithms.and_variation(hosts, htoolbox, H_CXPB, H_MUTPB),
+                            len(s)))
+        parasites = list(islice(algorithms.and_variation(parasites, ptoolbox, P_CXPB,
+                                                         P_MUTPB),
+                                len(s)))
+
         fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
         for host, parasite, fit in zip(hosts, parasites, fits):
             host.fitness.values = parasite.fitness.values = fit
-        
+
         hof.update(hosts)
         record = hstats.compile(hosts)
         logbook.record(gen=g, evals=len(hosts), **record)
         print(logbook.stream)
-    
+
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(best_network)
     print(best_network.draw())

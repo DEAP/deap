@@ -59,13 +59,13 @@ creator.create("Individual", array.array, typecode='b', fitness=creator.FitnessM
 toolbox = base.Toolbox()
 toolbox.register("evaluate", evalOneMax)
 
-def main(seed):
+def main(seed, verbose=True):
     random.seed(seed)
 
     NGEN = 50
 
     #Initialize the PBIL EDA
-    pbil = PBIL(ndim=50, learning_rate=0.3, mut_prob=0.1, 
+    pbil = PBIL(ndim=50, learning_rate=0.3, mut_prob=0.1,
                 mut_shift=0.05, lambda_=20)
 
     toolbox.register("generate", pbil.generate, creator.Individual)
@@ -78,7 +78,17 @@ def main(seed):
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
 
-    pop, logbook = algorithms.eaGenerateUpdate(toolbox, NGEN, stats=stats, verbose=True)
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.GenerateUpdateAlgorithm(toolbox)):
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
 if __name__ == "__main__":
     main(seed=None)

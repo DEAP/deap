@@ -26,15 +26,15 @@ from deap import creator
 from deap import tools
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", numpy.ndarray, fitness=creator.FitnessMin) 
+creator.create("Individual", numpy.ndarray, fitness=creator.FitnessMin)
 
 class EMNA(object):
-    """Estimation of Multivariate Normal Algorithm (EMNA) as described 
-    by Algorithm 1 in: 
+    """Estimation of Multivariate Normal Algorithm (EMNA) as described
+    by Algorithm 1 in:
 
-    Fabien Teytaud and Olivier Teytaud. 2009. 
-    Why one must use reweighting in estimation of distribution algorithms. 
-    In Proceedings of the 11th Annual conference on Genetic and 
+    Fabien Teytaud and Olivier Teytaud. 2009.
+    Why one must use reweighting in estimation of distribution algorithms.
+    In Proceedings of the 11th Annual conference on Genetic and
     evolutionary computation (GECCO '09). ACM, New York, NY, USA, 453-460.
     """
     def __init__(self, centroid, sigma, mu, lambda_):
@@ -43,16 +43,16 @@ class EMNA(object):
         self.sigma = numpy.array(sigma)
         self.lambda_ = lambda_
         self.mu = mu
-    
+
     def generate(self, ind_init):
         # Generate lambda_ individuals and put them into the provided class
         arz = self.centroid + self.sigma * numpy.random.randn(self.lambda_, self.dim)
         return list(map(ind_init, arz))
-    
+
     def update(self, population):
         # Sort individuals so the best is first
         sorted_pop = sorted(population, key=attrgetter("fitness"), reverse=True)
-        
+
         # Compute the average of the mu best individuals
         z = sorted_pop[:self.mu] - self.centroid
         avg = numpy.mean(z, axis=0)
@@ -62,16 +62,18 @@ class EMNA(object):
         self.centroid = self.centroid + avg
 
 
-def main():
+def main(verbose=True):
     N, LAMBDA = 30, 1000
     MU = int(LAMBDA/4)
+    NGEN = 150
+
     strategy = EMNA(centroid=[5.0]*N, sigma=5.0, mu=MU, lambda_=LAMBDA)
-    
+
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
-    
+
     # Numpy equality function (operators.eq) between two arrays returns the
     # equality element wise, which raises an exception in the if similar()
     # check of the hall of fame. Using a different equality function like
@@ -82,13 +84,25 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    algorithms.eaGenerateUpdate(toolbox, ngen=150, stats=stats, halloffame=hof)
-    
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.GenerateUpdateAlgorithm(toolbox)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
     return hof[0].fitness.values[0]
 
 if __name__ == "__main__":
     main()
-    
+
 
 
