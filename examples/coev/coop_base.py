@@ -1,3 +1,4 @@
+
 #    This file is part of DEAP.
 #
 #    DEAP is free software: you can redistribute it and/or modify
@@ -20,10 +21,9 @@ re-use initialization code in some other examples.
 """
 
 import random
+import numpy as np
 
-from deap import base
-from deap import creator
-from deap import tools
+from deap import base, creator, tools
 
 IND_SIZE = 64
 SPECIES_SIZE = 50
@@ -46,51 +46,41 @@ def initTargetSet(schemata, size):
 def matchStrength(x, y):
     """Compute the match strength for the individual *x* on the string *y*.
     """
-    return sum(xi == yi for xi, yi in zip(x, y))
+    return len([1 for xi, yi in zip(x, y) if xi == yi])
 
 def matchStrengthNoNoise(x, y, n):
     """Compute the match strength for the individual *x* on the string *y*
     excluding noise *n*.
     """
-    return sum(xi == yi for xi, yi, ni in zip(x, y, n) if ni != "#")
+    return len([1 for xi, yi, ni in zip(x, y, n) if ni != "#" and xi == yi])
+
 
 def matchSetStrength(match_set, target_set):
     """Compute the match strength of a set of strings on the target set of
     strings. The strength is the maximum of all match string on each target.
     """
-    sum = 0.0
-    for t in target_set:
-        sum += max(matchStrength(m, t) for m in match_set)
-    return sum / len(target_set),
+    return np.mean([max(matchStrength(m, t) for m in match_set) for t in target_set]),
 
 def matchSetStrengthNoNoise(match_set, target_set, noise):
     """Compute the match strength of a set of strings on the target set of
     strings. The strength is the maximum of all match string on each target
     excluding noise.
     """
-    sum = 0.0
-    for t in target_set:
-        sum += max(matchStrengthNoNoise(m, t, noise) for m in match_set)
-    return sum / len(target_set),
+    return np.mean([max(matchStrengthNoNoise(m, t, noise) for m in match_set) for t in target_set]),
+
 
 def matchSetContribution(match_set, target_set, index):
     """Compute the contribution of the string at *index* in the match set.
     """
-    contribution = 0.0
+    contribution = 0
     for t in target_set:
-        match = -float("inf")
-        id = -1
-        for i, m in enumerate(match_set):
-            v = matchStrength(m, t)
-            if v > match:
-                match = v
-                id = i
-        if id == index:
-            contribution += match
+        i = np.argmax([matchStrength(m, t) for i, m in enumerate(match_set)])
+        if i == index:
+            contribution += matchStrength(match_set[i])
             
     return contribution / len(target_set),
      
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("FitnessMax", base.Fitness, weights=(1,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
