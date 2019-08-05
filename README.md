@@ -24,7 +24,7 @@ DEAP includes the following features:
 
 ## Downloads
 
-Following acceptation of [PEP 438](http://www.python.org/dev/peps/pep-0438/) by the Python community, we have moved DEAP's source releases on [PyPI](https://pypi.python.org).
+Following acceptance of [PEP 438](http://www.python.org/dev/peps/pep-0438/) by the Python community, we have moved DEAP's source releases on [PyPI](https://pypi.python.org).
 
 You can find the most recent releases at: https://pypi.python.org/pypi/deap/.
 
