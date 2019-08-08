@@ -56,7 +56,7 @@ def main(extended=True, verbose=True):
     logbook = tools.Logbook()
     logbook.header = "gen", "species", "evals", "std", "min", "avg", "max"
 
-    ngen = 20
+    ngen = 50
     g = 0
     
     size = TARGET_SIZE // TARGET_TYPE
