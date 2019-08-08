@@ -24,11 +24,9 @@ eight-length schematas.
 """
 
 import random
-
 import numpy as np
 
-from deap import algorithms
-from deap import tools
+from deap import algorithms, tools
 
 import coop_base
 
@@ -41,33 +39,33 @@ def nicheSchematas(type, size):
     """Produce the desired schemata based on the type required, 2 for half
     length, 4 for quarter length and 8 for eight length.
     """
-    rept = size//type
+    rept = size // type
     return ["#" * (i*rept) + "1" * rept + "#" * ((type-i-1)*rept) for i in range(type)]
 
 toolbox = coop_base.toolbox
 
 def main(extended=True, verbose=True):
     target_set = []
-    
+
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("std", np.std)
     stats.register("min", np.min)
     stats.register("max", np.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "species", "evals", "std", "min", "avg", "max"
-    
+
     ngen = 20
     g = 0
     
-    size = TARGET_SIZE//TARGET_TYPE
+    size = TARGET_SIZE // TARGET_TYPE
     schematas = nicheSchematas(TARGET_TYPE, IND_SIZE)
     L = len(schematas)
     for schemata in schematas:
         target_set.extend(toolbox.target_set(schemata, size))
-    species=[toolbox.species()]*L
-    
+    species=[toolbox.species()]*L # set of pops
+
     # Init with a random representative for each species
     representatives = [random.choice(s) for s in species]
     
@@ -76,7 +74,7 @@ def main(extended=True, verbose=True):
         next_repr = [None] * L
         for i, s in enumerate(species):
             # Vary the species individuals
-            s = algorithms.varAnd(s, toolbox, 0.6, 1)
+            s = algorithms.varAnd(s, toolbox, 0.6, 1.0)
             
             # Get the representatives excluding the current species
             r = representatives[:i] + representatives[i+1:]
@@ -98,7 +96,7 @@ def main(extended=True, verbose=True):
 
     if extended:
         for r in representatives:
-            print("".join(str(x) for x in r))
+            print("".join(map(str, r)))
     
 if __name__ == "__main__":
     main()

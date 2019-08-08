@@ -34,7 +34,7 @@ def initTargetSet(schemata, size):
     """
     test_set = []
     for _ in range(size):
-        test = list(random.randint(0, 1) for _ in range(len(schemata)))
+        test = list(random.randint(0, 1) for _ in schemata)
         for i, x in enumerate(schemata):
             if x == "0":
                 test[i] = 0
@@ -72,15 +72,15 @@ def matchSetStrengthNoNoise(match_set, target_set, noise):
 def matchSetContribution(match_set, target_set, index):
     """Compute the contribution of the string at *index* in the match set.
     """
-    contribution = 0
+    contribution = 0.0
     for t in target_set:
-        i = np.argmax([matchStrength(m, t) for i, m in enumerate(match_set)])
+        i = np.argmax([matchStrength(m, t) for m in match_set])
         if i == index:
             contribution += matchStrength(match_set[i])
             
     return contribution / len(target_set),
      
-creator.create("FitnessMax", base.Fitness, weights=(1,))
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
@@ -91,7 +91,7 @@ toolbox.register("species", tools.initRepeat, list, toolbox.individual, SPECIES_
 toolbox.register("target_set", initTargetSet)
 
 toolbox.register("mate", tools.cxTwoPoint)
-toolbox.register("mutate", tools.mutFlipBit, indpb=1./IND_SIZE)
+toolbox.register("mutate", tools.mutFlipBit, indpb=1.0/IND_SIZE)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("get_best", tools.selBest, k=1)
 toolbox.register("evaluate", matchSetStrength)
