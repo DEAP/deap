@@ -35,6 +35,7 @@ def initTargetSet(schemata, size):
     test_set = []
     for _ in range(size):
         test = list(random.randint(0, 1) for _ in schemata)
+        # test = np.random.randint(0,2, len(schemata))
         for i, x in enumerate(schemata):
             if x == "0":
                 test[i] = 0
