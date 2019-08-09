@@ -56,7 +56,7 @@ def main(extended=True, verbose=True):
     logbook = tools.Logbook()
     logbook.header = "gen", "species", "evals", "std", "min", "avg", "max"
 
-    ngen = 200
+    ngen =50
     g = 0
     
     size = TARGET_SIZE // TARGET_TYPE
@@ -64,7 +64,7 @@ def main(extended=True, verbose=True):
     L = len(schematas)
     for schemata in schematas:
         target_set.extend(toolbox.target_set(schemata, size))
-    species=[toolbox.species()]*L # set of pops
+    species=[toolbox.species() for _ in range(L)]  # set of populations
 
     # Init with a random representative for each species
     representatives = [random.choice(s) for s in species]
@@ -76,10 +76,10 @@ def main(extended=True, verbose=True):
             # Vary the species individuals
             s = algorithms.varAnd(s, toolbox, 0.6, 1.0)
             
-            # Get the representatives excluding the current species
-            r = representatives[:i] + representatives[i+1:]
+            r = representatives[:]
             for ind in s:
-                ind.fitness.values = toolbox.evaluate([ind] + r, target_set)
+                r[i] = ind    # replace the i-th individual with an individual in the current specie
+                ind.fitness.values = toolbox.evaluate(r, target_set)
             
             record = stats.compile(s)
             logbook.record(gen=g, species=i, evals=len(s), **record)
