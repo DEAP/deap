@@ -529,7 +529,16 @@ class HallOfFame(object):
             self.insert(population[0])
 
         for ind in population:
-            if ind.fitness > self[-1].fitness or len(self) < self.maxsize:
+            if isinstance(ind.fitness, (tuple, list)):
+                # Lexicase selection algorithms require fitness to be a
+                # collection of errors on individual "test cases".
+                canidate_tot_fitness = sum(ind.fitness.wvalues)
+                hofer_tot_fitness = sum(self[-1].fitness.wvalues)
+            else:
+                canidate_tot_fitness = ind.fitness
+                hofer_tot_fitness = self[-1].fitness
+
+            if canidate_tot_fitness > hofer_tot_fitness or len(self) < self.maxsize:
                 for hofer in self:
                     # Loop through the hall of fame to check for any
                     # similar individual
