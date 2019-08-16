@@ -158,7 +158,7 @@ Particle
 A particle is another special type of individual as it usually has a speed and
 generally remembers its best position. This type of individual is created (once
 again) the same way as inheriting from a list. This time, :attr:`speed`,
-:attr:`best` and speed limits (:attr:`smin`,:attr:`smax`) attributes are added to the object. Again, an
+:attr:`best` and speed limits (:attr:`smin`, :attr:`smax`) attributes are added to the object. Again, an
 initialization function :func:`initParticle` is also registered to produce the
 individual receiving the particle class, size, domain, and speed limits as
 arguments.
