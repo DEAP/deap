@@ -20,7 +20,7 @@ program inputs. For the last presented tree, the arguments are the variables
 :math:`x` and :math:`y`, and the constant is the number :math:`3`.
 
 In DEAP, user defined primitives and terminals are contained in a primitive set.
-For now, two kinds of primitive set exists: the loosely and the strongly typed. 
+For now, two kinds of primitive set exists: the loosely and the strongly typed.
 
 Loosely Typed GP
 ----------------
@@ -66,7 +66,7 @@ prefix tree.  ::
 	expr = genFull(pset, min_=1, max_=3)
 	tree = PrimitiveTree(expr)
 
-The last code produces a valid full tree with height randomly chosen 
+The last code produces a valid full tree with height randomly chosen
 between 1 and 3.
 
 Strongly Typed GP
@@ -120,7 +120,7 @@ because the type restrictions.
    float, ``"and"`` takes 2 boolean and ``"neg"`` takes a float, no terminal is
    defined and the arguments are booleans. The following situation will occur
    where no terminal can be placed to complete the tree.
-   
+
    |
 
    .. image:: /_images/gptypederrtree.png
@@ -185,11 +185,11 @@ generate a tree and output the code from the first example primitive set. ::
 	'mul(add(x, x), max(y, x))'
 
 Now, this string represents the program we just generated, but it cannot yet be
-executed. To make it executable, we have to compile the expression to a the Python
+executed. To make it executable, we have to compile the expression into a Python
 code object. Since this function has two inputs, we wish to compile the code
-into a callable object. This is possible with :func:`~deap.gp.compile`. 
-The function takes two arguments: the expression to compile and the associated 
-primitive set. The following example compiles the previous tree and evaluates the 
+into a callable object. This is possible with :func:`~deap.gp.compile`.
+The function takes two arguments: the expression to compile and the associated
+primitive set. The following example compiles the previous tree and evaluates the
 resulting function for :math:`x=1` and :math:`y=2`.
 ::
 
@@ -197,8 +197,8 @@ resulting function for :math:`x=1` and :math:`y=2`.
 	>>> function(1, 2)
 	4
 
-When the generated program has no input argument, the expression can be 
-compiled to byte code using the same :func:`~deap.gp.compile` function. 
+When the generated program has no input argument, the expression can be
+compiled to byte code using the same :func:`~deap.gp.compile` function.
 An example of this sort of problem is the :ref:`artificial-ant`.
 
 Tree Size Limit and Bloat Control
@@ -211,8 +211,8 @@ fixed between 92 and 99. This means that an expression can at most be composed
 of 91 succeeding primitives. In other words, a tree can have a maximum depth of
 91.  When the limit is exceeded, Python raises the following error ::
 
-	s_push: parser stack overflow 
-	Traceback (most recent call last): 
+	s_push: parser stack overflow
+	Traceback (most recent call last):
 	[...]
 	MemoryError
 
@@ -235,34 +235,34 @@ a dictionary associating a label to each node. It can be used like following
 with pygraphviz.  ::
 
 	from deap import base, creator, gp
-	
+
 	pset = gp.PrimitiveSet("MAIN", 1)
 	pset.addPrimitive(operator.add, 2)
 	pset.addPrimitive(operator.sub, 2)
 	pset.addPrimitive(operator.mul, 2)
 	pset.renameArguments(ARG0='x')
-	
+
 	creator.create("Individual", gp.PrimitiveTree)
-	
+
 	toolbox = base.Toolbox()
 	toolbox.register("expr", gp.genHalfAndHalf, pset=pset, min_=1, max_=2)
 	toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.expr)
-	
+
 	expr = toolbox.individual()
 	nodes, edges, labels = gp.graph(expr)
-	
+
 	### Graphviz Section ###
 	import pygraphviz as pgv
-	
+
 	g = pgv.AGraph()
 	g.add_nodes_from(nodes)
 	g.add_edges_from(edges)
 	g.layout(prog="dot")
-	
+
 	for i in nodes:
 	    n = g.get_node(i)
 	    n.attr["label"] = labels[i]
-		 
+
 	g.draw("tree.pdf")
 
 
@@ -271,12 +271,12 @@ Using NetworkX, the last section becomes:
 
 	import matplotlib.pyplot as plt
 	import networkx as nx
-	
+
 	g = nx.Graph()
 	g.add_nodes_from(nodes)
 	g.add_edges_from(edges)
 	pos = nx.graphviz_layout(g, prog="dot")
-	
+
 	nx.draw_networkx_nodes(g, pos)
 	nx.draw_networkx_edges(g, pos)
 	nx.draw_networkx_labels(g, pos, labels)
