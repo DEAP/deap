@@ -8,7 +8,7 @@ DEAP documentation
 DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
 ideas. It seeks to make algorithms explicit and data structures transparent.  It works 
 in perfect harmony with parallelisation mechanism such as multiprocessing and `SCOOP
-<http://pyscoop.org/>`_. The following documentation presents the key concepts
+<https://github.com/soravux/scoop>`_. The following documentation presents the key concepts
 and many features to build your own evolutions.
 
 .. sidebar:: Getting Help
