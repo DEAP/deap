@@ -30,25 +30,25 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 def update(ind, mu, std):
     for i, mu_i in enumerate(mu):
         ind[i] = random.gauss(mu_i,std)
- 
-toolbox = base.Toolbox()                  
+
+toolbox = base.Toolbox()
 toolbox.register("update", update)
 toolbox.register("evaluate", benchmarks.sphere)
 
 def main():
     """Implements the One-Fifth rule algorithm as expressed in :
-    Kern, S., S.D. Muller, N. Hansen, D. Buche, J. Ocenasek and P. Koumoutsakos (2004). 
-    Learning Probability Distributions in Continuous Evolutionary Algorithms - 
+    Kern, S., S.D. Muller, N. Hansen, D. Buche, J. Ocenasek and P. Koumoutsakos (2004).
+    Learning Probability Distributions in Continuous Evolutionary Algorithms -
     A Comparative Review. Natural Computing, 3(1), pp. 77-112.
 
     However instead of parent and offspring the algorithm is expressed in terms of
     best and worst. Best is equivalent to the parent, and worst to the offspring.
     Instead of producing a new individual each time, we have defined a function which
-    updates the worst individual using the best one as the mean of the gaussian and 
+    updates the worst individual using the best one as the mean of the gaussian and
     the sigma computed as the standard deviation.
     """
     random.seed(64)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "fitness"
 
@@ -63,18 +63,18 @@ def main():
 
     NGEN = 1500
     for g in range(NGEN):
-        toolbox.update(worst, best, sigma) 
+        toolbox.update(worst, best, sigma)
         worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:
             sigma = sigma * alpha
             best, worst = worst, best
         else:
             sigma = sigma * alpha**(-0.25)
-            
+
         logbook.record(gen=g, fitness=best.fitness.values)
         print(logbook.stream)
-    
+
     return best
-    
+
 if __name__ == "__main__":
     main()

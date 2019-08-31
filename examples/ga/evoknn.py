@@ -48,7 +48,7 @@ classifier.train(trainset[:N_TRAIN], trainlabels[:N_TRAIN])
 
 def evalClassifier(individual):
     labels = classifier.predict(trainset[N_TRAIN:], individual)
-    return sum(x == y for x, y in zip(labels, trainlabels[N_TRAIN:]))  / float(len(trainlabels[N_TRAIN:])), \
+    return sum(x == y for x, y in zip(labels, trainlabels[N_TRAIN:])) / float(len(trainlabels[N_TRAIN:])), \
            sum(individual) / float(classifier.ndim)
 
 creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
@@ -68,22 +68,34 @@ toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selNSGA2)
 
 
-def main():
+def main(verbose=True):
     # random.seed(64)
     MU, LAMBDA = 100, 200
-    pop = toolbox.population(n=MU)
+    NGEN = 40
+
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean, axis=0)
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
-    pop, logbook = algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA,
-                                             cxpb=0.7, mutpb=0.3, ngen=40, 
-                                             stats=stats, halloffame=hof)
-    
-    return pop, logbook, hof
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    pop = toolbox.population(n=MU)
+    for gen, state in enumerate(algorithms.MuLambdaAlgorithm(pop, toolbox, "+",
+                                                             LAMBDA, cxpb=0.7, mutpb=0.3)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
 
 if __name__ == "__main__":
     main()

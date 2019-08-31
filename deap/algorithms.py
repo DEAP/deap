@@ -84,11 +84,11 @@ class SimpleAlgorithm:
 
 
 class MuLambdaAlgorithm:
-    def __init__(self, population, selection_type, lambda_, toolbox, cxpb, mutpb):
+    def __init__(self, population, toolbox, selection_type, lambda_, cxpb, mutpb):
         self.population = population
+        self.toolbox = toolbox
         self.selection_type = selection_type
         self.lambda_ = lambda_
-        self.toolbox = toolbox
         self.cxpb = cxpb
         self.mutpb = mutpb
 
@@ -114,7 +114,7 @@ class MuLambdaAlgorithm:
             offspring = self.population + offspring
 
         # Select the next generation population
-        self.population[:] = self.toolbox.select(offspring, len(self.population))
+        self.population = self.toolbox.select(offspring, len(self.population))
 
         return self
 

@@ -22,7 +22,7 @@ from deap import base
 from deap import creator
 from deap import tools
 
-#Problem parameter
+# Problem parameter
 NB_QUEENS = 20
 
 def evalNQueens(individual):
@@ -36,17 +36,17 @@ def evalNQueens(individual):
     of conflicts along the diagonals.
     """
     size = len(individual)
-    #Count the number of conflicts with other queens.
-    #The conflicts can only be diagonal, count on each diagonal line
+    # Count the number of conflicts with other queens.
+    # The conflicts can only be diagonal, count on each diagonal line
     left_diagonal = [0] * (2*size-1)
     right_diagonal = [0] * (2*size-1)
-    
-    #Sum the number of queens on each diagonal:
+
+    # Sum the number of queens on each diagonal:
     for i in range(size):
         left_diagonal[i+individual[i]] += 1
         right_diagonal[size-1-i+individual[i]] += 1
-    
-    #Count the number of conflicts on each diagonal
+
+    # Count the number of conflicts on each diagonal
     sum_ = 0
     for i in range(2*size-1):
         if left_diagonal[i] > 1:
@@ -59,14 +59,14 @@ def evalNQueens(individual):
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
-#Since there is only one queen per line, 
-#individual are represented by a permutation
+# Since there is only one queen per line,
+# individual are represented by a permutation
 toolbox = base.Toolbox()
 toolbox.register("permutation", random.sample, range(NB_QUEENS), NB_QUEENS)
 
-#Structure initializers
-#An individual is a list that represents the position of each queen.
-#Only the line is stored, the column is the index of the number in the list.
+# Structure initializers
+# An individual is a list that represents the position of each queen.
+# Only the line is stored, the column is the index of the number in the list.
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.permutation)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
@@ -75,10 +75,15 @@ toolbox.register("mate", tools.cxPartialyMatched)
 toolbox.register("mutate", tools.mutShuffleIndexes, indpb=2.0/NB_QUEENS)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-def main(seed=0):
+def main(seed=None, verbose=True):
     random.seed(seed)
 
-    pop = toolbox.population(n=300)
+    NGEN = 100
+    MU = 300
+    CXPB = 0.5
+    MUTPB = 0.2
+
+    pop = toolbox.population(n=MU)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", numpy.mean)
@@ -86,11 +91,22 @@ def main(seed=0):
     stats.register("Min", numpy.min)
     stats.register("Max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=100, stats=stats,
-                        halloffame=hof, verbose=True)
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     return pop, stats, hof
 
+
 if __name__ == "__main__":
     main()
-    

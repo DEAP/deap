@@ -40,7 +40,7 @@ def main(verbose=True):
 
     # The CMA-ES algorithm takes a population of one individual as argument
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
-    # for more details about the rastrigin and other tests for CMA-ES    
+    # for more details about the rastrigin and other tests for CMA-ES
     strategy = cma.Strategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
@@ -54,35 +54,24 @@ def main(verbose=True):
 
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
-    
-    # Objects that will compile the data
-    sigma = numpy.ndarray((NGEN,1))
-    axis_ratio = numpy.ndarray((NGEN,1))
-    diagD = numpy.ndarray((NGEN,N))
-    fbest = numpy.ndarray((NGEN,1))
-    best = numpy.ndarray((NGEN,N))
-    std = numpy.ndarray((NGEN,N))
 
-    for gen in range(NGEN):
-        # Generate a new population
-        population = toolbox.generate()
-        # Evaluate the individuals
-        fitnesses = toolbox.map(toolbox.evaluate, population)
-        for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
-        
-        # Update the strategy with the evaluated individuals
-        toolbox.update(population)
-        
-        # Update the hall of fame and the statistics with the
-        # currently evaluated population
-        halloffame.update(population)
-        record = stats.compile(population)
-        logbook.record(evals=len(population), gen=gen, **record)
-        
+    # Objects that will compile the data
+    sigma = numpy.ndarray((NGEN, 1))
+    axis_ratio = numpy.ndarray((NGEN, 1))
+    diagD = numpy.ndarray((NGEN, N))
+    fbest = numpy.ndarray((NGEN, 1))
+    best = numpy.ndarray((NGEN, N))
+    std = numpy.ndarray((NGEN, N))
+
+    for gen, state in enumerate(algorithms.GenerateUpdateAlgorithm(toolbox)):
+        for ind in state.population:
+            fitness_history.append(ind.fitness.values)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
         if verbose:
             print(logbook.stream)
-        
+
         # Save more data along the evolution for latter plotting
         # diagD is sorted and sqrooted in the update method
         sigma[gen] = strategy.sigma
@@ -90,7 +79,10 @@ def main(verbose=True):
         diagD[gen, :N] = strategy.diagD**2
         fbest[gen] = halloffame[0].fitness.values
         best[gen, :N] = halloffame[0]
-        std[gen, :N] = numpy.std(population, axis=0)
+        std[gen, :N] = numpy.std(state.population, axis=0)
+
+        if gen >= NGEN:
+            break
 
     # The x-axis will be the number of evaluations
     x = list(range(0, strategy.lambda_ * NGEN, strategy.lambda_))
@@ -120,7 +112,7 @@ def main(verbose=True):
     plt.semilogy(x, std)
     plt.grid(True)
     plt.title("Standard Deviations in All Coordinates")
-    
+
     plt.show()
 
 if __name__ == "__main__":

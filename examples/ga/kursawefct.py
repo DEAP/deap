@@ -57,12 +57,16 @@ toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=3, indpb=0.3)
 toolbox.register("select", tools.selNSGA2)
 
 toolbox.decorate("mate", checkBounds(-5, 5))
-toolbox.decorate("mutate", checkBounds(-5, 5)) 
+toolbox.decorate("mutate", checkBounds(-5, 5))
 
-def main():
+def main(verbose=True):
     random.seed(64)
 
+    NGEN = 50
     MU, LAMBDA = 50, 100
+    CXPB = 0.5
+    MUTPB = 0.2
+
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -70,19 +74,30 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
-    algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
-                              cxpb=0.5, mutpb=0.2, ngen=150, 
-                              stats=stats, halloffame=hof)
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.MuLambdaAlgorithm(pop, toolbox, "+", LAMBDA,
+                                                             cxpb=CXPB, mutpb=MUTPB)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     return pop, stats, hof
 
 if __name__ == "__main__":
     pop, stats, hof = main()
-    
+
     # import matplotlib.pyplot as plt
     # import numpy
-    # 
+    #
     # front = numpy.array([ind.fitness.values for ind in pop])
     # plt.scatter(front[:,0], front[:,1], c="b")
     # plt.axis("tight")
