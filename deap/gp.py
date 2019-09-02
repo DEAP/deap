@@ -932,7 +932,7 @@ def staticLimit(key, max_value):
 ######################################
 
 class HARM:
-        """Implement bloat control on a GP evolution using HARM-GP, as defined in
+    """Implement bloat control on a GP evolution using HARM-GP, as defined in
     [Gardner2015]. It is implemented in the form of an evolution algorithm
     (similar to :func:`~deap.algorithms.eaSimple`).
 
