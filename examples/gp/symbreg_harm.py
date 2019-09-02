@@ -69,12 +69,20 @@ toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 toolbox.decorate("mate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max_value=17))
 
-def main():
+def main(verbose=True):
     random.seed(318)
+
+    NGEN = 40
+    CXPB = 0.5
+    MUTPB = 0.1
+    ALPHA = 0.05
+    BETA = 10
+    GAMMA = 0.25
+    RHO = 0.9
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    
+
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
     stats_size = tools.Statistics(len)
     mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
@@ -83,10 +91,21 @@ def main():
     mstats.register("min", numpy.min)
     mstats.register("max", numpy.max)
 
-    pop, log = gp.harm(pop, toolbox, 0.5, 0.1, 40, alpha=0.05, beta=10, gamma=0.25, rho=0.9, stats=mstats,
-                                   halloffame=hof, verbose=True)
-    # print log
-    return pop, log, hof
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (mstats.fields if mstats else [])
+
+    for gen, state in enumerate(gp.HARM(pop, toolbox, CXPB, MUTPB, ALPHA, BETA, GAMMA, RHO)):
+        hof.update(state.population)
+
+        record = mstats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
+    return pop, logbook, hof
 
 if __name__ == "__main__":
     main()

@@ -46,7 +46,7 @@ for i in range(2 ** MUX_TOTAL_LINES):
         if value >= divisor:
             inputs[i][j] = 1
             value -= divisor
-    
+
     # Determine the corresponding output
     indexOutput = MUX_SELECT_LINES
     for j, k in enumerate(inputs[i][:MUX_SELECT_LINES]):
@@ -80,8 +80,13 @@ toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genGrow, min_=0, max_=2)
 toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
-def main():
-#    random.seed(10)
+def main(verbose=True, seed=None):
+    random.seed(seed)
+
+    NGEN = 40
+    CXPB = 0.8
+    MUTPB = 0.1
+
     pop = toolbox.population(n=40)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -89,9 +94,21 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    algorithms.eaSimple(pop, toolbox, 0.8, 0.1, 40, stats, halloffame=hof)
-    
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=len(state.population), **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
     return pop, stats, hof
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ build a Genetic Program Tree, and the functions to evaluate it.
 
 This module support both strongly and loosely typed GP.
 """
-import copy
+from copy import deepcopy
 import math
 import random
 import re
@@ -31,6 +31,7 @@ from functools import partial, wraps
 from inspect import isclass
 from operator import eq, lt
 
+from algorithms import evaluate_invalids
 import tools  # Needed by HARM-GP
 
 ######################################
@@ -55,7 +56,7 @@ class PrimitiveTree(list):
 
     def __deepcopy__(self, memo):
         new = self.__class__(self)
-        new.__dict__.update(copy.deepcopy(self.__dict__, memo))
+        new.__dict__.update(deepcopy(self.__dict__, memo))
         return new
 
     def __setitem__(self, key, val):
@@ -914,7 +915,7 @@ def staticLimit(key, max_value):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            keep_inds = [copy.deepcopy(ind) for ind in args]
+            keep_inds = [deepcopy(ind) for ind in args]
             new_inds = list(func(*args, **kwargs))
             for i, ind in enumerate(new_inds):
                 if key(ind) > max_value:
@@ -930,10 +931,8 @@ def staticLimit(key, max_value):
 # GP bloat control algorithms        #
 ######################################
 
-def harm(population, toolbox, cxpb, mutpb, ngen,
-         alpha, beta, gamma, rho, nbrindsmodel=-1, mincutoff=20,
-         stats=None, halloffame=None, verbose=__debug__):
-    """Implement bloat control on a GP evolution using HARM-GP, as defined in
+class HARM:
+        """Implement bloat control on a GP evolution using HARM-GP, as defined in
     [Gardner2015]. It is implemented in the form of an evolution algorithm
     (similar to :func:`~deap.algorithms.eaSimple`).
 
@@ -942,7 +941,6 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                     operators.
     :param cxpb: The probability of mating two individuals.
     :param mutpb: The probability of mutating an individual.
-    :param ngen: The number of generation.
     :param alpha: The HARM *alpha* parameter.
     :param beta: The HARM *beta* parameter.
     :param gamma: The HARM *gamma* parameter.
@@ -956,14 +954,6 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                         used to ensure that HARM does not shrink the population
                         too much at the beginning of the evolution. The default
                         value is usually fine.
-    :param stats: A :class:`~deap.tools.Statistics` object that is updated
-                  inplace, optional.
-    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
-                       contain the best individuals, optional.
-    :param verbose: Whether or not to log the statistics.
-    :returns: The final population
-    :returns: A class:`~deap.tools.Logbook` with the statistics of the
-              evolution
 
     This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
     :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
@@ -983,8 +973,33 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         DOI 10.1007/s10710-015-9242-8
 
     """
+    def __init__(self, population, toolbox, cxpb, mutpb, alpha,
+                 beta, gamma, rho, nbrindsmodel=-1, mincutoff=20):
+        self.population = population
+        self.toolbox = toolbox
+        self.cxpb = cxpb
+        self.mutpb = mutpb
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
+        self.rho = rho
+        self.nbrindsmodel = nbrindsmodel
+        self.mincutoff = mincutoff
 
-    def _genpop(n, pickfrom=[], acceptfunc=lambda s: True, producesizes=False):
+        if self.nbrindsmodel == -1:
+            self.nbrindsmodel = max(2000, len(self.population))
+
+        # Evaluate all individuals
+        evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+
+    def halflife(self, x):
+        return x * float(self.alpha) + self.beta
+
+    def targetdist(self, x, cutoffsize):
+        return ((self.gamma * len(self.population) * math.log(2) / self.halflife(x))
+                * math.exp(-math.log(2) * (x - cutoffsize) / self.halflife(x)))
+
+    def _genpop(self, n, pickfrom=[], acceptfunc=lambda s: True, producesizes=False):
         # Generate a population of n individuals, using individuals in
         # *pickfrom* if possible, with a *acceptfunc* acceptance function.
         # If *producesizes* is true, also return a list of the produced
@@ -1000,70 +1015,49 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
             if len(pickfrom) > 0:
                 # If possible, use the already generated
                 # individuals (more efficient)
-                aspirant = pickfrom.pop()
-                if acceptfunc(len(aspirant)):
-                    producedpop.append(aspirant)
+                asp = pickfrom.pop()
+                if acceptfunc(len(asp)):
+                    producedpop.append(asp)
                     if producesizes:
-                        producedpopsizes.append(len(aspirant))
+                        producedpopsizes.append(len(asp))
             else:
                 opRandom = random.random()
-                if opRandom < cxpb:
+                if opRandom < self.cxpb:
                     # Crossover
-                    aspirant1, aspirant2 = toolbox.mate(*map(toolbox.clone,
-                                                             toolbox.select(population, 2)))
-                    del aspirant1.fitness.values, aspirant2.fitness.values
-                    if acceptfunc(len(aspirant1)):
-                        producedpop.append(aspirant1)
+                    asp1, asp2 = deepcopy(self.toolbox.select(self.population, 2))
+                    asp1, asp2 = self.toolbox.mate(asp1, asp2)
+                    del asp1.fitness.values, asp2.fitness.values
+                    if acceptfunc(len(asp1)):
+                        producedpop.append(asp1)
                         if producesizes:
-                            producedpopsizes.append(len(aspirant1))
+                            producedpopsizes.append(len(asp1))
 
-                    if len(producedpop) < n and acceptfunc(len(aspirant2)):
-                        producedpop.append(aspirant2)
+                    if len(producedpop) < n and acceptfunc(len(asp2)):
+                        producedpop.append(asp2)
                         if producesizes:
-                            producedpopsizes.append(len(aspirant2))
+                            producedpopsizes.append(len(asp2))
                 else:
-                    aspirant = toolbox.clone(toolbox.select(population, 1)[0])
-                    if opRandom - cxpb < mutpb:
+                    asp = deepcopy(self.toolbox.select(self.population, 1)[0])
+                    if opRandom - self.cxpb < self.mutpb:
                         # Mutation
-                        aspirant = toolbox.mutate(aspirant)[0]
-                        del aspirant.fitness.values
-                    if acceptfunc(len(aspirant)):
-                        producedpop.append(aspirant)
+                        asp = self.toolbox.mutate(asp)[0]
+                        del asp.fitness.values
+                    if acceptfunc(len(asp)):
+                        producedpop.append(asp)
                         if producesizes:
-                            producedpopsizes.append(len(aspirant))
+                            producedpopsizes.append(len(asp))
 
         if producesizes:
             return producedpop, producedpopsizes
         else:
             return producedpop
 
-    def halflifefunc(x):
-        return x * float(alpha) + beta
+    def __iter__(self):
+        return self
 
-    if nbrindsmodel == -1:
-        nbrindsmodel = max(2000, len(population))
-
-    logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
-
-    if halloffame is not None:
-        halloffame.update(population)
-
-    record = stats.compile(population) if stats else {}
-    logbook.record(gen=0, nevals=len(invalid_ind), **record)
-    if verbose:
-        print logbook.stream
-
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
+    def __next__(self):
         # Estimation population natural distribution of sizes
-        naturalpop, naturalpopsizes = _genpop(nbrindsmodel, producesizes=True)
+        naturalpop, naturalpopsizes = self._genpop(self.nbrindsmodel, producesizes=True)
 
         naturalhist = [0] * (max(naturalpopsizes) + 3)
         for indsize in naturalpopsizes:
@@ -1076,58 +1070,36 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                 naturalhist[indsize - 2] += 0.1
 
         # Normalization
-        naturalhist = [val * len(population) / nbrindsmodel for val in naturalhist]
+        naturalhist = [val * len(self.population) / self.nbrindsmodel for val in naturalhist]
 
         # Cutoff point selection
         sortednatural = sorted(naturalpop, key=lambda ind: ind.fitness)
-        cutoffcandidates = sortednatural[int(len(population) * rho - 1):]
+        cutoffcandidates = sortednatural[int(len(self.population) * self.rho - 1):]
         # Select the cutoff point, with an absolute minimum applied
         # to avoid weird cases in the first generations
-        cutoffsize = max(mincutoff, len(min(cutoffcandidates, key=len)))
-
-        # Compute the target distribution
-        def targetfunc(x):
-            return (gamma * len(population) * math.log(2) /
-                    halflifefunc(x)) * math.exp(-math.log(2) *
-                                                (x - cutoffsize) / halflifefunc(x))
+        cutoffsize = max(self.mincutoff, len(min(cutoffcandidates, key=len)))
 
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else
-                      targetfunc(binidx) for binidx in range(len(naturalhist))]
+                      self.targetdist(binidx, cutoffsize) for binidx in range(len(naturalhist))]
 
-        # Compute the probabilities distribution
+        # Compute the probability distributions
         probhist = [t / n if n > 0 else t for n, t in zip(naturalhist, targethist)]
 
         def probfunc(s):
-            return probhist[s] if s < len(probhist) else targetfunc(s)
+            return probhist[s] if s < len(probhist) else self.targetdist(s, cutoffsize)
 
         def acceptfunc(s):
             return random.random() <= probfunc(s)
 
-        # Generate offspring using the acceptance probabilities
+        # Generate next population using the acceptance probabilities
         # previously computed
-        offspring = _genpop(len(population), pickfrom=naturalpop,
-                            acceptfunc=acceptfunc, producesizes=False)
+        self.population = self._genpop(len(self.population), pickfrom=naturalpop,
+                                       acceptfunc=acceptfunc, producesizes=False)
 
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+        # Evaluate invalid individuals
+        evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
 
-        # Update the hall of fame with the generated individuals
-        if halloffame is not None:
-            halloffame.update(offspring)
-
-        # Replace the current population by the offspring
-        population[:] = offspring
-
-        # Append the current generation statistics to the logbook
-        record = stats.compile(population) if stats else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
-        if verbose:
-            print logbook.stream
-
-    return population, logbook
+        return self
 
 
 def graph(expr):
