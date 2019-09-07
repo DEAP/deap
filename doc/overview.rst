@@ -28,7 +28,7 @@ tutorial.
 
 Initialization
 --------------
-Once the types are created you need to fill them with sometimes random values,
+Once the types are created you need to fill them with sometimes random values
 or sometime guessed ones. Again, DEAP provides an easy mechanism to do just that.
 The :class:`~deap.base.Toolbox` is a container for tools of all sorts
 including initializers that can do what is needed of them. The following takes
