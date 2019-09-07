@@ -990,7 +990,7 @@ class HARM:
             self.nbrindsmodel = max(2000, len(self.population))
 
         # Evaluate all individuals
-        evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+        self.nevals = evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
 
     def halflife(self, x):
         return x * float(self.alpha) + self.beta
@@ -1100,7 +1100,7 @@ class HARM:
                                        acceptfunc=acceptfunc, producesizes=False)
 
         # Evaluate invalid individuals
-        evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+        self.nevals = evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
 
         return self
 

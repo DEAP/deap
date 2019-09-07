@@ -9,6 +9,8 @@ def evaluate_invalids(individuals, eval_func, map):
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
 
+    return len(invalid_ind)
+
 
 def and_variation(population, toolbox, cxpb, mutpb):
     individuals = cycle(population)
@@ -61,6 +63,7 @@ class SimpleAlgorithm:
         self.toolbox = toolbox
         self.cxpb = cxpb
         self.mutpb = mutpb
+        self.nevals = 0
 
     def __iter__(self):
         return self
@@ -76,7 +79,7 @@ class SimpleAlgorithm:
         ))
 
         # Evaluate the new individuals
-        evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
+        self.nevals = evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
         # Replace the current population by the offspring
         self.population = offspring
@@ -92,6 +95,7 @@ class MuLambdaAlgorithm:
         self.lambda_ = lambda_
         self.cxpb = cxpb
         self.mutpb = mutpb
+        self.nevals = 0
 
         assert selection_type in {"plus", "comma", "+", ","}, (
             "Selection type must be in {'plus', 'comma'}, "
@@ -109,7 +113,7 @@ class MuLambdaAlgorithm:
         ))
 
         # Evaluate the new individuals
-        evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
+        self.nevals = evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
         if self.selection_type in {"plus", "+"}:
             offspring = self.population + offspring
@@ -123,6 +127,7 @@ class MuLambdaAlgorithm:
 class GenerateUpdateAlgorithm:
     def __init__(self, toolbox):
         self.toolbox = toolbox
+        self.nevals = 0
 
     def __iter__(self):
         return self
@@ -132,7 +137,7 @@ class GenerateUpdateAlgorithm:
         self.population = self.toolbox.generate()
 
         # Evaluate the new individuals
-        evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+        self.nevals = evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
 
         # Update the strategy with the evaluated individuals
         self.toolbox.update(self.population)
