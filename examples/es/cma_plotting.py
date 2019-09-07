@@ -68,7 +68,7 @@ def main(verbose=True):
             fitness_history.append(ind.fitness.values)
 
         record = stats.compile(state.population)
-        logbook.record(gen=gen, nevals=len(state.population), **record)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
         if verbose:
             print(logbook.stream)
 

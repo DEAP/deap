@@ -102,7 +102,7 @@ def main(verbose=True, seed=None):
         hof.update(state.population)
 
         record = stats.compile(state.population)
-        logbook.record(gen=gen, nevals=len(state.population), **record)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
         if verbose:
             print(logbook.stream)
 
