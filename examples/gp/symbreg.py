@@ -72,9 +72,13 @@ toolbox.decorate("mutate", gp.staticLimit(key=operator.attrgetter("height"), max
 def main():
     random.seed(318)
 
+    NGEN = 40
+    CXPB = 0.5
+    MUTPB = 0.1
+
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    
+
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
     stats_size = tools.Statistics(len)
     mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)
@@ -83,10 +87,21 @@ def main():
     mstats.register("min", numpy.min)
     mstats.register("max", numpy.max)
 
-    pop, log = algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats=mstats,
-                                   halloffame=hof, verbose=True)
-    # print log
-    return pop, log, hof
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
+    return pop, stats, hof
 
 if __name__ == "__main__":
     main()
