@@ -16,7 +16,7 @@ def and_variation(population, toolbox, cxpb, mutpb):
     # zip(iter, iter) produces l[i], l[i+1]
     for i1, i2 in zip(individuals, individuals):
         # TODO: put deepcopy in operators
-        i1, i2 = deepcopy([i1, i2])
+        i1, i2 = deepcopy(i1), deepcopy(i2)
         if random.random() < cxpb:
             i1, i2 = toolbox.mate(i1, i2)
 
@@ -41,7 +41,8 @@ def or_variation(population, toolbox, cxpb, mutpb):
     while True:
         op_choice = random.random()
         if op_choice < cxpb:  # Apply crossover
-            i1, i2 = deepcopy(random.sample(population, 2))
+            i1, i2 = random.sample(population, 2)
+            i1, i2 = deepcopy(i1), deepcopy(i2)
             i1, _ = toolbox.mate(i1, i2)
             del i1.fitness.values
         elif op_choice < cxpb + mutpb:  # Apply mutation

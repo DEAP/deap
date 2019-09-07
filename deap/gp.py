@@ -1024,7 +1024,10 @@ class HARM:
                 opRandom = random.random()
                 if opRandom < self.cxpb:
                     # Crossover
-                    asp1, asp2 = deepcopy(self.toolbox.select(self.population, 2))
+                    asp1 , asp2 = self.toolbox.select(self.population, 2)
+                    # Don't deepcopy list, if the same individual is selected twice
+                    # we don't get two full copies
+                    asp1, asp2 = deepcopy(asp1), deepcopy(asp2)
                     asp1, asp2 = self.toolbox.mate(asp1, asp2)
                     del asp1.fitness.values, asp2.fitness.values
                     if acceptfunc(len(asp1)):
