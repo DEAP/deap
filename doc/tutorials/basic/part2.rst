@@ -63,7 +63,7 @@ simply apply the desired function.
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 35-37
 
-The fitness' values are deleted because they're not related to the individual anymore. As stated above, the mutation does mutate and only mutate an individual it is neither responsible of invalidating the fitness nor anything else. The following shows that ``ind2`` and ``mutant`` are in fact the same individual.
+The fitness' values are deleted because they're not related to the individual anymore. As stated above, the mutation does mutate and only mutate an individual. It is neither responsible of invalidating the fitness nor anything else. The following shows that ``ind2`` and ``mutant`` are in fact the same individual.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 39-40
@@ -113,12 +113,12 @@ selected individuals. The selection is made as follow.
    :lines: 49-50
 
 .. warning:: It is **very** important here to note that the selection
-   operators does not duplicate any individual during the selection process. 
-   If an individual is selected twice and one of either object is modified, 
-   the other will also be modified. Only a reference to the individual is 
+   operators does not duplicate any individual during the selection process.
+   If an individual is selected twice and one of either object is modified,
+   the other will also be modified. Only a reference to the individual is
    copied. Just like every other operator it selects and only selects.
 
-Usually duplication of the entire population will be made after selection or 
+Usually duplication of the entire population will be made after selection or
 before variation.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
@@ -145,7 +145,7 @@ toolbox.
 .. literalinclude:: /code/tutorials/part_3/3_6_using_the_toolbox.py
    :lines: 2-8,10-15
 
-Using the toolbox for registering tools helps keeping the rest of the
+Using the toolbox for registering tools helps with keeping the rest of the
 algorithms independent from the operator set. Using this scheme makes it very
 easy to locate and change any tool in the toolbox if needed.
 
@@ -153,7 +153,7 @@ easy to locate and change any tool in the toolbox if needed.
 
 Using the Tools
 +++++++++++++++
-When building evolutionary algorithms the toolbox is used to contain the
+When building evolutionary algorithms, the toolbox is used to contain the
 operators, which are called using their generic name. For example, here is a
 very simple generational evolutionary algorithm.
 
@@ -188,8 +188,8 @@ individuals. The mutation is often considered to return a single individual
 but again like for the evaluation, the single individual case is a special
 case of the multiple individual case.
 
-|more| For more information on decorators, see 
-`Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ 
+|more| For more information on decorators, see
+`Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_
 and `Python Decorator Libary <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
 
 Variations
@@ -228,7 +228,7 @@ generation (*mutpb*) and a number of generations to accomplish (*ngen*).
 The best way to understand what the simple evolutionary algorithm does, is to
 take a look at the documentation or the source code.
 
-Now that you built your own evolutionary algorithm in python, you are welcome
+Now that you built your own evolutionary algorithm in Python, you are welcome
 to gives us feedback and appreciation. We would also really like to hear about
 your project and success stories with DEAP.
 

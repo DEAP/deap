@@ -1,5 +1,5 @@
 .. _symbreg:
-    
+
 ===============================================
 Symbolic Regression Problem: Introduction to GP
 ===============================================
@@ -12,7 +12,7 @@ therefore makes a good introductory example for the GP framework in DEAP.
 
 All symbolic regression problems use an arbitrary data distribution, and try
 to fit the most accurately the data with a symbolic formula. Usually, a
-measure like the RMSE (Root Mean Square Error) is used to measure an
+measures like the RMSE (Root Mean Square Error) or MSE (Mean Squared Error) are used to measure an
 individual's fitness.
 
 In this example, we use a classical distribution, the quartic polynomial
@@ -28,10 +28,10 @@ One of the most crucial aspect of a GP program is the choice of the
 primitives set. They should make good building blocks for the individuals so
 the evolution can succeed. In this problem, we use a classical set of
 primitives, which are basic arithmetic functions :
-  
+
 .. literalinclude:: /../examples/gp/symbreg.py
    :lines: 29-43
-    
+
 The redefinition of the division is made to protect it against a zero
 division error (which would crash the program). The other functions are
 simply a mapping from the Python :mod:`operator` module. The number following
@@ -49,7 +49,7 @@ inputs. Here, as we have only a one dimension regression problem, there is
 only one input, but it could have as many as you want. By default, those
 inputs are named "ARGx", where "x" is a number, but you can easily rename
 them :
-  
+
 .. literalinclude:: /../examples/gp/symbreg.py
    :lines: 44
 
@@ -59,7 +59,7 @@ Creator
 As any evolutionary program, symbolic regression needs (at least) two object
 types : an individual containing the genotype and a fitness. We can easily
 create them with the creator :
-   
+
 .. literalinclude:: /../examples/gp/symbreg.py
    :lines: 46-47
 
@@ -72,21 +72,21 @@ would want to add any other attribute (for instance, a file in which the
 individual will be saved), it would be as easy as adding this attribute of
 any type to this line. After this declaration, any individual produced will
 contain those wanted attributes.
-   
+
 
 Toolbox
 =======
 
 Now, we want to register some parameters specific to the evolution process.
 In DEAP, this is done through the toolbox :
-   
+
 .. literalinclude:: /../examples/gp/symbreg.py
    :lines: 49-70
 
 First, a toolbox instance is created (in some problem types like coevolution,
 you may consider creating more than one toolbox). Then, we can register any
 parameters. The first lines register how to create an individual (by calling
-gp.genRamped with the previously defined primitive set), and how to create
+gp.genHalfAndHalf with the previously defined primitive set), and how to create
 the population (by repeating the individual initialization).
 
 We may now introduce the evaluation function, which will receive an
@@ -95,7 +95,7 @@ the `compile` function previously defined to transform the individual into
 its executable form -- that is, a program. After that, the evaluation is only
 simple maths, where the difference between the values produced by the
 evaluated individual and the real values are squared and summed to compute
-the RMSE, which is returned as the fitness of the individual.
+the MSE (Mean Squared Error), which is returned as the fitness of the individual.
 
 .. warning::
     Even if the fitness only contains one measure, keep in mind that DEAP
@@ -105,7 +105,7 @@ the RMSE, which is returned as the fitness of the individual.
     .. literalinclude:: /../examples/gp/symbreg.py
         :pyobject: evalSymbReg
         :emphasize-lines: 9
-        
+
     Returning only the value would produce strange behaviors and errors, as
     the selection and stats functions relies on the fact that the fitness is
     always an iterable.
@@ -133,7 +133,7 @@ DEAP offers a simple class which can handle most of the "boring work". In
 this case, we want to compute the mean, standard deviation, minimum, and
 maximum of both the individuals fitness and size. For that we'll use a
 :class:`~deap.tools.MultiStatistics` object.
-    
+
 	.. literalinclude:: /../examples/gp/symbreg.py
 	   :lines: 78-84
 
