@@ -66,7 +66,7 @@ def test_cma():
     state = next(islice(algorithms.GenerateUpdateAlgorithm(toolbox), NGEN, None))
     best, = tools.selBest(state.population, k=1)
 
-    assert best.fitness.values < (1e-8,), f"CMA algorithm did not converged properly. {best.fitness.values}"
+    assert best.fitness.values < (1e-8,), "CMA algorithm did not converged properly."
 
 @with_setup(setup_func_multi_obj, teardown_func)
 def test_nsga2():
