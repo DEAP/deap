@@ -19,7 +19,7 @@ matrix:
     dist: xenial
     env: PACKAGES="numpy"
   - python: "pypy"
-    env: PACKAGES="mock git+https://bitbucket.org/pypy/numpy.git"
+    env: PACKAGES="mock git+https://bitbucket.org/pypy/numpy.git@pypy-4.0.1"
   - python: "3.7"
     name: "Flake8"
     dist: xenial
