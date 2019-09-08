@@ -13,9 +13,10 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from nose import with_setup
+from itertools import islice
 import random
 
+from nose import with_setup
 import numpy
 
 from deap import algorithms
@@ -52,6 +53,7 @@ def teardown_func():
 @with_setup(setup_func_single_obj, teardown_func)
 def test_cma():
     NDIM = 5
+    NGEN = 100
 
     strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
 
@@ -60,10 +62,11 @@ def test_cma():
     toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
     toolbox.register("update", strategy.update)
 
-    pop, _ = algorithms.eaGenerateUpdate(toolbox, ngen=100)
-    best, = tools.selBest(pop, k=1)
+    # Consume the algorithm until NGEN
+    state = next(islice(algorithms.GenerateUpdateAlgorithm(toolbox), NGEN, None))
+    best, = tools.selBest(state.population, k=1)
 
-    assert best.fitness.values < (1e-8,), "CMA algorithm did not converged properly."
+    assert best.fitness.values < (1e-8,), f"CMA algorithm did not converged properly. {best.fitness.values}"
 
 @with_setup(setup_func_multi_obj, teardown_func)
 def test_nsga2():
@@ -211,9 +214,10 @@ def test_nsga3():
         ind.fitness.values = fit
 
     pop = toolbox.select(pop, len(pop))
-     # Begin the generational process
+    # Begin the generational process
     for gen in range(1, NGEN):
-        offspring = algorithms.varAnd(pop, toolbox, 1.0, 1.0)
+        # Vary the individuals
+        offspring = list(islice(algorithms.and_variation(pop, toolbox, 1.0, 1.0), len(pop)))
 
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]

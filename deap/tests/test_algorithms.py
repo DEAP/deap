@@ -88,7 +88,7 @@ class TestAlgorithms(unittest.TestCase):
         pop = [Ind([0] * 4) for i in range(5)]
 
         with mock.patch("deap.algorithms.and_variation") as mock_var, \
-                mock.patch("deap.algorithms._evaluate_invalids") as mock_eval_invld:
+                mock.patch("deap.algorithms.evaluate_invalids") as mock_eval_invld:
             mock_var.return_value = itertools.repeat([1] * 4)
 
             state = next(algorithms.SimpleAlgorithm(pop, self.tb, 1.0, 1.0))
