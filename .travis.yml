@@ -48,7 +48,7 @@ install:
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
         NUMPY=$NUMPY"@pypy-4.0.1"
       fi
-  - pip install $PACKAGES
+  - pip install -U $PACKAGES
 
 # command to run tests
 script:
