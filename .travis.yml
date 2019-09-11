@@ -48,6 +48,7 @@ install:
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
         PACKAGES="$PACKAGES $NUMPY@pypy-4.0.1"
       fi
+  - pip insyall -U nose
   - pip install -U $PACKAGES
 
 # command to run tests
