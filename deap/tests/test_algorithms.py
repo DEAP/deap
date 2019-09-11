@@ -13,7 +13,7 @@ from deap import algorithms, base
 
 class Ind(list):
     def __init__(self, content):
-        super().__init__(content)
+        super(Ind, self).__init__(content)
         self.fitness = mock.Mock()
 
 
@@ -59,7 +59,7 @@ class TestVariations(unittest.TestCase):
 
     def test_or_var_asserts(self):
         self.assertRaises(AssertionError,
-                          iter(algorithms.or_variation([], None, 1.0, 1.0)).__next__)
+                          next, iter(algorithms.or_variation([], None, 1.0, 1.0)))
 
     def test_or_var_calls(self):
         pop = [Ind(range(i, i + 4)) for i in range(5)] * 2

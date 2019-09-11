@@ -1,5 +1,5 @@
 from copy import deepcopy
-from itertools import cycle, islice
+from itertools import cycle, islice, izip
 import random
 
 
@@ -16,7 +16,7 @@ def and_variation(population, toolbox, cxpb, mutpb):
     individuals = cycle(population)
 
     # zip(iter, iter) produces l[i], l[i+1]
-    for i1, i2 in zip(individuals, individuals):
+    for i1, i2 in izip(individuals, individuals):
         # TODO: put deepcopy in operators
         i1, i2 = deepcopy(i1), deepcopy(i2)
         if random.random() < cxpb:
@@ -68,7 +68,7 @@ class SimpleAlgorithm:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         # Select the next generation individuals
         offspring = self.toolbox.select(self.population, len(self.population))
 
@@ -105,7 +105,7 @@ class MuLambdaAlgorithm:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         # Vary the population
         offspring = list(islice(
             or_variation(self.population, self.toolbox, self.cxpb, self.mutpb),
@@ -132,7 +132,7 @@ class GenerateUpdateAlgorithm:
     def __iter__(self):
         return self
 
-    def __next__(self):
+    def next(self):
         # Generate a new population
         self.population = self.toolbox.generate()
 
