@@ -19,7 +19,7 @@ matrix:
     dist: xenial
     env: PACKAGES="numpy"
   - python: "pypy"
-    env: PACKAGES="mock git+https://bitbucket.org/pypy/numpy.git@pypy-4.0.1"
+    env: PACKAGES="mock"; NUMPY="git+https://bitbucket.org/pypy/numpy.git"
   - python: "3.7"
     name: "Flake8"
     dist: xenial
@@ -46,7 +46,7 @@ install:
         "$PYENV_ROOT/bin/pyenv" install "pypy-$PYPY_VERSION"
         virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
-        NUMPY=$NUMPY"@pypy-4.0.1"
+        PACKAGES="$PACKAGES $NUMPY@pypy-4.0.1"
       fi
   - pip install -U $PACKAGES
 
