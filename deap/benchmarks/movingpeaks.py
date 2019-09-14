@@ -28,7 +28,7 @@ import random
 try:
     from collections.abc import Sequence
 except:
-    from colections import Sequence
+    from collections import Sequence
 
 def cone(individual, position, height, width):
     """The cone peak function to be used with scenario 2 and 3.
