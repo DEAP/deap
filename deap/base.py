@@ -20,7 +20,11 @@ class used as base class, for the fitness member of any individual. """
 
 import sys
 
-from collections import Sequence
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
+
 from copy import deepcopy
 from functools import partial
 from operator import mul, truediv
