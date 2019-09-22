@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 try:
     import cPickle as pickle
@@ -17,6 +17,7 @@ def identity(obj):
     """Returns directly the argument *obj*.
     """
     return obj
+
 
 class History(object):
     """The :class:`History` class helps to build a genealogy of all the
@@ -67,6 +68,7 @@ class History(object):
        number of generation is large.
 
     """
+
     def __init__(self):
         self.genealogy_index = 0
         self.genealogy_history = dict()
@@ -112,12 +114,15 @@ class History(object):
         individuals with their history parameters modified according to the
         update function.
         """
+
         def decFunc(func):
             def wrapFunc(*args, **kargs):
                 individuals = func(*args, **kargs)
                 self.update(individuals)
                 return individuals
+
             return wrapFunc
+
         return decFunc
 
     def getGenealogy(self, individual, max_depth=float("inf")):
@@ -135,7 +140,8 @@ class History(object):
                   values are a tuple corresponding to the index of the parents.
         """
         gtree = {}
-        visited = set()     # Adds memory to the breadth first search
+        visited = set()  # Adds memory to the breadth first search
+
         def genealogy(index, depth):
             if index not in self.genealogy_tree:
                 return
@@ -148,8 +154,10 @@ class History(object):
                 if ind not in visited:
                     genealogy(ind, depth)
                 visited.add(ind)
+
         genealogy(individual.history_index, 0)
         return gtree
+
 
 class Statistics(object):
     """Object that compiles statistics on a list of arbitrary objects.
@@ -176,6 +184,7 @@ class Statistics(object):
         >>> s.compile([5, 6, 7, 8])     # doctest: +SKIP
         {'mean': 6.5, 'max': 8}
     """
+
     def __init__(self, key=identity):
         self.key = key
         self.functions = dict()
@@ -205,9 +214,10 @@ class Statistics(object):
         values = tuple(self.key(elem) for elem in data)
 
         entry = dict()
-        for key, func in self.functions.iteritems():
+        for key, func in self.functions.items():
             entry[key] = func(values)
         return entry
+
 
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
@@ -229,6 +239,7 @@ class MultiStatistics(dict):
         >>> mstats.compile([[0.0, 1.0, 1.0, 5.0], [2.0, 5.0]])  # doctest: +SKIP
         {'length': {'mean': 3.0, 'max': 4}, 'item': {'mean': 1.0, 'max': 2.0}}
     """
+
     def compile(self, data):
         """Calls :meth:`Statistics.compile` with *data* of each
         :class:`Statistics` object.
@@ -257,6 +268,7 @@ class MultiStatistics(dict):
         """
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
+
 
 class Logbook(list):
     """Evolution records as a chronological list of dictionaries.
@@ -431,7 +443,8 @@ class Logbook(list):
         if not columns:
             columns = sorted(self[0].keys()) + sorted(self.chapters.keys())
         if not self.columns_len or len(self.columns_len) != len(columns):
-            self.columns_len = map(len, columns)
+            self.columns_len = list(map(len, columns))
+            # self.columns_len = map(len, columns)
 
         chapters_txt = {}
         offsets = defaultdict(int)
@@ -445,7 +458,7 @@ class Logbook(list):
             str_line = []
             for j, name in enumerate(columns):
                 if name in chapters_txt:
-                    column = chapters_txt[name][i+offsets[name]]
+                    column = chapters_txt[name][i + offsets[name]]
                 else:
                     value = line.get(name, "")
                     string = "{0:n}" if isinstance(value, float) else "{0}"
@@ -459,17 +472,17 @@ class Logbook(list):
             nlines = 1
             if len(self.chapters) > 0:
                 nlines += max(map(len, chapters_txt.values())) - len(self) + 1
-            header = [[] for i in xrange(nlines)]
+            header = [[] for i in range(nlines)]
             for j, name in enumerate(columns):
                 if name in chapters_txt:
                     length = max(len(line.expandtabs()) for line in chapters_txt[name])
                     blanks = nlines - 2 - offsets[name]
-                    for i in xrange(blanks):
+                    for i in range(blanks):
                         header[i].append(" " * length)
                     header[blanks].append(name.center(length))
-                    header[blanks+1].append("-" * length)
-                    for i in xrange(offsets[name]):
-                        header[blanks+2+i].append(chapters_txt[name][i])
+                    header[blanks + 1].append("-" * length)
+                    for i in range(offsets[name]):
+                        header[blanks + 2 + i].append(chapters_txt[name][i])
                 else:
                     length = max(len(line[j].expandtabs()) for line in str_matrix)
                     for line in header[:-1]:
@@ -508,6 +521,7 @@ class HallOfFame(object):
     (without being one completely). It is possible to retrieve its length, to
     iterate on it forward and backward and to get an item or a slice from it.
     """
+
     def __init__(self, maxsize, similar=eq):
         self.maxsize = maxsize
         self.keys = list()
@@ -522,9 +536,9 @@ class HallOfFame(object):
         
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
-        """     
+        """
         for ind in population:
-            if len(self) == 0 and self.maxsize !=0:
+            if len(self) == 0 and self.maxsize != 0:
                 # Working on an empty hall of fame is problematic for the
                 # "for else"
                 self.insert(population[0])
@@ -606,6 +620,7 @@ class ParetoFront(HallOfFame):
     Since, the Pareto front hall of fame inherits from the :class:`HallOfFame`,
     it is sorted lexicographically at every moment.
     """
+
     def __init__(self, similar=eq):
         HallOfFame.__init__(self, None, similar)
 
@@ -623,7 +638,7 @@ class ParetoFront(HallOfFame):
             dominates_one = False
             has_twin = False
             to_remove = []
-            for i, hofer in enumerate(self):    # hofer = hall of famer
+            for i, hofer in enumerate(self):  # hofer = hall of famer
                 if not dominates_one and hofer.fitness.dominates(ind.fitness):
                     is_dominated = True
                     break
@@ -634,10 +649,11 @@ class ParetoFront(HallOfFame):
                     has_twin = True
                     break
 
-            for i in reversed(to_remove):       # Remove the dominated hofer
+            for i in reversed(to_remove):  # Remove the dominated hofer
                 self.remove(i)
             if not is_dominated and not has_twin:
                 self.insert(ind)
+
 
 __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
@@ -646,6 +662,7 @@ if __name__ == "__main__":
     from operator import itemgetter
 
     import numpy
+
     doctest.run_docstring_examples(Statistics, globals())
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.compile, globals())
