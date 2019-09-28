@@ -3,14 +3,20 @@ from itertools import cycle, islice, izip
 import random
 
 
-def evaluate_invalids(individuals, eval_func, map):
-    """Utility to evaluate all individuals marked with an invalid.
+def evaluate_invalids(individuals, eval_func, map=map):
+    """Utility to evaluate all individuals marked invalid.
 
     Args:
         individuals (list): Individuals to evaluate, they must have a
             :attr:`fitness` attribute. Only those with an invalid fitness
             will get evaluates.
+        eval_func (callable): The evaluation to use on each individual.
+            The function should take the individual as single argument.
+        map (callable): Functiona that applies the evaluation function
+            to each item in the invalid individuals iterable.
 
+    Returns:
+        int: The number of individuals evaluated.
 
     """
     invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
