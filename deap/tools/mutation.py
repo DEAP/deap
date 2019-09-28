@@ -3,8 +3,11 @@ import math
 import random
 
 from itertools import repeat
-from collections import Sequence
 
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
 
 ######################################
 # GA Mutations                       #

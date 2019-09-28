@@ -2,7 +2,11 @@ from __future__ import division
 import random
 import warnings
 
-from collections import Sequence
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
+
 from itertools import repeat
 
 

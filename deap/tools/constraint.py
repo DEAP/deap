@@ -1,7 +1,11 @@
 
 from functools import wraps
 from itertools import repeat
-from collections import Sequence
+
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
 
 class DeltaPenalty(object):
     """This decorator returns penalized fitness for invalid individuals and the
