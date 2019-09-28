@@ -4,6 +4,15 @@ import random
 
 
 def evaluate_invalids(individuals, eval_func, map):
+    """Utility to evaluate all individuals marked with an invalid.
+
+    Args:
+        individuals (list): Individuals to evaluate, they must have a
+            :attr:`fitness` attribute. Only those with an invalid fitness
+            will get evaluates.
+
+
+    """
     invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
     fitnesses = map(eval_func, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
