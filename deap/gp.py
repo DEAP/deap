@@ -515,7 +515,7 @@ def compileADF(expr, psets):
 # GP Program generation functions    #
 ######################################
 def genFull(pset, min_, max_, type_=None):
-    """Generate an expression where each leaf has a the same depth
+    """Generate an expression where each leaf has the same depth
     between *min* and *max*.
 
     :param pset: Primitive set from which primitives are selected.
