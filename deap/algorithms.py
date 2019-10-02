@@ -458,7 +458,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     function and updates the generation method with the :func:`toolbox.update`
     function. It returns the optimized population and a
     :class:`~deap.tools.Logbook` with the statistics of the evolution. The
-    logbook will contain the generation number, the number of evalutions for
+    logbook will contain the generation number, the number of evaluations for
     each generation and the statistics if a :class:`~deap.tools.Statistics` is
     given as argument. The pseudocode goes as follow ::
 
