@@ -11,7 +11,7 @@ regression methods may not work. It is conceptually a simple problem, and
 therefore makes a good introductory example for the GP framework in DEAP.
 
 All symbolic regression problems use an arbitrary data distribution, and try
-to fit the most accurately the data with a symbolic formula. Usually,
+to fit the data with the most accurate symbolic formula available. Usually,
 measures like the RMSE (Root Mean Square Error) or MSE (Mean Squared Error) are used to measure an
 individual's fitness.
 
