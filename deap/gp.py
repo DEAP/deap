@@ -683,7 +683,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
 
     :param ind1: First typed tree participating in the crossover.
     :param ind2: Second typed tree participating in the crossover.
-    :param termpb: The probability of chosing a terminal node (leaf).
+    :param termpb: The probability of choosing a terminal node (leaf).
     :returns: A tuple of two typed trees.
 
     When the nodes are strongly typed, the operator makes sure the
@@ -699,7 +699,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
         # No crossover on single node tree
         return ind1, ind2
 
-    # Determine wether we keep terminals or primitives for each individual
+    # Determine whether to keep terminals or primitives for each individual
     terminal_op = partial(eq, 0)
     primitive_op = partial(lt, 0)
     arity_op1 = terminal_op if random.random() < termpb else primitive_op
