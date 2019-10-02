@@ -515,7 +515,7 @@ def compileADF(expr, psets):
 # GP Program generation functions    #
 ######################################
 def genFull(pset, min_, max_, type_=None):
-    """Generate an expression where each leaf has a the same depth
+    """Generate an expression where each leaf has the same depth
     between *min* and *max*.
 
     :param pset: Primitive set from which primitives are selected.
@@ -549,7 +549,7 @@ def genGrow(pset, min_, max_, type_=None):
 
     def condition(height, depth):
         """Expression generation stops when the depth is equal to height
-        or when it is randomly determined that a a node should be a terminal.
+        or when it is randomly determined that a node should be a terminal.
         """
         return depth == height or \
                (depth >= min_ and random.random() < pset.terminalRatio)
@@ -599,7 +599,7 @@ def generate(pset, min_, max_, condition, type_=None):
                   :obj:`None` (default) the type of :pset: (pset.ret)
                   is assumed.
     :returns: A grown tree with leaves at possibly different depths
-              dependending on the condition function.
+              depending on the condition function.
     """
     if type_ is None:
         type_ = pset.ret
@@ -638,8 +638,8 @@ def generate(pset, min_, max_, condition, type_=None):
 ######################################
 
 def cxOnePoint(ind1, ind2):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual.
+    """Randomly select crossover point in each individual and exchange each
+    subtree with the point as root between each individual.
 
     :param ind1: First tree participating in the crossover.
     :param ind2: Second tree participating in the crossover.
@@ -683,7 +683,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
 
     :param ind1: First typed tree participating in the crossover.
     :param ind2: Second typed tree participating in the crossover.
-    :param termpb: The probability of chosing a terminal node (leaf).
+    :param termpb: The probability of choosing a terminal node (leaf).
     :returns: A tuple of two typed trees.
 
     When the nodes are strongly typed, the operator makes sure the
@@ -699,7 +699,7 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
         # No crossover on single node tree
         return ind1, ind2
 
-    # Determine wether we keep terminals or primitives for each individual
+    # Determine whether to keep terminals or primitives for each individual
     terminal_op = partial(eq, 0)
     primitive_op = partial(lt, 0)
     arity_op1 = terminal_op if random.random() < termpb else primitive_op
@@ -847,7 +847,7 @@ def mutInsert(individual, pset):
 
 
 def mutShrink(individual):
-    """This operator shrinks the *individual* by chosing randomly a branch and
+    """This operator shrinks the *individual* by choosing randomly a branch and
     replacing it with one of the branch's arguments (also randomly chosen).
 
     :param individual: The tree to be shrinked.
@@ -888,7 +888,7 @@ def staticLimit(key, max_value):
     mutation operators. When an invalid (over the limit) child is generated,
     it is simply replaced by one of its parents, randomly selected.
 
-    This operator can be used to avoid memory errors occuring when the tree
+    This operator can be used to avoid memory errors occurring when the tree
     gets higher than 90 levels (as Python puts a limit on the call stack
     depth), because it can ensure that no tree higher than this limit will ever
     be accepted in the population, except if it was generated at initialization
