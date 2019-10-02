@@ -549,7 +549,7 @@ def genGrow(pset, min_, max_, type_=None):
 
     def condition(height, depth):
         """Expression generation stops when the depth is equal to height
-        or when it is randomly determined that a a node should be a terminal.
+        or when it is randomly determined that a node should be a terminal.
         """
         return depth == height or \
                (depth >= min_ and random.random() < pset.terminalRatio)
