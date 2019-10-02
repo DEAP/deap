@@ -888,7 +888,7 @@ def staticLimit(key, max_value):
     mutation operators. When an invalid (over the limit) child is generated,
     it is simply replaced by one of its parents, randomly selected.
 
-    This operator can be used to avoid memory errors occuring when the tree
+    This operator can be used to avoid memory errors occurring when the tree
     gets higher than 90 levels (as Python puts a limit on the call stack
     depth), because it can ensure that no tree higher than this limit will ever
     be accepted in the population, except if it was generated at initialization
