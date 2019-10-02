@@ -217,7 +217,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     selected at random from :math:`P_\mathrm{p}`, cloned and appended to
     :math:`P_\mathrm{o}`.
 
-    This variation is named *Or* beceause an offspring will never result from
+    This variation is named *Or* because an offspring will never result from
     both operations crossover and mutation. The sum of both probabilities
     shall be in :math:`[0, 1]`, the reproduction probability is
     1 - *cxpb* - *mutpb*.
