@@ -105,7 +105,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     The algorithm takes in a population and evolves it in place using the
     :meth:`varAnd` method. It returns the optimized population and a
     :class:`~deap.tools.Logbook` with the statistics of the evolution. The
-    logbook will contain the generation number, the number of evalutions for
+    logbook will contain the generation number, the number of evaluations for
     each generation and the statistics if a :class:`~deap.tools.Statistics` is
     given as argument. The *cxpb* and *mutpb* arguments are passed to the
     :func:`varAnd` function. The pseudocode goes as follow ::
