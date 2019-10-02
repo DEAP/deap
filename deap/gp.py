@@ -599,7 +599,7 @@ def generate(pset, min_, max_, condition, type_=None):
                   :obj:`None` (default) the type of :pset: (pset.ret)
                   is assumed.
     :returns: A grown tree with leaves at possibly different depths
-              dependending on the condition function.
+              depending on the condition function.
     """
     if type_ is None:
         type_ = pset.ret
