@@ -638,8 +638,8 @@ def generate(pset, min_, max_, condition, type_=None):
 ######################################
 
 def cxOnePoint(ind1, ind2):
-    """Randomly select in each individual and exchange each subtree with the
-    point as root between each individual.
+    """Randomly select crossover point in each individual and exchange each
+    subtree with the point as root between each individual.
 
     :param ind1: First tree participating in the crossover.
     :param ind2: Second tree participating in the crossover.
