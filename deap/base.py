@@ -52,11 +52,11 @@ class Toolbox(object):
     def register(self, alias, function, *args, **kargs):
         """Register a *function* in the toolbox under the name *alias*. You
         may provide default arguments that will be passed automatically when
-        calling the registered function. Fixed arguments can then be overriden
+        calling the registered function. Fixed arguments can then be overridden
         at function call time.
 
         :param alias: The name the operator will take in the toolbox. If the
-                      alias already exist it will overwrite the the operator
+                      alias already exist it will overwrite the operator
                       already present.
         :param function: The function to which refer the alias.
         :param argument: One or more argument (and keyword argument) to pass
