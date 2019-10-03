@@ -325,7 +325,7 @@ class PrimitiveSetTyped(object):
         """Add a primitive to the set.
 
         :param primitive: callable object or a function.
-        :parma in_types: list of primitives arguments' type
+        :param in_types: list of primitives arguments' type
         :param ret_type: type returned by the primitive.
         :param name: alternative name for the primitive instead
                      of its __name__ attribute.
