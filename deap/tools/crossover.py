@@ -390,7 +390,7 @@ def cxMessyOnePoint(ind1, ind2):
 def cxESBlend(ind1, ind2, alpha):
     """Executes a blend crossover on both, the individual and the strategy. The
     individuals shall be a :term:`sequence` and must have a :term:`sequence`
-    :attr:`strategy` attribute. Adjustement of the minimal strategy shall be done
+    :attr:`strategy` attribute. Adjustment of the minimal strategy shall be done
     after the call to this function, consider using a decorator.
 
     :param ind1: The first evolution strategy participating in the crossover.
