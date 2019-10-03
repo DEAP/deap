@@ -124,7 +124,7 @@ class Toolbox(object):
 
 class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
-    provided as a tuple, the fitness is initalized using those values,
+    provided as a tuple, the fitness is initialized using those values,
     otherwise it is empty (or invalid).
 
     :param values: The initial values of the fitness as a tuple, optional.
