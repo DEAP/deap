@@ -80,7 +80,7 @@ def main(seed=None):
 
     # Compile statistics about the population
     record = stats.compile(pop)
-    logbook.record(gen=0, evals=len(invalid_ind), **record)
+    logbook.record(gen=0, evals=len(pop), **record)
     print(logbook.stream)
 
     # Begin the generational process
