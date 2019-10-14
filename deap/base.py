@@ -180,6 +180,13 @@ class Fitness(object):
 
         if len(values) > 0:
             self.values = values
+        
+        if self.__class__ is Fitness:
+            # Only use the predefined __deepcopy__ method when the object is of type `Fitness`
+            # This is to prevent creating invalid deepcopied object for subclasses having their
+            # own attributes which self.____deepcopy__ doesn't know and handle.
+            # See https://github.com/DEAP/deap/issues/420
+            self.__deepcopy__ = self.____deepcopy__
 
     def getValues(self):
         return tuple(map(truediv, self.wvalues, self.weights))
@@ -248,7 +255,7 @@ class Fitness(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def __deepcopy__(self, memo):
+    def ____deepcopy__(self, memo):
         """Replace the basic deepcopy function with a faster one.
 
         It assumes that the elements in the :attr:`values` tuple are
