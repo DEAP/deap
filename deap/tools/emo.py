@@ -158,12 +158,12 @@ def selTournamentDCD(individuals, k):
     :param k: The number of individuals to select.
     :returns: A list of selected individuals.
     """
-
-    if len(individuals) % 4 != 0:
-        raise ValueError("selTournamentDCD: individuals length must be a multiple of 4")
-
-    if k % 4 != 0:
-        raise ValueError("selTournamentDCD: number of individuals to select must be a multiple of 4")
+    
+    if k > len(individuals): 
+        raise ValueError("selTournamentDCD: k must be less than or equal to individuals length")
+   
+    if k == len(individuals) and k % 4 != 0:
+        raise ValueError("selTournamentDCD: k must be divisible by four if k == len(individuals)")
 
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
