@@ -28,7 +28,7 @@ import deap
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
               'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
-              'sphinx.ext.viewcode']
+              'sphinx.ext.viewcode', 'sphinx.ext.napoleon']
 
 try:
     import matplotlib

@@ -88,12 +88,13 @@ def main(verbose=True):
     mstats.register("max", numpy.max)
 
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+    logbook.header = ['gen', 'nevals'] + (mstats.fields if mstats else [])
 
-    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
         hof.update(state.population)
 
-        record = stats.compile(state.population)
+        record = mstats.compile(state.population)
         logbook.record(gen=gen, nevals=state.nevals, **record)
         if verbose:
             print(logbook.stream)

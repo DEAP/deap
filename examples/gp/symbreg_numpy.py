@@ -73,7 +73,7 @@ toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
-def main():
+def main(verbose=True):
     random.seed(318)
 
     NGEN = 40
@@ -91,7 +91,8 @@ def main():
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
         hof.update(state.population)
 
         record = stats.compile(state.population)

@@ -4,10 +4,10 @@ import random
 
 
 def evaluate_invalids(individuals, eval_func, map=map):
-    """Utility to evaluate all individuals marked invalid.
+    """Evaluate all individuals marked invalid.
 
     Args:
-        individuals (list): Individuals to evaluate, they must have a
+        individuals (iterable): Individuals to evaluate, they must have a
             :attr:`fitness` attribute. Only those with an invalid fitness
             will get evaluates.
         eval_func (callable): The evaluation to use on each individual.
@@ -28,11 +28,44 @@ def evaluate_invalids(individuals, eval_func, map=map):
 
 
 def and_variation(population, toolbox, cxpb, mutpb):
+    """Vary the individuals of a population using the operators in the toolbox.
+
+    Iterator that generates new individuals by varying consecutive pairs of two
+    individuals from the population. The variation first deepcopies the individuals
+    and then applies crossover and mutation with probability *cxpb* and *mutpb* on
+    each of them. Both probabilities should be in [0, 1]. The offspring are
+    returned one after an other. If more individuals than the size of the population
+    are requested, the population is cycled over.
+
+    Args:
+        population (Iterable): The individuals to vary.
+        toolbox (base.Toolbox): The toolbox containing the crossover, mutation
+            and mapping function to use for evolution.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
+
+    Yields:
+        individual: Offspring produced by the variation.
+
+    Example:
+        The variation can generates new offspring indefinitely if required.
+        To generate a given number of individual we :func:`~itertools.islice`
+        this generator to the given amount::
+
+            >>> offspring = list(islice(
+            ...     and_variation(population, toolbox, 0.6, 0.3),
+            ...     50
+            ... ))
+
+    """
     individuals = cycle(population)
 
     # zip(iter, iter) produces l[i], l[i+1]
     for i1, i2 in izip(individuals, individuals):
         # TODO: put deepcopy in operators
+        # Must deepcopy separately to ensure full deepcopy if the same
+        # individual is selected twice, it is deepcopied twice (what is
+        # not true with deepcopy([i1, i2])).
         i1, i2 = deepcopy(i1), deepcopy(i2)
         if random.random() < cxpb:
             i1, i2 = toolbox.mate(i1, i2)
@@ -50,6 +83,38 @@ def and_variation(population, toolbox, cxpb, mutpb):
 
 
 def or_variation(population, toolbox, cxpb, mutpb):
+    """Vary the individuals of a population using the operators in the toolbox.
+
+    Generates new offspring by varying the individuals of a population. At first,
+    the variation selects if a crossover, a mutation or a copy should be used
+    according to the given probabilities. Then, it samples randomly the appropriate
+    number of individuals, 2 for crossover and 1 for mutation and copy, and
+    deepcopies them before applying the operator and yields the result. In case
+    of a crossover, only the first offspring is yielded to keep the number of
+    individuals produced by crossover, mutation and copy proportional to the input
+    probabilities. *cxpb* and *mutpb* shoudn't sum above 1.
+
+    Args:
+        population (iterable): The individuals to vary.
+        toolbox (base.Toolbox): The toolbox containing the crossover, mutation
+            and mapping function to use for evolution.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
+
+    Yields:
+        individual: Offspring produced by the variation.
+
+    Example:
+        The variation can generates new offspring indefinitely if required.
+        To generate a given number of individual, say 50, we
+        :func:`~itertools.islice` this generator to the given amount::
+
+            >>> offspring = list(islice(
+            ...     or_variation(population, toolbox, 0.6, 0.3),
+            ...     50
+            ... ))
+
+    """
     assert (cxpb + mutpb) <= 1.0, (
         "The sum of the crossover and mutation probabilities must be smaller "
         "or equal to 1.0."
@@ -59,6 +124,9 @@ def or_variation(population, toolbox, cxpb, mutpb):
         op_choice = random.random()
         if op_choice < cxpb:  # Apply crossover
             i1, i2 = random.sample(population, 2)
+            # Must deepcopy separately to ensure full deepcopy if the same
+            # individual is selected twice, it is deepcopied twice (what is
+            # not true with deepcopy([i1, i2])).
             i1, i2 = deepcopy(i1), deepcopy(i2)
             i1, _ = toolbox.mate(i1, i2)
             del i1.fitness.values
@@ -72,7 +140,40 @@ def or_variation(population, toolbox, cxpb, mutpb):
         yield i1
 
 
-class SimpleAlgorithm:
+class GenerationalAlgorithm:
+    """Algorithm based on a generational process.
+
+    Each iteration, the parental population is selected from the population
+    for reproduction. It is advised to use a selection with replacement as
+    N individuals will be selected from a population of size N. The parents
+    get to reproduce using the :func:`and_variation`.
+
+    Args:
+        population (list):
+        toolbox (deap.base.Toolbox):
+        cxpb (float):
+        mutpb (float):
+
+    Yields:
+        self
+
+    Attributes:
+        population (list):
+        toolbox (deap.base.Toolbox):
+        cxpb (float):
+        mutpb (float):
+        nevals (int):
+
+    Example:
+        This algorithm can continue the optimization indefinetely or util stopped.
+        Each iteration it yields itself to give access to its internal parameters.
+        It can be used as follow::
+
+            for state in GenerationAlgorithm(pop, toolbox, CXPB, MUTPB):
+                if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
+                    break
+
+    """
     def __init__(self, population, toolbox, cxpb, mutpb):
         self.population = population
         self.toolbox = toolbox
@@ -113,8 +214,7 @@ class MuLambdaAlgorithm:
         self.nevals = 0
 
         assert selection_type in {"plus", "comma", "+", ","}, (
-            "Selection type must be in {'plus', 'comma'}, "
-            " {} provided"
+            "Selection type {} not in {'plus', 'comma'}, "
         ).format(selection_type)
 
     def __iter__(self):

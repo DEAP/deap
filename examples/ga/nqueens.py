@@ -75,7 +75,7 @@ toolbox.register("mate", tools.cxPartialyMatched)
 toolbox.register("mutate", tools.mutShuffleIndexes, indpb=2.0/NB_QUEENS)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-def main(seed=None, verbose=True):
+def main(verbose=True, seed=None):
     random.seed(seed)
 
     NGEN = 100
@@ -94,7 +94,8 @@ def main(seed=None, verbose=True):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
         hof.update(state.population)
 
         record = stats.compile(state.population)

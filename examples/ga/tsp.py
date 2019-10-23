@@ -74,7 +74,8 @@ def main(verbose=True):
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    for gen, state in enumerate(algorithms.SimpleAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)):
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
         hof.update(state.population)
 
         record = stats.compile(state.population)

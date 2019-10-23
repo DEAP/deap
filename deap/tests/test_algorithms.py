@@ -94,7 +94,7 @@ class TestAlgorithms(unittest.TestCase):
                 mock.patch("deap.algorithms.evaluate_invalids") as mock_eval_invld:
             mock_var.return_value = itertools.repeat([1] * 4)
 
-            state = next(algorithms.SimpleAlgorithm(pop, self.tb, 1.0, 1.0))
+            state = next(algorithms.GenerationalAlgorithm(pop, self.tb, 1.0, 1.0))
 
             self.assertEqual(mock_var.call_count, 1)
             self.assertEqual(mock_eval_invld.call_count, 1)
