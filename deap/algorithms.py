@@ -149,7 +149,7 @@ class GenerationalAlgorithm:
     get to reproduce using the :func:`and_variation`.
 
     Args:
-        population (list):
+        population (list): Initial population for the evolution.
         toolbox (deap.base.Toolbox):
         cxpb (float):
         mutpb (float):
@@ -158,13 +158,13 @@ class GenerationalAlgorithm:
         self
 
     Attributes:
-        population (list):
-        toolbox (deap.base.Toolbox):
+        population (list): The generation updated every generation.
+        toolbox (deap.base.Toolbox): The toolbox used during the evolution.
         cxpb (float):
         mutpb (float):
-        nevals (int):
+        nevals (int): The number of evaluations in the last generation.
 
-    Example:
+    Examples:
         This algorithm can continue the optimization indefinetely or util stopped.
         Each iteration it yields itself to give access to its internal parameters.
         It can be used as follow::
@@ -172,6 +172,12 @@ class GenerationalAlgorithm:
             for state in GenerationAlgorithm(pop, toolbox, CXPB, MUTPB):
                 if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
                     break
+
+        Any attribute can be changed during evolution. For example, to change the
+        generation directly use the state ::
+
+            for state in GenerationAlgorithm(pop, toolbox, CXPB, MUTPB):
+                state.population = new_population()
 
     """
     def __init__(self, population, toolbox, cxpb, mutpb):
