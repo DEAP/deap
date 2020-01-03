@@ -227,13 +227,14 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
         "or equal to 1.0.")
 
     offspring = []
-    for _ in xrange(lambda_):
+    while len(offspring) < lambda_:
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
             ind1, ind2 = toolbox.mate(ind1, ind2)
-            del ind1.fitness.values
+            del ind1.fitness.values, ind2.fitness.values
             offspring.append(ind1)
+            offspring.append(ind2)
         elif op_choice < cxpb + mutpb:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
             ind, = toolbox.mutate(ind)
@@ -241,6 +242,10 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
             offspring.append(ind)
         else:                           # Apply reproduction
             offspring.append(random.choice(population))
+
+    # If the last iteration was a crossover, remove the additional individual
+    if len(offspring) > lambda_:
+        del offspring[-1]
 
     return offspring
 
