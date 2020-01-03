@@ -203,13 +203,13 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :param mutpb: The probability of mutating an individual.
     :returns: The final population.
 
-    The variation goes as follow. On each of the *lambda_* iteration, it
-    selects one of the three operations; crossover, mutation or reproduction.
+    The variation goes as follow. Until *_lambda* offspring have been produced,
+    it selects one of the three operations; crossover, mutation or reproduction.
     In the case of a crossover, two individuals are selected at random from
     the parental population :math:`P_\mathrm{p}`, those individuals are cloned
     using the :meth:`toolbox.clone` method and then mated using the
-    :meth:`toolbox.mate` method. Only the first child is appended to the
-    offspring population :math:`P_\mathrm{o}`, the second child is discarded.
+    :meth:`toolbox.mate` method. Both children are appended to the
+    offspring population :math:`P_\mathrm{o}`.
     In the case of a mutation, one individual is selected at random from
     :math:`P_\mathrm{p}`, it is cloned and then mutated using using the
     :meth:`toolbox.mutate` method. The resulting mutant is appended to
