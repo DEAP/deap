@@ -226,16 +226,20 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
         "The sum of the crossover and mutation probabilities must be smaller "
         "or equal to 1.0.")
 
+    # adjust probabilities since both crossover children are appended
+    cxpb_adj = cxpb / (2 - cxpb)
+    mutpb_adj = mutpb / (mutpb + (1 - mutpb - cxpb)) * (1 - cxpb_adj)
+
     offspring = []
     while len(offspring) < lambda_:
         op_choice = random.random()
-        if op_choice < cxpb:            # Apply crossover
+        if op_choice < cxpb_adj:            # Apply crossover
             ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values, ind2.fitness.values
             offspring.append(ind1)
             offspring.append(ind2)
-        elif op_choice < cxpb + mutpb:  # Apply mutation
+        elif op_choice < cxpb_adj + mutpb_adj:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
             ind, = toolbox.mutate(ind)
             del ind.fitness.values
