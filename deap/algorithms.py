@@ -228,7 +228,10 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
 
     # adjust probabilities since both crossover children are appended
     cxpb_adj = cxpb / (2 - cxpb)
-    mutpb_adj = mutpb / (mutpb + (1 - mutpb - cxpb)) * (1 - cxpb_adj)
+    if cxpb != 1.0:         #  Avoid zero division
+        mutpb_adj = mutpb / (mutpb + (1 - mutpb - cxpb)) * (1 - cxpb_adj)
+    else:
+        mutpb_adj = mutpb
 
     offspring = []
     while len(offspring) < lambda_:
