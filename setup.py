@@ -7,8 +7,8 @@ try:
     from setuptools import setup, Extension, find_packages
     modules = find_packages(exclude=['examples'])
 except ImportError:
-    warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
-    from disutils.core import setup, Extension
+    warnings.append("warning: using distutils.core.setup, cannot use \"develop\" option")
+    from distutils.core import setup, Extension
     modules = ['deap', 'deap.benchmarks', 'deap.tests', 'deap.tools', 'deap.tools._hypervolume']
 
 from setuptools.command.build_ext import build_ext
