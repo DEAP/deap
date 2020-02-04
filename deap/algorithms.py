@@ -470,7 +470,6 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
 
     This function expects :meth:`toolbox.generate` and :meth:`toolbox.evaluate` aliases to be
     registered in the toolbox.
-    variation.
     
     .. [Colette2010] Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and
        R. Le Riche (2010). On Object-Oriented Programming of Optimizers -
