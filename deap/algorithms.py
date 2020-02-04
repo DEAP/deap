@@ -203,13 +203,13 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     :param mutpb: The probability of mutating an individual.
     :returns: The final population.
 
-    The variation goes as follow. On each of the *lambda_* iteration, it
-    selects one of the three operations; crossover, mutation or reproduction.
+    The variation goes as follow. Until *_lambda* offspring have been produced,
+    it selects one of the three operations; crossover, mutation or reproduction.
     In the case of a crossover, two individuals are selected at random from
     the parental population :math:`P_\mathrm{p}`, those individuals are cloned
     using the :meth:`toolbox.clone` method and then mated using the
-    :meth:`toolbox.mate` method. Only the first child is appended to the
-    offspring population :math:`P_\mathrm{o}`, the second child is discarded.
+    :meth:`toolbox.mate` method. Both children are appended to the
+    offspring population :math:`P_\mathrm{o}`.
     In the case of a mutation, one individual is selected at random from
     :math:`P_\mathrm{p}`, it is cloned and then mutated using using the
     :meth:`toolbox.mutate` method. The resulting mutant is appended to
@@ -226,21 +226,33 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
         "The sum of the crossover and mutation probabilities must be smaller "
         "or equal to 1.0.")
 
+    # adjust probabilities since both crossover children are appended
+    cxpb_adj = cxpb / (2 - cxpb)
+    if cxpb != 1.0:         #  Avoid zero division
+        mutpb_adj = mutpb / (mutpb + (1 - mutpb - cxpb)) * (1 - cxpb_adj)
+    else:
+        mutpb_adj = mutpb
+
     offspring = []
-    for _ in xrange(lambda_):
+    while len(offspring) < lambda_:
         op_choice = random.random()
-        if op_choice < cxpb:            # Apply crossover
+        if op_choice < cxpb_adj:            # Apply crossover
             ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
             ind1, ind2 = toolbox.mate(ind1, ind2)
-            del ind1.fitness.values
+            del ind1.fitness.values, ind2.fitness.values
             offspring.append(ind1)
-        elif op_choice < cxpb + mutpb:  # Apply mutation
+            offspring.append(ind2)
+        elif op_choice < cxpb_adj + mutpb_adj:  # Apply mutation
             ind = toolbox.clone(random.choice(population))
             ind, = toolbox.mutate(ind)
             del ind.fitness.values
             offspring.append(ind)
         else:                           # Apply reproduction
             offspring.append(random.choice(population))
+
+    # If the last iteration was a crossover, remove the additional individual
+    if len(offspring) > lambda_:
+        del offspring[-1]
 
     return offspring
 
