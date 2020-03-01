@@ -146,24 +146,26 @@ def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
     the two individuals do not interdominate the selection is made
     based on crowding distance (CD). The *individuals* sequence length has to
-    be a multiple of 4. Starting from the beginning of the selected
-    individuals, two consecutive individuals will be different (assuming all
-    individuals in the input list are unique). Each individual from the input
-    list won't be selected more than twice.
+    be a multiple of 4 only if k is equal to the length of individuals. 
+    Starting from the beginning of the selected individuals, two consecutive 
+    individuals will be different (assuming all individuals in the input list 
+    are unique). Each individual from the input list won't be selected more 
+    than twice.
 
     This selection requires the individuals to have a :attr:`crowding_dist`
     attribute, which can be set by the :func:`assignCrowdingDist` function.
 
     :param individuals: A list of individuals to select from.
-    :param k: The number of individuals to select.
+    :param k: The number of individuals to select. Must be less than or equal 
+              to len(individuals).
     :returns: A list of selected individuals.
     """
-
-    if len(individuals) % 4 != 0:
-        raise ValueError("selTournamentDCD: individuals length must be a multiple of 4")
-
-    if k % 4 != 0:
-        raise ValueError("selTournamentDCD: number of individuals to select must be a multiple of 4")
+    
+    if k > len(individuals): 
+        raise ValueError("selTournamentDCD: k must be less than or equal to individuals length")
+   
+    if k == len(individuals) and k % 4 != 0:
+        raise ValueError("selTournamentDCD: k must be divisible by four if k == len(individuals)")
 
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
