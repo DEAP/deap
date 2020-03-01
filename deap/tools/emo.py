@@ -448,7 +448,7 @@ NSGA3Memory = namedtuple("NSGA3Memory", ["best_point", "worst_point", "extreme_p
 class selNSGA3WithMemory(object):
     """Class version of NSGA-III selection including memory for best, worst and
     extreme points. Registering this operator in a toolbox is a bit different
-    than classical operators, it requires to instanciate the class instead
+    than classical operators, it requires to instantiate the class instead
     of just registering the function::
 
         >>> from deap import base

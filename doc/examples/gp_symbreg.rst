@@ -112,7 +112,7 @@ the MSE (Mean Squared Error), which is returned as the fitness of the individual
 
 Afterwards, we register the evaluation function. We also choose the selection
 method (a tournament of size 3), the mate method (one point crossover with
-uniform probability over all the nodes), the mutation method (an uniform
+uniform probability over all the nodes), and the mutation method (a uniform
 probability mutation which may append a new full sub-tree to a node).
 
 Then, we decorate the mate and mutate method to limit the height of generated
