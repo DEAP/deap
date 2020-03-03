@@ -16,7 +16,8 @@ matrix:
   - python: "3.6"
     env: PACKAGES="numpy"
   - python: "3.7"
-    dist: xenial
+    env: PACKAGES="numpy"
+  - python: "3.8"
     env: PACKAGES="numpy"
   - python: "pypy"
     env: PACKAGES="mock"; NUMPY="git+https://bitbucket.org/pypy/numpy.git"
