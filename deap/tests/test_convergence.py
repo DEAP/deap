@@ -335,7 +335,7 @@ def test_cma_mixed_integer_1_p_1_with_constraint():
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
-    restarts = 3
+    restarts = 10
 
     # Allow a couple of restarts
     while restarts > 0:
@@ -397,7 +397,7 @@ def test_cma_mixed_integer_1_p_20_with_constraint():
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
-    restarts = 3
+    restarts = 10
 
     # Allow a couple of restarts
     while restarts > 0:
