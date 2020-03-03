@@ -40,7 +40,7 @@ def main(verbose=True):
     parent = creator.Individual((numpy.random.rand() * 5) - 1 for _ in range(N))
     parent.fitness.values = toolbox.evaluate(parent)
 
-    strategy = cma.StrategyOnePlusLambda(parent, sigma=5.0, lambda_=10)
+    strategy = cma.OnePlusLambdaStrategy(parent, sigma=5.0, lambda_=10)
     toolbox.register("generate", strategy.generate, ind_init=creator.Individual)
     toolbox.register("update", strategy.update)
 

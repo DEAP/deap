@@ -27,6 +27,14 @@ def evaluate_invalids(individuals, eval_func, map=map):
     return len(invalid_ind)
 
 
+def take(n, iterable):
+    """Return first n items of an iterable as a list.
+
+    This function is taken from Python stdlib :mod:`itertools`.
+    """
+    return list(islice(iterable, n))
+
+
 def and_variation(population, toolbox, cxpb, mutpb):
     """Vary the individuals of a population using the operators in the toolbox.
 
@@ -39,8 +47,8 @@ def and_variation(population, toolbox, cxpb, mutpb):
 
     Args:
         population (Iterable): The individuals to vary.
-        toolbox (base.Toolbox): The toolbox containing the crossover, mutation
-            and mapping function to use for evolution.
+        toolbox (base.Toolbox): The toolbox containing a *mate* and *mutate*
+            method to variate the individuals.
         cxpb (float): Probability to apply crossover on every pair of individuals.
         mutpb (float): Probability to apply mutation on every individual.
 
@@ -49,13 +57,12 @@ def and_variation(population, toolbox, cxpb, mutpb):
 
     Example:
         The variation can generates new offspring indefinitely if required.
-        To generate a given number of individual we :func:`~itertools.islice`
-        this generator to the given amount::
+        To generate a given number of individual::
 
-            >>> offspring = list(islice(
-            ...     and_variation(population, toolbox, 0.6, 0.3),
-            ...     50
-            ... ))
+            >>> offspring = take(
+            ...     50,
+            ...     and_variation(population, toolbox, 0.6, 0.3)
+            ... )       # doctest: +SKIP
 
     """
     individuals = cycle(population)
@@ -89,15 +96,13 @@ def or_variation(population, toolbox, cxpb, mutpb):
     the variation selects if a crossover, a mutation or a copy should be used
     according to the given probabilities. Then, it samples randomly the appropriate
     number of individuals, 2 for crossover and 1 for mutation and copy, and
-    deepcopies them before applying the operator and yields the result. In case
-    of a crossover, only the first offspring is yielded to keep the number of
-    individuals produced by crossover, mutation and copy proportional to the input
-    probabilities. *cxpb* and *mutpb* shoudn't sum above 1.
+    deepcopies them before applying the operator and yields the result. *cxpb*
+    and *mutpb* shoudn't sum above 1.
 
     Args:
         population (iterable): The individuals to vary.
-        toolbox (base.Toolbox): The toolbox containing the crossover, mutation
-            and mapping function to use for evolution.
+        toolbox (base.Toolbox): The toolbox containing a *mate* and *mutate*
+            method to variate the individuals.
         cxpb (float): Probability to apply crossover on every pair of individuals.
         mutpb (float): Probability to apply mutation on every individual.
 
@@ -106,13 +111,12 @@ def or_variation(population, toolbox, cxpb, mutpb):
 
     Example:
         The variation can generates new offspring indefinitely if required.
-        To generate a given number of individual, say 50, we
-        :func:`~itertools.islice` this generator to the given amount::
+        To generate a given number of individual::
 
-            >>> offspring = list(islice(
-            ...     or_variation(population, toolbox, 0.6, 0.3),
-            ...     50
-            ... ))
+            >>> offspring = take(
+            ...     50,
+            ...     or_variation(population, toolbox, 0.6, 0.3)
+            ... )       # doctest: +SKIP
 
     """
     assert (cxpb + mutpb) <= 1.0, (
@@ -120,24 +124,35 @@ def or_variation(population, toolbox, cxpb, mutpb):
         "or equal to 1.0."
     )
 
+    # adjust probabilities since both crossover children are appended
+    cxpb_adj = cxpb / (2 - cxpb)
+    if cxpb != 1.0:         #  Avoid zero division
+        mutpb_adj = mutpb / (mutpb + (1 - mutpb - cxpb)) * (1 - cxpb_adj)
+    else:
+        mutpb_adj = mutpb
+
     while True:
         op_choice = random.random()
-        if op_choice < cxpb:  # Apply crossover
+        if op_choice < cxpb_adj:                # Apply crossover
             i1, i2 = random.sample(population, 2)
             # Must deepcopy separately to ensure full deepcopy if the same
             # individual is selected twice, it is deepcopied twice (what is
             # not true with deepcopy([i1, i2])).
             i1, i2 = deepcopy(i1), deepcopy(i2)
             i1, _ = toolbox.mate(i1, i2)
-            del i1.fitness.values
-        elif op_choice < cxpb + mutpb:  # Apply mutation
+            del i1.fitness.values, i2.fitness.values
+            offspring = [i1, i2]
+        elif op_choice < cxpb_adj + mutpb_adj:  # Apply mutation
             i1 = deepcopy(random.choice(population))
             i1, = toolbox.mutate(i1)
             del i1.fitness.values
-        else:  # Apply reproduction
+            offspring = [i1]
+        else:                                   # Apply reproduction
             i1 = deepcopy(random.choice(population))
+            offspring = [i1]
 
-        yield i1
+        for child in offspring:
+            yield child
 
 
 class GenerationalAlgorithm:
@@ -150,22 +165,23 @@ class GenerationalAlgorithm:
 
     Args:
         population (list): Initial population for the evolution.
-        toolbox (deap.base.Toolbox):
-        cxpb (float):
-        mutpb (float):
+        toolbox (deap.base.Toolbox): Toolbox containing a *mate*,
+            *mutate*, *select* and *evaluate* method.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
 
     Yields:
         self
 
     Attributes:
-        population (list): The generation updated every generation.
-        toolbox (deap.base.Toolbox): The toolbox used during the evolution.
-        cxpb (float):
-        mutpb (float):
-        nevals (int): The number of evaluations in the last generation.
+        population: The population updated every generation.
+        nevals: The number of evaluations in the last generation.
+        toolbox
+        cxpb
+        mutpb
 
     Examples:
-        This algorithm can continue the optimization indefinetely or util stopped.
+        This algorithm can continue the optimization indefinetely util stopped.
         Each iteration it yields itself to give access to its internal parameters.
         It can be used as follow::
 
@@ -174,7 +190,7 @@ class GenerationalAlgorithm:
                     break
 
         Any attribute can be changed during evolution. For example, to change the
-        generation directly use the state ::
+        population, directly use the state ::
 
             for state in GenerationAlgorithm(pop, toolbox, CXPB, MUTPB):
                 state.population = new_population()
@@ -195,10 +211,10 @@ class GenerationalAlgorithm:
         offspring = self.toolbox.select(self.population, len(self.population))
 
         # Vary the pool of individuals
-        offspring = list(islice(
-            and_variation(offspring, self.toolbox, self.cxpb, self.mutpb),
-            len(self.population)
-        ))
+        offspring = take(
+            len(self.population),
+            and_variation(offspring, self.toolbox, self.cxpb, self.mutpb)
+        )
 
         # Evaluate the new individuals
         self.nevals = evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
@@ -210,6 +226,53 @@ class GenerationalAlgorithm:
 
 
 class MuLambdaAlgorithm:
+    r""":math:`(\mu~\begin{smallmatrix}+ \\ ,\end{smallmatrix}~\lambda)` evolutionary
+    algorithm.
+
+    Each iteration, *lambda_* individuals are produced by the :func:`or_variation`.
+    The individuals are then evaluated and selection is made from the parents and
+    offspring (`"+"`) or only from the offspring (`","`) depending on the input
+    *selection_type*.
+
+    Args:
+        population (list): Initial population for the evolution.
+        toolbox (deap.base.Toolbox): Toolbox containing a *mate*,
+            *mutate*, *select* and *evaluate* method.
+        selection_type (str): One of `"+", "plus", ",", or "comma"` specifying if the
+            selection is made from the parents and the offspring (`"+"`) or only
+            from the offspring (`","`).
+        lambda_ (int): Number of individual so produce each generation.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
+
+    Yields:
+        self
+
+    Attributes:
+        population: The population updated every generation.
+        nevals: The number of evaluations in the last generation.
+        toolbox
+        selection_type
+        lambda_
+        cxpb
+        mutpb
+
+    Examples:
+        This algorithm can continue the optimization indefinetely util stopped.
+        Each iteration it yields itself to give access to its internal parameters.
+        It can be used as follow::
+
+            for state in MuLambdaAlgorithm(pop, toolbox, "+", 50, CXPB, MUTPB):
+                if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
+                    break
+
+        Any attribute can be changed during evolution. For example, to change the
+        population, directly use the state ::
+
+            for state in MuLambdaAlgorithm(pop, toolbox, "+", 50, CXPB, MUTPB):
+                state.population = new_population()
+
+    """
     def __init__(self, population, toolbox, selection_type, lambda_, cxpb, mutpb):
         self.population = population
         self.toolbox = toolbox
@@ -228,10 +291,10 @@ class MuLambdaAlgorithm:
 
     def next(self):
         # Vary the population
-        offspring = list(islice(
-            or_variation(self.population, self.toolbox, self.cxpb, self.mutpb),
-            self.lambda_
-        ))
+        offspring = take(
+            self.lambda_,
+            or_variation(self.population, self.toolbox, self.cxpb, self.mutpb)
+        )
 
         # Evaluate the new individuals
         self.nevals = evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
@@ -246,6 +309,40 @@ class MuLambdaAlgorithm:
 
 
 class GenerateUpdateAlgorithm:
+    """Two step evolutionary algorithm -- generate/update.
+
+    Each iteration, individuals are produced using the toolbox's generate method.
+    These individuals are evaluted and passed to the toolbox's update method.
+
+    Args:
+        toolbox (deap.base.Toolbox): Toolbox containing the *generate* and
+            *update* methods.
+
+    Yields:
+        self
+
+    Attributes:
+        population: The population updated every generation.
+        nevals: The number of evaluations in the last generation.
+        toolbox
+
+    Examples:
+        This algorithm can continue the optimization indefinetely util stopped.
+        Each iteration it yields itself to give access to its internal parameters.
+        It can be used as follow::
+
+            for state in GenerateUpdateAlgorithm(toolbox):
+                if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
+                    break
+
+        Any attribute can be changed during evolution. For example, to change the
+        generation method at some point in the evolution, use the state ::
+
+            for g, state in enumerate(GenerateUpdateAlgorithm(toolbox)):
+                if g > 50:
+                    state.toolbox = new_toolbox()
+
+    """
     def __init__(self, toolbox):
         self.toolbox = toolbox
         self.nevals = 0
@@ -258,7 +355,8 @@ class GenerateUpdateAlgorithm:
         self.population = self.toolbox.generate()
 
         # Evaluate the new individuals
-        self.nevals = evaluate_invalids(self.population, self.toolbox.evaluate, self.toolbox.map)
+        self.nevals = evaluate_invalids(self.population, self.toolbox.evaluate,
+                                        self.toolbox.map)
 
         # Update the strategy with the evaluated individuals
         self.toolbox.update(self.population)

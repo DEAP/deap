@@ -37,7 +37,10 @@ for g in range(NGEN):
     offspring = map(toolbox.clone, toolbox.select(pop, len(pop)))
 
     # Apply crossover and mutation on the offspring
-    offspring = algorithms.varAnd(offspring, toolbox, CXPB, MUTPB)
+    offspring = algorithms.take(
+        len(offspring),
+        algorithms.and_variation(offspring, toolbox, CXPB, MUTPB)
+    )
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -46,4 +49,4 @@ for g in range(NGEN):
         ind.fitness.values = fit
 
     # The population is entirely replaced by the offspring
-    pop[:] = offspring
+    pop = offspring

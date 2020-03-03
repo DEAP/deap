@@ -5,27 +5,26 @@
 DEAP documentation
 ==================
 
-DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
-ideas. It seeks to make algorithms explicit and data structures transparent.  It works 
+DEAP is a novel evolutionary computation framework for rapid prototyping and testing of
+ideas. It seeks to make algorithms explicit and data structures transparent.  It works
 in perfect harmony with parallelisation mechanism such as multiprocessing and `SCOOP
 <http://pyscoop.org/>`_. The following documentation presents the key concepts
 and many features to build your own evolutions.
 
 .. sidebar:: Getting Help
-    
+
     Having trouble? We’d like to help!
 
-    * Search for information in the archives of the `deap-users mailing list 
+    * Search for information in the archives of the `deap-users mailing list
       <https://groups.google.com/forum/?fromgroups#!forum/deap-users>`_,
       or post a question.
-    * Report bugs with DEAP in our `issue tracker 
+    * Report bugs with DEAP in our `issue tracker
       <https://www.github.com/deap/deap/issues>`_.
 
-* **First steps:** 
+* **First steps:**
 
   * :doc:`Overview (Start Here!) <overview>`
   * :doc:`Installation <installation>`
-  * :doc:`Porting Guide <porting>`
 
 * **Basic tutorials:**
 
@@ -42,7 +41,7 @@ and many features to build your own evolutions.
   * :doc:`tutorials/advanced/constraints`
   * :doc:`tutorials/advanced/benchmarking`
   * :doc:`tutorials/advanced/numpy`
-  
+
 * :doc:`examples/index`
 
 * :doc:`api/index`

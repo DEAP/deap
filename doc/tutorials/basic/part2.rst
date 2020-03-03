@@ -113,12 +113,12 @@ selected individuals. The selection is made as follow.
    :lines: 49-50
 
 .. warning:: It is **very** important here to note that the selection
-   operators does not duplicate any individual during the selection process. 
-   If an individual is selected twice and one of either object is modified, 
-   the other will also be modified. Only a reference to the individual is 
+   operators does not duplicate any individual during the selection process.
+   If an individual is selected twice and one of either object is modified,
+   the other will also be modified. Only a reference to the individual is
    copied. Just like every other operator it selects and only selects.
 
-Usually duplication of the entire population will be made after selection or 
+Usually duplication of the entire population will be made after selection or
 before variation.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
@@ -188,19 +188,18 @@ individuals. The mutation is often considered to return a single individual
 but again like for the evaluation, the single individual case is a special
 case of the multiple individual case.
 
-|more| For more information on decorators, see 
-`Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_ 
+|more| For more information on decorators, see
+`Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_
 and `Python Decorator Libary <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
 
 Variations
 ----------
 Variations allow to build simple algorithms using predefined small building blocks. In
 order to use a variation, the toolbox must be set to contain the required
-operators. For example in the lastly presented complete algorithm, the
-crossover and mutation are regrouped in the :func:`~deap.algorithms.varAnd`
-function, this function requires the toolbox to contain the :func:`~deap.mate`
-and :func:`~deap.mutate` functions. This variation can be used to simplify
-the writing of an algorithm as follows.
+operators. Variations can produce an infinite number of individuals. Provided with
+a toolbox populated with a :meth:`~deap.Toolbox.mate` and a :meth:`~deap.Toolbox.mutate`
+method, one need to :func:`~deap.algorithms.take` the first n individuals as in the next
+example
 
 .. literalinclude:: /code/tutorials/part_3/3_7_variations.py
    :lines: 33-
@@ -210,11 +209,14 @@ build algorithms that are very close to pseudo code.
 
 Algorithms
 ----------
-There are several algorithms implemented in the :mod:`~deap.algorithms` module.
+There are a few algorithms implemented in the :mod:`~deap.algorithms` module.
 They are very simple and
 reflect the basic types of evolutionary algorithms present in the literature.
-The algorithms use a :class:`~deap.base.Toolbox` as defined in the last
-sections. In order to setup a toolbox for an algorithm, you must register the
+The algorithms mainly use a :class:`~deap.base.Toolbox` as defined in the last
+sections to
+
+
+In order to setup a toolbox for an algorithm, you must register the
 desired operators under the specified names, refer to the documentation of the
 selected algorithm for more details. Once the toolbox is ready, it is time to
 launch the algorithm. The simple evolutionary algorithm takes 5 arguments, a

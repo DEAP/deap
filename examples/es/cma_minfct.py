@@ -39,7 +39,7 @@ def main(verbose=True):
     # The CMA-ES algorithm takes a population of one individual as argument
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
     # for more details about the rastrigin and other tests for CMA-ES
-    strategy = cma.Strategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
+    strategy = cma.BasicStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 

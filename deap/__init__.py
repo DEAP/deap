@@ -13,5 +13,4 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 __author__ = "DEAP Team"
-__version__ = "1.3"
-__revision__ = "1.3.0"
+__version__ = "2.0.0.a0"

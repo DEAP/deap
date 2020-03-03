@@ -98,7 +98,7 @@ def main(verbose=True):
         mins = deque(maxlen=TOLHISTFUN_ITER)
 
         # We start with a centroid in [-4, 4]**D
-        strategy = cma.Strategy(centroid=numpy.random.uniform(-4, 4, N), sigma=sigma, lambda_=lambda_)
+        strategy = cma.BasicStrategy(centroid=numpy.random.uniform(-4, 4, N), sigma=sigma, lambda_=lambda_)
         toolbox.register("generate", strategy.generate, creator.Individual)
         toolbox.register("update", strategy.update)
 

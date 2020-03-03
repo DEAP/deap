@@ -37,6 +37,10 @@ def setup_func_single_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
 
+def setup_func_single_obj_const():
+    creator.create(FITCLSNAME, base.ConstrainedFitness, weights=(-1.0,))
+    creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
+
 def setup_func_multi_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
@@ -55,7 +59,7 @@ def test_cma():
     NDIM = 5
     NGEN = 100
 
-    strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
+    strategy = cma.BasicStrategy(centroid=[0.0]*NDIM, sigma=1.0)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
@@ -156,7 +160,7 @@ def test_mo_cma_es():
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
-    strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
+    strategy = cma.MultiObjectiveStrategy(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
 
     toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
     toolbox.register("update", strategy.update)
@@ -235,3 +239,202 @@ def test_nsga3():
 
     for ind in pop:
         assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
+
+
+@with_setup(setup_func_single_obj, teardown_func)
+def test_cma_mixed_integer_1_p_1_no_constraint():
+    N = 3
+    NGEN = 15000
+
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", benchmarks.sphere)
+
+    parent = (numpy.random.rand(N) * 2) + 1
+
+    strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1], lambda_=1)
+
+    toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
+    toolbox.register("update", strategy.update)
+
+    best = None
+
+    for gen in range(NGEN):
+        # Generate a new population
+        population = toolbox.generate()
+
+        # Evaluate the individuals
+        for individual in population:
+            individual.fitness.values = toolbox.evaluate(individual)
+
+            if best is None or individual.fitness >= best.fitness:
+                best = individual
+
+        # We must stop CMA-ES before the update becomes unstable
+        if best.fitness.values[0] < 1e-12:
+            break
+
+        # Update the strategy with the evaluated individuals
+        toolbox.update(population)
+
+    assert best.fitness.values[0] < 1e-12
+
+
+@with_setup(setup_func_single_obj, teardown_func)
+def test_cma_mixed_integer_1_p_20_no_constraint():
+    N = 3
+    NGEN = 15000
+
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", benchmarks.sphere)
+
+    parent = (numpy.random.rand(N) * 2) + 1
+
+    strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1], lambda_=20)
+
+    toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
+    toolbox.register("update", strategy.update)
+
+    best = None
+
+    for gen in range(NGEN):
+        # Generate a new population
+        population = toolbox.generate()
+
+        # Evaluate the individuals
+        for individual in population:
+            individual.fitness.values = toolbox.evaluate(individual)
+
+            if best is None or individual.fitness >= best.fitness:
+                best = individual
+
+        # Stop when we've reached some kind of optimum
+        if best.fitness.values[0] < 1e-12:
+            break
+
+        # Update the strategy with the evaluated individuals
+        toolbox.update(population)
+
+    assert best.fitness.values[0] < 1e-12
+
+
+@with_setup(setup_func_single_obj_const, teardown_func)
+def test_cma_mixed_integer_1_p_1_with_constraint():
+    def c1(individual):
+        if individual[0] + individual[1] < 0.1:
+            return True
+        return False
+
+    def c2(individual):
+        if individual[1] < 0.1:
+            return True
+        return False
+
+    N = 5
+    NGEN = 15000
+    optimum = 0.015
+
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", benchmarks.sphere)
+    restarts = 3
+
+    # Allow a couple of restarts
+    while restarts > 0:
+        parent = (numpy.random.rand(N) * 2) + 1
+
+        strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1, 0, 0], lambda_=1)
+
+        toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
+        toolbox.register("update", strategy.update)
+
+        best = None
+
+        for gen in range(NGEN):
+            # Generate a new population
+            population = toolbox.generate()
+
+            # Evaluate the individuals
+            for individual in population:
+                constraint_violation = c1(individual), c2(individual)
+                if not any(constraint_violation):
+                    individual.fitness.values = toolbox.evaluate(individual)
+                individual.fitness.constraint_violation = constraint_violation
+
+                if best is None or individual.fitness >= best.fitness:
+                    best = individual
+
+            # Stop when we've reached some kind of optimum
+            if best.fitness.values[0] - optimum < 1e-7:
+                restarts = 0
+                break
+
+            # Update the strategy with the evaluated individuals
+            toolbox.update(population)
+
+            if strategy.condition_number > 10e12:
+                # We've become unstable
+                break
+
+        restarts -= 1
+
+    assert best.fitness.values[0] - optimum < 1e-7
+
+
+@with_setup(setup_func_single_obj_const, teardown_func)
+def test_cma_mixed_integer_1_p_20_with_constraint():
+    def c1(individual):
+        if individual[0] + individual[1] < 0.1:
+            return True
+        return False
+
+    def c2(individual):
+        if individual[3] < 0.1:
+            return True
+        return False
+
+    N = 5
+    NGEN = 15000
+    optimum = 0.015
+
+    toolbox = base.Toolbox()
+    toolbox.register("evaluate", benchmarks.sphere)
+    restarts = 3
+
+    # Allow a couple of restarts
+    while restarts > 0:
+        parent = (numpy.random.rand(N) * 2) + 1
+
+        strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1, 0, 0], lambda_=20)
+
+        toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
+        toolbox.register("update", strategy.update)
+
+        best = None
+
+        for gen in range(NGEN):
+            # Generate a new population
+            population = toolbox.generate()
+
+            # Evaluate the individuals
+            for individual in population:
+                constraint_violation = c1(individual), c2(individual)
+                if not any(constraint_violation):
+                    individual.fitness.values = toolbox.evaluate(individual)
+                individual.fitness.constraint_violation = constraint_violation
+
+                if best is None or individual.fitness >= best.fitness:
+                    best = individual
+
+            if best.fitness.values[0] - optimum < 1e-7:
+                restarts = 0
+                break
+
+            # Stop when we've reached some kind of optimum
+            toolbox.update(population)
+
+            if strategy.condition_number > 10e12:
+                # We've become unstable
+                break
+
+        restarts -= 1
+
+    assert best.fitness.values[0] - optimum < 1e-7

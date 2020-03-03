@@ -67,7 +67,8 @@ class TestVariations(unittest.TestCase):
         mu = 10
         list(itertools.islice(algorithms.or_variation(pop, self.tb, 1.0, 0.0), mu))
 
-        self.assertEqual(self.cx_mock.call_count, mu)
+        # CX produces 2 individuals
+        self.assertEqual(self.cx_mock.call_count, mu/2)
         self.assertEqual(self.mut_mock.call_count, 0)
 
         self.cx_mock.reset_mock()
