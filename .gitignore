@@ -15,5 +15,6 @@ MANIFEST
 *.pyc
 *.pyo
 *.orig
+*~
 .DS_Store
 *.so

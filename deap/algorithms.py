@@ -28,6 +28,7 @@ you really want them to do.
 import random
 
 import tools
+import _algorithms
 
 
 def varAnd(population, toolbox, cxpb, mutpb):
@@ -501,3 +502,45 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
             print logbook.stream
 
     return population, logbook
+
+
+def moead(population, toolbox, weights, neighbour_size, scalar_method, cxpb,
+          mutpb, ngen, stats=None, verbose=__debug__):
+    """This is algorithm implements the MOEA/D propsed in [Zhang2007]_.
+
+    :param population: A list of individuals.
+    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
+                    operators.
+    :param weights: A list of weight vectors.
+    :param neighbour_size: The number of neighbour.
+    :param scalar_method: The method to scalarize multi objective.
+                          Specify 'weightedSum' or 'tchebycheff'.
+    :param cxpb: The probability of mating two individuals.
+    :param mutpb: The probability of mutating an individual.
+    :param ngen: The number of generation.
+    :param stats: A :class:`~deap.tools.Statistics` object that is updated
+                  inplace, optional.
+    :param verbose: Whether or not to log the statistics.
+    :returns: The external population
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution
+
+    This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    and :meth:`toolbox.evaluate` aliases to be registered in the toolbox.
+
+    You can register :meth:`toolbox.improve` for problem specific improvement.
+    ::
+
+        def custom_improve(i, offspring):
+            # Some problem specific improvement for subproblem i
+            return offspring
+
+        toolbox.register('improve', custom_improve)
+
+    .. [Zhang2007] Q. Zhang and H. Li: MOEA/D: A multi-objective evolutionary
+       algorithm based on decomposition, IEEE Trans. on Evolutionary
+       Computation, Vol. 11, No. 6, pp. 712-731, 2007
+    """
+    moead = _algorithms.MOEAD(population, toolbox, weights, neighbour_size,
+                              scalar_method, cxpb, mutpb, ngen, stats, verbose)
+    return moead.run()
