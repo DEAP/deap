@@ -437,10 +437,10 @@ class StrategyMultiObjective(object):
         mid_front = None
         not_chosen = list()
 
-        # Fill the next population (chosen) with the fronts until there is not enouch space
+        # Fill the next population (chosen) with the fronts until there is not enough space
         # When an entire front does not fit in the space left we rely on the hypervolume
         # for this front
-        # The remaining fronts are explicitely not chosen
+        # The remaining fronts are explicitly not chosen
         full = False
         for front in pareto_fronts:
             if len(chosen) + len(front) <= self.mu and not full:

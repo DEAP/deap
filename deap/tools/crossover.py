@@ -72,12 +72,12 @@ def cxTwoPoints(ind1, ind2):
 
 def cxUniform(ind1, ind2, indpb):
     """Executes a uniform crossover that modify in place the two
-    :term:`sequence` individuals. The attributes are swapped accordingto the
+    :term:`sequence` individuals. The attributes are swapped according to the
     *indpb* probability.
 
     :param ind1: The first individual participating in the crossover.
     :param ind2: The second individual participating in the crossover.
-    :param indpb: Independent probabily for each attribute to be exchanged.
+    :param indpb: Independent probability for each attribute to be exchanged.
     :returns: A tuple of two individuals.
 
     This function uses the :func:`~random.random` function from the python base
@@ -390,7 +390,7 @@ def cxMessyOnePoint(ind1, ind2):
 def cxESBlend(ind1, ind2, alpha):
     """Executes a blend crossover on both, the individual and the strategy. The
     individuals shall be a :term:`sequence` and must have a :term:`sequence`
-    :attr:`strategy` attribute. Adjustement of the minimal strategy shall be done
+    :attr:`strategy` attribute. Adjustment of the minimal strategy shall be done
     after the call to this function, consider using a decorator.
 
     :param ind1: The first evolution strategy participating in the crossover.
