@@ -1,7 +1,23 @@
+#    This file is part of DEAP.
+#
+#    DEAP is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU Lesser General Public License as
+#    published by the Free Software Foundation, either version 3 of
+#    the License, or (at your option) any later version.
+#
+#    DEAP is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
+
 import random
 import operator
 
 import numpy as np
+
 from deap import tools
 
 def sort_index(array):
@@ -68,7 +84,7 @@ class MOEAD:
         record = self.stats.compile(self.population) if self.stats else {}
         self.logbook.record(gen=0, nevals=npop, **record)
         if self.verbose:
-            print self.logbook.stream
+            print(self.logbook.stream)
 
         # Step 2)
         for i in range(self.ngen):
@@ -78,7 +94,7 @@ class MOEAD:
             record = self.stats.compile(self.population) if self.stats else {}
             self.logbook.record(gen=i+1, nevals=npop, **record)
             if self.verbose:
-                print self.logbook.stream
+                print(self.logbook.stream)
 
         return self.EP, self.logbook
 
@@ -252,6 +268,7 @@ class MOEAD:
         :params offspring: An individual that maybe add to EP.
         """
 
+        """
         # Setup condition list for each objective
         cond = [operator.gt if w > 0 else operator.lt
                 for w in offspring.fitness.weights]
@@ -274,3 +291,63 @@ class MOEAD:
             if dominated(ind, offspring):
                 return
         self.EP.append(offspring)
+        """
+
+        # Above code is clear but very slow.
+        # So, speed up using numpy.
+
+        # np.array for empty list makes bad shape.
+        # So, first check and return.
+        if not self.EP:
+            self.EP.append(offspring)
+            return
+
+        # Setup condition list for each objective(like above but numpy)
+        cond = [np.greater if w > 0 else np.less
+                for w in offspring.fitness.weights]
+
+        nobj = len(offspring.fitness.weights)
+
+        # Make fitness array for EP and offspring
+        epf = np.array([ind.fitness.values for ind in self.EP])
+        osf = np.array(offspring.fitness.values)
+
+        # Evaluate condition for each objective
+        check = np.empty(epf.shape, dtype=np.bool)
+        for i, c in enumerate(cond):
+            check[:, i] = c(osf[i], epf[:, i])
+        # Dominated means all conditions are True
+        dominated = (check.sum(axis=1) == nobj)
+
+        # Remove from EP if all vectors dominated by offspring
+        self.EP = [ind for ind, dom in zip(self.EP, dominated) if not dom]
+
+        # If all EP are removed, simple add offspring.
+        if not self.EP:
+            self.EP.append(offspring)
+            return
+
+        # Don't add same gene.
+        # This is useful for binary code, but slow down for real gene(exact
+        # same gene is very rare).
+        # So, enable only not float gene.
+        if not type(offspring[0]) == float:
+            epg = np.array(self.EP)
+            osg = np.array(offspring)
+            # Count same gene and check that count is equal to length of gene.
+            same = ((epg == osg).sum(axis=1) == len(offspring))
+            # Same gene is already in EP. Don't add.
+            if np.any(same):
+                return
+
+        # Remove dominated idnividual from EP fitness array
+        epf = epf[~dominated]
+
+        # Like above dominate check but reverse operand
+        check = np.empty(epf.shape, dtype=np.bool)
+        for i, c in enumerate(cond):
+            check[:, i] = c(epf[:, i], osf[i])
+        dominated = check.sum(axis=1) == nobj
+        # Add offspring to EP if no vectors in EP dominate offspring
+        if dominated.sum() == 0:
+            self.EP.append(offspring)
