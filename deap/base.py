@@ -185,6 +185,7 @@ class Fitness(object):
         return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
+        assert len(values) == len(self.weights), "Assigned values have not the same length than fitness weights"
         try:
             self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
