@@ -19,6 +19,8 @@ jobs:
           python.version: '3.6'
         Python37_VS2017:
           python.version: '3.7'
+        Python38_VS2017:
+          python.version: '3.8'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -53,6 +55,8 @@ jobs:
           python.version: '3.6'
         Python37_macOS1014:
           python.version: '3.7'
+        Python38_macOS1014:
+          python.version: '3.8'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -70,19 +74,21 @@ jobs:
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
     
-  - job: macOS10_13Build
+  - job: macOS10_15Build
     pool:
-      vmImage: 'macOS-10.13'
+      vmImage: 'macOS-10.15'
     strategy:
       matrix:
-        Python27_macOS1013:
+        Python27_macOS1015:
           python.version: '2.7'
-        Python35_macOS1013:
+        Python35_macOS1015:
           python.version: '3.5'
-        Python36_macOS1013:
+        Python36_macOS1015:
           python.version: '3.6'
-        Python37_macOS1013:
+        Python37_macOS1015:
           python.version: '3.7'
+        Python38_macOS1015:
+          python.version: '3.8'
     steps:
     - task: UsePythonVersion@0
       inputs:
