@@ -12,7 +12,8 @@ other tools.
 A First Individual
 ------------------
 
-First import the required modules and register the different functions required to create individuals that are lists of floats with a minimizing two objectives fitness.
+First import the required modules and register the different functions required to
+create individuals that are lists of floats with a minimizing two objectives fitness.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 2-16
@@ -22,12 +23,14 @@ The first individual can now be built by adding the appropriate line to the scri
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 18
 
-Printing the individual ``ind1`` and checking if its fitness is valid will give something like this
+Printing the individual ``ind1`` and checking if its fitness is valid will give
+something like this
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 20-21
 
-The individual is printed as its base class representation (here a list) and the fitness is invalid because it contains no values.
+The individual is printed as its base class representation (here a list) and the fitness
+is invalid because it contains no values.
 
 Evaluation
 ----------
@@ -35,15 +38,19 @@ Evaluation
 The evaluation is the most personal part of an evolutionary algorithm, it is
 the only part of the library that you must write yourself. A typical
 evaluation function takes one individual as argument and returns its fitness as
-a :class:`tuple`. As shown in the in the :ref:`core` section, a fitness is a list of floating point values and has a
-property :attr:`~deap.base.Fitness.valid` to know if this individual shall be re-evaluated. The
-fitness is set by setting the :attr:`~deap.base.Fitness.values` to the
-associated :class:`tuple`. For example, the following evaluates the previously created individual ``ind1`` and assigns its fitness to the corresponding values.
+a :class:`tuple`. As shown in the in the :ref:`core` section, a fitness is a list
+of floating point values and has a
+property :attr:`~deap.base.Fitness.valid` to know if this individual shall be
+re-evaluated. The fitness is set by setting the :attr:`~deap.base.Fitness.values`
+to the associated :class:`tuple`. For example, the following evaluates the previously
+created individual ``ind1`` and assigns its fitness to the corresponding values.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 24-32
 
-Dealing with single objective fitness is not different, the evaluation function **must** return a tuple because single-objective is treated as a special case of multi-objective.
+Dealing with single objective fitness is not different, the evaluation function
+**must** return a tuple because single-objective is treated as a special case of
+multi-objective.
 
 Mutation
 --------
@@ -55,15 +62,19 @@ in order to avoid undesirable behaviour.
 
 The general rule for mutation operators is that they **only** mutate, this
 means that an independent copy must be made prior to mutating the individual
-if the original individual has to be kept or is a *reference* to another individual (see the selection operator).
+if the original individual has to be kept or is a *reference* to another individual
+(see the selection operator).
 
-In order to apply a mutation (here a gaussian mutation) on the individual ``ind1``,
-simply apply the desired function.
+In order to apply a mutation (here a gaussian mutation) on the individual
+``ind1``, simply apply the desired function.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 35-37
 
-The fitness' values are deleted because they're not related to the individual anymore. As stated above, the mutation does mutate and only mutate an individual it is neither responsible of invalidating the fitness nor anything else. The following shows that ``ind2`` and ``mutant`` are in fact the same individual.
+The fitness' values are deleted because they're not related to the individual
+anymore. As stated above, the mutation does mutate and only mutate an individual
+it is neither responsible of invalidating the fitness nor anything else. The
+following shows that ``ind2`` and ``mutant`` are in fact the same individual.
 
 .. literalinclude:: /code/tutorials/part_3/3_next_step.py
    :lines: 39-40
@@ -210,25 +221,19 @@ build algorithms that are very close to pseudo code.
 Algorithms
 ----------
 There are a few algorithms implemented in the :mod:`~deap.algorithms` module.
-They are very simple and
-reflect the basic types of evolutionary algorithms present in the literature.
-The algorithms mainly use a :class:`~deap.base.Toolbox` as defined in the last
-sections to
-
-
-In order to setup a toolbox for an algorithm, you must register the
-desired operators under the specified names, refer to the documentation of the
-selected algorithm for more details. Once the toolbox is ready, it is time to
-launch the algorithm. The simple evolutionary algorithm takes 5 arguments, a
-*population*, a *toolbox*, a probability of mating each individual at each
-generation (*cxpb*), a probability of mutating each individual at each
-generation (*mutpb*) and a number of generations to accomplish (*ngen*).
+Algorithms provide quick implementations of traditional evolutionary algorithms.
+Algorithms are generators that can continue an optimization indefinetely until
+a stoping criteria is defined. For example the traditional generational algorithm
+can be used as follow. Given an initial *population*, a *toolbox*, a probability
+of mating each individual at each generation (*cxpb*), a probability of mutating
+each individual at each generation (*mutpb*) the
+:class:`~deap.algorithms.GenerationalAlgorithm` can be used as follow
 
 .. literalinclude:: /code/tutorials/part_3/3_8_algorithms.py
    :lines: 33-
 
-The best way to understand what the simple evolutionary algorithm does, is to
-take a look at the documentation or the source code.
+The best way to understand what the algorithms do, is to take a look at the
+documentation and their source code.
 
 Now that you built your own evolutionary algorithm in python, you are welcome
 to gives us feedback and appreciation. We would also really like to hear about

@@ -47,5 +47,10 @@ stats.register("max", numpy.max, axis=0)
 record = stats.compile(pop)
 print(record)
 
-pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=0, 
-                                   stats=stats, verbose=True)
+algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+for gen, state in enumerate(algo):
+    record = stats.compile(state.population)
+    print(record)
+
+    if gen > 50:
+        break
