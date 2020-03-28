@@ -2,7 +2,7 @@
 
 [![Build status](https://travis-ci.org/DEAP/deap.svg?branch=master)](https://travis-ci.org/DEAP/deap) [![Download](https://img.shields.io/pypi/dm/deap.svg)](https://pypi.python.org/pypi/deap) [![Join the chat at https://gitter.im/DEAP/deap](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DEAP/deap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://dev.azure.com/fderainville/DEAP/_apis/build/status/DEAP.deap?branchName=master)](https://dev.azure.com/fderainville/DEAP/_build/latest?definitionId=1&branchName=master) [![Documentation Status](https://readthedocs.org/projects/deap/badge/?version=master)](https://deap.readthedocs.io/en/master/?badge=master)
 
-DEAP is a novel evolutionary computation framework for rapid prototyping and testing of 
+DEAP is a novel evolutionary computation framework for rapid prototyping and testing of
 ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanisms such as multiprocessing and [SCOOP](https://github.com/soravux/scoop).
 
 DEAP includes the following features:
@@ -46,7 +46,7 @@ We encourage you to use easy_install or pip to install DEAP on your system. Othe
 pip install deap
 ```
 
-The latest version can be installed with 
+The latest version can be installed with
 ```bash
 pip install git+https://github.com/DEAP/deap@master
 ```
@@ -94,11 +94,22 @@ population = toolbox.population(n=300)
 
 NGEN=40
 for gen in range(NGEN):
-    offspring = algorithms.varAnd(population, toolbox, cxpb=0.5, mutpb=0.1)
+    # Create offspring by taking the first n children created by
+    # crossover and mutation
+    offspring = algorithms.take(
+        len(population),
+        algorithm.and_variation(population, toolbox, cxpb=0.5, mutpb=0.1):
+    )
+
+    # Evaluate the offspring
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit
+
+    # Replace the population with
     population = toolbox.select(offspring, k=len(population))
+
+# Retrieve the 10 best infividuals of the last population
 top10 = tools.selBest(population, k=10)
 ```
 
@@ -106,7 +117,7 @@ top10 = tools.selBest(population, k=10)
 Authors of scientific papers including results generated using DEAP are encouraged to cite the following paper.
 
 ```xml
-@article{DEAP_JMLR2012, 
+@article{DEAP_JMLR2012,
     author    = " F\'elix-Antoine Fortin and Fran\c{c}ois-Michel {De Rainville} and Marc-Andr\'e Gardner and Marc Parizeau and Christian Gagn\'e ",
     title     = { {DEAP}: Evolutionary Algorithms Made Easy },
     pages    = { 2171--2175 },
@@ -138,7 +149,7 @@ Authors of scientific papers including results generated using DEAP are encourag
   * Marc-André Gardner, Christian Gagné, and Marc Parizeau. Estimation of Distribution Algorithm based on Hidden Markov Models for Combinatorial Optimization. in Comp. Proc. Genetic and Evolutionary Computation Conference (GECCO 2013), July 2013.
   * J. T. Zhai, M. A. Bamakhrama, and T. Stefanov. "Exploiting Just-enough Parallelism when Mapping Streaming Applications in Hard Real-time Systems". Design Automation Conference (DAC 2013), 2013.
   * V. Akbarzadeh, C. Gagné, M. Parizeau, M. Argany, M. A Mostafavi, "Probabilistic Sensing Model for Sensor Placement Optimization Based on Line-of-Sight Coverage", Accepted in IEEE Transactions on Instrumentation and Measurement, 2012.
-  * M. Reif, F. Shafait, and A. Dengel. "Dataset Generation for Meta-Learning". Proceedings of the German Conference on Artificial Intelligence (KI'12). 2012. 
+  * M. Reif, F. Shafait, and A. Dengel. "Dataset Generation for Meta-Learning". Proceedings of the German Conference on Artificial Intelligence (KI'12). 2012.
   * M. T. Ribeiro, A. Lacerda, A. Veloso, and N. Ziviani. "Pareto-Efficient Hybridization for Multi-Objective Recommender Systems". Proceedings of the Conference on Recommanders Systems (!RecSys'12). 2012.
   * M. Pérez-Ortiz, A. Arauzo-Azofra, C. Hervás-Martínez, L. García-Hernández and L. Salas-Morera. "A system learning user preferences for multiobjective optimization of facility layouts". Pr,oceedings on the Int. Conference on Soft Computing Models in Industrial and Environmental Applications (SOCO'12). 2012.
   * Lévesque, J.C., Durand, A., Gagné, C., and Sabourin, R., Multi-Objective Evolutionary Optimization for Generating Ensembles of Classifiers in the ROC Space, Genetic and Evolutionary Computation Conference (GECCO 2012), 2012.

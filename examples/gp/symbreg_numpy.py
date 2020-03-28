@@ -63,7 +63,7 @@ def evalSymbReg(individual):
     # Transform the tree expression in a callable function
     func = toolbox.compile(expr=individual)
     # Evaluate the sum of squared difference between the expression
-    # and the real function values : x**4 + x**3 + x**2 + x 
+    # and the real function values : x**4 + x**3 + x**2 + x
     diff = numpy.sum((func(samples) - values)**2)
     return diff,
 
@@ -73,8 +73,12 @@ toolbox.register("mate", gp.cxOnePoint)
 toolbox.register("expr_mut", gp.genFull, min_=0, max_=2)
 toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
-def main():
+def main(verbose=True):
     random.seed(318)
+
+    NGEN = 40
+    CXPB = 0.5
+    MUTPB = 0.1
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
@@ -83,8 +87,21 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    algorithms.eaSimple(pop, toolbox, 0.5, 0.1, 40, stats, halloffame=hof)
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     return pop, stats, hof
 

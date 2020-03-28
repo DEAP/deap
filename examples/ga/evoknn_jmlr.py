@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #    This file is part of DEAP.
 #
 #    DEAP is free software: you can redistribute it and/or modify
@@ -13,6 +13,8 @@
 #
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
+
+from itertools import islice
 
 import knn, random
 from deap import algorithms, base, creator, tools
@@ -39,7 +41,10 @@ for fit, ind in zip(fits, population):
     ind.fitness.values = fit
 
 for gen in range(50):
-    offspring = algorithms.varOr(population, toolbox, lambda_=100, cxpb=0.5,mutpb=0.1)
+    offspring = islice(
+        algorithms.or_variation(population, tools, cxpb=0.5, mutpb=0.1),
+        100
+    )
     fits = toolbox.map(toolbox.evaluate, offspring)
     for fit, ind in zip(fits, offspring):
         ind.fitness.values = fit

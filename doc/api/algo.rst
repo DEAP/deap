@@ -2,45 +2,58 @@ Algorithms
 ==========
 
 .. automodule:: deap.algorithms
-   
+
 
 Complete Algorithms
 -------------------
 These are complete boxed algorithms that are somewhat limited to the very
-basic evolutionary computation concepts. All algorithms accept, in addition to
-their arguments, an initialized :class:`~deap.tools.Statistics` object to
-maintain stats of the evolution, an initialized
-:class:`~deap.tools.HallOfFame` to hold the best individual(s) to appear in
-the population, and a boolean `verbose` to specify whether to
-log what is happening during the evolution or not.
+basic evolutionary computation concepts.
 
-.. autofunction:: deap.algorithms.eaSimple(population, toolbox, cxpb, mutpb, ngen[, stats, halloffame, verbose])
+.. autoclass:: deap.algorithms.GenerationalAlgorithm
 
-.. autofunction:: deap.algorithms.eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, verbose])
+.. autoclass:: deap.algorithms.MuLambdaAlgorithm
 
-.. autofunction:: deap.algorithms.eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen[, stats, halloffame, verbose])
-
-.. autofunction:: deap.algorithms.eaGenerateUpdate(toolbox, ngen[, stats, halloffame, verbose])
+.. autoclass:: deap.algorithms.GenerateUpdateAlgorithm
 
 Variations
 ----------
 Variations are smaller parts of the algorithms that can be used separately to
 build more complex algorithms.
 
-.. autofunction:: deap.algorithms.varAnd
+.. autofunction:: deap.algorithms.and_variation
 
-.. autofunction:: deap.algorithms.varOr
+.. autofunction:: deap.algorithms.or_variation
+
+Utils
+-----
+
+.. autofunction:: deap.algorithms.evaluate_invalids
+
+.. autofunction:: deap.algorithms.take
 
 Covariance Matrix Adaptation Evolution Strategy
 ===============================================
-
 .. automodule:: deap.cma
 
-.. autoclass:: deap.cma.Strategy(centroid, sigma[, **kargs])
+.. currentmodule:: deap.cma
+
+.. autosummary::
+   :nosignatures:
+
+   deap.cma.BasicStrategy
+   deap.cma.OnePlusLambdaStrategy
+   deap.cma.ActiveOnePlusLambdaStrategy
+   deap.cma.MultiObjectiveStrategy
+
+
+.. autoclass:: BasicStrategy(centroid, sigma[, **kargs])
    :members:
 
-.. autoclass:: deap.cma.StrategyOnePlusLambda(parent, sigma[, **kargs])
+.. autoclass:: OnePlusLambdaStrategy(parent, sigma[, **kargs])
    :members:
 
-.. autoclass:: deap.cma.StrategyMultiObjective(population, sigma[, **kargs])
+.. autoclass:: ActiveOnePlusLambdaStrategy(parent, sigma[, **kargs])
+   :members:
+
+.. autoclass:: MultiObjectiveStrategy(population, sigma[, **kargs])
    :members:

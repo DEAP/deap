@@ -59,7 +59,7 @@ def main():
     toolbox.unregister("population")
 
     NGEN, FREQ = 40, 5
-    toolbox.register("algorithm", algorithms.eaSimple, toolbox=toolbox, 
+    toolbox.register("algorithm", algorithms.eaSimple, toolbox=toolbox,
                      cxpb=0.5, mutpb=0.2, ngen=FREQ, verbose=False)
     for i in range(0, NGEN, FREQ):
         results = toolbox.map(toolbox.algorithm, islands)

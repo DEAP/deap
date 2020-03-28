@@ -19,10 +19,6 @@ import multiprocessing
 import random
 import sys
 
-if sys.version_info < (2, 7):
-    print("mpga_onemax example requires Python >= 2.7.")
-    exit(1)
-
 import numpy
 
 from deap import algorithms
@@ -51,13 +47,18 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-if __name__ == "__main__":
+def main(verbose=True):
     random.seed(64)
-    
+
+    NGEN = 40
+    CXPB = 0.5
+    MUTPB = 0.1
+    verbose = True
+
     # Process Pool of 4 workers
     pool = multiprocessing.Pool(processes=4)
     toolbox.register("map", pool.map)
-    
+
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -66,7 +67,28 @@ if __name__ == "__main__":
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
 
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, 
-                        stats=stats, halloffame=hof)
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     pool.close()
+    return pop, stats, hof
+
+
+if __name__ == "__main__":
+    if sys.version_info < (2, 7):
+        print("mpga_onemax example requires Python >= 2.7.")
+        exit(1)
+
+    main()

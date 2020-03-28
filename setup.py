@@ -61,7 +61,7 @@ def run_setup(build_ext):
         extra_modules.append(hv_module)
 
     setup(name='deap',
-          version=deap.__revision__,
+          version=deap.__version__,
           description='Distributed Evolutionary Algorithms in Python',
           long_description=long_description,
           long_description_content_type="text/markdown",

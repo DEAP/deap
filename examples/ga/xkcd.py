@@ -33,7 +33,7 @@ from deap import tools
 
 IND_INIT_SIZE = 3
 
-# Create the item dictionary: item id is an integer, and value is 
+# Create the item dictionary: item id is an integer, and value is
 # a (name, weight, value) 3-uple. Since the comic didn't specified a time for
 # each menu item, random was called to generate a time.
 ITEMS_NAME = "Mixed Fruit", "French Fries", "Side Salad", "Hot Wings", "Mozzarella Sticks", "Sampler Plate"
@@ -81,7 +81,7 @@ toolbox.register("mate", cxCounter, indpb=0.5)
 toolbox.register("mutate", mutCounter)
 toolbox.register("select", tools.selNSGA2)
 
-def main():
+def main(verbose=True):
     NGEN = 40
     MU = 100
     LAMBDA = 200
@@ -90,7 +90,7 @@ def main():
 
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
-    
+
     price_stats = tools.Statistics(key=lambda ind: ind.fitness.values[0])
     time_stats = tools.Statistics(key=lambda ind: ind.fitness.values[1])
     stats = tools.MultiStatistics(price=price_stats, time=time_stats)
@@ -98,10 +98,23 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
 
-    algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN,
-                              stats, halloffame=hof)
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.MuLambdaAlgorithm(pop, toolbox, "+", LAMBDA,
+                                                             cxpb=CXPB, mutpb=MUTPB)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     return pop, stats, hof
+
 
 if __name__ == "__main__":
     _, _, hof = main()

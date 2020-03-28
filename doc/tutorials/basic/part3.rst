@@ -15,10 +15,12 @@ The statistical functions are now registered. The ``register`` function expects 
 
 Predefined Algorithms
 ---------------------
-When using a predefined algorithm such as :func:`~deap.algorithms.eaSimple`, :func:`~deap.algorithms.eaMuPlusLambda`, :func:`~deap.algorithms.eaMuCommaLambda`, or :func:`~deap.algorithms.eaGenerateUpdate`, the statistics object previously created can be given as argument to the algorithm.
+When using a predefined algorithm such as :func:`~deap.algorithms.GenerationalAlgorithm`,
+:func:`~deap.algorithms.MuLambdaAlgorithm`, or :func:`~deap.algorithms.GenerateUpdateAlgorithm`,
+the statistics object can compute its record on the state's population.
 
 .. literalinclude:: /code/tutorials/part_3/stats.py
-   :lines: 50-51
+   :lines: 50-
 
 Statistics will automatically be computed on the population every generation. The verbose argument prints the statistics on screen while the optimization takes place. Once the algorithm returns, the final population and a :class:`~deap.tools.Logbook` are returned. See the :ref:`next section <logging>` or the :class:`~deap.tools.Logbook` documentation for more information.
 
@@ -96,7 +98,7 @@ A logbook is a picklable object (as long as all inserted objects are picklable) 
    :lines: 1,15
 
 .. note::
-   
+
    Every algorithm returns a logbook containing the statistics for every generation and the number of evaluations for the whole evolution.
 
 Printing to Screen
@@ -139,12 +141,12 @@ One difference is the column ordering, where we can specify an order for the cha
 The resulting output is::
 
    >>> print(logbook)
-                        fitness                 size       
+                        fitness                 size
                -------------------------  ---------------
    gen   evals min      avg      max      min   avg   max
-   0     30    0.165572 1.71136  6.85956  3     4.54  7  
+   0     30    0.165572 1.71136  6.85956  3     4.54  7
 
-Retrieving the data is also done through the chapters. 
+Retrieving the data is also done through the chapters.
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
    :lines: 39-41

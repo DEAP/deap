@@ -31,7 +31,7 @@ NBR_ITEMS = 20
 # dict initialization. It is also seeded in main().
 random.seed(64)
 
-# Create the item dictionary: item name is an integer, and value is 
+# Create the item dictionary: item name is an integer, and value is
 # a (weight, value) 2-uple.
 items = {}
 # Create random items and store them in the items' dictionary.
@@ -47,7 +47,7 @@ toolbox = base.Toolbox()
 toolbox.register("attr_item", random.randrange, NBR_ITEMS)
 
 # Structure initializers
-toolbox.register("individual", tools.initRepeat, creator.Individual, 
+toolbox.register("individual", tools.initRepeat, creator.Individual,
     toolbox.attr_item, IND_INIT_SIZE)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
@@ -70,7 +70,7 @@ def cxSet(ind1, ind2):
     ind1 &= ind2                    # Intersection (inplace)
     ind2 ^= temp                    # Symmetric Difference (inplace)
     return ind1, ind2
-    
+
 def mutSet(individual):
     """Mutation that pops or add an element."""
     if random.random() < 0.5:
@@ -85,14 +85,14 @@ toolbox.register("mate", cxSet)
 toolbox.register("mutate", mutSet)
 toolbox.register("select", tools.selNSGA2)
 
-def main():
+def main(verbose=True):
     random.seed(64)
     NGEN = 50
     MU = 50
     LAMBDA = 100
     CXPB = 0.7
     MUTPB = 0.2
-    
+
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -100,11 +100,22 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
-    algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
-                              halloffame=hof)
-    
-    return pop, stats, hof
-                 
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    for gen, state in enumerate(algorithms.MuLambdaAlgorithm(pop, toolbox, "+", LAMBDA,
+                                                             cxpb=CXPB, mutpb=MUTPB)):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
+
 if __name__ == "__main__":
-    main()                 
+    main()

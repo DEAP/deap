@@ -80,36 +80,30 @@ def main():
     for ind in population:
         ind.fitness.values = toolbox.evaluate(ind)
 
-    strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
+    strategy = cma.MultiObjectiveStrategy(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
     toolbox.register("generate", strategy.generate, creator.Individual)
     toolbox.register("update", strategy.update)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-   
+
     logbook = tools.Logbook()
     logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
 
     fitness_history = []
 
-    for gen in range(NGEN):
-        # Generate a new population
-        population = toolbox.generate()
+    for gen, state in enumerate(algorithms.GenerateUpdateAlgorithm(toolbox)):
+        for ind in state.population:
+            fitness_history.append(ind.fitness.values)
 
-        # Evaluate the individuals
-        fitnesses = toolbox.map(toolbox.evaluate, population)
-        for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
-            fitness_history.append(fit)
-        
-        # Update the strategy with the evaluated individuals
-        toolbox.update(population)
-        
-        record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(population), **record)
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
         if verbose:
             print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     if verbose:
         print("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0]))
@@ -134,7 +128,7 @@ def main():
             mpl_tmp.use('Agg')   # Force matplotlib to not use any Xwindows backend.
         import matplotlib.pyplot as plt
 
-        fig = plt.figure()
+        plt.figure()
         plt.title("Multi-objective minimization via MO-CMA-ES")
         plt.xlabel("First objective (function) to minimize")
         plt.ylabel("Second objective (function) to minimize")
@@ -145,16 +139,16 @@ def main():
 
         # Plot all history. Note the values include the penalty.
         fitness_history = numpy.asarray(fitness_history)
-        plt.scatter(fitness_history[:,0], fitness_history[:,1],
-            facecolors='none', edgecolors="lightblue")
+        plt.scatter(fitness_history[:, 0], fitness_history[:, 1],
+                    facecolors='none', edgecolors="lightblue")
 
         valid_front = numpy.array([ind.fitness.values for ind in strategy.parents if close_valid(ind)])
         invalid_front = numpy.array([ind.fitness.values for ind in strategy.parents if not close_valid(ind)])
 
         if len(valid_front) > 0:
-            plt.scatter(valid_front[:,0], valid_front[:,1], c="g")
+            plt.scatter(valid_front[:, 0], valid_front[:, 1], c="g")
         if len(invalid_front) > 0:
-            plt.scatter(invalid_front[:,0], invalid_front[:,1], c="r")
+            plt.scatter(invalid_front[:, 0], invalid_front[:, 1], c="r")
 
         if interactive:
             plt.show()

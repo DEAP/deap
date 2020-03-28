@@ -43,9 +43,13 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-def main():
+def main(verbose=True):
     random.seed(64)
-    
+
+    NGEN = 40
+    CXPB = 0.5
+    MUTPB = 0.2
+
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -53,11 +57,23 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, 
-                                   stats=stats, halloffame=hof, verbose=True)
-    
-    return pop, log, hof
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
+    return pop, stats, hof
 
 if __name__ == "__main__":
     main()

@@ -55,8 +55,12 @@ toolbox.register("mutate", tools.mutShuffleIndexes, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("evaluate", evalTSP)
 
-def main():
+def main(verbose=True):
     random.seed(169)
+
+    NGEN = 40
+    CXPB = 0.7
+    MUTPB = 0.2
 
     pop = toolbox.population(n=300)
 
@@ -66,10 +70,22 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats, 
-                        halloffame=hof)
-    
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
+
     return pop, stats, hof
 
 if __name__ == "__main__":

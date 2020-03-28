@@ -30,6 +30,8 @@ fitnesses = toolbox.map(toolbox.evaluate, pop)
 for ind, fit in zip(pop, fitnesses):
     ind.fitness.values = fit
 
-from deap import algorithms
+from deap.algorithms import GenerationalAlgorithm
 
-algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=50)
+for gen, state in enumerate(GenerationalAlgorithm(pop, toolbox, cxpb=0.5, mutpb=0.2)):
+    if gen > 50 or any(ind.fitness.values[0] < 1e-7 for ind in pop):
+        break

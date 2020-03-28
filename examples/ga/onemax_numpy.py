@@ -39,7 +39,7 @@ def cxTwoPointCopy(ind1, ind2):
     copy is required because the slicing in numpy returns a view of the data,
     which leads to a self overwritting in the swap operation. It prevents
     ::
-    
+
         >>> import numpy
         >>> a = numpy.array((1,2,3,4))
         >>> b = numpy.array((5.6.7.8))
@@ -59,36 +59,53 @@ def cxTwoPointCopy(ind1, ind2):
 
     ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
         = ind2[cxpoint1:cxpoint2].copy(), ind1[cxpoint1:cxpoint2].copy()
-        
+
     return ind1, ind2
-    
-    
+
+
 toolbox.register("evaluate", evalOneMax)
 toolbox.register("mate", cxTwoPointCopy)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-def main():
+def main(verbose=True):
     random.seed(64)
-    
+
+    NGEN = 40
+    CXPB = 0.5
+    MUTPB = 0.2
+
     pop = toolbox.population(n=300)
-    
+
     # Numpy equality function (operators.eq) between two arrays returns the
     # equality element wise, which raises an exception in the if similar()
     # check of the hall of fame. Using a different equality function like
     # numpy.array_equal or numpy.allclose solve this issue.
     hof = tools.HallOfFame(1, similar=numpy.array_equal)
-    
+
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
-    algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, stats=stats,
-                        halloffame=hof)
+
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+
+    algo = algorithms.GenerationalAlgorithm(pop, toolbox, cxpb=CXPB, mutpb=MUTPB)
+    for gen, state in enumerate(algo):
+        hof.update(state.population)
+
+        record = stats.compile(state.population)
+        logbook.record(gen=gen, nevals=state.nevals, **record)
+        if verbose:
+            print(logbook.stream)
+
+        if gen >= NGEN:
+            break
 
     return pop, stats, hof
+
 
 if __name__ == "__main__":
     main()

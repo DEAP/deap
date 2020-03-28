@@ -1,230 +1,128 @@
-#    This file is part of DEAP.
-#
-#    DEAP is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as
-#    published by the Free Software Foundation, either version 3 of
-#    the License, or (at your option) any later version.
-#
-#    DEAP is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU Lesser General Public License for more details.
-#
-#    You should have received a copy of the GNU Lesser General Public
-#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
-
-"""The :mod:`algorithms` module is intended to contain some specific algorithms
-in order to execute very common evolutionary algorithms. The method used here
-are more for convenience than reference as the implementation of every
-evolutionary algorithm may vary infinitely. Most of the algorithms in this
-module use operators registered in the toolbox. Generally, the keyword used are
-:meth:`mate` for crossover, :meth:`mutate` for mutation, :meth:`~deap.select`
-for selection and :meth:`evaluate` for evaluation.
-
-You are encouraged to write your own algorithms in order to make them do what
-you really want them to do.
-"""
-
+from copy import deepcopy
+from itertools import cycle, islice, izip
 import random
 
-import tools
 
+def evaluate_invalids(individuals, eval_func, map=map):
+    """Evaluate all individuals marked invalid.
 
-def varAnd(population, toolbox, cxpb, mutpb):
-    """Part of an evolutionary algorithm applying only the variation part
-    (crossover **and** mutation). The modified individuals have their
-    fitness invalidated. The individuals are cloned so returned population is
-    independent of the input population.
+    Args:
+        individuals (iterable): Individuals to evaluate, they must have a
+            :attr:`fitness` attribute. Only those with an invalid fitness
+            will get evaluates.
+        eval_func (callable): The evaluation to use on each individual.
+            The function should take the individual as single argument.
+        map (callable): Functiona that applies the evaluation function
+            to each item in the invalid individuals iterable.
 
-    :param population: A list of individuals to vary.
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param cxpb: The probability of mating two individuals.
-    :param mutpb: The probability of mutating an individual.
-    :returns: A list of varied individuals that are independent of their
-              parents.
+    Returns:
+        int: The number of individuals evaluated.
 
-    The variation goes as follow. First, the parental population
-    :math:`P_\mathrm{p}` is duplicated using the :meth:`toolbox.clone` method
-    and the result is put into the offspring population :math:`P_\mathrm{o}`.  A
-    first loop over :math:`P_\mathrm{o}` is executed to mate pairs of
-    consecutive individuals. According to the crossover probability *cxpb*, the
-    individuals :math:`\mathbf{x}_i` and :math:`\mathbf{x}_{i+1}` are mated
-    using the :meth:`toolbox.mate` method. The resulting children
-    :math:`\mathbf{y}_i` and :math:`\mathbf{y}_{i+1}` replace their respective
-    parents in :math:`P_\mathrm{o}`. A second loop over the resulting
-    :math:`P_\mathrm{o}` is executed to mutate every individual with a
-    probability *mutpb*. When an individual is mutated it replaces its not
-    mutated version in :math:`P_\mathrm{o}`. The resulting :math:`P_\mathrm{o}`
-    is returned.
-
-    This variation is named *And* beceause of its propention to apply both
-    crossover and mutation on the individuals. Note that both operators are
-    not applied systematicaly, the resulting individuals can be generated from
-    crossover only, mutation only, crossover and mutation, and reproduction
-    according to the given probabilities. Both probabilities should be in
-    :math:`[0, 1]`.
     """
-    offspring = [toolbox.clone(ind) for ind in population]
-
-    # Apply crossover and mutation on the offspring
-    for i in range(1, len(offspring), 2):
-        if random.random() < cxpb:
-            offspring[i - 1], offspring[i] = toolbox.mate(offspring[i - 1],
-                                                          offspring[i])
-            del offspring[i - 1].fitness.values, offspring[i].fitness.values
-
-    for i in range(len(offspring)):
-        if random.random() < mutpb:
-            offspring[i], = toolbox.mutate(offspring[i])
-            del offspring[i].fitness.values
-
-    return offspring
-
-
-def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=__debug__):
-    """This algorithm reproduce the simplest evolutionary algorithm as
-    presented in chapter 7 of [Back2000]_.
-
-    :param population: A list of individuals.
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param cxpb: The probability of mating two individuals.
-    :param mutpb: The probability of mutating an individual.
-    :param ngen: The number of generation.
-    :param stats: A :class:`~deap.tools.Statistics` object that is updated
-                  inplace, optional.
-    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
-                       contain the best individuals, optional.
-    :param verbose: Whether or not to log the statistics.
-    :returns: The final population
-    :returns: A class:`~deap.tools.Logbook` with the statistics of the
-              evolution
-
-    The algorithm takes in a population and evolves it in place using the
-    :meth:`varAnd` method. It returns the optimized population and a
-    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
-    logbook will contain the generation number, the number of evalutions for
-    each generation and the statistics if a :class:`~deap.tools.Statistics` is
-    given as argument. The *cxpb* and *mutpb* arguments are passed to the
-    :func:`varAnd` function. The pseudocode goes as follow ::
-
-        evaluate(population)
-        for g in range(ngen):
-            population = select(population, len(population))
-            offspring = varAnd(population, toolbox, cxpb, mutpb)
-            evaluate(offspring)
-            population = offspring
-
-    As stated in the pseudocode above, the algorithm goes as follow. First, it
-    evaluates the individuals with an invalid fitness. Second, it enters the
-    generational loop where the selection procedure is applied to entirely
-    replace the parental population. The 1:1 replacement ratio of this
-    algorithm **requires** the selection procedure to be stochastic and to
-    select multiple times the same individual, for example,
-    :func:`~deap.tools.selTournament` and :func:`~deap.tools.selRoulette`.
-    Third, it applies the :func:`varAnd` function to produce the next
-    generation population. Fourth, it evaluates the new individuals and
-    compute the statistics on this population. Finally, when *ngen*
-    generations are done, the algorithm returns a tuple with the final
-    population and a :class:`~deap.tools.Logbook` of the evolution.
-
-    .. note::
-
-        Using a non-stochastic selection method will result in no selection as
-        the operator selects *n* individuals from a pool of *n*.
-
-    This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
-    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox.
-
-    .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
-       Basic Algorithms and Operators", 2000.
-    """
-    logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+    invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
+    fitnesses = map(eval_func, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
         ind.fitness.values = fit
 
-    if halloffame is not None:
-        halloffame.update(population)
-
-    record = stats.compile(population) if stats else {}
-    logbook.record(gen=0, nevals=len(invalid_ind), **record)
-    if verbose:
-        print logbook.stream
-
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
-        # Select the next generation individuals
-        offspring = toolbox.select(population, len(population))
-
-        # Vary the pool of individuals
-        offspring = varAnd(offspring, toolbox, cxpb, mutpb)
-
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
-
-        # Update the hall of fame with the generated individuals
-        if halloffame is not None:
-            halloffame.update(offspring)
-
-        # Replace the current population by the offspring
-        population[:] = offspring
-
-        # Append the current generation statistics to the logbook
-        record = stats.compile(population) if stats else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
-        if verbose:
-            print logbook.stream
-
-    return population, logbook
+    return len(invalid_ind)
 
 
-def varOr(population, toolbox, lambda_, cxpb, mutpb):
-    """Part of an evolutionary algorithm applying only the variation part
-    (crossover, mutation **or** reproduction). The modified individuals have
-    their fitness invalidated. The individuals are cloned so returned
-    population is independent of the input population.
+def take(n, iterable):
+    """Return first n items of an iterable as a list.
 
-    :param population: A list of individuals to vary.
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param lambda\_: The number of children to produce
-    :param cxpb: The probability of mating two individuals.
-    :param mutpb: The probability of mutating an individual.
-    :returns: The final population.
+    This function is taken from Python stdlib :mod:`itertools`.
+    """
+    return list(islice(iterable, n))
 
-    The variation goes as follow. Until *_lambda* offspring have been produced,
-    it selects one of the three operations; crossover, mutation or reproduction.
-    In the case of a crossover, two individuals are selected at random from
-    the parental population :math:`P_\mathrm{p}`, those individuals are cloned
-    using the :meth:`toolbox.clone` method and then mated using the
-    :meth:`toolbox.mate` method. Both children are appended to the
-    offspring population :math:`P_\mathrm{o}`.
-    In the case of a mutation, one individual is selected at random from
-    :math:`P_\mathrm{p}`, it is cloned and then mutated using using the
-    :meth:`toolbox.mutate` method. The resulting mutant is appended to
-    :math:`P_\mathrm{o}`. In the case of a reproduction, one individual is
-    selected at random from :math:`P_\mathrm{p}`, cloned and appended to
-    :math:`P_\mathrm{o}`.
 
-    This variation is named *Or* beceause an offspring will never result from
-    both operations crossover and mutation. The sum of both probabilities
-    shall be in :math:`[0, 1]`, the reproduction probability is
-    1 - *cxpb* - *mutpb*.
+def and_variation(population, toolbox, cxpb, mutpb):
+    """Vary the individuals of a population using the operators in the toolbox.
+
+    Iterator that generates new individuals by varying consecutive pairs of two
+    individuals from the population. The variation first deepcopies the individuals
+    and then applies crossover and mutation with probability *cxpb* and *mutpb* on
+    each of them. Both probabilities should be in [0, 1]. The offspring are
+    returned one after an other. If more individuals than the size of the population
+    are requested, the population is cycled over.
+
+    Args:
+        population (Iterable): The individuals to vary.
+        toolbox (base.Toolbox): The toolbox containing a *mate* and *mutate*
+            method to variate the individuals.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
+
+    Yields:
+        individual: Offspring produced by the variation.
+
+    Example:
+        The variation can generates new offspring indefinitely if required.
+        To generate a given number of individual::
+
+            >>> offspring = take(
+            ...     50,
+            ...     and_variation(population, toolbox, 0.6, 0.3)
+            ... )       # doctest: +SKIP
+
+    """
+    individuals = cycle(population)
+
+    # zip(iter, iter) produces l[i], l[i+1]
+    for i1, i2 in izip(individuals, individuals):
+        # TODO: put deepcopy in operators
+        # Must deepcopy separately to ensure full deepcopy if the same
+        # individual is selected twice, it is deepcopied twice (what is
+        # not true with deepcopy([i1, i2])).
+        i1, i2 = deepcopy(i1), deepcopy(i2)
+        if random.random() < cxpb:
+            i1, i2 = toolbox.mate(i1, i2)
+
+        if random.random() < mutpb:
+            i1, = toolbox.mutate(i1)
+
+        if random.random() < mutpb:
+            i2, = toolbox.mutate(i2)
+
+        del i1.fitness.values, i2.fitness.values
+
+        yield i1
+        yield i2
+
+
+def or_variation(population, toolbox, cxpb, mutpb):
+    """Vary the individuals of a population using the operators in the toolbox.
+
+    Generates new offspring by varying the individuals of a population. At first,
+    the variation selects if a crossover, a mutation or a copy should be used
+    according to the given probabilities. Then, it samples randomly the appropriate
+    number of individuals, 2 for crossover and 1 for mutation and copy, and
+    deepcopies them before applying the operator and yields the result. *cxpb*
+    and *mutpb* shoudn't sum above 1.
+
+    Args:
+        population (iterable): The individuals to vary.
+        toolbox (base.Toolbox): The toolbox containing a *mate* and *mutate*
+            method to variate the individuals.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
+
+    Yields:
+        individual: Offspring produced by the variation.
+
+    Example:
+        The variation can generates new offspring indefinitely if required.
+        To generate a given number of individual::
+
+            >>> offspring = take(
+            ...     50,
+            ...     or_variation(population, toolbox, 0.6, 0.3)
+            ... )       # doctest: +SKIP
+
     """
     assert (cxpb + mutpb) <= 1.0, (
         "The sum of the crossover and mutation probabilities must be smaller "
-        "or equal to 1.0.")
+        "or equal to 1.0."
+    )
 
     # adjust probabilities since both crossover children are appended
     cxpb_adj = cxpb / (2 - cxpb)
@@ -233,279 +131,234 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
     else:
         mutpb_adj = mutpb
 
-    offspring = []
-    while len(offspring) < lambda_:
+    while True:
         op_choice = random.random()
-        if op_choice < cxpb_adj:            # Apply crossover
-            ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
-            ind1, ind2 = toolbox.mate(ind1, ind2)
-            del ind1.fitness.values, ind2.fitness.values
-            offspring.append(ind1)
-            offspring.append(ind2)
+        if op_choice < cxpb_adj:                # Apply crossover
+            i1, i2 = random.sample(population, 2)
+            # Must deepcopy separately to ensure full deepcopy if the same
+            # individual is selected twice, it is deepcopied twice (what is
+            # not true with deepcopy([i1, i2])).
+            i1, i2 = deepcopy(i1), deepcopy(i2)
+            i1, _ = toolbox.mate(i1, i2)
+            del i1.fitness.values, i2.fitness.values
+            offspring = [i1, i2]
         elif op_choice < cxpb_adj + mutpb_adj:  # Apply mutation
-            ind = toolbox.clone(random.choice(population))
-            ind, = toolbox.mutate(ind)
-            del ind.fitness.values
-            offspring.append(ind)
-        else:                           # Apply reproduction
-            offspring.append(random.choice(population))
+            i1 = deepcopy(random.choice(population))
+            i1, = toolbox.mutate(i1)
+            del i1.fitness.values
+            offspring = [i1]
+        else:                                   # Apply reproduction
+            i1 = deepcopy(random.choice(population))
+            offspring = [i1]
 
-    # If the last iteration was a crossover, remove the additional individual
-    if len(offspring) > lambda_:
-        del offspring[-1]
-
-    return offspring
+        for child in offspring:
+            yield child
 
 
-def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
-                   stats=None, halloffame=None, verbose=__debug__):
-    """This is the :math:`(\mu + \lambda)` evolutionary algorithm.
+class GenerationalAlgorithm:
+    """Algorithm based on a generational process.
 
-    :param population: A list of individuals.
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param mu: The number of individuals to select for the next generation.
-    :param lambda\_: The number of children to produce at each generation.
-    :param cxpb: The probability that an offspring is produced by crossover.
-    :param mutpb: The probability that an offspring is produced by mutation.
-    :param ngen: The number of generation.
-    :param stats: A :class:`~deap.tools.Statistics` object that is updated
-                  inplace, optional.
-    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
-                       contain the best individuals, optional.
-    :param verbose: Whether or not to log the statistics.
-    :returns: The final population
-    :returns: A class:`~deap.tools.Logbook` with the statistics of the
-              evolution.
+    Each iteration, the parental population is selected from the population
+    for reproduction. It is advised to use a selection with replacement as
+    N individuals will be selected from a population of size N. The parents
+    get to reproduce using the :func:`and_variation`.
 
-    The algorithm takes in a population and evolves it in place using the
-    :func:`varOr` function. It returns the optimized population and a
-    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
-    logbook will contain the generation number, the number of evalutions for
-    each generation and the statistics if a :class:`~deap.tools.Statistics` is
-    given as argument. The *cxpb* and *mutpb* arguments are passed to the
-    :func:`varOr` function. The pseudocode goes as follow ::
+    Args:
+        population (list): Initial population for the evolution.
+        toolbox (deap.base.Toolbox): Toolbox containing a *mate*,
+            *mutate*, *select* and *evaluate* method.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
 
-        evaluate(population)
-        for g in range(ngen):
-            offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
-            evaluate(offspring)
-            population = select(population + offspring, mu)
+    Yields:
+        self
 
-    First, the individuals having an invalid fitness are evaluated. Second,
-    the evolutionary loop begins by producing *lambda_* offspring from the
-    population, the offspring are generated by the :func:`varOr` function. The
-    offspring are then evaluated and the next generation population is
-    selected from both the offspring **and** the population. Finally, when
-    *ngen* generations are done, the algorithm returns a tuple with the final
-    population and a :class:`~deap.tools.Logbook` of the evolution.
+    Attributes:
+        population: The population updated every generation.
+        nevals: The number of evaluations in the last generation.
+        toolbox
+        cxpb
+        mutpb
 
-    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
-    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox. This algorithm uses the :func:`varOr`
-    variation.
+    Examples:
+        This algorithm can continue the optimization indefinetely util stopped.
+        Each iteration it yields itself to give access to its internal parameters.
+        It can be used as follow::
+
+            for state in GenerationAlgorithm(pop, toolbox, CXPB, MUTPB):
+                if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
+                    break
+
+        Any attribute can be changed during evolution. For example, to change the
+        population, directly use the state ::
+
+            for state in GenerationAlgorithm(pop, toolbox, CXPB, MUTPB):
+                state.population = new_population()
+
     """
-    logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+    def __init__(self, population, toolbox, cxpb, mutpb):
+        self.population = population
+        self.toolbox = toolbox
+        self.cxpb = cxpb
+        self.mutpb = mutpb
+        self.nevals = 0
 
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+    def __iter__(self):
+        return self
 
-    if halloffame is not None:
-        halloffame.update(population)
+    def next(self):
+        # Select the next generation individuals
+        offspring = self.toolbox.select(self.population, len(self.population))
 
-    record = stats.compile(population) if stats is not None else {}
-    logbook.record(gen=0, nevals=len(invalid_ind), **record)
-    if verbose:
-        print logbook.stream
+        # Vary the pool of individuals
+        offspring = take(
+            len(self.population),
+            and_variation(offspring, self.toolbox, self.cxpb, self.mutpb)
+        )
 
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
+        # Evaluate the new individuals
+        self.nevals = evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
+
+        # Replace the current population by the offspring
+        self.population = offspring
+
+        return self
+
+
+class MuLambdaAlgorithm:
+    r""":math:`(\mu~\begin{smallmatrix}+ \\ ,\end{smallmatrix}~\lambda)` evolutionary
+    algorithm.
+
+    Each iteration, *lambda_* individuals are produced by the :func:`or_variation`.
+    The individuals are then evaluated and selection is made from the parents and
+    offspring (`"+"`) or only from the offspring (`","`) depending on the input
+    *selection_type*.
+
+    Args:
+        population (list): Initial population for the evolution.
+        toolbox (deap.base.Toolbox): Toolbox containing a *mate*,
+            *mutate*, *select* and *evaluate* method.
+        selection_type (str): One of `"+", "plus", ",", or "comma"` specifying if the
+            selection is made from the parents and the offspring (`"+"`) or only
+            from the offspring (`","`).
+        lambda_ (int): Number of individual so produce each generation.
+        cxpb (float): Probability to apply crossover on every pair of individuals.
+        mutpb (float): Probability to apply mutation on every individual.
+
+    Yields:
+        self
+
+    Attributes:
+        population: The population updated every generation.
+        nevals: The number of evaluations in the last generation.
+        toolbox
+        selection_type
+        lambda_
+        cxpb
+        mutpb
+
+    Examples:
+        This algorithm can continue the optimization indefinetely util stopped.
+        Each iteration it yields itself to give access to its internal parameters.
+        It can be used as follow::
+
+            for state in MuLambdaAlgorithm(pop, toolbox, "+", 50, CXPB, MUTPB):
+                if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
+                    break
+
+        Any attribute can be changed during evolution. For example, to change the
+        population, directly use the state ::
+
+            for state in MuLambdaAlgorithm(pop, toolbox, "+", 50, CXPB, MUTPB):
+                state.population = new_population()
+
+    """
+    def __init__(self, population, toolbox, selection_type, lambda_, cxpb, mutpb):
+        self.population = population
+        self.toolbox = toolbox
+        self.selection_type = selection_type
+        self.lambda_ = lambda_
+        self.cxpb = cxpb
+        self.mutpb = mutpb
+        self.nevals = 0
+
+        assert selection_type in {"plus", "comma", "+", ","}, (
+            "Selection type {} not in {'plus', 'comma'}, "
+        ).format(selection_type)
+
+    def __iter__(self):
+        return self
+
+    def next(self):
         # Vary the population
-        offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
+        offspring = take(
+            self.lambda_,
+            or_variation(self.population, self.toolbox, self.cxpb, self.mutpb)
+        )
 
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+        # Evaluate the new individuals
+        self.nevals = evaluate_invalids(offspring, self.toolbox.evaluate, self.toolbox.map)
 
-        # Update the hall of fame with the generated individuals
-        if halloffame is not None:
-            halloffame.update(offspring)
+        if self.selection_type in {"plus", "+"}:
+            offspring = self.population + offspring
 
         # Select the next generation population
-        population[:] = toolbox.select(population + offspring, mu)
+        self.population = self.toolbox.select(offspring, len(self.population))
 
-        # Update the statistics with the new population
-        record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
-        if verbose:
-            print logbook.stream
-
-    return population, logbook
+        return self
 
 
-def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
-                    stats=None, halloffame=None, verbose=__debug__):
-    """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
+class GenerateUpdateAlgorithm:
+    """Two step evolutionary algorithm -- generate/update.
 
-    :param population: A list of individuals.
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param mu: The number of individuals to select for the next generation.
-    :param lambda\_: The number of children to produce at each generation.
-    :param cxpb: The probability that an offspring is produced by crossover.
-    :param mutpb: The probability that an offspring is produced by mutation.
-    :param ngen: The number of generation.
-    :param stats: A :class:`~deap.tools.Statistics` object that is updated
-                  inplace, optional.
-    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
-                       contain the best individuals, optional.
-    :param verbose: Whether or not to log the statistics.
-    :returns: The final population
-    :returns: A class:`~deap.tools.Logbook` with the statistics of the
-              evolution
+    Each iteration, individuals are produced using the toolbox's generate method.
+    These individuals are evaluted and passed to the toolbox's update method.
 
-    The algorithm takes in a population and evolves it in place using the
-    :func:`varOr` function. It returns the optimized population and a
-    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
-    logbook will contain the generation number, the number of evalutions for
-    each generation and the statistics if a :class:`~deap.tools.Statistics` is
-    given as argument. The *cxpb* and *mutpb* arguments are passed to the
-    :func:`varOr` function. The pseudocode goes as follow ::
+    Args:
+        toolbox (deap.base.Toolbox): Toolbox containing the *generate* and
+            *update* methods.
 
-        evaluate(population)
-        for g in range(ngen):
-            offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
-            evaluate(offspring)
-            population = select(offspring, mu)
+    Yields:
+        self
 
-    First, the individuals having an invalid fitness are evaluated. Second,
-    the evolutionary loop begins by producing *lambda_* offspring from the
-    population, the offspring are generated by the :func:`varOr` function. The
-    offspring are then evaluated and the next generation population is
-    selected from **only** the offspring. Finally, when
-    *ngen* generations are done, the algorithm returns a tuple with the final
-    population and a :class:`~deap.tools.Logbook` of the evolution.
+    Attributes:
+        population: The population updated every generation.
+        nevals: The number of evaluations in the last generation.
+        toolbox
 
-    .. note::
+    Examples:
+        This algorithm can continue the optimization indefinetely util stopped.
+        Each iteration it yields itself to give access to its internal parameters.
+        It can be used as follow::
 
-        Care must be taken when the lambda:mu ratio is 1 to 1 as a
-        non-stochastic selection will result in no selection at all as the
-        operator selects *lambda* individuals from a pool of *mu*.
+            for state in GenerateUpdateAlgorithm(toolbox):
+                if min(state.population, key=lambda ind: ind.fitness.values) < 1e-6:
+                    break
 
+        Any attribute can be changed during evolution. For example, to change the
+        generation method at some point in the evolution, use the state ::
 
-    This function expects :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
-    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
-    registered in the toolbox. This algorithm uses the :func:`varOr`
-    variation.
-    """
-    assert lambda_ >= mu, "lambda must be greater or equal to mu."
-
-    # Evaluate the individuals with an invalid fitness
-    invalid_ind = [ind for ind in population if not ind.fitness.valid]
-    fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-    for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
-
-    if halloffame is not None:
-        halloffame.update(population)
-
-    logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-    record = stats.compile(population) if stats is not None else {}
-    logbook.record(gen=0, nevals=len(invalid_ind), **record)
-    if verbose:
-        print logbook.stream
-
-    # Begin the generational process
-    for gen in range(1, ngen + 1):
-        # Vary the population
-        offspring = varOr(population, toolbox, lambda_, cxpb, mutpb)
-
-        # Evaluate the individuals with an invalid fitness
-        invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
-        for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
-
-        # Update the hall of fame with the generated individuals
-        if halloffame is not None:
-            halloffame.update(offspring)
-
-        # Select the next generation population
-        population[:] = toolbox.select(offspring, mu)
-
-        # Update the statistics with the new population
-        record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(invalid_ind), **record)
-        if verbose:
-            print logbook.stream
-    return population, logbook
-
-
-def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
-                     verbose=__debug__):
-    """This is algorithm implements the ask-tell model proposed in
-    [Colette2010]_, where ask is called `generate` and tell is called `update`.
-
-    :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
-                    operators.
-    :param ngen: The number of generation.
-    :param stats: A :class:`~deap.tools.Statistics` object that is updated
-                  inplace, optional.
-    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
-                       contain the best individuals, optional.
-    :param verbose: Whether or not to log the statistics.
-    :returns: The final population
-    :returns: A class:`~deap.tools.Logbook` with the statistics of the
-              evolution
-
-    The algorithm generates the individuals using the :func:`toolbox.generate`
-    function and updates the generation method with the :func:`toolbox.update`
-    function. It returns the optimized population and a
-    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
-    logbook will contain the generation number, the number of evalutions for
-    each generation and the statistics if a :class:`~deap.tools.Statistics` is
-    given as argument. The pseudocode goes as follow ::
-
-        for g in range(ngen):
-            population = toolbox.generate()
-            evaluate(population)
-            toolbox.update(population)
-
-    .. [Colette2010] Collette, Y., N. Hansen, G. Pujol, D. Salazar Aponte and
-       R. Le Riche (2010). On Object-Oriented Programming of Optimizers -
-       Examples in Scilab. In P. Breitkopf and R. F. Coelho, eds.:
-       Multidisciplinary Design Optimization in Computational Mechanics,
-       Wiley, pp. 527-565;
+            for g, state in enumerate(GenerateUpdateAlgorithm(toolbox)):
+                if g > 50:
+                    state.toolbox = new_toolbox()
 
     """
-    logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+    def __init__(self, toolbox):
+        self.toolbox = toolbox
+        self.nevals = 0
 
-    for gen in xrange(ngen):
+    def __iter__(self):
+        return self
+
+    def next(self):
         # Generate a new population
-        population = toolbox.generate()
-        # Evaluate the individuals
-        fitnesses = toolbox.map(toolbox.evaluate, population)
-        for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
+        self.population = self.toolbox.generate()
 
-        if halloffame is not None:
-            halloffame.update(population)
+        # Evaluate the new individuals
+        self.nevals = evaluate_invalids(self.population, self.toolbox.evaluate,
+                                        self.toolbox.map)
 
         # Update the strategy with the evaluated individuals
-        toolbox.update(population)
+        self.toolbox.update(self.population)
 
-        record = stats.compile(population) if stats is not None else {}
-        logbook.record(gen=gen, nevals=len(population), **record)
-        if verbose:
-            print logbook.stream
-
-    return population, logbook
+        return self

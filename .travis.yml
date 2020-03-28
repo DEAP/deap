@@ -8,22 +8,23 @@ branches:
 matrix:
   include:
   - python: "2.7"
-    env: NUMPY=numpy
+    env: PACKAGES="mock numpy"
   - python: "3.4"
-    env: NUMPY=numpy
+    env: PACKAGES="numpy"
   - python: "3.5"
-    env: NUMPY=numpy
+    env: PACKAGES="numpy"
   - python: "3.6"
-    env: NUMPY=numpy
+    env: PACKAGES="numpy"
   - python: "3.7"
-    dist: xenial
-    env: NUMPY=numpy
+    env: PACKAGES="numpy"
+  - python: "3.8"
+    env: PACKAGES="numpy"
   - python: "pypy"
-    env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
+    env: PACKAGES="mock"; NUMPY="git+https://bitbucket.org/pypy/numpy.git"
   - python: "3.7"
     name: "Flake8"
     dist: xenial
-    env: NUMPY=numpy; FLAKE8=1
+    env: PACKAGES="numpy flake8"; FLAKE8=1
 
 addons:
   apt:
@@ -46,9 +47,10 @@ install:
         "$PYENV_ROOT/bin/pyenv" install "pypy-$PYPY_VERSION"
         virtualenv --python="$PYENV_ROOT/versions/pypy-$PYPY_VERSION/bin/python" "$HOME/virtualenvs/pypy-$PYPY_VERSION"
         source "$HOME/virtualenvs/pypy-$PYPY_VERSION/bin/activate"
-        NUMPY=$NUMPY"@pypy-4.0.1"
+        PACKAGES="$PACKAGES $NUMPY@pypy-4.0.1"
       fi
-  - pip install $NUMPY nose flake8
+  - pip install -U nose
+  - pip install -U $PACKAGES
 
 # command to run tests
 script:
