@@ -637,8 +637,8 @@ def niching(individuals, k, niches, distances, niche_counts):
         selected_niches = selected_niches[:n]
 
         for niche in selected_niches:
-            # Find the individuals associated with this niche
-            niche_individuals = numpy.flatnonzero(niches == niche)
+            # Select from available individuals in niche
+            niche_individuals = numpy.flatnonzero(numpy.logical_and(niches == niche, available))
             numpy.random.shuffle(niche_individuals)
 
             # If no individual in that niche, select the closest to reference
