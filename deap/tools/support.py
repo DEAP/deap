@@ -48,7 +48,7 @@ class History(object):
         import networkx
 
         graph = networkx.DiGraph(history.genealogy_tree)
-        graph = graph.reverse()     # Make the grah top-down
+        graph = graph.reverse()     # Make the graph top-down
         colors = [toolbox.evaluate(history.genealogy_history[i])[0] for i in graph]
         networkx.draw(graph, node_color=colors)
         plt.show()
@@ -126,7 +126,7 @@ class History(object):
         :func:`~deap.tools.History.update` in order to retrieve its associated
         genealogy tree. The returned graph contains the parents up to
         *max_depth* variations before this individual. If not provided
-        the maximum depth is up to the begining of the evolution.
+        the maximum depth is up to the beginning of the evolution.
 
         :param individual: The individual at the root of the genealogy tree.
         :param max_depth: The approximate maximum distance between the root
@@ -264,7 +264,7 @@ class Logbook(list):
     Data can be retrieved via the :meth:`select` method given the appropriate
     names.
 
-    The :class:`Logbook` class may also contain other logbooks refered to
+    The :class:`Logbook` class may also contain other logbooks referred to
     as chapters. Chapters are used to store information associated to a
     specific part of the evolution. For example when computing statistics
     on different components of individuals (namely :class:`MultiStatistics`),
@@ -291,7 +291,7 @@ class Logbook(list):
             logbook.chapters["size"].select("mean")
 
         Compiling a :class:`MultiStatistics` object returns a dictionary
-        containing dictionnaries, therefore when recording such an object in a
+        containing dictionaries, therefore when recording such an object in a
         logbook using the keyword argument unpacking operator (**), chapters
         will be automatically added to the logbook.
         ::
@@ -321,7 +321,7 @@ class Logbook(list):
 
             logbook.header = ("gen", "mean", "max")
 
-        If not set the header is built with all fields, in arbritrary order
+        If not set the header is built with all fields, in arbitrary order
         on insertion of the first data. The header can be removed by setting
         it to :data:`None`.
         """
@@ -334,7 +334,7 @@ class Logbook(list):
 
     def record(self, **infos):
         """Enter a record of event in the logbook as a list of key-value pairs.
-        The informations are appended chronogically to a list as a dictionary.
+        The informations are appended chronologically to a list as a dictionary.
         When the value part of a pair is a dictionary, the informations contained
         in the dictionary are recorded in a chapter entitled as the name of the
         key part of the pair. Chapters are also Logbook.
@@ -519,10 +519,10 @@ class HallOfFame(object):
         worst individuals in it by the best individuals present in
         *population* (if they are better). The size of the hall of fame is
         kept constant.
-        
+
         :param population: A list of individual with a fitness attribute to
                            update the hall of fame with.
-        """     
+        """
         for ind in population:
             if len(self) == 0 and self.maxsize !=0:
                 # Working on an empty hall of fame is problematic for the
@@ -593,7 +593,7 @@ class ParetoFront(HallOfFame):
     that ever lived in the population. That means that the Pareto front hall of
     fame can contain an infinity of different individuals.
 
-    :param similar: A function that tels the Pareto front whether or not two
+    :param similar: A function that tells the Pareto front whether or not two
                     individuals are similar, optional.
 
     The size of the front may become very large if it is used for example on

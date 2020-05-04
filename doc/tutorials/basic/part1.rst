@@ -167,7 +167,7 @@ arguments.
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete particle with
-a speed vector and a maximizing two objectives fitness attribute.
+a speed vector and a fitness attribute for maximizing two objectives.
 
 .. _funky:
 
