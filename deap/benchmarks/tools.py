@@ -5,13 +5,15 @@ from functools import wraps
 from itertools import repeat
 try:
     import numpy
+    numpy_imported = True
 except ImportError:
-    numpy = False
+    numpy_imported = False
 
 try:
     import scipy.spatial
+    scipy_imported = True
 except ImportError:
-    scipy = False
+    scipy_imported = False
 
 try:
     # try importing the C version
@@ -79,7 +81,7 @@ class rotate(object):
            Q, _ = numpy.linalg.qr(A)
     """
     def __init__(self, matrix):
-        if not numpy:
+        if not numpy_imported:
             raise RuntimeError("Numpy is required for using the rotation "
                 "decorator")
         # The inverse is taken since the rotation is applied to the individual
@@ -312,7 +314,7 @@ def hypervolume(front, ref=None):
 def igd(A, Z):
     """Inverse generational distance.
     """
-    if not scipy:
+    if not scipy_imported:
         raise ImportError("idg requires scipy module")
     distances = scipy.spatial.distance.cdist(A, Z)
     return numpy.average(numpy.min(distances, axis=0))
