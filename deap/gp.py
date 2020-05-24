@@ -25,6 +25,7 @@ import random
 import re
 import sys
 import warnings
+import numpy as np
 
 from collections import defaultdict, deque
 from functools import partial, wraps
@@ -514,6 +515,111 @@ def compileADF(expr, psets):
 ######################################
 # GP Program generation functions    #
 ######################################
+def genBalanced(pset, dist_, dist_args_, bias_=0, type_=None):
+    length_ = max(1, int(np.round(dist_(*dist_args_))))
+    return genBalanced(pset, length_, bias_, type_)
+
+
+def genBalanced(pset, length_, bias_=0, type_=None):
+    """Generate an expression with specified length *length* and maximum depth *depth*.
+
+    :param pset: Primitive set from which primitives are selected.
+    :param type_: The type that should return the tree when called, when
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
+    :returns: A full tree with a balanced shape.
+    """
+    def sampleChild(minArity_, maxArity_):
+        candidates = []
+
+        if maxArity_ > 0:
+            for prim in pset.primitives[type_]:
+                if prim.arity > maxArity_:
+                    continue
+                candidates.append(prim)
+
+        if minArity_ == 0:
+            # consider terminals awe sll
+            terminals = pset.terminals[type_]
+            p = 1 / (len(candidates) + 1)
+            if np.random.binomial(1, p, 1):
+                term = random.choice(terminals)
+                if isclass(term):
+                    term = term()
+                return term
+
+        if len(candidates) == 0:
+            raise Exception, (f'Could not find suitable candidates with arities in [{minArity_},{maxArity_}]')
+
+        return random.choice(candidates)
+
+
+    def breadthToPrefix(expr):
+        prefix = []
+
+        def addPrefix(t):
+            node, _, index = t
+            prefix.append(node)
+            for i in range(index, index + getArity(node)):
+                addPrefix(expr[i])
+
+        addPrefix(expr[0])
+        return prefix 
+
+
+    def getArity(node):
+        return node.arity if isinstance(node.arity, int) else 0
+
+    if length_ < 1: 
+        raise Exception, f'Invalid tree length {length_} provided.'
+
+
+    if type_ is None:
+        type_ = pset.ret
+
+    expr = []
+
+    arities = list(map(lambda x: x.arity, pset.primitives[type_]))
+    minFunctionArity = min(arities)
+    maxFunctionArity = max(arities)
+
+    # adapt length to restrictions of the primitive set
+    if length_ % 2 == 0 and minFunctionArity > 1:
+        length_ = length_ + 1 if np.random.random_sample(1) > 0.5 else length_ - 1
+
+    targetLength = length_ - 1 # don't count the root node 
+    maxFunctionArity = min(maxFunctionArity, targetLength)
+    minFunctionArity = min(minFunctionArity, targetLength)
+    root = sampleChild(minFunctionArity, maxFunctionArity) 
+
+    # inner lists of the form [node, depth, childIndex] 
+    # childIndex is only used at the end to transform 
+    # the representation from breadth to prefix
+    expr.append([root, 0, 1])
+
+    openSlots = root.arity 
+
+    for i in range(0, length_):
+        (node, nodeDepth, childIndex) = expr[i]
+        childDepth = nodeDepth + 1
+        
+        for j in range(0, getArity(node)):
+            maxArity = min(maxFunctionArity, targetLength - openSlots)
+            min_ = 0 if (openSlots - len(expr) > 1 and np.random.binomial(1, bias_, 1)) else minFunctionArity
+            minArity = min(min_, maxArity)
+            child = sampleChild(minArity, maxArity)
+
+            if j == 0:
+                expr[i][2] = len(expr)
+
+            expr.append([child, childDepth, 0])
+            openSlots += getArity(child) 
+
+    nodes = breadthToPrefix(expr)
+    assert(len(nodes) == length_)
+    return nodes
+
+
 def genFull(pset, min_, max_, type_=None):
     """Generate an expression where each leaf has the same depth
     between *min* and *max*.
@@ -593,7 +699,7 @@ def generate(pset, min_, max_, condition, type_=None):
     :param min_: Minimum height of the produced trees.
     :param max_: Maximum Height of the produced trees.
     :param condition: The condition is a function that takes two arguments,
-                      the height of the tree to build and the current
+                      the height of the tree to build and the currgit@github.com:foolnotion/deap.gitent
                       depth in the tree.
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) the type of :pset: (pset.ret)
@@ -631,6 +737,8 @@ def generate(pset, min_, max_, condition, type_=None):
             for arg in reversed(prim.args):
                 stack.append((depth + 1, arg))
     return expr
+
+
 
 
 ######################################
