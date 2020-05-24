@@ -516,14 +516,25 @@ def compileADF(expr, psets):
 # GP Program generation functions    #
 ######################################
 def genBalanced(pset, dist_, dist_args_, bias_=0, type_=None):
+    """Generate an expression with target length sampled from distribution *dist_*.
+    :param pset: Primitive set from which primitives are selected.
+    :param dist_: Random number distribution from which to draw the tree length.
+    :param dist_args_: Parameters of the tree length distribution.
+    :param bias_: Tree creator shape bias (0 = no bias, 1 = max bias).
+    :param type_: The type that should return the tree when called, when
+                  :obj:`None` (default) the type of :pset: (pset.ret)
+                  is assumed.
+    :returns: A full tree with a balanced shape.
+    """
     length_ = max(1, int(np.round(dist_(*dist_args_))))
     return genBalanced(pset, length_, bias_, type_)
 
 
 def genBalanced(pset, length_, bias_=0, type_=None):
     """Generate an expression with specified length *length* and maximum depth *depth*.
-
     :param pset: Primitive set from which primitives are selected.
+    :param length_: The target tree length.
+    :param bias_: Tree creator shape bias (0 = no bias, 1 = max bias).
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) the type of :pset: (pset.ret)
                   is assumed.
@@ -539,7 +550,7 @@ def genBalanced(pset, length_, bias_=0, type_=None):
                 candidates.append(prim)
 
         if minArity_ == 0:
-            # consider terminals awe sll
+            # consider terminals as well 
             terminals = pset.terminals[type_]
             p = 1 / (len(candidates) + 1)
             if np.random.binomial(1, p, 1):
