@@ -204,7 +204,7 @@ def identity(obj):
     return obj
 
 def isDominated(wvalues1, wvalues2):
-    """Returns whether or not *wvalues1* dominates *wvalues2*.
+    """Returns whether or not *wvalues2* dominates *wvalues1*.
 
     :param wvalues1: The weighted fitness values that would be dominated.
     :param wvalues2: The weighted fitness values of the dominant.
