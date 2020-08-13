@@ -31,6 +31,7 @@ from collections import defaultdict, deque
 from functools import partial, wraps
 from inspect import isclass
 from operator import eq, lt
+from collections import deque
 
 import tools  # Needed by HARM-GP
 
@@ -515,7 +516,7 @@ def compileADF(expr, psets):
 ######################################
 # GP Program generation functions    #
 ######################################
-def SampleChild(pset, minArity_, maxArity_, type_):
+def sampleChild(pset, minArity_, maxArity_, type_):
     candidates = []
 
     if maxArity_ > 0:
@@ -525,7 +526,8 @@ def SampleChild(pset, minArity_, maxArity_, type_):
         candidates += pset.terminals[type_]
 
     if len(candidates) == 0:
-        raise Exception, 'Could not find suitable candidates with arities in [{},{}]'.format(minArity_, maxArity_)
+        raise Exception(f'Could not find suitable candidates with arities in \
+                [{minArity_},{maxArity_}]')
 
     node = random.choice(candidates)
 
@@ -537,9 +539,8 @@ def SampleChild(pset, minArity_, maxArity_, type_):
     return node
 
 
-def genBalanced(pset, dist_, dist_args_, bias_=0, type_=None):
-    """Generate an expression with target length sampled from distribution *dist_*
-    using a breadth-first expansion approacj.
+def genBalanced(pset, dist_, dist_args_, bias_=0.5, type_=None):
+    """Generate an expression with target length sampled from distribution *dist_*.
     :param pset: Primitive set from which primitives are selected.
     :param dist_: Random number distribution from which to draw the tree length.
     :param dist_args_: Parameters of the tree length distribution.
@@ -547,13 +548,13 @@ def genBalanced(pset, dist_, dist_args_, bias_=0, type_=None):
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) the type of :pset: (pset.ret)
                   is assumed.
-    :returns: A complete expression.
+    :returns: A full tree with a balanced shape.
     """
     length_ = max(1, int(np.round(dist_(*dist_args_))))
     return genBalanced(pset, length_, bias_, type_)
 
 
-def genBalanced(pset, length_, bias_=0, type_=None):
+def generateBalanced(pset, length_, bias_, type_=None):
     """Generate an expression with specified length *length*.
     :param pset: Primitive set from which primitives are selected.
     :param length_: The target tree length.
@@ -563,55 +564,63 @@ def genBalanced(pset, length_, bias_=0, type_=None):
                   is assumed.
     :returns: A full tree with a balanced shape.
     """
+    if length_ < 1: 
+        raise ValueError(f'Invalid tree length {length_} provided. \
+                Length must be positive (>0).')
+
     def getArity(node):
         return node.arity if isinstance(node.arity, int) else 0
-
-    if length_ < 1: 
-        raise Exception('Invalid tree length {} provided.'.format(length_))
 
     if type_ is None:
         type_ = pset.ret
 
-
-    arities = list(map(lambda x: x.arity, pset.primitives[type_]))
+    arities = [ x.arity for x in pset.primitives[type_] ] 
     
     minFunctionArity, maxFunctionArity = min(arities), max(arities)
 
-    # adapt length to restrictions of the primitive set
-    if length_ % 2 == 0 and minFunctionArity > 1:
-        length_ = length_ + 1 if random.uniform(0, 1) > 0.5 else length_ - 1
+    # check what kind of lengths we can achieve apart from length 1 (=1 leaf)
+    if 1 < length_ < minFunctionArity + 1:
+        length_ = minFunctionArity + 1
 
-    targetLength = length_ - 1 # don't count the root node 
-    maxFunctionArity = min(maxFunctionArity, targetLength)
+    maxFunctionArity = min(maxFunctionArity, length_ - 1)
     minFunctionArity = min(minFunctionArity, maxFunctionArity)
-    root = SampleChild(pset, minFunctionArity, maxFunctionArity, type_) 
-
-    # inner lists of the form [node, arity, childIndex] 
-    # childIndex is only used at the end to transform 
-    # the representation from breadth to prefix
+    root = sampleChild(pset, minFunctionArity, maxFunctionArity, type_) 
 
     openSlots = getArity(root) 
     
+    # inner lists of the form [node, arity, childIndex] 
+    # childIndex is only used at the end to transform 
+    # the representation from breadth to prefix
     expr = [ [ root, openSlots, 1] ]
-
-    for i in range(0, length_):
-        node, arity, childIndex = expr[i]
-
+    
+    i = 0
+    while len(expr) < length_:
+        node, arity, _ = expr[i]
         expr[i][2] = len(expr)
+
+        i = i+1
 
         for j in range(0, arity):
             if openSlots - len(expr) > 1 and random.uniform(0, 1) < bias_:
-                minArity = 0
                 maxArity = 0
             else:
-                maxArity = min(maxFunctionArity, targetLength - openSlots)
-                minArity = min(minFunctionArity, maxArity)
+                maxArity = min(maxFunctionArity, length_ - openSlots - 1)
 
-            child      = SampleChild(pset, minArity, maxArity, type_)
+            # this adjustment will only be necessary in cases when the 
+            # primitive set does not allow certain target lengths to be reached
+            # in this case we try to push the length_ target towards an achievable value
+            if 0 < maxArity < minFunctionArity:
+                length_ += minFunctionArity - maxArity 
+                maxArity = minFunctionArity
+
+            minArity = min(minFunctionArity, maxArity)
+
+            child      = sampleChild(pset, minArity, maxArity, type_)
             childArity = getArity(child)
 
             expr.append([child, childArity, 0])
             openSlots += childArity
+
 
     nodes = []
 
@@ -629,14 +638,15 @@ def genBalanced(pset, length_, bias_=0, type_=None):
             q.append((i, j + 1))
             q.append((index + j, 0))
 
-    assert(len(nodes) == length_)
     return nodes
 
 
-def genProb(pset, dist_, dist_args_, bias_=0, type_=None):
-    """Generate an expression with specified length *length_* using the 
-    PTC2 algorithm described in S. Luke - Two fast tree-creation algorithms 
-    for genetic programming, https://ieeexplore.ieee.org/document/873237.
+def genProb(pset, dist_, dist_args_, bias_=1, type_=None):
+    """Generate an expression with target length sampled from distribution *dist_*.
+       Implements the algorithm from Luke and Panait, with a couple of improvements:
+       - always generates the target length if the primitise set allows it
+       - accepts a bias parameter for controlling tree shape
+       https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.28.4837
     :param pset: Primitive set from which primitives are selected.
     :param dist_: Random number distribution from which to draw the tree length.
     :param dist_args_: Parameters of the tree length distribution.
@@ -644,95 +654,92 @@ def genProb(pset, dist_, dist_args_, bias_=0, type_=None):
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) the type of :pset: (pset.ret)
                   is assumed.
-    :returns: A complete expression.
+    :returns: A full tree.
     """
     length_ = max(1, int(np.round(dist_(*dist_args_))))
-    return genProb(pset, length_, type_)
+    return generateProb(pset, length_, type_)
 
 
-def genProb(pset, length_, bias_=0, type_=None):
-    """Generate an expression with target length sampled from distribution *dist_*
-    using the PTC2 algorithm described in S. Luke - Two fast tree-creation algorithms 
-    for genetic programming, https://ieeexplore.ieee.org/document/873237.
+def generateProb(pset, length_, bias_, type_=None):
+    """Generate an expression with specified length *length*.
     :param pset: Primitive set from which primitives are selected.
-    :param dist_: Random number distribution from which to draw the tree length.
-    :param dist_args_: Parameters of the tree length distribution.
+    :param length_: The target tree length.
     :param bias_: Tree creator shape bias (0 = no bias, 1 = max bias).
     :param type_: The type that should return the tree when called, when
                   :obj:`None` (default) the type of :pset: (pset.ret)
                   is assumed.
-    :returns: A complete expression.
+    :returns: A full tree.
     """
     def getArity(node):
         return node.arity if isinstance(node.arity, int) else 0
 
     if length_ < 1: 
-        raise Exception('Invalid tree length {} provided.'.format(length_))
+        raise ValueError(f'Invalid tree length {length_} provided. \
+                Length must be positive (>0).')
 
     if type_ is None:
         type_ = pset.ret
 
-    arities = list(map(lambda x: x.arity, pset.primitives[type_]))
-    minFunctionArity = min(arities)
-    maxFunctionArity = max(arities)
+    arities = [ x.arity for x in pset.primitives[type_] ] 
+    minFunctionArity, maxFunctionArity = min(arities), max(arities)
 
-    # adapt length to restrictions of the primitive set
-    if length_ % 2 == 0 and minFunctionArity > 1:
-        length_ = length_ + 1 if random.uniform(0,1) > 0.5 else length_ - 1
-
+    if 1 < length_ < minFunctionArity + 1:
+        length_ = minFunctionArity + 1
+    
     maxFunctionArity = min(maxFunctionArity, length_-1)
     minFunctionArity = min(minFunctionArity, maxFunctionArity)
 
-    root = SampleChild(pset, minFunctionArity, maxFunctionArity, type_) 
+    root = sampleChild(pset, minFunctionArity, maxFunctionArity, type_) 
 
-    expr = [None] * length_
+    expr = []
 
     q = []
     qi = 0
 
-    # emulate a "randomized queue" (yes, they actually do exist, sadly)
     def qsize():
-        return len(q) - qi 
+        return len(q) - qi
 
     def random_dequeue():
         r = random.randrange(len(q)-qi) + qi
         q[r], q[qi] = q[qi], q[r]
         return q[qi]
-        #return q[qi]
 
     def enqueue(x):
         q.append(x)
 
     arity = getArity(root)
-    expr[0] = 0, arity, root
+    expr.append([0, arity, root])
 
     for i in range(arity):
         enqueue(1)
 
-    for i in range(1, length_):
+    while qsize() > 0:
         childDepth = random_dequeue()
         qi = qi + 1
 
         if qsize() > 1 and random.uniform(0, 1) < bias_:
-            minArity = 0
             maxArity = 0
         else:
-            maxArity = min(maxFunctionArity, length_ - (qsize() + i) - 1)
-            minArity = min(minFunctionArity, maxArity)
+            maxArity = min(maxFunctionArity, length_ - len(q) - 1)
 
-        child = SampleChild(pset, minArity, maxArity, type_)
+        # this adjustment will only be necessary in cases when the 
+        # primitive set does not allow certain target lengths to be reached
+        # in this case we try to push the length_ target towards an achievable value
+        if 0 < maxArity < minFunctionArity:
+            length_ += minFunctionArity - maxArity 
+            maxArity = minFunctionArity
+            
+        minArity = min(minFunctionArity, maxArity)
+
+        child = sampleChild(pset, minArity, maxArity, type_)
         childArity = getArity(child)
         
-        expr[i] = childDepth, childArity, child
+        expr.append([childDepth, childArity, child])
 
         for j in range(childArity):
             enqueue(childDepth + 1)
 
-    if (length_ != len(expr)):
-        raise Exception('Expr len {} falls short of target length {}'.format(len(expr), length_))
-
-    expr.sort(key=lambda x: x[0])
-
+    expr = sorted(expr, key=lambda x: x[0])
     childIndices = [0] * len(expr)
 
     c = 1
@@ -762,9 +769,7 @@ def genProb(pset, length_, bias_=0, type_=None):
             q.append((i, j + 1))
             q.append((childIndices[i] + j, 0))
 
-    assert(len(nodes) == length_)
     return nodes
-
 
 
 def genFull(pset, min_, max_, type_=None):
