@@ -551,7 +551,7 @@ def genBalanced(pset, dist_, dist_args_, bias_=0.5, type_=None):
     :returns: A full tree with a balanced shape.
     """
     length_ = max(1, int(np.round(dist_(*dist_args_))))
-    return generateBalanced(pset, length_, bias_, type_)
+    return genBalanced(pset, length_, bias_, type_)
 
 
 def generateBalanced(pset, length_, bias_, type_=None):
@@ -593,12 +593,9 @@ def generateBalanced(pset, length_, bias_, type_=None):
     # the representation from breadth to prefix
     expr = [ [ root, openSlots, 1] ]
     
-    i = 0
     while len(expr) < length_:
-        node, arity, _ = expr[i]
-        expr[i][2] = len(expr)
-
-        i = i+1
+        node, arity, _ = expr[-1]
+        expr[-1][2] = len(expr)
 
         for j in range(0, arity):
             if openSlots - len(expr) > 1 and random.uniform(0, 1) < bias_:
@@ -621,7 +618,6 @@ def generateBalanced(pset, length_, bias_, type_=None):
             expr.append([child, childArity, 0])
             openSlots += childArity
 
-
     nodes = []
 
     q = deque()
@@ -638,38 +634,16 @@ def generateBalanced(pset, length_, bias_, type_=None):
             q.append((i, j + 1))
             q.append((index + j, 0))
 
+    assert(len(nodes) == length_)
     return nodes
 
 
 def genProb(pset, dist_, dist_args_, bias_=1, type_=None):
-    """Generate an expression with target length sampled from distribution *dist_*.
-       Implements the algorithm from Luke and Panait, with a couple of improvements:
-       - always generates the target length if the primitise set allows it
-       - accepts a bias parameter for controlling tree shape
-       https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.28.4837
-    :param pset: Primitive set from which primitives are selected.
-    :param dist_: Random number distribution from which to draw the tree length.
-    :param dist_args_: Parameters of the tree length distribution.
-    :param bias_: Tree creator shape bias (0 = no bias, 1 = max bias).
-    :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) the type of :pset: (pset.ret)
-                  is assumed.
-    :returns: A full tree.
-    """
     length_ = max(1, int(np.round(dist_(*dist_args_))))
     return generateProb(pset, length_, type_)
 
 
 def generateProb(pset, length_, bias_, type_=None):
-    """Generate an expression with specified length *length*.
-    :param pset: Primitive set from which primitives are selected.
-    :param length_: The target tree length.
-    :param bias_: Tree creator shape bias (0 = no bias, 1 = max bias).
-    :param type_: The type that should return the tree when called, when
-                  :obj:`None` (default) the type of :pset: (pset.ret)
-                  is assumed.
-    :returns: A full tree.
-    """
     def getArity(node):
         return node.arity if isinstance(node.arity, int) else 0
 
@@ -769,6 +743,7 @@ def generateProb(pset, length_, bias_, type_=None):
             q.append((i, j + 1))
             q.append((childIndices[i] + j, 0))
 
+    assert(len(nodes) == length_)
     return nodes
 
 
@@ -1588,3 +1563,6 @@ if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
+
+
+
