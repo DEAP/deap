@@ -61,7 +61,7 @@ else:
         @staticmethod
         def __new__(cls, iterable):
             """Creates a new instance of a numpy.ndarray from a function call.
-            Adds the possibility to instanciate from an iterable."""
+            Adds the possibility to instantiate from an iterable."""
             return numpy.array(list(iterable)).view(cls)
 
         def __setstate__(self, state):

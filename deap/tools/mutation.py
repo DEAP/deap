@@ -148,10 +148,10 @@ def mutUniformInt(individual, low, up, indpb):
 
     :param individual: :term:`Sequence <sequence>` individual to be mutated.
     :param low: The lower bound or a :term:`python:sequence` of
-                of lower bounds of the range from wich to draw the new
+                of lower bounds of the range from which to draw the new
                 integer.
     :param up: The upper bound or a :term:`python:sequence` of
-               of upper bounds of the range from wich to draw the new
+               of upper bounds of the range from which to draw the new
                integer.
     :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
