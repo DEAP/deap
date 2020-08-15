@@ -1,10 +1,8 @@
 """Test functions from deap/benchmarks."""
 import sys
 import unittest
-from nose import with_setup
 
 from deap import base
-from deap import benchmarks
 from deap import creator
 from deap.benchmarks import binary
 
@@ -52,7 +50,7 @@ class BenchmarkTest(unittest.TestCase):
             # python3. Thus an error occurs in python2.7 but an assignment is
             # correctly executed in python3.
             if sys.version_info < (3, ):
-                with self.assertRaises(TypeError):
+                with self.assertRaises(AssertionError):
                     ind.fitness.values = fit
             else:
                 assert wrong_population[0].fitness.values == ()
