@@ -8,7 +8,7 @@ building programs automatically to solve problems independently of their domain.
 Although there exist diverse representations used to evolve programs, the most
 common is the syntax tree.
 
-.. image:: /_images/gptree.png
+.. image:: ../../../_images/gptree.png
    :align: center
 
 For example, the above figure presents the program :math:`\max(x + 3 * y, x +
@@ -107,7 +107,7 @@ defined.
 The previous code can produce the tree on the left but not the one on the right
 because the type restrictions.
 
-.. image:: /_images/gptypedtrees.png
+.. image:: ../../../_images/gptypedtrees.png
 	:align: center
 
 .. note::
@@ -123,7 +123,7 @@ because the type restrictions.
 
    |
 
-   .. image:: /_images/gptypederrtree.png
+   .. image:: ../../../_images/gptypederrtree.png
       :align: center
 
    In this case, DEAP raises an :class:`IndexError` with the message ``"The
