@@ -7,22 +7,19 @@ try:
     from setuptools import setup, Extension, find_packages
     modules = find_packages(exclude=['examples'])
 except ImportError:
-    warnings.append("warning: using disutils.core.setup, cannot use \"develop\" option")
-    from disutils.core import setup, Extension
+    warnings.append("warning: using distutils.core.setup, cannot use \"develop\" option")
+    from distutils.core import setup, Extension
     modules = ['deap', 'deap.benchmarks', 'deap.tests', 'deap.tools', 'deap.tools._hypervolume']
 
 from setuptools.command.build_ext import build_ext
 from distutils.errors import CCompilerError, DistutilsExecError, \
     DistutilsPlatformError
 
-try:
-    from pypandoc import convert
-except ImportError:
-    warnings.append("warning: pypandoc module not found, could not convert ReadMe Markdown to RST")
-    import codecs
-    read_md = lambda f: codecs.open(f, 'r', 'utf-8').read()
-else:
-    read_md = lambda f: convert(f, 'rst')
+# read the contents of README file
+from os import path
+import codecs
+this_directory = path.abspath(path.dirname(__file__))
+long_description = codecs.open(path.join(this_directory, 'README.md'), 'r', 'utf-8').read()
 
 import deap
 
@@ -44,13 +41,15 @@ class ve_build_ext(build_ext):
     def run(self):
         try:
             build_ext.run(self)
-        except DistutilsPlatformError:
+        except DistutilsPlatformError as e:
+            print(e)
             raise BuildFailed()
 
     def build_extension(self, ext):
         try:
             build_ext.build_extension(self, ext)
-        except ext_errors:
+        except ext_errors as e:
+            print(e)
             raise BuildFailed()
 
 def run_setup(build_ext):
@@ -64,14 +63,15 @@ def run_setup(build_ext):
     setup(name='deap',
           version=deap.__revision__,
           description='Distributed Evolutionary Algorithms in Python',
-          long_description=read_md('README.md'),
+          long_description=long_description,
+          long_description_content_type="text/markdown",
           author='deap Development Team',
           author_email='deap-users@googlegroups.com',
           url='https://www.github.com/deap',
           packages=find_packages(exclude=['examples']),
         #   packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
-          keywords=['evolutionary algorithms','genetic algorithms','genetic programming','cma-es','ga','gp','es','pso'],
+          keywords=['evolutionary algorithms', 'genetic algorithms', 'genetic programming', 'cma-es', 'ga', 'gp', 'es', 'pso'],
           license='LGPL',
           classifiers=[
             'Development Status :: 4 - Beta',
@@ -84,8 +84,9 @@ def run_setup(build_ext):
             'Topic :: Scientific/Engineering',
             'Topic :: Software Development',
             ],
-         ext_modules = extra_modules,
-         cmdclass = {"build_ext" : ve_build_ext},
+         ext_modules=extra_modules,
+         cmdclass={"build_ext": ve_build_ext},
+         install_requires=['numpy'],
          use_2to3=True
     )
 

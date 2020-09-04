@@ -27,16 +27,16 @@ import deap
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
-              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
-              'sphinx.ext.viewcode'] 
+              'sphinx.ext.intersphinx', 'sphinx.ext.extlinks',
+              'sphinx.ext.viewcode']
 
 try:
     import matplotlib
-except:
+except ImportError:
     pass
 else:
-      extensions += ['matplotlib.sphinxext.only_directives',
-                     'matplotlib.sphinxext.plot_directive']
+    extensions += ['matplotlib.sphinxext.only_directives',
+                   'matplotlib.sphinxext.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -45,7 +45,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8'
+source_encoding = 'utf-8'
 
 # The master toctree document.
 master_doc = 'index'
@@ -119,7 +119,7 @@ plot_include_source = False
 #plot_pre_code
 
 # Base directory, to which ``plot::`` file names are relative
-# to.  (If None or empty, file names are relative to the 
+# to.  (If None or empty, file names are relative to the
 # directory where the file containing the directive is.)
 #plot_basedir
 
@@ -143,7 +143,7 @@ html_theme_path = ["_themes"]
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'classic' and 'alabaster'.
 html_theme = 'pydoctheme'
-#RTFD.org does not support sphinx 1.3.1 yet. 
+#RTFD.org does not support sphinx 1.3.1 yet.
 #html_theme = 'alabaster'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -182,7 +182,7 @@ html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
-    'index': 'indexsidebar.html',
+    'index': ['indexsidebar.html'],
 }
 
 # Additional templates that should be rendered to pages, maps page names to

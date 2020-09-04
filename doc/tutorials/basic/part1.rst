@@ -12,7 +12,7 @@ The provided :class:`~deap.base.Fitness` class is an abstract class that needs a
 minimizing fitness is built using negatives weights, while a maximizing fitness
 has positive weights. For example, the following line creates, in the
 :mod:`~deap.creator`, a ready to use single objective minimizing fitness named
-:class:`FitnessMin`. 
+:class:`FitnessMin`.
 
 .. literalinclude:: /code/tutorials/part_2/2_1_fitness.py
    :lines: 6
@@ -41,7 +41,7 @@ the :mod:`~deap.creator` and initializing them using a
 :class:`~deap.base.Toolbox`.
 
 .. warning::
-   
+
    Before inheriting from :class:`numpy.ndarray` you should **absolutely** read
    the :doc:`/tutorials/advanced/numpy` tutorial and have a look at the
    :doc:`/examples/ga_onemax_numpy` example!
@@ -156,9 +156,9 @@ attribute.
 Particle
 ++++++++
 A particle is another special type of individual as it usually has a speed and
-generally remember its best position. This type of individual is created (once
+generally remembers its best position. This type of individual is created (once
 again) the same way as inheriting from a list. This time, :attr:`speed`,
-:attr:`best` and speed limits attributes are added to the object. Again, an
+:attr:`best` and speed limits (:attr:`smin`, :attr:`smax`) attributes are added to the object. Again, an
 initialization function :func:`initParticle` is also registered to produce the
 individual receiving the particle class, size, domain, and speed limits as
 arguments.
@@ -167,7 +167,7 @@ arguments.
    :lines: 2-
 
 Calling :func:`toolbox.individual` will readily return a complete particle with
-a speed vector and a maximizing two objectives fitness attribute.
+a speed vector and a fitness attribute for maximizing two objectives.
 
 .. _funky:
 
@@ -231,7 +231,7 @@ Swarm
 +++++
 A swarm is used in particle swarm optimization. It is different in the sense
 that it contains a communication network. The simplest network is the completely
-connected one, where each particle knows the best position that have ever been
+connected one, where each particle knows the best position that has ever been
 visited by any particle. This is generally implemented by copying that global
 best position to a :attr:`gbest` attribute and the global best fitness to a
 :attr:`gbestfit` attribute.
@@ -257,7 +257,7 @@ argument of the :func:`~deap.tools.initRepeat` function.
 Seeding a Population
 ++++++++++++++++++++
 Sometimes, a first guess population can be used to initialize an evolutionary
-algorithm. The key idea to initialize a population with not random individuals
+algorithm. The key idea to initialize a population with non-random individuals
 is to have an individual initializer that takes a content as argument.
 
 .. literalinclude:: /code/tutorials/part_2/2_3_5_seeding_a_population.py
@@ -265,7 +265,7 @@ is to have an individual initializer that takes a content as argument.
 
 The population will be initialized from the file ``my_guess.json`` that shall
 contain a list of first guess individuals. This initialization can be combined
-with a regular initialization to have part random and part not random
+with a regular initialization to have part random and part non-random
 individuals. Note that the definition of :func:`initIndividual` and the
 registration of :func:`individual_guess` are optional as the default constructor
 of a list is similar. Removing those lines leads to the following: ::

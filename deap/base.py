@@ -20,7 +20,11 @@ class used as base class, for the fitness member of any individual. """
 
 import sys
 
-from collections import Sequence
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
+
 from copy import deepcopy
 from functools import partial
 from operator import mul, truediv
@@ -48,11 +52,11 @@ class Toolbox(object):
     def register(self, alias, function, *args, **kargs):
         """Register a *function* in the toolbox under the name *alias*. You
         may provide default arguments that will be passed automatically when
-        calling the registered function. Fixed arguments can then be overriden
+        calling the registered function. Fixed arguments can then be overridden
         at function call time.
 
         :param alias: The name the operator will take in the toolbox. If the
-                      alias already exist it will overwrite the the operator
+                      alias already exist it will overwrite the operator
                       already present.
         :param function: The function to which refer the alias.
         :param argument: One or more argument (and keyword argument) to pass
@@ -120,7 +124,7 @@ class Toolbox(object):
 
 class Fitness(object):
     """The fitness is a measure of quality of a solution. If *values* are
-    provided as a tuple, the fitness is initalized using those values,
+    provided as a tuple, the fitness is initialized using those values,
     otherwise it is empty (or invalid).
 
     :param values: The initial values of the fitness as a tuple, optional.
@@ -181,6 +185,7 @@ class Fitness(object):
         return tuple(map(truediv, self.wvalues, self.weights))
 
     def setValues(self, values):
+        assert len(values) == len(self.weights), "Assigned values have not the same length than fitness weights"
         try:
             self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:

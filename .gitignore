@@ -2,6 +2,11 @@
 build/
 dist/
 doc/_build/
+.vscode/
+.pytest_cache/
+__pycache__/
+env/
+*.egg-info/
 
 # files to ignore
 MANIFEST

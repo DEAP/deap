@@ -28,8 +28,8 @@ tutorial.
 
 Initialization
 --------------
-Once the types are created you need to fill them with sometimes random values,
-sometime guessed ones. Again, DEAP provides an easy mechanism to do just that.
+Once the types are created you need to fill them with sometimes random values
+or sometime guessed ones. Again, DEAP provides an easy mechanism to do just that.
 The :class:`~deap.base.Toolbox` is a container for tools of all sorts
 including initializers that can do what is needed of them. The following takes
 on the last lines of code to create the initializers for individuals
@@ -45,7 +45,7 @@ in the toolbox with their default arguments under the given name. For example,
 it will be possible to call the function :func:`toolbox.population` to
 instantly create a population.
 More initialization methods
-are found in the :doc:`tutorials/basic/part1` tutorial and the various 
+are found in the :doc:`tutorials/basic/part1` tutorial and the various
 :doc:`examples/index`.
 
 Operators

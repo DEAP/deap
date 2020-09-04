@@ -1,0 +1,133 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger: none
+
+jobs:
+  - job: WindowsBuild
+    pool:
+      vmImage: 'vs2017-win2016'
+    strategy:
+      matrix:
+        Python27_VS2017:
+          python.version: '2.7'
+        Python35_VS2017:
+          python.version: '3.5'
+        Python36_VS2017:
+          python.version: '3.6'
+        Python37_VS2017:
+          python.version: '3.7'
+        Python38_VS2017:
+          python.version: '3.8'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        choco install vcpython27 --yes
+      condition: eq(variables['python.version'], '2.7')
+      displayName: 'Install vcpython27'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+  
+  - job: macOS10_14Build
+    pool:
+      vmImage: 'macOS-10.14'
+    strategy:
+      matrix:
+        Python27_macOS1014:
+          python.version: '2.7'
+        Python35_macOS1014:
+          python.version: '3.5'
+        Python36_macOS1014:
+          python.version: '3.6'
+        Python37_macOS1014:
+          python.version: '3.7'
+        Python38_macOS1014:
+          python.version: '3.8'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+    
+  - job: macOS10_13Build
+    pool:
+      vmImage: 'macOS-10.13'
+    strategy:
+      matrix:
+        Python27_macOS1013:
+          python.version: '2.7'
+        Python35_macOS1013:
+          python.version: '3.5'
+        Python36_macOS1013:
+          python.version: '3.6'
+        Python37_macOS1013:
+          python.version: '3.7'
+        Python38_macOS1013:
+          python.version: '3.8'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+  
+  - job: Manylinux2010Build
+    pool:
+      vmImage: 'ubuntu-16.04'
+    container: quay.io/pypa/manylinux2010_x86_64:latest
+    variables:
+      python: /opt/python/cp37-cp37m/bin/python
+    steps:
+    - script: |
+        for PYBIN in /opt/python/*/bin; do
+          "${PYBIN}/pip" install --user numpy twine
+        done
+      displayName: 'Install dependencies and build tools'
+    - script: |
+        for PYBIN in /opt/python/*/bin; do
+          "${PYBIN}/pip" wheel . -w wheelhouse/
+        done
+      displayName: 'Build wheels'
+    - script: |
+        for whl in wheelhouse/deap*.whl; do
+          auditwheel repair "$whl" --plat manylinux2010_x86_64 -w wheelhouse-manylinux/
+        done
+      displayName: 'Audit wheels'
+    - script: |
+        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
+      displayName: 'Publish wheel to PyPi'

@@ -11,28 +11,29 @@ individuals. This means, for example, that providing two individuals to the
 crossover will transform those individuals in-place. The responsibility of
 making offspring(s) independent of their parent(s) and invalidating the
 fitness is left to the user and is generally fulfilled in the algorithms by
-calling :func:`toolbox.clone` on an individual to duplicate it and 
-``del`` on the :attr:`values` attribute of the individual's fitness to 
+calling :func:`toolbox.clone` on an individual to duplicate it and
+``del`` on the :attr:`values` attribute of the individual's fitness to
 invalidate it.
 
 Here is a list of the implemented operators in DEAP,
 
 ============================ =========================================== ========================================= ========================================= ================
- Initialization               Crossover                                   Mutation                                  Selection                                 Migration 
+ Initialization               Crossover                                   Mutation                                  Selection                                 Migration
 ============================ =========================================== ========================================= ========================================= ================
  :func:`initRepeat`           :func:`cxOnePoint`                          :func:`mutGaussian`                       :func:`selTournament`                     :func:`migRing`
- :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`                       ..             
- :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`                          ..             
- ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selSPEA2`                          ..             
- ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selRandom`                         ..             
- ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selBest`                           ..             
- ..                           :func:`cxBlend`                             ..                                        :func:`selWorst`                          ..             
- ..                           :func:`cxESBlend`                           ..                                        :func:`selTournamentDCD`                  ..             
- ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selDoubleTournament`               ..             
- ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selStochasticUniversalSampling`    ..             
- ..                           :func:`cxSimulatedBinaryBounded`            ..                                        :func:`selLexicase`                      ..             
- ..                           :func:`cxMessyOnePoint`                     ..                                        :func:`selEpsilonLexicase`                ..             
- ..                           ..                                          ..                                        :func:`selAutomaticEpsilonLexicase`       ..             
+ :func:`initIterate`          :func:`cxTwoPoint`                          :func:`mutShuffleIndexes`                 :func:`selRoulette`                       ..
+ :func:`initCycle`            :func:`cxUniform`                           :func:`mutFlipBit`                        :func:`selNSGA2`                          ..
+ ..                           :func:`cxPartialyMatched`                   :func:`mutPolynomialBounded`              :func:`selNSGA3`                          ..
+ ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selSPEA2`                          ..
+ ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selRandom`                         ..
+ ..                           :func:`cxBlend`                             ..                                        :func:`selBest`                           ..
+ ..                           :func:`cxESBlend`                           ..                                        :func:`selWorst`                          ..
+ ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selTournamentDCD`                  ..
+ ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selDoubleTournament`               ..
+ ..                           :func:`cxSimulatedBinaryBounded`            ..                                        :func:`selStochasticUniversalSampling`    ..
+ ..                           :func:`cxMessyOnePoint`                     ..                                        :func:`selLexicase`                       ..
+ ..                           ..                                          ..                                        :func:`selEpsilonLexicase`                ..
+ ..                           ..                                          ..                                        :func:`selAutomaticEpsilonLexicase`       ..
 ============================ =========================================== ========================================= ========================================= ================
 
 and genetic programming specific operators.
@@ -42,9 +43,10 @@ and genetic programming specific operators.
 ================================ =========================================== ========================================= ================================
  :func:`~deap.gp.genFull`         :func:`~deap.gp.cxOnePoint`                 :func:`~deap.gp.mutShrink`                :func:`~deap.gp.staticLimit`
  :func:`~deap.gp.genGrow`         :func:`~deap.gp.cxOnePointLeafBiased`       :func:`~deap.gp.mutUniform`               :func:`selDoubleTournament`
- :func:`~deap.gp.genHalfAndHalf`  ..                                          :func:`~deap.gp.mutNodeReplacement`       ..
+ :func:`~deap.gp.genHalfAndHalf`  :func:`~deap.gp.cxSemantic`                 :func:`~deap.gp.mutNodeReplacement`       ..
  ..                               ..                                          :func:`~deap.gp.mutEphemeral`             ..
  ..                               ..                                          :func:`~deap.gp.mutInsert`                ..
+ ..                               ..                                          :func:`~deap.gp.mutSemantic`              ..
 ================================ =========================================== ========================================= ================================
 
 
@@ -100,6 +102,8 @@ Crossover
 
 .. autofunction:: deap.gp.cxOnePointLeafBiased
 
+.. autofunction:: deap.gp.cxSemantic
+
 Mutation
 ++++++++
 
@@ -125,6 +129,8 @@ Mutation
 
 .. autofunction:: deap.gp.mutInsert
 
+.. autofunction:: deap.gp.mutSemantic
+
 Selection
 +++++++++
 
@@ -133,6 +139,12 @@ Selection
 .. autofunction:: deap.tools.selRoulette
 
 .. autofunction:: deap.tools.selNSGA2
+
+.. autofunction:: deap.tools.selNSGA3
+
+.. autofunction:: deap.tools.selNSGA3WithMemory
+
+.. autofunction:: deap.tools.uniform_reference_points
 
 .. autofunction:: deap.tools.selSPEA2
 
@@ -187,11 +199,11 @@ Hall-Of-Fame
 .. autoclass:: deap.tools.HallOfFame
 
    .. automethod:: deap.tools.HallOfFame.update
-   
+
    .. automethod:: deap.tools.HallOfFame.insert
-   
+
    .. automethod:: deap.tools.HallOfFame.remove
-   
+
    .. automethod:: deap.tools.HallOfFame.clear
 
 .. autoclass:: deap.tools.ParetoFront([similar])

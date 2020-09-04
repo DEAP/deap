@@ -26,7 +26,7 @@ except ImportError:
 def hypervolume(front, **kargs):
     """Returns the index of the individual with the least the hypervolume
     contribution. The provided *front* should be a set of non-dominated
-    individuals having each a :attr:`fitness` attribute. 
+    individuals having each a :attr:`fitness` attribute.
     """
     # Must use wvalues * -1 since hypervolume use implicit minimization
     # And minimization in deap use max on -obj
@@ -34,7 +34,7 @@ def hypervolume(front, **kargs):
     ref = kargs.get("ref", None)
     if ref is None:
         ref = numpy.max(wobj, axis=0) + 1
-    
+
     def contribution(i):
         # The contribution of point p_i in point set P
         # is the hypervolume of P without p_i
@@ -61,7 +61,7 @@ def additive_epsilon(front, **kargs):
         mwobj = numpy.ma.array(wobj)
         mwobj[i] = numpy.ma.masked
         return numpy.min(numpy.max(wobj[i] - mwobj, axis=1))
-        
+
     contrib_values = map(contribution, range(len(front)))
 
     # Select the minimum contribution value
@@ -83,7 +83,7 @@ def multiplicative_epsilon(front, **kargs):
         mwobj = numpy.ma.array(wobj)
         mwobj[i] = numpy.ma.masked
         return numpy.min(numpy.max(wobj[i] / mwobj, axis=1))
-        
+
     contrib_values = map(contribution, range(len(front)))
 
     # Select the minimum contribution value
