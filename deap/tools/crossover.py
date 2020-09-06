@@ -482,7 +482,6 @@ def cxCycle(ind1, ind2):
 # List of exported function names.
 __all__ = ['cxOnePoint', 'cxTwoPoint', 'cxUniform', 'cxPartialyMatched',
            'cxUniformPartialyMatched', 'cxOrdered', 'cxBlend',
-
            'cxSimulatedBinary','cxSimulatedBinaryBounded', 'cxMessyOnePoint', 
            'cxESBlend', 'cxESTwoPoint', 'cxCycle']
 
