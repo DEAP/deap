@@ -16,7 +16,7 @@ from deap import tools
 def func():
     return "True"
 
-class Pickling(unittest.TestCase):
+class PickleTest(unittest.TestCase):
 
     def setUp(self):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))

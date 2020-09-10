@@ -6,7 +6,7 @@ import numpy
 from deap import tools
 
 
-class LogbookTest(unittest.TestCase):
+class StatisticsTest(unittest.TestCase):
     def test_statistics_compile(self):
         s = tools.Statistics()
         s.register("mean", numpy.mean)
