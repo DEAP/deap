@@ -41,7 +41,7 @@ def hypervolume(front, **kargs):
         return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
     # Parallelization note: Cannot pickle local function
-    contrib_values = map(contribution, range(len(front)))
+    contrib_values = list(map(contribution, list(range(len(front)))))
 
     # Select the maximum hypervolume value (correspond to the minimum difference)
     return numpy.argmax(contrib_values)
@@ -62,7 +62,7 @@ def additive_epsilon(front, **kargs):
         mwobj[i] = numpy.ma.masked
         return numpy.min(numpy.max(wobj[i] - mwobj, axis=1))
 
-    contrib_values = map(contribution, range(len(front)))
+    contrib_values = list(map(contribution, list(range(len(front)))))
 
     # Select the minimum contribution value
     return numpy.argmin(contrib_values)
@@ -84,7 +84,7 @@ def multiplicative_epsilon(front, **kargs):
         mwobj[i] = numpy.ma.masked
         return numpy.min(numpy.max(wobj[i] / mwobj, axis=1))
 
-    contrib_values = map(contribution, range(len(front)))
+    contrib_values = list(map(contribution, list(range(len(front)))))
 
     # Select the minimum contribution value
     return numpy.argmin(contrib_values)

@@ -27,7 +27,7 @@ you really want them to do.
 
 import random
 
-import tools
+from deap import tools
 
 
 def varAnd(population, toolbox, cxpb, mutpb):
@@ -157,7 +157,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     record = stats.compile(population) if stats else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print((logbook.stream))
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -184,7 +184,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print((logbook.stream))
 
     return population, logbook
 
@@ -227,10 +227,10 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
         "or equal to 1.0.")
 
     offspring = []
-    for _ in xrange(lambda_):
+    for _ in range(lambda_):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
-            ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
+            ind1, ind2 = list(map(toolbox.clone, random.sample(population, 2)))
             ind1, ind2 = toolbox.mate(ind1, ind2)
             del ind1.fitness.values
             offspring.append(ind1)
@@ -308,7 +308,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats is not None else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print((logbook.stream))
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -332,7 +332,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print((logbook.stream))
 
     return population, logbook
 
@@ -409,7 +409,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats is not None else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print((logbook.stream))
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -433,7 +433,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print((logbook.stream))
     return population, logbook
 
 
@@ -481,7 +481,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    for gen in xrange(ngen):
+    for gen in range(ngen):
         # Generate a new population
         population = toolbox.generate()
         # Evaluate the individuals
@@ -498,6 +498,6 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
-            print logbook.stream
+            print((logbook.stream))
 
     return population, logbook

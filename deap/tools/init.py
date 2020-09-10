@@ -1,4 +1,4 @@
-from __future__ import division
+
 
 def initRepeat(container, func, n):
     """Call the function *container* with a generator function corresponding
@@ -22,7 +22,7 @@ def initRepeat(container, func, n):
 
     See the :ref:`list-of-floats` and :ref:`population` tutorials for more examples.
     """
-    return container(func() for _ in xrange(n))
+    return container(func() for _ in range(n))
 
 def initIterate(container, generator):
     """Call the function *container* with an iterable as
@@ -42,7 +42,7 @@ def initIterate(container, generator):
         >>> import random
         >>> from functools import partial
         >>> random.seed(42)
-        >>> gen_idx = partial(random.sample, range(10), 10)
+        >>> gen_idx = partial(random.sample, list(range(10)), 10)
         >>> initIterate(list, gen_idx)      # doctest: +SKIP
         [1, 0, 4, 9, 6, 5, 8, 2, 3, 7]
 
@@ -72,7 +72,7 @@ def initCycle(container, seq_func, n=1):
 
     See the :ref:`funky` tutorial for an example.
     """
-    return container(func() for _ in xrange(n) for func in seq_func)
+    return container(func() for _ in range(n) for func in seq_func)
 
 __all__ = ['initRepeat', 'initIterate', 'initCycle']
 
@@ -86,4 +86,5 @@ if __name__ == "__main__":
     random.seed(64)
     doctest.run_docstring_examples(initIterate, globals())
     doctest.run_docstring_examples(initCycle, globals())
+
 

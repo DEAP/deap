@@ -142,7 +142,7 @@ def create(name, base, **kargs):
 
     dict_inst = {}
     dict_cls = {}
-    for obj_name, obj in kargs.iteritems():
+    for obj_name, obj in list(kargs.items()):
         if isinstance(obj, type):
             dict_inst[obj_name] = obj
         else:
@@ -161,7 +161,7 @@ def create(name, base, **kargs):
         """Replace the __init__ function of the new type, in order to
         add attributes that were defined with **kargs to the instance.
         """
-        for obj_name, obj in dict_inst.iteritems():
+        for obj_name, obj in list(dict_inst.items()):
             setattr(self, obj_name, obj())
         if base.__init__ is not object.__init__:
             base.__init__(self, *args, **kargs)

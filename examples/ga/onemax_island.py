@@ -109,12 +109,12 @@ def main(procid, pipein, pipeout, sync, seed=None):
     
     if procid == 0:
         # Synchronization needed to log header on top and only once
-        print(logbook.stream)
+        print((logbook.stream))
         sync.set()
     else:
         logbook.log_header = False  # Never output the header
         sync.wait()
-        print(logbook.stream)
+        print((logbook.stream))
     
     for gen in range(1, NGEN):
         deme = toolbox.select(deme, len(deme))
@@ -127,7 +127,7 @@ def main(procid, pipein, pipeout, sync, seed=None):
         hof.update(deme)
         record = stats.compile(deme)
         logbook.record(gen=gen, deme=procid, evals=len(deme), **record)
-        print(logbook.stream)
+        print((logbook.stream))
             
         if gen % MIG_RATE == 0 and gen > 0:
             toolbox.migrate(deme)

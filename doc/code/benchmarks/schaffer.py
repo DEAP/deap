@@ -18,7 +18,7 @@ ax = Axes3D(fig, azim = -29, elev = 60)
 X = np.arange(-25, 25, 0.25)
 Y = np.arange(-25, 25, 0.25)
 X, Y = np.meshgrid(X, Y)
-Z = np.fromiter(map(schaffer_arg0, zip(X.flat,Y.flat)), dtype=np.float, count=X.shape[0]*X.shape[1]).reshape(X.shape)
+Z = np.fromiter(list(map(schaffer_arg0, list(zip(X.flat,Y.flat)))), dtype=np.float, count=X.shape[0]*X.shape[1]).reshape(X.shape)
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.jet, linewidth=0.2)
  

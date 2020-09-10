@@ -139,7 +139,7 @@ def main():
     hof.update(pop)
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)
-    print(logbook.stream)
+    print((logbook.stream))
     
     for g in range(1, NGEN):
         # Select the offspring
@@ -171,9 +171,9 @@ def main():
         hof.update(pop)
         record = stats.compile(pop)
         logbook.record(gen=g, evals=len(invalids), **record)
-        print(logbook.stream)
+        print((logbook.stream))
     
-    print('Best individual : ', hof[0][0], hof[0].fitness)
+    print(('Best individual : ', hof[0][0], hof[0].fitness))
     
     return pop, stats, hof
     

@@ -81,7 +81,7 @@ def main(verbose=True):
     logbook.record(gen=0, evals=mpb.nevals, error=mpb.currentError(),
                    offline_error=mpb.offlineError(), **record)
     if verbose:
-        print(logbook.stream)
+        print((logbook.stream))
 
     g = 1
     while mpb.nevals < 5e5:
@@ -93,7 +93,7 @@ def main(verbose=True):
 
         # Apply exclusion
         rexcl = (BOUNDS[1] - BOUNDS[0]) / (2 * NPOP**(1.0/NDIM))
-        for i, j in itertools.combinations(range(NPOP), 2):
+        for i, j in itertools.combinations(list(range(NPOP)), 2):
             if bests[i].fitness.valid and bests[j].fitness.valid:
                 d = sum((bests[i][k] - bests[j][k])**2 for k in range(NDIM))
                 d = math.sqrt(d)
@@ -116,7 +116,7 @@ def main(verbose=True):
         logbook.record(gen=g, evals=mpb.nevals, error=mpb.currentError(),
                        offline_error=mpb.offlineError(), **record)
         if verbose:
-            print(logbook.stream)
+            print((logbook.stream))
 
         # Evolve the sub-populations
         for idx, subpop in enumerate(populations):

@@ -11,7 +11,7 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 IND_SIZE=10
 
 toolbox = base.Toolbox()
-toolbox.register("indices", random.sample, range(IND_SIZE), IND_SIZE)
+toolbox.register("indices", random.sample, list(range(IND_SIZE)), IND_SIZE)
 toolbox.register("individual", tools.initIterate, creator.Individual,
                  toolbox.indices)
 toolbox.register("deme", tools.initRepeat, list, toolbox.individual)

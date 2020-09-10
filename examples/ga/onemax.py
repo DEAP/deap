@@ -89,7 +89,7 @@ def main():
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
     
-    print("  Evaluated %i individuals" % len(pop))
+    print(("  Evaluated %i individuals" % len(pop)))
 
     # Extracting all the fitnesses of 
     fits = [ind.fitness.values[0] for ind in pop]
@@ -101,7 +101,7 @@ def main():
     while max(fits) < 100 and g < 1000:
         # A new generation
         g = g + 1
-        print("-- Generation %i --" % g)
+        print(("-- Generation %i --" % g))
         
         # Select the next generation individuals
         offspring = toolbox.select(pop, len(pop))
@@ -129,11 +129,11 @@ def main():
     
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(toolbox.evaluate, invalid_ind)
+        fitnesses = list(map(toolbox.evaluate, invalid_ind))
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
-        print("  Evaluated %i individuals" % len(invalid_ind))
+        print(("  Evaluated %i individuals" % len(invalid_ind)))
         
         # The population is entirely replaced by the offspring
         pop[:] = offspring
@@ -146,15 +146,15 @@ def main():
         sum2 = sum(x*x for x in fits)
         std = abs(sum2 / length - mean**2)**0.5
         
-        print("  Min %s" % min(fits))
-        print("  Max %s" % max(fits))
-        print("  Avg %s" % mean)
-        print("  Std %s" % std)
+        print(("  Min %s" % min(fits)))
+        print(("  Max %s" % max(fits)))
+        print(("  Avg %s" % mean))
+        print(("  Std %s" % std))
     
     print("-- End of (successful) evolution --")
     
     best_ind = tools.selBest(pop, 1)[0]
-    print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+    print(("Best individual is %s, %s" % (best_ind, best_ind.fitness.values)))
 
 if __name__ == "__main__":
     main()

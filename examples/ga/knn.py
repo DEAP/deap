@@ -56,14 +56,14 @@ class KNN(object):
             classes = dict((cls, 0) for cls in self.classes)
             for n in nns[:self.k]:
                 classes[self.labels[n]] += 1
-            labels = sorted(classes.items(), key=operator.itemgetter(1))[-1][0]
+            labels = sorted(list(classes.items()), key=operator.itemgetter(1))[-1][0]
         elif data.ndim == 2:
             labels = list()
             for i, d in enumerate(data):
                 classes = dict((cls, 0) for cls in self.classes)
                 for n in nns[i, :self.k]:
                     classes[self.labels[n]] += 1
-                labels.append(sorted(classes.items(), key=operator.itemgetter(1))[-1][0])
+                labels.append(sorted(list(classes.items()), key=operator.itemgetter(1))[-1][0])
         
         return labels
 
@@ -98,6 +98,6 @@ if __name__ == "__main__":
     knn = KNN(1)
     knn.train(trainset, trainlabels)
     print("Single Data ===========")
-    print(knn.predict([1, 0], [1, 1]))
+    print((knn.predict([1, 0], [1, 1])))
     print("Multiple Data ===========")
-    print(knn.predict([[1, 3], [1, 0]], [1, 1]))
+    print((knn.predict([[1, 3], [1, 0]], [1, 1])))

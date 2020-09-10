@@ -40,7 +40,7 @@ def genWire(dimension):
     
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
-    return [genWire(dimension) for i in xrange(size)]
+    return [genWire(dimension) for i in range(size)]
     
 def mutWire(individual, dimension, indpb):
     for index, elem in enumerate(individual):
@@ -97,9 +97,9 @@ def main():
     stats.update(population)
     
     # Begin the evolution
-    for g in xrange(NGEN):
+    for g in range(NGEN):
         t1 = time.time()
-        print "-- Generation %i --" % g
+        print("-- Generation %i --" % g)
         offspring = [toolbox.clone(ind) for ind in population]
         t2 = time.time()
         # Apply crossover and mutation
@@ -128,29 +128,29 @@ def main():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
         
-        print "  Evaluated %i individuals" % len(invalid_ind)
+        print("  Evaluated %i individuals" % len(invalid_ind))
         t5 = time.time()
         population = toolbox.select(population+offspring, len(offspring))
         t6 = time.time()
         #hof.update(population)
         stats.update(population)
         t7 = time.time()
-        print stats
+        print(stats)
         
         print("Times :")
-        print("Clone : " + str(t2-t1) + " (" + str((t2-t1)/(t7-t1)) +"%)")
-        print("Cx : " + str(t3-t2) + " (" + str((t3-t2)/(t7-t1)) +"%)")
-        print("Mut : " + str(t4-t3) + " (" + str((t4-t3)/(t7-t1)) +"%)")
-        print("Eval : " + str(t5-t4) + " (" + str((t5-t4)/(t7-t1)) +"%)")
-        print("Select : " + str(t6-t5) + " (" + str((t6-t5)/(t7-t1)) +"%)")
-        print("HOF + stats : " + str(t7-t6) + " (" + str((t7-t6)/(t7-t1)) +"%)")
-        print("TOTAL : " + str(t7-t1))
+        print(("Clone : " + str(t2-t1) + " (" + str((t2-t1)/(t7-t1)) +"%)"))
+        print(("Cx : " + str(t3-t2) + " (" + str((t3-t2)/(t7-t1)) +"%)"))
+        print(("Mut : " + str(t4-t3) + " (" + str((t4-t3)/(t7-t1)) +"%)"))
+        print(("Eval : " + str(t5-t4) + " (" + str((t5-t4)/(t7-t1)) +"%)"))
+        print(("Select : " + str(t6-t5) + " (" + str((t6-t5)/(t7-t1)) +"%)"))
+        print(("HOF + stats : " + str(t7-t6) + " (" + str((t7-t6)/(t7-t1)) +"%)"))
+        print(("TOTAL : " + str(t7-t1)))
         
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
-    print best_network
-    print best_network.draw()
-    print "%i errors, length %i, depth %i" % hof[0].fitness.values
+    print(best_network)
+    print(best_network.draw())
+    print("%i errors, length %i, depth %i" % hof[0].fitness.values)
     
     return population, stats, hof
 

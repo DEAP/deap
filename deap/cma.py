@@ -24,7 +24,7 @@ import copy
 from math import sqrt, log, exp
 import numpy
 
-import tools
+from . import tools
 
 
 class Strategy(object):
@@ -118,7 +118,7 @@ class Strategy(object):
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
-        return map(ind_init, arz)
+        return list(map(ind_init, arz))
 
     def update(self, population):
         """Update the current covariance matrix strategy from the
@@ -286,7 +286,7 @@ class StrategyOnePlusLambda(object):
         # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)
-        return map(ind_init, arz)
+        return list(map(ind_init, arz))
 
     def update(self, population):
         """Update the current covariance matrix strategy from the

@@ -26,7 +26,7 @@ import random
 import numpy
 
 try:
-    from itertools import imap
+
 except:
     # Python 3 nothing to do
     pass
@@ -82,15 +82,15 @@ def convertQuantum(swarm, rcloud, centre, dist):
 def updateParticle(part, best, chi, c):
     ce1 = (c * random.uniform(0, 1) for _ in range(len(part)))
     ce2 = (c * random.uniform(0, 1) for _ in range(len(part)))
-    ce1_p = map(operator.mul, ce1, map(operator.sub, best, part))
-    ce2_g = map(operator.mul, ce2, map(operator.sub, part.best, part))
-    a = map(operator.sub,
-                      map(operator.mul,
+    ce1_p = list(map(operator.mul, ce1, list(map(operator.sub, best, part))))
+    ce2_g = list(map(operator.mul, ce2, list(map(operator.sub, part.best, part))))
+    a = list(map(operator.sub,
+                      list(map(operator.mul,
                                     itertools.repeat(chi),
-                                    map(operator.add, ce1_p, ce2_g)),
-                      map(operator.mul,
+                                    list(map(operator.add, ce1_p, ce2_g)))),
+                      list(map(operator.mul,
                                      itertools.repeat(1 - chi),
-                                     part.speed))
+                                     part.speed))))
     part.speed = list(map(operator.add, part.speed, a))
     part[:] = list(map(operator.add, part, part.speed))
 
@@ -139,7 +139,7 @@ def main(verbose=True):
                    error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
     if verbose:
-        print(logbook.stream)
+        print((logbook.stream))
     
     generation = 1
     while mpb.nevals < 5e5:
@@ -197,11 +197,11 @@ def main(verbose=True):
                        error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
         if verbose:
-            print(logbook.stream)
+            print((logbook.stream))
         
         # Apply exclusion
         reinit_swarms = set()
-        for s1, s2 in itertools.combinations(range(len(population)), 2):
+        for s1, s2 in itertools.combinations(list(range(len(population))), 2):
             # Swarms must have a best and not already be set to reinitialize
             if population[s1].best and population[s2].best and not (s1 in reinit_swarms or s2 in reinit_swarms):
                 dist = 0

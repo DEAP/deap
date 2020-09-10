@@ -50,7 +50,7 @@ def cxExponential(x, y, cr):
     size = len(x)
     index = random.randrange(size)
     # Loop on the indices index -> end, then on 0 -> index
-    for i in chain(range(index, size), range(0, index)):
+    for i in chain(list(range(index, size)), list(range(0, index))):
         x[i] = y[i]
         if random.random() < cr:
             break
@@ -88,7 +88,7 @@ def main():
     
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)
-    print(logbook.stream)
+    print((logbook.stream))
 
     for g in range(1, NGEN):
         children = []
@@ -111,10 +111,10 @@ def main():
         hof.update(pop)
         record = stats.compile(pop)
         logbook.record(gen=g, evals=len(pop), **record)
-        print(logbook.stream)
+        print((logbook.stream))
     
-    print("Best individual is ", hof[0])
-    print("with fitness", hof[0].fitness.values[0])
+    print(("Best individual is ", hof[0]))
+    print(("with fitness", hof[0].fitness.values[0]))
     return logbook
             
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ from deap import algorithms
 
 for g in range(NGEN):
     # Select and clone the next generation individuals
-    offspring = map(toolbox.clone, toolbox.select(pop, len(pop)))
+    offspring = list(map(toolbox.clone, toolbox.select(pop, len(pop))))
 
     # Apply crossover and mutation on the offspring
     offspring = algorithms.varAnd(offspring, toolbox, CXPB, MUTPB)

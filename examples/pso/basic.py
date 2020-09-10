@@ -38,9 +38,9 @@ def generate(size, pmin, pmax, smin, smax):
 def updateParticle(part, best, phi1, phi2):
     u1 = (random.uniform(0, phi1) for _ in range(len(part)))
     u2 = (random.uniform(0, phi2) for _ in range(len(part)))
-    v_u1 = map(operator.mul, u1, map(operator.sub, part.best, part))
-    v_u2 = map(operator.mul, u2, map(operator.sub, best, part))
-    part.speed = list(map(operator.add, part.speed, map(operator.add, v_u1, v_u2)))
+    v_u1 = list(map(operator.mul, u1, list(map(operator.sub, part.best, part))))
+    v_u2 = list(map(operator.mul, u2, list(map(operator.sub, best, part))))
+    part.speed = list(map(operator.add, part.speed, list(map(operator.add, v_u1, v_u2))))
     for i, speed in enumerate(part.speed):
         if abs(speed) < part.smin:
             part.speed[i] = math.copysign(part.smin, speed)
@@ -82,7 +82,7 @@ def main():
 
         # Gather all the fitnesses in one list and print the stats
         logbook.record(gen=g, evals=len(pop), **stats.compile(pop))
-        print(logbook.stream)
+        print((logbook.stream))
     
     return pop, logbook, best
 

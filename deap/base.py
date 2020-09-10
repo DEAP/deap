@@ -66,7 +66,7 @@ class Toolbox(object):
         The following code block is an example of how the toolbox is used. ::
 
             >>> def func(a, b, c=3):
-            ...     print a, b, c
+            ...     print((a, b, c))
             ...
             >>> tools = Toolbox()
             >>> tools.register("myFunc", func, 2, c=4)
@@ -190,12 +190,12 @@ class Fitness(object):
             self.wvalues = tuple(map(mul, values, self.weights))
         except TypeError:
             _, _, traceback = sys.exc_info()
-            raise TypeError, ("Both weights and assigned values must be a "
-                              "sequence of numbers when assigning to values of "
-                              "%r. Currently assigning value(s) %r of %r to a "
-                              "fitness with weights %s."
-                              % (self.__class__, values, type(values),
-                                 self.weights)), traceback
+            raise TypeError(("Both weights and assigned values must be a "
+                             "sequence of numbers when assigning to values of "
+                             "%r. Currently assigning value(s) %r of %r to a "
+                             "fitness with weights %s."
+                             % (self.__class__, values, type(values),
+                                self.weights)), traceback)
 
     def delValues(self):
         self.wvalues = ()
@@ -268,3 +268,4 @@ class Fitness(object):
         """Return the Python code to build a copy of the object."""
         return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
                               self.values if self.valid else tuple())
+

@@ -108,7 +108,7 @@ if __name__ == "__main__":
             
             # Iterate over all the instance of a single problem
             # Rotation, translation, etc.
-            for instance in chain(range(1, 6), range(21, 31)):
+            for instance in chain(list(range(1, 6)), list(range(21, 31))):
                 
                 # Set the function to be used (problem) in the logger
                 e.setfun(*bn.instantiate(f_name, iinstance=instance))
@@ -129,9 +129,9 @@ if __name__ == "__main__":
                 
                 e.finalizerun()
                 
-                print('f%d in %d-D, instance %d: FEs=%d with %d restarts, '
+                print(('f%d in %d-D, instance %d: FEs=%d with %d restarts, '
                       'fbest-ftarget=%.4e'
                       % (f_name, dim, instance, e.evaluations, restarts,
-                         e.fbest - e.ftarget))
+                         e.fbest - e.ftarget)))
                          
-            print('date and time: %s' % time.asctime())
+            print(('date and time: %s' % time.asctime()))
