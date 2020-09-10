@@ -18,6 +18,9 @@ matrix:
     - python: "3.7"
       dist: xenial
       env: NUMPY=numpy
+    - python: "3.8"
+      dist: xenial
+      env: NUMPY=numpy
 addons:
   apt:
     packages:
