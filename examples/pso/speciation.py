@@ -149,7 +149,7 @@ def main(verbose=True):
                        error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
         if verbose:
-            print((logbook.stream))
+            print(logbook.stream)
 
         # Detect change
         if any(s[0].bestfit.values != toolbox.evaluate(s[0].best) for s in species):

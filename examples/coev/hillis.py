@@ -134,7 +134,7 @@ def main():
     hof.update(hosts)
     record = hstats.compile(hosts)
     logbook.record(gen=0, evals=len(hosts), **record)
-    print((logbook.stream))
+    print(logbook.stream)
     
     for g in range(1, MAXGEN):
         
@@ -151,12 +151,12 @@ def main():
         hof.update(hosts)
         record = hstats.compile(hosts)
         logbook.record(gen=g, evals=len(hosts), **record)
-        print((logbook.stream))
+        print(logbook.stream)
     
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(best_network)
-    print((best_network.draw()))
-    print(("%i errors" % best_network.assess()))
+    print(best_network.draw())
+    print("%i errors" % best_network.assess())
 
     return hosts, logbook, hof
 

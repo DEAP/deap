@@ -388,11 +388,11 @@ class Logbook(list):
 
             >>> log = Logbook()
             >>> log.append({'gen' : 0})
-            >>> print((log.stream))  # doctest: +NORMALIZE_WHITESPACE
+            >>> print(log.stream)  # doctest: +NORMALIZE_WHITESPACE
             gen
             0
             >>> log.append({'gen' : 1})
-            >>> print((log.stream))  # doctest: +NORMALIZE_WHITESPACE
+            >>> print(log.stream)  # doctest: +NORMALIZE_WHITESPACE
             1
         """
         startindex, self.buffindex = self.buffindex, len(self)

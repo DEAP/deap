@@ -329,8 +329,8 @@ if __name__ == "__main__":
     pointset = [(a, a) for a in numpy.arange(1, 0, -0.01)]
     ref = numpy.array([2, 2])
 
-    print(("Python version: %f" % hypervolume(pointset, ref)))
+    print("Python version: %f" % hypervolume(pointset, ref))
     if hv:
-        print(("C version: %f" % hv.hypervolume(pointset, ref)))
-    print(("Approximated: %f" % hypervolume_approximation(pointset, ref)))
+        print("C version: %f" % hv.hypervolume(pointset, ref))
+    print("Approximated: %f" % hypervolume_approximation(pointset, ref))
 

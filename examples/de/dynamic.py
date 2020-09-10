@@ -81,7 +81,7 @@ def main(verbose=True):
     logbook.record(gen=0, evals=mpb.nevals, error=mpb.currentError(),
                    offline_error=mpb.offlineError(), **record)
     if verbose:
-        print((logbook.stream))
+        print(logbook.stream)
 
     g = 1
     while mpb.nevals < 5e5:
@@ -116,7 +116,7 @@ def main(verbose=True):
         logbook.record(gen=g, evals=mpb.nevals, error=mpb.currentError(),
                        offline_error=mpb.offlineError(), **record)
         if verbose:
-            print((logbook.stream))
+            print(logbook.stream)
 
         # Evolve the sub-populations
         for idx, subpop in enumerate(populations):

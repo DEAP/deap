@@ -139,7 +139,7 @@ def main(verbose=True):
                    error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
     if verbose:
-        print((logbook.stream))
+        print(logbook.stream)
     
     generation = 1
     while mpb.nevals < 5e5:
@@ -197,7 +197,7 @@ def main(verbose=True):
                        error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
 
         if verbose:
-            print((logbook.stream))
+            print(logbook.stream)
         
         # Apply exclusion
         reinit_swarms = set()

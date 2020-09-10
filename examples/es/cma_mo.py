@@ -109,10 +109,10 @@ def main():
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
-            print((logbook.stream))
+            print(logbook.stream)
 
     if verbose:
-        print(("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0])))
+        print("Final population hypervolume is %f" % hypervolume(strategy.parents, [11.0, 11.0]))
 
         # Note that we use a penalty to guide the search to feasible solutions,
         # but there is no guarantee that individuals are valid.
@@ -122,10 +122,10 @@ def main():
             dist = distance(closest_feasible(ind), ind)
             if numpy.isclose(dist, 0.0, rtol=1.e-5, atol=1.e-5):
                 num_valid += 1
-        print(("Number of valid individuals is %d/%d" % (num_valid, len(strategy.parents))))
+        print("Number of valid individuals is %d/%d" % (num_valid, len(strategy.parents)))
 
         print("Final population:")
-        print((numpy.asarray(strategy.parents)))
+        print(numpy.asarray(strategy.parents))
 
     if create_plot:
         interactive = 0

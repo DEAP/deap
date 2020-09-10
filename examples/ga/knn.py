@@ -98,6 +98,6 @@ if __name__ == "__main__":
     knn = KNN(1)
     knn.train(trainset, trainlabels)
     print("Single Data ===========")
-    print((knn.predict([1, 0], [1, 1])))
+    print(knn.predict([1, 0], [1, 1]))
     print("Multiple Data ===========")
-    print((knn.predict([[1, 3], [1, 0]], [1, 1])))
+    print(knn.predict([[1, 3], [1, 0]], [1, 1]))

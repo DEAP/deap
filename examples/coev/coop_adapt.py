@@ -89,7 +89,7 @@ def main(extended=True, verbose=True):
             logbook.record(gen=g, species=i, evals=len(s), **record)
             
             if verbose: 
-                print((logbook.stream))
+                print(logbook.stream)
             
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
@@ -118,7 +118,7 @@ def main(extended=True, verbose=True):
     if extended:
         for r in representatives:
             # print individuals without noise
-            print(("".join(str(x) for x, y in zip(r, noise) if y == "*")))
+            print("".join(str(x) for x, y in zip(r, noise) if y == "*"))
     
     if plt and extended:
         # Do the final plotting

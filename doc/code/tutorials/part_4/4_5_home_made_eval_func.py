@@ -138,13 +138,13 @@ def main():
         print(stats)
         
         print("Times :")
-        print(("Clone : " + str(t2-t1) + " (" + str((t2-t1)/(t7-t1)) +"%)"))
-        print(("Cx : " + str(t3-t2) + " (" + str((t3-t2)/(t7-t1)) +"%)"))
-        print(("Mut : " + str(t4-t3) + " (" + str((t4-t3)/(t7-t1)) +"%)"))
-        print(("Eval : " + str(t5-t4) + " (" + str((t5-t4)/(t7-t1)) +"%)"))
-        print(("Select : " + str(t6-t5) + " (" + str((t6-t5)/(t7-t1)) +"%)"))
-        print(("HOF + stats : " + str(t7-t6) + " (" + str((t7-t6)/(t7-t1)) +"%)"))
-        print(("TOTAL : " + str(t7-t1)))
+        print("Clone : " + str(t2-t1) + " (" + str((t2-t1)/(t7-t1)) +"%)")
+        print("Cx : " + str(t3-t2) + " (" + str((t3-t2)/(t7-t1)) +"%)")
+        print("Mut : " + str(t4-t3) + " (" + str((t4-t3)/(t7-t1)) +"%)")
+        print("Eval : " + str(t5-t4) + " (" + str((t5-t4)/(t7-t1)) +"%)")
+        print("Select : " + str(t6-t5) + " (" + str((t6-t5)/(t7-t1)) +"%)")
+        print("HOF + stats : " + str(t7-t6) + " (" + str((t7-t6)/(t7-t1)) +"%)")
+        print("TOTAL : " + str(t7-t1))
         
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])

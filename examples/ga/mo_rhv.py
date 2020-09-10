@@ -117,7 +117,7 @@ def main(seed=None):
 
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(invalid_ind), **record)
-    print((logbook.stream))
+    print(logbook.stream)
 
     # Begin the generational process
     for gen in range(1, NGEN):
@@ -162,9 +162,9 @@ def main(seed=None):
 
         record = stats.compile(pop)
         logbook.record(gen=gen, evals=len(invalid_ind), **record)
-        print((logbook.stream))
+        print(logbook.stream)
 
-    print(("Final population hypervolume is %f" % hypervolume(pop, [11.0, 11.0])))
+    print("Final population hypervolume is %f" % hypervolume(pop, [11.0, 11.0]))
 
     return pop, logbook
 

@@ -21,9 +21,9 @@ os.remove("logbook.pkl")
 logbook.header = "gen", "avg", "spam"
 print(logbook)
 
-print((logbook.stream))
+print(logbook.stream)
 logbook.record(gen=1, evals=15, **record)
-print((logbook.stream))
+print(logbook.stream)
 
 from multistats import record
 

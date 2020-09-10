@@ -94,7 +94,7 @@ def main():
     hof.update(population)
     record = stats.compile(population)
     logbook.record(gen=0, evals=len(population), **record)
-    print((logbook.stream))
+    print(logbook.stream)
     
     # Begin the evolution
     for g in range(1, NGEN):
@@ -130,13 +130,13 @@ def main():
         hof.update(population)
         record = stats.compile(population)
         logbook.record(gen=g, evals=len(invalid_ind), **record)
-        print((logbook.stream))
+        print(logbook.stream)
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
     print(stats)
     print(best_network)
-    print((best_network.draw()))
-    print(("%i errors, length %i, depth %i" % hof[0].fitness.values))
+    print(best_network.draw())
+    print("%i errors, length %i, depth %i" % hof[0].fitness.values)
     
     return population, logbook, hof
 

@@ -72,7 +72,7 @@ def main():
             sigma = sigma * alpha**(-0.25)
             
         logbook.record(gen=g, fitness=best.fitness.values)
-        print((logbook.stream))
+        print(logbook.stream)
     
     return best
     
