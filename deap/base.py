@@ -66,7 +66,7 @@ class Toolbox(object):
         The following code block is an example of how the toolbox is used. ::
 
             >>> def func(a, b, c=3):
-            ...     print((a, b, c))
+            ...     print("%d %d %d" % (a, b, c))
             ...
             >>> tools = Toolbox()
             >>> tools.register("myFunc", func, 2, c=4)
