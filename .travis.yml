@@ -18,8 +18,9 @@ matrix:
     - python: "3.7"
       dist: xenial
       env: NUMPY=numpy
-    - python: "pypy"
-      env: NUMPY="git+https://bitbucket.org/pypy/numpy.git"
+    - python: "3.8"
+      dist: xenial
+      env: NUMPY=numpy
 addons:
   apt:
     packages:
@@ -46,7 +47,7 @@ install:
   - pip install $NUMPY
 # command to run tests
 script:
-  - python setup.py nosetests --verbosity=3 --with-doctest
+  - pytest
 notifications:
   webhooks:
     urls:
