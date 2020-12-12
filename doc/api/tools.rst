@@ -27,6 +27,7 @@ Here is a list of the implemented operators in DEAP,
  ..                           :func:`cxUniformPartialyMatched`            :func:`mutUniformInt`                     :func:`selSPEA2`                          ..
  ..                           :func:`cxOrdered`                           :func:`mutESLogNormal`                    :func:`selRandom`                         ..
  ..                           :func:`cxBlend`                             ..                                        :func:`selBest`                           ..
+ ..                           :func:`cxBlendBounded`                      ..
  ..                           :func:`cxESBlend`                           ..                                        :func:`selWorst`                          ..
  ..                           :func:`cxESTwoPoint`                        ..                                        :func:`selTournamentDCD`                  ..
  ..                           :func:`cxSimulatedBinary`                   ..                                        :func:`selDoubleTournament`               ..
@@ -85,6 +86,8 @@ Crossover
 .. autofunction:: deap.tools.cxOrdered
 
 .. autofunction:: deap.tools.cxBlend
+
+.. autofunction:: deap.tools.cxBlendBounded
 
 .. autofunction:: deap.tools.cxESBlend
 
