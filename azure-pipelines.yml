@@ -21,6 +21,8 @@ jobs:
           python.version: '3.7'
         Python38_VS2017:
           python.version: '3.8'
+        Python39_VS2017:
+          python.version: '3.9'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -57,6 +59,8 @@ jobs:
           python.version: '3.7'
         Python38_macOS1014:
           python.version: '3.8'
+        Python39_macOS1014:
+          python.version: '3.9'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -89,6 +93,8 @@ jobs:
           python.version: '3.7'
         Python38_macOS1013:
           python.version: '3.8'
+        Python39_macOS1013:
+          python.version: '3.9'
     steps:
     - task: UsePythonVersion@0
       inputs:
