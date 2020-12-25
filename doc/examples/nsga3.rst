@@ -102,7 +102,7 @@ uniform distribution: one at full scale, and the other at half scale.
 Conclusion
 ----------
 That's it for the NSGA-III algorithm using DEAP, now you can leverage
-the power of many-objective optimization with DEAP. If you're interrested,
+the power of many-objective optimization with DEAP. If you're interested,
 you can copy the `example <https://github.com/DEAP/deap/blob/nsga-3/examples/ga/nsga3.py>`_
 change the evaluation function and try applying it to your own problem.
 
