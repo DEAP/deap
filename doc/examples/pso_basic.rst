@@ -79,7 +79,7 @@ function is already defined in the benchmarks module, so we can register it
 directly.
 
 .. literalinclude:: /../examples/pso/basic.py
-   :lines: 50-54
+   :lines: 51-55
 
 Algorithm
 =========
