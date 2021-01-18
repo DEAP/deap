@@ -34,7 +34,7 @@ best state in which it has been so far.
 This translates in DEAP by the following two lines of code :
 
 .. literalinclude:: /../examples/pso/basic.py
-   :lines: 26-28
+   :lines: 27-29
 
 Here we create two new objects in the :mod:`~deap.creator` space. First, we
 create a :class:`FitnessMax` object, and we specify the
