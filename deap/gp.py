@@ -585,10 +585,10 @@ def genRamped(pset, min_, max_, type_=None):
 
 
 def generate(pset, min_, max_, condition, type_=None):
-    """Generate a Tree as a list of primitives and terminals. The tree is build
-    from the root to the leaves, and it stop growing when the condition is
+    """Generate a tree as a list of primitives and terminals. The tree is build
+    from the root to the leaves, and it stops growing when the *condition* is
     fulfilled. The returned list can then be passed to the constructor of the
-    class PrimitiveTree to build an actual tree object.
+    class *PrimitiveTree* to build an actual tree object.
 
     :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
