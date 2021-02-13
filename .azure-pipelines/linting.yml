@@ -1,0 +1,21 @@
+trigger:
+- master
+- dev
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.9'
+
+- script: |
+    python -m pip install --upgrade pip wheel
+  displayName: 'Install build tools'
+
+- script: |
+    pip install .
+  displayName: 'Install library'
+
+- script: |
+    pip install flake8
+    flake8 .
+  displayName: 'Run linting'
