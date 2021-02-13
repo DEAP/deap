@@ -31,8 +31,3 @@ steps:
     pip install pytest pytest-azurepipelines pytest-cov
     pytest .
   displayName: 'Run tests'
-
-- script: |
-    pip install flake8
-    flake8 .
-  displayName: 'Run linting'
