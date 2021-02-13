@@ -20,8 +20,8 @@ steps:
   displayName: 'Use Python $(python.version)'
 
 - script: |
-        python -m pip install --upgrade pip wheel
-      displayName: 'Install build tools'
+    python -m pip install --upgrade pip wheel
+  displayName: 'Install build tools'
 
 - script: |
     pip install .
