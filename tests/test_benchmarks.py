@@ -1,7 +1,6 @@
 """Test functions from deap/benchmarks."""
 import sys
 import unittest
-from nose import with_setup
 
 from deap import base
 from deap import benchmarks
