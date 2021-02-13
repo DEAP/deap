@@ -2,32 +2,47 @@ trigger:
 - master
 - dev
 
-pool:
-  vmImage: 'ubuntu-16.04'
-strategy:
-  matrix:
-    Python37:
-      python.version: '3.7'
-    Python38:
-      python.version: '3.8'
-    Python39:
-      python.version: '3.9'
+jobs:
+- job: 'Tests'
+  pool:
+    vmImage: 'ubuntu-16.04'
+  strategy:
+    matrix:
+      Python37:
+        python.version: '3.7'
+      Python38:
+        python.version: '3.8'
+      Python39:
+        python.version: '3.9'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '$(python.version)'
-  displayName: 'Use Python $(python.version)'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
 
-- script: |
-    python -m pip install --upgrade pip wheel
-  displayName: 'Install build tools'
+  - script: |
+      python -m pip install --upgrade pip wheel
+    displayName: 'Install build tools'
 
-- script: |
-    pip install .
-  displayName: 'Install library'
+  - script: |
+      pip install .
+    displayName: 'Install library'
 
-- script: |
-    pip install pytest pytest-azurepipelines pytest-cov
-    pytest .
-  displayName: 'Run tests'
+  - script: |
+      pip install pytest pytest-azurepipelines pytest-cov
+      pytest .
+    displayName: 'Run tests'
+
+- job: 'Lint'
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.9'
+
+  - script: |
+      pip install flake8
+      flake8 .
+    displayName: 'Run linting'
