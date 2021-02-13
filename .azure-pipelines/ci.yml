@@ -20,11 +20,15 @@ steps:
   displayName: 'Use Python $(python.version)'
 
 - script: |
-    python setup.py install
+        python -m pip install --upgrade pip wheel
+      displayName: 'Install build tools'
+
+- script: |
+    pip install .
   displayName: 'Install library'
 
 - script: |
     pip install pytest pytest-azurepipelines pytest-cov
-    pytest
+    pytest .
   displayName: 'Run tests'
 

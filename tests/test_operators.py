@@ -5,7 +5,7 @@ except ImportError:
     import mock
 import random
 
-from ..tools import crossover
+from deap.tools import crossover
 
 class TestCxOrdered(unittest.TestCase):
     def setUp(self):
