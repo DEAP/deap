@@ -654,8 +654,8 @@ def cxOnePoint(ind1, ind2):
     types2 = defaultdict(list)
     if ind1.root.ret == __type__:
         # Not STGP optimization
-        types1[__type__] = xrange(1, len(ind1))
-        types2[__type__] = xrange(1, len(ind2))
+        types1[__type__] = range(1, len(ind1))
+        types2[__type__] = range(1, len(ind2))
         common_types = [__type__]
     else:
         for idx, node in enumerate(ind1[1:], 1):
