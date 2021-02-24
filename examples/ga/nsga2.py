@@ -28,6 +28,8 @@ from deap.benchmarks.tools import diversity, convergence, hypervolume
 from deap import creator
 from deap import tools
 
+from pathlib import Path
+
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessMin)
 
@@ -121,24 +123,25 @@ def main(seed=None):
     return pop, logbook
         
 if __name__ == "__main__":
-    # with open("pareto_front/zdt1_front.json") as optimal_front_data:
-    #     optimal_front = json.load(optimal_front_data)
+    path = Path(__file__).parent / "pareto_front/zdt1_front.json"
+    with path.open() as optimal_front_data:
+        optimal_front = json.load(optimal_front_data)
     # Use 500 of the 1000 points in the json file
-    # optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
+    optimal_front = sorted(optimal_front[i] for i in range(0, len(optimal_front), 2))
     
     pop, stats = main()
-    # pop.sort(key=lambda x: x.fitness.values)
+    pop.sort(key=lambda x: x.fitness.values)
     
-    # print(stats)
-    # print("Convergence: ", convergence(pop, optimal_front))
-    # print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
+    print(stats)
+    print("Convergence: ", convergence(pop, optimal_front))
+    print("Diversity: ", diversity(pop, optimal_front[0], optimal_front[-1]))
     
-    # import matplotlib.pyplot as plt
-    # import numpy
+    import matplotlib.pyplot as plt
+    import numpy
     
-    # front = numpy.array([ind.fitness.values for ind in pop])
-    # optimal_front = numpy.array(optimal_front)
-    # plt.scatter(optimal_front[:,0], optimal_front[:,1], c="r")
-    # plt.scatter(front[:,0], front[:,1], c="b")
-    # plt.axis("tight")
-    # plt.show()
+    front = numpy.array([ind.fitness.values for ind in pop])
+    optimal_front = numpy.array(optimal_front)
+    plt.scatter(optimal_front[:,0], optimal_front[:,1], c="r")
+    plt.scatter(front[:,0], front[:,1], c="b")
+    plt.axis("tight")
+    plt.show()
