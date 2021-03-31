@@ -32,7 +32,7 @@ def main():
     # Evaluate the entire population
     fitnesses = map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     for g in range(NGEN):
         # Select the next generation individuals
@@ -56,7 +56,7 @@ def main():
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         # The population is entirely replaced by the offspring
         pop[:] = offspring
