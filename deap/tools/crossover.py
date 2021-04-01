@@ -344,7 +344,8 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                 if rand <= 1.0 / alpha:
                     beta_q = (rand * alpha) ** (1.0 / (eta + 1))
                 else:
-                    beta_q = (1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1))
+                    beta_q_sign = 1 if (1.0 / (2.0 - rand * alpha)) >= 0 else -1
+                    beta_q = beta_q_sign * (abs(1.0 / (2.0 - rand * alpha)) ** (1.0 / (eta + 1)))
                 c2 = 0.5 * (x1 + x2 + beta_q * (x2 - x1))
 
                 c1 = min(max(c1, xl), xu)
