@@ -178,7 +178,7 @@ def mutUniformInt(individual, low, up, indpb):
 ######################################
 
 def mutESLogNormal(individual, c, indpb):
-    """Mutate an evolution strategy according to its :attr:`strategy`
+    r"""Mutate an evolution strategy according to its :attr:`strategy`
     attribute as described in [Beyer2002]_. First the strategy is mutated
     according to an extended log normal rule, :math:`\\boldsymbol{\sigma}_t =
     \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[ \\sigma_{t-1, 1}\\exp(\\tau
