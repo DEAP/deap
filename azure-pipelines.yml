@@ -99,3 +99,39 @@ jobs:
     - script: |
         $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
       displayName: 'Publish wheel to PyPi'
+
+  - job: AArch64_Manylinux2014Build
+    pool:
+      vmImage: 'ubuntu-18.04'
+    strategy:
+      matrix:
+        Py36 Arm64:
+          python.version: 'cp36-cp36m'
+          manylinux: 'manylinux_aarch64'
+        Py37 Arm64:
+          python.version: 'cp37-cp37m'
+          manylinux: 'manylinux_aarch64'
+        Py38 Arm64:
+          python.version: 'cp38-cp38'
+          manylinux: 'manylinux_aarch64'
+        Py39 Arm64:
+          python.version: 'cp39-cp39'
+          manylinux: 'manylinux_aarch64'
+    steps:
+    - script: docker run --rm --privileged hypriot/qemu-register
+      displayName: 'Registering qemu'
+    - script: |
+        docker run -v $(pwd):"${DOCKER_ROOT_DIRECTORY}":rw,z \
+                   -e HOST_USER_ID \
+                    "quay.io/pypa/manylinux2014_aarch64:latest" \
+                    bash -c "cd $DOCKER_ROOT_DIRECTORY;
+                    "${PYBIN}/pip" install --upgrade pip && \
+                    "${PYBIN}/pip" install twine numpy && \
+                    "${PYBIN}/pip" wheel . -w wheelhouse/ && \
+                    auditwheel repair wheelhouse/deap*.whl --plat manylinux2014_aarch64 -w wheelhouse-manylinux && \
+                    "${PYBIN}/python" -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*"
+      displayName: 'Running AArch64 build'
+      env:
+        DOCKER_ROOT_DIRECTORY: "/home/source_root"
+        HOST_USER_ID: $(id -u)
+        PYBIN: /opt/python/$(python.version)/bin
