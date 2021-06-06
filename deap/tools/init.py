@@ -1,5 +1,6 @@
 from __future__ import division
 
+
 def initRepeat(container, func, n):
     """Call the function *func* *n* times and return the results in a 
     container type `container`
@@ -22,7 +23,8 @@ def initRepeat(container, func, n):
 
     See the :ref:`list-of-floats` and :ref:`population` tutorials for more examples.
     """
-    return container(func() for _ in xrange(n))
+    return container(func() for _ in range(n))
+
 
 def initIterate(container, generator):
     """Call the function *container* with an iterable as
@@ -51,6 +53,7 @@ def initIterate(container, generator):
     """
     return container(generator())
 
+
 def initCycle(container, seq_func, n=1):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the functions present in *seq_func*.
@@ -72,18 +75,18 @@ def initCycle(container, seq_func, n=1):
 
     See the :ref:`funky` tutorial for an example.
     """
-    return container(func() for _ in xrange(n) for func in seq_func)
+    return container(func() for _ in range(n) for func in seq_func)
+
 
 __all__ = ['initRepeat', 'initIterate', 'initCycle']
-
 
 if __name__ == "__main__":
     import doctest
     import random
+
     random.seed(64)
     doctest.run_docstring_examples(initRepeat, globals())
 
     random.seed(64)
     doctest.run_docstring_examples(initIterate, globals())
     doctest.run_docstring_examples(initCycle, globals())
-

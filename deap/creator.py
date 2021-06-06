@@ -26,11 +26,12 @@ import copy
 import warnings
 
 class_replacers = {}
+
 """Some classes in Python's standard library as well as third party library
 may be in part incompatible with the logic used in DEAP. To palliate
 this problem, the method :func:`create` uses the dictionary
 `class_replacers` to identify if the base type provided is problematic, and if
-so  the new class inherits from the replacement class instead of the
+so the new class inherits from the replacement class instead of the
 original base class.
 
 `class_replacers` keys are classes to be replaced and the values are the
@@ -39,6 +40,7 @@ replacing classes.
 
 try:
     import numpy
+
     _ = (numpy.ndarray, numpy.array)
 except ImportError:
     # Numpy is not present, skip the definition of the replacement class.
@@ -70,6 +72,7 @@ else:
         def __reduce__(self):
             return (self.__class__, (list(self),), self.__dict__)
 
+
     class_replacers[numpy.ndarray] = _numpy_array
 
 
@@ -90,6 +93,8 @@ class _array(array.array):
 
     def __reduce__(self):
         return (self.__class__, (list(self),), self.__dict__)
+
+
 class_replacers[array.array] = _array
 
 
@@ -142,7 +147,7 @@ def create(name, base, **kargs):
 
     dict_inst = {}
     dict_cls = {}
-    for obj_name, obj in kargs.iteritems():
+    for obj_name, obj in kargs.items():
         if isinstance(obj, type):
             dict_inst[obj_name] = obj
         else:
@@ -161,7 +166,7 @@ def create(name, base, **kargs):
         """Replace the __init__ function of the new type, in order to
         add attributes that were defined with **kargs to the instance.
         """
-        for obj_name, obj in dict_inst.iteritems():
+        for obj_name, obj in dict_inst.items():
             setattr(self, obj_name, obj())
         if base.__init__ is not object.__init__:
             base.__init__(self, *args, **kargs)

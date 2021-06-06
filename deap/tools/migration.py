@@ -33,10 +33,10 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
     if migarray is None:
         migarray = range(1, nbr_demes) + [0]
 
-    immigrants = [[] for i in xrange(nbr_demes)]
-    emigrants = [[] for i in xrange(nbr_demes)]
+    immigrants = [[] for i in range(nbr_demes)]
+    emigrants = [[] for i in range(nbr_demes)]
 
-    for from_deme in xrange(nbr_demes):
+    for from_deme in range(nbr_demes):
         emigrants[from_deme].extend(selection(populations[from_deme], k))
         if replacement is None:
             # If no replacement strategy is selected, replace those who migrate
@@ -49,5 +49,6 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
         for i, immigrant in enumerate(immigrants[to_deme]):
             indx = populations[to_deme].index(immigrant)
             populations[to_deme][indx] = emigrants[from_deme][i]
+
 
 __all__ = ['migRing']

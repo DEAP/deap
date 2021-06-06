@@ -5,6 +5,7 @@ import numpy as np
 from functools import partial
 from operator import attrgetter
 
+
 ######################################
 # Selections                         #
 ######################################
@@ -21,7 +22,7 @@ def selRandom(individuals, k):
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     """
-    return [random.choice(individuals) for i in xrange(k)]
+    return [random.choice(individuals) for i in range(k)]
 
 
 def selBest(individuals, k, fit_attr="fitness"):
@@ -63,10 +64,11 @@ def selTournament(individuals, k, tournsize, fit_attr="fitness"):
     :mod:`random` module.
     """
     chosen = []
-    for i in xrange(k):
+    for i in range(k):
         aspirants = selRandom(individuals, tournsize)
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
     return chosen
+
 
 def selRoulette(individuals, k, fit_attr="fitness"):
     """Select *k* individuals from the input *individuals* using *k*
@@ -90,7 +92,7 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     s_inds = sorted(individuals, key=attrgetter(fit_attr), reverse=True)
     sum_fits = sum(getattr(ind, fit_attr).values[0] for ind in individuals)
     chosen = []
-    for i in xrange(k):
+    for i in range(k):
         u = random.random() * sum_fits
         sum_ = 0
         for ind in s_inds:
@@ -147,7 +149,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _sizeTournament(individuals, k, select):
         chosen = []
-        for i in xrange(k):
+        for i in range(k):
             # Select two individuals from the population
             # The first individual has to be the shortest
             prob = parsimony_size / 2.
@@ -167,7 +169,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _fitTournament(individuals, k, select):
         chosen = []
-        for i in xrange(k):
+        for i in range(k):
             aspirants = select(individuals, k=fitness_size)
             chosen.append(max(aspirants, key=attrgetter(fit_attr)))
         return chosen
@@ -178,6 +180,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
     else:
         tsize = partial(_sizeTournament, select=selRandom)
         return _fitTournament(individuals, k, tsize)
+
 
 def selStochasticUniversalSampling(individuals, k, fit_attr="fitness"):
     """Select the *k* individuals among the input *individuals*.
@@ -198,7 +201,7 @@ def selStochasticUniversalSampling(individuals, k, fit_attr="fitness"):
 
     distance = sum_fits / float(k)
     start = random.uniform(0, distance)
-    points = [start + i*distance for i in xrange(k)]
+    points = [start + i * distance for i in range(k)]
 
     chosen = []
     for p in points:
@@ -210,6 +213,7 @@ def selStochasticUniversalSampling(individuals, k, fit_attr="fitness"):
         chosen.append(s_inds[i])
 
     return chosen
+
 
 def selLexicase(individuals, k):
     """Returns an individual that does the best on the fitness cases when
@@ -269,7 +273,7 @@ def selEpsilonLexicase(individuals, k, epsilon):
                 best_val_for_case = max(map(lambda x: x.fitness.values[cases[0]], candidates))
                 min_val_to_survive_case = best_val_for_case - epsilon
                 candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive_case, candidates))
-            else :
+            else:
                 best_val_for_case = min(map(lambda x: x.fitness.values[cases[0]], candidates))
                 max_val_to_survive_case = best_val_for_case + epsilon
                 candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive_case, candidates))
@@ -279,6 +283,7 @@ def selEpsilonLexicase(individuals, k, epsilon):
         selected_individuals.append(random.choice(candidates))
 
     return selected_individuals
+
 
 def selAutomaticEpsilonLexicase(individuals, k):
     """
@@ -308,7 +313,7 @@ def selAutomaticEpsilonLexicase(individuals, k):
                 best_val_for_case = max(errors_for_this_case)
                 min_val_to_survive = best_val_for_case - median_absolute_deviation
                 candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive, candidates))
-            else :
+            else:
                 best_val_for_case = min(errors_for_this_case)
                 max_val_to_survive = best_val_for_case + median_absolute_deviation
                 candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive, candidates))
@@ -323,4 +328,3 @@ def selAutomaticEpsilonLexicase(individuals, k):
 __all__ = ['selRandom', 'selBest', 'selWorst', 'selRoulette',
            'selTournament', 'selDoubleTournament', 'selStochasticUniversalSampling',
            'selLexicase', 'selEpsilonLexicase', 'selAutomaticEpsilonLexicase']
-

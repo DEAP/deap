@@ -22,9 +22,8 @@ Evolution Strategy.
 """
 import copy
 from math import sqrt, log, exp
-import numpy
-
-import tools
+import numpy as np
+import deap.tools as tools
 
 
 class Strategy(object):
@@ -81,23 +80,24 @@ class Strategy(object):
        Self-Adaptation in Evolution Strategies. *Evolutionary Computation*
 
     """
+
     def __init__(self, centroid, sigma, **kargs):
         self.params = kargs
 
-        # Create a centroid as a numpy array
-        self.centroid = numpy.array(centroid)
+        # Create a centroid as a np array
+        self.centroid = np.array(centroid)
 
         self.dim = len(self.centroid)
         self.sigma = sigma
-        self.pc = numpy.zeros(self.dim)
-        self.ps = numpy.zeros(self.dim)
+        self.pc = np.zeros(self.dim)
+        self.ps = np.zeros(self.dim)
         self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) +
                                       1. / (21. * self.dim ** 2))
 
-        self.C = self.params.get("cmatrix", numpy.identity(self.dim))
-        self.diagD, self.B = numpy.linalg.eigh(self.C)
+        self.C = self.params.get("cmatrix", np.identity(self.dim))
+        self.diagD, self.B = np.linalg.eigh(self.C)
 
-        indx = numpy.argsort(self.diagD)
+        indx = np.argsort(self.diagD)
         self.diagD = self.diagD[indx] ** 0.5
         self.B = self.B[:, indx]
         self.BD = self.B * self.diagD
@@ -116,8 +116,8 @@ class Strategy(object):
                          individual from a list.
         :returns: A list of individuals.
         """
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
+        arz = np.random.standard_normal((self.lambda_, self.dim))
+        arz = self.centroid + self.sigma * np.dot(arz, self.BD.T)
         return map(ind_init, arz)
 
     def update(self, population):
@@ -130,39 +130,39 @@ class Strategy(object):
         population.sort(key=lambda ind: ind.fitness, reverse=True)
 
         old_centroid = self.centroid
-        self.centroid = numpy.dot(self.weights, population[0:self.mu])
+        self.centroid = np.dot(self.weights, population[0:self.mu])
 
         c_diff = self.centroid - old_centroid
 
         # Cumulation : update evolution path
         self.ps = (1 - self.cs) * self.ps \
-            + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
-            * numpy.dot(self.B, (1. / self.diagD) *
-                        numpy.dot(self.B.T, c_diff))
+                  + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
+                  * np.dot(self.B, (1. / self.diagD) *
+                           np.dot(self.B.T, c_diff))
 
-        hsig = float((numpy.linalg.norm(self.ps) /
+        hsig = float((np.linalg.norm(self.ps) /
                       sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN <
                       (1.4 + 2. / (self.dim + 1.))))
 
         self.update_count += 1
 
         self.pc = (1 - self.cc) * self.pc + hsig \
-            * sqrt(self.cc * (2 - self.cc) * self.mueff) / self.sigma \
-            * c_diff
+                  * sqrt(self.cc * (2 - self.cc) * self.mueff) / self.sigma \
+                  * c_diff
 
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
         self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) *
                   self.ccov1 * self.cc * (2 - self.cc)) * self.C \
-            + self.ccov1 * numpy.outer(self.pc, self.pc) \
-            + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
-            / self.sigma ** 2
+                 + self.ccov1 * np.outer(self.pc, self.pc) \
+                 + self.ccovmu * np.dot((self.weights * artmp.T), artmp) \
+                 / self.sigma ** 2
 
-        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) *
-                                self.cs / self.damps)
+        self.sigma *= np.exp((np.linalg.norm(self.ps) / self.chiN - 1.) *
+                             self.cs / self.damps)
 
-        self.diagD, self.B = numpy.linalg.eigh(self.C)
-        indx = numpy.argsort(self.diagD)
+        self.diagD, self.B = np.linalg.eigh(self.C)
+        indx = np.argsort(self.diagD)
 
         self.cond = self.diagD[indx[-1]] / self.diagD[indx[0]]
 
@@ -180,11 +180,11 @@ class Strategy(object):
         rweights = params.get("weights", "superlinear")
         if rweights == "superlinear":
             self.weights = log(self.mu + 0.5) - \
-                numpy.log(numpy.arange(1, self.mu + 1))
+                           np.log(np.arange(1, self.mu + 1))
         elif rweights == "linear":
-            self.weights = self.mu + 0.5 - numpy.arange(1, self.mu + 1)
+            self.weights = self.mu + 0.5 - np.arange(1, self.mu + 1)
         elif rweights == "equal":
-            self.weights = numpy.ones(self.mu)
+            self.weights = np.ones(self.mu)
         else:
             raise RuntimeError("Unknown weights : %s" % rweights)
 
@@ -243,15 +243,16 @@ class StrategyOnePlusLambda(object):
     multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
 
     """
+
     def __init__(self, parent, sigma, **kargs):
         self.parent = parent
         self.sigma = sigma
         self.dim = len(self.parent)
 
-        self.C = numpy.identity(self.dim)
-        self.A = numpy.identity(self.dim)
+        self.C = np.identity(self.dim)
+        self.A = np.identity(self.dim)
 
-        self.pc = numpy.zeros(self.dim)
+        self.pc = np.zeros(self.dim)
 
         self.computeParams(kargs)
         self.psucc = self.ptarg
@@ -283,9 +284,9 @@ class StrategyOnePlusLambda(object):
                          individual from a list.
         :returns: A list of individuals.
         """
-        # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
-        arz = numpy.random.standard_normal((self.lambda_, self.dim))
-        arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)
+        # self.y = np.dot(self.A, np.random.standard_normal(self.dim))
+        arz = np.random.standard_normal((self.lambda_, self.dim))
+        arz = self.parent + self.sigma * np.dot(arz, self.A.T)
         return map(ind_init, arz)
 
     def update(self, population):
@@ -301,14 +302,15 @@ class StrategyOnePlusLambda(object):
         self.psucc = (1 - self.cp) * self.psucc + self.cp * p_succ
 
         if self.parent.fitness <= population[0].fitness:
-            x_step = (population[0] - numpy.array(self.parent)) / self.sigma
+            x_step = (population[0] - np.array(self.parent)) / self.sigma
             self.parent = copy.deepcopy(population[0])
             if self.psucc < self.pthresh:
                 self.pc = (1 - self.cc) * self.pc + sqrt(self.cc * (2 - self.cc)) * x_step
-                self.C = (1 - self.ccov) * self.C + self.ccov * numpy.outer(self.pc, self.pc)
+                self.C = (1 - self.ccov) * self.C + self.ccov * np.outer(self.pc, self.pc)
             else:
                 self.pc = (1 - self.cc) * self.pc
-                self.C = (1 - self.ccov) * self.C + self.ccov * (numpy.outer(self.pc, self.pc) + self.cc * (2 - self.cc) * self.C)
+                self.C = (1 - self.ccov) * self.C + self.ccov * (
+                        np.outer(self.pc, self.pc) + self.cc * (2 - self.cc) * self.C)
 
         self.sigma = self.sigma * exp(1.0 / self.d * (self.psucc - self.ptarg) / (1.0 - self.ptarg))
 
@@ -322,7 +324,7 @@ class StrategyOnePlusLambda(object):
         # the squareroot of D^2, and multiply B and D in order to get A, we directly get A.
         # This can't be done (without cost) with the standard CMA-ES as the eigen decomposition is used
         # to compute covariance matrix inverse in the step-size evolutionary path computation.
-        self.A = numpy.linalg.cholesky(self.C)
+        self.A = np.linalg.cholesky(self.C)
 
 
 class StrategyMultiObjective(object):
@@ -362,6 +364,7 @@ class StrategyMultiObjective(object):
        for the MO-CMA-ES", 2010.
 
     """
+
     def __init__(self, population, sigma, **params):
         self.parents = population
         self.dim = len(self.parents[0])
@@ -383,10 +386,10 @@ class StrategyMultiObjective(object):
         # Internal parameters associated to the mu parent
         self.sigmas = [sigma] * len(population)
         # Lower Cholesky matrix (Sampling matrix)
-        self.A = [numpy.identity(self.dim) for _ in range(len(population))]
+        self.A = [np.identity(self.dim) for _ in range(len(population))]
         # Inverse Cholesky matrix (Used in the update of A)
-        self.invCholesky = [numpy.identity(self.dim) for _ in range(len(population))]
-        self.pc = [numpy.zeros(self.dim) for _ in range(len(population))]
+        self.invCholesky = [np.identity(self.dim) for _ in range(len(population))]
+        self.pc = [np.zeros(self.dim) for _ in range(len(population))]
         self.psucc = [self.ptarg] * len(population)
 
         self.indicator = params.get("indicator", tools.hypervolume)
@@ -402,7 +405,7 @@ class StrategyMultiObjective(object):
                   indicates that the individual is an offspring and the index
                   of its parent.
         """
-        arz = numpy.random.randn(self.lambda_, self.dim)
+        arz = np.random.randn(self.lambda_, self.dim)
         individuals = list()
 
         # Make sure every parent has a parent tag and index
@@ -413,16 +416,17 @@ class StrategyMultiObjective(object):
         if self.lambda_ == self.mu:
             for i in range(self.lambda_):
                 # print "Z", list(arz[i])
-                individuals.append(ind_init(self.parents[i] + self.sigmas[i] * numpy.dot(self.A[i], arz[i])))
+                individuals.append(ind_init(self.parents[i] + self.sigmas[i] * np.dot(self.A[i], arz[i])))
                 individuals[-1]._ps = "o", i
 
         # Parents producing an offspring are chosen at random from the first front
         else:
             ndom = tools.sortLogNondominated(self.parents, len(self.parents), first_front_only=True)
             for i in range(self.lambda_):
-                j = numpy.random.randint(0, len(ndom))
+                j = np.random.randint(0, len(ndom))
                 _, p_idx = ndom[j]._ps
-                individuals.append(ind_init(self.parents[p_idx] + self.sigmas[p_idx] * numpy.dot(self.A[p_idx], arz[i])))
+                individuals.append(
+                    ind_init(self.parents[p_idx] + self.sigmas[p_idx] * np.dot(self.A[p_idx], arz[i])))
                 individuals[-1]._ps = "o", p_idx
 
         return individuals
@@ -457,8 +461,8 @@ class StrategyMultiObjective(object):
         if k > 0:
             # reference point is chosen in the complete population
             # as the worst in each dimension +1
-            ref = numpy.array([ind.fitness.wvalues for ind in candidates]) * -1
-            ref = numpy.max(ref, axis=0) + 1
+            ref = np.array([ind.fitness.wvalues for ind in candidates]) * -1
+            ref = np.max(ref, axis=0) + 1
 
             for _ in range(len(mid_front) - k):
                 idx = self.indicator(mid_front, ref=ref)
@@ -469,18 +473,18 @@ class StrategyMultiObjective(object):
         return chosen, not_chosen
 
     def _rankOneUpdate(self, invCholesky, A, alpha, beta, v):
-        w = numpy.dot(invCholesky, v)
+        w = np.dot(invCholesky, v)
 
         # Under this threshold, the update is mostly noise
         if w.max() > 1e-20:
-            w_inv = numpy.dot(w, invCholesky)
-            norm_w2 = numpy.sum(w ** 2)
+            w_inv = np.dot(w, invCholesky)
+            norm_w2 = np.sum(w ** 2)
             a = sqrt(alpha)
-            root = numpy.sqrt(1 + beta / alpha * norm_w2)
+            root = np.sqrt(1 + beta / alpha * norm_w2)
             b = a / norm_w2 * (root - 1)
 
-            A = a * A + b * numpy.outer(v, w)
-            invCholesky = 1.0 / a * invCholesky - b / (a ** 2 + a * b * norm_w2) * numpy.outer(w, w_inv)
+            A = a * A + b * np.outer(v, w)
+            invCholesky = 1.0 / a * invCholesky - b / (a ** 2 + a * b * norm_w2) * np.outer(w, w_inv)
 
         return invCholesky, A
 
@@ -515,8 +519,8 @@ class StrategyMultiObjective(object):
                 sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
 
                 if psucc[i] < pthresh:
-                    xp = numpy.array(ind)
-                    x = numpy.array(self.parents[p_idx])
+                    xp = np.array(ind)
+                    x = np.array(self.parents[p_idx])
                     pc[i] = (1.0 - cc) * pc[i] + sqrt(cc * (2.0 - cc)) * (xp - x) / last_steps[i]
                     invCholesky[i], A[i] = self._rankOneUpdate(invCholesky[i], A[i], 1 - ccov, ccov, pc[i])
                 else:
@@ -541,7 +545,8 @@ class StrategyMultiObjective(object):
         # The parameter is in the temporary variable for offspring and in the original one for parents
         self.parents = chosen
         self.sigmas = [sigmas[i] if ind._ps[0] == "o" else self.sigmas[ind._ps[1]] for i, ind in enumerate(chosen)]
-        self.invCholesky = [invCholesky[i] if ind._ps[0] == "o" else self.invCholesky[ind._ps[1]] for i, ind in enumerate(chosen)]
+        self.invCholesky = [invCholesky[i] if ind._ps[0] == "o" else self.invCholesky[ind._ps[1]] for i, ind in
+                            enumerate(chosen)]
         self.A = [A[i] if ind._ps[0] == "o" else self.A[ind._ps[1]] for i, ind in enumerate(chosen)]
         self.pc = [pc[i] if ind._ps[0] == "o" else self.pc[ind._ps[1]] for i, ind in enumerate(chosen)]
         self.psucc = [psucc[i] if ind._ps[0] == "o" else self.psucc[ind._ps[1]] for i, ind in enumerate(chosen)]
