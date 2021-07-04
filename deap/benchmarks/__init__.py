@@ -586,7 +586,9 @@ def dtlz5(ind, n_objs):
     gval = g(ind[n_objs-1:])
     
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
-    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+
+    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) *
+           reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:n_objs-1]]) if n_objs > 2 else 1]
            
     for m in reversed(range(1, n_objs)):
         if m == 1:
@@ -604,9 +606,9 @@ def dtlz6(ind, n_objs):
     """
     gval = sum([a**0.1 for a in ind[n_objs-1:]])
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
-    
+
     fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) *
-           reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+           reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:n_objs-1]]) if n_objs > 2 else 1]
 
     for m in reversed(range(1, n_objs)):
         if m == 1:
