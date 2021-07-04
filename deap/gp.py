@@ -25,7 +25,6 @@ import random
 import re
 import sys
 import warnings
-
 from collections import defaultdict, deque
 from functools import partial, wraps
 from inspect import isclass
@@ -137,7 +136,8 @@ class PrimitiveTree(list):
                 try:
                     token = eval(token)
                 except NameError:
-                    raise TypeError("Unable to evaluate terminal: {}.".format(token))
+                    raise TypeError(
+                        "Unable to evaluate terminal: {}.".format(token))
 
                 if type_ is None:
                     type_ = type(token)
@@ -324,12 +324,22 @@ class PrimitiveSetTyped(object):
     def addPrimitive(self, primitive, in_types, ret_type, name=None):
         """Add a primitive to the set.
 
+        If primitive is not a callable, it raises a TypeError. If it is a
+        callable but has a different number of parameters than in_types,
+        it raise a ValueError.
+
         :param primitive: callable object or a function.
         :param in_types: list of primitives arguments' type
         :param ret_type: type returned by the primitive.
         :param name: alternative name for the primitive instead
                      of its __name__ attribute.
         """
+        if not callable(primitive):
+            raise TypeError("primitive should be a callable")
+        if primitive.func_code.co_argcount != len(in_types):
+            raise ValueError("primitives has a different number of parameters"
+                             " than the number of parameters specified in "
+                             "in_types.")
         if name is None:
             name = primitive.__name__
         prim = Primitive(name, in_types, ret_type)
@@ -397,11 +407,13 @@ class PrimitiveSetTyped(object):
             class_ = module_gp[name]
             if issubclass(class_, Ephemeral):
                 if class_.func is not ephemeral:
-                    raise Exception("Ephemerals with different functions should "
-                                    "be named differently, even between psets.")
+                    raise Exception(
+                        "Ephemerals with different functions should "
+                        "be named differently, even between psets.")
                 elif class_.ret is not ret_type:
-                    raise Exception("Ephemerals with the same name and function "
-                                    "should have the same type, even between psets.")
+                    raise Exception(
+                        "Ephemerals with the same name and function "
+                        "should have the same type, even between psets.")
             else:
                 raise Exception("Ephemerals should be named differently "
                                 "than classes defined in the gp module.")
@@ -831,7 +843,8 @@ def mutInsert(individual, pset):
 
     new_node = choice(primitives)
     new_subtree = [None] * len(new_node.args)
-    position = choice([i for i, a in enumerate(new_node.args) if a == node.ret])
+    position = choice(
+        [i for i, a in enumerate(new_node.args) if a == node.ret])
 
     for i, arg_type in enumerate(new_node.args):
         if i != position:
@@ -864,7 +877,8 @@ def mutShrink(individual):
 
     if len(iprims) != 0:
         index, prim = random.choice(iprims)
-        arg_idx = random.choice([i for i, type_ in enumerate(prim.args) if type_ == prim.ret])
+        arg_idx = random.choice(
+            [i for i, type_ in enumerate(prim.args) if type_ == prim.ret])
         rindex = index + 1
         for _ in range(arg_idx + 1):
             rslice = individual.searchSubtree(rindex)
@@ -1010,7 +1024,9 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                 if opRandom < cxpb:
                     # Crossover
                     aspirant1, aspirant2 = toolbox.mate(*map(toolbox.clone,
-                                                             toolbox.select(population, 2)))
+                                                             toolbox.select(
+                                                                 population,
+                                                                 2)))
                     del aspirant1.fitness.values, aspirant2.fitness.values
                     if acceptfunc(len(aspirant1)):
                         producedpop.append(aspirant1)
@@ -1076,7 +1092,8 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
                 naturalhist[indsize - 2] += 0.1
 
         # Normalization
-        naturalhist = [val * len(population) / nbrindsmodel for val in naturalhist]
+        naturalhist = [val * len(population) / nbrindsmodel for val in
+                       naturalhist]
 
         # Cutoff point selection
         sortednatural = sorted(naturalpop, key=lambda ind: ind.fitness)
@@ -1089,13 +1106,16 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
         def targetfunc(x):
             return (gamma * len(population) * math.log(2) /
                     halflifefunc(x)) * math.exp(-math.log(2) *
-                                                (x - cutoffsize) / halflifefunc(x))
+                                                (
+                                                            x - cutoffsize) / halflifefunc(
+                x))
 
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else
                       targetfunc(binidx) for binidx in range(len(naturalhist))]
 
         # Compute the probabilities distribution
-        probhist = [t / n if n > 0 else t for n, t in zip(naturalhist, targethist)]
+        probhist = [t / n if n > 0 else t for n, t in
+                    zip(naturalhist, targethist)]
 
         def probfunc(s):
             return probhist[s] if s < len(probhist) else targetfunc(s)
@@ -1207,7 +1227,8 @@ def graph(expr):
 # GSGP Mutation                      #
 ######################################
 
-def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
+def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2,
+                max=6):
     """
     Implementation of the Semantic Mutation operator. [Geometric semantic genetic programming, Moraglio et al., 2012]
     mutated_individual = individual + logistic * (random_tree1 - random_tree2)
