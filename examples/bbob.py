@@ -74,7 +74,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
         toolbox.update(worst, best, sigma)
         worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:
-            # Incease mutation strength and swap the individual
+            # Increase mutation strength and swap the individual
             sigma = sigma * alpha
             best, worst = worst, best
         else:
