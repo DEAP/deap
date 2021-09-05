@@ -47,56 +47,56 @@ if plt:
 
 def main(extended=True, verbose=True):
     target_set = []
-    
+
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "species", "evals", "std", "min", "avg", "max"
-    
+
     ngen = 300
     adapt_length = 100
     g = 0
     add_next = [adapt_length]
-    
+
     for i in range(len(schematas)):
         target_set.extend(toolbox.target_set(schematas[i], int(TARGET_SIZE/len(schematas))))
-    
+
     species = [toolbox.species() for _ in range(NUM_SPECIES)]
-    
+
     # Init with random a representative for each species
     representatives = [random.choice(s) for s in species]
-    
+
     if plt and extended:
         # We must save the match strength to plot them
         t1, t2, t3 = list(), list(), list()
-    
+
     while g < ngen:
         # Initialize a container for the next generation representatives
         next_repr = [None] * len(species)
         for i, s in enumerate(species):
             # Vary the species individuals
             s = algorithms.varAnd(s, toolbox, 0.6, 1.0)
-            
+
             r = representatives[:i] + representatives[i+1:]
             for ind in s:
                 ind.fitness.values = toolbox.evaluate([ind] + r, target_set)
-                
+
             record = stats.compile(s)
             logbook.record(gen=g, species=i, evals=len(s), **record)
-            
+
             if verbose: 
                 print(logbook.stream)
-            
+
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
             next_repr[i] = toolbox.get_best(s)[0]   # Best selection
-            
+
             g += 1
-        
+
             if plt and extended:
                 # Compute the match strength without noise for the
                 # representatives on the three schematas
@@ -106,20 +106,20 @@ def main(extended=True, verbose=True):
                     toolbox.target_set(schematas[1], 1), noise)[0])
                 t3.append(toolbox.evaluate_nonoise(representatives,
                     toolbox.target_set(schematas[2], 1), noise)[0])
-        
+
         representatives = next_repr
-        
+
         # Add a species at every *adapt_length* generation
         if add_next[-1] <= g < ngen:
             species.append(toolbox.species())
             representatives.append(random.choice(species[-1]))
             add_next.append(add_next[-1] + adapt_length)
-    
+
     if extended:
         for r in representatives:
             # print individuals without noise
             print("".join(str(x) for x, y in zip(r, noise) if y == "*"))
-    
+
     if plt and extended:
         # Do the final plotting
         plt.plot(t1, '-', color="k", label="Target 1")
@@ -133,6 +133,6 @@ def main(extended=True, verbose=True):
         plt.xlabel("Generations")
         plt.ylabel("Number of matched bits")
         plt.show()
-    
+
 if __name__ == "__main__":
     main()

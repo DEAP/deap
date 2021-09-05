@@ -24,20 +24,20 @@ class KNN(object):
         self.data = None
         self.labels = None
         self.ndim = 0
-    
+
     def train(self, data, labels):
         self.data = numpy.array(data)
         self.labels = numpy.array(labels)
         self.classes = numpy.unique(self.labels)
         self.ndim = len(self.data[0])
-    
+
     def predict(self, data, features=None):
         data = numpy.array(data)
         if features is None:
             features = numpy.ones(self.data.shape[1])
         else:
             features = numpy.array(features)
-        
+
         if data.ndim == 1:
             dist = self.data - data
         elif data.ndim == 2:
@@ -51,7 +51,7 @@ class KNN(object):
         dist = numpy.sum(dist, -1)
         dist = numpy.sqrt(dist)
         nns = numpy.argsort(dist)
-        
+
         if data.ndim == 1:
             classes = dict((cls, 0) for cls in self.classes)
             for n in nns[:self.k]:
@@ -64,7 +64,7 @@ class KNN(object):
                 for n in nns[i, :self.k]:
                     classes[self.labels[n]] += 1
                 labels.append(sorted(classes.items(), key=operator.itemgetter(1))[-1][0])
-        
+
         return labels
 
 # Create a default internal KNN object

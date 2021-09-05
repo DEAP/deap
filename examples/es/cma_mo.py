@@ -87,7 +87,7 @@ def main():
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-   
+
     logbook = tools.Logbook()
     logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
 
@@ -102,10 +102,10 @@ def main():
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
             fitness_history.append(fit)
-        
+
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
-        
+
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:

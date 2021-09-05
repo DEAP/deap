@@ -59,19 +59,19 @@ def convert_quantum(swarm, rcloud, centre):
     for part in swarm:
         position = [random.gauss(0, 1) for _ in range(dim)]
         dist = math.sqrt(sum(x**2 for x in position))
-        
+
         # Gaussian distribution
         # u = abs(random.gauss(0, 1.0/3.0))
         # part[:] = [(rcloud * x * u**(1.0/dim) / dist) + c for x, c in zip(position, centre)]
-        
+
         # UVD distribution
         # u = random.random()
         # part[:] = [(rcloud * x * u**(1.0/dim) / dist) + c for x, c in zip(position, centre)]
-        
+
         # NUVD distribution
         u = abs(random.gauss(0, 1.0/3.0))
         part[:] = [(rcloud * x * u / dist) + c for x, c in zip(position, centre)]
-        
+
         del part.fitness.values
         del part.bestfit.values
         part.best = None
@@ -92,7 +92,7 @@ def updateParticle(part, best, chi, c):
                                      part.speed))
     part.speed = list(map(operator.add, part.speed, a))
     part[:] = list(map(operator.add, part, part.speed))
-    
+
 toolbox = base.Toolbox()
 toolbox.register("particle", generate, creator.Particle, dim=NDIM,
     pmin=BOUNDS[0], pmax=BOUNDS[1], smin=-(BOUNDS[1] - BOUNDS[0])/2.0,
@@ -113,12 +113,12 @@ def main(verbose=True):
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "nswarm", "evals", "error", "offline_error", "avg", "max"
-    
+
     swarm = toolbox.swarm(n=NPARTICLES)
-    
+
     generation = 0
     while mpb.nevals < 5e5:
         # Evaluate each particle in the swarm
@@ -127,7 +127,7 @@ def main(verbose=True):
             if not part.best or part.bestfit < part.fitness:
                 part.best = toolbox.clone(part[:])         # Get the position
                 part.bestfit.values = part.fitness.values  # Get the fitness
-        
+
 
         # Sort swarm into species, best individual comes first
         sorted_swarm = sorted(swarm, key=lambda ind: ind.bestfit, reverse=True)
@@ -143,7 +143,7 @@ def main(verbose=True):
             if not found:
                 species.append([sorted_swarm[0]])
             sorted_swarm.pop(0)
-        
+
         record = stats.compile(swarm)
         logbook.record(gen=generation, evals=mpb.nevals, nswarm=len(species),
                        error=mpb.currentError(), offline_error=mpb.offlineError(), **record)
@@ -164,18 +164,18 @@ def main(verbose=True):
                     n = len(s) - PMAX
                     del s[PMAX:]
                     s.extend(toolbox.swarm(n=n))
-            
+
             # Update particles that have not been reinitialized
             for s in species[:-1]:
                 for part in s[:PMAX]:
                     toolbox.update(part, s[0].best)
                     del part.fitness.values
-        
+
         # Return all but the worst species' updated particles to the swarm
         # The worst species is replaced by new particles
         swarm = list(itertools.chain(toolbox.swarm(n=len(species[-1])), *species[:-1]))
         generation += 1
-        
+
 if __name__ == '__main__':
     main()
 

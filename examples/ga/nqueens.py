@@ -40,12 +40,12 @@ def evalNQueens(individual):
     #The conflicts can only be diagonal, count on each diagonal line
     left_diagonal = [0] * (2*size-1)
     right_diagonal = [0] * (2*size-1)
-    
+
     #Sum the number of queens on each diagonal:
     for i in range(size):
         left_diagonal[i+individual[i]] += 1
         right_diagonal[size-1-i+individual[i]] += 1
-    
+
     #Count the number of conflicts on each diagonal
     sum_ = 0
     for i in range(2*size-1):
@@ -93,4 +93,4 @@ def main(seed=0):
 
 if __name__ == "__main__":
     main()
-    
+

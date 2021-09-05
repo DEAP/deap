@@ -90,7 +90,7 @@ def main():
 
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
-    
+
     price_stats = tools.Statistics(key=lambda ind: ind.fitness.values[0])
     time_stats = tools.Statistics(key=lambda ind: ind.fitness.values[1])
     stats = tools.MultiStatistics(price=price_stats, time=time_stats)

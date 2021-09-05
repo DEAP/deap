@@ -70,7 +70,7 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
+
     algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
                               cxpb=0.5, mutpb=0.2, ngen=150, 
                               stats=stats, halloffame=hof)
@@ -79,7 +79,7 @@ def main():
 
 if __name__ == "__main__":
     pop, stats, hof = main()
-    
+
     # import matplotlib.pyplot as plt
     # import numpy
     # 

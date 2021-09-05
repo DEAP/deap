@@ -45,7 +45,7 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 
 def main():
     random.seed(64)
-    
+
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -53,10 +53,10 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     pop, log = algorithms.eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.2, ngen=40, 
                                    stats=stats, halloffame=hof, verbose=True)
-    
+
     return pop, log, hof
 
 if __name__ == "__main__":

@@ -74,7 +74,7 @@ def main():
 
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
-    
+
     stats_fit = tools.Statistics(lambda ind: ind.fitness.values)
     stats_size = tools.Statistics(len)
     mstats = tools.MultiStatistics(fitness=stats_fit, size=stats_size)

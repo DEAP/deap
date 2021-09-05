@@ -23,7 +23,7 @@ Z = np.fromiter(map(bohachevsky_arg0, zip(X.flat,Y.flat)), dtype=np.float, count
 
 
 ax.plot_surface(X, Y, Z, rstride=1, cstride=1,  norm=LogNorm(), cmap=cm.jet, linewidth=0.2)
- 
+
 plt.xlabel("x")
 plt.ylabel("y")
 

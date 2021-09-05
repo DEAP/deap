@@ -42,7 +42,7 @@ def main():
     F = 1  
     MU = 300
     NGEN = 200    
-    
+
     pop = toolbox.population(n=MU);
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -50,19 +50,19 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
-    
+
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
-    
+
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)
     print(logbook.stream)
-    
+
     for g in range(1, NGEN):
         for k, agent in enumerate(pop):
             a,b,c = toolbox.select(pop)
@@ -80,6 +80,6 @@ def main():
         print(logbook.stream)
 
     print("Best individual is ", hof[0], hof[0].fitness.values[0])
-    
+
 if __name__ == "__main__":
     main()
