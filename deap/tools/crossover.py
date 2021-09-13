@@ -321,7 +321,7 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     elif len(up) < size:
         raise IndexError("up must be at least the size of the shorter individual: %d < %d" % (len(up), size))
 
-    for i, xl, xu in zip(xrange(size), low, up):
+    for i, xl, xu in zip(range(size), low, up):
         if random.random() <= 0.5:
             # This epsilon should probably be changed for 0 since
             # floating point arithmetic in Python is safer

@@ -74,7 +74,7 @@ def sortNondominated(individuals, k, first_front_only=False):
     map_fit_ind = defaultdict(list)
     for ind in individuals:
         map_fit_ind[ind.fitness].append(ind)
-    fits = map_fit_ind.keys()
+    fits = list(map_fit_ind.keys())
 
     current_front = []
     next_front = []
@@ -129,7 +129,7 @@ def assignCrowdingDist(individuals):
 
     nobj = len(individuals[0].fitness.values)
 
-    for i in xrange(nobj):
+    for i in range(nobj):
         crowd.sort(key=lambda element: element[0][i])
         distances[crowd[0][1]] = float("inf")
         distances[crowd[-1][1]] = float("inf")
@@ -186,7 +186,7 @@ def selTournamentDCD(individuals, k):
     individuals_2 = random.sample(individuals, len(individuals))
 
     chosen = []
-    for i in xrange(0, k, 4):
+    for i in range(0, k, 4):
         chosen.append(tourn(individuals_1[i],   individuals_1[i+1]))
         chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
         chosen.append(tourn(individuals_2[i],   individuals_2[i+1]))
