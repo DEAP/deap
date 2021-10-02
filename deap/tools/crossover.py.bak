@@ -1,4 +1,4 @@
-
+from __future__ import division
 import random
 import warnings
 
@@ -84,7 +84,7 @@ def cxUniform(ind1, ind2, indpb):
     :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
-    for i in range(size):
+    for i in xrange(size):
         if random.random() < indpb:
             ind1[i], ind2[i] = ind2[i], ind1[i]
 
@@ -115,7 +115,7 @@ def cxPartialyMatched(ind1, ind2):
     p1, p2 = [0] * size, [0] * size
 
     # Initialize the position of each indices in the individuals
-    for i in range(size):
+    for i in xrange(size):
         p1[ind1[i]] = i
         p2[ind2[i]] = i
     # Choose crossover points
@@ -127,7 +127,7 @@ def cxPartialyMatched(ind1, ind2):
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
     # Apply crossover between cx points
-    for i in range(cxpoint1, cxpoint2):
+    for i in xrange(cxpoint1, cxpoint2):
         # Keep track of the selected values
         temp1 = ind1[i]
         temp2 = ind2[i]
@@ -166,11 +166,11 @@ def cxUniformPartialyMatched(ind1, ind2, indpb):
     p1, p2 = [0] * size, [0] * size
 
     # Initialize the position of each indices in the individuals
-    for i in range(size):
+    for i in xrange(size):
         p1[ind1[i]] = i
         p2[ind2[i]] = i
 
-    for i in range(size):
+    for i in xrange(size):
         if random.random() < indpb:
             # Keep track of the selected values
             temp1 = ind1[i]
@@ -209,7 +209,7 @@ def cxOrdered(ind1, ind2):
        optimization and machine learning. Addison Wesley, 1989
     """
     size = min(len(ind1), len(ind2))
-    a, b = random.sample(range(size), 2)
+    a, b = random.sample(xrange(size), 2)
     if a > b:
         a, b = b, a
 
@@ -321,7 +321,7 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
     elif len(up) < size:
         raise IndexError("up must be at least the size of the shorter individual: %d < %d" % (len(up), size))
 
-    for i, xl, xu in zip(range(size), low, up):
+    for i, xl, xu in zip(xrange(size), low, up):
         if random.random() <= 0.5:
             # This epsilon should probably be changed for 0 since
             # floating point arithmetic in Python is safer

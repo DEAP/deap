@@ -1,4 +1,4 @@
-
+from __future__ import division
 import random
 import numpy as np
 
@@ -21,7 +21,7 @@ def selRandom(individuals, k):
     This function uses the :func:`~random.choice` function from the
     python base :mod:`random` module.
     """
-    return [random.choice(individuals) for i in range(k)]
+    return [random.choice(individuals) for i in xrange(k)]
 
 
 def selBest(individuals, k, fit_attr="fitness"):
@@ -63,7 +63,7 @@ def selTournament(individuals, k, tournsize, fit_attr="fitness"):
     :mod:`random` module.
     """
     chosen = []
-    for i in range(k):
+    for i in xrange(k):
         aspirants = selRandom(individuals, tournsize)
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
     return chosen
@@ -90,7 +90,7 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     s_inds = sorted(individuals, key=attrgetter(fit_attr), reverse=True)
     sum_fits = sum(getattr(ind, fit_attr).values[0] for ind in individuals)
     chosen = []
-    for i in range(k):
+    for i in xrange(k):
         u = random.random() * sum_fits
         sum_ = 0
         for ind in s_inds:
@@ -147,7 +147,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _sizeTournament(individuals, k, select):
         chosen = []
-        for i in range(k):
+        for i in xrange(k):
             # Select two individuals from the population
             # The first individual has to be the shortest
             prob = parsimony_size / 2.
@@ -167,7 +167,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _fitTournament(individuals, k, select):
         chosen = []
-        for i in range(k):
+        for i in xrange(k):
             aspirants = select(individuals, k=fitness_size)
             chosen.append(max(aspirants, key=attrgetter(fit_attr)))
         return chosen
@@ -198,7 +198,7 @@ def selStochasticUniversalSampling(individuals, k, fit_attr="fitness"):
 
     distance = sum_fits / float(k)
     start = random.uniform(0, distance)
-    points = [start + i*distance for i in range(k)]
+    points = [start + i*distance for i in xrange(k)]
 
     chosen = []
     for p in points:
@@ -234,9 +234,9 @@ def selLexicase(individuals, k):
             if fit_weights[cases[0]] > 0:
                 f = max
 
-            best_val_for_case = f([x.fitness.values[cases[0]] for x in candidates])
+            best_val_for_case = f(map(lambda x: x.fitness.values[cases[0]], candidates))
 
-            candidates = list([x for x in candidates if x.fitness.values[cases[0]] == best_val_for_case])
+            candidates = list(filter(lambda x: x.fitness.values[cases[0]] == best_val_for_case, candidates))
             cases.pop(0)
 
         selected_individuals.append(random.choice(candidates))
@@ -266,13 +266,13 @@ def selEpsilonLexicase(individuals, k, epsilon):
 
         while len(cases) > 0 and len(candidates) > 1:
             if fit_weights[cases[0]] > 0:
-                best_val_for_case = max([x.fitness.values[cases[0]] for x in candidates])
+                best_val_for_case = max(map(lambda x: x.fitness.values[cases[0]], candidates))
                 min_val_to_survive_case = best_val_for_case - epsilon
-                candidates = list([x for x in candidates if x.fitness.values[cases[0]] >= min_val_to_survive_case])
+                candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive_case, candidates))
             else :
-                best_val_for_case = min([x.fitness.values[cases[0]] for x in candidates])
+                best_val_for_case = min(map(lambda x: x.fitness.values[cases[0]], candidates))
                 max_val_to_survive_case = best_val_for_case + epsilon
-                candidates = list([x for x in candidates if x.fitness.values[cases[0]] <= max_val_to_survive_case])
+                candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive_case, candidates))
 
             cases.pop(0)
 
@@ -307,11 +307,11 @@ def selAutomaticEpsilonLexicase(individuals, k):
             if fit_weights[cases[0]] > 0:
                 best_val_for_case = max(errors_for_this_case)
                 min_val_to_survive = best_val_for_case - median_absolute_deviation
-                candidates = list([x for x in candidates if x.fitness.values[cases[0]] >= min_val_to_survive])
+                candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive, candidates))
             else :
                 best_val_for_case = min(errors_for_this_case)
                 max_val_to_survive = best_val_for_case + median_absolute_deviation
-                candidates = list([x for x in candidates if x.fitness.values[cases[0]] <= max_val_to_survive])
+                candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive, candidates))
 
             cases.pop(0)
 

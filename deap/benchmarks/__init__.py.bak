@@ -489,7 +489,7 @@ def dtlz1(individual, obj):
     """
     g = 100 * (len(individual[obj-1:]) + sum((xi-0.5)**2 - cos(20*pi*(xi-0.5)) for xi in individual[obj-1:]))
     f = [0.5 * reduce(mul, individual[:obj-1], 1) * (1 + g)]
-    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(range(obj-1)))
+    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(xrange(obj-1)))
     return f
 
 def dtlz2(individual, obj):
@@ -588,7 +588,7 @@ def dtlz5(ind, n_objs):
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
     fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
            
-    for m in reversed(list(range(1, n_objs))):
+    for m in reversed(range(1, n_objs)):
         if m == 1:
             fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
@@ -608,7 +608,7 @@ def dtlz6(ind, n_objs):
     fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) *
            reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
 
-    for m in reversed(list(range(1, n_objs))):
+    for m in reversed(range(1, n_objs)):
         if m == 1:
             fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
