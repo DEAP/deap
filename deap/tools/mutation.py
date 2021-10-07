@@ -173,6 +173,29 @@ def mutUniformInt(individual, low, up, indpb):
     return individual,
 
 
+def mutInversion(individual):
+    """Select two points (indices) in the individual, reverse the order of the
+    attributes between these points [low, high) and return the mutated individual.
+    This implementation allows for the length of the inversion to be 0 and 1,
+    which would cause no change. This mutation is useful in situations where the
+    order/adjacency of elements is important.
+
+    :param individual: Individual to be mutated.
+    :returns: A tuple of one individual.
+
+    This function uses the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
+
+    size = len(individual)
+    index_one = random.randrange(size)
+    index_two = random.randrange(index_one, size)
+
+    
+
+    return individual,
+
+
 ######################################
 # ES Mutations                       #
 ######################################
