@@ -246,4 +246,4 @@ def mutESLogNormal(individual, c, indpb):
 
 
 __all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',
-           'mutFlipBit', 'mutUniformInt', 'mutESLogNormal']
+           'mutFlipBit', 'mutUniformInt', 'mutInversion', 'mutESLogNormal']
