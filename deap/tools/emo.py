@@ -42,7 +42,7 @@ def selNSGA2(individuals, k, nd='standard'):
         assignCrowdingDist(front)
 
     chosen = list(chain(*pareto_fronts[:-1]))
-    k = k - len(chosen)
+    k -= len(chosen)
     if k > 0:
         sorted_front = sorted(pareto_fronts[-1], key=attrgetter("fitness.crowding_dist"), reverse=True)
         chosen.extend(sorted_front[:k])

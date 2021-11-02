@@ -66,10 +66,10 @@ def main():
         toolbox.update(worst, best, sigma) 
         worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:
-            sigma = sigma * alpha
+            sigma *= alpha
             best, worst = worst, best
         else:
-            sigma = sigma * alpha**(-0.25)
+            sigma *= alpha**(-0.25)
             
         logbook.record(gen=g, fitness=best.fitness.values)
         print(logbook.stream)

@@ -59,7 +59,7 @@ class EMNA(object):
 
         # Adjust variance of the distribution
         self.sigma = numpy.sqrt(numpy.sum(numpy.sum((z - avg)**2, axis=1)) / (self.mu*self.dim))
-        self.centroid = self.centroid + avg
+        self.centroid += avg
 
 
 def main():

@@ -140,7 +140,7 @@ def main(seed=None):
             ind.fitness.values = fit
 
         # Select the next generation population
-        pop = pop + offspring
+        pop += offspring
         fronts = toolbox.sort(pop, len(pop))
         chosen = []
         for i, front in enumerate(fronts):

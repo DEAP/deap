@@ -47,7 +47,7 @@ class KNN(object):
         else:
             raise ValueError("Cannot process data with dimensionality > 2")
         dist = features * dist
-        dist = dist * dist
+        dist **= 2
         dist = numpy.sum(dist, -1)
         dist = numpy.sqrt(dist)
         nns = numpy.argsort(dist)

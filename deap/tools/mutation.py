@@ -89,7 +89,7 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
                 val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * xy ** (eta + 1)
                 delta_q = 1.0 - val ** mut_pow
 
-            x = x + delta_q * (xu - xl)
+            x += delta_q * (xu - xl)
             x = min(max(x, xl), xu)
             individual[i] = x
     return individual,

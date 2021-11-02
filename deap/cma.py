@@ -310,7 +310,7 @@ class StrategyOnePlusLambda(object):
                 self.pc = (1 - self.cc) * self.pc
                 self.C = (1 - self.ccov) * self.C + self.ccov * (numpy.outer(self.pc, self.pc) + self.cc * (2 - self.cc) * self.C)
 
-        self.sigma = self.sigma * exp(1.0 / self.d * (self.psucc - self.ptarg) / (1.0 - self.ptarg))
+        self.sigma *= exp(1.0 / self.d * (self.psucc - self.ptarg) / (1.0 - self.ptarg))
 
         # We use Cholesky since for now we have no use of eigen decomposition
         # Basically, Cholesky returns a matrix A as C = A*A.T
@@ -512,7 +512,7 @@ class StrategyMultiObjective(object):
             if t == "o":
                 # Update (Success = 1 since it is chosen)
                 psucc[i] = (1.0 - cp) * psucc[i] + cp
-                sigmas[i] = sigmas[i] * exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
+                sigmas[i] *= exp((psucc[i] - ptarg) / (d * (1.0 - ptarg)))
 
                 if psucc[i] < pthresh:
                     xp = numpy.array(ind)
@@ -525,7 +525,7 @@ class StrategyMultiObjective(object):
                     invCholesky[i], A[i] = self._rankOneUpdate(invCholesky[i], A[i], 1 - ccov + pc_weight, ccov, pc[i])
 
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx] + cp
-                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
+                self.sigmas[p_idx] *= exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
 
         # It is unnecessary to update the entire parameter set for not chosen individuals
         # Their parameters will not make it to the next generation
@@ -535,7 +535,7 @@ class StrategyMultiObjective(object):
             # Only the offspring update the parameter set
             if t == "o":
                 self.psucc[p_idx] = (1.0 - cp) * self.psucc[p_idx]
-                self.sigmas[p_idx] = self.sigmas[p_idx] * exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
+                self.sigmas[p_idx] *= exp((self.psucc[p_idx] - ptarg) / (d * (1.0 - ptarg)))
 
         # Make a copy of the internal parameters
         # The parameter is in the temporary variable for offspring and in the original one for parents

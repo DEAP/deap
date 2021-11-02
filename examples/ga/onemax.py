@@ -100,7 +100,7 @@ def main():
     # Begin the evolution
     while max(fits) < 100 and g < 1000:
         # A new generation
-        g = g + 1
+        g += 1
         print("-- Generation %i --" % g)
         
         # Select the next generation individuals

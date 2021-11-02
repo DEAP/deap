@@ -75,11 +75,11 @@ def main(func, dim, maxfuncevals, ftarget=None):
         worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:
             # Incease mutation strength and swap the individual
-            sigma = sigma * alpha
+            sigma *= alpha
             best, worst = worst, best
         else:
             # Decrease mutation strength
-            sigma = sigma * alpha**(-0.25)
+            sigma *= alpha**(-0.25)
         
         # Test if we reached the optimum of the function
         # Remember that ">" for fitness means better (not greater)
