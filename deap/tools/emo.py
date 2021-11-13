@@ -591,12 +591,15 @@ def find_intercepts(extreme_points, best_point, current_worst, front_worst):
     except numpy.linalg.LinAlgError:
         intercepts = current_worst
     else:
-        intercepts = 1 / x
-
-        if (not numpy.allclose(numpy.dot(A, x), b) or
-                numpy.any(intercepts <= 1e-6) or
-                numpy.any((intercepts + best_point) > current_worst)):
+        if numpy.count_nonzero(x) != len(x):
             intercepts = front_worst
+        else:
+            intercepts = 1 / x
+
+            if (not numpy.allclose(numpy.dot(A, x), b) or
+                    numpy.any(intercepts <= 1e-6) or
+                    numpy.any((intercepts + best_point) > current_worst)):
+                intercepts = front_worst
 
     return intercepts
 
