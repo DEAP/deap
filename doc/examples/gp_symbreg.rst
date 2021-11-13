@@ -122,7 +122,7 @@ max depth of 17.
 
 At this point, any structure with an access to the toolbox instance will also
 have access to all of those registered parameters. Of course, the user could
-register other parameters basing on his needs.
+register other parameters basing on their needs.
 
 
 Statistics
