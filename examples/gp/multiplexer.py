@@ -46,7 +46,7 @@ for i in range(2 ** MUX_TOTAL_LINES):
         if value >= divisor:
             inputs[i][j] = 1
             value -= divisor
-    
+
     # Determine the corresponding output
     indexOutput = MUX_SELECT_LINES
     for j, k in enumerate(inputs[i][:MUX_SELECT_LINES]):
@@ -89,9 +89,9 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     algorithms.eaSimple(pop, toolbox, 0.8, 0.1, 40, stats, halloffame=hof)
-    
+
     return pop, stats, hof
 
 if __name__ == "__main__":

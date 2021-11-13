@@ -160,10 +160,10 @@ def selTournamentDCD(individuals, k):
               to len(individuals).
     :returns: A list of selected individuals.
     """
-    
+
     if k > len(individuals): 
         raise ValueError("selTournamentDCD: k must be less than or equal to individuals length")
-   
+
     if k == len(individuals) and k % 4 != 0:
         raise ValueError("selTournamentDCD: k must be divisible by four if k == len(individuals)")
 

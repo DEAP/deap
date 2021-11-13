@@ -54,7 +54,7 @@ def main(verbose=True):
 
     logbook = tools.Logbook()
     logbook.header = "gen", "evals", "std", "min", "avg", "max"
-    
+
     # Objects that will compile the data
     sigma = numpy.ndarray((NGEN,1))
     axis_ratio = numpy.ndarray((NGEN,1))
@@ -70,19 +70,19 @@ def main(verbose=True):
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
             ind.fitness.values = fit
-        
+
         # Update the strategy with the evaluated individuals
         toolbox.update(population)
-        
+
         # Update the hall of fame and the statistics with the
         # currently evaluated population
         halloffame.update(population)
         record = stats.compile(population)
         logbook.record(evals=len(population), gen=gen, **record)
-        
+
         if verbose:
             print(logbook.stream)
-        
+
         # Save more data along the evolution for latter plotting
         # diagD is sorted and sqrooted in the update method
         sigma[gen] = strategy.sigma
@@ -120,7 +120,7 @@ def main(verbose=True):
     plt.semilogy(x, std)
     plt.grid(True)
     plt.title("Standard Deviations in All Coordinates")
-    
+
     plt.show()
 
 if __name__ == "__main__":

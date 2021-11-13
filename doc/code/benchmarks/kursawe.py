@@ -18,7 +18,7 @@ Z2 = np.zeros(X.shape)
 for i in range(X.shape[0]):
     for j in range(X.shape[1]):
         Z1[i,j],  Z2[i,j] = benchmarks.kursawe((X[i,j],Y[i,j]))
-        
+
 fig = plt.figure(figsize=(12,5))
 
 ax = fig.add_subplot(1, 2, 1, projection='3d')

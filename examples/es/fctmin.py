@@ -74,11 +74,11 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     pop, logbook = algorithms.eaMuCommaLambda(pop, toolbox, mu=MU, lambda_=LAMBDA, 
         cxpb=0.6, mutpb=0.3, ngen=500, stats=stats, halloffame=hof)
-    
+
     return pop, logbook, hof
-    
+
 if __name__ == "__main__":
     main()

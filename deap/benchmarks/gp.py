@@ -17,11 +17,11 @@ from math import exp, sin, cos
 
 def kotanchek(data):
     """Kotanchek benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
-       
+
        * - Range
          - :math:`\mathbf{x} \in [-1, 7]^2`
        * - Function
@@ -31,7 +31,7 @@ def kotanchek(data):
 
 def salustowicz_1d(data):
     """Salustowicz benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
@@ -42,10 +42,10 @@ def salustowicz_1d(data):
          - :math:`f(x) = e^{-x} x^3 \cos(x) \sin(x) (\cos(x) \sin^2(x) - 1)`
     """
     return exp(-data[0]) * data[0]**3 * cos(data[0]) * sin(data[0]) * (cos(data[0]) * sin(data[0])**2 - 1)
-    
+
 def salustowicz_2d(data):
     """Salustowicz benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
@@ -59,7 +59,7 @@ def salustowicz_2d(data):
 
 def unwrapped_ball(data):
     """Unwrapped ball benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
@@ -73,7 +73,7 @@ def unwrapped_ball(data):
 
 def rational_polynomial(data):
     """Rational polynomial ball benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
@@ -87,7 +87,7 @@ def rational_polynomial(data):
 
 def sin_cos(data):
     """Sine cosine benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
@@ -101,7 +101,7 @@ def sin_cos(data):
 
 def ripple(data):
     """Ripple benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1
@@ -115,7 +115,7 @@ def ripple(data):
 
 def rational_polynomial2(data):
     """Rational polynomial benchmark function.
-    
+
     .. list-table:: 
        :widths: 10 50
        :stub-columns: 1

@@ -85,7 +85,7 @@ def evalSpambase(individual):
     # Evaluate the sum of correctly identified mail as spam
     result = sum(bool(func(*mail[:57])) is bool(mail[57]) for mail in spam_samp)
     return result,
-    
+
 toolbox.register("evaluate", evalSpambase)
 toolbox.register("select", tools.selTournament, tournsize=3)
 toolbox.register("mate", gp.cxOnePoint)
@@ -101,7 +101,7 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof)
 
     return pop, stats, hof

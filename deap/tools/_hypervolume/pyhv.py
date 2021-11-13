@@ -85,7 +85,7 @@ class _HyperVolume:
             # shift points so that referencePoint == [0, ..., 0]
             # this way the reference point doesn't have to be explicitly used
             # in the HV computation
-            
+
             #######
             # fmder: Assume relevantPoints are numpy array
             # for j in xrange(len(relevantPoints)):
@@ -198,19 +198,19 @@ class _HyperVolume:
         decorated.sort()
         # write back to original list
         nodes[:] = [node for (_, node) in decorated]
-            
-            
-            
+
+
+
 class _MultiList: 
     """A special data structure needed by FonsecaHyperVolume. 
-    
+
     It consists of several doubly linked lists that share common nodes. So, 
     every node has multiple predecessors and successors, one in every list.
 
     """
 
     class Node: 
-        
+
         def __init__(self, numberLists, cargo=None): 
             self.cargo = cargo 
             self.next  = [None] * numberLists
@@ -218,16 +218,16 @@ class _MultiList:
             self.ignore = 0
             self.area = [0.0] * numberLists
             self.volume = [0.0] * numberLists
-    
+
         def __str__(self): 
             return str(self.cargo)
 
         def __lt__(self, other):
             return all(self.cargo < other.cargo)
-        
+
     def __init__(self, numberLists):  
         """Constructor. 
-        
+
         Builds 'numberLists' doubly linked lists.
 
         """
@@ -235,8 +235,8 @@ class _MultiList:
         self.sentinel = _MultiList.Node(numberLists)
         self.sentinel.next = [self.sentinel] * numberLists
         self.sentinel.prev = [self.sentinel] * numberLists  
-        
-        
+
+
     def __str__(self):
         strings = []
         for i in xrange(self.numberLists):
@@ -250,13 +250,13 @@ class _MultiList:
         for string in strings:
             stringRepr += string + "\n"
         return stringRepr
-    
-    
+
+
     def __len__(self):
         """Returns the number of lists that are included in this _MultiList."""
         return self.numberLists
-    
-    
+
+
     def getLength(self, i):
         """Returns the length of the i-th list."""
         length = 0
@@ -266,8 +266,8 @@ class _MultiList:
             length += 1
             node = node.next[i]
         return length
-            
-            
+
+
     def append(self, node, index):
         """Appends a node to the end of the list at the given index."""
         lastButOne = self.sentinel.prev[index]
@@ -276,8 +276,8 @@ class _MultiList:
         # set the last element as the new one
         self.sentinel.prev[index] = node
         lastButOne.next[index] = node
-        
-        
+
+
     def extend(self, nodes, index):
         """Extends the list at the given index with the nodes."""
         sentinel = self.sentinel
@@ -288,8 +288,8 @@ class _MultiList:
             # set the last element as the new one
             sentinel.prev[index] = node
             lastButOne.next[index] = node
-        
-        
+
+
     def remove(self, node, index, bounds): 
         """Removes and returns 'node' from all lists in [0, 'index'[."""
         for i in xrange(index): 
@@ -300,8 +300,8 @@ class _MultiList:
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
         return node
-    
-    
+
+
     def reinsert(self, node, index, bounds):
         """
         Inserts 'node' at the position it had in all lists in [0, 'index'[
@@ -314,7 +314,7 @@ class _MultiList:
             node.next[i].prev[i] = node
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
-            
+
 __all__ = ["hypervolume_kmax", "hypervolume"]
 
 if __name__ == "__main__":

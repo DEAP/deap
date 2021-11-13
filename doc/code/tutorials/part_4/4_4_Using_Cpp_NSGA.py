@@ -31,11 +31,11 @@ def evalEvoSN(individual, dimension):
 
 def genWire(dimension):
     return (random.randrange(dimension), random.randrange(dimension))
-    
+
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
     return [genWire(dimension) for i in xrange(size)]
-    
+
 def mutWire(individual, dimension, indpb):
     for index, elem in enumerate(individual):
         if random.random() < indpb:
@@ -73,7 +73,7 @@ def main():
 
     population = toolbox.population(n=300)
     hof = tools.ParetoFront()
-    
+
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("Avg", tools.mean)
     stats.register("Std", tools.std)
@@ -81,27 +81,27 @@ def main():
     stats.register("Max", max)
 
     CXPB, MUTPB, ADDPB, DELPB, NGEN = 0.5, 0.2, 0.01, 0.01, 40
-    
+
     # Evaluate every individuals
     fitnesses = toolbox.map(toolbox.evaluate, population)
     for ind, fit in zip(population, fitnesses):
         ind.fitness.values = fit
-    
+
     hof.update(population)
     stats.update(population)
-    
+
     # Begin the evolution
     for g in xrange(NGEN):
         print "-- Generation %i --" % g
         offspring = [toolbox.clone(ind) for ind in population]
-    
+
         # Apply crossover and mutation
         for ind1, ind2 in zip(offspring[::2], offspring[1::2]):
             if random.random() < CXPB:
                 toolbox.mate(ind1, ind2)
                 del ind1.fitness.values
                 del ind2.fitness.values
-        
+
         # Note here that we have a different sheme of mutation than in the
         # original algorithm, we use 3 different mutations subsequently.
         for ind in offspring:
@@ -114,15 +114,15 @@ def main():
             if random.random() < DELPB:
                 toolbox.delwire(ind)
                 del ind.fitness.values
-                
+
         # Evaluate the individuals with an invalid fitness
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
-        
+
         print "  Evaluated %i individuals" % len(invalid_ind)
-        
+
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
         stats.update(population)
@@ -136,9 +136,9 @@ def main():
     print best_network
     print best_network.draw()
     print "%i errors, length %i, depth %i" % hof[0].fitness.values
-    
+
     return population, stats, hof
 
 if __name__ == "__main__":
     main()
- 
+

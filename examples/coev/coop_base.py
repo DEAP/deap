@@ -87,9 +87,9 @@ def matchSetContribution(match_set, target_set, index):
                 id = i
         if id == index:
             contribution += match
-            
+
     return contribution / len(target_set),
-     
+
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
