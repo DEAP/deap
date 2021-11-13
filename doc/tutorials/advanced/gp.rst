@@ -3,6 +3,8 @@
 Genetic Programming
 ===================
 
+To see a given function, one can simply print out an individual candidate solution to see the string representation. However, it is possible to generate a figure. 
+
 Genetic programming is a special field of evolutionary computation that aims at
 building programs automatically to solve problems independently of their domain.
 Although there exist diverse representations used to evolve programs, the most
