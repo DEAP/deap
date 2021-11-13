@@ -31,7 +31,7 @@ import tools
 
 
 def varAnd(population, toolbox, cxpb, mutpb):
-    """Part of an evolutionary algorithm applying only the variation part
+    r"""Part of an evolutionary algorithm applying only the variation part
     (crossover **and** mutation). The modified individuals have their
     fitness invalidated. The individuals are cloned so returned population is
     independent of the input population.
@@ -190,7 +190,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
 
 def varOr(population, toolbox, lambda_, cxpb, mutpb):
-    """Part of an evolutionary algorithm applying only the variation part
+    r"""Part of an evolutionary algorithm applying only the variation part
     (crossover, mutation **or** reproduction). The modified individuals have
     their fitness invalidated. The individuals are cloned so returned
     population is independent of the input population.
@@ -247,7 +247,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
 
 def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                    stats=None, halloffame=None, verbose=__debug__):
-    """This is the :math:`(\mu + \lambda)` evolutionary algorithm.
+    r"""This is the :math:`(\mu + \lambda)` evolutionary algorithm.
 
     :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
@@ -339,7 +339,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
 def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
                     stats=None, halloffame=None, verbose=__debug__):
-    """This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
+    r"""This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
 
     :param population: A list of individuals.
     :param toolbox: A :class:`~deap.base.Toolbox` that contains the evolution
