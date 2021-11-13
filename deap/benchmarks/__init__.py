@@ -93,7 +93,7 @@ def cigar(individual):
        * - Function
          - :math:`f(\mathbf{x}) = x_0^2 + 10^6\\sum_{i=1}^N\,x_i^2`
     """
-    return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual),
+    return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual[1:]),
 
 def rosenbrock(individual):  
     """Rosenbrock test objective function.
