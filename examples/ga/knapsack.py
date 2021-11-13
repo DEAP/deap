@@ -27,12 +27,12 @@ MAX_ITEM = 50
 MAX_WEIGHT = 50
 NBR_ITEMS = 20
 
-# To assure reproductibility, the RNG seed is set prior to the items
+# To assure reproducibility, the RNG seed is set prior to the items
 # dict initialization. It is also seeded in main().
 random.seed(64)
 
 # Create the item dictionary: item name is an integer, and value is 
-# a (weight, value) 2-uple.
+# a (weight, value) 2-tuple.
 items = {}
 # Create random items and store them in the items' dictionary.
 for i in range(NBR_ITEMS):
