@@ -42,12 +42,14 @@ __type__ = object
 
 
 class PrimitiveTree(list):
-    """Tree specifically formatted for optimization of genetic
-    programming operations. The tree is represented with a
-    list where the nodes are appended in a depth-first order.
-    The nodes appended to the tree are required to
-    have an attribute *arity* which defines the arity of the
-    primitive. An arity of 0 is expected from terminals nodes.
+    """Tree specifically formatted for optimization of genetic programming
+    operations. The tree is represented with a list, where the nodes are
+    appended, or are assumed to have been appended when initializing an object
+    of this class with a list of primitives and terminals e.g. generated with
+    the method **gp.generate**, in a depth-first order.
+    The nodes appended to the tree are required to have an attribute *arity*,
+    which defines the arity of the primitive. An arity of 0 is expected from
+    terminals nodes.
     """
 
     def __init__(self, content):
@@ -585,9 +587,12 @@ def genRamped(pset, min_, max_, type_=None):
 
 
 def generate(pset, min_, max_, condition, type_=None):
-    """Generate a Tree as a list of list. The tree is build
-    from the root to the leaves, and it stop growing when the
-    condition is fulfilled.
+    """Generate a tree as a list of primitives and terminals in a depth-first
+    order. The tree is built from the root to the leaves, and it stops growing
+    the current branch when the *condition* is fulfilled: in which case, it
+    back-tracks, then tries to grow another branch until the *condition* is
+    fulfilled again, and so on. The returned list can then be passed to the
+    constructor of the class *PrimitiveTree* to build an actual tree object.
 
     :param pset: Primitive set from which primitives are selected.
     :param min_: Minimum height of the produced trees.
