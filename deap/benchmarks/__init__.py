@@ -243,7 +243,7 @@ def rastrigin_scaled(individual):
     """Scaled Rastrigin test objective function.
 
     :math:`f_{\\text{RastScaled}}(\mathbf{x}) = 10N + \sum_{i=1}^N \
-        \left(10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)^2 x_i)^2 - \
+        \left(10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)^2 - \
         10\cos\\left(2\\pi 10^{\left(\\frac{i-1}{N-1}\\right)} x_i \\right)`
     """
     N = len(individual)
