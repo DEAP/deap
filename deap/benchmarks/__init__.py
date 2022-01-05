@@ -253,7 +253,7 @@ def rastrigin_scaled(individual):
 def rastrigin_skew(individual):
     """Skewed Rastrigin test objective function.
 
-     :math:`f_{\\text{RastSkew}}(\mathbf{x}) = 10N \sum_{i=1}^N \left(y_i^2 - 10 \\cos(2\\pi x_i)\\right)`
+     :math:`f_{\\text{RastSkew}}(\mathbf{x}) = 10N + \sum_{i=1}^N \left(y_i^2 - 10 \\cos(2\\pi x_i)\\right)`
 
      :math:`\\text{with } y_i = \
                             \\begin{cases} \
