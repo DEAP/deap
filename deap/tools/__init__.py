@@ -10,15 +10,15 @@ from copy import deepcopy
 from functools import wraps
 from typing import Callable, List
 
-# from .constraint import *
-# from .crossover import *
-# from .emo import *
-# from .indicator import *
-# from .init import *
-# from .migration import *
-# from .mutation import *
-# from .selection import *
-# from .support import *
+from .constraint import *
+from .crossover import *
+from .emo import *
+from .indicator import *
+from .init import *
+from .migration import *
+from .mutation import *
+from .selection import *
+from .support import *
 
 from ..base import Individual
 
@@ -55,7 +55,7 @@ def variation(func: Callable):
             if isinstance(argument, Individual):
                 copy_ = deepcopy(argument)
                 individuals.append(copy_)
-                argument = copy_._getattributes(key)
+                argument = copy_._getattribute(key)
 
             variator_args.append(argument)
 
@@ -64,7 +64,7 @@ def variation(func: Callable):
             if isinstance(argument, Individual):
                 copy_ = deepcopy(argument)
                 individuals.append(copy_)
-                argument = copy_._getattributes(key)
+                argument = copy_._getattribute(key)
 
             variator_kwargs[keyword] = argument
 
@@ -75,15 +75,44 @@ def variation(func: Callable):
         # individual
         if len(individuals) > 1:
             for i, a in zip(individuals, attributes):
-                i._setattributes(key, a)
+                i._setattribute(key, a)
                 i.invalidate_fitness()
 
         else:
             individuals = individuals[0]
-            individuals._setattributes(key, attributes)
+            individuals._setattribute(key, attributes)
             individuals.invalidate_fitness()
 
         # Return the whole individuals with their fitness invalidated
         return individuals
+
+    return wrapper
+
+
+def evaluation(func: Callable):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        key = kwargs.pop("key", None)
+        evaluation_args = list()
+        evaluation_kwargs = dict()
+
+        # Deepcopy passed individuals
+        for argument in args:
+            if isinstance(argument, Individual):
+                argument = argument._getattribute(key)
+
+            evaluation_args.append(argument)
+
+        # Deepcopy passed individuals
+        for keyword, argument in kwargs.items():
+            if isinstance(argument, Individual):
+                argument = argument._getattribute(key)
+
+            evaluation_kwargs[keyword] = argument
+
+        # Get variated attributes
+        fitness = func(*evaluation_args, **evaluation_kwargs)
+
+        return fitness
 
     return wrapper

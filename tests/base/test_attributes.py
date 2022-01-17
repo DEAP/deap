@@ -6,22 +6,43 @@ from deap.base import Attribute
 
 
 class TestBaseAttribute(unittest.TestCase):
-    def test_get_value(self):
-        a = Attribute(3)
-        self.assertEqual(a._getvalue(), 3)
-
-    def test_set_value(self):
+    def test_init_value_none(self):
         a = Attribute()
-        a._setvalue(3)
-        self.assertEqual(a.value, 3)
+        self.assertEqual(a, None)
 
-    def test_del_value(self):
-        a = Attribute(3)
-        a._delvalue()
-        self.assertEqual(a.value, None)
+    def test_init_value(self):
+        init_val = 3
+        a = Attribute(init_val)
+        self.assertEqual(a, init_val)
 
-    def test_str(self):
-        value = 3
-        a = Attribute(value)
-        str_a = str(a)
-        self.assertEqual(str_a, str(value))
+    def test_unwrap(self):
+        init_val = {"a": 3}
+        a = Attribute(init_val)
+        expected = a.unwrap()
+        self.assertIs(expected, init_val)
+
+
+# class TestNumpyAttribute(unittest.TestCase):
+    # def test_add_value(self):
+    #     a = Attribute(numpy.array([1, 2, 3]))
+    #     a += 3
+    #     numpy.testing.assert_equal(a, [4, 5, 6])
+
+    # def test_dot_attributes(self):
+    #     list_ = [1, 2, 3]
+    #     # array = numpy.array(list_)
+    #     attr = Attribute(list_)
+
+    #     expected = numpy.dot(list_, list_)
+    #     result = numpy.dot(attr, attr)
+
+    #     numpy.testing.assert_equal(expected, result)
+
+    # def test_array_attributes(self):
+    #     list_ = [1, 2, 3]
+    #     attr = Attribute(list_)
+
+    #     expected = numpy.array([list_, list_])
+    #     result = numpy.array([attr, attr])
+
+    #     numpy.testing.assert_equal(expected, result)

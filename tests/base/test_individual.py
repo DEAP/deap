@@ -168,8 +168,26 @@ class TestIndividualAttribute(unittest.TestCase):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
-        self.assertIn("my_attr", ind._attribute)
-        self.assertIs(ind._attribute["my_attr"], attr)
+        self.assertIn("my_attr", ind._attributes)
+        self.assertTrue(hasattr(ind, "my_attr"))
+        self.assertIs(ind._attributes["my_attr"], None)
+
+    def test_register_single_attribute_multi_individual(self):
+        attr1 = Attribute()
+        attr2 = Attribute()
+        ind1 = Individual()
+        ind2 = Individual()
+        ind1.my_attr1 = attr1
+        ind2.my_attr2 = attr2
+        self.assertIn("my_attr1", ind1._attributes)
+        self.assertTrue(hasattr(ind1, "my_attr1"))
+        self.assertNotIn("my_attr2", ind1._attributes)
+        self.assertFalse(hasattr(ind1, "my_attr2"))
+
+        self.assertNotIn("my_attr1", ind2._attributes)
+        self.assertFalse(hasattr(ind2, "my_attr1"))
+        self.assertIn("my_attr2", ind2._attributes)
+        self.assertTrue(hasattr(ind2, "my_attr2"))
 
     def test_register_multi_attributes(self):
         attr1 = Attribute()
@@ -177,28 +195,28 @@ class TestIndividualAttribute(unittest.TestCase):
         ind = Individual()
         ind.my_attr1 = attr1
         ind.my_attr2 = attr2
-        self.assertIn("my_attr1", ind._attribute)
-        self.assertIs(ind._attribute["my_attr1"], attr1)
-        self.assertIn("my_attr2", ind._attribute)
-        self.assertIs(ind._attribute["my_attr2"], attr2)
+        self.assertIn("my_attr1", ind._attributes)
+        self.assertIs(ind._attributes["my_attr1"], attr1)
+        self.assertIn("my_attr2", ind._attributes)
+        self.assertIs(ind._attributes["my_attr2"], attr2)
 
     def test_get_single_attribute_no_key(self):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
-        self.assertIs(ind._getattribute(), attr)
+        self.assertIsInstance(ind._getattribute(), Attribute)
 
     def test_get_single_attribute_with_key(self):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
-        self.assertIs(ind._getattribute("my_attr"), attr)
+        self.assertIsInstance(ind._getattribute("my_attr"), Attribute)
 
     def test_get_single_attribute_direct(self):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
-        self.assertIs(ind.my_attr, attr)
+        self.assertIsInstance(ind.my_attr, Attribute)
 
     def test_get_multi_attributes_no_key_raises(self):
         attr1 = Attribute()
@@ -208,47 +226,47 @@ class TestIndividualAttribute(unittest.TestCase):
         ind.my_attr2 = attr2
         self.assertRaises(AttributeError, ind._getattribute)
 
-    def test_get_multi_fitnesses_with_key(self):
+    def test_get_multi_attributes_with_key(self):
         attr1 = Attribute()
         attr2 = Attribute()
         ind = Individual()
         ind.my_attr1 = attr1
         ind.my_attr2 = attr2
-        self.assertIs(ind._getattribute("my_attr1"), attr1)
-        self.assertIs(ind._getattribute("my_attr2"), attr2)
+        self.assertIsInstance(ind._getattribute("my_attr1"), Attribute)
+        self.assertIsInstance(ind._getattribute("my_attr2"), Attribute)
 
-    def test_get_multi_fitnesses_direct(self):
+    def test_get_multi_attributes_direct(self):
         attr1 = Attribute()
         attr2 = Attribute()
         ind = Individual()
         ind.my_attr1 = attr1
         ind.my_attr2 = attr2
-        self.assertIs(ind.my_attr1, attr1)
-        self.assertIs(ind.my_attr2, attr2)
+        self.assertIsInstance(ind.my_attr1, Attribute)
+        self.assertIsInstance(ind.my_attr2, Attribute)
 
     def test_set_single_attribute_no_key(self):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
         ind._setattribute(None, "abc")
-        self.assertIs(ind._getattribute("my_attr"), attr)
-        self.assertEqual(ind.my_attr.value, "abc")
+        self.assertIsInstance(ind._getattribute("my_attr"), Attribute)
+        self.assertEqual(ind.my_attr, "abc")
 
     def test_set_single_attribute_with_key(self):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
         ind._setattribute("my_attr", "abc")
-        self.assertIs(ind._getattribute("my_attr"), attr)
-        self.assertEqual(ind.my_attr.value, "abc")
+        self.assertIsInstance(ind._getattribute("my_attr"), Attribute)
+        self.assertEqual(ind.my_attr, "abc")
 
     def test_set_single_attribute_direct(self):
         attr = Attribute()
         ind = Individual()
         ind.my_attr = attr
         ind.my_attr = "abc"
-        self.assertIs(ind._getattribute("my_attr"), attr)
-        self.assertEqual(ind.my_attr.value, "abc")
+        self.assertIsInstance(ind._getattribute("my_attr"), Attribute)
+        self.assertEqual(ind.my_attr, "abc")
 
     def test_set_multi_attributes_no_key_raises(self):
         attr1 = Attribute()
@@ -265,11 +283,11 @@ class TestIndividualAttribute(unittest.TestCase):
         ind.my_attr1 = attr1
         ind.my_attr2 = attr2
         ind._setattribute("my_attr1", "abc")
-        self.assertIs(ind._getattribute("my_attr1"), attr1)
-        self.assertEqual(attr1.value, "abc")
+        self.assertIsInstance(ind._getattribute("my_attr1"), Attribute)
+        self.assertEqual(attr1, "abc")
         ind._setattribute("my_attr2", "def")
-        self.assertIs(ind._getattribute("my_attr2"), attr2)
-        numpy.testing.assert_array_equal(attr2.value, "def")
+        self.assertIsInstance(ind._getattribute("my_attr2"), Attribute)
+        self.assertEqual(attr2, "def")
 
     def test_set_multi_attributes_direct(self):
         attr1 = Attribute()
@@ -278,8 +296,74 @@ class TestIndividualAttribute(unittest.TestCase):
         ind.my_attr1 = attr1
         ind.my_attr2 = attr2
         ind.my_attr1 = "abc"
-        self.assertIs(ind._getattribute("my_attr1"), attr1)
-        self.assertEqual(attr1.value, "abc")
+        self.assertIsInstance(ind._getattribute("my_attr1"), Attribute)
+        self.assertEqual(attr1, "abc")
         ind.my_attr2 = "def"
-        self.assertIs(ind._getattribute("my_attr2"), attr2)
-        numpy.testing.assert_array_equal(attr2.value, "def")
+        self.assertIsInstance(ind._getattribute("my_attr2"), Attribute)
+        self.assertEqual(attr2, "def")
+
+    def test_del_single_attribute(self):
+        attr = Attribute()
+        ind = Individual()
+        ind.my_attr = attr
+        del ind.my_attr
+        self.assertNotIn("my_attr", ind._attributes)
+        self.assertFalse(hasattr(ind, "my_attr"))
+
+    def test_del_multi_attributes(self):
+        attr1= Attribute()
+        attr2= Attribute()
+        ind = Individual()
+        ind.my_attr1 = attr1
+        ind.my_attr2 = attr1
+        del ind.my_attr1
+        del ind.my_attr2
+        self.assertNotIn("my_attr1", ind._attributes)
+        self.assertFalse(hasattr(ind, "my_attr1"))
+        self.assertNotIn("my_attr2", ind._attributes)
+        self.assertFalse(hasattr(ind, "my_attr2"))
+
+    def test_del_single_attribute_multi_individuals(self):
+        attr = Attribute()
+        ind1 = Individual()
+        ind2 = Individual()
+        ind1.my_attr = attr
+        ind2.my_attr = attr
+        del ind1.my_attr
+        self.assertNotIn("my_attr", ind1._attributes)
+        self.assertFalse(hasattr(ind1, "my_attr"))
+        self.assertIn("my_attr", ind2._attributes)
+        self.assertTrue(hasattr(ind2, "my_attr"))
+
+
+class TestIndividualHeritance(unittest.TestCase):
+    class TestIndividual(Individual):
+        def __init__(self, initval=None):
+            super().__init__()
+            self.fitness = Fitness(Fitness.MINIMIZE)
+            self.attr = Attribute(initval)
+
+    class TestIndividualNoSuperInit(Individual):
+        def __init__(self, initval=None):
+            self.fitness = Fitness(Fitness.MINIMIZE)
+            self.attr = Attribute(initval)
+
+    class TestIndividualNoSuperInitAttrFirst(Individual):
+        def __init__(self, initval=None):
+            self.attr = Attribute(initval)
+            self.fitness = Fitness(Fitness.MINIMIZE)
+
+    def test_subclass_has_all_attr(self):
+        ind = TestIndividualHeritance.TestIndividual()
+        self.assertTrue(hasattr(ind, "_fitnesses"))
+        self.assertTrue(hasattr(ind, "_attributes"))
+        self.assertTrue(hasattr(ind, "fitness"))
+        self.assertTrue(hasattr(ind, "attr"))
+
+    def test_subclass_no_super_init_raises(self):
+        with self.assertRaisesRegex(AttributeError, r"cannot assign \w+ before Individual\.__init__\(\) call"):
+            TestIndividualHeritance.TestIndividualNoSuperInit()
+
+    def test_subclass_no_super_init_raises_attr(self):
+        with self.assertRaisesRegex(AttributeError, r"cannot assign \w+ before Individual\.__init__\(\) call"):
+            TestIndividualHeritance.TestIndividualNoSuperInitAttrFirst()

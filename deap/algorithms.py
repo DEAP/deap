@@ -1,9 +1,12 @@
 from copy import deepcopy
-from itertools import cycle, islice, izip
+from itertools import cycle, islice
 import random
+from typing import Sequence
+
+from .base import Individual
 
 
-def evaluate_invalids(individuals, eval_func, map=map):
+def evaluate_invalids(individuals: Sequence[Individual], eval_func, map=map):
     """Evaluate all individuals marked invalid.
 
     Args:
@@ -22,7 +25,7 @@ def evaluate_invalids(individuals, eval_func, map=map):
     invalid_ind = [ind for ind in individuals if not ind.fitness.valid]
     fitnesses = map(eval_func, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+        ind._setfitness(None, fit)
 
     return len(invalid_ind)
 
@@ -68,7 +71,7 @@ def and_variation(population, toolbox, cxpb, mutpb):
     individuals = cycle(population)
 
     # zip(iter, iter) produces l[i], l[i+1]
-    for i1, i2 in izip(individuals, individuals):
+    for i1, i2 in zip(individuals, individuals):
         # TODO: put deepcopy in operators
         # Must deepcopy separately to ensure full deepcopy if the same
         # individual is selected twice, it is deepcopied twice (what is
@@ -126,7 +129,7 @@ def or_variation(population, toolbox, cxpb, mutpb):
 
     # adjust probabilities since both crossover children are appended
     cxpb_adj = cxpb / (2 - cxpb)
-    if cxpb != 1.0:         #  Avoid zero division
+    if cxpb != 1.0:         # Avoid zero division
         mutpb_adj = mutpb / (mutpb + (1 - mutpb - cxpb)) * (1 - cxpb_adj)
     else:
         mutpb_adj = mutpb
@@ -345,12 +348,16 @@ class GenerateUpdateAlgorithm:
     """
     def __init__(self, toolbox):
         self.toolbox = toolbox
+        self.population = None
         self.nevals = 0
 
     def __iter__(self):
         return self
 
     def next(self):
+        return self.__next__()
+
+    def __next__(self):
         # Generate a new population
         self.population = self.toolbox.generate()
 

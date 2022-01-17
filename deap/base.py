@@ -7,7 +7,7 @@ from functools import partial
 from operator import mul, truediv
 
 from collections.abc import Callable, Sequence
-from copy import deepcopy
+from copy import copy, deepcopy
 from functools import wraps
 from operator import attrgetter
 from typing import Any, Callable, Collection, List, Tuple
@@ -209,29 +209,21 @@ class Fitness:
 
 
 class Attribute:
-    """General attribute in an :class:`Individual`.
+    """General attributes in an :class:`Individual`.
 
     Attribute are placeholders in an :class:`Individual`. Individuals will initialize
-    attribute as properties allowing to set and get their values properly.
+    attribute as property-like objects allowing to set and get their values properly.
 
     Arguments:
         initval (any): Initial value for the attribute. Can be of any type.
 
     """
     def __init__(self, initval: Any = None):
-        self.value = initval
+        self.wrapped = initval
 
-    def _getvalue(self) -> None:
-        return self.value
-
-    def _setvalue(self, val: Any) -> None:
-        self.value = val
-
-    def _delvalue(self) -> None:
-        self.value = None
-
-    def __str__(self) -> str:
-        return str(self.value)
+    def unwrap(self):
+        """Drop the wrapper."""
+        return self.wrapped
 
 
 class Individual:
@@ -240,9 +232,9 @@ class Individual:
     Abstract base class for individuals. This class turns fitness and attribute
     members into property like objects that can be set directly with their values.
 
-    The individual is a mix of attribute and fitnesses. An individuals can have as
-    many attribute and fitnesses as desired. However, when having multiple attribute
-    or fitnesses the key argument in variations and/or selections becomes mandatory.
+    The individual is a mix of attributes and fitnesses. An individuals can have as
+    many attributes and fitnesses as desired. However, when having multiple attributes
+    or fitnesses the key argument in variations and selections becomes mandatory.
 
     Note:
         Predefined algorithms are not capable of handling multiple fitnesses.
@@ -305,28 +297,19 @@ class Individual:
     """
     def __init__(self):
         self._fitnesses = dict()
-        self._attribute = dict()
+        self._attributes = dict()
 
     def _register_fitness(self, name, fitness):
-        self._fitnesses[name] = fitness
+        if not hasattr(self, "_fitnesses"):
+            raise AttributeError(
+                "cannot assign fitness before Individual.__init__() call")
+        super().__getattribute__("_fitnesses")[name] = fitness
 
     def _register_attribute(self, name, attribute):
-        self._attribute[name] = attribute
-
-    def _register_property(self, name, type_):
-        def _getter(self):
-            # Return the object and not the values to be able to use them
-            # with all their instance methods (i.e., return a Fitness not a ndarray)
-            return self.__getattribute__(type_)[name]
-
-        def _setter(self, val):
-            self.__getattribute__(type_)[name]._setvalue(val)
-
-        def _deletter(self):
-            self.__getattribute__(type_)[name]._delvalue()
-
-        # Property is a class attribute
-        setattr(Individual, name, property(_getter, _setter, _deletter))
+        if not hasattr(self, "_attributes"):
+            raise AttributeError(
+                "cannot assign attribute before Individual.__init__() call")
+        super().__getattribute__("_attributes")[name] = attribute.unwrap()
 
     def _getattribute(self, name=None):
         """Retrieve the attribute of this individual. If *name* is provided, retrieve
@@ -336,8 +319,8 @@ class Individual:
         Note:
             This method is generally for internal use.
         """
-        if name is None and len(self._attribute) == 1:
-            name = next(iter(self._attribute.keys()))
+        if name is None and len(self._attributes) == 1:
+            name = next(iter(self._attributes.keys()))
         elif name is None:
             raise AttributeError("individual with multiple attribute "
                                  "require the 'name' argument in operators")
@@ -351,11 +334,11 @@ class Individual:
         Note:
             This method is generally for internal use.
         """
-        if name is None and len(self._attribute) == 1:
-            name = next(iter(self._attribute.keys()))
+        if name is None and len(self._attributes) == 1:
+            name = next(iter(self._attributes.keys()))
         elif name is None:
-            raise AttributeError("individual with multiple attribute "
-                                 "require the 'name' argument in operators")
+            raise AttributeError("individuals with multiple attribute "
+                                 "require argument 'name' in operators")
         return setattr(self, name, value)
 
     def _getfitness(self, name=None):
@@ -369,8 +352,8 @@ class Individual:
         if name is None and len(self._fitnesses) == 1:
             name = next(iter(self._fitnesses.keys()))
         elif name is None:
-            raise AttributeError("individual with multiple fitnesses "
-                                 "require the 'name' argument in operators")
+            raise AttributeError("individuals with multiple fitnesses "
+                                 "require argument 'name' in operators")
         return getattr(self, name)
 
     def _setfitness(self, name=None, value=None):
@@ -398,26 +381,53 @@ class Individual:
             f.reset()
 
     def __setattr__(self, name, value):
+        # Avoid this class __getattribute__ small overhead
+        getter = super().__getattribute__
         if isinstance(value, Fitness):
-            if getattr(self, "_fitnesses", None) is None:
-                self._fitnesses = dict()
-
             self._register_fitness(name, value)
-            self._register_property(name, "_fitnesses")
-
+        elif hasattr(self, "_fitnesses") and name in getter("_fitnesses"):
+            getter("_fitnesses")[name]._setvalue(value)
         elif isinstance(value, Attribute):
-            if getattr(self, "_attribute", None) is None:
-                self._attribute = dict()
-
             self._register_attribute(name, value)
-            self._register_property(name, "_attribute")
-
+        elif hasattr(self, "_attributes") and name in getter("_attributes"):
+            getter("_attributes")[name] = value
         else:
             super().__setattr__(name, value)
 
+    def __getattribute__(self, name):
+        getter = super().__getattribute__
+        try:
+            fitnesses = getter("_fitnesses")
+        except AttributeError:
+            fitnesses = {}
+
+        try:
+            attributes = getter("_attributes")
+        except AttributeError:
+            attributes = {}
+
+        if name in fitnesses:
+            return fitnesses[name]
+
+        elif name in attributes:
+            return attributes[name]
+
+        return getter(name)
+
+    def __delattr__(self, name):
+        getter = super().__getattribute__
+        if name in getter("_fitnesses"):
+            self._fitnesses[name].reset()
+
+        elif name in getter("_attributes"):
+            del self._attributes[name]
+
+        else:
+            super().__delattr__(name)
+
     def __str__(self):
         str_values = ', '.join('='.join((name, str(attr.getvalue())))
-                               for name, attr in self._attribute.items())
+                               for name, attr in self._attributes.items())
         return f"{self.__class__.__name__}({str_values})"
 
 

@@ -1,62 +1,45 @@
-"""Test functions from deap/benchmarks."""
 import sys
 import unittest
 
-from deap import base
-from deap import benchmarks
-from deap import creator
 from deap.benchmarks import binary
 
 
-class BenchmarkTest(unittest.TestCase):
+class TestBin2Float(unittest.TestCase):
     """Test object for unittest of deap/benchmarks."""
 
     def setUp(self):
+        self.b2f = binary.bin2float(0, 1023, 10)(lambda x: x)
 
-        @binary.bin2float(0, 1023, 10)
-        def evaluate(individual):
-            """Simplest evaluation function."""
-            return individual
+    def test_zero(self):
+        zero = [0] * 10
+        res = self.b2f(zero)
+        self.assertSequenceEqual(res, [0])
 
-        creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-        creator.create("Individual", list, fitness=creator.FitnessMin)
-        self.toolbox = base.Toolbox()
-        self.toolbox.register("evaluate", evaluate)
+    def test_full(self):
+        full = [1] * 10
+        res = self.b2f(full)
+        self.assertSequenceEqual(res, [1023])
 
-    def tearDown(self):
-        del creator.FitnessMin
+    def test_two(self):
+        two = [0] * 8 + [1, 0]
+        res = self.b2f(two)
+        self.assertSequenceEqual(res, [2])
 
-    def test_bin2float(self):
+    def test_one_two(self):
+        one = [0] * 9 + [1]
+        two = [0] * 8 + [1, 0]
+        one_two = one + two
+        res = self.b2f(one_two)
+        self.assertSequenceEqual(res, [1, 2])
 
-        # Correct evaluation of bin2float.
-        zero_individual = creator.Individual([0] * 10)
-        full_individual = creator.Individual([1] * 10)
-        two_individiual = creator.Individual(8*[0] + [1, 0])
-        population = [zero_individual, full_individual, two_individiual]
-        fitnesses = map(self.toolbox.evaluate, population)
-        for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
-        assert population[0].fitness.values == (0.0, )
-        assert population[1].fitness.values == (1023.0, )
-        assert population[2].fitness.values == (2.0, )
+    @unittest.skipUnless(sys.version_info < (3, ), "Python 2")
+    def test_wrong_size_raises_py2(self):
+        wrong = [0, 1, 0, 1, 0, 1, 0, 1, 1]
+        with self.assertRaises(TypeError):
+            self.b2f(wrong)
 
-        # Incorrect evaluation of bin2float.
-        wrong_size_individual = creator.Individual([0, 1, 0, 1, 0, 1, 0, 1, 1])
-        wrong_population = [wrong_size_individual]
-        # It is up the user to make sure that bin2float gets an individual with
-        # an adequate length; no exceptions are raised.
-        fitnesses = map(self.toolbox.evaluate, wrong_population)
-        for ind, fit in zip(wrong_population, fitnesses):
-            # In python 2.7 operator.mul works in a different way than in
-            # python3. Thus an error occurs in python2.7 but an assignment is
-            # correctly executed in python3.
-            if sys.version_info < (3, ):
-                with self.assertRaises(TypeError):
-                    ind.fitness.values = fit
-            else:
-                assert wrong_population[0].fitness.values == ()
-
-
-if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(BenchmarkTest)
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    @unittest.skipUnless(sys.version_info >= (3, ), "Python 3+")
+    def test_wrong_size_no_value_py3(self):
+        wrong = [0, 1, 0, 1, 0, 1, 0, 1, 1]
+        res = self.b2f(wrong)
+        self.assertEqual(len(res), 0)

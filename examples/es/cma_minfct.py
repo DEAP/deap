@@ -19,18 +19,23 @@ from deap import algorithms
 from deap import base
 from deap import benchmarks
 from deap import cma
-from deap import creator
 from deap import tools
 
 # Problem size
 N=30
 NGEN=250
 
-creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
-creator.create("Individual", list, fitness=creator.FitnessMin)
+class Individual(base.Individual):
+    def __init__(self, initval=None):
+        super().__init__()
+        self.fitness = base.Fitness(base.Fitness.MINIMIZE)
+        self.attrs = base.Attribute(initval)
+
+# creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+# creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
-toolbox.register("evaluate", benchmarks.rastrigin)
+toolbox.register("evaluate", benchmarks.rastrigin, key="attrs")
 
 def main(verbose=True):
     # The cma module uses the numpy random number generator
@@ -40,11 +45,11 @@ def main(verbose=True):
     # The centroid is set to a vector of 5.0 see http://www.lri.fr/~hansen/cmaes_inmatlab.html
     # for more details about the rastrigin and other tests for CMA-ES
     strategy = cma.BasicStrategy(centroid=[5.0]*N, sigma=5.0, lambda_=20*N)
-    toolbox.register("generate", strategy.generate, creator.Individual)
+    toolbox.register("generate", strategy.generate, Individual)
     toolbox.register("update", strategy.update)
 
     hof = tools.HallOfFame(1)
-    stats = tools.Statistics(lambda ind: ind.fitness.values)
+    stats = tools.Statistics(lambda ind: ind.fitness.value)
     stats.register("avg", numpy.mean)
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
@@ -64,7 +69,6 @@ def main(verbose=True):
         if gen >= NGEN:
             break
 
-    # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]
 
 if __name__ == "__main__":
