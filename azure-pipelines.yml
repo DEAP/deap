@@ -11,8 +11,6 @@ jobs:
       vmImage: 'vs2017-win2016'
     strategy:
       matrix:
-        Python27_VS2017:
-          python.version: '2.7'
         Python36_VS2017:
           python.version: '3.6'
         Python37_VS2017:
@@ -21,15 +19,13 @@ jobs:
           python.version: '3.8'
         Python39_VS2017:
           python.version: '3.9'
+        Python310_VS2017:
+          python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '$(python.version)'
       displayName: 'Use Python $(python.version)'
-    - script: |
-        choco install vcpython27 --yes
-      condition: eq(variables['python.version'], '2.7')
-      displayName: 'Install vcpython27'
     - script: |
         python -m pip install --upgrade pip
         pip install numpy
@@ -41,14 +37,12 @@ jobs:
         python setup.py sdist bdist_wheel
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
-  
+
   - job: macOS10_14Build
     pool:
       vmImage: 'macOS-10.14'
     strategy:
       matrix:
-        Python27_macOS1014:
-          python.version: '2.7'
         Python36_macOS1014:
           python.version: '3.6'
         Python37_macOS1014:
@@ -57,6 +51,8 @@ jobs:
           python.version: '3.8'
         Python39_macOS1014:
           python.version: '3.9'
+        Python310_macOS1014:
+          python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -73,7 +69,7 @@ jobs:
         python setup.py sdist bdist_wheel
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
-  
+
   - job: Manylinux2010Build
     pool:
       vmImage: 'ubuntu-16.04'
@@ -116,6 +112,9 @@ jobs:
           manylinux: 'manylinux_aarch64'
         Py39 Arm64:
           python.version: 'cp39-cp39'
+          manylinux: 'manylinux_aarch64'
+        Py310 Arm64:
+          python.version: 'cp310-cp310'
           manylinux: 'manylinux_aarch64'
     steps:
     - script: docker run --rm --privileged hypriot/qemu-register
