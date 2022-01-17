@@ -164,8 +164,11 @@ def create(name, base, **kargs):
         for obj_name, obj in dict_inst.iteritems():
             setattr(self, obj_name, obj())
         if base.__init__ is not object.__init__:
+            for k, v in dict_cls.iteritems():
+                setattr(self, k, v)
             base.__init__(self, *args, **kargs)
 
-    objtype = type(str(name), (base,), dict_cls)
+    slots = list(kargs.keys())
+    objtype = type(str(name), (base,), {'__slots__': slots})
     objtype.__init__ = initType
     globals()[name] = objtype
