@@ -1,26 +1,26 @@
-import multiprocessing
-import unittest
+# import multiprocessing
+# import unittest
 
-from deap import base
-from deap import creator
-
-
-def _evalOneMax(individual):
-        return sum(individual),
+# from deap import base
+# from deap import creator
 
 
-def test_multiproc():
-    creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-    creator.create("Individual", list, fitness=creator.FitnessMax)
+# def _evalOneMax(individual):
+#         return sum(individual),
 
-    toolbox = base.Toolbox()
-    toolbox.register("evaluate", _evalOneMax)
 
-    # Process Pool of 4 workers
-    pool = multiprocessing.Pool(processes=4)
-    toolbox.register("map", pool.map)
+# def test_multiproc():
+#     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+#     creator.create("Individual", list, fitness=creator.FitnessMax)
 
-    pop = [[1]*20 for _ in range(100)]
-    fitnesses = toolbox.map(toolbox.evaluate, pop)
-    for ind, fit in zip(pop, fitnesses):
-        assert fit == (sum(ind),)
+#     toolbox = base.Toolbox()
+#     toolbox.register("evaluate", _evalOneMax)
+
+#     # Process Pool of 4 workers
+#     pool = multiprocessing.Pool(processes=4)
+#     toolbox.register("map", pool.map)
+
+#     pop = [[1]*20 for _ in range(100)]
+#     fitnesses = toolbox.map(toolbox.evaluate, pop)
+#     for ind, fit in zip(pop, fitnesses):
+#         assert fit == (sum(ind),)

@@ -1,33 +1,438 @@
-#    This file is part of DEAP.
-#
-#    DEAP is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Lesser General Public License as
-#    published by the Free Software Foundation, either version 3 of
-#    the License, or (at your option) any later version.
-#
-#    DEAP is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#    GNU Lesser General Public License for more details.
-#
-#    You should have received a copy of the GNU Lesser General Public
-#    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
-
 """The :mod:`~deap.base` module provides basic structures to build
 evolutionary algorithms. It contains the :class:`~deap.base.Toolbox`, useful
 to store evolutionary operators, and a virtual :class:`~deap.base.Fitness`
 class used as base class, for the fitness member of any individual. """
 
-import sys
-
-from collections import Sequence
-from copy import deepcopy
 from functools import partial
 from operator import mul, truediv
 
+from collections.abc import Callable, Sequence
+from copy import copy, deepcopy
+from functools import wraps
+from operator import attrgetter
+from typing import Any, Callable, Collection, List, Tuple
+
+import numpy
+
+
+class Fitness:
+    """Class for initializing fitnesses in an individual.
+
+    The fitness is a measure of quality of a solution. If *initval* is
+    provided as a single value or a tuple, the fitness is initalized using
+    those values, otherwise it is empty (or invalid). The values are converted
+    to numpy.float64 when set, ensure your values can be safely casted using
+    ``numpy.asarray(value, dtype=numpy.float64)``.
+
+    Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
+    ``!=``. The comparisons are made through a strict dominance criteria meaning
+    that two fitnesses are considered equal if neither dominates the other.
+
+    Constraint handling can be provided. A fitness violating a constraint (invalid)
+    will always be dominated by a valid fitness. Two invalid fitnesses compare
+    as if they were valid.
+
+    Arguments:
+        objectives (scalar or sequence): Usualy one of :data:`Fitness.MAXIMIZE`
+            or :data:`Fitness.MINIMIZE` or a tuple thereof.
+        initval (scalar or sequence): Initial value for a fitness. When not provided
+            the fitness remains invalid until its value is set.
+        violated_constraints (sequence of boolean): A list of booleans which assess if
+            if a constraint is violated.
+
+
+    Examples:
+        Fitnesses can be compared directly::
+
+            >>> obj = Fitness.MAXIMIZE
+            >>> f1 = Fitness(obj, initval=2)
+            >>> f2 = Fitness(obj, initval=3)
+
+            >>> f1 > f2
+            False
+            >>> f1 < f2
+            True
+
+        Multiobjective fitnesses compare using strict domimance::
+
+            >>> mobj = (Fitness.MAXIMIZE, Fitness.MAXIMIZE)
+            >>> f1 = Fitness(mobj, initval=(2, 3))
+            >>> f2 = Fitness(mobj, initval=(2, 4))
+
+            >>> f1 < f2
+            True
+            >>> f1 > f2
+            False
+
+        Strict dominance imply that all objective must be atleast be better
+        or equal for one fitness to dominate the other. In this example neither
+        fitness dominates the other::
+
+            >>> mobj = (Fitness.MAXIMIZE, Fitness.MAXIMIZE)
+            >>> f1 = Fitness(mobj, initval=(2, 3))
+            >>> f2 = Fitness(mobj, initval=(1, 4))
+
+            >>> f1 < f2
+            False
+            >>> f1 > f2
+            False
+            >>> f1 == f2
+            True
+
+        Constraint handling can be done inside fitnesses::
+
+            >>> f1 = Fitness(Fitness.MAXIMIZE,
+            ...              initval=11,
+            ...              violated_constraints=[True, False])
+            >>> f1.valid
+            False
+
+            >>> f2 = Fitness(Fitness.MAXIMIZE,
+            ...              initval=5,
+            ...              violated_constraints=[False, False])
+            >>> f2.valid
+            True
+
+            >>> f2 > f1
+            True
+
+
+    """
+    MAXIMIZE = 1.0
+    MINIMIZE = -1.0
+
+    def __init__(self, objectives, initval=(), violated_constraints=()):
+        if not isinstance(objectives, Sequence):
+            objectives = (objectives,)
+
+        self.objectives = numpy.asarray(objectives, dtype=numpy.float64)
+        self._value: numpy.ndarray = numpy.asarray((), dtype=numpy.float64)
+        self._wvalue: numpy.ndarray = numpy.array((), dtype=numpy.float64)
+        self._violated_constraints = violated_constraints
+
+        self.value = initval
+
+    def _getvalue(self) -> numpy.ndarray:
+        """Raw values of this fitness as numpy.array of type float64."""
+        return self._value
+
+    def _setvalue(self, val):
+        if val is None:
+            val = ()
+
+        if isinstance(val, str) \
+                or (not isinstance(val, Sequence)
+                    and not isinstance(val, numpy.ndarray)):
+            val = (val,)
+
+        if len(val) > 0 and len(val) != len(self.objectives):
+            raise ValueError(f"setting fitness with {len(val)} "
+                             f"value{'s' if len(val) > 1 else ''}, "
+                             f"{len(self.objectives)} expected.")
+
+        self._value = numpy.asarray(val, dtype=numpy.float64)
+
+        if len(val) > 0:
+            # Store objective relative values for performance
+            self._wvalue = self._value * self.objectives
+
+    def _delvalue(self):
+        self._value = numpy.asarray((), dtype=numpy.float64)
+
+    value = property(_getvalue, _setvalue, _delvalue)
+
+    @property
+    def violated_constraints(self):
+        """Status of constraint violations for this fitness."""
+        return self._violated_constraints
+
+    @violated_constraints.setter
+    def violated_constraints(self, violated_constraints):
+        self._violated_constraints = violated_constraints
+
+    @violated_constraints.deleter
+    def violated_constraints(self):
+        self._violated_constraints = ()
+
+    def reset(self):
+        """Reset the values and constraint violations of this fitness."""
+        del self.value
+        del self.violated_constraints
+
+    @property
+    def valid(self):
+        """Assess if a fitness is valid or not. Either the fitness never
+        received a value or it violates one or more constraints."""
+        return self.evaluated and not any(self.violated_constraints)
+
+    @property
+    def evaluated(self):
+        """Assess if a fitness received a value."""
+        return self._value.size > 0
+
+    def __lt__(self, other: "Fitness") -> bool:
+        return other._dominates(self)
+
+    def __le__(self, other: "Fitness") -> bool:
+        return self < other or self == other
+
+    def __eq__(self, other: "Fitness") -> bool:
+        return not self._dominates(other) and not other._dominates(self)
+
+    def __ge__(self, other: "Fitness") -> bool:
+        return not self < other
+
+    def __gt__(self, other: "Fitness") -> bool:
+        return not self <= other
+
+    def _dominates(self, other: "Fitness") -> bool:
+        if not self.evaluated or not other.evaluated:
+            raise ValueError("Cannot compare fitnesses without values in"
+                             f", {self} dominates {other}")
+
+        self_valid = self.valid
+        other_valid = other.valid
+
+        if self_valid and not other_valid:
+            return True
+        elif not self_valid and other_valid:
+            return False
+
+        if numpy.any(self._wvalue < other._wvalue):
+            return False
+        if numpy.any(self._wvalue > other._wvalue):
+            return True
+        return False
+
+    def __str__(self):
+        return str(self._value)
+
+
+class Attribute:
+    """General attributes in an :class:`Individual`.
+
+    Attribute are placeholders in an :class:`Individual`. Individuals will initialize
+    attribute as property-like objects allowing to set and get their values properly.
+
+    Arguments:
+        initval (any): Initial value for the attribute. Can be of any type.
+
+    """
+    def __init__(self, initval: Any = None):
+        self.wrapped = initval
+
+    def unwrap(self):
+        """Drop the wrapper."""
+        return self.wrapped
+
+
+class Individual:
+    """Base class for individuals.
+
+    Abstract base class for individuals. This class turns fitness and attribute
+    members into property like objects that can be set directly with their values.
+
+    The individual is a mix of attributes and fitnesses. An individuals can have as
+    many attributes and fitnesses as desired. However, when having multiple attributes
+    or fitnesses the key argument in variations and selections becomes mandatory.
+
+    Note:
+        Predefined algorithms are not capable of handling multiple fitnesses.
+
+    Examples:
+
+        An individual with a single array of attribute and a single fitness.
+
+            >>> from operator import attrgetter
+            >>> import numpy
+
+            >>> class AwesomeIndividual(Individual):
+            ...     def __init__(self, alpha, beta, size):
+            ...         super().__init__()
+            ...         self.fitness = Fitness(Fitness.MINIMIZE)
+            ...         values = numpy.random.beta(alpha, beta, size)
+            ...         self.attrs = Attribute(values)
+
+            >>> i1 = AwesomeIndividual(alpha=1, beta=2, size=5)
+            >>> i2 = AwesomeIndividual(alpha=1, beta=2, size=5)
+            >>> i1.fitness = 2
+            >>> i2.fitness = 5
+            >>> ordered = sorted([i1, i2], key=attrgetter("fitness"))
+            >>> ordered == [i2, i1]
+            True
+
+        An individual with two arrays of attribute and a single fitness.
+
+            >>> from operator import attrgetter
+            >>> import numpy
+
+            >>> class AwesomeIndividual(Individual):
+            ...     def __init__(self, alpha, beta, lam, fsize, isize):
+            ...         super().__init__()
+            ...         self.fitness = Fitness(Fitness.MINIMIZE)
+            ...         val_float = numpy.random.beta(alpha, beta, fsize)
+            ...         self.attrs_float = Attribute(val_float)
+            ...         val_int = numpy.random.poisson(lam, isize)
+            ...         self.attrs_int = Attribute(val_int)
+
+            >>> i1 = AwesomeIndividual(alpha=1, beta=2, lam=5, fsize=5, isize=10)
+
+        An individual with a single array of attribute and two fitnesses.
+
+            >>> from operator import attrgetter
+            >>> import numpy
+
+            >>> class AwesomeIndividual(Individual):
+            ...     def __init__(self, alpha, beta, size):
+            ...         super().__init__()
+            ...         self.fitness_a = Fitness(Fitness.MINIMIZE)
+            ...         self.fitness_b = Fitness((Fitness.MINIMIZE, Fitness.MAXIMIZE))
+            ...         val_float = numpy.random.beta(alpha, beta, size)
+            ...         self.attrs_float = Attribute(val_float)
+
+            >>> i1 = AwesomeIndividual(alpha=1, beta=2, size=5)
+            >>> i1.fitness_a = 2
+            >>> i1.fitness_b = (5, 3)
+
+    """
+    def __init__(self):
+        self._fitnesses = dict()
+        self._attributes = dict()
+
+    def _register_fitness(self, name, fitness):
+        if not hasattr(self, "_fitnesses"):
+            raise AttributeError(
+                "cannot assign fitness before Individual.__init__() call")
+        super().__getattribute__("_fitnesses")[name] = fitness
+
+    def _register_attribute(self, name, attribute):
+        if not hasattr(self, "_attributes"):
+            raise AttributeError(
+                "cannot assign attribute before Individual.__init__() call")
+        super().__getattribute__("_attributes")[name] = attribute.unwrap()
+
+    def _getattribute(self, name=None):
+        """Retrieve the attribute of this individual. If *name* is provided, retrieve
+        the attribute with name *name*. Name is mandatory for individuals having
+        more than one attribute.
+
+        Note:
+            This method is generally for internal use.
+        """
+        if name is None and len(self._attributes) == 1:
+            name = next(iter(self._attributes.keys()))
+        elif name is None:
+            raise AttributeError("individual with multiple attribute "
+                                 "require the 'name' argument in operators")
+        return getattr(self, name)
+
+    def _setattribute(self, name=None, value=None):
+        """Set the attribute of this individual. If *name* is provided, set
+        the attribute with name *name*. Name is mandatory for individuals having
+        more than one attribute.
+
+        Note:
+            This method is generally for internal use.
+        """
+        if name is None and len(self._attributes) == 1:
+            name = next(iter(self._attributes.keys()))
+        elif name is None:
+            raise AttributeError("individuals with multiple attribute "
+                                 "require argument 'name' in operators")
+        return setattr(self, name, value)
+
+    def _getfitness(self, name=None):
+        """Retrieve the fitness of this individual. If *name* is provided, retrieve
+        the fitness with name *name*. Name is mandatory for individuals having
+        more than one fitness.
+
+        Note:
+            This method is generally for internal use.
+        """
+        if name is None and len(self._fitnesses) == 1:
+            name = next(iter(self._fitnesses.keys()))
+        elif name is None:
+            raise AttributeError("individuals with multiple fitnesses "
+                                 "require argument 'name' in operators")
+        return getattr(self, name)
+
+    def _setfitness(self, name=None, value=None):
+        """Set the fitness of this individual. If *name* is provided, set
+        the fitness with name *name*. Name is mandatory for individuals having
+        more than one fitness.
+
+        Note:
+            This method is generally for internal use.
+        """
+        if name is None and len(self._fitnesses) == 1:
+            name = next(iter(self._fitnesses.keys()))
+        elif name is None:
+            raise AttributeError("individual with multiple fitnesses "
+                                 "require the 'name' argument in operators")
+        return setattr(self, name, value)
+
+    def invalidate_fitness(self):
+        """Invalidate all fitnesses of this individual.
+
+        Note:
+            This method is generally for internal use.
+        """
+        for f in self._fitnesses.values():
+            f.reset()
+
+    def __setattr__(self, name, value):
+        # Avoid this class __getattribute__ small overhead
+        getter = super().__getattribute__
+        if isinstance(value, Fitness):
+            self._register_fitness(name, value)
+        elif hasattr(self, "_fitnesses") and name in getter("_fitnesses"):
+            getter("_fitnesses")[name]._setvalue(value)
+        elif isinstance(value, Attribute):
+            self._register_attribute(name, value)
+        elif hasattr(self, "_attributes") and name in getter("_attributes"):
+            getter("_attributes")[name] = value
+        else:
+            super().__setattr__(name, value)
+
+    def __getattribute__(self, name):
+        getter = super().__getattribute__
+        try:
+            fitnesses = getter("_fitnesses")
+        except AttributeError:
+            fitnesses = {}
+
+        try:
+            attributes = getter("_attributes")
+        except AttributeError:
+            attributes = {}
+
+        if name in fitnesses:
+            return fitnesses[name]
+
+        elif name in attributes:
+            return attributes[name]
+
+        return getter(name)
+
+    def __delattr__(self, name):
+        getter = super().__getattribute__
+        if name in getter("_fitnesses"):
+            self._fitnesses[name].reset()
+
+        elif name in getter("_attributes"):
+            del self._attributes[name]
+
+        else:
+            super().__delattr__(name)
+
+    def __str__(self):
+        str_values = ', '.join('='.join((name, str(attr.getvalue())))
+                               for name, attr in self._attributes.items())
+        return f"{self.__class__.__name__}({str_values})"
+
 
 class Toolbox(object):
-    """A toolbox for evolution that contains the evolutionary operators. At
+    """A toolbox for the evolutionary operators. At
     first the toolbox contains a :meth:`~deap.toolbox.clone` method that
     duplicates any element it is passed as argument, this method defaults to
     the :func:`copy.deepcopy` function. and a :meth:`~deap.toolbox.map`
@@ -42,7 +447,6 @@ class Toolbox(object):
     """
 
     def __init__(self):
-        self.register("clone", deepcopy)
         self.register("map", map)
 
     def register(self, alias, function, *args, **kargs):
@@ -62,14 +466,14 @@ class Toolbox(object):
         The following code block is an example of how the toolbox is used. ::
 
             >>> def func(a, b, c=3):
-            ...     print a, b, c
+            ...     print(a, b, c)
             ...
             >>> tools = Toolbox()
             >>> tools.register("myFunc", func, 2, c=4)
             >>> tools.myFunc(3)
             2 3 4
 
-        The registered function will be given the attributes :attr:`__name__`
+        The registered function will be given the attribute :attr:`__name__`
         set to the alias and :attr:`__doc__` set to the original function's
         documentation. The :attr:`__dict__` attribute will also be updated
         with the original function's instance dictionary, if any.
@@ -116,238 +520,3 @@ class Toolbox(object):
         for decorator in decorators:
             function = decorator(function)
         self.register(alias, function, *args, **kargs)
-
-
-class Fitness(object):
-    """The fitness is a measure of quality of a solution. If *values* are
-    provided as a tuple, the fitness is initalized using those values,
-    otherwise it is empty (or invalid).
-
-    :param values: The initial values of the fitness as a tuple, optional.
-
-    Fitnesses may be compared using the ``>``, ``<``, ``>=``, ``<=``, ``==``,
-    ``!=``. The comparison of those operators is made lexicographically.
-    Maximization and minimization are taken care off by a multiplication
-    between the :attr:`weights` and the fitness :attr:`values`. The comparison
-    can be made between fitnesses of different size, if the fitnesses are
-    equal until the extra elements, the longer fitness will be superior to the
-    shorter.
-
-    Different types of fitnesses are created in the :ref:`creating-types`
-    tutorial.
-
-    .. note::
-       When comparing fitness values that are **minimized**, ``a > b`` will
-       return :data:`True` if *a* is **smaller** than *b*.
-    """
-
-    weights = None
-    """The weights are used in the fitness comparison. They are shared among
-    all fitnesses of the same type. When subclassing :class:`Fitness`, the
-    weights must be defined as a tuple where each element is associated to an
-    objective. A negative weight element corresponds to the minimization of
-    the associated objective and positive weight to the maximization.
-
-    .. note::
-        If weights is not defined during subclassing, the following error will
-        occur at instantiation of a subclass fitness object:
-
-        ``TypeError: Can't instantiate abstract <class Fitness[...]> with
-        abstract attribute weights.``
-    """
-
-    wvalues = ()
-    """Contains the weighted values of the fitness, the multiplication with the
-    weights is made when the values are set via the property :attr:`values`.
-    Multiplication is made on setting of the values for efficiency.
-
-    Generally it is unnecessary to manipulate wvalues as it is an internal
-    attribute of the fitness used in the comparison operators.
-    """
-
-    def __init__(self, values=()):
-        if self.weights is None:
-            raise TypeError("Can't instantiate abstract %r with abstract "
-                            "attribute weights." % (self.__class__))
-
-        if not isinstance(self.weights, Sequence):
-            raise TypeError("Attribute weights of %r must be a sequence."
-                            % self.__class__)
-
-        if len(values) > 0:
-            self.values = values
-
-    def getValues(self):
-        return tuple(map(truediv, self.wvalues, self.weights))
-
-    def setValues(self, values):
-        try:
-            self.wvalues = tuple(map(mul, values, self.weights))
-        except TypeError:
-            _, _, traceback = sys.exc_info()
-            raise TypeError, ("Both weights and assigned values must be a "
-                              "sequence of numbers when assigning to values of "
-                              "%r. Currently assigning value(s) %r of %r to a "
-                              "fitness with weights %s."
-                              % (self.__class__, values, type(values),
-                                 self.weights)), traceback
-
-    def delValues(self):
-        self.wvalues = ()
-
-    values = property(getValues, setValues, delValues,
-                      ("Fitness values. Use directly ``individual.fitness.values = values`` "
-                       "in order to set the fitness and ``del individual.fitness.values`` "
-                       "in order to clear (invalidate) the fitness. The (unweighted) fitness "
-                       "can be directly accessed via ``individual.fitness.values``."))
-
-    def dominates(self, other, obj=slice(None)):
-        """Return true if each objective of *self* is not strictly worse than
-        the corresponding objective of *other* and at least one objective is
-        strictly better.
-
-        :param obj: Slice indicating on which objectives the domination is
-                    tested. The default value is `slice(None)`, representing
-                    every objectives.
-        """
-        not_equal = False
-        for self_wvalue, other_wvalue in zip(self.wvalues[obj], other.wvalues[obj]):
-            if self_wvalue > other_wvalue:
-                not_equal = True
-            elif self_wvalue < other_wvalue:
-                return False
-        return not_equal
-
-    @property
-    def valid(self):
-        """Assess if a fitness is valid or not."""
-        return len(self.wvalues) != 0
-
-    def __hash__(self):
-        return hash(self.wvalues)
-
-    def __gt__(self, other):
-        return not self.__le__(other)
-
-    def __ge__(self, other):
-        return not self.__lt__(other)
-
-    def __le__(self, other):
-        return self.wvalues <= other.wvalues
-
-    def __lt__(self, other):
-        return self.wvalues < other.wvalues
-
-    def __eq__(self, other):
-        return self.wvalues == other.wvalues
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __deepcopy__(self, memo):
-        """Replace the basic deepcopy function with a faster one.
-
-        It assumes that the elements in the :attr:`values` tuple are
-        immutable and the fitness does not contain any other object
-        than :attr:`values` and :attr:`weights`.
-        """
-        copy_ = self.__class__()
-        copy_.wvalues = self.wvalues
-        return copy_
-
-    def __str__(self):
-        """Return the values of the Fitness object."""
-        return str(self.values if self.valid else tuple())
-
-    def __repr__(self):
-        """Return the Python code to build a copy of the object."""
-        return "%s.%s(%r)" % (self.__module__, self.__class__.__name__,
-                              self.values if self.valid else tuple())
-
-
-def _violates_constraint(fitness):
-    return not fitness.valid \
-        and fitness.constraint_violation is not None \
-        and sum(fitness.constraint_violation) > 0
-
-
-class ConstrainedFitness(Fitness):
-    def __init__(self, values=(), constraint_violation=None):
-        super(ConstrainedFitness, self).__init__(values)
-        self.constraint_violation = constraint_violation
-
-    @Fitness.values.deleter
-    def values(self):
-        self.wvalues = ()
-        self.constraint_violation = None
-
-    def __gt__(self, other):
-        return not self.__le__(other)
-
-    def __ge__(self, other):
-        return not self.__lt__(other)
-
-    def __le__(self, other):
-        self_violates_constraints = _violates_constraint(self)
-        other_violates_constraints = _violates_constraint(other)
-
-        if self_violates_constraints and other_violates_constraints:
-            return True
-        elif self_violates_constraints:
-            return True
-        elif other_violates_constraints:
-            return False
-
-        return self.wvalues <= other.wvalues
-
-    def __lt__(self, other):
-        self_violates_constraints = _violates_constraint(self)
-        other_violates_constraints = _violates_constraint(other)
-
-        if self_violates_constraints and other_violates_constraints:
-            return False
-        elif self_violates_constraints:
-            return True
-        elif other_violates_constraints:
-            return False
-
-        return self.wvalues < other.wvalues
-
-    def __eq__(self, other):
-        self_violates_constraints = _violates_constraint(self)
-        other_violates_constraints = _violates_constraint(other)
-
-        if self_violates_constraints and other_violates_constraints:
-            return True
-        elif self_violates_constraints:
-            return False
-        elif other_violates_constraints:
-            return False
-
-        return self.wvalues == other.wvalues
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def dominates(self, other):
-        self_violates_constraints = _violates_constraint(self)
-        other_violates_constraints = _violates_constraint(other)
-
-        if self_violates_constraints and other_violates_constraints:
-            return False
-        elif self_violates_constraints:
-            return False
-        elif other_violates_constraints:
-            return True
-
-        return super(ConstrainedFitness, self).dominates(other)
-
-    def __str__(self):
-        """Return the values of the Fitness object."""
-        return str((self.values if self.valid else tuple(), self.constraint_violation))
-
-    def __repr__(self):
-        """Return the Python code to build a copy of the object."""
-        return "%s.%s(%r, %r)" % (self.__module__, self.__class__.__name__,
-                                  self.values if self.valid else tuple(),
-                                  self.constraint_violation)

@@ -22,11 +22,13 @@
 import copy
 import itertools
 from math import sqrt, log, exp
+import typing as tp
 import warnings
 
 import numpy
 
 from . import tools
+from .base import Individual, Fitness
 
 
 class BasicStrategy(object):
@@ -83,11 +85,13 @@ class BasicStrategy(object):
        Self-Adaptation in Evolution Strategies. *Evolutionary Computation*
 
     """
-    def __init__(self, centroid, sigma, **kargs):
+    def __init__(self, centroid, sigma, attribute_key=None, fitness_key=None, **kargs):
         self.params = kargs
+        self.attribute_key = attribute_key
+        self.fitness_key = fitness_key
 
         # Create a centroid as a numpy array
-        self.centroid = numpy.array(centroid)
+        self.centroid = numpy.asarray(centroid)
 
         self.dim = len(self.centroid)
         self.sigma = sigma
@@ -122,18 +126,19 @@ class BasicStrategy(object):
         arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
         return map(ind_init, arz)
 
-    def update(self, population):
+    def update(self, population: tp.Sequence[Individual]):
         """Update the current covariance matrix strategy from the
         *population*.
 
         :param population: A list of individuals from which to update the
                            parameters.
         """
-        population.sort(key=lambda ind: ind.fitness, reverse=True)
+        population.sort(key=lambda ind: ind._getfitness(self.fitness_key), reverse=True)
 
         old_centroid = self.centroid
-        self.centroid = numpy.dot(self.weights, population[0:self.mu])
-
+        attributes = numpy.array([ind._getattribute(self.attribute_key)
+                                  for ind in population[0:self.mu]])
+        self.centroid = numpy.dot(self.weights, attributes)
         c_diff = self.centroid - old_centroid
 
         # Cumulation : update evolution path
@@ -153,7 +158,7 @@ class BasicStrategy(object):
             * c_diff
 
         # Update covariance matrix
-        artmp = population[0:self.mu] - old_centroid
+        artmp = attributes - old_centroid
         self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) *
                   self.ccov1 * self.cc * (2 - self.cc)) * self.C \
             + self.ccov1 * numpy.outer(self.pc, self.pc) \
