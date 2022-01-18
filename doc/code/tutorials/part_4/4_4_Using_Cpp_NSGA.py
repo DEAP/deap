@@ -102,7 +102,7 @@ def main():
                 del ind1.fitness.values
                 del ind2.fitness.values
 
-        # Note here that we have a different sheme of mutation than in the
+        # Note here that we have a different scheme of mutation than in the
         # original algorithm, we use 3 different mutations subsequently.
         for ind in offspring:
             if random.random() < MUTPB:

@@ -19,7 +19,7 @@ need a minimizing fitness and an individual that is a :class:`list`.
 
 The main function includes the setting of some parameters, namely the number
 of increasing population restarts and the initial sigma value. Then, the
-instanciation of the :class:`~deap.base.Toolbox` is done in the main function
+instantiation of the :class:`~deap.base.Toolbox` is done in the main function
 because it will change with the restarts. Next are initialized the
 :class:`~deap.tools.HallOfFame`, The :class:`~deap.tools.statistics` and the list
 of :class:`~deap.tools.Logbook` objects, one for each restart.
@@ -35,7 +35,7 @@ is simply the generate-update loop as presented in the
 .. literalinclude:: /../examples/es/cma_bipop.py
    :lines: 62,101-110,114-130,151-188,192-194
 
-Some variables have been omited for clarity, refer to the complete example for
+Some variables have been omitted for clarity, refer to the complete example for
 more details :example:`es/cma_bipop`.
 
 .. [Hansen2001] Hansen and Ostermeier, 2001. Completely Derandomized

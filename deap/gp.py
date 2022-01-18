@@ -855,7 +855,7 @@ def mutShrink(individual):
     """This operator shrinks the *individual* by choosing randomly a branch and
     replacing it with one of the branch's arguments (also randomly chosen).
 
-    :param individual: The tree to be shrinked.
+    :param individual: The tree to be shrunk.
     :returns: A tuple of one tree.
     """
     # We don't want to "shrink" the root

@@ -61,13 +61,13 @@ def function1(individual, position, height, width):
 class MovingPeaks:
     """The Moving Peaks Benchmark is a fitness function changing over time. It
     consists of a number of peaks, changing in height, width and location. The
-    peaks function is given by *pfunc*, wich is either a function object or a
+    peaks function is given by *pfunc*, which is either a function object or a
     list of function objects (the default is :func:`function1`). The number of
     peaks is determined by *npeaks* (which defaults to 5). This parameter can
     be either a integer or a sequence. If it is set to an integer the number
     of peaks won't change, while if set to a sequence of 3 elements, the
     number of peaks will fluctuate between the first and third element of that
-    sequence, the second element is the inital number of peaks. When
+    sequence, the second element is the initial number of peaks. When
     fluctuating the number of peaks, the parameter *number_severity* must be
     included, it represents the number of peak fraction that is allowed to
     change. The dimensionality of the search domain is *dim*. A basis function
@@ -100,7 +100,7 @@ class MovingPeaks:
     ``period``          5000                          5000                1000                Period between two changes.
     =================== ============================= =================== =================== ======================================================================================================================
 
-    Dictionnaries :data:`SCENARIO_1`, :data:`SCENARIO_2` and
+    Dictionaries :data:`SCENARIO_1`, :data:`SCENARIO_2` and
     :data:`SCENARIO_3` of this module define the defaults for these
     parameters. The scenario 3 requires a constant basis function
     which can be given as a lambda function ``lambda x: constant``.
@@ -211,7 +211,7 @@ class MovingPeaks:
         configuration.
 
         :param indidivudal: The individual to evaluate.
-        :param count: Wether or not to count this evaluation in
+        :param count: Whether or not to count this evaluation in
                       the total evaluation count. (Defaults to
                       :data:`True`)
         """
@@ -237,7 +237,7 @@ class MovingPeaks:
             self._error = min(self._error, abs(fitness - self._optimum))
             self._offline_error += self._error
 
-            # We exausted the number of evaluation, change peaks for the next one.
+            # We exhausted the number of evaluation, change peaks for the next one.
             if self.period > 0 and self.nevals % self.period == 0:
                 self.changePeaks()
 

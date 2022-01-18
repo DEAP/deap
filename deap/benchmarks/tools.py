@@ -180,7 +180,7 @@ class scale(object):
     This decorator adds a :func:`scale` method to the decorated function.
     """
     def __init__(self, factor):
-        # Factor is inverted since it is aplied to the individual and not the
+        # Factor is inverted since it is applied to the individual and not the
         # objective function
         self.factor = tuple(1.0/f for f in factor)
 
@@ -205,7 +205,7 @@ class scale(object):
             # This will cancel the scaling
             evaluate.scale([1.0, 1.0, ..., 1.0])
         """
-        # Factor is inverted since it is aplied to the individual and not the
+        # Factor is inverted since it is applied to the individual and not the
         # objective function
         self.factor = tuple(1.0/f for f in factor)
 
@@ -213,7 +213,7 @@ class bound(object):
     """Decorator for crossover and mutation functions, it changes the
     individuals after the modification is done to bring it back in the allowed
     *bounds*. The *bounds* are functions taking individual and returning
-    wheter of not the variable is allowed. You can provide one or multiple such
+    whether of not the variable is allowed. You can provide one or multiple such
     functions. In the former case, the function is used on all dimensions and
     in the latter case, the number of functions must be greater or equal to
     the number of dimension of the individuals.

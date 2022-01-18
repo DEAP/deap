@@ -153,7 +153,7 @@ def main(seed=None):
                 fitness_hv = hypervolume_contrib(front)
                 for ind, fit_hv in zip(front, fitness_hv):
                     ind.fitness_hv.values = (fit_hv,)
-                # Fill chosen with best indiviuals from inspect front
+                # Fill chosen with best individuals from inspect front
                 # (based on hypervolume contribution)
                 chosen.extend(toolbox.select(front, MU - len(chosen)))
                 break

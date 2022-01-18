@@ -16,7 +16,7 @@
 """Implementation of the BI-Population CMA-ES algorithm. As presented in
 *Hansen, 2009, Benchmarking a BI-Population CMA-ES on the BBOB-2009 Function
 Testbed* with the exception of the modifications to the original CMA-ES
-parameters mentionned at the end of section 2's first paragraph.
+parameters mentioned at the end of section 2's first paragraph.
 """
 
 from collections import deque
@@ -174,7 +174,7 @@ def main(verbose=True):
             if len(bestvalues) > STAGNATION_ITER and len(medianvalues) > STAGNATION_ITER and \
                numpy.median(bestvalues[-20:]) >= numpy.median(bestvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]) and \
                numpy.median(medianvalues[-20:]) >= numpy.median(medianvalues[-STAGNATION_ITER:-STAGNATION_ITER + 20]):
-                # Stagnation occured
+                # Stagnation occurred
                 conditions["Stagnation"] = True
 
             if strategy.cond > 10**14:

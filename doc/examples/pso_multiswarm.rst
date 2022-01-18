@@ -4,7 +4,7 @@ In this example we show how to use the :class:`~deap.benchmarks.movingpeaks.Movi
 
 Choosing the Scenario
 ---------------------
-The moving peak benchmark allows to choose from the 3 original scenarios proposed in the `original studies <http://people.aifb.kit.edu/jbr/MovPeaks/>`_. This is done by retreiving one of the constants defined in the :mod:`~deap.benchmarks.movingpeaks` module. Here we will use Scenario 2.
+The moving peak benchmark allows to choose from the 3 original scenarios proposed in the `original studies <http://people.aifb.kit.edu/jbr/MovPeaks/>`_. This is done by retrieving one of the constants defined in the :mod:`~deap.benchmarks.movingpeaks` module. Here we will use Scenario 2.
 
 .. literalinclude:: /../examples/pso/multiswarm.py
    :lines: 37,41
@@ -23,7 +23,7 @@ As in every DEAP example we are required to create the objects. The moving peak 
 .. literalinclude:: /../examples/pso/multiswarm.py
    :lines: 48-51
 
-Then, the particle generator is defined. It takes the particle class object :data:`pclass` into which to put the data. Remeber that :class:`creator.Particle`, which is gonna be give to this argument in the toolbox, inherits from :class:`list` and can be initialized with an iterable. The position (elements of the list) and the speed (attribute) of the particle is set to randomly generated numbers between the given bounds.
+Then, the particle generator is defined. It takes the particle class object :data:`pclass` into which to put the data. Remember that :class:`creator.Particle`, which is gonna be give to this argument in the toolbox, inherits from :class:`list` and can be initialized with an iterable. The position (elements of the list) and the speed (attribute) of the particle is set to randomly generated numbers between the given bounds.
 
 .. literalinclude:: /../examples/pso/multiswarm.py
    :pyobject: generate

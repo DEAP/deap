@@ -9,7 +9,7 @@ DEAP includes the following features:
 
   * Genetic algorithm using any imaginable representation
     * List, Array, Set, Dictionary, Tree, Numpy Array, etc.
-  * Genetic programing using prefix trees
+  * Genetic programming using prefix trees
     * Loosely typed, Strongly typed
     * Automatically defined functions
   * Evolution strategies (including CMA-ES)

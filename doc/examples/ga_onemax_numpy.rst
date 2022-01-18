@@ -9,7 +9,7 @@ short example. The individual class is inherited from the :class:`numpy.ndarray`
    :lines: 18,26
 
 The first major difference is the crossover function that implements
-the copying mechanism mentionned in the :doc:`/tutorials/advanced/numpy` tutorial.
+the copying mechanism mentioned in the :doc:`/tutorials/advanced/numpy` tutorial.
 
 .. literalinclude:: /../examples/ga/onemax_numpy.py
    :pyobject: cxTwoPointCopy
