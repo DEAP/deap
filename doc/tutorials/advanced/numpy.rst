@@ -51,9 +51,9 @@ individual being changed.
 
 The problem is that, first, the elements in ``a`` are replaced by the
 elements of the view returned by ``b`` and the element of ``b`` are replaced
-by the element in the view of ``a`` which are now the one intially in ``b``
+by the element in the view of ``a`` which are now the one initially in ``b``
 leading to the wrong final result. One way of to circumvent this problem is
-to explicitely copy the view returned by the ``__getitem__``.
+to explicitly copy the view returned by the ``__getitem__``.
 ::
 
 	>>> import numpy
@@ -110,7 +110,7 @@ Performance
 -----------
 If your intent is performance, `DEAP Speed
 <http://deap.gel.ulaval.ca/speed/>`_ reveals that using an
-:class:`array.array` should be prefered to :class:`numpy.ndarray`. This is
+:class:`array.array` should be preferred to :class:`numpy.ndarray`. This is
 mostly because the creation (also required by the deep copy) of new arrays is
 longer for the :class:`numpy.array` than for :class:`array.array`.
 

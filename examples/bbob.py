@@ -69,7 +69,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
     best.fitness.values = toolbox.evaluate(best)
 
     # Evolve until ftarget is reached or the number of evaluation
-    # is exausted (maxfuncevals)
+    # is exhausted (maxfuncevals)
     for g in range(1, maxfuncevals):
         toolbox.update(worst, best, sigma)
         worst.fitness.values = toolbox.evaluate(worst)

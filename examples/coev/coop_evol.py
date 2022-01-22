@@ -153,7 +153,7 @@ def main(extended=True, verbose=True):
             # print final representatives without noise
             print("".join(str(x) for x, y in zip(r, noise) if y == "*"))
 
-    if extended and plt:      # Ploting of the evolution
+    if extended and plt:      # Plotting of the evolution
         line1, = plt.plot(collab, "--", color="k")
 
         for con in contribs:

@@ -11,7 +11,7 @@ that modifications made to an object on a distant processing unit will not be
 made available to the other processing units (including the master one) if it
 is not explicitly communicated through function arguments and return values.
 
-Scalable Concurent Operations in Python (SCOOP)
+Scalable Concurrent Operations in Python (SCOOP)
 -----------------------------------------------
 SCOOP_ is a distributed task module allowing concurrent parallel programming on
 various environments, from heterogeneous grids to supercomputers. It has an
@@ -29,7 +29,7 @@ distribute the evaluations, we will replace this map by the one from SCOOP.
 
     toolbox.register("map", futures.map)
 
-Once this line is added, your program absolutly needs to be run from a
+Once this line is added, your program absolutely needs to be run from a
 :func:`main` function as mentioned in the
 `scoop documentation <http://scoop.readthedocs.org/en/latest/usage.html>`_. To
 run your program, use scoop as the main module.
@@ -95,7 +95,7 @@ toolbox.
 .. Parallel Variation
 .. ------------------
 .. 
-.. The paralellization of the variation operators is not directly supported in
+.. The parallelization of the variation operators is not directly supported in
 .. the algorithms, although it is still possible. What one needs is to create its
 .. own algorithm (from one in the algorithm module for example) and change the
 .. desired lines in order to use the :meth:`~deap.toolbox.map` method from the
