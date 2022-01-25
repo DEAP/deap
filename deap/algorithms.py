@@ -157,7 +157,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     record = stats.compile(population) if stats else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print(logbook.stream)
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -184,7 +184,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         record = stats.compile(population) if stats else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print(logbook.stream)
 
     return population, logbook
 
@@ -308,7 +308,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats is not None else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print(logbook.stream)
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -332,7 +332,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print(logbook.stream)
 
     return population, logbook
 
@@ -409,7 +409,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     record = stats.compile(population) if stats is not None else {}
     logbook.record(gen=0, nevals=len(invalid_ind), **record)
     if verbose:
-        print logbook.stream
+        print(logbook.stream)
 
     # Begin the generational process
     for gen in range(1, ngen + 1):
@@ -433,7 +433,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
-            print logbook.stream
+            print(logbook.stream)
     return population, logbook
 
 
@@ -498,6 +498,6 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         record = stats.compile(population) if stats is not None else {}
         logbook.record(gen=gen, nevals=len(population), **record)
         if verbose:
-            print logbook.stream
+            print(logbook.stream)
 
     return population, logbook

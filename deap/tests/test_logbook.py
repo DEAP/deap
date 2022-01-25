@@ -7,7 +7,7 @@ class LogbookTest(unittest.TestCase):
 
     def setUp(self):
         self.logbook = tools.Logbook()
-        print
+        print()
 
     def test_multi_chapters(self):
         self.logbook.record(gen=0, evals=100, fitness={'obj 1' : {'avg' : 1.0, 'max' : 10},

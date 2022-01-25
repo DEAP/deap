@@ -92,7 +92,7 @@ def main():
 
     # Begin the evolution
     for g in xrange(NGEN):
-        print "-- Generation %i --" % g
+        print("-- Generation %i --" % g)
         offspring = [toolbox.clone(ind) for ind in population]
 
         # Apply crossover and mutation
@@ -121,21 +121,21 @@ def main():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        print "  Evaluated %i individuals" % len(invalid_ind)
+        print("  Evaluated %i individuals" % len(invalid_ind))
 
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
         stats.update(population)
 
-        print "  Min %s" % stats.Min[0][-1][0]
-        print "  Max %s" % stats.Max[0][-1][0]
-        print "  Avg %s" % stats.Avg[0][-1][0]
-        print "  Std %s" % stats.Std[0][-1][0]
+        print("  Min %s" % stats.Min[0][-1][0])
+        print("  Max %s" % stats.Max[0][-1][0])
+        print("  Avg %s" % stats.Avg[0][-1][0])
+        print("  Std %s" % stats.Std[0][-1][0])
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
-    print best_network
-    print best_network.draw()
-    print "%i errors, length %i, depth %i" % hof[0].fitness.values
+    print(best_network)
+    print(best_network.draw())
+    print("%i errors, length %i, depth %i" % hof[0].fitness.values)
 
     return population, stats, hof
 
