@@ -34,7 +34,7 @@ def genWire(dimension):
 
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
-    return [genWire(dimension) for i in xrange(size)]
+    return [genWire(dimension) for i in range(size)]
 
 def mutWire(individual, dimension, indpb):
     for index, elem in enumerate(individual):
@@ -91,7 +91,7 @@ def main():
     stats.update(population)
 
     # Begin the evolution
-    for g in xrange(NGEN):
+    for g in range(NGEN):
         print("-- Generation %i --" % g)
         offspring = [toolbox.clone(ind) for ind in population]
 

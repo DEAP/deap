@@ -459,16 +459,16 @@ class Logbook(list):
             nlines = 1
             if len(self.chapters) > 0:
                 nlines += max(map(len, chapters_txt.values())) - len(self) + 1
-            header = [[] for i in xrange(nlines)]
+            header = [[] for i in range(nlines)]
             for j, name in enumerate(columns):
                 if name in chapters_txt:
                     length = max(len(line.expandtabs()) for line in chapters_txt[name])
                     blanks = nlines - 2 - offsets[name]
-                    for i in xrange(blanks):
+                    for i in range(blanks):
                         header[i].append(" " * length)
                     header[blanks].append(name.center(length))
                     header[blanks+1].append("-" * length)
-                    for i in xrange(offsets[name]):
+                    for i in range(offsets[name]):
                         header[blanks+2+i].append(chapters_txt[name][i])
                 else:
                     length = max(len(line[j].expandtabs()) for line in str_matrix)

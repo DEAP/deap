@@ -92,7 +92,7 @@ class SortingNetwork(list):
         str_wires[0][1] = " o"
         str_spaces = []
 
-        for i in xrange(1, self.dimension):
+        for i in range(1, self.dimension):
             str_wires.append(["-"]*7 * self.depth)
             str_spaces.append([" "]*7 * self.depth)
             str_wires[i][0] = str(i)
@@ -102,9 +102,9 @@ class SortingNetwork(list):
             for wire1, wire2 in level.iteritems():
                 str_wires[wire1][(index+1)*6] = "x"
                 str_wires[wire2][(index+1)*6] = "x"
-                for i in xrange(wire1, wire2):
+                for i in range(wire1, wire2):
                     str_spaces[i][(index+1)*6+1] = "|"
-                for i in xrange(wire1+1, wire2):
+                for i in range(wire1+1, wire2):
                     str_wires[i][(index+1)*6] = "|"
 
         network_draw = "".join(str_wires[0])

@@ -227,7 +227,7 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
         "or equal to 1.0.")
 
     offspring = []
-    for _ in xrange(lambda_):
+    for _ in range(lambda_):
         op_choice = random.random()
         if op_choice < cxpb:            # Apply crossover
             ind1, ind2 = map(toolbox.clone, random.sample(population, 2))
@@ -481,7 +481,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     logbook = tools.Logbook()
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
-    for gen in xrange(ngen):
+    for gen in range(ngen):
         # Generate a new population
         population = toolbox.generate()
         # Evaluate the individuals
