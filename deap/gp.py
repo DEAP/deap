@@ -31,7 +31,7 @@ from functools import partial, wraps
 from inspect import isclass
 from operator import eq, lt
 
-import tools  # Needed by HARM-GP
+from . import tools  # Needed by HARM-GP
 
 ######################################
 # GP Data structure                  #
