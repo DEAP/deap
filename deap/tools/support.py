@@ -200,7 +200,7 @@ class Statistics(object):
         values = tuple(self.key(elem) for elem in data)
 
         entry = dict()
-        for key, func in self.functions.iteritems():
+        for key, func in self.functions.items():
             entry[key] = func(values)
         return entry
 
