@@ -86,8 +86,7 @@ def run_setup(build_ext):
             ],
          ext_modules=extra_modules,
          cmdclass={"build_ext": ve_build_ext},
-         install_requires=['numpy'],
-         use_2to3=True
+         install_requires=['numpy']
     )
 
 try:
