@@ -231,3 +231,38 @@ def test_nsga3():
 
     for ind in pop:
         assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
+
+
+@with_setup(setup_func_multi_obj, teardown_func)
+def test_moead():
+    NDIM = 5
+    BOUND_LOW, BOUND_UP = 0.0, 1.0
+    MU = 16
+    NGEN = 100
+
+    toolbox = base.Toolbox()
+    toolbox.register("attr_float", random.uniform, BOUND_LOW, BOUND_UP)
+    toolbox.register("individual", tools.initRepeat, creator.__dict__[INDCLSNAME], toolbox.attr_float, NDIM)
+    toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+    toolbox.register("evaluate", benchmarks.zdt1)
+    toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+
+    pop = toolbox.population(n=MU)
+    weights = []
+    for i in range(MU):
+        weights.append([i / float(MU - 1), (MU - i - 1) / float(MU - 1)])
+
+    EP, logbook = algorithms.moead(
+        pop, toolbox, weights, 4, 'tchebycheff',
+        0.9, 1.0, NGEN, None, False
+    )
+
+    hv = hypervolume(EP, [11.0, 11.0])
+    # hv = 120.777 # Optimal value
+
+    assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
+
+    for ind in EP:
+        assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
