@@ -53,14 +53,14 @@ def evalXKCD(individual, target_price):
     taken by the order if the chef can cook everything in parallel."""
     price = 0.0
     times = list()
-    for item, number in individual.items():
+    for item, number in list(individual.items()):
         price += ITEMS[item][0] * number
         times.append(ITEMS[item][1])
     return abs(price - target_price), max(times)
 
 def cxCounter(ind1, ind2, indpb):
     """Swaps the number of perticular items between two individuals"""
-    for key in ITEMS.keys():
+    for key in list(ITEMS.keys()):
         if random.random() < indpb:
             ind1[key], ind2[key] = ind2[key], ind1[key]
     return ind1, ind2

@@ -73,7 +73,7 @@ def main():
             ind.fitness.values = toolbox.evaluate(ind)
         logbook.record(gen=0, deme=idx, evals=len(deme), **stats.compile(deme))
         hof.update(deme)
-    print(logbook.stream)
+    print((logbook.stream))
 
     gen = 1
     while gen <= NGEN and logbook[-1]["max"] < 100.0:
@@ -87,7 +87,7 @@ def main():
 
             logbook.record(gen=gen, deme=idx, evals=len(deme), **stats.compile(deme))
             hof.update(deme)
-        print(logbook.stream)
+        print((logbook.stream))
 
         if gen % MIG_RATE == 0:
             toolbox.migrate(demes)

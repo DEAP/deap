@@ -124,7 +124,7 @@ def main(verbose=True):
             record = stats.compile(population)
             logbooks[-1].record(gen=t, evals=lambda_, restart=i, regime=regime, **record)
             if verbose:
-                print(logbooks[-1].stream)
+                print((logbooks[-1].stream))
 
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
@@ -189,8 +189,8 @@ def main(verbose=True):
                 # The main axis std has no effect
                 conditions["NoEffectCoor"] = True
 
-        stop_causes = [k for k, v in conditions.items() if v]
-        print("Stopped because of condition%s %s" % ((":" if len(stop_causes) == 1 else "s:"), ",".join(stop_causes)))
+        stop_causes = [k for k, v in list(conditions.items()) if v]
+        print(("Stopped because of condition%s %s" % ((":" if len(stop_causes) == 1 else "s:"), ",".join(stop_causes))))
         i += 1
 
     return halloffame

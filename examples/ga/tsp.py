@@ -38,7 +38,7 @@ creator.create("Individual", array.array, typecode='i', fitness=creator.FitnessM
 toolbox = base.Toolbox()
 
 # Attribute generator
-toolbox.register("indices", random.sample, range(IND_SIZE), IND_SIZE)
+toolbox.register("indices", random.sample, list(range(IND_SIZE)), IND_SIZE)
 
 # Structure initializers
 toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.indices)

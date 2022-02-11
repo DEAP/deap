@@ -81,7 +81,7 @@ def main(seed=None):
     # Compile statistics about the population
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(invalid_ind), **record)
-    print(logbook.stream)
+    print((logbook.stream))
 
     # Begin the generational process
     for gen in range(1, NGEN):
@@ -99,7 +99,7 @@ def main(seed=None):
         # Compile statistics about the new population
         record = stats.compile(pop)
         logbook.record(gen=gen, evals=len(invalid_ind), **record)
-        print(logbook.stream)
+        print((logbook.stream))
 
     return pop, logbook
 
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     pop_fit = numpy.array([ind.fitness.values for ind in pop])
 
     pf = problem.pareto_front(ref_points)
-    print(igd(pop_fit, pf))
+    print((igd(pop_fit, pf)))
 
     import matplotlib.pyplot as plt
     import mpl_toolkits.mplot3d as Axes3d

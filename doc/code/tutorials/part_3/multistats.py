@@ -47,7 +47,7 @@ toolbox.register("compile", gp.compile, pset=pset)
 pop = toolbox.population(n=100)
 
 # Evaluate the individuals
-fitnesses = map(toolbox.evaluate, pop)
+fitnesses = list(map(toolbox.evaluate, pop))
 for ind, fit in zip(pop, fitnesses):
     ind.fitness.values = fit
 

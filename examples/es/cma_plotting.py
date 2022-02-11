@@ -81,7 +81,7 @@ def main(verbose=True):
         logbook.record(evals=len(population), gen=gen, **record)
 
         if verbose:
-            print(logbook.stream)
+            print((logbook.stream))
 
         # Save more data along the evolution for latter plotting
         # diagD is sorted and sqrooted in the update method

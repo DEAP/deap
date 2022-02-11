@@ -1,4 +1,4 @@
-from __future__ import division
+
 import bisect
 from collections import defaultdict, namedtuple
 from itertools import chain
@@ -250,7 +250,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
 
     #Launch the sorting algorithm
     obj = len(individuals[0].fitness.wvalues)-1
-    fitnesses = unique_fits.keys()
+    fitnesses = list(unique_fits.keys())
     front = dict.fromkeys(fitnesses, 0)
 
     # Sort the fitnesses lexicographically.
@@ -286,7 +286,7 @@ def sortNDHelperA(fitnesses, obj, front):
             front[s2] = max(front[s2], front[s1] + 1)
     elif obj == 1:
         sweepA(fitnesses, front)
-    elif len(frozenset(map(itemgetter(obj), fitnesses))) == 1:
+    elif len(frozenset(list(map(itemgetter(obj), fitnesses)))) == 1:
         #All individuals for objective M are equal: go to objective M-1
         sortNDHelperA(fitnesses, obj-1, front)
     else:
@@ -620,7 +620,7 @@ def associate_to_niche(fitnesses, reference_points, best_point, intercepts):
 
     # Retrieve min distance niche index
     niches = numpy.argmin(distances, axis=1)
-    distances = distances[range(niches.shape[0]), niches]
+    distances = distances[list(range(niches.shape[0])), niches]
     return niches, distances
 
 
@@ -710,7 +710,7 @@ def selSPEA2(individuals, k):
     K = math.sqrt(N)
     strength_fits = [0] * N
     fits = [0] * N
-    dominating_inds = [list() for i in xrange(N)]
+    dominating_inds = [list() for i in range(N)]
 
     for i, ind_i in enumerate(individuals):
         for j, ind_j in enumerate(individuals[i+1:], i+1):
@@ -721,19 +721,19 @@ def selSPEA2(individuals, k):
                 strength_fits[j] += 1
                 dominating_inds[i].append(j)
 
-    for i in xrange(N):
+    for i in range(N):
         for j in dominating_inds[i]:
             fits[i] += strength_fits[j]
 
     # Choose all non-dominated individuals
-    chosen_indices = [i for i in xrange(N) if fits[i] < 1]
+    chosen_indices = [i for i in range(N) if fits[i] < 1]
 
     if len(chosen_indices) < k:     # The archive is too small
-        for i in xrange(N):
+        for i in range(N):
             distances = [0.0] * N
-            for j in xrange(i + 1, N):
+            for j in range(i + 1, N):
                 dist = 0.0
-                for l in xrange(L):
+                for l in range(L):
                     val = individuals[i].fitness.values[l] - \
                           individuals[j].fitness.values[l]
                     dist += val * val
@@ -742,7 +742,7 @@ def selSPEA2(individuals, k):
             density = 1.0 / (kth_dist + 2.0)
             fits[i] += density
 
-        next_indices = [(fits[i], i) for i in xrange(N)
+        next_indices = [(fits[i], i) for i in range(N)
                         if not i in chosen_indices]
         next_indices.sort()
         #print next_indices
@@ -750,12 +750,12 @@ def selSPEA2(individuals, k):
 
     elif len(chosen_indices) > k:   # The archive is too large
         N = len(chosen_indices)
-        distances = [[0.0] * N for i in xrange(N)]
-        sorted_indices = [[0] * N for i in xrange(N)]
-        for i in xrange(N):
-            for j in xrange(i + 1, N):
+        distances = [[0.0] * N for i in range(N)]
+        sorted_indices = [[0] * N for i in range(N)]
+        for i in range(N):
+            for j in range(i + 1, N):
                 dist = 0.0
-                for l in xrange(L):
+                for l in range(L):
                     val = individuals[chosen_indices[i]].fitness.values[l] - \
                           individuals[chosen_indices[j]].fitness.values[l]
                     dist += val * val
@@ -764,8 +764,8 @@ def selSPEA2(individuals, k):
             distances[i][i] = -1
 
         # Insert sort is faster than quick sort for short arrays
-        for i in xrange(N):
-            for j in xrange(1, N):
+        for i in range(N):
+            for j in range(1, N):
                 l = j
                 while l > 0 and distances[i][j] < distances[i][sorted_indices[i][l - 1]]:
                     sorted_indices[i][l] = sorted_indices[i][l - 1]
@@ -777,8 +777,8 @@ def selSPEA2(individuals, k):
         while size > k:
             # Search for minimal distance
             min_pos = 0
-            for i in xrange(1, N):
-                for j in xrange(1, size):
+            for i in range(1, N):
+                for j in range(1, size):
                     dist_i_sorted_j = distances[i][sorted_indices[i][j]]
                     dist_min_sorted_j = distances[min_pos][sorted_indices[min_pos][j]]
 
@@ -789,11 +789,11 @@ def selSPEA2(individuals, k):
                         break
 
             # Remove minimal distance from sorted_indices
-            for i in xrange(N):
+            for i in range(N):
                 distances[i][min_pos] = float("inf")
                 distances[min_pos][i] = float("inf")
 
-                for j in xrange(1, size - 1):
+                for j in range(1, size - 1):
                     if sorted_indices[i][j] == min_pos:
                         sorted_indices[i][j] = sorted_indices[i][j + 1]
                         sorted_indices[i][j + 1] = min_pos
