@@ -19,7 +19,7 @@ except ImportError:
     def product(*args, **kwds):
         # product('ABCD', 'xy') --> Ax Ay Bx By Cx Cy Dx Dy
         # product(range(2), repeat=3) --> 000 001 010 011 100 101 110 111
-        pools = map(tuple, args) * kwds.get('repeat', 1)
+        pools = list(map(tuple, args)) * kwds.get('repeat', 1)
         result = [[]]
         for pool in pools:
             result = [x+[y] for x in result for y in pool]
@@ -55,7 +55,7 @@ class SortingNetwork(list):
             self.append({wire1: wire2})
             return
 
-        for wires in last_level.iteritems():
+        for wires in last_level.items():
             if wires[1] >= wire1 and wires[0] <= wire2:
                 self.append({wire1: wire2})
                 return
@@ -65,7 +65,7 @@ class SortingNetwork(list):
     def sort(self, values):
         """Sort the values in-place based on the connectors in the network."""
         for level in self:
-            for wire1, wire2 in level.iteritems():
+            for wire1, wire2 in level.items():
                 if values[wire1] > values[wire2]:
                     values[wire1], values[wire2] = values[wire2], values[wire1]
 
@@ -75,7 +75,7 @@ class SortingNetwork(list):
         the network dimensionality.
         """
         if cases is None:
-            cases = product(range(2), repeat=self.dimension)
+            cases = product(list(range(2)), repeat=self.dimension)
 
         misses = 0
         ordered = [[0]*(self.dimension-i) + [1]*i for i in range(self.dimension+1)]
@@ -92,19 +92,19 @@ class SortingNetwork(list):
         str_wires[0][1] = " o"
         str_spaces = []
 
-        for i in xrange(1, self.dimension):
+        for i in range(1, self.dimension):
             str_wires.append(["-"]*7 * self.depth)
             str_spaces.append([" "]*7 * self.depth)
             str_wires[i][0] = str(i)
             str_wires[i][1] = " o"
 
         for index, level in enumerate(self):
-            for wire1, wire2 in level.iteritems():
+            for wire1, wire2 in level.items():
                 str_wires[wire1][(index+1)*6] = "x"
                 str_wires[wire2][(index+1)*6] = "x"
-                for i in xrange(wire1, wire2):
+                for i in range(wire1, wire2):
                     str_spaces[i][(index+1)*6+1] = "|"
-                for i in xrange(wire1+1, wire2):
+                for i in range(wire1+1, wire2):
                     str_wires[i][(index+1)*6] = "|"
 
         network_draw = "".join(str_wires[0])

@@ -1,7 +1,7 @@
-from __future__ import division
+
 
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 
@@ -205,7 +205,7 @@ class Statistics(object):
         values = tuple(self.key(elem) for elem in data)
 
         entry = dict()
-        for key, func in self.functions.iteritems():
+        for key, func in self.functions.items():
             entry[key] = func(values)
         return entry
 
@@ -236,7 +236,7 @@ class MultiStatistics(dict):
         :param data: Sequence of objects on which the statistics are computed.
         """
         record = {}
-        for name, stats in self.items():
+        for name, stats in list(self.items()):
             record[name] = stats.compile(data)
         return record
 
@@ -255,7 +255,7 @@ class MultiStatistics(dict):
                          automatically to the registered function when called,
                          optional.
         """
-        for stats in self.values():
+        for stats in list(self.values()):
             stats.register(name, function, *args, **kargs)
 
 class Logbook(list):
@@ -339,8 +339,8 @@ class Logbook(list):
         in the dictionary are recorded in a chapter entitled as the name of the
         key part of the pair. Chapters are also Logbook.
         """
-        apply_to_all = {k: v for k, v in infos.items() if not isinstance(v, dict)}
-        for key, value in infos.items():
+        apply_to_all = {k: v for k, v in list(infos.items()) if not isinstance(v, dict)}
+        for key, value in list(infos.items()):
             if isinstance(value, dict):
                 chapter_infos = value.copy()
                 chapter_infos.update(apply_to_all)
@@ -402,11 +402,11 @@ class Logbook(list):
         if isinstance(key, slice):
             for i, in range(*key.indices(len(self))):
                 self.pop(i)
-                for chapter in self.chapters.values():
+                for chapter in list(self.chapters.values()):
                     chapter.pop(i)
         else:
             self.pop(key)
-            for chapter in self.chapters.values():
+            for chapter in list(self.chapters.values()):
                 chapter.pop(key)
 
     def pop(self, index=0):
@@ -431,11 +431,11 @@ class Logbook(list):
         if not columns:
             columns = sorted(self[0].keys()) + sorted(self.chapters.keys())
         if not self.columns_len or len(self.columns_len) != len(columns):
-            self.columns_len = map(len, columns)
+            self.columns_len = list(map(len, columns))
 
         chapters_txt = {}
         offsets = defaultdict(int)
-        for name, chapter in self.chapters.items():
+        for name, chapter in list(self.chapters.items()):
             chapters_txt[name] = chapter.__txt__(startindex)
             if startindex == 0:
                 offsets[name] = len(chapters_txt[name]) - len(self)
@@ -458,17 +458,17 @@ class Logbook(list):
             header = []
             nlines = 1
             if len(self.chapters) > 0:
-                nlines += max(map(len, chapters_txt.values())) - len(self) + 1
-            header = [[] for i in xrange(nlines)]
+                nlines += max(list(map(len, list(chapters_txt.values())))) - len(self) + 1
+            header = [[] for i in range(nlines)]
             for j, name in enumerate(columns):
                 if name in chapters_txt:
                     length = max(len(line.expandtabs()) for line in chapters_txt[name])
                     blanks = nlines - 2 - offsets[name]
-                    for i in xrange(blanks):
+                    for i in range(blanks):
                         header[i].append(" " * length)
                     header[blanks].append(name.center(length))
                     header[blanks+1].append("-" * length)
-                    for i in xrange(offsets[name]):
+                    for i in range(offsets[name]):
                         header[blanks+2+i].append(chapters_txt[name][i])
                 else:
                     length = max(len(line[j].expandtabs()) for line in str_matrix)

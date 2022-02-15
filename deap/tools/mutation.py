@@ -1,4 +1,4 @@
-from __future__ import division
+
 import math
 import random
 
@@ -41,7 +41,7 @@ def mutGaussian(individual, mu, sigma, indpb):
     elif len(sigma) < size:
         raise IndexError("sigma must be at least the size of individual: %d < %d" % (len(sigma), size))
 
-    for i, m, s in zip(xrange(size), mu, sigma):
+    for i, m, s in zip(range(size), mu, sigma):
         if random.random() < indpb:
             individual[i] += random.gauss(m, s)
 
@@ -60,9 +60,15 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
                 is the lower bound of the search space.
     :param up: A value or a :term:`python:sequence` of values that
                is the upper bound of the search space.
+    :param indpb: A value or a :term:`python:sequence` of values that
+               is the probability of mutation (per parameter).
     :returns: A tuple of one individual.
     """
     size = len(individual)
+    if not isinstance(indpb, Sequence):
+        indpb = repeat(indpb, size)
+    elif len(indpb) < size:
+        raise IndexError("indpb must be at least the size of individual: %d < %d" % (len(indpb), size))
     if not isinstance(low, Sequence):
         low = repeat(low, size)
     elif len(low) < size:
@@ -71,9 +77,9 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
         up = repeat(up, size)
     elif len(up) < size:
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
-
-    for i, xl, xu in zip(xrange(size), low, up):
-        if random.random() <= indpb:
+    
+    for i, xl, xu, mp in zip(list(range(size)), low, up, indpb):
+        if random.random() <= mp:
             x = individual[i]
             delta_1 = (x - xl) / (xu - xl)
             delta_2 = (xu - x) / (xu - xl)
@@ -110,7 +116,7 @@ def mutShuffleIndexes(individual, indpb):
     functions from the python base :mod:`random` module.
     """
     size = len(individual)
-    for i in xrange(size):
+    for i in range(size):
         if random.random() < indpb:
             swap_indx = random.randint(0, size - 2)
             if swap_indx >= i:
@@ -135,7 +141,7 @@ def mutFlipBit(individual, indpb):
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-    for i in xrange(len(individual)):
+    for i in range(len(individual)):
         if random.random() < indpb:
             individual[i] = type(individual[i])(not individual[i])
 
@@ -166,7 +172,7 @@ def mutUniformInt(individual, low, up, indpb):
     elif len(up) < size:
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
 
-    for i, xl, xu in zip(xrange(size), low, up):
+    for i, xl, xu in zip(range(size), low, up):
         if random.random() < indpb:
             individual[i] = random.randint(xl, xu)
 
@@ -207,7 +213,7 @@ def mutESLogNormal(individual, c, indpb):
     n = random.gauss(0, 1)
     t0_n = t0 * n
 
-    for indx in xrange(size):
+    for indx in range(size):
         if random.random() < indpb:
             individual.strategy[indx] *= math.exp(t0_n + t * random.gauss(0, 1))
             individual[indx] += individual.strategy[indx] * random.gauss(0, 1)

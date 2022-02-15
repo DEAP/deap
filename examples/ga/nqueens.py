@@ -62,7 +62,7 @@ creator.create("Individual", list, fitness=creator.FitnessMin)
 #Since there is only one queen per line, 
 #individual are represented by a permutation
 toolbox = base.Toolbox()
-toolbox.register("permutation", random.sample, range(NB_QUEENS), NB_QUEENS)
+toolbox.register("permutation", random.sample, list(range(NB_QUEENS)), NB_QUEENS)
 
 #Structure initializers
 #An individual is a list that represents the position of each queen.

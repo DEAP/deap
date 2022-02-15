@@ -99,7 +99,7 @@ def main(extended=True, verbose=True):
             logbook.record(gen=g, species=j, evals=len(s), **record)
 
             if verbose: 
-                print(logbook.stream)
+                print((logbook.stream))
 
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
@@ -133,7 +133,7 @@ def main(extended=True, verbose=True):
                 for i in range(len(species)):
                     contributions.append(toolbox.evaluateContribution(representatives, target_set, i)[0])
 
-                for i in reversed(range(len(species))):
+                for i in reversed(list(range(len(species)))):
                     if contributions[i] < EXTINCTION_TRESHOLD:
                         species.pop(i)
                         species_index.pop(i)
@@ -151,14 +151,14 @@ def main(extended=True, verbose=True):
     if extended:
         for r in representatives:
             # print final representatives without noise
-            print("".join(str(x) for x, y in zip(r, noise) if y == "*"))
+            print(("".join(str(x) for x, y in zip(r, noise) if y == "*")))
 
     if extended and plt:      # Plotting of the evolution
         line1, = plt.plot(collab, "--", color="k")
 
         for con in contribs:
             try:
-                con, g = zip(*con)
+                con, g = list(zip(*con))
                 line2, = plt.plot(g, con, "-", color="k")
             except ValueError:
                 pass

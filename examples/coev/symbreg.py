@@ -69,7 +69,7 @@ def main():
     record = stats.compile(pop_gp)
     logbook.record(gen=0, type='gp', evals=len(pop_gp), **record)
 
-    print(logbook.stream)
+    print((logbook.stream))
 
     CXPB, MUTPB, NGEN = 0.5, 0.2, 50
 
@@ -121,15 +121,15 @@ def main():
 
         record = stats.compile(pop_gp)
         logbook.record(gen=g, type='gp', evals=len(pop_gp), **record)
-        print(logbook.stream)
+        print((logbook.stream))
 
 
         best_ga = tools.selBest(pop_ga, 1)[0]
         best_gp = tools.selBest(pop_gp, 1)[0]
 
 
-    print("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values))
-    print("Best individual GP is %s, %s" % (best_gp, best_gp.fitness.values))
+    print(("Best individual GA is %s, %s" % (best_ga, best_ga.fitness.values)))
+    print(("Best individual GP is %s, %s" % (best_gp, best_gp.fitness.values)))
 
     return pop_ga, pop_gp, best_ga, best_gp, logbook
 

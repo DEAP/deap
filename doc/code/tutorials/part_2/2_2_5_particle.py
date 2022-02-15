@@ -10,8 +10,8 @@ creator.create("Particle", list, fitness=creator.FitnessMax, speed=None,
                smin=None, smax=None, best=None)
 
 def initParticle(pcls, size, pmin, pmax, smin, smax):
-    part = pcls(random.uniform(pmin, pmax) for _ in xrange(size))
-    part.speed = [random.uniform(smin, smax) for _ in xrange(size)]
+    part = pcls(random.uniform(pmin, pmax) for _ in range(size))
+    part.speed = [random.uniform(smin, smax) for _ in range(size)]
     part.smin = smin
     part.smax = smax
     return part

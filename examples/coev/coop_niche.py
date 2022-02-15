@@ -84,7 +84,7 @@ def main(extended=True, verbose=True):
             logbook.record(gen=g, species=i, evals=len(s), **record)
 
             if verbose: 
-                print(logbook.stream)
+                print((logbook.stream))
 
             # Select the individuals
             species[i] = toolbox.select(s, len(s))  # Tournament selection
@@ -95,7 +95,7 @@ def main(extended=True, verbose=True):
 
     if extended:
         for r in representatives:
-            print("".join(str(x) for x in r))
+            print(("".join(str(x) for x in r)))
 
 if __name__ == "__main__":
     main()
