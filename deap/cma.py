@@ -109,7 +109,7 @@ class Strategy(object):
         self.computeParams(self.params)
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
 
         :param ind_init: A function object that is able to initialize an
@@ -171,7 +171,7 @@ class Strategy(object):
         self.BD = self.B * self.diagD
 
     def computeParams(self, params):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
+        r"""Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
 
         :param params: A dictionary of the manually set parameters.
@@ -206,7 +206,7 @@ class Strategy(object):
 
 
 class StrategyOnePlusLambda(object):
-    """
+    r"""
     A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm ([Igel2007]_).
 
     :param parent: An iterable object that indicates where to start the
@@ -257,7 +257,7 @@ class StrategyOnePlusLambda(object):
         self.psucc = self.ptarg
 
     def computeParams(self, params):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
+        r"""Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
 
         :param params: A dictionary of the manually set parameters.
@@ -276,7 +276,7 @@ class StrategyOnePlusLambda(object):
         self.pthresh = params.get("pthresh", 0.44)
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
 
         :param ind_init: A function object that is able to initialize an
@@ -392,7 +392,7 @@ class StrategyMultiObjective(object):
         self.indicator = params.get("indicator", tools.hypervolume)
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
 
         :param ind_init: A function object that is able to initialize an
