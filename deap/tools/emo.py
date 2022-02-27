@@ -625,13 +625,13 @@ def associate_to_niche(fitnesses, reference_points, best_point, intercepts):
 
 def niching(individuals, k, niches, distances, niche_counts):
     selected = []
-    available = numpy.ones(len(individuals), dtype=numpy.bool)
+    available = numpy.ones(len(individuals), dtype=bool)
     while len(selected) < k:
         # Maximum number of individuals (niches) to select in that round
         n = k - len(selected)
 
         # Find the available niches and the minimum niche count in them
-        available_niches = numpy.zeros(len(niche_counts), dtype=numpy.bool)
+        available_niches = numpy.zeros(len(niche_counts), dtype=bool)
         available_niches[numpy.unique(niches[available])] = True
         min_count = numpy.min(niche_counts[available_niches])
 
