@@ -25,7 +25,7 @@ def hypervolume(front, **kargs):
         return hv.hypervolume(numpy.concatenate((wobj[:i], wobj[i+1:])), ref)
 
     # Parallelization note: Cannot pickle local function
-    contrib_values = map(contribution, range(len(front)))
+    contrib_values = list(map(contribution, list(range(len(front)))))
 
     # Select the maximum hypervolume value (correspond to the minimum difference)
     return numpy.argmax(contrib_values)

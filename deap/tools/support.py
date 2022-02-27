@@ -335,7 +335,7 @@ class Logbook(list):
         key part of the pair. Chapters are also Logbook.
         """
         apply_to_all = {k: v for k, v in infos.items() if not isinstance(v, dict)}
-        for key, value in infos.items():
+        for key, value in list(infos.items()):
             if isinstance(value, dict):
                 chapter_infos = value.copy()
                 chapter_infos.update(apply_to_all)
@@ -426,7 +426,7 @@ class Logbook(list):
         if not columns:
             columns = sorted(self[0].keys()) + sorted(self.chapters.keys())
         if not self.columns_len or len(self.columns_len) != len(columns):
-            self.columns_len = map(len, columns)
+            self.columns_len = [len(c) for c in columns]
 
         chapters_txt = {}
         offsets = defaultdict(int)

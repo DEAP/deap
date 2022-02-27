@@ -73,7 +73,7 @@ def sortNondominated(individuals, k, first_front_only=False):
     map_fit_ind = defaultdict(list)
     for ind in individuals:
         map_fit_ind[ind.fitness].append(ind)
-    fits = map_fit_ind.keys()
+    fits = list(map_fit_ind.keys())
 
     current_front = []
     next_front = []
@@ -249,7 +249,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
 
     #Launch the sorting algorithm
     obj = len(individuals[0].fitness.wvalues)-1
-    fitnesses = unique_fits.keys()
+    fitnesses = list(unique_fits.keys())
     front = dict.fromkeys(fitnesses, 0)
 
     # Sort the fitnesses lexicographically.
