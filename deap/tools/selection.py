@@ -229,13 +229,10 @@ def selLexicase(individuals, k):
         random.shuffle(cases)
 
         while len(cases) > 0 and len(candidates) > 1:
-            f = min
-            if fit_weights[cases[0]] > 0:
-                f = max
+            f = max if fit_weights[cases[0]] > 0 else min
+            best_val_for_case = f(x.fitness.values[cases[0]] for x in candidates)
 
-            best_val_for_case = f(map(lambda x: x.fitness.values[cases[0]], candidates))
-
-            candidates = list(filter(lambda x: x.fitness.values[cases[0]] == best_val_for_case, candidates))
+            candidates = [x for x in candidates if x.fitness.values[cases[0]] == best_val_for_case]
             cases.pop(0)
 
         selected_individuals.append(random.choice(candidates))
@@ -265,13 +262,13 @@ def selEpsilonLexicase(individuals, k, epsilon):
 
         while len(cases) > 0 and len(candidates) > 1:
             if fit_weights[cases[0]] > 0:
-                best_val_for_case = max(map(lambda x: x.fitness.values[cases[0]], candidates))
+                best_val_for_case = max(x.fitness.values[cases[0]] for x in candidates)
                 min_val_to_survive_case = best_val_for_case - epsilon
-                candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive_case, candidates))
+                candidates = [x for x in candidates if x.fitness.values[cases[0]] >= min_val_to_survive_case]
             else :
-                best_val_for_case = min(map(lambda x: x.fitness.values[cases[0]], candidates))
+                best_val_for_case = min(x.fitness.values[cases[0]] for x in candidates)
                 max_val_to_survive_case = best_val_for_case + epsilon
-                candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive_case, candidates))
+                candidates = [x for x in candidates if x.fitness.values[cases[0]] <= max_val_to_survive_case]
 
             cases.pop(0)
 
@@ -306,11 +303,11 @@ def selAutomaticEpsilonLexicase(individuals, k):
             if fit_weights[cases[0]] > 0:
                 best_val_for_case = max(errors_for_this_case)
                 min_val_to_survive = best_val_for_case - median_absolute_deviation
-                candidates = list(filter(lambda x: x.fitness.values[cases[0]] >= min_val_to_survive, candidates))
+                candidates = [x for x in candidates if x.fitness.values[cases[0]] >= min_val_to_survive]
             else :
                 best_val_for_case = min(errors_for_this_case)
                 max_val_to_survive = best_val_for_case + median_absolute_deviation
-                candidates = list(filter(lambda x: x.fitness.values[cases[0]] <= max_val_to_survive, candidates))
+                candidates = [x for x in candidates if x.fitness.values[cases[0]] <= max_val_to_survive]
 
             cases.pop(0)
 
