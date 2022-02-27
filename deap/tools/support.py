@@ -1,9 +1,4 @@
-from __future__ import division
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 from bisect import bisect_right
 from collections import defaultdict

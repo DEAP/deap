@@ -1,4 +1,3 @@
-from __future__ import division
 import bisect
 from collections import defaultdict, namedtuple
 from itertools import chain

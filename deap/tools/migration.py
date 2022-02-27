@@ -1,6 +1,3 @@
-from __future__ import division
-
-
 def migRing(populations, k, selection, replacement=None, migarray=None):
     """Perform a ring migration between the *populations*. The migration first
     select *k* emigrants from each population using the specified *selection*

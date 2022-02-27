@@ -1,5 +1,3 @@
-from __future__ import division
-
 def initRepeat(container, func, n):
     """Call the function *func* *n* times and return the results in a 
     container type `container`
