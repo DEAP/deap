@@ -21,8 +21,9 @@ points are generated in the range [-1, 1], and are used to evaluate the
 fitness. 
 
 Note that in this example, the ``evalSymbReg`` function has the polynomial being 
-regressed to hard coded, and thus the :math:`y` value can be calculated for each value of :math:`x`. If one were using the system to fit other data, the hard coded quadratic
-polynomial expression would need to be replaced. For example, 
+regressed to hard coded, and thus the :math:`y` value can be calculated for each
+value of :math:`x`. If one were using the system to fit other data, the hard coded
+quadratic polynomial expression would need to be replaced. For example,
 :math:`\frac{1}{n}\sum_{i=1}^{n}(\hat{y_{i}} - y_{i})^2`, where :math:`\hat{y_{i}}` is 
 a candidate solution's predicted value based on the independent variables, and 
 :math:`y_{i}` is the the expected value. 
