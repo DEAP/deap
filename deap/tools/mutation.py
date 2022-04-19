@@ -197,7 +197,7 @@ def mutInversion(individual):
 
     # Reverse the contents of the individual between the indices
     while start_index < end_index - 1:
-        individual[start_index], individual[end_index] = individual[end_index], individual[start_index]
+        individual[start_index], individual[end_index - 1] = individual[end_index - 1], individual[start_index]
         start_index += 1
         end_index -= 1
 
