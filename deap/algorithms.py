@@ -98,7 +98,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
-    :param callback: Function for calling on last step of the loop. Function is like: def f(): pass.
+    :param callback: Function for calling on last step of the loop. Function is like: def f(population, gen): pass.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
@@ -188,7 +188,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
             print logbook.stream
 
         if callback is not None:
-            callback()
+            callback(population, gen)
 
     return population, logbook
 
