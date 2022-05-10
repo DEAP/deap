@@ -83,7 +83,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
 
 
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=__debug__):
+             halloffame=None, verbose=__debug__, callback=None):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
 
@@ -98,6 +98,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
+    :param callback: Function for calling on last step of the loop. Function is like: def f(): pass.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
@@ -185,6 +186,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         logbook.record(gen=gen, nevals=len(invalid_ind), **record)
         if verbose:
             print logbook.stream
+
+        if callback is not None:
+            callback()
 
     return population, logbook
 
