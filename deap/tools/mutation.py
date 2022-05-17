@@ -196,10 +196,7 @@ def mutInversion(individual):
     end_index = max(index_one, index_two)
 
     # Reverse the contents of the individual between the indices
-    while start_index < end_index - 1:
-        individual[start_index], individual[end_index - 1] = individual[end_index - 1], individual[start_index]
-        start_index += 1
-        end_index -= 1
+    individual[start_index:end_index] = individual[start_index:end_index][::-1]
 
     return individual,
 
