@@ -99,8 +99,8 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
-    :param stop_cond: Function returns True is solution has been found otherwise False. Function is like: def f(population, gen): pass.
-    :param callback: Function for calling on last step of the loop. Function is like: def f(population, gen): pass.
+    :param stop_cond: Function returns True is solution has been found otherwise False. Function is like: def f(population, gen, halloffame=None): pass.
+    :param callback: Function for calling on last step of the loop. Function is like: def f(population, gen, halloffame=None): pass.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
@@ -193,11 +193,15 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         if verbose:
             print logbook.stream
 
+        kvargs = {}
+        if halloffame is not None:
+            kvargs['halloffame'] = halloffame
+
         if callback is not None:
-            callback(population, gen)
+            callback(population, gen, **kvargs)
 
         if stop_cond is not None:
-            if stop_cond(population, gen):
+            if stop_cond(population, gen, **kvargs):
                 break
 
     return population, logbook
