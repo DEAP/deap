@@ -178,10 +178,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        offspring.extend(halloffame.items)
-
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
+            offspring.extend(halloffame.items)
             halloffame.update(offspring)
 
         # Replace the current population by the offspring
