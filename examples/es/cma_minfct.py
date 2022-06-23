@@ -48,10 +48,10 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-   
+
     # The CMA-ES algorithm converge with good probability with those settings
     algorithms.eaGenerateUpdate(toolbox, ngen=250, stats=stats, halloffame=hof)
-    
+
     # print "Best individual is %s, %s" % (hof[0], hof[0].fitness.values)
     return hof[0].fitness.values[0]
 

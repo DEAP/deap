@@ -82,7 +82,7 @@ def main():
         # Gather all the fitnesses in one list and print the stats
         logbook.record(gen=g, evals=len(pop), **stats.compile(pop))
         print(logbook.stream)
-    
+
     return pop, logbook, best
 
 if __name__ == "__main__":

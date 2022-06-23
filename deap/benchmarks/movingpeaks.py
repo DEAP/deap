@@ -32,9 +32,9 @@ except:
 
 def cone(individual, position, height, width):
     """The cone peak function to be used with scenario 2 and 3.
-    
+
     :math:`f(\mathbf{x}) = h - w \sqrt{\sum_{i=1}^N (x_i - p_i)^2}`
-    
+
     """
     value = 0.0
     for x, p in zip(individual, position):
@@ -49,9 +49,9 @@ def sphere(individual, position, height, width):
 
 def function1(individual, position, height, width):
     """The function1 peak function to be used with scenario 1.
-    
+
     :math:`f(\mathbf{x}) = \\frac{h}{1 + w \sqrt{\sum_{i=1}^N (x_i - p_i)^2}}`
-    
+
     """
     value = 0.0
     for x, p in zip(individual, position):
@@ -61,13 +61,13 @@ def function1(individual, position, height, width):
 class MovingPeaks:
     """The Moving Peaks Benchmark is a fitness function changing over time. It
     consists of a number of peaks, changing in height, width and location. The
-    peaks function is given by *pfunc*, wich is either a function object or a
+    peaks function is given by *pfunc*, which is either a function object or a
     list of function objects (the default is :func:`function1`). The number of
     peaks is determined by *npeaks* (which defaults to 5). This parameter can
     be either a integer or a sequence. If it is set to an integer the number
     of peaks won't change, while if set to a sequence of 3 elements, the
     number of peaks will fluctuate between the first and third element of that
-    sequence, the second element is the inital number of peaks. When
+    sequence, the second element is the initial number of peaks. When
     fluctuating the number of peaks, the parameter *number_severity* must be
     included, it represents the number of peak fraction that is allowed to
     change. The dimensionality of the search domain is *dim*. A basis function
@@ -78,7 +78,7 @@ class MovingPeaks:
     functions from the Python module :mod:`random`). Various other keyword
     parameters listed in the table below are required to setup the benchmark,
     default parameters are based on scenario 1 of this benchmark.
-    
+
     =================== ============================= =================== =================== ======================================================================================================================
     Parameter           :data:`SCENARIO_1` (Default)  :data:`SCENARIO_2`  :data:`SCENARIO_3`    Details
     =================== ============================= =================== =================== ======================================================================================================================
@@ -99,15 +99,15 @@ class MovingPeaks:
     ``width_severity``  0.01                          1.0                 0.5                 The standard deviation of the change made to the width of a peak when peaks change.
     ``period``          5000                          5000                1000                Period between two changes.
     =================== ============================= =================== =================== ======================================================================================================================
-    
-    Dictionnaries :data:`SCENARIO_1`, :data:`SCENARIO_2` and
+
+    Dictionaries :data:`SCENARIO_1`, :data:`SCENARIO_2` and
     :data:`SCENARIO_3` of this module define the defaults for these
     parameters. The scenario 3 requires a constant basis function
     which can be given as a lambda function ``lambda x: constant``.
-    
+
     The following shows an example of scenario 1 with non uniform heights and
     widths.
-    
+
     .. plot:: code/benchmarks/movingsc1.py
        :width: 67 %
     """
@@ -115,7 +115,7 @@ class MovingPeaks:
         # Scenario 1 is the default
         sc = SCENARIO_1.copy()
         sc.update(kargs)
-        
+
         pfunc = sc.get("pfunc")
         npeaks = sc.get("npeaks")
         self.dim = dim
@@ -124,7 +124,7 @@ class MovingPeaks:
         if hasattr(npeaks, "__getitem__"):
             self.minpeaks, npeaks, self.maxpeaks = npeaks
             self.number_severity = sc.get("number_severity")
-            
+
         try:
             if len(pfunc) == npeaks:
                 self.peaks_function = pfunc
@@ -134,28 +134,28 @@ class MovingPeaks:
         except TypeError:
             self.peaks_function = list(itertools.repeat(pfunc, npeaks))
             self.pfunc_pool = (pfunc,)
-        
+
         self.random = random
         self.basis_function = sc.get("bfunc")
-        
+
         self.min_coord = sc.get("min_coord")
         self.max_coord = sc.get("max_coord")
-        
+
         self.min_height = sc.get("min_height")
         self.max_height = sc.get("max_height")
         uniform_height = sc.get("uniform_height")
-        
+
         self.min_width = sc.get("min_width")
         self.max_width = sc.get("max_width")
         uniform_width = sc.get("uniform_width")
-        
+
         self.lambda_ = sc.get("lambda_")
         self.move_severity = sc.get("move_severity")
         self.height_severity = sc.get("height_severity")
         self.width_severity = sc.get("width_severity")
-        
+
         self.peaks_position = [[self.random.uniform(self.min_coord, self.max_coord) for _ in range(dim)] for _ in range(npeaks)]
-        
+
         if uniform_height != 0:
             self.peaks_height = [uniform_height for _ in range(npeaks)]
         else:
@@ -166,9 +166,9 @@ class MovingPeaks:
             self.peaks_width = [uniform_width for _ in range(npeaks)]
         else:
             self.peaks_width = [self.random.uniform(self.min_width, self.max_width) for _ in range(npeaks)]
-        
+
         self.last_change_vector = [[self.random.random() - 0.5 for _ in range(dim)] for _ in range(npeaks)]
-        
+
         self.period = sc.get("period")
 
         # Used by the Offline Error calculation
@@ -189,7 +189,7 @@ class MovingPeaks:
                                             self.peaks_width):
             potential_max.append((func(pos, pos, height, width), pos))
         return max(potential_max)
-    
+
     def maximums(self):
         """Returns all visible maximums value and position sorted with the
         global maximum first.
@@ -205,24 +205,24 @@ class MovingPeaks:
             if val >= self.__call__(pos, count=False)[0]:
                 maximums.append((val, pos))
         return sorted(maximums, reverse=True)
-    
+
     def __call__(self, individual, count=True):
         """Evaluate a given *individual* with the current benchmark
         configuration.
 
         :param indidivudal: The individual to evaluate.
-        :param count: Wether or not to count this evaluation in
+        :param count: Whether or not to count this evaluation in
                       the total evaluation count. (Defaults to
                       :data:`True`)
         """
         possible_values = []
-        
+
         for func, pos, height, width in zip(self.peaks_function,
                                             self.peaks_position,
                                             self.peaks_height,
                                             self.peaks_width):
             possible_values.append(func(individual, pos, height, width))
-        
+
         if self.basis_function:
             possible_values.append(self.basis_function(individual))
 
@@ -237,12 +237,12 @@ class MovingPeaks:
             self._error = min(self._error, abs(fitness - self._optimum))
             self._offline_error += self._error
 
-            # We exausted the number of evaluation, change peaks for the next one.
+            # We exhausted the number of evaluation, change peaks for the next one.
             if self.period > 0 and self.nevals % self.period == 0:
                 self.changePeaks()
-        
+
         return fitness,
-    
+
     def offlineError(self):
         return self._offline_error / self.nevals
 
@@ -283,15 +283,15 @@ class MovingPeaks:
             shift = [self.random.random() - 0.5 for _ in range(len(self.peaks_position[i]))]
             shift_length = sum(s**2 for s in shift)
             shift_length = self.move_severity / math.sqrt(shift_length) if shift_length > 0 else 0
-            
+
             shift = [shift_length * (1.0 - self.lambda_) * s \
                      + self.lambda_ * c for s, c in zip(shift, self.last_change_vector[i])]
-            
+
             shift_length = sum(s**2 for s in shift)
             shift_length = self.move_severity / math.sqrt(shift_length) if shift_length > 0 else 0
 
             shift = [s*shift_length for s in shift]
-            
+
             new_position = []
             final_shift = []
             for pp, s in zip(self.peaks_position[i], shift):

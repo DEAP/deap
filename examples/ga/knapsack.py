@@ -27,12 +27,12 @@ MAX_ITEM = 50
 MAX_WEIGHT = 50
 NBR_ITEMS = 20
 
-# To assure reproductibility, the RNG seed is set prior to the items
+# To assure reproducibility, the RNG seed is set prior to the items
 # dict initialization. It is also seeded in main().
 random.seed(64)
 
 # Create the item dictionary: item name is an integer, and value is 
-# a (weight, value) 2-uple.
+# a (weight, value) 2-tuple.
 items = {}
 # Create random items and store them in the items' dictionary.
 for i in range(NBR_ITEMS):
@@ -70,7 +70,7 @@ def cxSet(ind1, ind2):
     ind1 &= ind2                    # Intersection (inplace)
     ind2 ^= temp                    # Symmetric Difference (inplace)
     return ind1, ind2
-    
+
 def mutSet(individual):
     """Mutation that pops or add an element."""
     if random.random() < 0.5:
@@ -92,7 +92,7 @@ def main():
     LAMBDA = 100
     CXPB = 0.7
     MUTPB = 0.2
-    
+
     pop = toolbox.population(n=MU)
     hof = tools.ParetoFront()
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -100,11 +100,11 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
+
     algorithms.eaMuPlusLambda(pop, toolbox, MU, LAMBDA, CXPB, MUTPB, NGEN, stats,
                               halloffame=hof)
-    
+
     return pop, stats, hof
-                 
+
 if __name__ == "__main__":
     main()                 

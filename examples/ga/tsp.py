@@ -66,10 +66,10 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     algorithms.eaSimple(pop, toolbox, 0.7, 0.2, 40, stats=stats, 
                         halloffame=hof)
-    
+
     return pop, stats, hof
 
 if __name__ == "__main__":

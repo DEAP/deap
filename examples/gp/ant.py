@@ -76,13 +76,13 @@ class AntSimulator(object):
     direction = ["north","east","south","west"]
     dir_row = [1, 0, -1, 0]
     dir_col = [0, 1, 0, -1]
-    
+
     def __init__(self, max_moves):
         self.max_moves = max_moves
         self.moves = 0
         self.eaten = 0
         self.routine = None
-        
+
     def _reset(self):
         self.row = self.row_start 
         self.col = self.col_start 
@@ -94,7 +94,7 @@ class AntSimulator(object):
     @property
     def position(self):
         return (self.row, self.col, self.direction[self.dir])
-            
+
     def turn_left(self): 
         if self.moves < self.max_moves:
             self.moves += 1
@@ -104,7 +104,7 @@ class AntSimulator(object):
         if self.moves < self.max_moves:
             self.moves += 1    
             self.dir = (self.dir + 1) % 4
-        
+
     def move_forward(self):
         if self.moves < self.max_moves:
             self.moves += 1
@@ -118,15 +118,15 @@ class AntSimulator(object):
         ahead_row = (self.row + self.dir_row[self.dir]) % self.matrix_row
         ahead_col = (self.col + self.dir_col[self.dir]) % self.matrix_col        
         return self.matrix_exc[ahead_row][ahead_col] == "food"
-   
+
     def if_food_ahead(self, out1, out2):
         return partial(if_then_else, self.sense_food, out1, out2)
-   
+
     def run(self,routine):
         self._reset()
         while self.moves < self.max_moves:
             routine()
-    
+
     def parse_matrix(self, matrix):
         self.matrix = list()
         for i, line in enumerate(matrix):
@@ -168,7 +168,7 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ex
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalArtificialAnt(individual):
-    # Transform the tree expression to functionnal Python code
+    # Transform the tree expression to functional Python code
     routine = gp.compile(individual, pset)
     # Run the generated routine
     ant.run(routine)
@@ -182,10 +182,10 @@ toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
 
 def main():
     random.seed(69)
-    
+
     with  open("ant/santafe_trail.txt") as trail_file:
       ant.parse_matrix(trail_file)
-    
+
     pop = toolbox.population(n=300)
     hof = tools.HallOfFame(1)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
@@ -193,9 +193,9 @@ def main():
     stats.register("std", numpy.std)
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
-    
+
     algorithms.eaSimple(pop, toolbox, 0.5, 0.2, 40, stats, halloffame=hof)
-    
+
     return pop, hof, stats
 
 if __name__ == "__main__":

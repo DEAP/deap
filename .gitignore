@@ -17,3 +17,7 @@ MANIFEST
 *.orig
 .DS_Store
 *.so
+
+# IDE stuff
+.idea
+.vscode

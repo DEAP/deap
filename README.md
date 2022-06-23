@@ -9,7 +9,7 @@ DEAP includes the following features:
 
   * Genetic algorithm using any imaginable representation
     * List, Array, Set, Dictionary, Tree, Numpy Array, etc.
-  * Genetic programing using prefix trees
+  * Genetic programming using prefix trees
     * Loosely typed, Strongly typed
     * Automatically defined functions
   * Evolution strategies (including CMA-ES)
@@ -148,5 +148,6 @@ Authors of scientific papers including results generated using DEAP are encourag
   * DEAP is also used in ROS as an optimization package http://www.ros.org/wiki/deap.
   * DEAP is an optional dependency for [PyXRD](https://github.com/mathijs-dumon/PyXRD), a Python implementation of the matrix algorithm developed for the X-ray diffraction analysis of disordered lamellar structures.
   * DEAP is used in [glyph](https://github.com/Ambrosys/glyph), a library for symbolic regression with applications to [MLC](https://en.wikipedia.org/wiki/Machine_learning_control).
+  * DEAP is used in [Sklearn-genetic-opt](https://github.com/rodrigo-arenas/Sklearn-genetic-opt), an open source tool that uses evolutionary programming to fine tune machine learning hyperparameters.
 
 If you want your project listed here, send us a link and a brief description and we'll be glad to add it.

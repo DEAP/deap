@@ -160,10 +160,10 @@ def selTournamentDCD(individuals, k):
               to len(individuals).
     :returns: A list of selected individuals.
     """
-    
+
     if k > len(individuals): 
         raise ValueError("selTournamentDCD: k must be less than or equal to individuals length")
-   
+
     if k == len(individuals) and k % 4 != 0:
         raise ValueError("selTournamentDCD: k must be divisible by four if k == len(individuals)")
 
@@ -591,12 +591,15 @@ def find_intercepts(extreme_points, best_point, current_worst, front_worst):
     except numpy.linalg.LinAlgError:
         intercepts = current_worst
     else:
-        intercepts = 1 / x
-
-        if (not numpy.allclose(numpy.dot(A, x), b) or
-                numpy.any(intercepts <= 1e-6) or
-                numpy.any((intercepts + best_point) > current_worst)):
+        if numpy.count_nonzero(x) != len(x):
             intercepts = front_worst
+        else:
+            intercepts = 1 / x
+
+            if (not numpy.allclose(numpy.dot(A, x), b) or
+                    numpy.any(intercepts <= 1e-6) or
+                    numpy.any((intercepts + best_point) > current_worst)):
+                intercepts = front_worst
 
     return intercepts
 

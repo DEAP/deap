@@ -334,8 +334,8 @@ class Logbook(list):
 
     def record(self, **infos):
         """Enter a record of event in the logbook as a list of key-value pairs.
-        The informations are appended chronologically to a list as a dictionary.
-        When the value part of a pair is a dictionary, the informations contained
+        The information are appended chronologically to a list as a dictionary.
+        When the value part of a pair is a dictionary, the information contained
         in the dictionary are recorded in a chapter entitled as the name of the
         key part of the pair. Chapters are also Logbook.
         """

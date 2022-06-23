@@ -30,7 +30,7 @@ creator.create("Individual", array.array, typecode='d', fitness=creator.FitnessM
 def update(ind, mu, std):
     for i, mu_i in enumerate(mu):
         ind[i] = random.gauss(mu_i,std)
- 
+
 toolbox = base.Toolbox()                  
 toolbox.register("update", update)
 toolbox.register("evaluate", benchmarks.sphere)
@@ -48,7 +48,7 @@ def main():
     the sigma computed as the standard deviation.
     """
     random.seed(64)
-    
+
     logbook = tools.Logbook()
     logbook.header = "gen", "fitness"
 
@@ -70,11 +70,11 @@ def main():
             best, worst = worst, best
         else:
             sigma = sigma * alpha**(-0.25)
-            
+
         logbook.record(gen=g, fitness=best.fitness.values)
         print(logbook.stream)
-    
+
     return best
-    
+
 if __name__ == "__main__":
     main()

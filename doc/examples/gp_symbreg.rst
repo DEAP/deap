@@ -65,7 +65,7 @@ create them with the creator :
 
 The first line creates the fitness object (this is a minimization problem, so
 the weight is negative). The `weights` argument must be an iterable of
-weights, even if there is only one fitness measure. The second line create
+weights, even if there is only one fitness measure. The second line creates
 the individual object itself. Very straightforward, we can see that it will
 be based upon a tree, to which we add a fitness. If, for any reason, the user
 would want to add any other attribute (for instance, a file in which the
@@ -122,7 +122,7 @@ max depth of 17.
 
 At this point, any structure with an access to the toolbox instance will also
 have access to all of those registered parameters. Of course, the user could
-register other parameters basing on his needs.
+register other parameters basing on their needs.
 
 
 Statistics

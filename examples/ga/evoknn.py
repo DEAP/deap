@@ -78,11 +78,11 @@ def main():
     stats.register("std", numpy.std, axis=0)
     stats.register("min", numpy.min, axis=0)
     stats.register("max", numpy.max, axis=0)
-    
+
     pop, logbook = algorithms.eaMuPlusLambda(pop, toolbox, mu=MU, lambda_=LAMBDA,
                                              cxpb=0.7, mutpb=0.3, ngen=40, 
                                              stats=stats, halloffame=hof)
-    
+
     return pop, logbook, hof
 
 if __name__ == "__main__":

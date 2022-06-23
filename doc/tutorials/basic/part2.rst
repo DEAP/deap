@@ -190,7 +190,7 @@ case of the multiple individual case.
 
 |more| For more information on decorators, see
 `Introduction to Python Decorators <http://www.artima.com/weblogs/viewpost.jsp?thread=240808>`_
-and `Python Decorator Libary <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
+and `Python Decorator Library <http://wiki.python.org/moin/PythonDecoratorLibrary>`_.
 
 Variations
 ----------

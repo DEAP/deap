@@ -8,7 +8,7 @@ except ImportError:
     from collections import Sequence
 
 class DeltaPenalty(object):
-    """This decorator returns penalized fitness for invalid individuals and the
+    r"""This decorator returns penalized fitness for invalid individuals and the
     original fitness value for valid individuals. The penalized fitness is made
     of a constant factor *delta* added with an (optional) *distance* penalty. The
     distance function, if provided, shall return a value growing as the
@@ -66,7 +66,7 @@ class DeltaPenalty(object):
 DeltaPenality = DeltaPenalty
 
 class ClosestValidPenalty(object):
-    """This decorator returns penalized fitness for invalid individuals and the
+    r"""This decorator returns penalized fitness for invalid individuals and the
     original fitness value for valid individuals. The penalized fitness is made
     of the fitness of the closest valid individual added with a weighted
     (optional) *distance* penalty. The distance function, if provided, shall
