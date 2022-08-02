@@ -31,7 +31,7 @@ for g in range(NGEN):
     # Select the next generation individuals
     offspring = toolbox.select(pop, len(pop))
     # Clone the selected individuals
-    offspring = map(toolbox.clone, offspring)
+    offspring = list(map(toolbox.clone, offspring))
 
     # Apply crossover on the offspring
     for child1, child2 in zip(offspring[::2], offspring[1::2]):

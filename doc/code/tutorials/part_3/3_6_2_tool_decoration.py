@@ -10,7 +10,7 @@ def checkBounds(min, max):
         def wrapper(*args, **kargs):
             offspring = func(*args, **kargs)
             for child in offspring:
-                for i in xrange(len(child)):
+                for i in range(len(child)):
                     if child[i] > max:
                         child[i] = max
                     elif child[i] < min:
