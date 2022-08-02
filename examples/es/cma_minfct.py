@@ -49,6 +49,8 @@ def main():
     stats.register("min", numpy.min)
     stats.register("max", numpy.max)
 
+    #logger = tools.EvolutionLogger(stats.functions.keys())
+   
     # The CMA-ES algorithm converge with good probability with those settings
     algorithms.eaGenerateUpdate(toolbox, ngen=250, stats=stats, halloffame=hof)
 
