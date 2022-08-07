@@ -38,9 +38,9 @@ jobs:
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
-  - job: macOS10_14Build
+  - job: macOS10_15Build
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: 'macOS-10.15'
     strategy:
       matrix:
         Python36_macOS1014:
