@@ -150,6 +150,7 @@ jobs:
       python: /opt/python/cp37-cp37m/bin/python
     steps:
     - script: |
+        sudo apt-get install -qq -y libffi-dev
         for PYBIN in /opt/python/*/bin; do
           "${PYBIN}/pip" install --user numpy twine
         done
