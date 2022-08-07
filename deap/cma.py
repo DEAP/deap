@@ -24,7 +24,7 @@ import copy
 from math import sqrt, log, exp
 import numpy
 
-import tools
+from . import tools
 
 
 class Strategy(object):
@@ -109,7 +109,7 @@ class Strategy(object):
         self.computeParams(self.params)
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
 
         :param ind_init: A function object that is able to initialize an
@@ -118,7 +118,7 @@ class Strategy(object):
         """
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.centroid + self.sigma * numpy.dot(arz, self.BD.T)
-        return map(ind_init, arz)
+        return [ind_init(a) for a in arz]
 
     def update(self, population):
         """Update the current covariance matrix strategy from the
@@ -171,7 +171,7 @@ class Strategy(object):
         self.BD = self.B * self.diagD
 
     def computeParams(self, params):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
+        r"""Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
 
         :param params: A dictionary of the manually set parameters.
@@ -206,7 +206,7 @@ class Strategy(object):
 
 
 class StrategyOnePlusLambda(object):
-    """
+    r"""
     A CMA-ES strategy that uses the :math:`1 + \lambda` paradigm ([Igel2007]_).
 
     :param parent: An iterable object that indicates where to start the
@@ -225,7 +225,7 @@ class StrategyOnePlusLambda(object):
     | ``d``          | ``1.0 + N / (2.0 *        | Damping for step-size.     |
     |                | lambda_)``                |                            |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Taget success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate.        |
     |                | / 2.0)``                  |                            |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg * lambda_ / (2.0 +| Step size learning rate.   |
@@ -257,7 +257,7 @@ class StrategyOnePlusLambda(object):
         self.psucc = self.ptarg
 
     def computeParams(self, params):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
+        r"""Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
 
         :param params: A dictionary of the manually set parameters.
@@ -276,7 +276,7 @@ class StrategyOnePlusLambda(object):
         self.pthresh = params.get("pthresh", 0.44)
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
 
         :param ind_init: A function object that is able to initialize an
@@ -286,7 +286,7 @@ class StrategyOnePlusLambda(object):
         # self.y = numpy.dot(self.A, numpy.random.standard_normal(self.dim))
         arz = numpy.random.standard_normal((self.lambda_, self.dim))
         arz = self.parent + self.sigma * numpy.dot(arz, self.A.T)
-        return map(ind_init, arz)
+        return [ind_init(a) for a in arz]
 
     def update(self, population):
         """Update the current covariance matrix strategy from the
@@ -346,7 +346,7 @@ class StrategyMultiObjective(object):
     +================+===========================+============================+
     | ``d``          | ``1.0 + N / 2.0``         | Damping for step-size.     |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Taget success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Target success rate.        |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg / (2.0 + ptarg)`` | Step size learning rate.   |
     +----------------+---------------------------+----------------------------+
@@ -392,7 +392,7 @@ class StrategyMultiObjective(object):
         self.indicator = params.get("indicator", tools.hypervolume)
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
 
         :param ind_init: A function object that is able to initialize an

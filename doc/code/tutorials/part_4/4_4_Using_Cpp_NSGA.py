@@ -34,7 +34,7 @@ def genWire(dimension):
 
 def genNetwork(dimension, min_size, max_size):
     size = random.randint(min_size, max_size)
-    return [genWire(dimension) for i in xrange(size)]
+    return [genWire(dimension) for i in range(size)]
 
 def mutWire(individual, dimension, indpb):
     for index, elem in enumerate(individual):
@@ -91,8 +91,8 @@ def main():
     stats.update(population)
 
     # Begin the evolution
-    for g in xrange(NGEN):
-        print "-- Generation %i --" % g
+    for g in range(NGEN):
+        print("-- Generation %i --" % g)
         offspring = [toolbox.clone(ind) for ind in population]
 
         # Apply crossover and mutation
@@ -102,7 +102,7 @@ def main():
                 del ind1.fitness.values
                 del ind2.fitness.values
 
-        # Note here that we have a different sheme of mutation than in the
+        # Note here that we have a different scheme of mutation than in the
         # original algorithm, we use 3 different mutations subsequently.
         for ind in offspring:
             if random.random() < MUTPB:
@@ -121,21 +121,21 @@ def main():
         for ind, fit in zip(invalid_ind, fitnesses):
             ind.fitness.values = fit
 
-        print "  Evaluated %i individuals" % len(invalid_ind)
+        print("  Evaluated %i individuals" % len(invalid_ind))
 
         population = toolbox.select(population+offspring, len(offspring))
         hof.update(population)
         stats.update(population)
 
-        print "  Min %s" % stats.Min[0][-1][0]
-        print "  Max %s" % stats.Max[0][-1][0]
-        print "  Avg %s" % stats.Avg[0][-1][0]
-        print "  Std %s" % stats.Std[0][-1][0]
+        print("  Min %s" % stats.Min[0][-1][0])
+        print("  Max %s" % stats.Max[0][-1][0])
+        print("  Avg %s" % stats.Avg[0][-1][0])
+        print("  Std %s" % stats.Std[0][-1][0])
 
     best_network = sn.SortingNetwork(INPUTS, hof[0])
-    print best_network
-    print best_network.draw()
-    print "%i errors, length %i, depth %i" % hof[0].fitness.values
+    print(best_network)
+    print(best_network.draw())
+    print("%i errors, length %i, depth %i" % hof[0].fitness.values)
 
     return population, stats, hof
 

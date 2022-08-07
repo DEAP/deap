@@ -168,7 +168,7 @@ toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.ex
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 def evalArtificialAnt(individual):
-    # Transform the tree expression to functionnal Python code
+    # Transform the tree expression to functional Python code
     routine = gp.compile(individual, pset)
     # Run the generated routine
     ant.run(routine)

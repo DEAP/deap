@@ -93,7 +93,7 @@ def main():
     for g in range(1, NGEN):
         children = []
         for agent in pop:
-            # We must clone everything to ensure independance
+            # We must clone everything to ensure independence
             a, b, c = [toolbox.clone(ind) for ind in toolbox.select(pop)]
             x = toolbox.clone(agent)
             y = toolbox.clone(agent)

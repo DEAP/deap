@@ -1,5 +1,3 @@
-from __future__ import division
-
 def initRepeat(container, func, n):
     """Call the function *func* *n* times and return the results in a 
     container type `container`
@@ -22,7 +20,7 @@ def initRepeat(container, func, n):
 
     See the :ref:`list-of-floats` and :ref:`population` tutorials for more examples.
     """
-    return container(func() for _ in xrange(n))
+    return container(func() for _ in range(n))
 
 def initIterate(container, generator):
     """Call the function *container* with an iterable as
@@ -72,7 +70,7 @@ def initCycle(container, seq_func, n=1):
 
     See the :ref:`funky` tutorial for an example.
     """
-    return container(func() for _ in xrange(n) for func in seq_func)
+    return container(func() for _ in range(n) for func in seq_func)
 
 __all__ = ['initRepeat', 'initIterate', 'initCycle']
 

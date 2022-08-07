@@ -9,7 +9,7 @@ DEAP includes the following features:
 
   * Genetic algorithm using any imaginable representation
     * List, Array, Set, Dictionary, Tree, Numpy Array, etc.
-  * Genetic programing using prefix trees
+  * Genetic programming using prefix trees
     * Loosely typed, Strongly typed
     * Automatically defined functions
   * Evolution strategies (including CMA-ES)
@@ -63,7 +63,7 @@ DEAP build status is available on Travis-CI https://travis-ci.org/DEAP/deap.
 ## Requirements
 The most basic features of DEAP requires Python2.6. In order to combine the toolbox and the multiprocessing module Python2.7 is needed for its support to pickle partial functions. CMA-ES requires Numpy, and we recommend matplotlib for visualization of results as it is fully compatible with DEAP's API.
 
-Since version 0.8, DEAP is compatible out of the box with Python 3. The installation procedure automatically translates the source to Python 3 with 2to3.
+Since version 0.8, DEAP is compatible out of the box with Python 3.
 
 ## Example
 

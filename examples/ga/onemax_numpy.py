@@ -37,7 +37,7 @@ def evalOneMax(individual):
 def cxTwoPointCopy(ind1, ind2):
     """Execute a two points crossover with copy on the input individuals. The
     copy is required because the slicing in numpy returns a view of the data,
-    which leads to a self overwritting in the swap operation. It prevents
+    which leads to a self overwriting in the swap operation. It prevents
     ::
 
         >>> import numpy
