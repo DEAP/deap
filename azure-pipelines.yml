@@ -35,6 +35,8 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
@@ -67,6 +69,8 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
@@ -99,6 +103,8 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
@@ -131,6 +137,8 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
