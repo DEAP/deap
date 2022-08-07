@@ -11,15 +11,15 @@ jobs:
       vmImage: 'windows-latest'
     strategy:
       matrix:
-        Python36_VS2017:
+        Python36:
           python.version: '3.6'
-        Python37_VS2017:
+        Python37:
           python.version: '3.7'
-        Python38_VS2017:
+        Python38:
           python.version: '3.8'
-        Python39_VS2017:
+        Python39:
           python.version: '3.9'
-        Python310_VS2017:
+        Python310:
           python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
@@ -43,15 +43,15 @@ jobs:
       vmImage: 'macOS-10.15'
     strategy:
       matrix:
-        Python36_macOS1014:
+        Python36:
           python.version: '3.6'
-        Python37_macOS1014:
+        Python37:
           python.version: '3.7'
-        Python38_macOS1014:
+        Python38:
           python.version: '3.8'
-        Python39_macOS1014:
+        Python39:
           python.version: '3.9'
-        Python310_macOS1014:
+        Python310:
           python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
@@ -75,15 +75,15 @@ jobs:
       vmImage: 'macOS-11'
     strategy:
       matrix:
-        Python36_macOS1014:
+        Python36:
           python.version: '3.6'
-        Python37_macOS1014:
+        Python37:
           python.version: '3.7'
-        Python38_macOS1014:
+        Python38:
           python.version: '3.8'
-        Python39_macOS1014:
+        Python39:
           python.version: '3.9'
-        Python310_macOS1014:
+        Python310:
           python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
@@ -107,15 +107,15 @@ jobs:
       vmImage: 'macOS-12'
     strategy:
       matrix:
-        Python36_macOS1014:
+        Python36:
           python.version: '3.6'
-        Python37_macOS1014:
+        Python37:
           python.version: '3.7'
-        Python38_macOS1014:
+        Python38:
           python.version: '3.8'
-        Python39_macOS1014:
+        Python39:
           python.version: '3.9'
-        Python310_macOS1014:
+        Python310:
           python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
@@ -136,7 +136,7 @@ jobs:
 
   - job: Manylinux2010Build
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: 'ubuntu-latest'
     container: quay.io/pypa/manylinux2010_x86_64:latest
     variables:
       python: /opt/python/cp37-cp37m/bin/python
@@ -162,22 +162,22 @@ jobs:
 
   - job: AArch64_Manylinux2014Build
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
     strategy:
       matrix:
-        Py36 Arm64:
+        Python36:
           python.version: 'cp36-cp36m'
           manylinux: 'manylinux_aarch64'
-        Py37 Arm64:
+        Python37:
           python.version: 'cp37-cp37m'
           manylinux: 'manylinux_aarch64'
-        Py38 Arm64:
+        Python38:
           python.version: 'cp38-cp38'
           manylinux: 'manylinux_aarch64'
-        Py39 Arm64:
+        Python39:
           python.version: 'cp39-cp39'
           manylinux: 'manylinux_aarch64'
-        Py310 Arm64:
+        Python310:
           python.version: 'cp310-cp310'
           manylinux: 'manylinux_aarch64'
     steps:
