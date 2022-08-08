@@ -142,46 +142,43 @@ jobs:
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
-  - job: Manylinux2010Build
+
+  - job: Manylinux2014Build
     pool:
       vmImage: 'ubuntu-latest'
+    container: quay.io/pypa/manylinux2014_x86_64:latest
     strategy:
       matrix:
         Python36:
-          python.version: '3.6'
+          python.version: 'cp36-cp36m'
         Python37:
-          python.version: '3.7'
+          python.version: 'cp37-cp37m'
         Python38:
-          python.version: '3.8'
+          python.version: 'cp38-cp38'
         Python39:
-          python.version: '3.9'
+          python.version: 'cp39-cp39'
         Python310:
-          python.version: '3.10'
+          python.version: 'cp310-cp310'
     steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
     - script: |
-        sudo apt-get -qq -y update
-        sudo apt-get -qq -y install libffi-dev
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
+        "${PYBIN}/python" -m pip install --upgrade pip
+        "${PYBIN}/python" -m pip install numpy twine
+      displayName: 'Install dependencies and build tools'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
     - script: |
-        pip install wheel twine
-      displayName: 'Install build tools'
+        "${PYBIN}/python" -m pip wheel . -w wheelhouse/
+      displayName: 'Build wheels'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
     - script: |
-        python -m pip wheel . -w wheelhouse/
-      displayName: 'Build wheel'
+        auditwheel repair wheelhouse/deap*.whl --plat manylinux2014_x86_64 -w wheelhouse-manylinux/
+      displayName: 'Audit wheels'
     - script: |
-        for whl in wheelhouse/deap*.whl; do
-          auditwheel repair "$whl" --plat manylinux2010_x86_64 -w wheelhouse-manylinux/
-        done
-      displayName: 'Audit wheel'
-    - script: |
-        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
+        "${PYBIN}/python" -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
       displayName: 'Publish wheel to PyPi'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
 
   - job: AArch64_Manylinux2014Build
     pool:
