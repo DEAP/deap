@@ -335,7 +335,7 @@ class Logbook(list):
         key part of the pair. Chapters are also Logbook.
         """
         apply_to_all = {k: v for k, v in infos.items() if not isinstance(v, dict)}
-        for key, value in infos.items():
+        for key, value in list(infos.items()):
             if isinstance(value, dict):
                 chapter_infos = value.copy()
                 chapter_infos.update(apply_to_all)
