@@ -27,7 +27,7 @@ you really want them to do.
 
 import random
 
-import tools
+import tools, base
 
 
 def varAnd(population, toolbox, cxpb, mutpb):
@@ -80,6 +80,164 @@ def varAnd(population, toolbox, cxpb, mutpb):
             del offspring[i].fitness.values
 
     return offspring
+
+class Popolation:
+    @property
+    def Size(self) -> float: return self._size
+    @property
+    def HallOfFame(self) -> tools.HallOfFame: return self._hall_of_fame
+    @property
+    def HallOfFameSize(self) -> int: return self._hall_of_fame_size
+    @property
+    def Cxpb(self) -> float: return self._cxpb
+    @property
+    def Mutpb(self) -> float: return self._mutpb
+    @property
+    def Toolbox(self) -> float: return self._toolbox
+
+    def __init__(self,
+        size,
+        cxpb,
+        mutpb,
+        hall_of_fame_size: int,
+        toolbox: base.Toolbox,
+        ind_creator,
+        ):
+        self.Inds = [ind_creator() for _ in range(size)]
+
+        self._size = size
+        self._hall_of_fame_size = hall_of_fame_size
+        self._hall_of_fame = None
+        if self._hall_of_fame_size > 0:
+            self._hall_of_fame = tools.HallOfFame(self._hall_of_fame_size)
+        self._cxpb = cxpb
+        self._mutpb = mutpb
+        self._toolbox = toolbox
+
+def eaSimpleMultiPop(
+    populations: List[Popolation],
+    ngen: int,
+    verbose: bool=__debug__,
+    stats: tools.Statistics=None,
+    stop_cond=None,
+    callback=None,
+    ) -> List[Popolation]:
+    """This algorithm reproduce the simplest evolutionary algorithm as
+    presented in chapter 7 of [Back2000]_ for several popultaions.
+
+    :param population: A list of individuals.
+    :param ngen: The number of generation.
+    :param stats: A :class:`~deap.tools.Statistics` object that is updated
+                  inplace, optional.
+    :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
+                       contain the best individuals, optional.
+    :param verbose: Whether or not to log the statistics.
+    :param stop_cond: Function returns True is solution has been found otherwise False. Function is like: def f(population, gen, halloffame=None): pass.
+    :param callback: Function for calling on last step of the loop. Function is like: def f(population, gen, halloffame=None): pass.
+    :returns: The final populations
+    :returns: A class:`~deap.tools.Logbook` with the statistics of the
+              evolution
+
+    The algorithm takes in a population and evolves it in place using the
+    :meth:`varAnd` method. It returns the optimized population and a
+    :class:`~deap.tools.Logbook` with the statistics of the evolution. The
+    logbook will contain the generation number, the number of evaluations for
+    each generation and the statistics if a :class:`~deap.tools.Statistics` is
+    given as argument. The *cxpb* and *mutpb* arguments are passed to the
+    :func:`varAnd` function. The pseudocode goes as follow ::
+
+        evaluate(population)
+        for g in range(ngen):
+            population = select(population, len(population))
+            offspring = varAnd(population, toolbox, cxpb, mutpb)
+            evaluate(offspring)
+            population = offspring
+
+    As stated in the pseudocode above, the algorithm goes as follow. First, it
+    evaluates the individuals with an invalid fitness. Second, it enters the
+    generational loop where the selection procedure is applied to entirely
+    replace the parental population. The 1:1 replacement ratio of this
+    algorithm **requires** the selection procedure to be stochastic and to
+    select multiple times the same individual, for example,
+    :func:`~deap.tools.selTournament` and :func:`~deap.tools.selRoulette`.
+    Third, it applies the :func:`varAnd` function to produce the next
+    generation population. Fourth, it evaluates the new individuals and
+    compute the statistics on this population. Finally, when *ngen*
+    generations are done, the algorithm returns a tuple with the final
+    population and a :class:`~deap.tools.Logbook` of the evolution.
+
+    .. note::
+
+        Using a non-stochastic selection method will result in no selection as
+        the operator selects *n* individuals from a pool of *n*.
+
+    This function expects the :meth:`toolbox.mate`, :meth:`toolbox.mutate`,
+    :meth:`toolbox.select` and :meth:`toolbox.evaluate` aliases to be
+    registered in the toolbox.
+
+    .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
+       Basic Algorithms and Operators", 2000.
+    """
+    logbook = tools.Logbook()
+    logbook.header = ['gen', 'nevals', 'pop_idx'] + (stats.fields if stats else [])
+
+    for pop_idx, population in enumerate(populations):
+        # Evaluate the individuals with an invalid fitness
+        invalid_ind = [ind for ind in population.Inds if not ind.fitness.valid]
+        fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
+        for ind, fit in zip(invalid_ind, fitnesses):
+            ind.fitness.values = fit
+
+        if population.Halloffame is not None:
+            population.Halloffame.update(population.Inds)
+
+        hof_size = len(halloffame.items) if halloffame is not None else 0
+
+        record = stats.compile(population.Inds) if stats else {}
+        logbook.record(gen=0, nevals=len(invalid_ind), pop_idx=pop_idx, **record)
+        if verbose:
+            print logbook.stream
+
+        # Begin the generational process
+        for gen in range(1, ngen + 1):
+            # Select the next generation individuals
+            offspring = population.Toolbox.select(population.Inds, len(population.Inds) - population.HallOfFameSize)
+
+            # Vary the pool of individuals
+            offspring = varAnd(offspring, population.Toolbox, population.Cxpb, population.Mutpb)
+
+            # Evaluate the individuals with an invalid fitness
+            invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
+            fitnesses = population.Toolbox.map(population.Toolbox.evaluate, invalid_ind)
+            for ind, fit in zip(invalid_ind, fitnesses):
+                ind.fitness.values = fit
+
+            # Update the hall of fame with the generated individuals
+            if population.Halloffame is not None:
+                offspring.extend(population.Halloffame.items)
+                population.Halloffame.update(offspring)
+
+            # Replace the current population by the offspring
+            population.Inds[:] = offspring
+
+            # Append the current generation statistics to the logbook
+            record = stats.compile(population.Inds) if stats else {}
+            logbook.record(gen=gen, nevals=len(invalid_ind), pop_idx=pop_idx, **record)
+            if verbose:
+                print logbook.stream
+
+            kvargs = {}
+            if population.Halloffame is not None:
+                kvargs['halloffame'] = population.Halloffame
+
+            if callback is not None:
+                callback(population.Inds, gen, **kvargs)
+
+            if stop_cond is not None:
+                if stop_cond(population.Inds, gen, **kvargs):
+                    break
+
+    return populations, logbook
 
 
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
