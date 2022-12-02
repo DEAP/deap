@@ -1329,6 +1329,77 @@ def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
     return new_ind1, new_ind2
 
 
+class MultiOutputTree(PrimitiveTree):
+    """Implementation with modification of multiple-output genetic programming tree [Zhang, Yun & Zhang, Mengjie. (2005).
+    A multiple-output program tree structure in genetic programming. 6-10.]
+
+        Modification: Modi node accepts only one argument.
+
+        >>> import numpy
+        >>> import random
+        >>> from deap import gp, creator
+        >>> num_outputs = 2
+        >>> pset = gp.PrimitiveSet("MAIN", 1)
+        >>> pset.addPrimitive(numpy.add, 2, name="vadd")
+        >>> pset.addPrimitive(numpy.multiply, 2, name="vmul")
+        >>> pset.addEphemeralConstant("rand101", lambda: random.randint(-1,1))
+        >>> for i in range(num_outputs):
+        >>>     modi_i = gp.Modi(i)
+        >>>     pset.addPrimitive(modi_i, 1, name=str(modi_i))
+        >>> creator.create("ModiTree", gp.MultiOutputTree, num_outputs=2)
+        >>> tree = creator.ModiTree(gp.genHalfAndHalf(pset=pset, min_=3, max_=3))
+        >>> print(f"tree: {tree}")
+        'tree: [modi0(modi1(ARG0)),modi1(ARG0)+modi1(modi0(modi1(ARG0)))]'
+        >>> print(f"eval: {gp.compile(tree, pset=pset)(1)}")
+        'eval: [1, 2]'
+    """
+    num_outputs = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.num_outputs is None:
+            raise Exception("Please initialize class attribute num_outputs")
+
+    def __str__(self):
+        """Return the expression in a human-readable string.
+        """
+        string_outputs = [""] * self.num_outputs
+        stack = []
+        for node in self:
+            stack.append((node, []))
+            while len(stack[-1][1]) == stack[-1][0].arity:
+                prim, args = stack.pop()
+                string = prim.format(*args)
+                if prim.name[:4] == "modi":
+                    index = int(prim.name[4:])
+                    if string_outputs[index] != "":
+                        string_outputs[index] += "+"
+                    string_outputs[index] += string
+                if len(stack) == 0:
+                    break  # If stack is empty, all nodes should have been seen
+                stack[-1][1].append(string)
+
+        string_outputs = [output if output else "0" for output in string_outputs]
+        return "[" + ",".join(string_outputs) + "]"
+
+
+class Modi:
+    """Container for associated output index, returns value of its argument on call. Implement modified Modi
+    node from [Zhang, Yun & Zhang, Mengjie. (2005). A multiple-output program tree structure in genetic programming.
+    6-10.]
+
+    Modification: Modi node accepts only one argument.
+    """
+    def __init__(self, index: int):
+        self.index = index
+
+    def __call__(self, x):
+        return x
+
+    def __str__(self):
+        return f"modi{self.index}"
+
+
 if __name__ == "__main__":
     import doctest
 
