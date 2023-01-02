@@ -177,8 +177,13 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         if halloffame is not None:
             halloffame.update(offspring)
 
-        # Replace the current population by the offspring
-        population[:] = offspring
+        if hasattr(toolbox, "replace"):
+            # Use replacement function to create the next population by
+            #   mixing individuals from the population and the offspring
+            population = toolbox.replace(population, offspring)
+        else:
+            # No replacement mechanism specified
+            population[:] = offspring
 
         # Append the current generation statistics to the logbook
         record = stats.compile(population) if stats else {}
