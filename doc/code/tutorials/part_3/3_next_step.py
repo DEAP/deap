@@ -17,8 +17,8 @@ toolbox.register("individual", tools.initRepeat, creator.Individual,
 
 ind1 = toolbox.individual()
 
-print ind1               # [0.86..., 0.27..., 0.70..., 0.03..., 0.87...]
-print ind1.fitness.valid # False
+print(ind1)               # [0.86..., 0.27..., 0.70..., 0.03..., 0.87...]
+print(ind1.fitness.valid) # False
 
 ## 3.2 Evaluation
 def evaluate(individual):
@@ -28,16 +28,16 @@ def evaluate(individual):
     return a, 1. / b
 
 ind1.fitness.values = evaluate(ind1)
-print ind1.fitness.valid    # True
-print ind1.fitness          # (2.73, 0.2)
+print(ind1.fitness.valid)    # True
+print(ind1.fitness)          # (2.73, 0.2)
 
 ## 3.3 Mutation
 mutant = toolbox.clone(ind1)
 ind2, = tools.mutGaussian(mutant, mu=0.0, sigma=0.2, indpb=0.2)
 del mutant.fitness.values
 
-print ind2 is mutant    # True
-print mutant is ind1    # False
+print(ind2 is mutant)    # True
+print(mutant is ind1)    # False
 
 ## 3.4 Crossover
 child1, child2 = [toolbox.clone(ind) for ind in (ind1, ind2)]
@@ -47,7 +47,7 @@ del child2.fitness.values
 
 ## 3.5 Selection
 selected = tools.selBest([child1, child2], 2)
-print child1 in selected	# True
+print(child1 in selected)	# True
 
 ## 3.5 Note
 LAMBDA = 10

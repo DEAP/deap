@@ -8,18 +8,18 @@ trigger: none
 jobs:
   - job: WindowsBuild
     pool:
-      vmImage: 'vs2017-win2016'
+      vmImage: 'windows-latest'
     strategy:
       matrix:
-        Python36_VS2017:
+        Python36:
           python.version: '3.6'
-        Python37_VS2017:
+        Python37:
           python.version: '3.7'
-        Python38_VS2017:
+        Python38:
           python.version: '3.8'
-        Python39_VS2017:
+        Python39:
           python.version: '3.9'
-        Python310_VS2017:
+        Python310:
           python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
@@ -35,23 +35,25 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
-  - job: macOS10_14Build
+  - job: macOS10_15Build
     pool:
-      vmImage: 'macOS-10.14'
+      vmImage: 'macOS-10.15'
     strategy:
       matrix:
-        Python36_macOS1014:
+        Python36:
           python.version: '3.6'
-        Python37_macOS1014:
+        Python37:
           python.version: '3.7'
-        Python38_macOS1014:
+        Python38:
           python.version: '3.8'
-        Python39_macOS1014:
+        Python39:
           python.version: '3.9'
-        Python310_macOS1014:
+        Python310:
           python.version: '3.10'
     steps:
     - task: UsePythonVersion@0
@@ -67,53 +69,135 @@ jobs:
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
-  - job: Manylinux2010Build
+  - job: macOS11Build
     pool:
-      vmImage: 'ubuntu-16.04'
-    container: quay.io/pypa/manylinux2010_x86_64:latest
-    variables:
-      python: /opt/python/cp37-cp37m/bin/python
+      vmImage: 'macOS-11'
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+        Python38:
+          python.version: '3.8'
+        Python39:
+          python.version: '3.9'
+        Python310:
+          python.version: '3.10'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+
+  - job: macOS12Build
+    pool:
+      vmImage: 'macOS-12'
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+        Python38:
+          python.version: '3.8'
+        Python39:
+          python.version: '3.9'
+        Python310:
+          python.version: '3.10'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+
+
+  - job: Manylinux2014Build
+    pool:
+      vmImage: 'ubuntu-latest'
+    container: quay.io/pypa/manylinux2014_x86_64:latest
+    strategy:
+      matrix:
+        Python36:
+          python.version: 'cp36-cp36m'
+        Python37:
+          python.version: 'cp37-cp37m'
+        Python38:
+          python.version: 'cp38-cp38'
+        Python39:
+          python.version: 'cp39-cp39'
+        Python310:
+          python.version: 'cp310-cp310'
     steps:
     - script: |
-        for PYBIN in /opt/python/*/bin; do
-          "${PYBIN}/pip" install --user numpy twine
-        done
+        "${PYBIN}/python" -m pip install --upgrade pip
+        "${PYBIN}/python" -m pip install numpy twine
       displayName: 'Install dependencies and build tools'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
     - script: |
-        for PYBIN in /opt/python/*/bin; do
-          "${PYBIN}/pip" wheel . -w wheelhouse/
-        done
+        "${PYBIN}/python" -m pip wheel . -w wheelhouse/
       displayName: 'Build wheels'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
     - script: |
-        for whl in wheelhouse/deap*.whl; do
-          auditwheel repair "$whl" --plat manylinux2010_x86_64 -w wheelhouse-manylinux/
-        done
+        auditwheel repair wheelhouse/deap*.whl --plat manylinux2014_x86_64 -w wheelhouse-manylinux/
       displayName: 'Audit wheels'
     - script: |
-        $(python) -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
+        "${PYBIN}/python" -m twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar wheelhouse-manylinux/*
       displayName: 'Publish wheel to PyPi'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
 
   - job: AArch64_Manylinux2014Build
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
     strategy:
       matrix:
-        Py36 Arm64:
+        Python36:
           python.version: 'cp36-cp36m'
           manylinux: 'manylinux_aarch64'
-        Py37 Arm64:
+        Python37:
           python.version: 'cp37-cp37m'
           manylinux: 'manylinux_aarch64'
-        Py38 Arm64:
+        Python38:
           python.version: 'cp38-cp38'
           manylinux: 'manylinux_aarch64'
-        Py39 Arm64:
+        Python39:
           python.version: 'cp39-cp39'
           manylinux: 'manylinux_aarch64'
-        Py310 Arm64:
+        Python310:
           python.version: 'cp310-cp310'
           manylinux: 'manylinux_aarch64'
     steps:
