@@ -2,6 +2,7 @@ import math
 import random
 
 from itertools import repeat
+from past.builtins import xrange
 
 try:
     from collections.abc import Sequence
@@ -172,6 +173,34 @@ def mutUniformInt(individual, low, up, indpb):
     return individual,
 
 
+def mutInversion(individual):
+    """Select two points (indices) in the individual, reverse the order of the
+    attributes between these points [low, high] and return the mutated individual.
+    This implementation allows for the length of the inversion to be 0 and 1,
+    which would cause no change. This mutation is useful in situations where the
+    order/adjacency of elements is important.
+
+    :param individual: Individual to be mutated.
+    :returns: A tuple of one individual.
+
+    This function uses the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
+    size = len(individual)
+    if size == 0:
+        return individual,
+
+    index_one = random.randrange(size)
+    index_two = random.randrange(size)
+    start_index = min(index_one, index_two)
+    end_index = max(index_one, index_two)
+
+    # Reverse the contents of the individual between the indices
+    individual[start_index:end_index] = individual[start_index:end_index][::-1]
+
+    return individual,
+
+
 ######################################
 # ES Mutations                       #
 ######################################
@@ -215,4 +244,4 @@ def mutESLogNormal(individual, c, indpb):
 
 
 __all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',
-           'mutFlipBit', 'mutUniformInt', 'mutESLogNormal']
+           'mutFlipBit', 'mutUniformInt', 'mutInversion', 'mutESLogNormal']
