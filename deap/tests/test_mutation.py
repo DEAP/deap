@@ -5,9 +5,10 @@ from deap.tools.mutation import mutInversion
 
 class MutationTest(unittest.TestCase):
 
-    def test_mutInverstion_empty_chromosome_raises_value_error_from_randrange(self):
-        with self.assertRaises(ValueError, msg="empty range for randrange()"):
-            mutInversion([])
+    def test_mutInverstion_size_zero_chromosome_returns_unchanged_chromosome_in_tuple(self):
+        chromosome = []
+        expected = []
+        self.assertEqual((expected,), mutInversion(chromosome))
 
     def test_mutInversion_size_one_chromosome_returns_unchanged_chromosome_in_tuple(self):
         chromosome = ["a"]
