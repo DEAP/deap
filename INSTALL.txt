@@ -15,7 +15,7 @@ Options
 Prefix
 ++++++
 
-You might want to install this software somewhere else by addind the prefix options to the installation.
+You might want to install this software somewhere else by adding the prefix options to the installation.
 
 $ python setup.py install --prefix=somewhere/else
 
