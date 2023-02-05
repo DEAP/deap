@@ -187,9 +187,10 @@ def mutInversion(individual):
     This function uses the :func:`~random.random` function from the python base
     :mod:`random` module.
     """
-
-    # Select two random indices
     size = len(individual)
+    if size == 0:
+        return individual,
+
     index_one = random.randrange(size)
     index_two = random.randrange(size)
     start_index = min(index_one, index_two)
