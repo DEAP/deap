@@ -67,6 +67,49 @@ def selTournament(individuals, k, tournsize, fit_attr="fitness"):
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
     return chosen
 
+def selTournamentFineGrained(individuals, k, fgtournsize, fit_attr="fitness"):
+    """The ratio between exploration and exploitation governs the search process. 
+    Level of exploration(looking for new solutions) and exploitation (using previously 
+    acquired knowledge) is determined by the tournament size.
+    Very often, the search process converges too slow with smaller tournament size and too fast with bigger tournament size. 
+    Fine Grained Tournament Selection (denoted as FGTS) preserves good features of the tournament selection and 
+    (at the same time) allows that  setting of the ratio between exploration and exploitation becomes more precise.
+    FGTS is controlled by real value parameter *fgtournsize* (the desired average tournament size) instead of 
+    the integer parameter. 
+    Similarly to the tournament selection, an individual is chosen if it is the best individual on the tournament. 
+    However, unlike tournament selection, size of the tournament is not unique in the whole population, i.e., tournaments 
+    with different number of competitors can be held within one step of the selection. (see [Filipovic2003fgts]_)
+    
+    Procedure selects the best individual among (in average) *fgtournsize* randomly 
+    chosen individuals, *k* times. The list returned contains
+    references to the input *individuals*.
+    
+    :param individuals: A list of individuals to select from.
+    :param k: The number of individuals to select.
+    :param fgtournsize: The average number of individuals participating in each 
+        tournament.
+    :param fit_attr: The attribute of individuals to use as selection criterion
+    :returns: A list of selected individuals.
+    
+    This function uses the :func:`~random.choice` function from the python base
+    :mod:`random` module.
+    
+    .. [Filipovic2003fgts] Filipovic, 2003, Fine-grained Tournament Selection Operator in Genetic Algorithms. 
+    Available from: https://www.cai.sk/ojs/index.php/cai/article/view/452 """
+    chosen = []
+    tournsizeminus = int(floor(fgtournsize))
+    tournsizeplus = tournsizeminus + 1
+    kminus = int(ceil(k*(tournsizeplus - fgtournsize)) )
+    kplus = k - kminus
+    for i in xrange(kminus):
+        aspirants = selRandom(individuals, tournsizeminus)
+        chosen.append(max(aspirants, key=attrgetter(fit_attr)))
+    for i in xrange(kplus):
+        aspirants = selRandom(individuals, tournsizeplus)
+        chosen.append(max(aspirants, key=attrgetter(fit_attr)))
+    return chosen
+
+
 def selRoulette(individuals, k, fit_attr="fitness"):
     """Select *k* individuals from the input *individuals* using *k*
     spins of a roulette. The selection is made by looking only at the first
