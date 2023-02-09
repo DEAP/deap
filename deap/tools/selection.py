@@ -360,6 +360,7 @@ def selAutomaticEpsilonLexicase(individuals, k):
 
 
 __all__ = ['selRandom', 'selBest', 'selWorst', 'selRoulette',
-           'selTournament', 'selDoubleTournament', 'selStochasticUniversalSampling',
+           'selTournament', 'selTournamentFineGrained',
+           'selDoubleTournament', 'selStochasticUniversalSampling',
            'selLexicase', 'selEpsilonLexicase', 'selAutomaticEpsilonLexicase']
 
