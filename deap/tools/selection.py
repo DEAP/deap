@@ -102,10 +102,10 @@ def selTournamentFineGrained(individuals, k, fgtournsize, fit_attr="fitness"):
     tournsizeplus = tournsizeminus + 1
     kminus = int(math.ceil(k*(tournsizeplus - fgtournsize)) )
     kplus = k - kminus
-    for i in xrange(kminus):
+    for i in range(kminus):
         aspirants = selRandom(individuals, tournsizeminus)
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
-    for i in xrange(kplus):
+    for i in range(kplus):
         aspirants = selRandom(individuals, tournsizeplus)
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
     return chosen
