@@ -97,9 +97,9 @@ def selTournamentFineGrained(individuals, k, fgtournsize, fit_attr="fitness"):
     .. [Filipovic2003fgts] Filipovic, 2003, Fine-grained Tournament Selection Operator in Genetic Algorithms. 
     Available from: https://www.cai.sk/ojs/index.php/cai/article/view/452 """
     chosen = []
-    tournsizeminus = int(floor(fgtournsize))
+    tournsizeminus = int(math.floor(fgtournsize))
     tournsizeplus = tournsizeminus + 1
-    kminus = int(ceil(k*(tournsizeplus - fgtournsize)) )
+    kminus = int(math.ceil(k*(tournsizeplus - fgtournsize)) )
     kplus = k - kminus
     for i in xrange(kminus):
         aspirants = selRandom(individuals, tournsizeminus)
