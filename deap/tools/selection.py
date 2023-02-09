@@ -94,7 +94,7 @@ def selTournamentFineGrained(individuals, k, fgtournsize, fit_attr="fitness"):
     
     This function uses the :func:`~random.choice` function from the python base
     :mod:`random` module.
-    
+        
     .. [Filipovic2003fgts] Filipovic, 2003, Fine-grained Tournament Selection Operator in Genetic Algorithms. 
     Available from: https://www.cai.sk/ojs/index.php/cai/article/view/452 """
     chosen = []
