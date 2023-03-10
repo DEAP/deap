@@ -85,13 +85,11 @@ def selRoulette(individuals, k, fit_attr="fitness"):
        or when the fitness can be smaller or equal to 0.
     """
 
-    fits = [getattr(ind, fit_attr).values[0] for ind in individuals]
+    fits = [getattr(ind,fit_attr).values[0] for ind in individuals]
     sum_fits = sum(fits)
-    fit_proportions = [i/sum_fits for i in fits]
+    fitness_proportions = [i/sum_fits for i in fits]
     
-    chosen_positions = np.random.choice(k,k,p=fit_proportions)
-    chosen = [individuals[position] for position in chosen_positions]
-
+    chosen = random.choices(individuals, weights=fitness_proportions, k=k)
     return chosen
 
 
