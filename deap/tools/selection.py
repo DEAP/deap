@@ -78,7 +78,8 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     :param fit_attr: The attribute of individuals to use as selection criterion
     :returns: A list of selected individuals.
 
-    This function uses the :func:`random.choice()` function from the NumPy library
+    This function uses the :func:`~random.choices` function from the python base
+    :mod:`random` module.
 
     .. warning::
        The roulette selection by definition cannot be used for minimization
@@ -87,7 +88,10 @@ def selRoulette(individuals, k, fit_attr="fitness"):
 
     fits = [getattr(ind,fit_attr).values[0] for ind in individuals]
     sum_fits = sum(fits)
-    fitness_proportions = [i/sum_fits for i in fits]
+    if sum_fits == 0:
+        # If all individuals have zero fitness, evenly distribute probability of selection
+        fitness_proportions = [1/k for i in fits] 
+    else: fitness_proportions = [i/sum_fits for i in fits]
     
     chosen = random.choices(individuals, weights=fitness_proportions, k=k)
     return chosen
