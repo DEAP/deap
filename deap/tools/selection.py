@@ -78,25 +78,19 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     :param fit_attr: The attribute of individuals to use as selection criterion
     :returns: A list of selected individuals.
 
-    This function uses the :func:`~random.random` function from the python base
-    :mod:`random` module.
+    This function uses the :func:`random.choice()` function from the NumPy library
 
     .. warning::
        The roulette selection by definition cannot be used for minimization
        or when the fitness can be smaller or equal to 0.
     """
 
-    s_inds = sorted(individuals, key=attrgetter(fit_attr), reverse=True)
-    sum_fits = sum(getattr(ind, fit_attr).values[0] for ind in individuals)
-    chosen = []
-    for i in range(k):
-        u = random.random() * sum_fits
-        sum_ = 0
-        for ind in s_inds:
-            sum_ += getattr(ind, fit_attr).values[0]
-            if sum_ > u:
-                chosen.append(ind)
-                break
+    fits = [getattr(ind, fit_attr).values[0] for ind in individuals]
+    sum_fits = sum(fits)
+    fit_proportions = [i/sum_fits for i in fits]
+    
+    chosen_positions = np.random.choice(k,k,p=fit_proportions)
+    chosen = [individuals[position] for position in chosen_positions]
 
     return chosen
 
