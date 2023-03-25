@@ -23,7 +23,7 @@ argument containing the path of the checkpoint file to restore. ::
     def main(checkpoint=None):
         if checkpoint:
             # A file name has been given, then load the data from the file
-            with open(checkpoint, "r") as cp_file:
+            with open(checkpoint, "rb") as cp_file:
                 cp = pickle.load(cp_file)
             population = cp["population"]
             start_gen = cp["generation"]
