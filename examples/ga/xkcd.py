@@ -59,7 +59,7 @@ def evalXKCD(individual, target_price):
     return abs(price - target_price), max(times)
 
 def cxCounter(ind1, ind2, indpb):
-    """Swaps the number of perticular items between two individuals"""
+    """Swaps the number of particular items between two individuals"""
     for key in ITEMS.keys():
         if random.random() < indpb:
             ind1[key], ind2[key] = ind2[key], ind1[key]

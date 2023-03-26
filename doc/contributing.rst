@@ -71,7 +71,7 @@ Same as PEP8.
 Imports
 +++++++
 
-First imports in a file are the standard library module, then come the imports of eap module, and finally the custom module for a problem. Each block of imports should be separated by a new line.
+First imports in a file are the standard library module, then come the imports of deap module, and finally the custom module for a problem. Each block of imports should be separated by a new line.
 
 ::
 
