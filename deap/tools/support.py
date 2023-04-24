@@ -1,5 +1,3 @@
-import pickle
-
 from bisect import bisect_right
 from collections import defaultdict
 from copy import deepcopy
@@ -64,8 +62,8 @@ class History(object):
     """
     def __init__(self):
         self.genealogy_index = 0
-        self.genealogy_history = dict()
-        self.genealogy_tree = dict()
+        self.genealogy_history = {}
+        self.genealogy_tree = {}
 
     def update(self, individuals):
         """Update the history with the new *individuals*. The index present in
@@ -173,7 +171,7 @@ class Statistics(object):
     """
     def __init__(self, key=identity):
         self.key = key
-        self.functions = dict()
+        self.functions = {}
         self.fields = []
 
     def register(self, name, function, *args, **kargs):
@@ -199,7 +197,7 @@ class Statistics(object):
         """
         values = tuple(self.key(elem) for elem in data)
 
-        entry = dict()
+        entry = {}
         for key, func in self.functions.items():
             entry[key] = func(values)
         return entry
@@ -482,7 +480,7 @@ class Logbook(list):
         return "\n".join(text)
 
 
-class HallOfFame(object):
+class HallOfFame():
     """The hall of fame contains the best individual that ever lived in the
     population during the evolution. It is lexicographically sorted at all
     time so that the first element of the hall of fame is the individual that
@@ -505,8 +503,8 @@ class HallOfFame(object):
     """
     def __init__(self, maxsize, similar=eq):
         self.maxsize = maxsize
-        self.keys = list()
-        self.items = list()
+        self.keys = []
+        self.items = []
         self.similar = similar
 
     def update(self, population):
@@ -638,9 +636,7 @@ __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistic
 
 if __name__ == "__main__":
     import doctest
-    from operator import itemgetter
 
-    import numpy
     doctest.run_docstring_examples(Statistics, globals())
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.compile, globals())

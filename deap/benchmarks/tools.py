@@ -22,7 +22,7 @@ except ImportError:
     # fallback on python version
     from ..tools._hypervolume import pyhv as hv
 
-class translate(object):
+class translate():
     """Decorator for evaluation functions, it translates the objective
     function by *vector* which should be the same length as the individual
     size. When called the decorated function should take as first argument the
@@ -61,7 +61,7 @@ class translate(object):
         """
         self.vector = vector
 
-class rotate(object):
+class rotate():
     """Decorator for evaluation functions, it rotates the objective function
     by *matrix* which should be a valid orthogonal NxN rotation matrix, with N
     the length of an individual. When called the decorated function should
@@ -114,7 +114,7 @@ class rotate(object):
         """
         self.matrix = numpy.linalg.inv(matrix)
 
-class noise(object):
+class noise():
     """Decorator for evaluation functions, it evaluates the objective function
     and adds noise by calling the function(s) provided in the *noise*
     argument. The noise functions are called without any argument, consider
@@ -139,7 +139,7 @@ class noise(object):
         @wraps(func)
         def wrapper(individual, *args, **kargs):
             result = func(individual, *args, **kargs)
-            noisy = list()
+            noisy = []
             for r, f in zip(result, self.rand_funcs):
                 if f is None:
                     noisy.append(r)
@@ -168,7 +168,7 @@ class noise(object):
         except TypeError:
             self.rand_funcs = repeat(noise)
 
-class scale(object):
+class scale():
     """Decorator for evaluation functions, it scales the objective function by
     *factor* which should be the same length as the individual size. When
     called the decorated function should take as first argument the individual
@@ -209,7 +209,7 @@ class scale(object):
         # objective function
         self.factor = tuple(1.0/f for f in factor)
 
-class bound(object):
+class bound():
     """Decorator for crossover and mutation functions, it changes the
     individuals after the modification is done to bring it back in the allowed
     *bounds*. The *bounds* are functions taking individual and returning
@@ -240,17 +240,17 @@ class bound(object):
         wrapper.bound = self.bound
         return wrapper
 
-    def __init__(self, bounds, type):
+    def __init__(self, bounds, typ):
         try:
             self.bounds = tuple(bounds)
         except TypeError:
             self.bounds = repeat(bounds)
 
-        if type == "mirror":
+        if typ == "mirror":
             self.bound = self._mirror
-        elif type == "wrap":
+        elif typ == "wrap":
             self.bound = self._wrap
-        elif type == "clip":
+        elif typ == "clip":
             self.bound = self._clip
 
 def diversity(first_front, first, last):

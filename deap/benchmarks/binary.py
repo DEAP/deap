@@ -14,7 +14,6 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 from functools import wraps
-import math
 
 def bin2float(min_, max_, nbits):
     """Convert a binary array into an array of float where each
@@ -45,7 +44,6 @@ def trap(individual):
     k = len(individual)
     if u == k:
         return k
-    else:
         return k - 1 - u
 
 
@@ -54,7 +52,6 @@ def inv_trap(individual):
     k = len(individual)
     if u == 0:
         return k
-    else:
         return u - 1
 
 

@@ -22,8 +22,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from math import log, floor
-import random
 import warnings
 
 import numpy
@@ -62,12 +60,6 @@ class _HyperVolume:
         that the reference point is [0, ..., 0].
 
         """
-
-        def weaklyDominates(point, other):
-            for i in range(len(point)):
-                if point[i] > other[i]:
-                    return False
-            return True
 
         relevantPoints = []
         referencePoint = self.referencePoint

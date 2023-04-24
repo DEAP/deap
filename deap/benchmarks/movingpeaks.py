@@ -31,7 +31,7 @@ except:
     from collections import Sequence
 
 def cone(individual, position, height, width):
-    """The cone peak function to be used with scenario 2 and 3.
+    r"""The cone peak function to be used with scenario 2 and 3.
 
     :math:`f(\mathbf{x}) = h - w \sqrt{\sum_{i=1}^N (x_i - p_i)^2}`
 
@@ -41,14 +41,14 @@ def cone(individual, position, height, width):
         value += (x - p)**2
     return height - width * math.sqrt(value)
 
-def sphere(individual, position, height, width):
+def sphere(individual, position, height, _):
     value = 0.0
     for x, p in zip(individual, position):
         value += (x - p)**2
     return height * value
 
 def function1(individual, position, height, width):
-    """The function1 peak function to be used with scenario 1.
+    r"""The function1 peak function to be used with scenario 1.
 
     :math:`f(\mathbf{x}) = \\frac{h}{1 + w \sqrt{\sum_{i=1}^N (x_i - p_i)^2}}`
 
@@ -182,7 +182,7 @@ class MovingPeaks:
     def globalMaximum(self):
         """Returns the global maximum value and position."""
         # The global maximum is at one peak's position
-        potential_max = list()
+        potential_max = []
         for func, pos, height, width in zip(self.peaks_function,
                                             self.peaks_position,
                                             self.peaks_height,
@@ -196,7 +196,7 @@ class MovingPeaks:
         """
         # The maximums are at the peaks position but might be swallowed by 
         # other peaks
-        maximums = list()
+        maximums = []
         for func, pos, height, width in zip(self.peaks_function,
                                             self.peaks_position,
                                             self.peaks_height,

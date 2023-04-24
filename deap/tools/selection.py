@@ -62,7 +62,7 @@ def selTournament(individuals, k, tournsize, fit_attr="fitness"):
     :mod:`random` module.
     """
     chosen = []
-    for i in range(k):
+    for _ in range(k):
         aspirants = selRandom(individuals, tournsize)
         chosen.append(max(aspirants, key=attrgetter(fit_attr)))
     return chosen
@@ -89,7 +89,7 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     s_inds = sorted(individuals, key=attrgetter(fit_attr), reverse=True)
     sum_fits = sum(getattr(ind, fit_attr).values[0] for ind in individuals)
     chosen = []
-    for i in range(k):
+    for _ in range(k):
         u = random.random() * sum_fits
         sum_ = 0
         for ind in s_inds:
@@ -146,7 +146,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _sizeTournament(individuals, k, select):
         chosen = []
-        for i in range(k):
+        for _ in range(k):
             # Select two individuals from the population
             # The first individual has to be the shortest
             prob = parsimony_size / 2.
@@ -166,7 +166,7 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
 
     def _fitTournament(individuals, k, select):
         chosen = []
-        for i in range(k):
+        for _ in range(k):
             aspirants = select(individuals, k=fitness_size)
             chosen.append(max(aspirants, key=attrgetter(fit_attr)))
         return chosen
@@ -221,7 +221,7 @@ def selLexicase(individuals, k):
     """
     selected_individuals = []
 
-    for i in range(k):
+    for _ in range(k):
         fit_weights = individuals[0].fitness.weights
 
         candidates = individuals
@@ -253,7 +253,7 @@ def selEpsilonLexicase(individuals, k, epsilon):
     """
     selected_individuals = []
 
-    for i in range(k):
+    for _ in range(k):
         fit_weights = individuals[0].fitness.weights
 
         candidates = individuals
@@ -289,7 +289,7 @@ def selAutomaticEpsilonLexicase(individuals, k):
     """
     selected_individuals = []
 
-    for i in range(k):
+    for _ in range(k):
         fit_weights = individuals[0].fitness.weights
 
         candidates = individuals

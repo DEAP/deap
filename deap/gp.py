@@ -209,7 +209,6 @@ class Primitive(object):
         if type(self) is type(other):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
-        else:
             return NotImplemented
 
 
@@ -236,7 +235,6 @@ class Terminal(object):
         if type(self) is type(other):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
-        else:
             return NotImplemented
 
 
@@ -271,7 +269,7 @@ class PrimitiveSetTyped(object):
         # being polluted by builtins function when evaluating
         # GP expression.
         self.context = {"__builtins__": None}
-        self.mapping = dict()
+        self.mapping = {}
         self.terms_count = 0
         self.prims_count = 0
 
@@ -401,7 +399,7 @@ class PrimitiveSetTyped(object):
                 if class_.func is not ephemeral:
                     raise Exception("Ephemerals with different functions should "
                                     "be named differently, even between psets.")
-                elif class_.ret is not ret_type:
+                if class_.ret is not ret_type:
                     raise Exception("Ephemerals with the same name and function "
                                     "should have the same type, even between psets.")
             else:
@@ -1039,7 +1037,6 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
 
         if producesizes:
             return producedpop, producedpopsizes
-        else:
             return producedpop
 
     def halflifefunc(x):
@@ -1192,8 +1189,8 @@ def graph(expr):
        out of order when using `NetworX <http://networkx.github.com/>`_.
     """
     nodes = list(range(len(expr)))
-    edges = list()
-    labels = dict()
+    edges = []
+    labels = {}
 
     stack = []
     for i, node in enumerate(expr):
@@ -1212,7 +1209,7 @@ def graph(expr):
 # GSGP Mutation                      #
 ######################################
 
-def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
+def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, minm=2, maxm=6):
     """
     Implementation of the Semantic Mutation operator. [Geometric semantic genetic programming, Moraglio et al., 2012]
     mutated_individual = individual + logistic * (random_tree1 - random_tree2)
@@ -1221,8 +1218,8 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     :param gen_func: function responsible for the generation of the random tree that will be used during the mutation
     :param pset: Primitive Set, which contains terminal and operands to be used during the evolution
     :param ms: Mutation Step
-    :param min: min depth of the random tree
-    :param max: max depth of the random tree
+    :param minm: min depth of the random tree
+    :param maxm: max depth of the random tree
     :return: mutated individual
 
     The mutated contains the original individual
@@ -1244,8 +1241,8 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     for p in ['lf', 'mul', 'add', 'sub']:
         assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic mutation"
 
-    tr1 = gen_func(pset, min, max)
-    tr2 = gen_func(pset, min, max)
+    tr1 = gen_func(pset, minm, maxm)
+    tr2 = gen_func(pset, minm, maxm)
     # Wrap mutation with a logistic function
     tr1.insert(0, pset.mapping['lf'])
     tr2.insert(0, pset.mapping['lf'])
@@ -1267,7 +1264,7 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     return new_ind,
 
 
-def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
+def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, minm=2, maxm=6):
     """
     Implementation of the Semantic Crossover operator [Geometric semantic genetic programming, Moraglio et al., 2012]
     offspring1 = random_tree1 * ind1 + (1 - random_tree1) * ind2
@@ -1304,7 +1301,7 @@ def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
     for p in ['lf', 'mul', 'add', 'sub']:
         assert p in pset.mapping, "A '" + p + "' function is required in order to perform semantic crossover"
 
-    tr = gen_func(pset, min, max)
+    tr = gen_func(pset, minm, maxm)
     tr.insert(0, pset.mapping['lf'])
     new_ind1 = ind1
     new_ind1.insert(0, pset.mapping["mul"])

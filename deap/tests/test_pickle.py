@@ -4,7 +4,6 @@ import unittest
 import array
 import pickle
 import operator
-import platform
 
 import numpy
 

@@ -34,7 +34,7 @@ def selNSGA2(individuals, k, nd='standard'):
     elif nd == 'log':
         pareto_fronts = sortLogNondominated(individuals, k)
     else:
-        raise Exception('selNSGA2: The choice of non-dominated sorting '
+        raise ValueError('selNSGA2: The choice of non-dominated sorting '
                         'method "{0}" is invalid.'.format(nd))
 
     for front in pareto_fronts:
@@ -135,8 +135,8 @@ def assignCrowdingDist(individuals):
         if crowd[-1][0][i] == crowd[0][0][i]:
             continue
         norm = nobj * float(crowd[-1][0][i] - crowd[0][0][i])
-        for prev, cur, next in zip(crowd[:-2], crowd[1:-1], crowd[2:]):
-            distances[cur[1]] += (next[0][i] - prev[0][i]) / norm
+        for prev, cur, nxt in zip(crowd[:-2], crowd[1:-1], crowd[2:]):
+            distances[cur[1]] += (nxt[0][i] - prev[0][i]) / norm
 
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
@@ -169,12 +169,12 @@ def selTournamentDCD(individuals, k):
     def tourn(ind1, ind2):
         if ind1.fitness.dominates(ind2.fitness):
             return ind1
-        elif ind2.fitness.dominates(ind1.fitness):
+        if ind2.fitness.dominates(ind1.fitness):
             return ind2
 
         if ind1.fitness.crowding_dist < ind2.fitness.crowding_dist:
             return ind2
-        elif ind1.fitness.crowding_dist > ind2.fitness.crowding_dist:
+        if ind1.fitness.crowding_dist > ind2.fitness.crowding_dist:
             return ind1
 
         if random.random() <= 0.5:
@@ -214,7 +214,7 @@ def isDominated(wvalues1, wvalues2):
     for self_wvalue, other_wvalue in zip(wvalues1, wvalues2):
         if self_wvalue > other_wvalue:
             return False
-        elif self_wvalue < other_wvalue:
+        if self_wvalue < other_wvalue:
             not_equal = True
     return not_equal
 
@@ -227,7 +227,6 @@ def median(seq, key=identity):
     length = len(seq)
     if length % 2 == 1:
         return key(sseq[(length - 1) // 2])
-    else:
         return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
 
 def sortLogNondominated(individuals, k, first_front_only=False):
@@ -271,7 +270,6 @@ def sortLogNondominated(individuals, k, first_front_only=False):
             if count >= k:
                 return pareto_fronts[:i+1]
         return pareto_fronts
-    else:
         return pareto_fronts[0]
 
 def sortNDHelperA(fitnesses, obj, front):
@@ -320,7 +318,6 @@ def splitA(fitnesses, obj):
 
     if balance_a <= balance_b:
         return best_a, worst_a
-    else:
         return best_b, worst_b
 
 def sweepA(fitnesses, front):
@@ -351,7 +348,7 @@ def sortNDHelperB(best, worst, obj, front):
     if len(worst) == 0 or len(best) == 0:
         #One of the lists is empty: nothing to do
         return
-    elif len(best) == 1 or len(worst) == 1:
+    if len(best) == 1 or len(worst) == 1:
         #One of the lists has one individual: compare directly
         for hi in worst:
             for li in best:
@@ -407,7 +404,6 @@ def splitB(best, worst, obj):
 
     if balance_a <= balance_b:
         return best1_a, best2_a, worst1_a, worst2_a
-    else:
         return best1_b, best2_b, worst1_b, worst2_b
 
 def sweepB(best, worst, front):
@@ -446,7 +442,7 @@ def sweepB(best, worst, front):
 NSGA3Memory = namedtuple("NSGA3Memory", ["best_point", "worst_point", "extreme_points"])
 
 
-class selNSGA3WithMemory(object):
+class selNSGA3WithMemory():
     """Class version of NSGA-III selection including memory for best, worst and
     extreme points. Registering this operator in a toolbox is a bit different
     than classical operators, it requires to instantiate the class instead
@@ -519,7 +515,7 @@ def selNSGA3(individuals, k, ref_points, nd="log", best_point=None,
     elif nd == "log":
         pareto_fronts = sortLogNondominated(individuals, k)
     else:
-        raise Exception("selNSGA3: The choice of non-dominated sorting "
+        raise ValueError("selNSGA3: The choice of non-dominated sorting "
                         "method '{0}' is invalid.".format(nd))
 
     # Extract fitnesses as a numpy array in the nd-sort order
@@ -709,7 +705,7 @@ def selSPEA2(individuals, k):
     K = math.sqrt(N)
     strength_fits = [0] * N
     fits = [0] * N
-    dominating_inds = [list() for i in range(N)]
+    dominating_inds = [[] for i in range(N)]
 
     for i, ind_i in enumerate(individuals):
         for j, ind_j in enumerate(individuals[i+1:], i+1):
@@ -784,7 +780,7 @@ def selSPEA2(individuals, k):
                     if dist_i_sorted_j < dist_min_sorted_j:
                         min_pos = i
                         break
-                    elif dist_i_sorted_j > dist_min_sorted_j:
+                    if dist_i_sorted_j > dist_min_sorted_j:
                         break
 
             # Remove minimal distance from sorted_indices
@@ -816,7 +812,6 @@ def _randomizedSelect(array, begin, end, i):
     k = q - begin + 1
     if i < k:
         return _randomizedSelect(array, begin, q, i)
-    else:
         return _randomizedSelect(array, q + 1, end, i - k)
 
 def _randomizedPartition(array, begin, end):
