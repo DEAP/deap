@@ -22,8 +22,6 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from math import log, floor
-import random
 import warnings
 
 import numpy
@@ -313,8 +311,6 @@ if __name__ == "__main__":
     except ImportError:
         hv = None
         print("Cannot import C version of hypervolume")
-
-    from deap.tools import sortLogNondominated
 
     pointset = [(a, a) for a in numpy.arange(1, 0, -0.01)]
     ref = numpy.array([2, 2])

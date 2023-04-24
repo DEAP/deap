@@ -174,8 +174,8 @@ def ackley(individual):
        :width: 67 %
     """
     N = len(individual)
-    return 20 - 20 * exp(-0.2*sqrt(1.0/N * sum(x**2 for x in individual))) \
-            + e - exp(1.0/N * sum(cos(2*pi*x) for x in individual)),
+    return 20 - 20 * exp(-0.2 * sqrt(1.0 / N * sum(x**2 for x in individual))) \
+        + e - exp(1.0 / N * sum(cos(2 * pi * x) for x in individual)),
 
 
 def bohachevsky(individual):
@@ -198,7 +198,7 @@ def bohachevsky(individual):
     .. plot:: code/benchmarks/bohachevsky.py
        :width: 67 %
     """
-    return sum(x**2 + 2*x1**2 - 0.3*cos(3*pi*x) - 0.4*cos(4*pi*x1) + 0.7
+    return sum(x**2 + 2 * x1**2 - 0.3 * cos(3 * pi * x) - 0.4 * cos(4 * pi * x1) + 0.7
                 for x, x1 in zip(individual[:-1], individual[1:])),
 
 
@@ -222,8 +222,8 @@ def griewank(individual):
     .. plot:: code/benchmarks/griewank.py
        :width: 67 %
     """
-    return 1.0/4000.0 * sum(x**2 for x in individual) - \
-        reduce(mul, (cos(x/sqrt(i+1.0)) for i, x in enumerate(individual)), 1) + 1,
+    return 1.0 / 4000.0 * sum(x ** 2 for x in individual) - \
+        reduce(mul, (cos(x / sqrt(i + 1.0)) for i, x in enumerate(individual)), 1) + 1,
 
 
 def rastrigin(individual):
@@ -257,8 +257,8 @@ def rastrigin_scaled(individual):
         10\cos\left(2\pi 10^{\left(\frac{i-1}{N-1}\right)} x_i \right)`
     """
     N = len(individual)
-    return 10*N + sum((10**(i/(N-1))*x)**2 -
-                      10*cos(2*pi*10**(i/(N-1))*x) for i, x in enumerate(individual)),
+    return 10 * N + sum((10 ** (i / (N - 1)) * x) ** 2 -
+                        10 * cos(2 * pi * 10 ** (i / (N - 1)) * x) for i, x in enumerate(individual)),
 
 
 def rastrigin_skew(individual):
@@ -296,7 +296,7 @@ def schaffer(individual):
     .. plot:: code/benchmarks/schaffer.py
         :width: 67 %
     """
-    return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0)
+    return sum((x**2 + x1**2)**0.25 * ((sin(50 * (x**2 + x1**2)**0.1))**2 + 1.0)
                 for x, x1 in zip(individual[:-1], individual[1:])),
 
 
@@ -322,7 +322,9 @@ def schwefel(individual):
         :width: 67 %
     """
     N = len(individual)
-    return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
+    return 418.9828872724339 * N - sum(x * sin(sqrt(abs(x))) for x in
+                                       individual),
+
 
 def himmelblau(individual):
     r"""The Himmelblau's function is multimodal with 4 defined minimums in
@@ -412,9 +414,9 @@ def zdt1(individual):
 
     :math:`f_{\text{ZDT1}2}(\mathbf{x}) = g(\mathbf{x})\left[1 - \sqrt{\frac{x_1}{g(\mathbf{x})}}\right]`
     """
-    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    g = 1.0 + 9.0 * sum(individual[1:]) / (len(individual) - 1)
     f1 = individual[0]
-    f2 = g * (1 - sqrt(f1/g))
+    f2 = g * (1 - sqrt(f1 / g))
     return f1, f2
 
 
@@ -429,9 +431,9 @@ def zdt2(individual):
 
     """
 
-    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    g = 1.0 + 9.0 * sum(individual[1:]) / (len(individual) - 1)
     f1 = individual[0]
-    f2 = g * (1 - (f1/g)**2)
+    f2 = g * (1 - (f1 / g)**2)
     return f1, f2
 
 
@@ -446,9 +448,9 @@ def zdt3(individual):
 
     """
 
-    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    g = 1.0 + 9.0 * sum(individual[1:]) / (len(individual) - 1)
     f1 = individual[0]
-    f2 = g * (1 - sqrt(f1/g) - f1/g * sin(10*pi*f1))
+    f2 = g * (1 - sqrt(f1 / g) - f1 / g * sin(10 * pi * f1))
     return f1, f2
 
 
@@ -462,9 +464,9 @@ def zdt4(individual):
     :math:`f_{\text{ZDT4}2}(\mathbf{x}) = g(\mathbf{x})\left[ 1 - \sqrt{x_1/g(\mathbf{x})} \right]`
 
     """
-    g  = 1 + 10*(len(individual)-1) + sum(xi**2 - 10*cos(4*pi*xi) for xi in individual[1:])
+    g = 1 + 10 * (len(individual) - 1) + sum(xi**2 - 10 * cos(4 * pi * xi) for xi in individual[1:])
     f1 = individual[0]
-    f2 = g * (1 - sqrt(f1/g))
+    f2 = g * (1 - sqrt(f1 / g))
     return f1, f2
 
 
@@ -478,9 +480,9 @@ def zdt6(individual):
     :math:`f_{\text{ZDT6}2}(\mathbf{x}) = g(\mathbf{x}) \left[ 1 - (f_{\text{ZDT6}1}(\mathbf{x})/g(\mathbf{x}))^2 \right]`
 
     """
-    g  = 1 + 9 * (sum(individual[1:]) / (len(individual)-1))**0.25
-    f1 = 1 - exp(-4*individual[0]) * sin(6*pi*individual[0])**6
-    f2 = g * (1 - (f1/g)**2)
+    g = 1 + 9 * (sum(individual[1:]) / (len(individual) - 1))**0.25
+    f1 = 1 - exp(-4 * individual[0]) * sin(6 * pi * individual[0])**6
+    f2 = g * (1 - (f1 / g)**2)
     return f1, f2
 
 
@@ -507,9 +509,9 @@ def dtlz1(individual, obj):
     individual in :math:`n > m` dimensions.
 
     """
-    g = 100 * (len(individual[obj-1:]) + sum((xi-0.5)**2 - cos(20*pi*(xi-0.5)) for xi in individual[obj-1:]))
-    f = [0.5 * reduce(mul, individual[:obj-1], 1) * (1 + g)]
-    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(range(obj-1)))
+    g = 100 * (len(individual[obj - 1:]) + sum((xi - 0.5)**2 - cos(20 * pi * (xi - 0.5)) for xi in individual[obj - 1:]))
+    f = [0.5 * reduce(mul, individual[:obj - 1], 1) * (1 + g)]
+    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(range(obj - 1)))
     return f
 
 
@@ -533,11 +535,11 @@ def dtlz2(individual, obj):
     vector of the remaining attributes :math:`[x_m~\ldots~x_n]` of the
     individual in :math:`n > m` dimensions.
     """
-    xc = individual[:obj-1]
-    xm = individual[obj-1:]
-    g = sum((xi-0.5)**2 for xi in xm)
-    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi*pi) for xi in xc), 1.0)]
-    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]*pi) for m in range(obj-2, -1, -1))
+    xc = individual[:obj - 1]
+    xm = individual[obj - 1:]
+    g = sum((xi - 0.5)**2 for xi in xm)
+    f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc), 1.0)]
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m]*pi) for m in range(obj-2, -1, -1))
 
     return f
 
@@ -562,11 +564,11 @@ def dtlz3(individual, obj):
     vector of the remaining attributes :math:`[x_m~\ldots~x_n]` of the
     individual in :math:`n > m` dimensions.
     """
-    xc = individual[:obj-1]
-    xm = individual[obj-1:]
-    g = 100 * (len(xm) + sum((xi-0.5)**2 - cos(20*pi*(xi-0.5)) for xi in xm))
-    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi*pi) for xi in xc), 1.0)]
-    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]*pi) for m in range(obj-2, -1, -1))
+    xc = individual[:obj - 1]
+    xm = individual[obj - 1:]
+    g = 100 * (len(xm) + sum((xi - 0.5)**2 - cos(20 * pi * (xi - 0.5)) for xi in xm))
+    f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc), 1.0)]
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m] * pi) for m in range(obj - 2, -1, -1))
     return f
 
 
@@ -592,11 +594,11 @@ def dtlz4(individual, obj, alpha):
     vector of the remaining attributes :math:`[x_m~\ldots~x_n]` of the
     individual in :math:`n > m` dimensions.
     """
-    xc = individual[:obj-1]
-    xm = individual[obj-1:]
-    g = sum((xi-0.5)**2 for xi in xm)
-    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc), 1.0)]
-    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]**alpha*pi) for m in range(obj-2, -1, -1))
+    xc = individual[:obj - 1]
+    xm = individual[obj - 1:]
+    g = sum((xi - 0.5)**2 for xi in xm)
+    f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi ** alpha * pi) for xi in xc), 1.0)]
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi**alpha * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m]**alpha * pi) for m in range(obj - 2, -1, -1))
     return f
 
 
@@ -607,17 +609,17 @@ def dtlz5(ind, n_objs):
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
     """
     g = lambda x: sum([(a - 0.5)**2 for a in x])
-    gval = g(ind[n_objs-1:])
+    gval = g(ind[n_objs - 1:])
 
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
-    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1:]])]
 
     for m in reversed(range(1, n_objs)):
         if m == 1:
             fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
             fit.append((1 + gval) * cos(pi / 2.0 * ind[0]) *
-                       reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
+                       reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1:m - 1]], 1) * sin(theta(ind[m - 1])))
     return fit
 
 
@@ -627,18 +629,18 @@ def dtlz6(ind, n_objs):
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
     """
-    gval = sum([a**0.1 for a in ind[n_objs-1:]])
+    gval = sum([a**0.1 for a in ind[n_objs - 1:]])
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
 
     fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) *
-           reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+           reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1:]])]
 
     for m in reversed(range(1, n_objs)):
         if m == 1:
             fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
             fit.append((1 + gval) * cos(pi / 2.0 * ind[0]) *
-                       reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
+                       reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1: m - 1]], 1) * sin(theta(ind[m - 1])))
     return fit
 
 
@@ -696,7 +698,7 @@ def poloni(individual):
     return 1 + (A_1 - B_1)**2 + (A_2 - B_2)**2, (x_1 + 3)**2 + (x_2 + 1)**2
 
 
-def dent(individual, lambda_ = 0.85):
+def dent(individual, lambda_=0.85):
     r"""Test problem Dent. Two-objective problem with a "dent". *individual* has
     two attributes that take values in [-1.5, 1.5].
     From: Schuetze, O., Laumanns, M., Tantar, E., Coello Coello, C.A., & Talbi, E.-G. (2010).

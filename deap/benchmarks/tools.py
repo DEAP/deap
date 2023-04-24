@@ -278,7 +278,7 @@ def diversity(first_front, first, last):
 
     dm = sum(dt)/len(dt)
     di = sum(abs(d_i - dm) for d_i in dt)
-    delta = (df + dl + di)/(df + dl + len(dt) * dm )
+    delta = (df + dl + di)/(df + dl + len(dt) * dm)
     return delta
 
 

@@ -32,7 +32,7 @@ except:
 
 
 def cone(individual, position, height, width):
-    """The cone peak function to be used with scenario 2 and 3.
+    r"""The cone peak function to be used with scenario 2 and 3.
 
     :math:`f(\mathbf{x}) = h - w \sqrt{\sum_{i=1}^N (x_i - p_i)^2}`
 
@@ -49,8 +49,9 @@ def sphere(individual, position, height, width):
         value += (x - p)**2
     return height * value
 
+
 def function1(individual, position, height, width):
-    """The function1 peak function to be used with scenario 1.
+    r"""The function1 peak function to be used with scenario 1.
 
     :math:`f(\mathbf{x}) = \\frac{h}{1 + w \sqrt{\sum_{i=1}^N (x_i - p_i)^2}}`
 
@@ -286,7 +287,7 @@ class MovingPeaks:
             shift_length = sum(s**2 for s in shift)
             shift_length = self.move_severity / math.sqrt(shift_length) if shift_length > 0 else 0
 
-            shift = [shift_length * (1.0 - self.lambda_) * s \
+            shift = [shift_length * (1.0 - self.lambda_) * s
                      + self.lambda_ * c for s, c in zip(shift, self.last_change_vector[i])]
 
             shift_length = sum(s**2 for s in shift)
@@ -333,8 +334,9 @@ class MovingPeaks:
 
         self._optimum = None
 
-SCENARIO_1 = {"pfunc" : function1,
-              "npeaks" : 5,
+
+SCENARIO_1 = {"pfunc": function1,
+              "npeaks": 5,
               "bfunc": None,
               "min_coord": 0.0,
               "max_coord": 100.0,
@@ -350,9 +352,9 @@ SCENARIO_1 = {"pfunc" : function1,
               "width_severity": 0.01,
               "period": 5000}
 
-SCENARIO_2 = {"pfunc" : cone,
-              "npeaks" : 10,
-              "bfunc" : None,
+SCENARIO_2 = {"pfunc": cone,
+              "npeaks": 10,
+              "bfunc": None,
               "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
@@ -367,9 +369,9 @@ SCENARIO_2 = {"pfunc" : cone,
               "width_severity": 1.0,
               "period": 5000}
 
-SCENARIO_3 = {"pfunc" : cone,
-              "npeaks" : 50,
-              "bfunc" : lambda x: 10,
+SCENARIO_3 = {"pfunc": cone,
+              "npeaks": 50,
+              "bfunc": lambda x: 10,
               "min_coord": 0.0,
               "max_coord": 100.0,
               "min_height": 30.0,
@@ -396,7 +398,7 @@ def diversity(population):
 
 
 if __name__ == "__main__":
-    mpb = MovingPeaks(dim=2, npeaks=[1,1,10], number_severity=0.1)
+    mpb = MovingPeaks(dim=2, npeaks=[1, 1, 10], number_severity=0.1)
     print(mpb.maximums())
     mpb.changePeaks()
     print(mpb.maximums())

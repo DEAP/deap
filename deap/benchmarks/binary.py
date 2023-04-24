@@ -14,7 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 from functools import wraps
-import math
+
 
 def bin2float(min_, max_, nbits):
     """Convert a binary array into an array of float where each
@@ -26,7 +26,7 @@ def bin2float(min_, max_, nbits):
         @wraps(function)
         def wrapped_function(individual, *args, **kargs):
             # User must take care to make nelem an integer.
-            nelem = len(individual)//nbits
+            nelem = len(individual) // nbits
             decoded = [0] * nelem
             for i in range(nelem):
                 gene = int("".join(map(str,

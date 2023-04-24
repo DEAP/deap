@@ -249,12 +249,12 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     if k == 0:
         return []
 
-    #Separate individuals according to unique fitnesses
+    # Separate individuals according to unique fitnesses
     unique_fits = defaultdict(list)
     for i, ind in enumerate(individuals):
         unique_fits[ind.fitness.wvalues].append(ind)
 
-    #Launch the sorting algorithm
+    # Launch the sorting algorithm
     obj = len(individuals[0].fitness.wvalues)-1
     fitnesses = list(unique_fits.keys())
     front = dict.fromkeys(fitnesses, 0)
@@ -263,7 +263,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     fitnesses.sort(reverse=True)
     sortNDHelperA(fitnesses, obj, front)
 
-    #Extract individuals from front list here
+    # Extract individuals from front list here
     nbfronts = max(front.values())+1
     pareto_fronts = [[] for i in range(nbfronts)]
     for fit in fitnesses:
@@ -294,7 +294,7 @@ def sortNDHelperA(fitnesses, obj, front):
     elif obj == 1:
         sweepA(fitnesses, front)
     elif len(frozenset(map(itemgetter(obj), fitnesses))) == 1:
-        #All individuals for objective M are equal: go to objective M-1
+        # All individuals for objective M are equal: go to objective M-1
         sortNDHelperA(fitnesses, obj-1, front)
     else:
         # More than two individuals, split list and then apply recursion
@@ -360,10 +360,10 @@ def sortNDHelperB(best, worst, obj, front):
     happen after sortNDHelperB is called."""
     key = itemgetter(obj)
     if len(worst) == 0 or len(best) == 0:
-        #One of the lists is empty: nothing to do
+        # One of the lists is empty: nothing to do
         return
     elif len(best) == 1 or len(worst) == 1:
-        #One of the lists has one individual: compare directly
+        # One of the lists has one individual: compare directly
         for hi in worst:
             for li in best:
                 if isDominated(hi[:obj+1], li[:obj+1]) or hi[:obj+1] == li[:obj+1]:
@@ -371,10 +371,10 @@ def sortNDHelperB(best, worst, obj, front):
     elif obj == 1:
         sweepB(best, worst, front)
     elif key(min(best, key=key)) >= key(max(worst, key=key)):
-        #All individuals from L dominate H for objective M:
-        #Also supports the case where every individuals in L and H
-        #has the same value for the current objective
-        #Skip to objective M-1
+        # All individuals from L dominate H for objective M:
+        # Also supports the case where every individuals in L and H
+        # has the same value for the current objective
+        # Skip to objective M-1
         sortNDHelperB(best, worst, obj-1, front)
     elif key(max(best, key=key)) >= key(min(worst, key=key)):
         best1, best2, worst1, worst2 = splitB(best, worst, obj)
@@ -758,7 +758,7 @@ def selSPEA2(individuals, k):
         next_indices = [(fits[i], i) for i in range(N)
                         if not i in chosen_indices]
         next_indices.sort()
-        #print next_indices
+        # print next_indices
         chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
 
     elif len(chosen_indices) > k:   # The archive is too large

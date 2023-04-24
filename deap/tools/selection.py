@@ -200,7 +200,7 @@ def selStochasticUniversalSampling(individuals, k, fit_attr="fitness"):
 
     distance = sum_fits / float(k)
     start = random.uniform(0, distance)
-    points = [start + i*distance for i in range(k)]
+    points = [start + i * distance for i in range(k)]
 
     chosen = []
     for p in points:
@@ -269,7 +269,7 @@ def selEpsilonLexicase(individuals, k, epsilon):
                 best_val_for_case = max(x.fitness.values[cases[0]] for x in candidates)
                 min_val_to_survive_case = best_val_for_case - epsilon
                 candidates = [x for x in candidates if x.fitness.values[cases[0]] >= min_val_to_survive_case]
-            else :
+            else:
                 best_val_for_case = min(x.fitness.values[cases[0]] for x in candidates)
                 max_val_to_survive_case = best_val_for_case + epsilon
                 candidates = [x for x in candidates if x.fitness.values[cases[0]] <= max_val_to_survive_case]
@@ -309,7 +309,7 @@ def selAutomaticEpsilonLexicase(individuals, k):
                 best_val_for_case = max(errors_for_this_case)
                 min_val_to_survive = best_val_for_case - median_absolute_deviation
                 candidates = [x for x in candidates if x.fitness.values[cases[0]] >= min_val_to_survive]
-            else :
+            else:
                 best_val_for_case = min(errors_for_this_case)
                 max_val_to_survive = best_val_for_case + median_absolute_deviation
                 candidates = [x for x in candidates if x.fitness.values[cases[0]] <= max_val_to_survive]
