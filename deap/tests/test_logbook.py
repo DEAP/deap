@@ -20,7 +20,6 @@ class LogbookTest(unittest.TestCase):
                             test={'avg' : 1.0, 'max' : 20})
         print(self.logbook.stream)
 
-
     def test_one_chapter(self):
         self.logbook.record(gen=0, evals=100, fitness={'avg' : 1.0, 'max' : 10})
         self.logbook.record(gen=0, evals=100, fitness={'avg' : 1.0, 'max' : 10})

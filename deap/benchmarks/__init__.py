@@ -177,6 +177,7 @@ def ackley(individual):
     return 20 - 20 * exp(-0.2*sqrt(1.0/N * sum(x**2 for x in individual))) \
             + e - exp(1.0/N * sum(cos(2*pi*x) for x in individual)),
 
+
 def bohachevsky(individual):
     r"""Bohachevsky test objective function.
 
@@ -199,6 +200,7 @@ def bohachevsky(individual):
     """
     return sum(x**2 + 2*x1**2 - 0.3*cos(3*pi*x) - 0.4*cos(4*pi*x1) + 0.7
                 for x, x1 in zip(individual[:-1], individual[1:])),
+
 
 def griewank(individual):
     r"""Griewank test objective function.
@@ -223,6 +225,7 @@ def griewank(individual):
     return 1.0/4000.0 * sum(x**2 for x in individual) - \
         reduce(mul, (cos(x/sqrt(i+1.0)) for i, x in enumerate(individual)), 1) + 1,
 
+
 def rastrigin(individual):
     r"""Rastrigin test objective function.
 
@@ -245,6 +248,7 @@ def rastrigin(individual):
     return 10 * len(individual) + sum(gene * gene - 10 * \
                         cos(2 * pi * gene) for gene in individual),
 
+
 def rastrigin_scaled(individual):
     r"""Scaled Rastrigin test objective function.
 
@@ -255,6 +259,7 @@ def rastrigin_scaled(individual):
     N = len(individual)
     return 10*N + sum((10**(i/(N-1))*x)**2 -
                       10*cos(2*pi*10**(i/(N-1))*x) for i, x in enumerate(individual)),
+
 
 def rastrigin_skew(individual):
     r"""Skewed Rastrigin test objective function.
@@ -293,6 +298,7 @@ def schaffer(individual):
     """
     return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0)
                 for x, x1 in zip(individual[:-1], individual[1:])),
+
 
 def schwefel(individual):
     r"""Schwefel test objective function.
@@ -344,6 +350,7 @@ def himmelblau(individual):
     return (individual[0] * individual[0] + individual[1] - 11)**2 + \
         (individual[0] + individual[1] * individual[1] - 7)**2,
 
+
 def shekel(individual, a, c):
     r"""The Shekel multimodal function can have any number of maxima. The number
     of maxima is given by the length of any of the arguments *a* or *c*, *a*
@@ -365,6 +372,7 @@ def shekel(individual, a, c):
         :width: 67 %
     """
     return sum((1. / (c[i] + sum((individual[j] - aij)**2 for j, aij in enumerate(a[i])))) for i in range(len(c))),
+
 
 # Multiobjectives
 def kursawe(individual):
@@ -394,6 +402,7 @@ def schaffer_mo(individual):
     """
     return individual[0] ** 2, (individual[0] - 2) ** 2
 
+
 def zdt1(individual):
     r"""ZDT1 multiobjective function.
 
@@ -407,6 +416,7 @@ def zdt1(individual):
     f1 = individual[0]
     f2 = g * (1 - sqrt(f1/g))
     return f1, f2
+
 
 def zdt2(individual):
     r"""ZDT2 multiobjective function.
@@ -424,6 +434,7 @@ def zdt2(individual):
     f2 = g * (1 - (f1/g)**2)
     return f1, f2
 
+
 def zdt3(individual):
     r"""ZDT3 multiobjective function.
 
@@ -440,6 +451,7 @@ def zdt3(individual):
     f2 = g * (1 - sqrt(f1/g) - f1/g * sin(10*pi*f1))
     return f1, f2
 
+
 def zdt4(individual):
     r"""ZDT4 multiobjective function.
 
@@ -455,6 +467,7 @@ def zdt4(individual):
     f2 = g * (1 - sqrt(f1/g))
     return f1, f2
 
+
 def zdt6(individual):
     r"""ZDT6 multiobjective function.
 
@@ -469,6 +482,7 @@ def zdt6(individual):
     f1 = 1 - exp(-4*individual[0]) * sin(6*pi*individual[0])**6
     f2 = g * (1 - (f1/g)**2)
     return f1, f2
+
 
 def dtlz1(individual, obj):
     r"""DTLZ1 multiobjective function. It returns a tuple of *obj* values.
@@ -498,6 +512,7 @@ def dtlz1(individual, obj):
     f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(range(obj-1)))
     return f
 
+
 def dtlz2(individual, obj):
     r"""DTLZ2 multiobjective function. It returns a tuple of *obj* values.
     The individual must have at least *obj* elements.
@@ -526,6 +541,7 @@ def dtlz2(individual, obj):
 
     return f
 
+
 def dtlz3(individual, obj):
     r"""DTLZ3 multiobjective function. It returns a tuple of *obj* values.
     The individual must have at least *obj* elements.
@@ -552,6 +568,7 @@ def dtlz3(individual, obj):
     f = [(1.0+g) *  reduce(mul, (cos(0.5*xi*pi) for xi in xc), 1.0)]
     f.extend((1.0+g) * reduce(mul, (cos(0.5*xi*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]*pi) for m in range(obj-2, -1, -1))
     return f
+
 
 def dtlz4(individual, obj, alpha):
     r"""DTLZ4 multiobjective function. It returns a tuple of *obj* values. The
@@ -581,6 +598,7 @@ def dtlz4(individual, obj, alpha):
     f = [(1.0+g) *  reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc), 1.0)]
     f.extend((1.0+g) * reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]**alpha*pi) for m in range(obj-2, -1, -1))
     return f
+
 
 def dtlz5(ind, n_objs):
     r"""DTLZ5 multiobjective function. It returns a tuple of *obj* values. The
@@ -676,6 +694,7 @@ def poloni(individual):
     B_1 = 0.5 * sin(x_1) - 2 * cos(x_1) + sin(x_2) - 1.5 * cos(x_2)
     B_2 = 1.5 * sin(x_1) - cos(x_1) + 2 * sin(x_2) - 0.5 * cos(x_2)
     return 1 + (A_1 - B_1)**2 + (A_2 - B_2)**2, (x_1 + 3)**2 + (x_2 + 1)**2
+
 
 def dent(individual, lambda_ = 0.85):
     r"""Test problem Dent. Two-objective problem with a "dent". *individual* has
