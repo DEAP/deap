@@ -27,8 +27,10 @@ from deap import creator
 
 CNAME = "CLASS_NAME"
 
+
 def teardown_func():
     creator.__dict__.pop(CNAME)
+
 
 @with_setup(None, teardown_func)
 def test_create():
@@ -44,6 +46,7 @@ def test_attribute():
 
     assert l.a == 1, "%s, expected %i" % (l.a, 1)
 
+
 @with_setup(None, teardown_func)
 def test_array():
     creator.create(CNAME, array.array, typecode="i")
@@ -55,6 +58,7 @@ def test_array():
     tb = array.array("i", [5,2,3,8])
     assert a == ta, "%s, expected %s" % (a, ta)
     assert b == tb, "%s, expected %s" % (b, tb)
+
 
 @skipIf(not numpy, "Cannot import Numpy numerical library")
 @with_setup(None, teardown_func)

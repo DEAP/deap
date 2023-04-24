@@ -13,6 +13,7 @@ def identity(obj):
     """
     return obj
 
+
 class History(object):
     """The :class:`History` class helps to build a genealogy of all the
     individuals produced in the evolution. It contains two attributes,
@@ -131,6 +132,7 @@ class History(object):
         """
         gtree = {}
         visited = set()     # Adds memory to the breadth first search
+
         def genealogy(index, depth):
             if index not in self.genealogy_tree:
                 return
@@ -145,6 +147,7 @@ class History(object):
                 visited.add(ind)
         genealogy(individual.history_index, 0)
         return gtree
+
 
 class Statistics(object):
     """Object that compiles statistics on a list of arbitrary objects.
@@ -204,6 +207,7 @@ class Statistics(object):
             entry[key] = func(values)
         return entry
 
+
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
     statistics on multiple keys using a single call to :meth:`compile`. It
@@ -252,6 +256,7 @@ class MultiStatistics(dict):
         """
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
+
 
 class Logbook(list):
     """Evolution records as a chronological list of dictionaries.
@@ -634,13 +639,12 @@ class ParetoFront(HallOfFame):
             if not is_dominated and not has_twin:
                 self.insert(ind)
 
+
 __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
 if __name__ == "__main__":
     import doctest
-    from operator import itemgetter
 
-    import numpy
     doctest.run_docstring_examples(Statistics, globals())
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.compile, globals())

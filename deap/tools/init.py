@@ -22,6 +22,7 @@ def initRepeat(container, func, n):
     """
     return container(func() for _ in range(n))
 
+
 def initIterate(container, generator):
     """Call the function *container* with an iterable as
     its only argument. The iterable must be returned by
@@ -49,6 +50,7 @@ def initIterate(container, generator):
     """
     return container(generator())
 
+
 def initCycle(container, seq_func, n=1):
     """Call the function *container* with a generator function corresponding
     to the calling *n* times the functions present in *seq_func*.
@@ -72,6 +74,7 @@ def initCycle(container, seq_func, n=1):
     """
     return container(func() for _ in range(n) for func in seq_func)
 
+
 __all__ = ['initRepeat', 'initIterate', 'initCycle']
 
 
@@ -84,4 +87,3 @@ if __name__ == "__main__":
     random.seed(64)
     doctest.run_docstring_examples(initIterate, globals())
     doctest.run_docstring_examples(initCycle, globals())
-

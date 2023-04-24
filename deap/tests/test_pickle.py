@@ -13,8 +13,10 @@ from deap import base
 from deap import gp
 from deap import tools
 
+
 def func():
     return "True"
+
 
 class Pickling(unittest.TestCase):
 
@@ -130,7 +132,6 @@ class Pickling(unittest.TestCase):
         self.assertEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
         self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
-
 
     # @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays (thus stats) is very unstable.")
     def test_pickle_logbook(self):

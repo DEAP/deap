@@ -7,6 +7,7 @@ try:
 except ImportError:
     from collections import Sequence
 
+
 class DeltaPenalty(object):
     r"""This decorator returns penalized fitness for invalid individuals and the
     original fitness value for valid individuals. The penalized fitness is made
@@ -63,7 +64,9 @@ class DeltaPenalty(object):
 
         return wrapper
 
+
 DeltaPenality = DeltaPenalty
+
 
 class ClosestValidPenalty(object):
     r"""This decorator returns penalized fitness for invalid individuals and the
@@ -130,6 +133,7 @@ class ClosestValidPenalty(object):
             return tuple(f - w * self.alpha * d for f, w, d in zip(f_fbl, weights, dists))
 
         return wrapper
+
 
 ClosestValidPenality = ClosestValidPenalty
 

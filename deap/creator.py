@@ -90,6 +90,8 @@ class _array(array.array):
 
     def __reduce__(self):
         return (self.__class__, (list(self),), self.__dict__)
+
+
 class_replacers[array.array] = _array
 
 

@@ -11,6 +11,7 @@ import numpy
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
+
 def selNSGA2(individuals, k, nd='standard'):
     """Apply NSGA-II selection operator on the *individuals*. Usually, the
     size of *individuals* will be larger than *k* because any individual
@@ -115,6 +116,7 @@ def sortNondominated(individuals, k, first_front_only=False):
 
     return fronts
 
+
 def assignCrowdingDist(individuals):
     """Assign a crowding distance to each individual's fitness. The
     crowding distance can be retrieve via the :attr:`crowding_dist`
@@ -140,6 +142,7 @@ def assignCrowdingDist(individuals):
 
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
+
 
 def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
@@ -197,10 +200,12 @@ def selTournamentDCD(individuals, k):
 # Generalized Reduced runtime ND sort #
 #######################################
 
+
 def identity(obj):
     """Returns directly the argument *obj*.
     """
     return obj
+
 
 def isDominated(wvalues1, wvalues2):
     """Returns whether or not *wvalues2* dominates *wvalues1*.
@@ -218,6 +223,7 @@ def isDominated(wvalues1, wvalues2):
             not_equal = True
     return not_equal
 
+
 def median(seq, key=identity):
     """Returns the median of *seq* - the numeric value separating the higher
     half of a sample from the lower half. If there is an even number of
@@ -229,6 +235,7 @@ def median(seq, key=identity):
         return key(sseq[(length - 1) // 2])
     else:
         return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
+
 
 def sortLogNondominated(individuals, k, first_front_only=False):
     """Sort *individuals* in pareto non-dominated fronts using the Generalized
@@ -274,6 +281,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     else:
         return pareto_fronts[0]
 
+
 def sortNDHelperA(fitnesses, obj, front):
     """Create a non-dominated sorting of S on the first M objectives"""
     if len(fitnesses) < 2:
@@ -294,6 +302,7 @@ def sortNDHelperA(fitnesses, obj, front):
         sortNDHelperA(best, obj, front)
         sortNDHelperB(best, worst, obj-1, front)
         sortNDHelperA(worst, obj, front)
+
 
 def splitA(fitnesses, obj):
     """Partition the set of fitnesses in two according to the median of
@@ -323,6 +332,7 @@ def splitA(fitnesses, obj):
     else:
         return best_b, worst_b
 
+
 def sweepA(fitnesses, front):
     """Update rank number associated to the fitnesses according
     to the first two objectives using a geometric sweep procedure.
@@ -341,6 +351,7 @@ def sweepA(fitnesses, front):
                 break
         stairs.insert(idx, -fit[1])
         fstairs.insert(idx, fit)
+
 
 def sortNDHelperB(best, worst, obj, front):
     """Assign front numbers to the solutions in H according to the solutions
@@ -370,6 +381,7 @@ def sortNDHelperB(best, worst, obj, front):
         sortNDHelperB(best1, worst1, obj, front)
         sortNDHelperB(best1, worst2, obj-1, front)
         sortNDHelperB(best2, worst2, obj, front)
+
 
 def splitB(best, worst, obj):
     """Split both best individual and worst sets of fitnesses according
@@ -410,6 +422,7 @@ def splitB(best, worst, obj):
     else:
         return best1_b, best2_b, worst1_b, worst2_b
 
+
 def sweepB(best, worst, front):
     """Adjust the rank number of the worst fitnesses according to
     the best fitnesses on the first two objectives using a sweep
@@ -442,6 +455,7 @@ def sweepB(best, worst, front):
 ######################################
 # Non-Dominated Sorting  (NSGA-III)  #
 ######################################
+
 
 NSGA3Memory = namedtuple("NSGA3Memory", ["best_point", "worst_point", "extreme_points"])
 
@@ -806,6 +820,7 @@ def selSPEA2(individuals, k):
 
     return [individuals[i] for i in chosen_indices]
 
+
 def _randomizedSelect(array, begin, end, i):
     """Allows to select the ith smallest element from array without sorting it.
     Runtime is expected to be O(n).
@@ -819,10 +834,12 @@ def _randomizedSelect(array, begin, end, i):
     else:
         return _randomizedSelect(array, q + 1, end, i - k)
 
+
 def _randomizedPartition(array, begin, end):
     i = random.randint(begin, end)
     array[begin], array[i] = array[i], array[begin]
     return _partition(array, begin, end)
+
 
 def _partition(array, begin, end):
     x = array[begin]

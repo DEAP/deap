@@ -36,18 +36,22 @@ def setup_func_single_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
 
+
 def setup_func_multi_obj():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
     creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
+
 
 def setup_func_multi_obj_numpy():
     creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
     creator.create(INDCLSNAME, numpy.ndarray, fitness=creator.__dict__[FITCLSNAME])
 
+
 def teardown_func():
     # Messy way to remove a class from the creator
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
+
 
 @with_setup(setup_func_single_obj, teardown_func)
 def test_cma():
@@ -64,6 +68,7 @@ def test_cma():
     best, = tools.selBest(pop, k=1)
 
     assert best.fitness.values < (1e-8,), "CMA algorithm did not converged properly."
+
 
 @with_setup(setup_func_multi_obj, teardown_func)
 def test_nsga2():

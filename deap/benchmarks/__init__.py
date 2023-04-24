@@ -22,6 +22,7 @@ from math import sin, cos, pi, exp, e, sqrt
 from operator import mul
 from functools import reduce
 
+
 # Unimodal
 def rand(individual):
     r"""Random test objective function.
@@ -41,6 +42,7 @@ def rand(individual):
     """
     return random.random(),
 
+
 def plane(individual):
     r"""Plane test objective function.
 
@@ -58,6 +60,7 @@ def plane(individual):
          - :math:`f(\mathbf{x}) = x_0`
     """
     return individual[0],
+
 
 def sphere(individual):
     r"""Sphere test objective function.
@@ -77,6 +80,7 @@ def sphere(individual):
     """
     return sum(gene * gene for gene in individual),
 
+
 def cigar(individual):
     r"""Cigar test objective function.
 
@@ -94,6 +98,7 @@ def cigar(individual):
          - :math:`f(\mathbf{x}) = x_0^2 + 10^6\sum_{i=1}^N\,x_i^2`
     """
     return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual[1:]),
+
 
 def rosenbrock(individual):
     r"""Rosenbrock test objective function.
@@ -116,6 +121,7 @@ def rosenbrock(individual):
     """
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
                    for x, y in zip(individual[:-1], individual[1:])),
+
 
 def h1(individual):
     r""" Simple two-dimensional function containing several local maxima.
@@ -145,7 +151,7 @@ def h1(individual):
     denum = ((individual[0] - 8.6998)**2 + (individual[1] - 6.7665)**2)**0.5 + 1
     return num / denum,
 
- #
+
 # Multimodal
 def ackley(individual):
     r"""Ackley test objective function.
@@ -596,6 +602,7 @@ def dtlz5(ind, n_objs):
                        reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
     return fit
 
+
 def dtlz6(ind, n_objs):
     r"""DTLZ6 multiobjective function. It returns a tuple of *obj* values. The
     individual must have at least *obj* elements.
@@ -616,6 +623,7 @@ def dtlz6(ind, n_objs):
                        reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
     return fit
 
+
 def dtlz7(ind, n_objs):
     r"""DTLZ7 multiobjective function. It returns a tuple of *obj* values. The
     individual must have at least *obj* elements.
@@ -626,6 +634,7 @@ def dtlz7(ind, n_objs):
     fit = [x for x in ind[:n_objs-1]]
     fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + sin(3 * pi * a)) for a in ind[:n_objs-1]])))
     return fit
+
 
 def fonseca(individual):
     r"""Fonseca and Fleming's multiobjective function.
@@ -641,6 +650,7 @@ def fonseca(individual):
     f_1 = 1 - exp(-sum((xi - 1/sqrt(3))**2 for xi in individual[:3]))
     f_2 = 1 - exp(-sum((xi + 1/sqrt(3))**2 for xi in individual[:3]))
     return f_1, f_2
+
 
 def poloni(individual):
     r"""Poloni's multiobjective function on a two attribute *individual*. From:

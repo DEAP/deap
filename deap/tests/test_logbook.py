@@ -1,7 +1,7 @@
-import sys
 import unittest
 
 from deap import tools
+
 
 class LogbookTest(unittest.TestCase):
 
@@ -37,8 +37,6 @@ class LogbookTest(unittest.TestCase):
         print(self.logbook.stream)
 
 
-
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(LogbookTest)
     unittest.TextTestRunner(verbosity=2).run(suite)
-

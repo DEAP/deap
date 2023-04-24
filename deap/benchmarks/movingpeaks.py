@@ -30,6 +30,7 @@ try:
 except:
     from collections import Sequence
 
+
 def cone(individual, position, height, width):
     """The cone peak function to be used with scenario 2 and 3.
 
@@ -40,6 +41,7 @@ def cone(individual, position, height, width):
     for x, p in zip(individual, position):
         value += (x - p)**2
     return height - width * math.sqrt(value)
+
 
 def sphere(individual, position, height, width):
     value = 0.0
@@ -57,6 +59,7 @@ def function1(individual, position, height, width):
     for x, p in zip(individual, position):
         value += (x - p)**2
     return height / (1 + width * value)
+
 
 class MovingPeaks:
     """The Moving Peaks Benchmark is a fitness function changing over time. It
@@ -160,7 +163,6 @@ class MovingPeaks:
             self.peaks_height = [uniform_height for _ in range(npeaks)]
         else:
             self.peaks_height = [self.random.uniform(self.min_height, self.max_height) for _ in range(npeaks)]
-
 
         if uniform_width != 0:
             self.peaks_width = [uniform_width for _ in range(npeaks)]
@@ -382,6 +384,7 @@ SCENARIO_3 = {"pfunc" : cone,
               "width_severity": 0.5,
               "period": 1000}
 
+
 def diversity(population):
     nind = len(population)
     ndim = len(population[0])
@@ -390,6 +393,7 @@ def diversity(population):
         d = [di + xi for di, xi in zip(d, x)]
     d = [di / nind for di in d]
     return math.sqrt(sum((di - xi)**2 for x in population for di, xi in zip(d, x)))
+
 
 if __name__ == "__main__":
     mpb = MovingPeaks(dim=2, npeaks=[1,1,10], number_severity=0.1)
