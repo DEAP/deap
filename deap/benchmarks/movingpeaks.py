@@ -14,7 +14,7 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
 """
-Re-implementation of the `Moving Peaks Benchmark 
+Re-implementation of the `Moving Peaks Benchmark
 <http://people.aifb.kit.edu/jbr/MovPeaks/>`_ by Jurgen Branke. With the
 addition of the fluctuating number of peaks presented in *du Plessis and
 Engelbrecht, 2013, Self-Adaptive Environment with Fluctuating Number of
@@ -197,7 +197,7 @@ class MovingPeaks:
         """Returns all visible maximums value and position sorted with the
         global maximum first.
         """
-        # The maximums are at the peaks position but might be swallowed by 
+        # The maximums are at the peaks position but might be swallowed by
         # other peaks
         maximums = list()
         for func, pos, height, width in zip(self.peaks_function,

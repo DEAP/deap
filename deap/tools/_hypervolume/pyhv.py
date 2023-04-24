@@ -32,7 +32,7 @@ def hypervolume(pointset, ref):
     reference point *ref*.
     """
     warnings.warn("Falling back to the python version of hypervolume "
-        "module. Expect this to be very slow.", RuntimeWarning)
+                  "module. Expect this to be very slow.", RuntimeWarning)
     hv = _HyperVolume(ref)
     return hv.compute(pointset)
 
@@ -195,32 +195,32 @@ class _HyperVolume:
         nodes[:] = [node for (_, node) in decorated]
 
 
-class _MultiList: 
-    """A special data structure needed by FonsecaHyperVolume. 
+class _MultiList:
+    """A special data structure needed by FonsecaHyperVolume.
 
-    It consists of several doubly linked lists that share common nodes. So, 
+    It consists of several doubly linked lists that share common nodes. So,
     every node has multiple predecessors and successors, one in every list.
 
     """
 
-    class Node: 
+    class Node:
 
-        def __init__(self, numberLists, cargo=None): 
-            self.cargo = cargo 
-            self.next  = [None] * numberLists
+        def __init__(self, numberLists, cargo=None):
+            self.cargo = cargo
+            self.next = [None] * numberLists
             self.prev = [None] * numberLists
             self.ignore = 0
             self.area = [0.0] * numberLists
             self.volume = [0.0] * numberLists
 
-        def __str__(self): 
+        def __str__(self):
             return str(self.cargo)
 
         def __lt__(self, other):
             return all(self.cargo < other.cargo)
 
-    def __init__(self, numberLists):  
-        """Constructor. 
+    def __init__(self, numberLists):
+        """Constructor.
 
         Builds 'numberLists' doubly linked lists.
 
@@ -228,7 +228,7 @@ class _MultiList:
         self.numberLists = numberLists
         self.sentinel = _MultiList.Node(numberLists)
         self.sentinel.next = [self.sentinel] * numberLists
-        self.sentinel.prev = [self.sentinel] * numberLists  
+        self.sentinel.prev = [self.sentinel] * numberLists
 
     def __str__(self):
         strings = []
@@ -278,13 +278,13 @@ class _MultiList:
             sentinel.prev[index] = node
             lastButOne.next[index] = node
 
-    def remove(self, node, index, bounds): 
+    def remove(self, node, index, bounds):
         """Removes and returns 'node' from all lists in [0, 'index'[."""
-        for i in range(index): 
+        for i in range(index):
             predecessor = node.prev[i]
             successor = node.next[i]
             predecessor.next[i] = successor
-            successor.prev[i] = predecessor  
+            successor.prev[i] = predecessor
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
         return node
@@ -292,7 +292,7 @@ class _MultiList:
     def reinsert(self, node, index, bounds):
         """
         Inserts 'node' at the position it had in all lists in [0, 'index'[
-        before it was removed. This method assumes that the next and previous 
+        before it was removed. This method assumes that the next and previous
         nodes of the node that is reinserted are in the list.
 
         """

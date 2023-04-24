@@ -216,7 +216,7 @@ def test_nsga3():
         ind.fitness.values = fit
 
     pop = toolbox.select(pop, len(pop))
-     # Begin the generational process
+    # Begin the generational process
     for gen in range(1, NGEN):
         offspring = algorithms.varAnd(pop, toolbox, 1.0, 1.0)
 

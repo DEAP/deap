@@ -44,7 +44,7 @@ class translate(object):
             # A subtraction is applied since the translation is applied to the
             # individual and not the function
             return func([v - t for v, t in zip(individual, self.vector)],
-                *args, **kargs)
+                        *args, **kargs)
         wrapper.translate = self.translate
         return wrapper
 
@@ -85,7 +85,7 @@ class rotate(object):
     def __init__(self, matrix):
         if not numpy_imported:
             raise RuntimeError("Numpy is required for using the rotation "
-                "decorator")
+                               "decorator")
         # The inverse is taken since the rotation is applied to the individual
         # and not the function which is the inverse
         self.matrix = numpy.linalg.inv(matrix)
@@ -193,7 +193,7 @@ class scale(object):
         @wraps(func)
         def wrapper(individual, *args, **kargs):
             return func([v * f for v, f in zip(individual, self.factor)],
-                *args, **kargs)
+                        *args, **kargs)
         wrapper.scale = self.scale
         return wrapper
 

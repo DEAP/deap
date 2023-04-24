@@ -148,22 +148,22 @@ def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
     the two individuals do not interdominate the selection is made
     based on crowding distance (CD). The *individuals* sequence length has to
-    be a multiple of 4 only if k is equal to the length of individuals. 
-    Starting from the beginning of the selected individuals, two consecutive 
-    individuals will be different (assuming all individuals in the input list 
-    are unique). Each individual from the input list won't be selected more 
+    be a multiple of 4 only if k is equal to the length of individuals.
+    Starting from the beginning of the selected individuals, two consecutive
+    individuals will be different (assuming all individuals in the input list
+    are unique). Each individual from the input list won't be selected more
     than twice.
 
     This selection requires the individuals to have a :attr:`crowding_dist`
     attribute, which can be set by the :func:`assignCrowdingDist` function.
 
     :param individuals: A list of individuals to select from.
-    :param k: The number of individuals to select. Must be less than or equal 
+    :param k: The number of individuals to select. Must be less than or equal
               to len(individuals).
     :returns: A list of selected individuals.
     """
 
-    if k > len(individuals): 
+    if k > len(individuals):
         raise ValueError("selTournamentDCD: k must be less than or equal to individuals length")
 
     if k == len(individuals) and k % 4 != 0:
@@ -189,9 +189,9 @@ def selTournamentDCD(individuals, k):
 
     chosen = []
     for i in range(0, k, 4):
-        chosen.append(tourn(individuals_1[i],   individuals_1[i+1]))
+        chosen.append(tourn(individuals_1[i], individuals_1[i+1]))
         chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
-        chosen.append(tourn(individuals_2[i],   individuals_2[i+1]))
+        chosen.append(tourn(individuals_2[i], individuals_2[i+1]))
         chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
 
     return chosen
@@ -748,7 +748,7 @@ def selSPEA2(individuals, k):
                 dist = 0.0
                 for l in range(L):
                     val = individuals[i].fitness.values[l] - \
-                          individuals[j].fitness.values[l]
+                        individuals[j].fitness.values[l]
                     dist += val * val
                 distances[j] = dist
             kth_dist = _randomizedSelect(distances, 0, N - 1, K)
@@ -770,7 +770,7 @@ def selSPEA2(individuals, k):
                 dist = 0.0
                 for l in range(L):
                     val = individuals[chosen_indices[i]].fitness.values[l] - \
-                          individuals[chosen_indices[j]].fitness.values[l]
+                        individuals[chosen_indices[j]].fitness.values[l]
                     dist += val * val
                 distances[i][j] = dist
                 distances[j][i] = dist

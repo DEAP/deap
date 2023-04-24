@@ -120,7 +120,7 @@ def rosenbrock(individual):
        :width: 67 %
     """
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
-                   for x, y in zip(individual[:-1], individual[1:])),
+               for x, y in zip(individual[:-1], individual[1:])),
 
 
 def h1(individual):
@@ -199,7 +199,7 @@ def bohachevsky(individual):
        :width: 67 %
     """
     return sum(x**2 + 2 * x1**2 - 0.3 * cos(3 * pi * x) - 0.4 * cos(4 * pi * x1) + 0.7
-                for x, x1 in zip(individual[:-1], individual[1:])),
+               for x, x1 in zip(individual[:-1], individual[1:])),
 
 
 def griewank(individual):
@@ -246,7 +246,7 @@ def rastrigin(individual):
        :width: 67 %
     """
     return 10 * len(individual) + sum(gene * gene - 10 * \
-                        cos(2 * pi * gene) for gene in individual),
+                                      cos(2 * pi * gene) for gene in individual),
 
 
 def rastrigin_scaled(individual):
@@ -297,7 +297,7 @@ def schaffer(individual):
         :width: 67 %
     """
     return sum((x**2 + x1**2)**0.25 * ((sin(50 * (x**2 + x1**2)**0.1))**2 + 1.0)
-                for x, x1 in zip(individual[:-1], individual[1:])),
+               for x, x1 in zip(individual[:-1], individual[1:])),
 
 
 def schwefel(individual):

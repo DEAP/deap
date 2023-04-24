@@ -1,5 +1,5 @@
 def initRepeat(container, func, n):
-    """Call the function *func* *n* times and return the results in a 
+    """Call the function *func* *n* times and return the results in a
     container type `container`
 
     :param container: The type to put in the data from func.

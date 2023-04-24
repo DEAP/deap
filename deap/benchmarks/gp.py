@@ -19,7 +19,7 @@ from math import exp, sin, cos
 def kotanchek(data):
     r"""Kotanchek benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -34,7 +34,7 @@ def kotanchek(data):
 def salustowicz_1d(data):
     r"""Salustowicz benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -49,7 +49,7 @@ def salustowicz_1d(data):
 def salustowicz_2d(data):
     r"""Salustowicz benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -64,7 +64,7 @@ def salustowicz_2d(data):
 def unwrapped_ball(data):
     r"""Unwrapped ball benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -79,7 +79,7 @@ def unwrapped_ball(data):
 def rational_polynomial(data):
     r"""Rational polynomial ball benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -94,7 +94,7 @@ def rational_polynomial(data):
 def sin_cos(data):
     r"""Sine cosine benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -109,7 +109,7 @@ def sin_cos(data):
 def ripple(data):
     r"""Ripple benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
@@ -124,7 +124,7 @@ def ripple(data):
 def rational_polynomial2(data):
     r"""Rational polynomial benchmark function.
 
-    .. list-table:: 
+    .. list-table::
        :widths: 10 50
        :stub-columns: 1
 
