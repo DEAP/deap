@@ -209,7 +209,7 @@ class Primitive(object):
         if type(self) is type(other):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
-            return NotImplemented
+        return NotImplemented
 
 
 class Terminal(object):
@@ -235,7 +235,7 @@ class Terminal(object):
         if type(self) is type(other):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
-            return NotImplemented
+        return NotImplemented
 
 
 class Ephemeral(Terminal):
@@ -1037,7 +1037,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
 
         if producesizes:
             return producedpop, producedpopsizes
-            return producedpop
+        return producedpop
 
     def halflifefunc(x):
         return x * float(alpha) + beta

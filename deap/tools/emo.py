@@ -35,7 +35,7 @@ def selNSGA2(individuals, k, nd='standard'):
         pareto_fronts = sortLogNondominated(individuals, k)
     else:
         raise ValueError('selNSGA2: The choice of non-dominated sorting '
-                        'method "{0}" is invalid.'.format(nd))
+                         'method "{0}" is invalid.'.format(nd))
 
     for front in pareto_fronts:
         assignCrowdingDist(front)
@@ -227,7 +227,7 @@ def median(seq, key=identity):
     length = len(seq)
     if length % 2 == 1:
         return key(sseq[(length - 1) // 2])
-        return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
+    return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
 
 def sortLogNondominated(individuals, k, first_front_only=False):
     """Sort *individuals* in pareto non-dominated fronts using the Generalized
@@ -270,7 +270,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
             if count >= k:
                 return pareto_fronts[:i+1]
         return pareto_fronts
-        return pareto_fronts[0]
+    return pareto_fronts[0]
 
 def sortNDHelperA(fitnesses, obj, front):
     """Create a non-dominated sorting of S on the first M objectives"""
@@ -318,7 +318,7 @@ def splitA(fitnesses, obj):
 
     if balance_a <= balance_b:
         return best_a, worst_a
-        return best_b, worst_b
+    return best_b, worst_b
 
 def sweepA(fitnesses, front):
     """Update rank number associated to the fitnesses according
@@ -404,7 +404,7 @@ def splitB(best, worst, obj):
 
     if balance_a <= balance_b:
         return best1_a, best2_a, worst1_a, worst2_a
-        return best1_b, best2_b, worst1_b, worst2_b
+    return best1_b, best2_b, worst1_b, worst2_b
 
 def sweepB(best, worst, front):
     """Adjust the rank number of the worst fitnesses according to
@@ -516,7 +516,7 @@ def selNSGA3(individuals, k, ref_points, nd="log", best_point=None,
         pareto_fronts = sortLogNondominated(individuals, k)
     else:
         raise ValueError("selNSGA3: The choice of non-dominated sorting "
-                        "method '{0}' is invalid.".format(nd))
+                         "method '{0}' is invalid.".format(nd))
 
     # Extract fitnesses as a numpy array in the nd-sort order
     # Use wvalues * -1 to tackle always as a minimization problem
@@ -812,7 +812,7 @@ def _randomizedSelect(array, begin, end, i):
     k = q - begin + 1
     if i < k:
         return _randomizedSelect(array, begin, q, i)
-        return _randomizedSelect(array, q + 1, end, i - k)
+    return _randomizedSelect(array, q + 1, end, i - k)
 
 def _randomizedPartition(array, begin, end):
     i = random.randint(begin, end)

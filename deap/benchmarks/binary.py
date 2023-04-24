@@ -44,7 +44,7 @@ def trap(individual):
     k = len(individual)
     if u == k:
         return k
-        return k - 1 - u
+    return k - 1 - u
 
 
 def inv_trap(individual):
@@ -52,7 +52,7 @@ def inv_trap(individual):
     k = len(individual)
     if u == 0:
         return k
-        return u - 1
+    return u - 1
 
 
 def chuang_f1(individual):
