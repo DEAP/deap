@@ -169,3 +169,13 @@ def create(name, base, **kargs):
     objtype = type(str(name), (base,), dict_cls)
     objtype.__init__ = initType
     globals()[name] = objtype
+
+
+def remove(name):
+    """
+    Remove a class created by :func:`create`.
+    """
+    try:
+        globals().pop(name)
+    except KeyError:
+        pass
