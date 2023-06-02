@@ -353,7 +353,7 @@ avl_unlink_node(avl_tree_t *avltree, avl_node_t *avlnode) {
 /*
  * avl_rebalance:
  * Rebalances the tree if one side becomes too heavy.  This function
- * assumes that both subtrees are AVL-trees with consistant data.  The
+ * assumes that both subtrees are AVL-trees with consistent data.  The
  * function has the additional side effect of recalculating the count of
  * the tree at this node.  It should be noted that at the return of this
  * function, if a rebalance takes place, the top of this subtree is no
@@ -1109,7 +1109,7 @@ test_dom(dlnode_t *list, dlnode_t *pp, int dim, int *order)
        at most, up to dim dimensions, and so if p0 dominates pp in
        the first y dimensions (y < dim), the point that dominates
        p0 also dominates pp in the first y dimensions or more, and
-       this informations is already stored in r_b), so p0 is
+       this information is already stored in r_b), so p0 is
        skipped.  */
     while (p0 != pp) {
         if (p0->ignore < dim) {
@@ -1225,7 +1225,7 @@ determine_ndomf(dlnode_t *list, int dim, int c, int *order, int *count)
 
 
 /*
-  This funtion implements the iterative version of MDP heuristic described in
+  This function implements the iterative version of MDP heuristic described in
   L. While, L. Bradstreet, L. Barone, and P. Hingston, "Heuristics for optimising
   the calculation of hypervolume for multi-objective optimisation problems", in
   Congress on Evolutionary Computation, B. McKay, Ed. IEEE, 2005, pp. 2225-2232
@@ -1235,10 +1235,10 @@ determine_ndomf(dlnode_t *list, int dim, int c, int *order, int *count)
    This algorithm tries to maximize the number of dominated points
    dominated in more dimensions.  For example, for a problem with d
    dimensions, an order with 20 points dominated from dimension 0 to
-   dimension d-1 is prefered to an order of objectives in which the
+   dimension d-1 is preferred to an order of objectives in which the
    number of points dominated from dimension 0 to d-1 is 10. An order
    with the same number of points dominated up to dimension d-1 as a
-   second order is prefered if it has more points dominated up to
+   second order is preferred if it has more points dominated up to
    dimension d-2 than the second order.  */
 static int define_order(dlnode_t *list, int dim, int c, int *order)
 {
