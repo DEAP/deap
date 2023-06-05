@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "deap"
+version = "0.2.0"
+description = "forked DEAP"
+authors = ["Vladimir Filipovic <vladofilipovic@hotmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
