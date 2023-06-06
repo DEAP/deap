@@ -2,7 +2,7 @@ import math
 import random
 
 from itertools import repeat
-from past.builtins import xrange
+#from past.builtins import xrange
 
 try:
     from collections.abc import Sequence
