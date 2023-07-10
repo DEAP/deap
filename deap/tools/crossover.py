@@ -258,6 +258,45 @@ def cxBlend(ind1, ind2, alpha):
 
     return ind1, ind2
 
+def cxBlendBounded(ind1, ind2, low, up, alpha):
+    """Executes a blend crossover that modify in-place the input individuals.
+    The blend crossover expects :term:`sequence` individuals of floating point
+    numbers.
+
+    :param ind1: The first individual participating in the crossover.
+    :param ind2: The second individual participating in the crossover.
+    :param low: A value or a :term:`python:sequence` of values that is the lower
+                bound of the search space.
+    :param up: A value or a :term:`python:sequence` of values that is the upper
+               bound of the search space.
+    :param alpha: Extent of the interval in which the new values can be drawn
+                  for each attribute on both side of the parents' attributes.
+    :returns: A tuple of two individuals.
+
+    This function uses the :func:`~random.random` function from the python base
+    :mod:`random` module.
+    """
+
+    size = min(len(ind1), len(ind2))
+    if not isinstance(low, Sequence):
+        low = repeat(low, size)
+    elif len(low) < size:
+        raise IndexError("low must be at least the size of the shorter individual: %d < %d" % (len(low), size))
+    if not isinstance(up, Sequence):
+        up = repeat(up, size)
+    elif len(up) < size:
+        raise IndexError("up must be at least the size of the shorter individual: %d < %d" % (len(up), size))
+
+    for i, (x1, x2, xl, xu) in enumerate(zip(ind1, ind2, low, up)):
+        gamma = (1. + 2. * alpha) * random.random() - alpha
+        c1 = (1. - gamma) * x1 + gamma * x2
+        c2 = gamma * x1 + (1. - gamma) * x2
+
+        ind1[i] = min(max(c1, xl), xu)
+        ind2[i] = min(max(c2, xl), xu)
+
+    return ind1, ind2
+
 
 def cxSimulatedBinary(ind1, ind2, eta):
     """Executes a simulated binary crossover that modify in-place the input
@@ -454,7 +493,7 @@ def cxESTwoPoints(ind1, ind2):
 
 # List of exported function names.
 __all__ = ['cxOnePoint', 'cxTwoPoint', 'cxUniform', 'cxPartialyMatched',
-           'cxUniformPartialyMatched', 'cxOrdered', 'cxBlend',
+           'cxUniformPartialyMatched', 'cxOrdered', 'cxBlend', "cxBlendBounded",
            'cxSimulatedBinary', 'cxSimulatedBinaryBounded', 'cxMessyOnePoint',
            'cxESBlend', 'cxESTwoPoint']
 
