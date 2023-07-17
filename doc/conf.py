@@ -11,7 +11,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, time
+import sys, time, os
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -128,13 +128,15 @@ plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
 import subprocess
-try:
-    tree = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
-except OSError:
-    import warnings
-    warnings.warn("Cannot link examples because we cannot retrieve the git version", Warning)
-else:
-    extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/")}
+tree = os.getenv('GITHUB_COMMIT')
+if tree is None:
+    try:
+        tree = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    except OSError:
+        import warnings
+        warnings.warn("Cannot link examples because we cannot retrieve the git version", Warning)
+if tree:
+    extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/%s")}
 # -- Options for HTML output ---------------------------------------------------
 
 # Add any paths that contain custom themes here, relative to this directory.
