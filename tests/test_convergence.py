@@ -42,6 +42,7 @@ class TearDownCreatorTestCase(unittest.TestCase):
         del creator.__dict__[FITCLSNAME]
         del creator.__dict__[INDCLSNAME]
 
+
 class TestSingleObjective(TearDownCreatorTestCase):
     def setUp(self):
         creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
@@ -51,7 +52,7 @@ class TestSingleObjective(TearDownCreatorTestCase):
         NDIM = 5
         NGEN = 100
 
-        strategy = cma.BasicStrategy(centroid=[0.0]*NDIM, sigma=1.0)
+        strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
 
         toolbox = base.Toolbox()
         toolbox.register("evaluate", benchmarks.sphere)
@@ -59,8 +60,9 @@ class TestSingleObjective(TearDownCreatorTestCase):
         toolbox.register("update", strategy.update)
 
         # Consume the algorithm until NGEN
-        state = next(islice(algorithms.GenerateUpdateAlgorithm(toolbox), NGEN, None))
-        best, = tools.selBest(state.population, k=1)
+        population, _ = algorithms.eaGenerateUpdate(toolbox, NGEN)
+
+        best, = tools.selBest(population, k=1)
 
         self.assertLess(best.fitness.values[0], 1e-8)
 
@@ -73,7 +75,7 @@ class TestSingleObjective(TearDownCreatorTestCase):
 
         parent = (numpy.random.rand(N) * 2) + 1
 
-        strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1], lambda_=1)
+        strategy = cma.StrategyActiveOnePlusLambda(parent, 0.5, [0, 0, 0.1], lambda_=1)
 
         toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
         toolbox.register("update", strategy.update)
@@ -109,7 +111,7 @@ class TestSingleObjective(TearDownCreatorTestCase):
 
         parent = (numpy.random.rand(N) * 2) + 1
 
-        strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1], lambda_=20)
+        strategy = cma.StrategyActiveOnePlusLambda(parent, 0.5, [0, 0, 0.1], lambda_=20)
 
         toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
         toolbox.register("update", strategy.update)
@@ -166,7 +168,7 @@ class TestSingleObjectiveConstrained(TearDownCreatorTestCase):
         while restarts > 0:
             parent = (numpy.random.rand(N) * 2) + 1
 
-            strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1, 0, 0], lambda_=1)
+            strategy = cma.StrategyActiveOnePlusLambda(parent, 0.5, [0, 0, 0.1, 0, 0], lambda_=1)
 
             toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
             toolbox.register("update", strategy.update)
@@ -226,7 +228,7 @@ class TestSingleObjectiveConstrained(TearDownCreatorTestCase):
         while restarts > 0:
             parent = (numpy.random.rand(N) * 2) + 1
 
-            strategy = cma.ActiveOnePlusLambdaStrategy(parent, 0.5, [0, 0, 0.1, 0, 0], lambda_=20)
+            strategy = cma.StrategyActiveOnePlusLambda(parent, 0.5, [0, 0, 0.1, 0, 0], lambda_=20)
 
             toolbox.register("generate", strategy.generate, ind_init=creator.__dict__[INDCLSNAME])
             toolbox.register("update", strategy.update)
@@ -345,7 +347,7 @@ class TestMultiObjective(TearDownCreatorTestCase):
         # Begin the generational process
         for gen in range(1, NGEN):
             # Vary the individuals
-            offspring = list(islice(algorithms.and_variation(pop, toolbox, 1.0, 1.0), len(pop)))
+            offspring = list(islice(algorithms.varAnd(pop, toolbox, 1.0, 1.0), len(pop)))
 
             # Evaluate the individuals with an invalid fitness
             invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
@@ -407,7 +409,7 @@ class TestMultiObjectiveNumpy(TearDownCreatorTestCase):
         for ind in population:
             ind.fitness.values = toolbox.evaluate(ind)
 
-        strategy = cma.MultiObjectiveStrategy(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
+        strategy = cma.StrategyMultiObjective(population, sigma=1.0, mu=MU, lambda_=LAMBDA)
 
         toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
         toolbox.register("update", strategy.update)

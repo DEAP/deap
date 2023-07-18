@@ -1,5 +1,5 @@
 import unittest
-import mock
+from unittest import mock
 
 from deap.tools.mutation import mutInversion
 
