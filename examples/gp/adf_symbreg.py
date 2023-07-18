@@ -19,6 +19,8 @@ import math
 
 import numpy
 
+from functools import partial
+
 from deap import base
 from deap import creator
 from deap import gp
@@ -69,7 +71,7 @@ pset.addPrimitive(protectedDiv, 2)
 pset.addPrimitive(operator.neg, 1)
 pset.addPrimitive(math.cos, 1)
 pset.addPrimitive(math.sin, 1)
-pset.addEphemeralConstant("rand101", lambda: random.randint(-1, 1))
+pset.addEphemeralConstant("rand101", partial(random.randint, -1, 1))
 pset.addADF(adfset0)
 pset.addADF(adfset1)
 pset.addADF(adfset2)
