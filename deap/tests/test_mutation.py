@@ -3,6 +3,7 @@ import mock
 
 from deap.tools.mutation import mutInversion
 
+
 class MutationTest(unittest.TestCase):
 
     def test_mutInverstion_size_zero_chromosome_returns_unchanged_chromosome_in_tuple(self):

@@ -22,6 +22,7 @@ from math import sin, cos, pi, exp, e, sqrt
 from operator import mul
 from functools import reduce
 
+
 # Unimodal
 def rand(individual):
     r"""Random test objective function.
@@ -41,6 +42,7 @@ def rand(individual):
     """
     return random.random(),
 
+
 def plane(individual):
     r"""Plane test objective function.
 
@@ -58,6 +60,7 @@ def plane(individual):
          - :math:`f(\mathbf{x}) = x_0`
     """
     return individual[0],
+
 
 def sphere(individual):
     r"""Sphere test objective function.
@@ -77,6 +80,7 @@ def sphere(individual):
     """
     return sum(gene * gene for gene in individual),
 
+
 def cigar(individual):
     r"""Cigar test objective function.
 
@@ -94,6 +98,7 @@ def cigar(individual):
          - :math:`f(\mathbf{x}) = x_0^2 + 10^6\sum_{i=1}^N\,x_i^2`
     """
     return individual[0]**2 + 1e6 * sum(gene * gene for gene in individual[1:]),
+
 
 def rosenbrock(individual):
     r"""Rosenbrock test objective function.
@@ -115,7 +120,8 @@ def rosenbrock(individual):
        :width: 67 %
     """
     return sum(100 * (x * x - y)**2 + (1. - x)**2 \
-                   for x, y in zip(individual[:-1], individual[1:])),
+               for x, y in zip(individual[:-1], individual[1:])),
+
 
 def h1(individual):
     r""" Simple two-dimensional function containing several local maxima.
@@ -145,7 +151,7 @@ def h1(individual):
     denum = ((individual[0] - 8.6998)**2 + (individual[1] - 6.7665)**2)**0.5 + 1
     return num / denum,
 
- #
+
 # Multimodal
 def ackley(individual):
     r"""Ackley test objective function.
@@ -168,8 +174,9 @@ def ackley(individual):
        :width: 67 %
     """
     N = len(individual)
-    return 20 - 20 * exp(-0.2*sqrt(1.0/N * sum(x**2 for x in individual))) \
-            + e - exp(1.0/N * sum(cos(2*pi*x) for x in individual)),
+    return 20 - 20 * exp(-0.2 * sqrt(1.0 / N * sum(x**2 for x in individual))) \
+        + e - exp(1.0 / N * sum(cos(2 * pi * x) for x in individual)),
+
 
 def bohachevsky(individual):
     r"""Bohachevsky test objective function.
@@ -191,8 +198,9 @@ def bohachevsky(individual):
     .. plot:: code/benchmarks/bohachevsky.py
        :width: 67 %
     """
-    return sum(x**2 + 2*x1**2 - 0.3*cos(3*pi*x) - 0.4*cos(4*pi*x1) + 0.7
-                for x, x1 in zip(individual[:-1], individual[1:])),
+    return sum(x**2 + 2 * x1**2 - 0.3 * cos(3 * pi * x) - 0.4 * cos(4 * pi * x1) + 0.7
+               for x, x1 in zip(individual[:-1], individual[1:])),
+
 
 def griewank(individual):
     r"""Griewank test objective function.
@@ -214,8 +222,9 @@ def griewank(individual):
     .. plot:: code/benchmarks/griewank.py
        :width: 67 %
     """
-    return 1.0/4000.0 * sum(x**2 for x in individual) - \
-        reduce(mul, (cos(x/sqrt(i+1.0)) for i, x in enumerate(individual)), 1) + 1,
+    return 1.0 / 4000.0 * sum(x ** 2 for x in individual) - \
+        reduce(mul, (cos(x / sqrt(i + 1.0)) for i, x in enumerate(individual)), 1) + 1,
+
 
 def rastrigin(individual):
     r"""Rastrigin test objective function.
@@ -237,7 +246,8 @@ def rastrigin(individual):
        :width: 67 %
     """
     return 10 * len(individual) + sum(gene * gene - 10 * \
-                        cos(2 * pi * gene) for gene in individual),
+                                      cos(2 * pi * gene) for gene in individual),
+
 
 def rastrigin_scaled(individual):
     r"""Scaled Rastrigin test objective function.
@@ -247,8 +257,9 @@ def rastrigin_scaled(individual):
         10\cos\left(2\pi 10^{\left(\frac{i-1}{N-1}\right)} x_i \right)`
     """
     N = len(individual)
-    return 10*N + sum((10**(i/(N-1))*x)**2 -
-                      10*cos(2*pi*10**(i/(N-1))*x) for i, x in enumerate(individual)),
+    return 10 * N + sum((10 ** (i / (N - 1)) * x) ** 2 -
+                        10 * cos(2 * pi * 10 ** (i / (N - 1)) * x) for i, x in enumerate(individual)),
+
 
 def rastrigin_skew(individual):
     r"""Skewed Rastrigin test objective function.
@@ -285,8 +296,9 @@ def schaffer(individual):
     .. plot:: code/benchmarks/schaffer.py
         :width: 67 %
     """
-    return sum((x**2+x1**2)**0.25 * ((sin(50*(x**2+x1**2)**0.1))**2+1.0)
-                for x, x1 in zip(individual[:-1], individual[1:])),
+    return sum((x**2 + x1**2)**0.25 * ((sin(50 * (x**2 + x1**2)**0.1))**2 + 1.0)
+               for x, x1 in zip(individual[:-1], individual[1:])),
+
 
 def schwefel(individual):
     r"""Schwefel test objective function.
@@ -310,7 +322,9 @@ def schwefel(individual):
         :width: 67 %
     """
     N = len(individual)
-    return 418.9828872724339*N-sum(x*sin(sqrt(abs(x))) for x in individual),
+    return 418.9828872724339 * N - sum(x * sin(sqrt(abs(x))) for x in
+                                       individual),
+
 
 def himmelblau(individual):
     r"""The Himmelblau's function is multimodal with 4 defined minimums in
@@ -338,6 +352,7 @@ def himmelblau(individual):
     return (individual[0] * individual[0] + individual[1] - 11)**2 + \
         (individual[0] + individual[1] * individual[1] - 7)**2,
 
+
 def shekel(individual, a, c):
     r"""The Shekel multimodal function can have any number of maxima. The number
     of maxima is given by the length of any of the arguments *a* or *c*, *a*
@@ -359,6 +374,7 @@ def shekel(individual, a, c):
         :width: 67 %
     """
     return sum((1. / (c[i] + sum((individual[j] - aij)**2 for j, aij in enumerate(a[i])))) for i in range(len(c))),
+
 
 # Multiobjectives
 def kursawe(individual):
@@ -388,6 +404,7 @@ def schaffer_mo(individual):
     """
     return individual[0] ** 2, (individual[0] - 2) ** 2
 
+
 def zdt1(individual):
     r"""ZDT1 multiobjective function.
 
@@ -397,10 +414,11 @@ def zdt1(individual):
 
     :math:`f_{\text{ZDT1}2}(\mathbf{x}) = g(\mathbf{x})\left[1 - \sqrt{\frac{x_1}{g(\mathbf{x})}}\right]`
     """
-    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    g = 1.0 + 9.0 * sum(individual[1:]) / (len(individual) - 1)
     f1 = individual[0]
-    f2 = g * (1 - sqrt(f1/g))
+    f2 = g * (1 - sqrt(f1 / g))
     return f1, f2
+
 
 def zdt2(individual):
     r"""ZDT2 multiobjective function.
@@ -413,10 +431,11 @@ def zdt2(individual):
 
     """
 
-    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    g = 1.0 + 9.0 * sum(individual[1:]) / (len(individual) - 1)
     f1 = individual[0]
-    f2 = g * (1 - (f1/g)**2)
+    f2 = g * (1 - (f1 / g)**2)
     return f1, f2
+
 
 def zdt3(individual):
     r"""ZDT3 multiobjective function.
@@ -429,10 +448,11 @@ def zdt3(individual):
 
     """
 
-    g  = 1.0 + 9.0*sum(individual[1:])/(len(individual)-1)
+    g = 1.0 + 9.0 * sum(individual[1:]) / (len(individual) - 1)
     f1 = individual[0]
-    f2 = g * (1 - sqrt(f1/g) - f1/g * sin(10*pi*f1))
+    f2 = g * (1 - sqrt(f1 / g) - f1 / g * sin(10 * pi * f1))
     return f1, f2
+
 
 def zdt4(individual):
     r"""ZDT4 multiobjective function.
@@ -444,10 +464,11 @@ def zdt4(individual):
     :math:`f_{\text{ZDT4}2}(\mathbf{x}) = g(\mathbf{x})\left[ 1 - \sqrt{x_1/g(\mathbf{x})} \right]`
 
     """
-    g  = 1 + 10*(len(individual)-1) + sum(xi**2 - 10*cos(4*pi*xi) for xi in individual[1:])
+    g = 1 + 10 * (len(individual) - 1) + sum(xi**2 - 10 * cos(4 * pi * xi) for xi in individual[1:])
     f1 = individual[0]
-    f2 = g * (1 - sqrt(f1/g))
+    f2 = g * (1 - sqrt(f1 / g))
     return f1, f2
+
 
 def zdt6(individual):
     r"""ZDT6 multiobjective function.
@@ -459,10 +480,11 @@ def zdt6(individual):
     :math:`f_{\text{ZDT6}2}(\mathbf{x}) = g(\mathbf{x}) \left[ 1 - (f_{\text{ZDT6}1}(\mathbf{x})/g(\mathbf{x}))^2 \right]`
 
     """
-    g  = 1 + 9 * (sum(individual[1:]) / (len(individual)-1))**0.25
-    f1 = 1 - exp(-4*individual[0]) * sin(6*pi*individual[0])**6
-    f2 = g * (1 - (f1/g)**2)
+    g = 1 + 9 * (sum(individual[1:]) / (len(individual) - 1))**0.25
+    f1 = 1 - exp(-4 * individual[0]) * sin(6 * pi * individual[0])**6
+    f2 = g * (1 - (f1 / g)**2)
     return f1, f2
+
 
 def dtlz1(individual, obj):
     r"""DTLZ1 multiobjective function. It returns a tuple of *obj* values.
@@ -487,10 +509,11 @@ def dtlz1(individual, obj):
     individual in :math:`n > m` dimensions.
 
     """
-    g = 100 * (len(individual[obj-1:]) + sum((xi-0.5)**2 - cos(20*pi*(xi-0.5)) for xi in individual[obj-1:]))
-    f = [0.5 * reduce(mul, individual[:obj-1], 1) * (1 + g)]
-    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(range(obj-1)))
+    g = 100 * (len(individual[obj - 1:]) + sum((xi - 0.5)**2 - cos(20 * pi * (xi - 0.5)) for xi in individual[obj - 1:]))
+    f = [0.5 * reduce(mul, individual[:obj - 1], 1) * (1 + g)]
+    f.extend(0.5 * reduce(mul, individual[:m], 1) * (1 - individual[m]) * (1 + g) for m in reversed(range(obj - 1)))
     return f
+
 
 def dtlz2(individual, obj):
     r"""DTLZ2 multiobjective function. It returns a tuple of *obj* values.
@@ -512,13 +535,14 @@ def dtlz2(individual, obj):
     vector of the remaining attributes :math:`[x_m~\ldots~x_n]` of the
     individual in :math:`n > m` dimensions.
     """
-    xc = individual[:obj-1]
-    xm = individual[obj-1:]
-    g = sum((xi-0.5)**2 for xi in xm)
-    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi*pi) for xi in xc), 1.0)]
-    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]*pi) for m in range(obj-2, -1, -1))
+    xc = individual[:obj - 1]
+    xm = individual[obj - 1:]
+    g = sum((xi - 0.5)**2 for xi in xm)
+    f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc), 1.0)]
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m]*pi) for m in range(obj-2, -1, -1))
 
     return f
+
 
 def dtlz3(individual, obj):
     r"""DTLZ3 multiobjective function. It returns a tuple of *obj* values.
@@ -540,12 +564,13 @@ def dtlz3(individual, obj):
     vector of the remaining attributes :math:`[x_m~\ldots~x_n]` of the
     individual in :math:`n > m` dimensions.
     """
-    xc = individual[:obj-1]
-    xm = individual[obj-1:]
-    g = 100 * (len(xm) + sum((xi-0.5)**2 - cos(20*pi*(xi-0.5)) for xi in xm))
-    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi*pi) for xi in xc), 1.0)]
-    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]*pi) for m in range(obj-2, -1, -1))
+    xc = individual[:obj - 1]
+    xm = individual[obj - 1:]
+    g = 100 * (len(xm) + sum((xi - 0.5)**2 - cos(20 * pi * (xi - 0.5)) for xi in xm))
+    f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc), 1.0)]
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m] * pi) for m in range(obj - 2, -1, -1))
     return f
+
 
 def dtlz4(individual, obj, alpha):
     r"""DTLZ4 multiobjective function. It returns a tuple of *obj* values. The
@@ -569,12 +594,13 @@ def dtlz4(individual, obj, alpha):
     vector of the remaining attributes :math:`[x_m~\ldots~x_n]` of the
     individual in :math:`n > m` dimensions.
     """
-    xc = individual[:obj-1]
-    xm = individual[obj-1:]
-    g = sum((xi-0.5)**2 for xi in xm)
-    f = [(1.0+g) *  reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc), 1.0)]
-    f.extend((1.0+g) * reduce(mul, (cos(0.5*xi**alpha*pi) for xi in xc[:m]), 1) * sin(0.5*xc[m]**alpha*pi) for m in range(obj-2, -1, -1))
+    xc = individual[:obj - 1]
+    xm = individual[obj - 1:]
+    g = sum((xi - 0.5)**2 for xi in xm)
+    f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi ** alpha * pi) for xi in xc), 1.0)]
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi**alpha * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m]**alpha * pi) for m in range(obj - 2, -1, -1))
     return f
+
 
 def dtlz5(ind, n_objs):
     r"""DTLZ5 multiobjective function. It returns a tuple of *obj* values. The
@@ -583,18 +609,19 @@ def dtlz5(ind, n_objs):
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
     """
     g = lambda x: sum([(a - 0.5)**2 for a in x])
-    gval = g(ind[n_objs-1:])
+    gval = g(ind[n_objs - 1:])
 
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
-    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+    fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) * reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1:]])]
 
     for m in reversed(range(1, n_objs)):
         if m == 1:
             fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
             fit.append((1 + gval) * cos(pi / 2.0 * ind[0]) *
-                       reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
+                       reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1:m - 1]], 1) * sin(theta(ind[m - 1])))
     return fit
+
 
 def dtlz6(ind, n_objs):
     r"""DTLZ6 multiobjective function. It returns a tuple of *obj* values. The
@@ -602,19 +629,20 @@ def dtlz6(ind, n_objs):
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
     """
-    gval = sum([a**0.1 for a in ind[n_objs-1:]])
+    gval = sum([a**0.1 for a in ind[n_objs - 1:]])
     theta = lambda x: pi / (4.0 * (1 + gval)) * (1 + 2 * gval * x)
 
     fit = [(1 + gval) * cos(pi / 2.0 * ind[0]) *
-           reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:]])]
+           reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1:]])]
 
     for m in reversed(range(1, n_objs)):
         if m == 1:
             fit.append((1 + gval) * sin(pi / 2.0 * ind[0]))
         else:
             fit.append((1 + gval) * cos(pi / 2.0 * ind[0]) *
-                       reduce(lambda x,y: x*y, [cos(theta(a)) for a in ind[1:m-1]], 1) * sin(theta(ind[m-1])))
+                       reduce(lambda x, y: x * y, [cos(theta(a)) for a in ind[1: m - 1]], 1) * sin(theta(ind[m - 1])))
     return fit
+
 
 def dtlz7(ind, n_objs):
     r"""DTLZ7 multiobjective function. It returns a tuple of *obj* values. The
@@ -626,6 +654,7 @@ def dtlz7(ind, n_objs):
     fit = [x for x in ind[:n_objs-1]]
     fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + sin(3 * pi * a)) for a in ind[:n_objs-1]])))
     return fit
+
 
 def fonseca(individual):
     r"""Fonseca and Fleming's multiobjective function.
@@ -641,6 +670,7 @@ def fonseca(individual):
     f_1 = 1 - exp(-sum((xi - 1/sqrt(3))**2 for xi in individual[:3]))
     f_2 = 1 - exp(-sum((xi + 1/sqrt(3))**2 for xi in individual[:3]))
     return f_1, f_2
+
 
 def poloni(individual):
     r"""Poloni's multiobjective function on a two attribute *individual*. From:
@@ -667,7 +697,8 @@ def poloni(individual):
     B_2 = 1.5 * sin(x_1) - cos(x_1) + 2 * sin(x_2) - 0.5 * cos(x_2)
     return 1 + (A_1 - B_1)**2 + (A_2 - B_2)**2, (x_1 + 3)**2 + (x_2 + 1)**2
 
-def dent(individual, lambda_ = 0.85):
+
+def dent(individual, lambda_=0.85):
     r"""Test problem Dent. Two-objective problem with a "dent". *individual* has
     two attributes that take values in [-1.5, 1.5].
     From: Schuetze, O., Laumanns, M., Tantar, E., Coello Coello, C.A., & Talbi, E.-G. (2010).
