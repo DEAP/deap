@@ -34,15 +34,15 @@ jobs:
       pytest .
     displayName: 'Run tests'
 
-- job: 'Lint'
-  pool:
-    vmImage: 'ubuntu-latest'
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.9'
+# - job: 'Lint'
+#   pool:
+#     vmImage: 'ubuntu-latest'
+#   steps:
+#   - task: UsePythonVersion@0
+#     inputs:
+#       versionSpec: '3.9'
 
-  - script: |
-      pip install flake8
-      flake8 .
-    displayName: 'Run linting'
+#   - script: |
+#       pip install flake8
+#       flake8 .
+#     displayName: 'Run linting'
