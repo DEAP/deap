@@ -24,7 +24,6 @@ programming, evolution strategies, particle swarm optimizers, and many more.
 import array
 import copy
 import warnings
-import copy_reg
 
 class_replacers = {}
 """Some classes in Python's standard library as well as third party library

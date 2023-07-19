@@ -21,7 +21,7 @@ This module support both strongly and loosely typed GP.
 """
 import copy
 import math
-import copy_reg
+import copyreg
 import random
 import re
 import sys
@@ -275,7 +275,7 @@ class MetaEphemeral(type):
     def __reduce__(cls):
         return (MetaEphemeral, (cls.name, cls.func, cls.ret, id(cls)))
 
-copy_reg.pickle(MetaEphemeral, MetaEphemeral.__reduce__)
+copyreg.pickle(MetaEphemeral, MetaEphemeral.__reduce__)
 
 
 class PrimitiveSetTyped(object):
