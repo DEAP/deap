@@ -23,6 +23,7 @@ programming, evolution strategies, particle swarm optimizers, and many more.
 
 import array
 import copy
+import copyreg
 import warnings
 
 class_replacers = {}
@@ -90,7 +91,54 @@ class _array(array.array):
 
     def __reduce__(self):
         return (self.__class__, (list(self),), self.__dict__)
+
+
 class_replacers[array.array] = _array
+
+
+class MetaCreator(type):
+    def __new__(cls, name, base, dct):
+        return super(MetaCreator, cls).__new__(cls, name, (base,), dct)
+
+    def __init__(cls, name, base, dct):
+        # A DeprecationWarning is raised when the object inherits from the
+        # class "object" which leave the option of passing arguments, but
+        # raise a warning stating that it will eventually stop permitting
+        # this option. Usually this happens when the base class does not
+        # override the __init__ method from object.
+        dict_inst = {}
+        dict_cls = {}
+        for obj_name, obj in dct.items():
+            if isinstance(obj, type):
+                dict_inst[obj_name] = obj
+            else:
+                dict_cls[obj_name] = obj
+
+        def init_type(self, *args, **kargs):
+            """Replace the __init__ function of the new type, in order to
+            add attributes that were defined with **kargs to the instance.
+            """
+            for obj_name, obj in dict_inst.items():
+                setattr(self, obj_name, obj())
+            if base.__init__ is not object.__init__:
+                base.__init__(self, *args, **kargs)
+
+        cls.__init__ = init_type
+        cls.reduce_args = (name, base, dct)
+        super(MetaCreator, cls).__init__(name, (base,), dict_cls)
+
+    def __reduce__(cls):
+        return (meta_create, cls.reduce_args)
+
+
+copyreg.pickle(MetaCreator, MetaCreator.__reduce__)
+
+
+def meta_create(name, base, dct):
+    class_ = MetaCreator(name, base, dct)
+    globals()[name] = class_
+    return class_
+
 
 def create(name, base, **kargs):
     """Creates a new class named *name* inheriting from *base* in the
