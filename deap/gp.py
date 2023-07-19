@@ -359,9 +359,9 @@ class PrimitiveSetTyped(object):
 
         assert name not in self.context or \
                self.context[name] is primitive, \
-            "Primitives are required to have a unique name. " \
-            "Consider using the argument 'name' to rename your " \
-            "second '%s' primitive." % (name,)
+               "Primitives are required to have a unique name. " \
+               "Consider using the argument 'name' to rename your " \
+               "second '%s' primitive." % (name,)
 
         self._add(prim)
         self.context[prim.name] = primitive
@@ -495,10 +495,10 @@ def compile(expr, pset):
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError("DEAP : Error in tree evaluation :"
-                            " Python cannot evaluate a tree higher than 90. "
-                            "To avoid this problem, you should use bloat control on your "
-                            "operators. See the DEAP documentation for more information. "
-                            "DEAP will now abort.").with_traceback(traceback)
+                          " Python cannot evaluate a tree higher than 90. "
+                          "To avoid this problem, you should use bloat control on your "
+                          "operators. See the DEAP documentation for more information. "
+                          "DEAP will now abort.").with_traceback(traceback)
 
 
 def compileADF(expr, psets):
@@ -520,7 +520,7 @@ def compileADF(expr, psets):
     """
     adfdict = {}
     func = None
-    for pset, subexpr in reversed(zip(psets, expr)):
+    for pset, subexpr in reversed(list(zip(psets, expr))):
         pset.context.update(adfdict)
         func = compile(subexpr, pset)
         adfdict.update({pset.name: func})
@@ -568,7 +568,7 @@ def genGrow(pset, min_, max_, type_=None):
         or when it is randomly determined that a node should be a terminal.
         """
         return depth == height or \
-               (depth >= min_ and random.random() < pset.terminalRatio)
+            (depth >= min_ and random.random() < pset.terminalRatio)
 
     return generate(pset, min_, max_, condition, type_)
 
@@ -632,9 +632,9 @@ def generate(pset, min_, max_, condition, type_=None):
                 term = random.choice(pset.terminals[type_])
             except IndexError:
                 _, _, traceback = sys.exc_info()
-                raise IndexError("The gp.generate function tried to add "\
-                                  "a terminal of type '%s', but there is "\
-                                  "none available." % (type_,)).with_traceback(traceback)
+                raise IndexError("The gp.generate function tried to add "
+                                 "a terminal of type '%s', but there is "
+                                 "none available." % (type_,)).with_traceback(traceback)
             if type(term) is MetaEphemeral:
                 term = term()
             expr.append(term)
@@ -644,8 +644,8 @@ def generate(pset, min_, max_, condition, type_=None):
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError("The gp.generate function tried to add "
-                                  "a primitive of type '%s', but there is "
-                                  "none available." % (type_,)).with_traceback(traceback)
+                                 "a primitive of type '%s', but there is "
+                                 "none available." % (type_,)).with_traceback(traceback)
             expr.append(prim)
             for arg in reversed(prim.args):
                 stack.append((depth + 1, arg))
