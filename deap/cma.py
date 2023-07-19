@@ -23,6 +23,7 @@ Evolution Strategy.
 import copy
 from math import sqrt, log, exp
 from itertools import cycle
+import warnings
 
 import numpy
 
