@@ -101,7 +101,7 @@ A logbook is a picklable object (as long as all inserted objects are picklable) 
 
 Printing to Screen
 ------------------
-A logbook can be printed to screen or file. Its :meth:`~deap.tools.Logbook.__str__` method returns a header of each key inserted in the first record and the complete logbook for each of these keys. The row are in chronological order of insertion while the columns are in an undefined order. The easiest way to specify an order is to set the :attr:`~deap.tools.Logbook.header` attribute to a list of strings specifying the order of the columns.
+A logbook can be printed to screen or file. Its :meth:`~deap.tools.Logbook.__str__` method returns a header of each key inserted in the first record and the complete logbook for each of these keys. The rows are in chronological order of insertion while the columns are in an undefined order. The easiest way to specify an order is to set the :attr:`~deap.tools.Logbook.header` attribute to a list of strings specifying the order of the columns.
 
 .. literalinclude:: /code/tutorials/part_3/logbook.py
    :lines: 21

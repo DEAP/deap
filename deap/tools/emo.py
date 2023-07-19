@@ -607,7 +607,7 @@ def associate_to_niche(fitnesses, reference_points, best_point, intercepts):
     """Associates individuals to reference points and calculates niche number.
     Corresponds to Algorithm 3 of Deb & Jain (2014)."""
     # Normalize by ideal point and intercepts
-    fn = (fitnesses - best_point) / (intercepts - best_point)
+    fn = (fitnesses - best_point) / (intercepts - best_point + numpy.finfo(float).eps)
 
     # Create distance matrix
     fn = numpy.repeat(numpy.expand_dims(fn, axis=1), len(reference_points), axis=1)
