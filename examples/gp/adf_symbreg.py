@@ -117,7 +117,6 @@ toolbox.register('mutate', gp.mutUniform, expr=toolbox.expr)
 
 def main():
     random.seed(1024)
-    ind = toolbox.individual()
 
     pop = toolbox.population(n=100)
     hof = tools.HallOfFame(1)
