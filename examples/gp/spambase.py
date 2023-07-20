@@ -20,6 +20,8 @@ import itertools
 
 import numpy
 
+from functools import partial
+
 from deap import algorithms
 from deap import base
 from deap import creator
@@ -64,7 +66,7 @@ pset.addPrimitive(operator.eq, [float, float], bool)
 pset.addPrimitive(if_then_else, [bool, float, float], float)
 
 # terminals
-pset.addEphemeralConstant("rand100", lambda: random.random() * 100, float)
+pset.addEphemeralConstant("rand100", partial(random.uniform, 0, 100), float)
 pset.addTerminal(False, bool)
 pset.addTerminal(True, bool)
 
