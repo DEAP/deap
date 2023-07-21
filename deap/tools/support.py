@@ -50,7 +50,7 @@ class History(object):
     Using NetworkX in combination with `pygraphviz
     <http://networkx.lanl.gov/pygraphviz/>`_ (dot layout) this amazing
     genealogy tree can be obtained from the OneMax example with a population
-    size of 20 and 5 generations, where the color of the nodes indicate there
+    size of 20 and 5 generations, where the color of the nodes indicate their
     fitness, blue is low and red is high.
 
     .. image:: /_images/genealogy.png
