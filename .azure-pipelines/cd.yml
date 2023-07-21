@@ -40,40 +40,6 @@ jobs:
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
-  - job: macOS10_15Build
-    pool:
-      vmImage: 'macOS-10.15'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python37:
-          python.version: '3.7'
-        Python38:
-          python.version: '3.8'
-        Python39:
-          python.version: '3.9'
-        Python310:
-          python.version: '3.10'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
-    - script: |
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
-    - script: |
-        pip install wheel twine
-      displayName: 'Install build tools'
-    - script: |
-        python setup.py sdist bdist_wheel
-      displayName: 'Build wheel'
-    - script: |
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
-      displayName: 'Publish wheel to PyPi'
-
   - job: macOS11Build
     pool:
       vmImage: 'macOS-11'
