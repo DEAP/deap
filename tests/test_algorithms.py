@@ -65,7 +65,7 @@ def setup_teardown_multi_obj_numpy():
 def test_cma(setup_teardown_single_obj):
     NDIM = 5
 
-    strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
+    strategy = cma.Strategy(centroid=[0.0] * NDIM, sigma=1.0)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
@@ -91,7 +91,7 @@ def test_nsga2(setup_teardown_multi_obj):
 
     toolbox.register("evaluate", benchmarks.zdt1)
     toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
     toolbox.register("select", tools.selNSGA2)
 
     pop = toolbox.population(n=MU)
@@ -212,7 +212,7 @@ def test_nsga3(setup_teardown_multi_obj):
 
     toolbox.register("evaluate", benchmarks.zdt1)
     toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
     toolbox.register("select", tools.selNSGA3, ref_points=ref_points)
 
     pop = toolbox.population(n=MU)

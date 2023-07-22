@@ -119,7 +119,7 @@ def rosenbrock(individual):
     .. plot:: code/benchmarks/rosenbrock.py
        :width: 67 %
     """
-    return sum(100 * (x * x - y)**2 + (1. - x)**2 \
+    return sum(100 * (x * x - y)**2 + (1. - x)**2
                for x, y in zip(individual[:-1], individual[1:])),
 
 
@@ -245,7 +245,7 @@ def rastrigin(individual):
     .. plot:: code/benchmarks/rastrigin.py
        :width: 67 %
     """
-    return 10 * len(individual) + sum(gene * gene - 10 * \
+    return 10 * len(individual) + sum(gene * gene - 10 *
                                       cos(2 * pi * gene) for gene in individual),
 
 
@@ -273,8 +273,10 @@ def rastrigin_skew(individual):
                             \end{cases}`
     """
     N = len(individual)
-    return 10*N + sum((10*x if x > 0 else x)**2
-                    - 10*cos(2*pi*(10*x if x > 0 else x)) for x in individual),
+    return 10 * N + sum((10 * x if x > 0 else x) ** 2
+                    - 10 * cos(2 * pi * (10 * x if x > 0 else x)) for x in individual),
+
+
 def schaffer(individual):
     r"""Schaffer test objective function.
 
@@ -539,7 +541,7 @@ def dtlz2(individual, obj):
     xm = individual[obj - 1:]
     g = sum((xi - 0.5)**2 for xi in xm)
     f = [(1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc), 1.0)]
-    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m]*pi) for m in range(obj-2, -1, -1))
+    f.extend((1.0 + g) * reduce(mul, (cos(0.5 * xi * pi) for xi in xc[:m]), 1) * sin(0.5 * xc[m] * pi) for m in range(obj - 2, -1, -1))
 
     return f
 
@@ -650,9 +652,9 @@ def dtlz7(ind, n_objs):
     From: K. Deb, L. Thiele, M. Laumanns and E. Zitzler. Scalable Multi-Objective
     Optimization Test Problems. CEC 2002, p. 825-830, IEEE Press, 2002.
     """
-    gval = 1 + 9.0 / len(ind[n_objs-1:]) * sum([a for a in ind[n_objs-1:]])
-    fit = [x for x in ind[:n_objs-1]]
-    fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + sin(3 * pi * a)) for a in ind[:n_objs-1]])))
+    gval = 1 + 9.0 / len(ind[n_objs - 1:]) * sum([a for a in ind[n_objs - 1:]])
+    fit = [x for x in ind[:n_objs - 1]]
+    fit.append((1 + gval) * (n_objs - sum([a / (1.0 + gval) * (1 + sin(3 * pi * a)) for a in ind[:n_objs - 1]])))
     return fit
 
 
@@ -667,8 +669,8 @@ def fonseca(individual):
 
     :math:`f_{\text{Fonseca}2}(\mathbf{x}) = 1 - e^{-\sum_{i=1}^{3}(x_i + \frac{1}{\sqrt{3}})^2}`
     """
-    f_1 = 1 - exp(-sum((xi - 1/sqrt(3))**2 for xi in individual[:3]))
-    f_2 = 1 - exp(-sum((xi + 1/sqrt(3))**2 for xi in individual[:3]))
+    f_1 = 1 - exp(-sum((xi - 1 / sqrt(3)) ** 2 for xi in individual[:3]))
+    f_2 = 1 - exp(-sum((xi + 1 / sqrt(3)) ** 2 for xi in individual[:3]))
     return f_1, f_2
 
 

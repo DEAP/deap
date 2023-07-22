@@ -83,7 +83,7 @@ def sortNondominated(individuals, k, first_front_only=False):
 
     # Rank first Pareto front
     for i, fit_i in enumerate(fits):
-        for fit_j in fits[i+1:]:
+        for fit_j in fits[i + 1:]:
             if fit_i.dominates(fit_j):
                 dominating_fits[fit_j] += 1
                 dominated_fits[fit_i].append(fit_j)
@@ -189,10 +189,10 @@ def selTournamentDCD(individuals, k):
 
     chosen = []
     for i in range(0, k, 4):
-        chosen.append(tourn(individuals_1[i], individuals_1[i+1]))
-        chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
-        chosen.append(tourn(individuals_2[i], individuals_2[i+1]))
-        chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
+        chosen.append(tourn(individuals_1[i], individuals_1[i + 1]))
+        chosen.append(tourn(individuals_1[i + 2], individuals_1[i + 3]))
+        chosen.append(tourn(individuals_2[i], individuals_2[i + 1]))
+        chosen.append(tourn(individuals_2[i + 2], individuals_2[i + 3]))
 
     return chosen
 
@@ -255,7 +255,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
         unique_fits[ind.fitness.wvalues].append(ind)
 
     # Launch the sorting algorithm
-    obj = len(individuals[0].fitness.wvalues)-1
+    obj = len(individuals[0].fitness.wvalues) - 1
     fitnesses = list(unique_fits.keys())
     front = dict.fromkeys(fitnesses, 0)
 
@@ -264,7 +264,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     sortNDHelperA(fitnesses, obj, front)
 
     # Extract individuals from front list here
-    nbfronts = max(front.values())+1
+    nbfronts = max(front.values()) + 1
     pareto_fronts = [[] for i in range(nbfronts)]
     for fit in fitnesses:
         index = front[fit]
@@ -276,7 +276,7 @@ def sortLogNondominated(individuals, k, first_front_only=False):
         for i, front in enumerate(pareto_fronts):
             count += len(front)
             if count >= k:
-                return pareto_fronts[:i+1]
+                return pareto_fronts[:i + 1]
         return pareto_fronts
     else:
         return pareto_fronts[0]
@@ -289,18 +289,18 @@ def sortNDHelperA(fitnesses, obj, front):
     elif len(fitnesses) == 2:
         # Only two individuals, compare them and adjust front number
         s1, s2 = fitnesses[0], fitnesses[1]
-        if isDominated(s2[:obj+1], s1[:obj+1]):
+        if isDominated(s2[:obj + 1], s1[:obj + 1]):
             front[s2] = max(front[s2], front[s1] + 1)
     elif obj == 1:
         sweepA(fitnesses, front)
     elif len(frozenset(map(itemgetter(obj), fitnesses))) == 1:
         # All individuals for objective M are equal: go to objective M-1
-        sortNDHelperA(fitnesses, obj-1, front)
+        sortNDHelperA(fitnesses, obj - 1, front)
     else:
         # More than two individuals, split list and then apply recursion
         best, worst = splitA(fitnesses, obj)
         sortNDHelperA(best, obj, front)
-        sortNDHelperB(best, worst, obj-1, front)
+        sortNDHelperB(best, worst, obj - 1, front)
         sortNDHelperA(worst, obj, front)
 
 
@@ -343,7 +343,7 @@ def sweepA(fitnesses, front):
         idx = bisect.bisect_right(stairs, -fit[1])
         if 0 < idx <= len(stairs):
             fstair = max(fstairs[:idx], key=front.__getitem__)
-            front[fit] = max(front[fit], front[fstair]+1)
+            front[fit] = max(front[fit], front[fstair] + 1)
         for i, fstair in enumerate(fstairs[idx:], idx):
             if front[fstair] == front[fit]:
                 del stairs[i]
@@ -366,7 +366,7 @@ def sortNDHelperB(best, worst, obj, front):
         # One of the lists has one individual: compare directly
         for hi in worst:
             for li in best:
-                if isDominated(hi[:obj+1], li[:obj+1]) or hi[:obj+1] == li[:obj+1]:
+                if isDominated(hi[:obj + 1], li[:obj + 1]) or hi[:obj + 1] == li[:obj + 1]:
                     front[hi] = max(front[hi], front[li] + 1)
     elif obj == 1:
         sweepB(best, worst, front)
@@ -375,11 +375,11 @@ def sortNDHelperB(best, worst, obj, front):
         # Also supports the case where every individuals in L and H
         # has the same value for the current objective
         # Skip to objective M-1
-        sortNDHelperB(best, worst, obj-1, front)
+        sortNDHelperB(best, worst, obj - 1, front)
     elif key(max(best, key=key)) >= key(min(worst, key=key)):
         best1, best2, worst1, worst2 = splitB(best, worst, obj)
         sortNDHelperB(best1, worst1, obj, front)
-        sortNDHelperB(best1, worst2, obj-1, front)
+        sortNDHelperB(best1, worst2, obj - 1, front)
         sortNDHelperB(best2, worst2, obj, front)
 
 
@@ -450,7 +450,7 @@ def sweepB(best, worst, front):
         idx = bisect.bisect_right(stairs, -h[1])
         if 0 < idx <= len(stairs):
             fstair = max(fstairs[:idx], key=front.__getitem__)
-            front[h] = max(front[h], front[fstair]+1)
+            front[h] = max(front[h], front[fstair] + 1)
 
 ######################################
 # Non-Dominated Sorting  (NSGA-III)  #
@@ -726,7 +726,7 @@ def selSPEA2(individuals, k):
     dominating_inds = [list() for i in range(N)]
 
     for i, ind_i in enumerate(individuals):
-        for j, ind_j in enumerate(individuals[i+1:], i+1):
+        for j, ind_j in enumerate(individuals[i + 1:], i + 1):
             if ind_i.fitness.dominates(ind_j.fitness):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
@@ -746,9 +746,9 @@ def selSPEA2(individuals, k):
             distances = [0.0] * N
             for j in range(i + 1, N):
                 dist = 0.0
-                for l in range(L):
-                    val = individuals[i].fitness.values[l] - \
-                        individuals[j].fitness.values[l]
+                for k in range(L):
+                    val = individuals[i].fitness.values[k] - \
+                        individuals[j].fitness.values[k]
                     dist += val * val
                 distances[j] = dist
             kth_dist = _randomizedSelect(distances, 0, N - 1, K)
@@ -756,7 +756,7 @@ def selSPEA2(individuals, k):
             fits[i] += density
 
         next_indices = [(fits[i], i) for i in range(N)
-                        if not i in chosen_indices]
+                        if i not in chosen_indices]
         next_indices.sort()
         # print next_indices
         chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
@@ -768,9 +768,9 @@ def selSPEA2(individuals, k):
         for i in range(N):
             for j in range(i + 1, N):
                 dist = 0.0
-                for l in range(L):
-                    val = individuals[chosen_indices[i]].fitness.values[l] - \
-                        individuals[chosen_indices[j]].fitness.values[l]
+                for k in range(L):
+                    val = individuals[chosen_indices[i]].fitness.values[k] - \
+                        individuals[chosen_indices[j]].fitness.values[k]
                     dist += val * val
                 distances[i][j] = dist
                 distances[j][i] = dist
@@ -779,11 +779,11 @@ def selSPEA2(individuals, k):
         # Insert sort is faster than quick sort for short arrays
         for i in range(N):
             for j in range(1, N):
-                l = j
-                while l > 0 and distances[i][j] < distances[i][sorted_indices[i][l - 1]]:
-                    sorted_indices[i][l] = sorted_indices[i][l - 1]
-                    l -= 1
-                sorted_indices[i][l] = j
+                k = j
+                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
+                    sorted_indices[i][k] = sorted_indices[i][k - 1]
+                    k -= 1
+                sorted_indices[i][k] = j
 
         size = N
         to_remove = []

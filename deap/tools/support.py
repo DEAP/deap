@@ -475,7 +475,7 @@ class Logbook(list):
                     header[-1].append(name)
             str_matrix = chain(header, str_matrix)
 
-        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(self.columns_len))
+        template = "\t".join("{%i:<%i}" % (i, k) for i, k in enumerate(self.columns_len))
         text = [template.format(*line) for line in str_matrix]
 
         return text

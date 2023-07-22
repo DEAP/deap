@@ -23,13 +23,12 @@ from itertools import chain
 
 from deap import base
 from deap import creator
-from deap import benchmarks
-
 import fgeneric
 import bbobbenchmarks as bn
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", array.array, typecode="d", fitness=creator.FitnessMin)
+
 
 def update(individual, mu, sigma):
     """Update the current *individual* with values from a gaussian centered on
@@ -38,6 +37,7 @@ def update(individual, mu, sigma):
     for i, mu_i in enumerate(mu):
         individual[i] = random.gauss(mu_i, sigma)
 
+
 def tupleize(func):
     """A decorator that tuple-ize the result of a function. This is useful
     when the evaluation function returns a single value.
@@ -45,6 +45,7 @@ def tupleize(func):
     def wrapper(*args, **kargs):
         return func(*args, **kargs),
     return wrapper
+
 
 def main(func, dim, maxfuncevals, ftarget=None):
     toolbox = base.Toolbox()
@@ -58,8 +59,8 @@ def main(func, dim, maxfuncevals, ftarget=None):
 
     # Interval in which to initialize the optimizer
     interval = -5, 5
-    sigma = (interval[1] - interval[0])/2.0
-    alpha = 2.0**(1.0/dim)
+    sigma = (interval[1] - interval[0]) / 2.0
+    alpha = 2.0**(1.0 / dim)
 
     # Initialize best randomly and worst as a place holder
     best = creator.Individual(random.uniform(interval[0], interval[1]) for _ in range(dim))
@@ -87,6 +88,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
             return best
 
     return best
+
 
 if __name__ == "__main__":
     # Maximum number of restart for an algorithm that detects stagnation

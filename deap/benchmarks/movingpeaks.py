@@ -27,7 +27,7 @@ import random
 
 try:
     from collections.abc import Sequence
-except:
+except ModuleNotFoundError:
     from collections import Sequence
 
 

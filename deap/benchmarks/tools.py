@@ -186,7 +186,7 @@ class scale(object):
     def __init__(self, factor):
         # Factor is inverted since it is applied to the individual and not the
         # objective function
-        self.factor = tuple(1.0/f for f in factor)
+        self.factor = tuple(1.0 / f for f in factor)
 
     def __call__(self, func):
         # wraps is used to combine stacked decorators that would add functions
@@ -211,7 +211,7 @@ class scale(object):
         """
         # Factor is inverted since it is applied to the individual and not the
         # objective function
-        self.factor = tuple(1.0/f for f in factor)
+        self.factor = tuple(1.0 / f for f in factor)
 
 
 class bound(object):
@@ -276,9 +276,9 @@ def diversity(first_front, first, last):
     if len(first_front) == 1:
         return df + dl
 
-    dm = sum(dt)/len(dt)
+    dm = sum(dt) / len(dt)
     di = sum(abs(d_i - dm) for d_i in dt)
-    delta = (df + dl + di)/(df + dl + len(dt) * dm)
+    delta = (df + dl + di) / (df + dl + len(dt) * dm)
     return delta
 
 

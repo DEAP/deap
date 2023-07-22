@@ -27,6 +27,7 @@ import re
 import sys
 import types
 import warnings
+from inspect import isclass
 
 from collections import defaultdict, deque
 from functools import partial, wraps
@@ -240,12 +241,14 @@ class Terminal(object):
         else:
             return NotImplemented
 
+
 class MetaEphemeral(type):
     """Meta-Class that creates a terminal which value is set when the
     object is created. To mutate the value, a new object has to be
     generated.
     """
     cache = {}
+
     def __new__(meta, name, func, ret=__type__, id_=None):
         if id_ in MetaEphemeral.cache:
             return MetaEphemeral.cache[id_]
@@ -259,11 +262,11 @@ class MetaEphemeral(type):
         def __init__(self):
             self.value = func()
 
-        attr = {'__init__' : __init__,
-                'name' : name,
-                'func' : func,
-                'ret' : ret,
-                'conv_fct' : repr}
+        attr = {'__init__': __init__,
+                'name': name,
+                'func': func,
+                'ret': ret,
+                'conv_fct': repr}
 
         cls = super(MetaEphemeral, meta).__new__(meta, name, (Terminal,), attr)
         MetaEphemeral.cache[id(cls)] = cls
@@ -274,6 +277,7 @@ class MetaEphemeral(type):
 
     def __reduce__(cls):
         return (MetaEphemeral, (cls.name, cls.func, cls.ret, id(cls)))
+
 
 copyreg.pickle(MetaEphemeral, MetaEphemeral.__reduce__)
 
@@ -411,7 +415,7 @@ class PrimitiveSetTyped(object):
         :param ephemeral: function with no arguments returning a random value.
         :param ret_type: type of the object returned by *ephemeral*.
         """
-        if not name in self.mapping:
+        if name not in self.mapping:
             class_ = MetaEphemeral(name, ephemeral, ret_type)
         else:
             class_ = self.mapping[name]

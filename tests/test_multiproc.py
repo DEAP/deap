@@ -1,12 +1,11 @@
 import multiprocessing
-import unittest
 
 from deap import base
 from deap import creator
 
 
 def _evalOneMax(individual):
-        return sum(individual),
+    return sum(individual),
 
 
 def test_multiproc():
@@ -20,7 +19,7 @@ def test_multiproc():
     pool = multiprocessing.Pool(processes=4)
     toolbox.register("map", pool.map)
 
-    pop = [[1]*20 for _ in range(100)]
+    pop = [[1] * 20 for _ in range(100)]
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
         assert fit == (sum(ind),)

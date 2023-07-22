@@ -4,7 +4,6 @@ import unittest
 import array
 import pickle
 import operator
-import platform
 import functools
 
 import numpy
@@ -24,8 +23,8 @@ class Pickling(unittest.TestCase):
     def setUp(self):
         creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         creator.create("IndList", list, fitness=creator.FitnessMax)
-        creator.create("IndArray", array.array,  typecode='f', fitness=creator.FitnessMax)
-        creator.create("IndNDArray", numpy.ndarray,  typecode='f', fitness=creator.FitnessMax)
+        creator.create("IndArray", array.array, typecode='f', fitness=creator.FitnessMax)
+        creator.create("IndNDArray", numpy.ndarray, typecode='f', fitness=creator.FitnessMax)
         creator.create("IndTree", gp.PrimitiveTree, fitness=creator.FitnessMax)
         self.toolbox = base.Toolbox()
         self.toolbox.register("func", func)
@@ -143,7 +142,6 @@ class Pickling(unittest.TestCase):
         self.assertEqual(pop[1].fitness, pop_l[1].fitness, "Unpickled individual fitness != pickled individual fitness")
         self.assertEqual(pop[2], pop_l[2], "Unpickled individual list != pickled individual list")
         self.assertEqual(pop[2].fitness, pop_l[2].fitness, "Unpickled individual fitness != pickled individual fitness")
-
 
     # @unittest.skipIf(platform.python_implementation() == "PyPy", "PyPy support for pickling ndarrays (thus stats) is very unstable.")
     def test_pickle_logbook(self):
