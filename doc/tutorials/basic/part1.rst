@@ -166,7 +166,7 @@ arguments.
 .. literalinclude:: /code/tutorials/part_2/2_2_5_particle.py
    :lines: 2-
 
-Calling :func:`toolbox.individual` will readily return a complete particle with
+Calling :func:`toolbox.particle` will readily return a complete particle with
 a speed vector and a fitness attribute for maximizing two objectives.
 
 .. _funky:
@@ -239,7 +239,7 @@ best position to a :attr:`gbest` attribute and the global best fitness to a
 .. literalinclude:: /code/tutorials/part_2/2_3_3_swarm.py
    :lines: 11,23
 
-Calling :func:`toolbox.population` will readily return a complete swarm. After
+Calling :func:`toolbox.swarm` will readily return a complete swarm. After
 each evaluation the :attr:`gbest` and :attr:`gbestfit` should be set by the
 algorithm to reflect the best found position and fitness.
 
