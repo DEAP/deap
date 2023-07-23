@@ -103,7 +103,7 @@ def sin_cos(data):
        * - Function
          - :math:`f(\mathbf{x}) = 6\sin(x_1)\cos(x_2)`
     """
-    6 * sin(data[0]) * cos(data[1])
+    return 6 * sin(data[0]) * cos(data[1])
 
 
 def ripple(data):
