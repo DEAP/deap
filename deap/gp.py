@@ -21,14 +21,16 @@ This module support both strongly and loosely typed GP.
 """
 import copy
 import math
+import copyreg
 import random
 import re
 import sys
+import types
 import warnings
+from inspect import isclass
 
 from collections import defaultdict, deque
 from functools import partial, wraps
-from inspect import isclass
 from operator import eq, lt
 
 from . import tools  # Needed by HARM-GP
@@ -240,21 +242,44 @@ class Terminal(object):
             return NotImplemented
 
 
-class Ephemeral(Terminal):
-    """Class that encapsulates a terminal which value is set when the
+class MetaEphemeral(type):
+    """Meta-Class that creates a terminal which value is set when the
     object is created. To mutate the value, a new object has to be
-    generated. This is an abstract base class. When subclassing, a
-    staticmethod 'func' must be defined.
+    generated.
     """
+    cache = {}
 
-    def __init__(self):
-        Terminal.__init__(self, self.func(), symbolic=False, ret=self.ret)
+    def __new__(meta, name, func, ret=__type__, id_=None):
+        if id_ in MetaEphemeral.cache:
+            return MetaEphemeral.cache[id_]
 
-    @staticmethod
-    def func():
-        """Return a random value used to define the ephemeral state.
-        """
-        raise NotImplementedError
+        if isinstance(func, types.LambdaType) and func.__name__ == '<lambda>':
+            warnings.warn("Ephemeral {name} function cannot be "
+                          "pickled because its generating function "
+                          "is a lambda function. Use functools.partial "
+                          "instead.".format(name=name), RuntimeWarning)
+
+        def __init__(self):
+            self.value = func()
+
+        attr = {'__init__': __init__,
+                'name': name,
+                'func': func,
+                'ret': ret,
+                'conv_fct': repr}
+
+        cls = super(MetaEphemeral, meta).__new__(meta, name, (Terminal,), attr)
+        MetaEphemeral.cache[id(cls)] = cls
+        return cls
+
+    def __init__(cls, name, func, ret=__type__, id_=None):
+        super(MetaEphemeral, cls).__init__(name, (Terminal,), {})
+
+    def __reduce__(cls):
+        return (MetaEphemeral, (cls.name, cls.func, cls.ret, id(cls)))
+
+
+copyreg.pickle(MetaEphemeral, MetaEphemeral.__reduce__)
 
 
 class PrimitiveSetTyped(object):
@@ -338,9 +363,9 @@ class PrimitiveSetTyped(object):
 
         assert name not in self.context or \
                self.context[name] is primitive, \
-            "Primitives are required to have a unique name. " \
-            "Consider using the argument 'name' to rename your " \
-            "second '%s' primitive." % (name,)
+               "Primitives are required to have a unique name. " \
+               "Consider using the argument 'name' to rename your " \
+               "second '%s' primitive." % (name,)
 
         self._add(prim)
         self.context[prim.name] = primitive
@@ -390,23 +415,16 @@ class PrimitiveSetTyped(object):
         :param ephemeral: function with no arguments returning a random value.
         :param ret_type: type of the object returned by *ephemeral*.
         """
-        module_gp = globals()
-        if name not in module_gp:
-            class_ = type(name, (Ephemeral,), {'func': staticmethod(ephemeral),
-                                               'ret': ret_type})
-            module_gp[name] = class_
+        if name not in self.mapping:
+            class_ = MetaEphemeral(name, ephemeral, ret_type)
         else:
-            class_ = module_gp[name]
-            if issubclass(class_, Ephemeral):
-                if class_.func is not ephemeral:
-                    raise Exception("Ephemerals with different functions should "
-                                    "be named differently, even between psets.")
-                elif class_.ret is not ret_type:
-                    raise Exception("Ephemerals with the same name and function "
-                                    "should have the same type, even between psets.")
-            else:
-                raise Exception("Ephemerals should be named differently "
-                                "than classes defined in the gp module.")
+            class_ = self.mapping[name]
+            if class_.func is not ephemeral:
+                raise Exception("Ephemerals with different functions should "
+                                "be named differently, even between psets.")
+            if class_.ret is not ret_type:
+                raise Exception("Ephemerals with the same name and function "
+                                "should have the same type, even between psets.")
 
         self._add(class_)
         self.terms_count += 1
@@ -481,10 +499,10 @@ def compile(expr, pset):
     except MemoryError:
         _, _, traceback = sys.exc_info()
         raise MemoryError("DEAP : Error in tree evaluation :"
-                            " Python cannot evaluate a tree higher than 90. "
-                            "To avoid this problem, you should use bloat control on your "
-                            "operators. See the DEAP documentation for more information. "
-                            "DEAP will now abort.").with_traceback(traceback)
+                          " Python cannot evaluate a tree higher than 90. "
+                          "To avoid this problem, you should use bloat control on your "
+                          "operators. See the DEAP documentation for more information. "
+                          "DEAP will now abort.").with_traceback(traceback)
 
 
 def compileADF(expr, psets):
@@ -506,7 +524,7 @@ def compileADF(expr, psets):
     """
     adfdict = {}
     func = None
-    for pset, subexpr in reversed(zip(psets, expr)):
+    for pset, subexpr in reversed(list(zip(psets, expr))):
         pset.context.update(adfdict)
         func = compile(subexpr, pset)
         adfdict.update({pset.name: func})
@@ -554,7 +572,7 @@ def genGrow(pset, min_, max_, type_=None):
         or when it is randomly determined that a node should be a terminal.
         """
         return depth == height or \
-               (depth >= min_ and random.random() < pset.terminalRatio)
+            (depth >= min_ and random.random() < pset.terminalRatio)
 
     return generate(pset, min_, max_, condition, type_)
 
@@ -619,9 +637,9 @@ def generate(pset, min_, max_, condition, type_=None):
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError("The gp.generate function tried to add "
-                                  "a terminal of type '%s', but there is "
-                                  "none available." % (type_,)).with_traceback(traceback)
-            if isclass(term):
+                                 "a terminal of type '%s', but there is "
+                                 "none available." % (type_,)).with_traceback(traceback)
+            if type(term) is MetaEphemeral:
                 term = term()
             expr.append(term)
         else:
@@ -630,8 +648,8 @@ def generate(pset, min_, max_, condition, type_=None):
             except IndexError:
                 _, _, traceback = sys.exc_info()
                 raise IndexError("The gp.generate function tried to add "
-                                  "a primitive of type '%s', but there is "
-                                  "none available." % (type_,)).with_traceback(traceback)
+                                 "a primitive of type '%s', but there is "
+                                 "none available." % (type_,)).with_traceback(traceback)
             expr.append(prim)
             for arg in reversed(prim.args):
                 stack.append((depth + 1, arg))
@@ -773,7 +791,7 @@ def mutNodeReplacement(individual, pset):
 
     if node.arity == 0:  # Terminal
         term = random.choice(pset.terminals[node.ret])
-        if isclass(term):
+        if type(term) is MetaEphemeral:
             term = term()
         individual[index] = term
     else:  # Primitive
@@ -799,7 +817,7 @@ def mutEphemeral(individual, mode):
 
     ephemerals_idx = [index
                       for index, node in enumerate(individual)
-                      if isinstance(node, Ephemeral)]
+                      if isinstance(type(node), MetaEphemeral)]
 
     if len(ephemerals_idx) > 0:
         if mode == "one":

@@ -22,6 +22,7 @@ except ImportError:
     # fallback on python version
     from ..tools._hypervolume import pyhv as hv
 
+
 class translate(object):
     """Decorator for evaluation functions, it translates the objective
     function by *vector* which should be the same length as the individual
@@ -43,7 +44,7 @@ class translate(object):
             # A subtraction is applied since the translation is applied to the
             # individual and not the function
             return func([v - t for v, t in zip(individual, self.vector)],
-                *args, **kargs)
+                        *args, **kargs)
         wrapper.translate = self.translate
         return wrapper
 
@@ -60,6 +61,7 @@ class translate(object):
             evaluate.translate([0.0, 0.0, ..., 0.0])
         """
         self.vector = vector
+
 
 class rotate(object):
     """Decorator for evaluation functions, it rotates the objective function
@@ -83,7 +85,7 @@ class rotate(object):
     def __init__(self, matrix):
         if not numpy_imported:
             raise RuntimeError("Numpy is required for using the rotation "
-                "decorator")
+                               "decorator")
         # The inverse is taken since the rotation is applied to the individual
         # and not the function which is the inverse
         self.matrix = numpy.linalg.inv(matrix)
@@ -113,6 +115,7 @@ class rotate(object):
             evaluate.rotate(numpy.identity(n))
         """
         self.matrix = numpy.linalg.inv(matrix)
+
 
 class noise(object):
     """Decorator for evaluation functions, it evaluates the objective function
@@ -168,6 +171,7 @@ class noise(object):
         except TypeError:
             self.rand_funcs = repeat(noise)
 
+
 class scale(object):
     """Decorator for evaluation functions, it scales the objective function by
     *factor* which should be the same length as the individual size. When
@@ -182,14 +186,14 @@ class scale(object):
     def __init__(self, factor):
         # Factor is inverted since it is applied to the individual and not the
         # objective function
-        self.factor = tuple(1.0/f for f in factor)
+        self.factor = tuple(1.0 / f for f in factor)
 
     def __call__(self, func):
         # wraps is used to combine stacked decorators that would add functions
         @wraps(func)
         def wrapper(individual, *args, **kargs):
             return func([v * f for v, f in zip(individual, self.factor)],
-                *args, **kargs)
+                        *args, **kargs)
         wrapper.scale = self.scale
         return wrapper
 
@@ -207,7 +211,8 @@ class scale(object):
         """
         # Factor is inverted since it is applied to the individual and not the
         # objective function
-        self.factor = tuple(1.0/f for f in factor)
+        self.factor = tuple(1.0 / f for f in factor)
+
 
 class bound(object):
     """Decorator for crossover and mutation functions, it changes the
@@ -253,6 +258,7 @@ class bound(object):
         elif type == "clip":
             self.bound = self._clip
 
+
 def diversity(first_front, first, last):
     """Given a Pareto front `first_front` and the two extreme points of the
     optimal Pareto front, this function returns a metric of the diversity
@@ -270,10 +276,11 @@ def diversity(first_front, first, last):
     if len(first_front) == 1:
         return df + dl
 
-    dm = sum(dt)/len(dt)
+    dm = sum(dt) / len(dt)
     di = sum(abs(d_i - dm) for d_i in dt)
-    delta = (df + dl + di)/(df + dl + len(dt) * dm )
+    delta = (df + dl + di) / (df + dl + len(dt) * dm)
     return delta
+
 
 def convergence(first_front, optimal_front):
     """Given a Pareto front `first_front` and the optimal Pareto front,

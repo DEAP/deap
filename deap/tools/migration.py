@@ -47,4 +47,5 @@ def migRing(populations, k, selection, replacement=None, migarray=None):
             indx = populations[to_deme].index(immigrant)
             populations[to_deme][indx] = emigrants[from_deme][i]
 
+
 __all__ = ['migRing']

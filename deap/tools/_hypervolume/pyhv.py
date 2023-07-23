@@ -22,18 +22,17 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from math import log, floor
-import random
 import warnings
 
 import numpy
+
 
 def hypervolume(pointset, ref):
     """Compute the absolute hypervolume of a *pointset* according to the
     reference point *ref*.
     """
     warnings.warn("Falling back to the python version of hypervolume "
-        "module. Expect this to be very slow.", RuntimeWarning)
+                  "module. Expect this to be very slow.", RuntimeWarning)
     hv = _HyperVolume(ref)
     return hv.compute(pointset)
 
@@ -53,7 +52,6 @@ class _HyperVolume:
         """Constructor."""
         self.referencePoint = referencePoint
         self.list = []
-
 
     def compute(self, front):
         """Returns the hypervolume that is dominated by a non-dominated front.
@@ -99,7 +97,6 @@ class _HyperVolume:
         hyperVolume = self.hvRecursive(dimensions - 1, len(relevantPoints), bounds)
         return hyperVolume
 
-
     def hvRecursive(self, dimIndex, length, bounds):
         """Recursive call to hypervolume calculation.
 
@@ -135,7 +132,7 @@ class _HyperVolume:
             hvRecursive = self.hvRecursive
             p = sentinel
             q = p.prev[dimIndex]
-            while q.cargo != None:
+            while q.cargo is not None:
                 if q.ignore < dimIndex:
                     q.ignore = 0
                 q = q.prev[dimIndex]
@@ -178,7 +175,6 @@ class _HyperVolume:
             hvol -= q.area[dimIndex] * q.cargo[dimIndex]
             return hvol
 
-
     def preProcess(self, front):
         """Sets up the list data structure needed for calculation."""
         dimensions = len(self.referencePoint)
@@ -188,7 +184,6 @@ class _HyperVolume:
             self.sortByDimension(nodes, i)
             nodeList.extend(nodes, i)
         self.list = nodeList
-
 
     def sortByDimension(self, nodes, i):
         """Sorts the list of nodes by the i-th value of the contained points."""
@@ -200,33 +195,32 @@ class _HyperVolume:
         nodes[:] = [node for (_, node) in decorated]
 
 
+class _MultiList:
+    """A special data structure needed by FonsecaHyperVolume.
 
-class _MultiList: 
-    """A special data structure needed by FonsecaHyperVolume. 
-
-    It consists of several doubly linked lists that share common nodes. So, 
+    It consists of several doubly linked lists that share common nodes. So,
     every node has multiple predecessors and successors, one in every list.
 
     """
 
-    class Node: 
+    class Node:
 
-        def __init__(self, numberLists, cargo=None): 
-            self.cargo = cargo 
-            self.next  = [None] * numberLists
+        def __init__(self, numberLists, cargo=None):
+            self.cargo = cargo
+            self.next = [None] * numberLists
             self.prev = [None] * numberLists
             self.ignore = 0
             self.area = [0.0] * numberLists
             self.volume = [0.0] * numberLists
 
-        def __str__(self): 
+        def __str__(self):
             return str(self.cargo)
 
         def __lt__(self, other):
             return all(self.cargo < other.cargo)
 
-    def __init__(self, numberLists):  
-        """Constructor. 
+    def __init__(self, numberLists):
+        """Constructor.
 
         Builds 'numberLists' doubly linked lists.
 
@@ -234,8 +228,7 @@ class _MultiList:
         self.numberLists = numberLists
         self.sentinel = _MultiList.Node(numberLists)
         self.sentinel.next = [self.sentinel] * numberLists
-        self.sentinel.prev = [self.sentinel] * numberLists  
-
+        self.sentinel.prev = [self.sentinel] * numberLists
 
     def __str__(self):
         strings = []
@@ -251,11 +244,9 @@ class _MultiList:
             stringRepr += string + "\n"
         return stringRepr
 
-
     def __len__(self):
         """Returns the number of lists that are included in this _MultiList."""
         return self.numberLists
-
 
     def getLength(self, i):
         """Returns the length of the i-th list."""
@@ -267,7 +258,6 @@ class _MultiList:
             node = node.next[i]
         return length
 
-
     def append(self, node, index):
         """Appends a node to the end of the list at the given index."""
         lastButOne = self.sentinel.prev[index]
@@ -276,7 +266,6 @@ class _MultiList:
         # set the last element as the new one
         self.sentinel.prev[index] = node
         lastButOne.next[index] = node
-
 
     def extend(self, nodes, index):
         """Extends the list at the given index with the nodes."""
@@ -289,23 +278,21 @@ class _MultiList:
             sentinel.prev[index] = node
             lastButOne.next[index] = node
 
-
-    def remove(self, node, index, bounds): 
+    def remove(self, node, index, bounds):
         """Removes and returns 'node' from all lists in [0, 'index'[."""
-        for i in range(index): 
+        for i in range(index):
             predecessor = node.prev[i]
             successor = node.next[i]
             predecessor.next[i] = successor
-            successor.prev[i] = predecessor  
+            successor.prev[i] = predecessor
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
         return node
 
-
     def reinsert(self, node, index, bounds):
         """
         Inserts 'node' at the position it had in all lists in [0, 'index'[
-        before it was removed. This method assumes that the next and previous 
+        before it was removed. This method assumes that the next and previous
         nodes of the node that is reinserted are in the list.
 
         """
@@ -314,6 +301,7 @@ class _MultiList:
             node.next[i].prev[i] = node
             if bounds[i] > node.cargo[i]:
                 bounds[i] = node.cargo[i]
+
 
 __all__ = ["hypervolume_kmax", "hypervolume"]
 
@@ -324,8 +312,6 @@ if __name__ == "__main__":
         hv = None
         print("Cannot import C version of hypervolume")
 
-    from deap.tools import sortLogNondominated
-
     pointset = [(a, a) for a in numpy.arange(1, 0, -0.01)]
     ref = numpy.array([2, 2])
 
@@ -333,4 +319,3 @@ if __name__ == "__main__":
     if hv:
         print("C version: %f" % hv.hypervolume(pointset, ref))
     print("Approximated: %f" % hypervolume_approximation(pointset, ref))
-

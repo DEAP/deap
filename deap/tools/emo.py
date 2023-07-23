@@ -11,6 +11,7 @@ import numpy
 # Non-Dominated Sorting   (NSGA-II)  #
 ######################################
 
+
 def selNSGA2(individuals, k, nd='standard'):
     """Apply NSGA-II selection operator on the *individuals*. Usually, the
     size of *individuals* will be larger than *k* because any individual
@@ -82,7 +83,7 @@ def sortNondominated(individuals, k, first_front_only=False):
 
     # Rank first Pareto front
     for i, fit_i in enumerate(fits):
-        for fit_j in fits[i+1:]:
+        for fit_j in fits[i + 1:]:
             if fit_i.dominates(fit_j):
                 dominating_fits[fit_j] += 1
                 dominated_fits[fit_i].append(fit_j)
@@ -115,6 +116,7 @@ def sortNondominated(individuals, k, first_front_only=False):
 
     return fronts
 
+
 def assignCrowdingDist(individuals):
     """Assign a crowding distance to each individual's fitness. The
     crowding distance can be retrieve via the :attr:`crowding_dist`
@@ -141,26 +143,27 @@ def assignCrowdingDist(individuals):
     for i, dist in enumerate(distances):
         individuals[i].fitness.crowding_dist = dist
 
+
 def selTournamentDCD(individuals, k):
     """Tournament selection based on dominance (D) between two individuals, if
     the two individuals do not interdominate the selection is made
     based on crowding distance (CD). The *individuals* sequence length has to
-    be a multiple of 4 only if k is equal to the length of individuals. 
-    Starting from the beginning of the selected individuals, two consecutive 
-    individuals will be different (assuming all individuals in the input list 
-    are unique). Each individual from the input list won't be selected more 
+    be a multiple of 4 only if k is equal to the length of individuals.
+    Starting from the beginning of the selected individuals, two consecutive
+    individuals will be different (assuming all individuals in the input list
+    are unique). Each individual from the input list won't be selected more
     than twice.
 
     This selection requires the individuals to have a :attr:`crowding_dist`
     attribute, which can be set by the :func:`assignCrowdingDist` function.
 
     :param individuals: A list of individuals to select from.
-    :param k: The number of individuals to select. Must be less than or equal 
+    :param k: The number of individuals to select. Must be less than or equal
               to len(individuals).
     :returns: A list of selected individuals.
     """
 
-    if k > len(individuals): 
+    if k > len(individuals):
         raise ValueError("selTournamentDCD: k must be less than or equal to individuals length")
 
     if k == len(individuals) and k % 4 != 0:
@@ -186,10 +189,10 @@ def selTournamentDCD(individuals, k):
 
     chosen = []
     for i in range(0, k, 4):
-        chosen.append(tourn(individuals_1[i],   individuals_1[i+1]))
-        chosen.append(tourn(individuals_1[i+2], individuals_1[i+3]))
-        chosen.append(tourn(individuals_2[i],   individuals_2[i+1]))
-        chosen.append(tourn(individuals_2[i+2], individuals_2[i+3]))
+        chosen.append(tourn(individuals_1[i], individuals_1[i + 1]))
+        chosen.append(tourn(individuals_1[i + 2], individuals_1[i + 3]))
+        chosen.append(tourn(individuals_2[i], individuals_2[i + 1]))
+        chosen.append(tourn(individuals_2[i + 2], individuals_2[i + 3]))
 
     return chosen
 
@@ -197,10 +200,12 @@ def selTournamentDCD(individuals, k):
 # Generalized Reduced runtime ND sort #
 #######################################
 
+
 def identity(obj):
     """Returns directly the argument *obj*.
     """
     return obj
+
 
 def isDominated(wvalues1, wvalues2):
     """Returns whether or not *wvalues2* dominates *wvalues1*.
@@ -218,6 +223,7 @@ def isDominated(wvalues1, wvalues2):
             not_equal = True
     return not_equal
 
+
 def median(seq, key=identity):
     """Returns the median of *seq* - the numeric value separating the higher
     half of a sample from the lower half. If there is an even number of
@@ -229,6 +235,7 @@ def median(seq, key=identity):
         return key(sseq[(length - 1) // 2])
     else:
         return (key(sseq[(length - 1) // 2]) + key(sseq[length // 2])) / 2.0
+
 
 def sortLogNondominated(individuals, k, first_front_only=False):
     """Sort *individuals* in pareto non-dominated fronts using the Generalized
@@ -242,13 +249,13 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     if k == 0:
         return []
 
-    #Separate individuals according to unique fitnesses
+    # Separate individuals according to unique fitnesses
     unique_fits = defaultdict(list)
     for i, ind in enumerate(individuals):
         unique_fits[ind.fitness.wvalues].append(ind)
 
-    #Launch the sorting algorithm
-    obj = len(individuals[0].fitness.wvalues)-1
+    # Launch the sorting algorithm
+    obj = len(individuals[0].fitness.wvalues) - 1
     fitnesses = list(unique_fits.keys())
     front = dict.fromkeys(fitnesses, 0)
 
@@ -256,8 +263,8 @@ def sortLogNondominated(individuals, k, first_front_only=False):
     fitnesses.sort(reverse=True)
     sortNDHelperA(fitnesses, obj, front)
 
-    #Extract individuals from front list here
-    nbfronts = max(front.values())+1
+    # Extract individuals from front list here
+    nbfronts = max(front.values()) + 1
     pareto_fronts = [[] for i in range(nbfronts)]
     for fit in fitnesses:
         index = front[fit]
@@ -269,10 +276,11 @@ def sortLogNondominated(individuals, k, first_front_only=False):
         for i, front in enumerate(pareto_fronts):
             count += len(front)
             if count >= k:
-                return pareto_fronts[:i+1]
+                return pareto_fronts[:i + 1]
         return pareto_fronts
     else:
         return pareto_fronts[0]
+
 
 def sortNDHelperA(fitnesses, obj, front):
     """Create a non-dominated sorting of S on the first M objectives"""
@@ -281,19 +289,20 @@ def sortNDHelperA(fitnesses, obj, front):
     elif len(fitnesses) == 2:
         # Only two individuals, compare them and adjust front number
         s1, s2 = fitnesses[0], fitnesses[1]
-        if isDominated(s2[:obj+1], s1[:obj+1]):
+        if isDominated(s2[:obj + 1], s1[:obj + 1]):
             front[s2] = max(front[s2], front[s1] + 1)
     elif obj == 1:
         sweepA(fitnesses, front)
     elif len(frozenset(map(itemgetter(obj), fitnesses))) == 1:
-        #All individuals for objective M are equal: go to objective M-1
-        sortNDHelperA(fitnesses, obj-1, front)
+        # All individuals for objective M are equal: go to objective M-1
+        sortNDHelperA(fitnesses, obj - 1, front)
     else:
         # More than two individuals, split list and then apply recursion
         best, worst = splitA(fitnesses, obj)
         sortNDHelperA(best, obj, front)
-        sortNDHelperB(best, worst, obj-1, front)
+        sortNDHelperB(best, worst, obj - 1, front)
         sortNDHelperA(worst, obj, front)
+
 
 def splitA(fitnesses, obj):
     """Partition the set of fitnesses in two according to the median of
@@ -323,6 +332,7 @@ def splitA(fitnesses, obj):
     else:
         return best_b, worst_b
 
+
 def sweepA(fitnesses, front):
     """Update rank number associated to the fitnesses according
     to the first two objectives using a geometric sweep procedure.
@@ -333,7 +343,7 @@ def sweepA(fitnesses, front):
         idx = bisect.bisect_right(stairs, -fit[1])
         if 0 < idx <= len(stairs):
             fstair = max(fstairs[:idx], key=front.__getitem__)
-            front[fit] = max(front[fit], front[fstair]+1)
+            front[fit] = max(front[fit], front[fstair] + 1)
         for i, fstair in enumerate(fstairs[idx:], idx):
             if front[fstair] == front[fit]:
                 del stairs[i]
@@ -342,6 +352,7 @@ def sweepA(fitnesses, front):
         stairs.insert(idx, -fit[1])
         fstairs.insert(idx, fit)
 
+
 def sortNDHelperB(best, worst, obj, front):
     """Assign front numbers to the solutions in H according to the solutions
     in L. The solutions in L are assumed to have correct front numbers and the
@@ -349,27 +360,28 @@ def sortNDHelperB(best, worst, obj, front):
     happen after sortNDHelperB is called."""
     key = itemgetter(obj)
     if len(worst) == 0 or len(best) == 0:
-        #One of the lists is empty: nothing to do
+        # One of the lists is empty: nothing to do
         return
     elif len(best) == 1 or len(worst) == 1:
-        #One of the lists has one individual: compare directly
+        # One of the lists has one individual: compare directly
         for hi in worst:
             for li in best:
-                if isDominated(hi[:obj+1], li[:obj+1]) or hi[:obj+1] == li[:obj+1]:
+                if isDominated(hi[:obj + 1], li[:obj + 1]) or hi[:obj + 1] == li[:obj + 1]:
                     front[hi] = max(front[hi], front[li] + 1)
     elif obj == 1:
         sweepB(best, worst, front)
     elif key(min(best, key=key)) >= key(max(worst, key=key)):
-        #All individuals from L dominate H for objective M:
-        #Also supports the case where every individuals in L and H
-        #has the same value for the current objective
-        #Skip to objective M-1
-        sortNDHelperB(best, worst, obj-1, front)
+        # All individuals from L dominate H for objective M:
+        # Also supports the case where every individuals in L and H
+        # has the same value for the current objective
+        # Skip to objective M-1
+        sortNDHelperB(best, worst, obj - 1, front)
     elif key(max(best, key=key)) >= key(min(worst, key=key)):
         best1, best2, worst1, worst2 = splitB(best, worst, obj)
         sortNDHelperB(best1, worst1, obj, front)
-        sortNDHelperB(best1, worst2, obj-1, front)
+        sortNDHelperB(best1, worst2, obj - 1, front)
         sortNDHelperB(best2, worst2, obj, front)
+
 
 def splitB(best, worst, obj):
     """Split both best individual and worst sets of fitnesses according
@@ -410,6 +422,7 @@ def splitB(best, worst, obj):
     else:
         return best1_b, best2_b, worst1_b, worst2_b
 
+
 def sweepB(best, worst, front):
     """Adjust the rank number of the worst fitnesses according to
     the best fitnesses on the first two objectives using a sweep
@@ -437,11 +450,12 @@ def sweepB(best, worst, front):
         idx = bisect.bisect_right(stairs, -h[1])
         if 0 < idx <= len(stairs):
             fstair = max(fstairs[:idx], key=front.__getitem__)
-            front[h] = max(front[h], front[fstair]+1)
+            front[h] = max(front[h], front[fstair] + 1)
 
 ######################################
 # Non-Dominated Sorting  (NSGA-III)  #
 ######################################
+
 
 NSGA3Memory = namedtuple("NSGA3Memory", ["best_point", "worst_point", "extreme_points"])
 
@@ -712,7 +726,7 @@ def selSPEA2(individuals, k):
     dominating_inds = [list() for i in range(N)]
 
     for i, ind_i in enumerate(individuals):
-        for j, ind_j in enumerate(individuals[i+1:], i+1):
+        for j, ind_j in enumerate(individuals[i + 1:], i + 1):
             if ind_i.fitness.dominates(ind_j.fitness):
                 strength_fits[i] += 1
                 dominating_inds[j].append(i)
@@ -732,9 +746,9 @@ def selSPEA2(individuals, k):
             distances = [0.0] * N
             for j in range(i + 1, N):
                 dist = 0.0
-                for l in range(L):
-                    val = individuals[i].fitness.values[l] - \
-                          individuals[j].fitness.values[l]
+                for k in range(L):
+                    val = individuals[i].fitness.values[k] - \
+                        individuals[j].fitness.values[k]
                     dist += val * val
                 distances[j] = dist
             kth_dist = _randomizedSelect(distances, 0, N - 1, K)
@@ -742,9 +756,9 @@ def selSPEA2(individuals, k):
             fits[i] += density
 
         next_indices = [(fits[i], i) for i in range(N)
-                        if not i in chosen_indices]
+                        if i not in chosen_indices]
         next_indices.sort()
-        #print next_indices
+        # print next_indices
         chosen_indices += [i for _, i in next_indices[:k - len(chosen_indices)]]
 
     elif len(chosen_indices) > k:   # The archive is too large
@@ -754,9 +768,9 @@ def selSPEA2(individuals, k):
         for i in range(N):
             for j in range(i + 1, N):
                 dist = 0.0
-                for l in range(L):
-                    val = individuals[chosen_indices[i]].fitness.values[l] - \
-                          individuals[chosen_indices[j]].fitness.values[l]
+                for k in range(L):
+                    val = individuals[chosen_indices[i]].fitness.values[k] - \
+                        individuals[chosen_indices[j]].fitness.values[k]
                     dist += val * val
                 distances[i][j] = dist
                 distances[j][i] = dist
@@ -765,11 +779,11 @@ def selSPEA2(individuals, k):
         # Insert sort is faster than quick sort for short arrays
         for i in range(N):
             for j in range(1, N):
-                l = j
-                while l > 0 and distances[i][j] < distances[i][sorted_indices[i][l - 1]]:
-                    sorted_indices[i][l] = sorted_indices[i][l - 1]
-                    l -= 1
-                sorted_indices[i][l] = j
+                k = j
+                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
+                    sorted_indices[i][k] = sorted_indices[i][k - 1]
+                    k -= 1
+                sorted_indices[i][k] = j
 
         size = N
         to_remove = []
@@ -806,6 +820,7 @@ def selSPEA2(individuals, k):
 
     return [individuals[i] for i in chosen_indices]
 
+
 def _randomizedSelect(array, begin, end, i):
     """Allows to select the ith smallest element from array without sorting it.
     Runtime is expected to be O(n).
@@ -819,10 +834,12 @@ def _randomizedSelect(array, begin, end, i):
     else:
         return _randomizedSelect(array, q + 1, end, i - k)
 
+
 def _randomizedPartition(array, begin, end):
     i = random.randint(begin, end)
     array[begin], array[i] = array[i], array[begin]
     return _partition(array, begin, end)
+
 
 def _partition(array, begin, end):
     x = array[begin]

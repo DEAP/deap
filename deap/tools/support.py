@@ -1,5 +1,3 @@
-import pickle
-
 from bisect import bisect_right
 from collections import defaultdict
 from copy import deepcopy
@@ -12,6 +10,7 @@ def identity(obj):
     """Returns directly the argument *obj*.
     """
     return obj
+
 
 class History(object):
     """The :class:`History` class helps to build a genealogy of all the
@@ -51,7 +50,7 @@ class History(object):
     Using NetworkX in combination with `pygraphviz
     <http://networkx.lanl.gov/pygraphviz/>`_ (dot layout) this amazing
     genealogy tree can be obtained from the OneMax example with a population
-    size of 20 and 5 generations, where the color of the nodes indicate there
+    size of 20 and 5 generations, where the color of the nodes indicate their
     fitness, blue is low and red is high.
 
     .. image:: /_images/genealogy.png
@@ -131,6 +130,7 @@ class History(object):
         """
         gtree = {}
         visited = set()     # Adds memory to the breadth first search
+
         def genealogy(index, depth):
             if index not in self.genealogy_tree:
                 return
@@ -145,6 +145,7 @@ class History(object):
                 visited.add(ind)
         genealogy(individual.history_index, 0)
         return gtree
+
 
 class Statistics(object):
     """Object that compiles statistics on a list of arbitrary objects.
@@ -204,6 +205,7 @@ class Statistics(object):
             entry[key] = func(values)
         return entry
 
+
 class MultiStatistics(dict):
     """Dictionary of :class:`Statistics` object allowing to compute
     statistics on multiple keys using a single call to :meth:`compile`. It
@@ -252,6 +254,7 @@ class MultiStatistics(dict):
         """
         for stats in self.values():
             stats.register(name, function, *args, **kargs)
+
 
 class Logbook(list):
     """Evolution records as a chronological list of dictionaries.
@@ -440,7 +443,7 @@ class Logbook(list):
             str_line = []
             for j, name in enumerate(columns):
                 if name in chapters_txt:
-                    column = chapters_txt[name][i+offsets[name]]
+                    column = chapters_txt[name][i + offsets[name]]
                 else:
                     value = line.get(name, "")
                     string = "{0:n}" if isinstance(value, float) else "{0}"
@@ -462,9 +465,9 @@ class Logbook(list):
                     for i in range(blanks):
                         header[i].append(" " * length)
                     header[blanks].append(name.center(length))
-                    header[blanks+1].append("-" * length)
+                    header[blanks + 1].append("-" * length)
                     for i in range(offsets[name]):
-                        header[blanks+2+i].append(chapters_txt[name][i])
+                        header[blanks + 2 + i].append(chapters_txt[name][i])
                 else:
                     length = max(len(line[j].expandtabs()) for line in str_matrix)
                     for line in header[:-1]:
@@ -472,7 +475,7 @@ class Logbook(list):
                     header[-1].append(name)
             str_matrix = chain(header, str_matrix)
 
-        template = "\t".join("{%i:<%i}" % (i, l) for i, l in enumerate(self.columns_len))
+        template = "\t".join("{%i:<%i}" % (i, k) for i, k in enumerate(self.columns_len))
         text = [template.format(*line) for line in str_matrix]
 
         return text
@@ -519,7 +522,7 @@ class HallOfFame(object):
                            update the hall of fame with.
         """
         for ind in population:
-            if len(self) == 0 and self.maxsize !=0:
+            if len(self) == 0 and self.maxsize != 0:
                 # Working on an empty hall of fame is problematic for the
                 # "for else"
                 self.insert(population[0])
@@ -634,13 +637,12 @@ class ParetoFront(HallOfFame):
             if not is_dominated and not has_twin:
                 self.insert(ind)
 
+
 __all__ = ['HallOfFame', 'ParetoFront', 'History', 'Statistics', 'MultiStatistics', 'Logbook']
 
 if __name__ == "__main__":
     import doctest
-    from operator import itemgetter
 
-    import numpy
     doctest.run_docstring_examples(Statistics, globals())
     doctest.run_docstring_examples(Statistics.register, globals())
     doctest.run_docstring_examples(Statistics.compile, globals())

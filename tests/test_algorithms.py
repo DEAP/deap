@@ -13,10 +13,10 @@
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 
-from nose import with_setup
 import random
 
 import numpy
+import pytest
 
 from deap import algorithms
 from deap import base
@@ -32,28 +32,40 @@ INDCLSNAME = "IND_TYPE"
 HV_THRESHOLD = 116.0        # 120.777 is Optimal value
 
 
-def setup_func_single_obj():
-    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
-    creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
-
-def setup_func_multi_obj():
-    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
-    creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
-
-def setup_func_multi_obj_numpy():
-    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
-    creator.create(INDCLSNAME, numpy.ndarray, fitness=creator.__dict__[FITCLSNAME])
-
-def teardown_func():
+def teardown_():
     # Messy way to remove a class from the creator
     del creator.__dict__[FITCLSNAME]
     del creator.__dict__[INDCLSNAME]
 
-@with_setup(setup_func_single_obj, teardown_func)
-def test_cma():
+
+@pytest.fixture
+def setup_teardown_single_obj():
+    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0,))
+    creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
+    yield
+    teardown_()
+
+
+@pytest.fixture
+def setup_teardown_multi_obj():
+    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
+    creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
+    yield
+    teardown_()
+
+
+@pytest.fixture
+def setup_teardown_multi_obj_numpy():
+    creator.create(FITCLSNAME, base.Fitness, weights=(-1.0, -1.0))
+    creator.create(INDCLSNAME, numpy.ndarray, fitness=creator.__dict__[FITCLSNAME])
+    yield
+    teardown_()
+
+
+def test_cma(setup_teardown_single_obj):
     NDIM = 5
 
-    strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
+    strategy = cma.Strategy(centroid=[0.0] * NDIM, sigma=1.0)
 
     toolbox = base.Toolbox()
     toolbox.register("evaluate", benchmarks.sphere)
@@ -65,8 +77,8 @@ def test_cma():
 
     assert best.fitness.values < (1e-8,), "CMA algorithm did not converged properly."
 
-@with_setup(setup_func_multi_obj, teardown_func)
-def test_nsga2():
+
+def test_nsga2(setup_teardown_multi_obj):
     NDIM = 5
     BOUND_LOW, BOUND_UP = 0.0, 1.0
     MU = 16
@@ -79,7 +91,7 @@ def test_nsga2():
 
     toolbox.register("evaluate", benchmarks.zdt1)
     toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
     toolbox.register("select", tools.selNSGA2)
 
     pop = toolbox.population(n=MU)
@@ -116,8 +128,7 @@ def test_nsga2():
         assert not (any(numpy.asarray(ind) < BOUND_LOW) or any(numpy.asarray(ind) > BOUND_UP))
 
 
-@with_setup(setup_func_multi_obj_numpy, teardown_func)
-def test_mo_cma_es():
+def test_mo_cma_es(setup_teardown_multi_obj_numpy):
 
     def distance(feasible_ind, original_ind):
         """A distance function to the feasibility region."""
@@ -186,8 +197,7 @@ def test_mo_cma_es():
     assert hv > HV_THRESHOLD, "Hypervolume is lower than expected %f < %f" % (hv, HV_THRESHOLD)
 
 
-@with_setup(setup_func_multi_obj, teardown_func)
-def test_nsga3():
+def test_nsga3(setup_teardown_multi_obj):
     NDIM = 5
     BOUND_LOW, BOUND_UP = 0.0, 1.0
     MU = 16
@@ -202,7 +212,7 @@ def test_nsga3():
 
     toolbox.register("evaluate", benchmarks.zdt1)
     toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+    toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
     toolbox.register("select", tools.selNSGA3, ref_points=ref_points)
 
     pop = toolbox.population(n=MU)
@@ -211,7 +221,7 @@ def test_nsga3():
         ind.fitness.values = fit
 
     pop = toolbox.select(pop, len(pop))
-     # Begin the generational process
+    # Begin the generational process
     for gen in range(1, NGEN):
         offspring = algorithms.varAnd(pop, toolbox, 1.0, 1.0)
 
