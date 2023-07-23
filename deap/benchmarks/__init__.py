@@ -161,8 +161,7 @@ def ackley(individual):
        * - Global optima
          - :math:`x_i = 0, \forall i \in \lbrace 1 \ldots N\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         - :math:`f(\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\frac{1}{N} \
-            \sum_{i=1}^N x_i^2} \right) + e - \exp\left(\frac{1}{N}\sum_{i=1}^N \cos(2\pi x_i) \right)`
+         - :math:`f(\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\frac{1}{N} \ \sum_{i=1}^N x_i^2} \right) + e - \exp\left(\frac{1}{N}\sum_{i=1}^N \cos(2\pi x_i) \right)`
 
     .. plot:: code/benchmarks/ackley.py
        :width: 67 %

@@ -35,8 +35,7 @@ try:
 except ImportError:
     pass
 else:
-    extensions += ['matplotlib.sphinxext.only_directives',
-                   'matplotlib.sphinxext.plot_directive']
+    extensions += ['matplotlib.sphinxext.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
