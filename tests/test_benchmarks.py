@@ -30,7 +30,7 @@ class BenchmarkTest(unittest.TestCase):
         # Correct evaluation of bin2float.
         zero_individual = creator.Individual([0] * 10)
         full_individual = creator.Individual([1] * 10)
-        two_individiual = creator.Individual(8*[0] + [1, 0])
+        two_individiual = creator.Individual(8 * [0] + [1, 0])
         population = [zero_individual, full_individual, two_individiual]
         fitnesses = map(self.toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):

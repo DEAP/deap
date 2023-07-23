@@ -4,6 +4,7 @@ import random
 
 from deap.tools import crossover
 
+
 class TestCxOrdered(unittest.TestCase):
     def setUp(self):
         pass
@@ -19,7 +20,6 @@ class TestCxOrdered(unittest.TestCase):
 
             self.assertSequenceEqual(expected_ap, ap)
             self.assertSequenceEqual(expected_bp, bp)
-
 
     def test_crossover_identical(self):
         i1 = list(range(100))

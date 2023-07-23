@@ -25,10 +25,7 @@ import math
 import itertools
 import random
 
-try:
-    from collections.abc import Sequence
-except:
-    from collections import Sequence
+from collections.abc import Sequence
 
 
 def cone(individual, position, height, width):

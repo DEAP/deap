@@ -52,7 +52,7 @@ class TestSingleObjective(TearDownCreatorTestCase):
         NDIM = 5
         NGEN = 100
 
-        strategy = cma.Strategy(centroid=[0.0]*NDIM, sigma=1.0)
+        strategy = cma.Strategy(centroid=[0.0] * NDIM, sigma=1.0)
 
         toolbox = base.Toolbox()
         toolbox.register("evaluate", benchmarks.sphere)
@@ -143,7 +143,6 @@ class TestSingleObjectiveConstrained(TearDownCreatorTestCase):
     def setUp(self):
         creator.create(FITCLSNAME, base.ConstrainedFitness, weights=(-1.0,))
         creator.create(INDCLSNAME, list, fitness=creator.__dict__[FITCLSNAME])
-
 
     def test_cma_mixed_integer_1_p_1_with_constraint(self):
         def c1(individual):
@@ -283,7 +282,7 @@ class TestMultiObjective(TearDownCreatorTestCase):
 
         toolbox.register("evaluate", benchmarks.zdt1)
         toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-        toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+        toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
         toolbox.register("select", tools.selNSGA2)
 
         pop = toolbox.population(n=MU)
@@ -335,7 +334,7 @@ class TestMultiObjective(TearDownCreatorTestCase):
 
         toolbox.register("evaluate", benchmarks.zdt1)
         toolbox.register("mate", tools.cxSimulatedBinaryBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0)
-        toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0/NDIM)
+        toolbox.register("mutate", tools.mutPolynomialBounded, low=BOUND_LOW, up=BOUND_UP, eta=20.0, indpb=1.0 / NDIM)
         toolbox.register("select", tools.selNSGA3, ref_points=ref_points)
 
         pop = toolbox.population(n=MU)
@@ -366,6 +365,7 @@ class TestMultiObjective(TearDownCreatorTestCase):
         for ind in pop:
             self.assertTrue(all(numpy.asarray(ind) >= BOUND_LOW))
             self.assertTrue(all(numpy.asarray(ind) <= BOUND_UP))
+
 
 @unittest.skipUnless(numpy, "requires numpy")
 class TestMultiObjectiveNumpy(TearDownCreatorTestCase):
@@ -440,5 +440,3 @@ class TestMultiObjectiveNumpy(TearDownCreatorTestCase):
         # but not 119. More generations would help but would slow down testing.
         hv = hypervolume(strategy.parents, [11.0, 11.0])
         self.assertGreater(hv, HV_THRESHOLD, msg="Hypervolume is lower than expected")
-
-

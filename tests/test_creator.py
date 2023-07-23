@@ -33,13 +33,13 @@ class TestCreator(unittest.TestCase):
 
     def test_create(self):
         creator.create(CNAME, list)
-        l = creator.__dict__[CNAME]([1, 2, 3, 4])
-        self.assertSequenceEqual(l, [1, 2, 3, 4])
+        result = creator.__dict__[CNAME]([1, 2, 3, 4])
+        self.assertSequenceEqual(result, [1, 2, 3, 4])
 
     def test_attribute(self):
         creator.create(CNAME, list, a=1)
-        l = creator.__dict__[CNAME]([1, 2, 3, 4])
-        self.assertEqual(l.a, 1)
+        result = creator.__dict__[CNAME]([1, 2, 3, 4])
+        self.assertEqual(result.a, 1)
 
     def test_array(self):
         creator.create(CNAME, array.array, typecode="i")

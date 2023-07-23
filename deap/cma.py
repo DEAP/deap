@@ -682,7 +682,7 @@ class StrategyActiveOnePlusLambda(object):
             round_values = numpy.tile(self.S_int > 0, (self.lambda_, 1))
             steps = numpy.tile(self.S_int, (self.lambda_, 1))
             x[round_values] = steps[round_values] * numpy.around(x[round_values]
-                                                                / steps[round_values])
+                                                                 / steps[round_values])
 
         # The update method requires to remember the y of each individual
         population = list(map(ind_init, x))
@@ -722,7 +722,7 @@ class StrategyActiveOnePlusLambda(object):
             # Probabilistically choose lambda_int individuals
             if numpy.random.rand() < p:
                 Rp[i, j] = 1
-                Rpp[i, j] = numpy.random.geometric(p=0.7**(1.0/n_I_R)) - 1
+                Rpp[i, j] = numpy.random.geometric(p=0.7**(1.0 / n_I_R)) - 1
 
         I_pm1 = (-1)**numpy.random.randint(0, 2, (self.lambda_, self.dim))
         R_int = I_pm1 * (Rp + Rpp)
@@ -809,7 +809,7 @@ class StrategyActiveOnePlusLambda(object):
         for i in range(self.constraint_vecs.shape[0]):
             if individual.fitness.constraint_violation[i]:
                 self.constraint_vecs[i] = (1 - self.cconst) * self.constraint_vecs[i] \
-                                          + self.cconst * individual._y
+                    + self.cconst * individual._y
 
         W = numpy.dot(self.invA, self.constraint_vecs.T).T  # M x N
         constraint_violation = numpy.sum(individual.fitness.constraint_violation)
@@ -855,7 +855,7 @@ class StrategyActiveOnePlusLambda(object):
             self._rank1update(valid_population[0],
                               float(lambda_succ) / len(valid_population))
 
-        if len(invalid_population) > 0 :
+        if len(invalid_population) > 0:
             # Learn constraint from all invalid individuals
             for ind in invalid_population:
                 self._infeasible_update(ind)
