@@ -15,13 +15,13 @@ The basic concept concept behind EDA is to sample :math:`\lambda` individuals
 with a certain distribution and estimate the problem distribution from the
 :math:`\mu` best individuals. This really simple concept adhere to the
 generate-update logic. The strategy contains a random number generator which
-is adapted from the population. The following :class:`EDA` class do just that.
+is adapted from the population. The following :class:`EMNA` class do just that.
 
-.. literalinclude:: /../examples/eda/fctmin.py
-   :pyobject: EDA
+.. literalinclude:: /../examples/eda/emna.py
+   :pyobject: EMNA
 
 A normal random number generator is initialized with a certain mean
-(*centroid*) and standard deviation (*sigma*) for each 
+(*centroid*) and standard deviation (*sigma*) for each
 dimension. The :meth:`generate` method uses numpy to generate *lambda_*
 sequences in *dim* dimensions, then the sequences are used to initialize
 individuals of class given in the *ind_init* argument. Finally, the
@@ -37,7 +37,7 @@ Two classes are needed, a minimization fitness and a individual that will
 combine the fitness and the real values. Moreover, we will use
 :class:`numpy.ndarray` as base class for our individuals.
 
-.. literalinclude:: /../examples/eda/fctmin.py
+.. literalinclude:: /../examples/eda/emna.py
    :lines: 28-29
 
 Operators
@@ -45,11 +45,11 @@ Operators
 
 The :func:`~deap.algorithms.eaGenerateUpdate` algorithm requires to set in a
 toolbox an evaluation function, an generation method and an update method.
-We will use the method of an initialized :class:`EDA`. For the generate
+We will use the method of an initialized :class:`EMNA`. For the generate
 method, we set the class that the individuals are transferred in to our
 :class:`Individual` class containing a fitness.
 
-.. literalinclude:: /../examples/eda/fctmin.py
+.. literalinclude:: /../examples/eda/emna.py
    :pyobject: main
 
-The complete :example:`eda/fctmin`. 
+The complete :example:`eda/fctmin`.
