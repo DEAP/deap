@@ -38,7 +38,7 @@ simply a mapping from the Python :mod:`operator` module. The number following
 the function is the *arity* of the primitive, that is the number of entries
 it takes.
 
-On the last line, we declare an :class:`~deap.gp.Ephemeral` constant. This is
+On the last line, we declare an :class:`~deap.gp.MetaEphemeral` constant. This is
 a special terminal type, which does not have a fixed value. When the program
 appends an ephemeral constant terminal to a tree, the function it contains is
 executed, and its result is inserted as a constant terminal. In this case,
