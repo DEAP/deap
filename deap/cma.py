@@ -580,7 +580,7 @@ class StrategyActiveOnePlusLambda(object):
     | ``d``          | ``1.0 + N / (2.0 *        | Damping for step-size.       |
     |                | lambda_)``                |                              |
     +----------------+---------------------------+------------------------------+
-    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Taget success rate           |
+    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate          |
     |                | / 2.0)``                  | (from 1 + lambda algorithm). |
     +----------------+---------------------------+------------------------------+
     | ``cp``         | ``ptarg * lambda_ / (2.0 +| Step size learning rate.     |
@@ -695,7 +695,7 @@ class StrategyActiveOnePlusLambda(object):
     def _integer_mutation(self):
         n_I_R = self.i_I_R.shape[0]
 
-        # Mixed integer CMA-ES is developped for (mu/mu , lambda)
+        # Mixed integer CMA-ES is developed for (mu/mu , lambda)
         # We have a (1 + lambda) setting, thus we make the integer mutation
         # probabilistic. The integer mutation is lambda / 2 if all dimensions
         # are integers or min(lambda / 2 - 1, lambda / 10 + n_I_R + 1). The minus
@@ -728,7 +728,7 @@ class StrategyActiveOnePlusLambda(object):
         R_int = I_pm1 * (Rp + Rpp)
 
         # Usually in mu/mu, lambda the last individual is set to the step taken.
-        # We don't use this sheme in the 1 + lambda scheme
+        # We don't use this scheme in the 1 + lambda scheme
         # if self.update_count > 0:
         #     R_int[-1, :] = (numpy.floor(-self.S_int - self.last_best)
         #                     - numpy.floor(-self.S_int - self.centroid))
