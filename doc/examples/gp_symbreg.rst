@@ -104,7 +104,7 @@ the MSE (Mean Squared Error), which is returned as the fitness of the individual
 
     .. literalinclude:: /../examples/gp/symbreg.py
         :pyobject: evalSymbReg
-        :emphasize-lines: 9
+        :emphasize-lines: 7
 
     Returning only the value would produce strange behaviors and errors, as
     the selection and stats functions relies on the fact that the fitness is
