@@ -109,6 +109,9 @@ intersphinx_mapping = {'python' : ('http://docs.python.org/', None),
 # Reload the cached values every 5 days
 intersphinx_cache_limit = 5
 
+# Align mathjax equations
+mathjax3_config = {'chtml': {'displayAlign': 'left'}}
+
 # -- Options for pyplot extension ----------------------------------------------
 
 # Default value for the include-source option
