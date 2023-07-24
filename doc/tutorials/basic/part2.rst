@@ -35,7 +35,7 @@ Evaluation
 The evaluation is the most personal part of an evolutionary algorithm, it is
 the only part of the library that you must write yourself. A typical
 evaluation function takes one individual as argument and returns its fitness as
-a :class:`tuple`. As shown in the :ref:`core` section, a fitness is a list of floating point values and has a
+a :class:`tuple`. As shown in the :ref:`creating-types` section, a fitness is a list of floating point values and has a
 property :attr:`~deap.base.Fitness.valid` to know if this individual shall be re-evaluated. The
 fitness is set by setting the :attr:`~deap.base.Fitness.values` to the
 associated :class:`tuple`. For example, the following evaluates the previously created individual ``ind1`` and assigns its fitness to the corresponding values.
