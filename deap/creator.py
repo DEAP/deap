@@ -176,7 +176,7 @@ def create(name, base, **kargs):
     .. warning::
 
        If your are inheriting from :class:`numpy.ndarray` see the
-       :doc:`tutorials/advanced/numpy` tutorial and the
+       :doc:`/tutorials/advanced/numpy` tutorial and the
        :doc:`/examples/ga_onemax_numpy` example.
 
     """

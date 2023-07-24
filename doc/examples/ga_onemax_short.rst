@@ -5,14 +5,14 @@ One Max Problem: Short Version
 ===============================
 
 The short One Max genetic algorithm example is very similar to the full one
-:ref:`-ga-onemax`. The only difference is that it makes use of the
+:ref:`ga-onemax`. The only difference is that it makes use of the
 :mod:`~deap.algorithms` module which implements some basic evolutionary
 algorithms. The initializations are almost the same. We only have to import
 some additional packages and modules.
 
 .. literalinclude:: /../examples/ga/onemax_short.py
    :lines: 16,19-21
-	   
+
 In order to use the evolution functions implemented in :mod:`~deap.algorithms`,
 we have to register some functions from the :mod:`~deap.tools` module:
 :func:`evaluate`, :func:`mate`, :func:`mutate`, and :func:`~deap.Toolbox.select`.
@@ -21,7 +21,7 @@ we have to register some functions from the :mod:`~deap.tools` module:
    :lines: 41-44
 
 The toolbox is then passed to the algorithm and via ``stats`` it uses the
-registered functions. 
+registered functions.
 
 .. literalinclude:: /../examples/ga/onemax_short.py
    :lines: 46, 49-58

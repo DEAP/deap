@@ -14,7 +14,7 @@ Genetic Programming
 .. autoclass:: deap.gp.Terminal
 	:members:
 
-.. autoclass:: deap.gp.Ephemeral
+.. autoclass:: deap.gp.MetaEphemeral
 	:members:
 
 .. autofunction:: deap.gp.compile

@@ -12,7 +12,7 @@ made available to the other processing units (including the master one) if it
 is not explicitly communicated through function arguments and return values.
 
 Scalable Concurrent Operations in Python (SCOOP)
------------------------------------------------
+------------------------------------------------
 SCOOP_ is a distributed task module allowing concurrent parallel programming on
 various environments, from heterogeneous grids to supercomputers. It has an
 interface similar to the :mod:`concurrent.futures` module introduced in Python
@@ -51,10 +51,10 @@ toolbox.
 ::
 
     import multiprocessing
-    
+
     pool = multiprocessing.Pool()
     toolbox.register("map", pool.map)
-    
+
     # Continue on with the evolutionary algorithm
 
 .. warning::
@@ -85,25 +85,25 @@ toolbox.
 .. difference between the `Multiprocessing One Max Example
 .. <https://www.github.com/deap/deap/examples/mpga_onemax.py>`_ and the `Regular One
 .. Max Example <https://www.github.com/deap/deap/examples/ga_onemax.py>`_ is the
-.. addition of these two lines 
+.. addition of these two lines
 .. ::
-.. 
+..
 ..    # Process Pool of 4 workers
 ..    pool = multiprocessing.Pool(processes=4)
 ..    tools.register("map", pool.map)
-.. 
+..
 .. Parallel Variation
 .. ------------------
-.. 
+..
 .. The parallelization of the variation operators is not directly supported in
 .. the algorithms, although it is still possible. What one needs is to create its
 .. own algorithm (from one in the algorithm module for example) and change the
 .. desired lines in order to use the :meth:`~deap.toolbox.map` method from the
 .. toolbox. This may be achieved for example, for the crossover operation from
 .. the :func:`~deap.algorithms.eaSimple` algorithm by replacing the crossover part
-.. of the algorithms by 
+.. of the algorithms by
 .. ::
-..     
+..
 ..     parents1 = list()
 ..     parents2 = list()
 ..     to_replace = list()
@@ -113,22 +113,22 @@ toolbox.
 ..             parents2.append(offspring[i])
 ..             to_replace.append(i - 1)
 ..             to_replace.append(i)
-..     
+..
 ..     children = tools.map(tools.mate, (parents1, parents2))
-..     
+..
 ..     for i, child in zip(to_replace, children):
 ..         del child.fitness.values
 ..         offspring[i] = child
-.. 
+..
 .. Since the multiprocessing map does take a single iterable we must
 .. bundle/unbundle the parents, respectively by creating a tuple in the
 .. :func:`tools.map` function of the preceding code example and the following
 .. decorator on the crossover function.
 .. ::
-.. 
+..
 ..     def unbundle(func):
 ..         def wrapUnbundle(bundled):
 ..             return func(*bundled)
 ..         return wrapUnbundle
-..     
+..
 ..     tools.decorate("mate", unbundle)
