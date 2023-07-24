@@ -59,6 +59,7 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
                 is the lower bound of the search space.
     :param up: A value or a :term:`python:sequence` of values that
                is the upper bound of the search space.
+    :param indpb: Independent probability for each attribute to be mutated.
     :returns: A tuple of one individual.
     """
     size = len(individual)
