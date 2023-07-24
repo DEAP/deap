@@ -406,7 +406,7 @@ class StrategyMultiObjective(object):
                   of its parent.
         """
         arz = numpy.random.randn(self.lambda_, self.dim)
-        individuals = list()
+        individuals = []
 
         # Make sure every parent has a parent tag and index
         for i, p in enumerate(self.parents):
@@ -436,9 +436,9 @@ class StrategyMultiObjective(object):
 
         pareto_fronts = tools.sortLogNondominated(candidates, len(candidates))
 
-        chosen = list()
+        chosen = []
         mid_front = None
-        not_chosen = list()
+        not_chosen = []
 
         # Fill the next population (chosen) with the fronts until there is not enough space
         # When an entire front does not fit in the space left we rely on the hypervolume
@@ -641,7 +641,7 @@ class StrategyActiveOnePlusLambda(object):
                                        < self.S_int)
 
         self.constraint_vecs = None
-        self.ancestors_fitness = list()
+        self.ancestors_fitness = []
 
     @property
     def lambda_(self):
@@ -703,7 +703,7 @@ class StrategyActiveOnePlusLambda(object):
         # the last best solution. We skip this last best solution part.
         if n_I_R == 0:
             return numpy.zeros((self.lambda_, self.dim))
-        elif n_I_R == self.dim:
+        if n_I_R == self.dim:
             p = self.lambda_ / 2.0 / self.lambda_
             # lambda_int = int(numpy.floor(self.lambda_ / 2))
         else:

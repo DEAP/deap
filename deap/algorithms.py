@@ -74,9 +74,9 @@ def varAnd(population, toolbox, cxpb, mutpb):
                                                           offspring[i])
             del offspring[i - 1].fitness.values, offspring[i].fitness.values
 
-    for i in range(len(offspring)):
+    for i, off in enumerate(offspring):
         if random.random() < mutpb:
-            offspring[i], = toolbox.mutate(offspring[i])
+            offspring[i], = toolbox.mutate(off)
             del offspring[i].fitness.values
 
     return offspring

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 
-warnings = list()
+warnings = []
 
 try:
     from setuptools import setup, Extension, find_packages
@@ -55,7 +55,7 @@ class ve_build_ext(build_ext):
 def run_setup(build_ext):
     extra_modules = None
     if build_ext:
-        extra_modules = list()
+        extra_modules = []
 
         hv_module = Extension("deap.tools._hypervolume.hv", sources=["deap/tools/_hypervolume/_hv.c", "deap/tools/_hypervolume/hv.cpp"])
         extra_modules.append(hv_module)
