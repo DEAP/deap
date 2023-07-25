@@ -551,7 +551,7 @@ class StrategyMultiObjective(object):
 
 
 class StrategyActiveOnePlusLambda(object):
-    """A CMA-ES strategy that combines the :math:`(1 + \\lambda)` paradigm
+    r"""A CMA-ES strategy that combines the :math:`(1 + \lambda)` paradigm
     [Igel2007]_, the mixed integer modification [Hansen2011]_, active
     covariance update [Arnold2010]_ and constraint handling [Arnold2012]_.
     This version of CMA-ES requires the random vector and the mutation
@@ -653,7 +653,7 @@ class StrategyActiveOnePlusLambda(object):
         self._compute_lambda_parameters()
 
     def _compute_lambda_parameters(self):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
+        r"""Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
         """
         # Step size control :
@@ -666,7 +666,7 @@ class StrategyActiveOnePlusLambda(object):
         self.beta = self.params.get("beta", 0.1 / (self.lambda_ * (self.dim + 2.0)))
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
         :param ind_init: A function object that is able to initialize an
                          individual from a list.
