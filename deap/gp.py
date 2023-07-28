@@ -1110,9 +1110,9 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
 
         # Compute the target distribution
         def targetfunc(x):
-            return (gamma * len(population) * math.log(2) /
-                    halflifefunc(x)) * math.exp(-math.log(2) *
-                                                (x - cutoffsize) / halflifefunc(x))
+            return (gamma * len(population) * math.log(2)
+                    / halflifefunc(x)) * math.exp(-math.log(2)
+                                                  * (x - cutoffsize) / halflifefunc(x))
 
         targethist = [naturalhist[binidx] if binidx <= cutoffsize else
                       targetfunc(binidx) for binidx in range(len(naturalhist))]

@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 import sys
 
+from setuptools.command.build_ext import build_ext
+from distutils.errors import CCompilerError, DistutilsExecError, \
+    DistutilsPlatformError
+
+# read the contents of README file
+from os import path
+import codecs
+
+import deap
+
 warnings = list()
 
 try:
@@ -11,29 +21,22 @@ except ImportError:
     from distutils.core import setup, Extension
     modules = ['deap', 'deap.benchmarks', 'deap.tests', 'deap.tools', 'deap.tools._hypervolume']
 
-from setuptools.command.build_ext import build_ext
-from distutils.errors import CCompilerError, DistutilsExecError, \
-    DistutilsPlatformError
-
-# read the contents of README file
-from os import path
-import codecs
 this_directory = path.abspath(path.dirname(__file__))
 long_description = codecs.open(path.join(this_directory, 'README.md'), 'r', 'utf-8').read()
 
-import deap
-
 if sys.platform == 'win32' and sys.version_info > (2, 6):
-   # 2.6's distutils.msvc9compiler can raise an IOError when failing to
-   # find the compiler
-   # It can also raise ValueError http://bugs.python.org/issue7511
-   ext_errors = (CCompilerError, DistutilsExecError, DistutilsPlatformError,
-                 IOError, ValueError)
+    # 2.6's distutils.msvc9compiler can raise an IOError when failing to
+    # find the compiler
+    # It can also raise ValueError http://bugs.python.org/issue7511
+    ext_errors = (CCompilerError, DistutilsExecError, DistutilsPlatformError,
+                  IOError, ValueError)
 else:
-   ext_errors = (CCompilerError, DistutilsExecError, DistutilsPlatformError)
+    ext_errors = (CCompilerError, DistutilsExecError, DistutilsPlatformError)
+
 
 class BuildFailed(Exception):
     pass
+
 
 class ve_build_ext(build_ext):
     # This class allows C extension building to fail.
@@ -52,6 +55,7 @@ class ve_build_ext(build_ext):
             print(e)
             raise BuildFailed()
 
+
 def run_setup(build_ext):
     extra_modules = None
     if build_ext:
@@ -69,25 +73,25 @@ def run_setup(build_ext):
           author_email='deap-users@googlegroups.com',
           url='https://www.github.com/deap',
           packages=find_packages(exclude=['examples', 'tests']),
-        #   packages=['deap', 'deap.tools', 'deap.tools._hypervolume', 'deap.benchmarks', 'deap.tests'],
           platforms=['any'],
           keywords=['evolutionary algorithms', 'genetic algorithms', 'genetic programming', 'cma-es', 'ga', 'gp', 'es', 'pso'],
           license='LGPL',
           classifiers=[
-            'Development Status :: 4 - Beta',
-            'Intended Audience :: Developers',
-            'Intended Audience :: Education',
-            'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 3',
-            'Topic :: Scientific/Engineering',
-            'Topic :: Software Development',
-            ],
-         ext_modules=extra_modules,
-         cmdclass={"build_ext": ve_build_ext},
-         install_requires=['numpy'],
-    )
+              'Development Status :: 4 - Beta',
+              'Intended Audience :: Developers',
+              'Intended Audience :: Education',
+              'Intended Audience :: Science/Research',
+              'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)',
+              'Programming Language :: Python',
+              'Programming Language :: Python :: 3',
+              'Topic :: Scientific/Engineering',
+              'Topic :: Software Development',
+          ],
+          ext_modules=extra_modules,
+          cmdclass={"build_ext": ve_build_ext},
+          install_requires=['numpy'],
+          )
+
 
 try:
     run_setup(True)
