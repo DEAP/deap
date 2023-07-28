@@ -43,7 +43,7 @@ def tupleize(func):
     when the evaluation function returns a single value.
     """
     def wrapper(*args, **kargs):
-        return func(*args, **kargs),
+        return (func(*args, **kargs),)
     return wrapper
 
 
@@ -71,7 +71,7 @@ def main(func, dim, maxfuncevals, ftarget=None):
 
     # Evolve until ftarget is reached or the number of evaluation
     # is exhausted (maxfuncevals)
-    for g in range(1, maxfuncevals):
+    for _ in range(1, maxfuncevals):
         toolbox.update(worst, best, sigma)
         worst.fitness.values = toolbox.evaluate(worst)
         if best.fitness <= worst.fitness:

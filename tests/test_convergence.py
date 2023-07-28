@@ -82,7 +82,7 @@ class TestSingleObjective(TearDownCreatorTestCase):
 
         best = None
 
-        for gen in range(NGEN):
+        for _ in range(NGEN):
             # Generate a new population
             population = toolbox.generate()
 
@@ -118,7 +118,7 @@ class TestSingleObjective(TearDownCreatorTestCase):
 
         best = None
 
-        for gen in range(NGEN):
+        for _ in range(NGEN):
             # Generate a new population
             population = toolbox.generate()
 
@@ -174,7 +174,7 @@ class TestSingleObjectiveConstrained(TearDownCreatorTestCase):
 
             best = None
 
-            for gen in range(NGEN):
+            for _ in range(NGEN):
                 # Generate a new population
                 population = toolbox.generate()
 
@@ -234,7 +234,7 @@ class TestSingleObjectiveConstrained(TearDownCreatorTestCase):
 
             best = None
 
-            for gen in range(NGEN):
+            for _ in range(NGEN):
                 # Generate a new population
                 population = toolbox.generate()
 
@@ -291,7 +291,7 @@ class TestMultiObjective(TearDownCreatorTestCase):
             ind.fitness.values = fit
 
         pop = toolbox.select(pop, len(pop))
-        for gen in range(1, NGEN):
+        for _ in range(1, NGEN):
             offspring = tools.selTournamentDCD(pop, len(pop))
             offspring = [toolbox.clone(ind) for ind in offspring]
 
@@ -344,7 +344,7 @@ class TestMultiObjective(TearDownCreatorTestCase):
 
         pop = toolbox.select(pop, len(pop))
         # Begin the generational process
-        for gen in range(1, NGEN):
+        for _ in range(1, NGEN):
             # Vary the individuals
             offspring = list(islice(algorithms.varAnd(pop, toolbox, 1.0, 1.0), len(pop)))
 
@@ -414,7 +414,7 @@ class TestMultiObjectiveNumpy(TearDownCreatorTestCase):
         toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
         toolbox.register("update", strategy.update)
 
-        for gen in range(NGEN):
+        for _ in range(NGEN):
             # Generate a new population
             population = toolbox.generate()
 
