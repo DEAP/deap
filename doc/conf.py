@@ -36,8 +36,7 @@ try:
 except ImportError:
     pass
 else:
-    extensions += ['matplotlib.sphinxext.only_directives',
-                   'matplotlib.sphinxext.plot_directive']
+    extensions += ['matplotlib.sphinxext.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -111,6 +110,9 @@ intersphinx_mapping = {'python': ('http://docs.python.org/', None),
 # Reload the cached values every 5 days
 intersphinx_cache_limit = 5
 
+# Align mathjax equations
+mathjax3_config = {'chtml': {'displayAlign': 'left'}}
+
 # -- Options for pyplot extension ----------------------------------------------
 
 # Default value for the include-source option
@@ -129,13 +131,15 @@ plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
 import subprocess
-try:
-    tree = subprocess.check_output(["git", "rev-parse", "HEAD"]).strip()
-except OSError:
-    import warnings
-    warnings.warn("Cannot link examples because we cannot retrieve the git version", Warning)
-else:
-    extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/")}
+tree = os.getenv('GITHUB_COMMIT')
+if tree is None:
+    try:
+        tree = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    except OSError:
+        import warnings
+        warnings.warn("Cannot link examples because we cannot retrieve the git version", Warning)
+if tree:
+    extlinks = {'example': ('https://github.com/DEAP/deap/blob/{tree}/examples/%s.py'.format(tree=tree), "examples/%s")}
 # -- Options for HTML output ---------------------------------------------------
 
 # Add any paths that contain custom themes here, relative to this directory.

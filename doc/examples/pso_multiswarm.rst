@@ -11,7 +11,7 @@ The moving peak benchmark allows to choose from the 3 original scenarios propose
 
 Once the scenario is retrieved, we need to set a few more constants and instantiate the benchmark, here the number of dimensions and the bounds of the problem.
 
-.. literalinclude:: /./examples/pso/multiswarm.py
+.. literalinclude:: /../examples/pso/multiswarm.py
    :lines: 43-46
 
 For a list of all the variables defined in the ``SENARIO_X`` dictionaries see :class:`~deap.benchmarks.movingpeaks.MovingPeaks` class documentation.

@@ -140,9 +140,11 @@ def h1(individual):
        * - Global optima
          - :math:`\mathbf{x} = (8.6998, 6.7665)`, :math:`f(\mathbf{x}) = 2`\n
        * - Function
-         - :math:`f(\mathbf{x}) = \frac{\sin(x_1 - \frac{x_2}{8})^2 + \
-            \sin(x_2 + \frac{x_1}{8})^2}{\sqrt{(x_1 - 8.6998)^2 + \
-            (x_2 - 6.7665)^2} + 1}`
+         - .. math::
+
+             f(\mathbf{x}) = \frac{\sin(x_1 - \frac{x_2}{8})^2 + \
+             \sin(x_2 + \frac{x_1}{8})^2}{\sqrt{(x_1 - 8.6998)^2 + \
+             (x_2 - 6.7665)^2} + 1}
 
     .. plot:: code/benchmarks/h1.py
        :width: 67 %
@@ -167,8 +169,10 @@ def ackley(individual):
        * - Global optima
          - :math:`x_i = 0, \forall i \in \lbrace 1 \ldots N\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         - :math:`f(\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\frac{1}{N} \
-            \sum_{i=1}^N x_i^2} \right) + e - \exp\left(\frac{1}{N}\sum_{i=1}^N \cos(2\pi x_i) \right)`
+         - .. math::
+
+              f(\mathbf{x}) = 20 - 20\exp\left(-0.2\sqrt{\frac{1}{N}
+              \sum_{i=1}^N x_i^2} \right) + e - \exp\left(\frac{1}{N}\sum_{i=1}^N \cos(2\pi x_i) \right)
 
     .. plot:: code/benchmarks/ackley.py
        :width: 67 %
@@ -192,8 +196,10 @@ def bohachevsky(individual):
        * - Global optima
          - :math:`x_i = 0, \forall i \in \lbrace 1 \ldots N\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         -  :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 - \
-                   0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)`
+         -  .. math::
+
+               f(\mathbf{x}) = \sum_{i=1}^{N-1}(x_i^2 + 2x_{i+1}^2 -
+               0.3\cos(3\pi x_i) - 0.4\cos(4\pi x_{i+1}) + 0.7)
 
     .. plot:: code/benchmarks/bohachevsky.py
        :width: 67 %
@@ -216,8 +222,10 @@ def griewank(individual):
        * - Global optima
          - :math:`x_i = 0, \forall i \in \lbrace 1 \ldots N\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         - :math:`f(\mathbf{x}) = \frac{1}{4000}\sum_{i=1}^N\,x_i^2 - \
-                  \prod_{i=1}^N\cos\left(\frac{x_i}{\sqrt{i}}\right) + 1`
+         - .. math::
+
+              f(\mathbf{x}) = \frac{1}{4000}\sum_{i=1}^N\,x_i^2 -
+              \prod_{i=1}^N\cos\left(\frac{x_i}{\sqrt{i}}\right) + 1
 
     .. plot:: code/benchmarks/griewank.py
        :width: 67 %
@@ -252,9 +260,11 @@ def rastrigin(individual):
 def rastrigin_scaled(individual):
     r"""Scaled Rastrigin test objective function.
 
-    :math:`f_{\text{RastScaled}}(\mathbf{x}) = 10N + \sum_{i=1}^N \
-        \left(10^{\left(\frac{i-1}{N-1}\right)} x_i \right)^2 - \
-        10\cos\left(2\pi 10^{\left(\frac{i-1}{N-1}\right)} x_i \right)`
+    .. math::
+
+       f_{\text{RastScaled}}(\mathbf{x}) = 10N + \sum_{i=1}^N
+       \left(10^{\left(\frac{i-1}{N-1}\right)} x_i \right)^2 -
+       10\cos\left(2\pi 10^{\left(\frac{i-1}{N-1}\right)} x_i \right)`
     """
     N = len(individual)
     return 10 * N + sum((10 ** (i / (N - 1)) * x) ** 2 -
@@ -264,13 +274,18 @@ def rastrigin_scaled(individual):
 def rastrigin_skew(individual):
     r"""Skewed Rastrigin test objective function.
 
-     :math:`f_{\text{RastSkew}}(\mathbf{x}) = 10N + \sum_{i=1}^N \left(y_i^2 - 10 \cos(2\pi x_i)\right)`
+    .. math::
 
-     :math:`\text{with } y_i = \
-                            \begin{cases} \
-                                10\cdot x_i & \text{ if } x_i > 0,\\ \
-                                x_i & \text{ otherwise } \
-                            \end{cases}`
+       f_{\text{RastSkew}}(\mathbf{x}) =
+       10N + \sum_{i=1}^N \left(y_i^2 - 10 \cos(2\pi x_i)\right)
+
+    .. math::
+
+       \text{with } y_i =
+       \begin{cases}
+          10\cdot x_i & \text{ if } x_i > 0,\\ \\
+          x_i & \text{ otherwise }
+       \end{cases}
     """
     N = len(individual)
     return 10 * N + sum((10 * x if x > 0 else x) ** 2
@@ -291,9 +306,10 @@ def schaffer(individual):
        * - Global optima
          - :math:`x_i = 0, \forall i \in \lbrace 1 \ldots N\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         -  :math:`f(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \
-                  \left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \
-                  \right]`
+         -  .. math::
+
+               f(\mathbf{x}) = \sum_{i=1}^{N-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot
+               \left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \right]
 
     .. plot:: code/benchmarks/schaffer.py
         :width: 67 %
@@ -316,9 +332,9 @@ def schwefel(individual):
        * - Global optima
          - :math:`x_i = 420.96874636, \forall i \in \lbrace 1 \ldots N\rbrace`, :math:`f(\mathbf{x}) = 0`
        * - Function
-         - :math:`f(\mathbf{x}) = 418.9828872724339\cdot N - \
-            \sum_{i=1}^N\,x_i\sin\left(\sqrt{|x_i|}\right)`
-
+         - .. math::
+              f(\mathbf{x}) = 418.9828872724339\cdot N -
+              \sum_{i=1}^N\,x_i\sin\left(\sqrt{|x_i|}\right)
 
     .. plot:: code/benchmarks/schwefel.py
         :width: 67 %

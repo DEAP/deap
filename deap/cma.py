@@ -228,7 +228,7 @@ class StrategyOnePlusLambda(object):
     | ``d``          | ``1.0 + N / (2.0 *        | Damping for step-size.     |
     |                | lambda_)``                |                            |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate.       |
     |                | / 2.0)``                  |                            |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg * lambda_ / (2.0 +| Step size learning rate.   |
@@ -243,7 +243,7 @@ class StrategyOnePlusLambda(object):
     +----------------+---------------------------+----------------------------+
 
     .. [Igel2007] Igel, Hansen, Roth, 2007. Covariance matrix adaptation for
-    multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
+       multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
 
     """
     def __init__(self, parent, sigma, **kargs):
@@ -349,7 +349,7 @@ class StrategyMultiObjective(object):
     +================+===========================+============================+
     | ``d``          | ``1.0 + N / 2.0``         | Damping for step-size.     |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Target success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Target success rate.       |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg / (2.0 + ptarg)`` | Step size learning rate.   |
     +----------------+---------------------------+----------------------------+
