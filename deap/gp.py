@@ -637,7 +637,7 @@ def generate(pset, min_, max_, condition, type_=None):
                 raise IndexError("The gp.generate function tried to add "
                                  "a terminal of type '%s', but there is "
                                  "none available." % (type_,)).with_traceback(traceback)
-            if isinstancep(term, MetaEphemeral):
+            if isinstance(term, MetaEphemeral):
                 term = term()
             expr.append(term)
         else:
