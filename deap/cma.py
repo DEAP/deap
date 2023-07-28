@@ -94,8 +94,8 @@ class Strategy(object):
         self.sigma = sigma
         self.pc = numpy.zeros(self.dim)
         self.ps = numpy.zeros(self.dim)
-        self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim) +
-                                      1. / (21. * self.dim ** 2))
+        self.chiN = sqrt(self.dim) * (1 - 1. / (4. * self.dim)
+                                      + 1. / (21. * self.dim ** 2))
 
         self.C = self.params.get("cmatrix", numpy.identity(self.dim))
         self.diagD, self.B = numpy.linalg.eigh(self.C)
@@ -140,12 +140,12 @@ class Strategy(object):
         # Cumulation : update evolution path
         self.ps = (1 - self.cs) * self.ps \
             + sqrt(self.cs * (2 - self.cs) * self.mueff) / self.sigma \
-            * numpy.dot(self.B, (1. / self.diagD) *
-                        numpy.dot(self.B.T, c_diff))
+            * numpy.dot(self.B, (1. / self.diagD)
+                        * numpy.dot(self.B.T, c_diff))
 
-        hsig = float((numpy.linalg.norm(self.ps) /
-                      sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN <
-                      (1.4 + 2. / (self.dim + 1.))))
+        hsig = float((numpy.linalg.norm(self.ps)
+                      / sqrt(1. - (1. - self.cs) ** (2. * (self.update_count + 1.))) / self.chiN
+                      < (1.4 + 2. / (self.dim + 1.))))
 
         self.update_count += 1
 
@@ -155,14 +155,14 @@ class Strategy(object):
 
         # Update covariance matrix
         artmp = population[0:self.mu] - old_centroid
-        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig) *
-                  self.ccov1 * self.cc * (2 - self.cc)) * self.C \
+        self.C = (1 - self.ccov1 - self.ccovmu + (1 - hsig)
+                  * self.ccov1 * self.cc * (2 - self.cc)) * self.C \
             + self.ccov1 * numpy.outer(self.pc, self.pc) \
             + self.ccovmu * numpy.dot((self.weights * artmp.T), artmp) \
             / self.sigma ** 2
 
-        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.) *
-                                self.cs / self.damps)
+        self.sigma *= numpy.exp((numpy.linalg.norm(self.ps) / self.chiN - 1.)
+                                * self.cs / self.damps)
 
         self.diagD, self.B = numpy.linalg.eigh(self.C)
         indx = numpy.argsort(self.diagD)
@@ -195,16 +195,16 @@ class Strategy(object):
         self.mueff = 1. / sum(self.weights ** 2)
 
         self.cc = params.get("ccum", 4. / (self.dim + 4.))
-        self.cs = params.get("cs", (self.mueff + 2.) /
-                             (self.dim + self.mueff + 3.))
-        self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3) ** 2 +
-                                               self.mueff))
-        self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2. +
-                                                 1. / self.mueff) /
-                                 ((self.dim + 2.) ** 2 + self.mueff))
+        self.cs = params.get("cs", (self.mueff + 2.)
+                             / (self.dim + self.mueff + 3.))
+        self.ccov1 = params.get("ccov1", 2. / ((self.dim + 1.3) ** 2
+                                               + self.mueff))
+        self.ccovmu = params.get("ccovmu", 2. * (self.mueff - 2.
+                                                 + 1. / self.mueff)
+                                 / ((self.dim + 2.) ** 2 + self.mueff))
         self.ccovmu = min(1 - self.ccov1, self.ccovmu)
-        self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.) /
-                                           (self.dim + 1.)) - 1.) + self.cs
+        self.damps = 1. + 2. * max(0, sqrt((self.mueff - 1.)
+                                           / (self.dim + 1.)) - 1.) + self.cs
         self.damps = params.get("damps", self.damps)
 
 
@@ -228,7 +228,7 @@ class StrategyOnePlusLambda(object):
     | ``d``          | ``1.0 + N / (2.0 *        | Damping for step-size.     |
     |                | lambda_)``                |                            |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate.       |
     |                | / 2.0)``                  |                            |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg * lambda_ / (2.0 +| Step size learning rate.   |
@@ -243,7 +243,7 @@ class StrategyOnePlusLambda(object):
     +----------------+---------------------------+----------------------------+
 
     .. [Igel2007] Igel, Hansen, Roth, 2007. Covariance matrix adaptation for
-    multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
+       multi-objective optimization. *Evolutionary Computation* Spring;15(1):1-28
 
     """
     def __init__(self, parent, sigma, **kargs):
@@ -349,7 +349,7 @@ class StrategyMultiObjective(object):
     +================+===========================+============================+
     | ``d``          | ``1.0 + N / 2.0``         | Damping for step-size.     |
     +----------------+---------------------------+----------------------------+
-    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Target success rate.        |
+    | ``ptarg``      | ``1.0 / (5 + 1.0 / 2.0)`` | Target success rate.       |
     +----------------+---------------------------+----------------------------+
     | ``cp``         | ``ptarg / (2.0 + ptarg)`` | Step size learning rate.   |
     +----------------+---------------------------+----------------------------+
@@ -551,7 +551,7 @@ class StrategyMultiObjective(object):
 
 
 class StrategyActiveOnePlusLambda(object):
-    """A CMA-ES strategy that combines the :math:`(1 + \\lambda)` paradigm
+    r"""A CMA-ES strategy that combines the :math:`(1 + \lambda)` paradigm
     [Igel2007]_, the mixed integer modification [Hansen2011]_, active
     covariance update [Arnold2010]_ and constraint handling [Arnold2012]_.
     This version of CMA-ES requires the random vector and the mutation
@@ -580,7 +580,7 @@ class StrategyActiveOnePlusLambda(object):
     | ``d``          | ``1.0 + N / (2.0 *        | Damping for step-size.       |
     |                | lambda_)``                |                              |
     +----------------+---------------------------+------------------------------+
-    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Taget success rate           |
+    | ``ptarg``      | ``1.0 / (5 + sqrt(lambda_)| Target success rate          |
     |                | / 2.0)``                  | (from 1 + lambda algorithm). |
     +----------------+---------------------------+------------------------------+
     | ``cp``         | ``ptarg * lambda_ / (2.0 +| Step size learning rate.     |
@@ -653,7 +653,7 @@ class StrategyActiveOnePlusLambda(object):
         self._compute_lambda_parameters()
 
     def _compute_lambda_parameters(self):
-        """Computes the parameters depending on :math:`\lambda`. It needs to
+        r"""Computes the parameters depending on :math:`\lambda`. It needs to
         be called again if :math:`\lambda` changes during evolution.
         """
         # Step size control :
@@ -666,7 +666,7 @@ class StrategyActiveOnePlusLambda(object):
         self.beta = self.params.get("beta", 0.1 / (self.lambda_ * (self.dim + 2.0)))
 
     def generate(self, ind_init):
-        """Generate a population of :math:`\lambda` individuals of type
+        r"""Generate a population of :math:`\lambda` individuals of type
         *ind_init* from the current strategy.
         :param ind_init: A function object that is able to initialize an
                          individual from a list.
@@ -695,7 +695,7 @@ class StrategyActiveOnePlusLambda(object):
     def _integer_mutation(self):
         n_I_R = self.i_I_R.shape[0]
 
-        # Mixed integer CMA-ES is developped for (mu/mu , lambda)
+        # Mixed integer CMA-ES is developed for (mu/mu , lambda)
         # We have a (1 + lambda) setting, thus we make the integer mutation
         # probabilistic. The integer mutation is lambda / 2 if all dimensions
         # are integers or min(lambda / 2 - 1, lambda / 10 + n_I_R + 1). The minus
@@ -728,7 +728,7 @@ class StrategyActiveOnePlusLambda(object):
         R_int = I_pm1 * (Rp + Rpp)
 
         # Usually in mu/mu, lambda the last individual is set to the step taken.
-        # We don't use this sheme in the 1 + lambda scheme
+        # We don't use this scheme in the 1 + lambda scheme
         # if self.update_count > 0:
         #     R_int[-1, :] = (numpy.floor(-self.S_int - self.last_best)
         #                     - numpy.floor(-self.S_int - self.centroid))

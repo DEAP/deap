@@ -30,7 +30,7 @@ API enhancements
   labels dictionary that can then be fed directly to networkx to
   draw the tree.
 - gp: Renamed :func:`deap.gp.genRamped` as :func:`deap.gp.genHalfAndHalf`.
-- gp: Merged :func:`~deap.gp.staticDepthLimit` and :func:`~deap.gp.staticSizeLimit` in a 
+- gp: Merged :func:`~deap.gp.staticDepthLimit` and :func:`~deap.gp.staticSizeLimit` in a
   single function :func:`~deap.gp.staticLimit` which takes a key function in argument than can
   be return the height, the size or whatever attribute the tree should be limited on.
 - tools: Revised the :class:`~deap.tools.HallOfFame` to include only unique individuals.
@@ -77,7 +77,7 @@ Bug fixes
 
 **Release 1.0.1**:
 
-- tools: issue #26: Operators with bounds do not work correctly when 
+- tools: issue #26: Operators with bounds do not work correctly when
   bounds are provided as list instead of iterator. rev: `b172432515af`, `9d4718a8cf2a`.
 - tools: add missing arguments to sortLogNondominated  (`k`, `first_front_only`). rev: `f60a6520b666`, `4de7df29dd0f`.
 - gp: issue #32: :meth:`~deap.gp.PrimitiveTree.from_string` used incorrect argument order with STGP. rev: `58c1a0711e1f`.
@@ -86,8 +86,8 @@ Bug fixes
 
 - benchmarks: fix computation of DTLZ2, DTLZ3 and DTLZ4.
 - cma 1+Lambda: fix the computation of the rank-one update.
-- gp: replace the generate functions default value for the argument `type_` from `object` to `None`. 
-  This removes the obligation to define the type_ argument for the individual generation function when doing STGP.
+- gp: replace the generate functions default value for the argument `type_` from `object` to `None`.
+  This removes the obligation to define the `type_`` argument for the individual generation function when doing STGP.
 - gp: fix a bug with OOGP when calling addPrimitive and addTerminal in arbitrary order.
 - gp: fix Ephemeral regeneration with mutEphemeral. rev: `ae46705`.
 - gp: fix issue #35 - from_string had issues with OOGP.
