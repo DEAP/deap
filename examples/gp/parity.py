@@ -34,14 +34,14 @@ outputs = [None] * PARITY_SIZE_M
 for i in range(PARITY_SIZE_M):
     inputs[i] = [None] * PARITY_FANIN_M
     value = i
-    dividor = PARITY_SIZE_M
+    divisor = PARITY_SIZE_M
     parity = 1
     for j in range(PARITY_FANIN_M):
-        dividor /= 2
-        if value >= dividor:
+        divisor /= 2
+        if value >= divisor:
             inputs[i][j] = 1
             parity = int(not parity)
-            value -= dividor
+            value -= divisor
         else:
             inputs[i][j] = 0
     outputs[i] = parity

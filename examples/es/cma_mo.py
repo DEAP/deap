@@ -131,7 +131,7 @@ def main():
         interactive = 0
         if not interactive:
             import matplotlib as mpl_tmp
-            mpl_tmp.use('Agg')   # Force matplotlib to not use any Xwindows backend.
+            mpl_tmp.use('Agg')   # Force matplotlib to not use any X backend.
         import matplotlib.pyplot as plt
 
         fig = plt.figure()
