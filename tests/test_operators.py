@@ -41,7 +41,7 @@ class TestCxOrdered(unittest.TestCase):
 
 class TestGpCxUniform(unittest.TestCase):
     def setUp(self):
-        self.pset = gp.PrimitiveSet("MAIN", 2)
+        self.pset = gp.PrimitiveSet("MAIN", 1)
         self.pset.addPrimitive(operator.add, 2)
         self.pset.addPrimitive(operator.sub, 2)
         self.pset.addPrimitive(operator.mul, 2)
@@ -103,7 +103,7 @@ class TestGpCxUniform(unittest.TestCase):
         self.assertEqual(parent1.root, child1.root)
         self.assertEqual(parent2.root, child2.root)
 
-    def test_correctness1(self):
+    def test_different_arities1(self):
         expr1 = 'sub(add(ARG0, ARG0), add(5, sub(ARG0, 5)))'
         parent1 = gp.PrimitiveTree.from_string(string=expr1, pset=self.pset)
 
@@ -112,10 +112,11 @@ class TestGpCxUniform(unittest.TestCase):
 
         child1, child2 = gp.cxUniform(parent1, parent2, swap_prob=1.0)
 
-        self.assertEqual(str(child1), 'sub(sin(ARG0), add(5, sub(ARG0, 5)))')
-        self.assertEqual(str(child2), 'cos(add(add(5, ARG0), ARG0))')
+        self.assertEqual('sub(sin(ARG0), add(5, sub(ARG0, 5)))', str(child1))
+        self.assertEqual('cos(add(add(5, ARG0), ARG0))', str(child2))
 
-    def test_correctness2(self):
+    def test_different_arities2(self):
+
         def add3(x, y, z):
             return x + y + z
         self.pset.addPrimitive(add3, arity=3)
@@ -128,11 +129,11 @@ class TestGpCxUniform(unittest.TestCase):
 
         child1, child2 = gp.cxUniform(parent1, parent2, swap_prob=1.0)
 
-        self.assertEqual(str(child1), 'mul(5, ARG0)')
-        self.assertEqual(str(child2), 'add3(sin(add3(ARG0, ARG0, 5)), add3(sin(5), cos(ARG0), mul(ARG0, ARG0)), ARG0)')
+        self.assertEqual('mul(5, ARG0)', str(child1))
+        self.assertEqual('add3(sin(add3(ARG0, ARG0, 5)), add3(sin(5), cos(ARG0), mul(ARG0, ARG0)), ARG0)', str(child2))
 
     @mock.patch("random.random")
-    def test_correctness3(self, mock_random):
+    def test_random_case(self, mock_random):
         mock_random.side_effect = [0.4, 0.6, 0.4, 0.0, 0.7, 0.9, 0.2, 0.8]
         expr1 = 'sub(add(ARG0, ARG0), add(5, sub(ARG0, 5)))'
         parent1 = gp.PrimitiveTree.from_string(string=expr1, pset=self.pset)
@@ -142,6 +143,28 @@ class TestGpCxUniform(unittest.TestCase):
 
         child1, child2 = gp.cxUniform(parent1, parent2, swap_prob=0.5)
 
-        self.assertEqual(str(child1), 'sub(add(ARG0, 5), sub(5, sub(5, ARG0)))')
-        self.assertEqual(str(child2), 'add(sub(5, ARG0), add(ARG0, mul(ARG0, 5)))')
+        self.assertEqual('sub(add(ARG0, 5), sub(5, sub(5, ARG0)))', str(child1))
+        self.assertEqual('add(sub(5, ARG0), add(ARG0, mul(ARG0, 5)))', str(child2))
+    
+    def test_stgp(self):
 
+        def if_then_else(input, output1, output2):
+            return output1 if input else output2
+
+        pset_stgp = gp.PrimitiveSetTyped("MAIN", [bool, float], float)
+        pset_stgp.addPrimitive(operator.xor, [bool, bool], bool)
+        pset_stgp.addPrimitive(operator.mul, [float, float], float)
+        pset_stgp.addPrimitive(if_then_else, [bool, float, float], float)
+        pset_stgp.addTerminal(3.0, float)
+        pset_stgp.addTerminal(1, bool)
+
+        expr1 = 'mul(ARG1, ARG1)'
+        parent1 = gp.PrimitiveTree.from_string(string=expr1, pset=pset_stgp)
+
+        expr2 = 'if_then_else(xor(ARG0, 1), mul(3.0, 3.0), if_then_else(ARG0, ARG1, 3.0))'
+        parent2 = gp.PrimitiveTree.from_string(string=expr2, pset=pset_stgp)
+
+        child1, child2 = gp.cxUniform(parent1, parent2, swap_prob=1.0)
+
+        self.assertEqual('mul(ARG1, mul(3.0, 3.0))', str(child1))
+        self.assertEqual('if_then_else(xor(ARG0, 1), ARG1, if_then_else(ARG0, ARG1, 3.0))', str(child2))
