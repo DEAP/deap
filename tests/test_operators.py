@@ -6,7 +6,7 @@ import math
 import copy
 
 from deap.tools import crossover
-from deap import gp, creator
+from deap import gp
 
 
 class TestCxOrdered(unittest.TestCase):
