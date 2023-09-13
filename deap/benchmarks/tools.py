@@ -288,19 +288,19 @@ def convergence(first_front, optimal_front):
     of the front as explained in the original NSGA-II article by K. Deb.
     The smaller the value is, the closer the front is to the optimal one.
     """
-    distances = []
+    # Extract fitness.values to the list and convert to numpy
+    first_front_ = numpy.array([i.fitness.values for i in first_front])
+    optimal_front_ = numpy.array(optimal_front)
 
-    for ind in first_front:
-        distances.append(float("inf"))
-        for opt_ind in optimal_front:
-            dist = 0.
-            for i in range(len(opt_ind)):
-                dist += (ind.fitness.values[i] - opt_ind[i])**2
-            if dist < distances[-1]:
-                distances[-1] = dist
-        distances[-1] = sqrt(distances[-1])
+    # The difference first_front - optimal_front and raised to a power
+    diff_pow = (first_front_[:, numpy.newaxis] - optimal_front_) ** 2
 
-    return sum(distances) / len(distances)
+    sum_dp = numpy.sum(diff_pow, axis=2)  # axis sums
+
+    # square root of minimums sum_dp
+    min_sq = numpy.sqrt(numpy.min(sum_dp, axis=1))
+
+    return numpy.sum(min_sq) / len(first_front_)
 
 
 def hypervolume(front, ref=None):
