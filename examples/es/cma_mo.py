@@ -100,7 +100,7 @@ def main():
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
             fitness_history.append(fit)
 
         # Update the strategy with the evaluated individuals

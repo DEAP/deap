@@ -118,7 +118,7 @@ def main(verbose=True):
             # Evaluate the individuals
             fitnesses = toolbox.map(toolbox.evaluate, population)
             for ind, fit in zip(population, fitnesses):
-                ind.fitness.values = fit
+                ind.fitness.values = (fit,)
 
             halloffame.update(population)
             record = stats.compile(population)

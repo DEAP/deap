@@ -149,7 +149,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     if halloffame is not None:
         halloffame.update(population)
@@ -171,7 +171,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -300,7 +300,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     if halloffame is not None:
         halloffame.update(population)
@@ -319,7 +319,7 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -398,7 +398,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     if halloffame is not None:
         halloffame.update(population)
@@ -420,7 +420,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         # Update the hall of fame with the generated individuals
         if halloffame is not None:
@@ -487,7 +487,7 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
         # Evaluate the individuals
         fitnesses = toolbox.map(toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         if halloffame is not None:
             halloffame.update(population)

@@ -84,7 +84,7 @@ def main():
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)
@@ -104,7 +104,7 @@ def main():
 
         fitnesses = toolbox.map(toolbox.evaluate, children)
         for (i, ind), fit in zip(enumerate(children), fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
             if ind.fitness > pop[i].fitness:
                 pop[i] = ind
 

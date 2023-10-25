@@ -85,7 +85,7 @@ def main():
     # Evaluate every individuals
     fitnesses = toolbox.map(toolbox.evaluate, population)
     for ind, fit in zip(population, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     hof.update(population)
     stats.update(population)
@@ -119,7 +119,7 @@ def main():
         invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         print("  Evaluated %i individuals" % len(invalid_ind))
 

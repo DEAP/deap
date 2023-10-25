@@ -129,7 +129,7 @@ def main():
 
     fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
     for host, parasite, fit in zip(hosts, parasites, fits):
-        host.fitness.values = parasite.fitness.values = fit
+        host.fitness.values = parasite.fitness.values = (fit,)
 
     hof.update(hosts)
     record = hstats.compile(hosts)
@@ -146,7 +146,7 @@ def main():
 
         fits = htoolbox.map(htoolbox.evaluate, hosts, parasites)
         for host, parasite, fit in zip(hosts, parasites, fits):
-            host.fitness.values = parasite.fitness.values = fit
+            host.fitness.values = parasite.fitness.values = (fit,)
 
         hof.update(hosts)
         record = hstats.compile(hosts)

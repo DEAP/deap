@@ -48,7 +48,7 @@ argument containing the path of the checkpoint file to restore. ::
             invalid_ind = [ind for ind in population if not ind.fitness.valid]
             fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
             for ind, fit in zip(invalid_ind, fitnesses):
-                ind.fitness.values = fit
+                ind.fitness.values = (fit,)
 
             halloffame.update(population)
             record = stats.compile(population)

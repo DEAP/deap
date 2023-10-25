@@ -57,7 +57,7 @@ def main():
     # Evaluate the individuals
     fitnesses = toolbox.map(toolbox.evaluate, pop)
     for ind, fit in zip(pop, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     record = stats.compile(pop)
     logbook.record(gen=0, evals=len(pop), **record)

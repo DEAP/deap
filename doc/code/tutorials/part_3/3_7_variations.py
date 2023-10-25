@@ -28,7 +28,7 @@ CXPB, MUTPB, NGEN= 0.7, 0.3, 25
 
 fitnesses = toolbox.map(toolbox.evaluate, pop)
 for ind, fit in zip(pop, fitnesses):
-    ind.fitness.values = fit
+    ind.fitness.values = (fit,)
 
 from deap import algorithms
 
@@ -43,7 +43,7 @@ for g in range(NGEN):
     invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
     fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
     for ind, fit in zip(invalid_ind, fitnesses):
-        ind.fitness.values = fit
+        ind.fitness.values = (fit,)
 
     # The population is entirely replaced by the offspring
     pop[:] = offspring

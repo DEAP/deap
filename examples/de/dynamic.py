@@ -75,7 +75,7 @@ def main(verbose=True):
     for idx, subpop in enumerate(populations):
         fitnesses = toolbox.map(toolbox.evaluate, subpop)
         for ind, fit in zip(subpop, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
     record = stats.compile(itertools.chain(*populations))
     logbook.record(gen=0, evals=mpb.nevals, error=mpb.currentError(),
@@ -110,7 +110,7 @@ def main(verbose=True):
         invalid_ind = [ind for ind in itertools.chain(*populations) if not ind.fitness.valid]
         fitnesses = toolbox.map(toolbox.evaluate, invalid_ind)
         for ind, fit in zip(invalid_ind, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
 
         record = stats.compile(itertools.chain(*populations))
         logbook.record(gen=g, evals=mpb.nevals, error=mpb.currentError(),

@@ -34,7 +34,7 @@ class BenchmarkTest(unittest.TestCase):
         population = [zero_individual, full_individual, two_individiual]
         fitnesses = map(self.toolbox.evaluate, population)
         for ind, fit in zip(population, fitnesses):
-            ind.fitness.values = fit
+            ind.fitness.values = (fit,)
         assert population[0].fitness.values == (0.0, )
         assert population[1].fitness.values == (1023.0, )
         assert population[2].fitness.values == (2.0, )
@@ -51,7 +51,7 @@ class BenchmarkTest(unittest.TestCase):
             # correctly executed in python3.
             if sys.version_info < (3, ):
                 with self.assertRaises(AssertionError):
-                    ind.fitness.values = fit
+                    ind.fitness.values = (fit,)
             else:
                 assert wrong_population[0].fitness.values == ()
 
