@@ -522,12 +522,10 @@ class HallOfFame(object):
                            update the hall of fame with.
         """
         for ind in population:
-            if ind.fitness.values[0] != ind.fitness.values[0]:
-                continue
             if len(self) == 0 and self.maxsize != 0:
                 # Working on an empty hall of fame is problematic for the
                 # "for else"
-                self.insert(ind)
+                self.insert(population[0])
                 continue
             if ind.fitness > self[-1].fitness or len(self) < self.maxsize:
                 for hofer in self:

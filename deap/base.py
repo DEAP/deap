@@ -232,10 +232,10 @@ class Fitness(object):
         return hash(self.wvalues)
 
     def __gt__(self, other):
-        return self.wvalues > other.wvalues
+        return not self.__le__(other)
 
     def __ge__(self, other):
-        return self.wvalues >= other.wvalues
+        return not self.__lt__(other)
 
     def __le__(self, other):
         return self.wvalues <= other.wvalues
