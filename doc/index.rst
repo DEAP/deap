@@ -13,7 +13,7 @@ and many features to build your own evolutions.
 
 .. sidebar:: Getting Help
     
-    Having trouble? We’d like to help!
+    Having trouble? We'd like to help!
 
     * Search for information in the archives of the `deap-users mailing list 
       <https://groups.google.com/forum/?fromgroups#!forum/deap-users>`_,
