@@ -131,6 +131,7 @@ plot_html_show_formats = True
 
 # -- Options for extlinks extension ----------------------------------------------
 import subprocess
+import os
 tree = os.getenv('GITHUB_COMMIT')
 if tree is None:
     try:
