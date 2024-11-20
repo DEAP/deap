@@ -1,84 +1,85 @@
-English | [简体中文](./README-zh_CN.md)
+简体中文 | [English](./README.md)
 
 # DEAP
 
 [![Build status](https://travis-ci.org/DEAP/deap.svg?branch=master)](https://travis-ci.org/DEAP/deap) [![Download](https://img.shields.io/pypi/dm/deap.svg)](https://pypi.python.org/pypi/deap) [![Join the chat at https://gitter.im/DEAP/deap](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/DEAP/deap?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status](https://dev.azure.com/fderainville/DEAP/_apis/build/status/DEAP.deap?branchName=master)](https://dev.azure.com/fderainville/DEAP/_build/latest?definitionId=1&branchName=master) [![Documentation Status](https://readthedocs.org/projects/deap/badge/?version=master)](https://deap.readthedocs.io/en/master/?badge=master)
 
-DEAP is a novel evolutionary computation framework for rapid prototyping and testing of
-ideas. It seeks to make algorithms explicit and data structures transparent. It works in perfect harmony with parallelisation mechanisms such as multiprocessing and [SCOOP](https://github.com/soravux/scoop).
+DEAP 是一款新型的进化计算框架，用于快速原型设计和测试想法，旨在能够使得算法明确、数据结构透明。它能够与并行机制（例如多进程和 [SCOOP](https://github.com/soravux/scoop)）完美协作。
 
-DEAP includes the following features:
+DEAP 包含以下特性:
 
-* Genetic algorithm using any imaginable representation
-   * List, Array, Set, Dictionary, Tree, Numpy Array, etc.
+* 使用任何你能够想象到的数据形式使用遗传算法
 
-* Genetic programming using prefix trees
-   * Loosely typed, Strongly typed
-   * Automatically defined functions
+   * 列表、数组、集合、字典、树、NumPy 数组等
 
-* Evolution strategies (including CMA-ES)
-* Multi-objective optimisation (NSGA-II, NSGA-III, SPEA2, MO-CMA-ES)
-* Co-evolution (cooperative and competitive) of multiple populations
-* Parallelization of the evaluations (and more)
-* Hall of Fame of the best individuals that lived in the population
-* Checkpoints that take snapshots of a system regularly
-* Benchmarks module containing most common test functions
-* Genealogy of an evolution (that is compatible with [NetworkX](https://github.com/networkx/networkx))
-* Examples of alternative algorithms : Particle Swarm Optimization, Differential Evolution, Estimation of Distribution Algorithm
+* 使用前缀树进行遗传编程
 
-## Downloads
+   * 松散类型，强类型
+   * 自动定义函数
 
-Following acceptance of [PEP 438](http://www.python.org/dev/peps/pep-0438/) by the Python community, we have moved DEAP's source releases on [PyPI](https://pypi.python.org).
+* 进化策略（包括 CMA-ES）
+* 多目标优化（NSGA-II、NSGA-III、SPEA2、MO-CMA-ES）
+* 多个种群的共同进化（合作和竞争）
+* 评估的并行化（以及更多其他的情况）
+* 最佳个体的名人堂，记录在种群中生活过的最佳个体
+* 定期快照系统的检查点
+* 基准模块，包含最常见的测试函数
+* 进化的谱系（与 [NetworkX](https://github.com/networkx/networkx) 兼容）
+* 替代算法的示例：粒子群优化、差分进化、分布估计算法
 
-You can find the most recent releases at: https://pypi.python.org/pypi/deap/.
+## 下载
 
-## Documentation
+在 Python 社区接受 [PEP 438](http://www.python.org/dev/peps/pep-0438/) 之后，我们已经将 DEAP 的源代码发布到了 PyPI。
 
-See the [DEAP User's Guide](http://deap.readthedocs.org/) for DEAP documentation.
+你可以在这里找到最新的发布版本：: https://pypi.python.org/pypi/deap/.
 
-In order to get the tip documentation, change directory to the `doc` subfolder and type in `make html`, the documentation will be under `_build/html`. You will need [Sphinx](http://sphinx.pocoo.org) to build the documentation.
+## 文档
+
+请参阅 [DEAP User's Guide](http://deap.readthedocs.org/) 用户指南以获取 DEAP 的文档。
+
+为了获取最新的文档，请切换到 `doc` 子文件夹并输入 `make html`, 文档在 [Sphinx](http://sphinx.pocoo.org) 目录下。之后你会用到这个文档。
 
 ### Notebooks
 
-Also checkout our new [notebook examples](https://github.com/DEAP/notebooks). Using [Jupyter notebooks](http://jupyter.org)  you'll be able to navigate and execute each block of code individually and tell what every line is doing. Either, look at the notebooks online using the notebook viewer links at the botom of the page or download the notebooks, navigate to the you download directory and run
+你还可以查看我们的新的[notebook examples](https://github.com/DEAP/notebooks)示例。使用 Jupyter 笔记本，你将能够进行导航，并且可以逐个执行代码块以了解每一行的作用。你也可以通过页面底部的链接在线查看 notebook，或者下载 notebook 到本地运行。
 
 ```bash
 jupyter notebook
 ```
 
-## Installation
+## 下载
 
-We encourage you to use easy_install or pip to install DEAP on your system. Other installation procedure like apt-get, yum, etc. usually provide an outdated version.
+我们提倡使用 easy_install 或者 pip 下载 DEAP 到你自己的系统里。对于其他的安装程序，比如 apt-get, yum 等，通常提供的不是最新的版本。
 
 ```bash
 pip install deap
 ```
 
-The latest version can be installed with
+可以使用下面的命令获取最新版本
 
 ```bash
 pip install git+https://github.com/DEAP/deap@master
 ```
 
-If you wish to build from sources, download or clone the repository and type
+如果你想通过源代码进行构建，下载或者克隆仓库，可以使用
 
 ```bash
 python setup.py install
 ```
 
-## Build Status
+## 构建状态
 
-DEAP build status is available on Travis-CI https://travis-ci.org/DEAP/deap.
+EAP 的构建状态可以在 Travis-CI 上查看，网址为 https://travis-ci.org/DEAP/deap.
 
-## Requirements
+## 依赖
 
-The most basic features of DEAP requires Python2.6. In order to combine the toolbox and the multiprocessing module Python2.7 is needed for its support to pickle partial functions. CMA-ES requires Numpy, and we recommend matplotlib for visualization of results as it is fully compatible with DEAP's API.
+DEAP 的最基本功能依赖于 Python 2.6。为了能够将工具箱与多进程模块结合使用，需要 Python 2.7，因为它支持对部分函数进行序列化（pickle）。CMA-ES 需要使用到 Numpy，我们推荐使用 matplotlib 进行可视化，因为它能够与 DEAP 的 API 完全兼容。
 
-Since version 0.8, DEAP is compatible out of the box with Python 3. The installation procedure automatically translates the source to Python 3 with 2to3, however this requires having `setuptools<=58`. It is recommended to use `pip install setuptools==57.5.0` to address this issue.
+自从 0.8 版本以来，DEAP 可以开箱即用地与 Python 3 兼容。安装过程中会自动使用 2to3 将源代码转换为 Python 3，但这需要 `setuptools<=58`。我们建议使用 `pip install setuptools==57.5.0` 来解决此问题。
 
-## Example
+## 示例
 
-The following code gives a quick overview how simple it is to implement the Onemax problem optimization with genetic algorithm using DEAP.  More examples are provided [here](http://deap.readthedocs.org/en/master/examples/index.html).
+以下代码简单概述了如何使用 DEAP 实现 Onemax 问题优化的遗传算法。更多示例可以在 [这里](http://deap.readthedocs.org/en/master/examples/index.html) 找到。
 
 ```python
 import random
@@ -113,9 +114,9 @@ for gen in range(NGEN):
 top10 = tools.selBest(population, k=10)
 ```
 
-## How to cite DEAP
+## 如何引用 DEAP
 
-Authors of scientific papers including results generated using DEAP are encouraged to cite the following paper.
+在科学论文中，包括使用 DEAP 生成的结果，我们鼓励作者引用以下论文。
 
 ```xml
 @article{DEAP_JMLR2012, 
@@ -129,13 +130,13 @@ Authors of scientific papers including results generated using DEAP are encourag
 }
 ```
 
-## Publications on DEAP
+## 研究过程中使用 DEAP 的论文
 
 * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP -- Enabling Nimbler Evolutions", SIGEVOlution, vol. 6, no 2, pp. 17-26, February 2014. [Paper](http://goo.gl/tOrXTp)
 * Félix-Antoine Fortin, François-Michel De Rainville, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: Evolutionary Algorithms Made Easy", Journal of Machine Learning Research, vol. 13, pp. 2171-2175, jul 2012. [Paper](http://goo.gl/amJ3x)
 * François-Michel De Rainville, Félix-Antoine Fortin, Marc-André Gardner, Marc Parizeau and Christian Gagné, "DEAP: A Python Framework for Evolutionary Algorithms", in !EvoSoft Workshop, Companion proc. of the Genetic and Evolutionary Computation Conference (GECCO 2012), July 07-11 2012. [Paper](http://goo.gl/pXXug)
 
-## Projects using DEAP
+## 使用 DEAP 的项目
 
 * Ribaric, T., & Houghten, S. (2017, June). Genetic programming for improved cryptanalysis of elliptic curve cryptosystems. In 2017 IEEE Congress on Evolutionary Computation (CEC) (pp. 419-426). IEEE.
 * Ellefsen, Kai Olav, Herman Augusto Lepikson, and Jan C. Albiez. "Multiobjective coverage path planning: Enabling automated inspection of complex, real-world structures." Applied Soft Computing 61 (2017): 264-282.
@@ -163,4 +164,4 @@ Authors of scientific papers including results generated using DEAP are encourag
 * DEAP is used in [glyph](https://github.com/Ambrosys/glyph), a library for symbolic regression with applications to [MLC](https://en.wikipedia.org/wiki/Machine_learning_control).
 * DEAP is used in [Sklearn-genetic-opt](https://github.com/rodrigo-arenas/Sklearn-genetic-opt), an open source tool that uses evolutionary programming to fine tune machine learning hyperparameters.
 
-If you want your project listed here, send us a link and a brief description and we'll be glad to add it.
+如果你希望你的项目在这里列出，请发送链接和简要描述，我们将很高兴添加。
