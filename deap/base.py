@@ -298,9 +298,9 @@ class ConstrainedFitness(Fitness):
 
         if self_violates_constraints and other_violates_constraints:
             return True
-        elif self_violates_constraints:
+        if self_violates_constraints:
             return True
-        elif other_violates_constraints:
+        if other_violates_constraints:
             return False
 
         return self.wvalues <= other.wvalues
@@ -311,9 +311,9 @@ class ConstrainedFitness(Fitness):
 
         if self_violates_constraints and other_violates_constraints:
             return False
-        elif self_violates_constraints:
+        if self_violates_constraints:
             return True
-        elif other_violates_constraints:
+        if other_violates_constraints:
             return False
 
         return self.wvalues < other.wvalues
@@ -324,9 +324,9 @@ class ConstrainedFitness(Fitness):
 
         if self_violates_constraints and other_violates_constraints:
             return True
-        elif self_violates_constraints:
+        if self_violates_constraints:
             return False
-        elif other_violates_constraints:
+        if other_violates_constraints:
             return False
 
         return self.wvalues == other.wvalues
@@ -340,9 +340,9 @@ class ConstrainedFitness(Fitness):
 
         if self_violates_constraints and other_violates_constraints:
             return False
-        elif self_violates_constraints:
+        if self_violates_constraints:
             return False
-        elif other_violates_constraints:
+        if other_violates_constraints:
             return True
 
         return super(ConstrainedFitness, self).dominates(other)
