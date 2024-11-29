@@ -28,7 +28,18 @@ def cxOnePoint(ind1, ind2):
     """
     size = min(len(ind1), len(ind2))
     cxpoint = random.randint(1, size - 1)
-    ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
+
+    # Check if the inputs are numpy arrays
+    if type(ind1).__module__ == 'numpy' and type(ind2).__module__ == 'numpy':
+        # Use copies to avoid issues with numpy arrays
+        ind1[cxpoint:], ind2[cxpoint:] = (
+            ind2[cxpoint:].copy(),
+            ind1[cxpoint:].copy()
+        )
+
+    else:
+        # Default behaviour for lists
+        ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
 
     return ind1, ind2
 
@@ -53,8 +64,20 @@ def cxTwoPoint(ind1, ind2):
     else:  # Swap the two cx points
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
-    ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] \
-        = ind2[cxpoint1:cxpoint2], ind1[cxpoint1:cxpoint2]
+    # Check if the inputs are numpy arrays
+    if type(ind1).__module__ == 'numpy' and type(ind2).__module__ == 'numpy':
+        # Use copies to avoid issues with numpy arrays
+        ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] = (
+            ind2[cxpoint1:cxpoint2].copy(), 
+            ind1[cxpoint1:cxpoint2].copy()
+        )
+
+    else:
+        # Default behavior for lists
+        ind1[cxpoint1:cxpoint2], ind2[cxpoint1:cxpoint2] = (
+            ind2[cxpoint1:cxpoint2], 
+            ind1[cxpoint1:cxpoint2]
+        )
 
     return ind1, ind2
 
