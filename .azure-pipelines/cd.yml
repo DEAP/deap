@@ -146,7 +146,7 @@ jobs:
       displayName: 'Publish wheel to PyPi'
 
 
-    - job: macOS15Build
+  - job: macOS15Build
     pool:
       vmImage: 'macOS-15'
     strategy:
