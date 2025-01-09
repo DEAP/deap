@@ -11,16 +11,16 @@ jobs:
       vmImage: 'windows-latest'
     strategy:
       matrix:
-        Python36:
-          python.version: '3.6'
-        Python37:
-          python.version: '3.7'
-        Python38:
-          python.version: '3.8'
         Python39:
           python.version: '3.9'
         Python310:
           python.version: '3.10'
+        Python311:
+          python.version: '3.11'
+        Python312:
+          python.version: '3.12'
+        Python313:
+          python.version: '3.13'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -31,7 +31,7 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -40,55 +40,22 @@ jobs:
         twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
       displayName: 'Publish wheel to PyPi'
 
-  - job: macOS11Build
-    pool:
-      vmImage: 'macOS-11'
-    strategy:
-      matrix:
-        Python36:
-          python.version: '3.6'
-        Python37:
-          python.version: '3.7'
-        Python38:
-          python.version: '3.8'
-        Python39:
-          python.version: '3.9'
-        Python310:
-          python.version: '3.10'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
-    - script: |
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
-    - script: |
-        pip install wheel twine
-      displayName: 'Install build tools'
-    - script: |
-        python setup.py sdist bdist_wheel
-      displayName: 'Build wheel'
-    - script: |
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
-      displayName: 'Publish wheel to PyPi'
 
   - job: macOS12Build
     pool:
       vmImage: 'macOS-12'
     strategy:
       matrix:
-        Python36:
-          python.version: '3.6'
-        Python37:
-          python.version: '3.7'
-        Python38:
-          python.version: '3.8'
         Python39:
           python.version: '3.9'
         Python310:
           python.version: '3.10'
+        Python311:
+          python.version: '3.11'
+        Python312:
+          python.version: '3.12'
+        Python313:
+          python.version: '3.13'
     steps:
     - task: UsePythonVersion@0
       inputs:
@@ -99,7 +66,112 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+
+
+  - job: macOS13Build
+    pool:
+      vmImage: 'macOS-13'
+    strategy:
+      matrix:
+        Python39:
+          python.version: '3.9'
+        Python310:
+          python.version: '3.10'
+        Python311:
+          python.version: '3.11'
+        Python312:
+          python.version: '3.12'
+        Python313:
+          python.version: '3.13'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine setuptools
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+
+
+  - job: macOS14Build
+    pool:
+      vmImage: 'macOS-14'
+    strategy:
+      matrix:
+        Python39:
+          python.version: '3.9'
+        Python310:
+          python.version: '3.10'
+        Python311:
+          python.version: '3.11'
+        Python312:
+          python.version: '3.12'
+        Python313:
+          python.version: '3.13'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine setuptools
+      displayName: 'Install build tools'
+    - script: |
+        python setup.py sdist bdist_wheel
+      displayName: 'Build wheel'
+    - script: |
+        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
+      displayName: 'Publish wheel to PyPi'
+
+
+  - job: macOS15Build
+    pool:
+      vmImage: 'macOS-15'
+    strategy:
+      matrix:
+        Python39:
+          python.version: '3.9'
+        Python310:
+          python.version: '3.10'
+        Python311:
+          python.version: '3.11'
+        Python312:
+          python.version: '3.12'
+        Python313:
+          python.version: '3.13'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install numpy
+      displayName: 'Install dependencies'
+    - script: |
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -115,21 +187,27 @@ jobs:
     container: quay.io/pypa/manylinux2014_x86_64:latest
     strategy:
       matrix:
-        Python36:
-          python.version: 'cp36-cp36m'
-        Python37:
-          python.version: 'cp37-cp37m'
-        Python38:
-          python.version: 'cp38-cp38'
         Python39:
           python.version: 'cp39-cp39'
         Python310:
           python.version: 'cp310-cp310'
+        Python311:
+          python.version: 'cp311-cp311'
+        Python312:
+          python.version: 'cp312-cp312'
+        Python313:
+          python.version: 'cp313-cp313'
+          
     steps:
     - script: |
         "${PYBIN}/python" -m pip install --upgrade pip
-        "${PYBIN}/python" -m pip install numpy twine
-      displayName: 'Install dependencies and build tools'
+        "${PYBIN}/python" -m pip install numpy
+      displayName: 'Install dependencies'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
+    - script: |
+        "${PYBIN}/python" -m pip install wheel twine setuptools
+      displayName: 'Install build tools'
       env:
         PYBIN: /opt/python/$(python.version)/bin
     - script: |
@@ -151,20 +229,20 @@ jobs:
       vmImage: 'ubuntu-latest'
     strategy:
       matrix:
-        Python36:
-          python.version: 'cp36-cp36m'
-          manylinux: 'manylinux_aarch64'
-        Python37:
-          python.version: 'cp37-cp37m'
-          manylinux: 'manylinux_aarch64'
-        Python38:
-          python.version: 'cp38-cp38'
-          manylinux: 'manylinux_aarch64'
         Python39:
           python.version: 'cp39-cp39'
           manylinux: 'manylinux_aarch64'
         Python310:
           python.version: 'cp310-cp310'
+          manylinux: 'manylinux_aarch64'
+        Python311:
+          python.version: 'cp311-cp311'
+          manylinux: 'manylinux_aarch64'
+        Python312:
+          python.version: 'cp312-cp312'
+          manylinux: 'manylinux_aarch64'
+        Python313:
+          python.version: 'cp313-cp313'
           manylinux: 'manylinux_aarch64'
     steps:
     - script: docker run --rm --privileged hypriot/qemu-register
