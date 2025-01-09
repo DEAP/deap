@@ -31,7 +31,7 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -66,7 +66,7 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -101,7 +101,7 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -136,7 +136,7 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -171,7 +171,7 @@ jobs:
         pip install numpy
       displayName: 'Install dependencies'
     - script: |
-        pip install wheel twine
+        pip install wheel twine setuptools
       displayName: 'Install build tools'
     - script: |
         python setup.py sdist bdist_wheel
@@ -201,8 +201,13 @@ jobs:
     steps:
     - script: |
         "${PYBIN}/python" -m pip install --upgrade pip
-        "${PYBIN}/python" -m pip install numpy twine
-      displayName: 'Install dependencies and build tools'
+        "${PYBIN}/python" -m pip install numpy
+      displayName: 'Install dependencies'
+      env:
+        PYBIN: /opt/python/$(python.version)/bin
+    - script: |
+        "${PYBIN}/python" -m pip install wheel twine setuptools
+      displayName: 'Install build tools'
       env:
         PYBIN: /opt/python/$(python.version)/bin
     - script: |
