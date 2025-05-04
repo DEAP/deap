@@ -14,4 +14,4 @@
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
 __author__ = "DEAP Team"
 __version__ = "1.4"
-__revision__ = "1.4.2"
+__revision__ = "1.4.3"
