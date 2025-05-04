@@ -719,7 +719,7 @@ def selSPEA2(individuals, k):
        strength Pareto evolutionary algorithm", 2001.
     """
     N = len(individuals)
-    L = len(individuals[0].fitness.values)
+    M = len(individuals[0].fitness.values)
     K = math.sqrt(N)
     strength_fits = [0] * N
     fits = [0] * N
@@ -746,9 +746,9 @@ def selSPEA2(individuals, k):
             distances = [0.0] * N
             for j in range(i + 1, N):
                 dist = 0.0
-                for k in range(L):
-                    val = individuals[i].fitness.values[k] - \
-                        individuals[j].fitness.values[k]
+                for m in range(M):
+                    val = individuals[i].fitness.values[m] - \
+                        individuals[j].fitness.values[m]
                     dist += val * val
                 distances[j] = dist
             kth_dist = _randomizedSelect(distances, 0, N - 1, K)
@@ -768,9 +768,9 @@ def selSPEA2(individuals, k):
         for i in range(N):
             for j in range(i + 1, N):
                 dist = 0.0
-                for k in range(L):
-                    val = individuals[chosen_indices[i]].fitness.values[k] - \
-                        individuals[chosen_indices[j]].fitness.values[k]
+                for m in range(M):
+                    val = individuals[chosen_indices[i]].fitness.values[m] - \
+                        individuals[chosen_indices[j]].fitness.values[m]
                     dist += val * val
                 distances[i][j] = dist
                 distances[j][i] = dist
@@ -779,11 +779,11 @@ def selSPEA2(individuals, k):
         # Insert sort is faster than quick sort for short arrays
         for i in range(N):
             for j in range(1, N):
-                k = j
-                while k > 0 and distances[i][j] < distances[i][sorted_indices[i][k - 1]]:
-                    sorted_indices[i][k] = sorted_indices[i][k - 1]
-                    k -= 1
-                sorted_indices[i][k] = j
+                m = j
+                while m > 0 and distances[i][j] < distances[i][sorted_indices[i][m - 1]]:
+                    sorted_indices[i][m] = sorted_indices[i][m - 1]
+                    m -= 1
+                sorted_indices[i][m] = j
 
         size = N
         to_remove = []
