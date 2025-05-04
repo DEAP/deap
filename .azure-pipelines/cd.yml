@@ -41,41 +41,6 @@ jobs:
       displayName: 'Publish wheel to PyPi'
 
 
-  - job: macOS12Build
-    pool:
-      vmImage: 'macOS-12'
-    strategy:
-      matrix:
-        Python39:
-          python.version: '3.9'
-        Python310:
-          python.version: '3.10'
-        Python311:
-          python.version: '3.11'
-        Python312:
-          python.version: '3.12'
-        Python313:
-          python.version: '3.13'
-    steps:
-    - task: UsePythonVersion@0
-      inputs:
-        versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
-    - script: |
-        python -m pip install --upgrade pip
-        pip install numpy
-      displayName: 'Install dependencies'
-    - script: |
-        pip install wheel twine setuptools
-      displayName: 'Install build tools'
-    - script: |
-        python setup.py sdist bdist_wheel
-      displayName: 'Build wheel'
-    - script: |
-        twine upload -r pypi -u $(twineUsername) -p $(twinePassword) --skip-existing --disable-progress-bar dist/*
-      displayName: 'Publish wheel to PyPi'
-
-
   - job: macOS13Build
     pool:
       vmImage: 'macOS-13'
