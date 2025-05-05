@@ -2,6 +2,9 @@ import math
 import random
 
 from itertools import repeat
+from webbrowser import get
+
+from deap.base import Toolbox
 
 try:
     from collections.abc import Sequence
@@ -243,5 +246,34 @@ def mutESLogNormal(individual, c, indpb):
     return individual,
 
 
+# Custom mutation function
+def mutMixedAttributes(seqFunc, individual, indpb):
+    
+    '''Mutate an individual by applying a mutation function to each attribute
+    with probability indpb.
+    :param individual: Individual to be mutated.
+    :param seqFunc: sequence of functions to be applied to attributes.
+    :param indpb: Independent probability for each attribute to be mutated.
+    :returns: A tuple of one individual.
+
+    the individual is assumed to be created using initCycle function 
+    '''   
+    func, args, keywords = seqFunc.func, seqFunc.args, seqFunc.keywords
+    
+    if func.__name__ != 'initCycle':
+        raise ValueError("Individual must have been created using initCycle function")
+    
+    n = keywords['n'] # number of times to iterate through the list of functions
+    index = 1 # index to function sequence
+    num_Attr = len(args[index])
+    
+    for i in range(n * num_Attr):
+        if random.random() < indpb:      
+            individual[i] = args[index][i % num_Attr]()
+    return individual,
+
+
+
 __all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',
-           'mutFlipBit', 'mutUniformInt', 'mutInversion', 'mutESLogNormal']
+           'mutFlipBit', 'mutUniformInt', 'mutInversion', 'mutESLogNormal',
+           'mutMixedAttributes']
