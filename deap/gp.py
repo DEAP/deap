@@ -631,7 +631,7 @@ def generate(pset, min_, max_, condition, type_=None):
     stack = [(0, type_)]
     while len(stack) != 0:
         depth, type_ = stack.pop()
-        if condition(height, depth):
+        if len(pset.terminals[type_]) != 0 and (True if len(pset.primitives[type_])==0 else condition(height, depth)):
             try:
                 term = random.choice(pset.terminals[type_])
             except IndexError:
