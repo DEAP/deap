@@ -224,7 +224,11 @@ class Terminal(object):
     def __init__(self, terminal, symbolic, ret):
         self.ret = ret
         self.value = terminal
-        self.name = str(terminal)
+        #self.name = str(terminal)
+        if callable(self.value):
+            self.name = self.value.__name__
+        else:
+            self.name = str(terminal)
         self.conv_fct = str if symbolic else repr
 
     @property
@@ -232,7 +236,13 @@ class Terminal(object):
         return 0
 
     def format(self):
-        return self.conv_fct(self.value)
+        if callable(self.value):
+            return (self.name + "()")
+        else:
+            return self.conv_fct(self.value)
+
+    #def format(self):
+    #    return self.conv_fct(self.value)
 
     def __eq__(self, other):
         if type(self) is type(other):
@@ -395,7 +405,7 @@ class PrimitiveSetTyped(object):
 
         if name is not None:
             self.context[name] = terminal
-            terminal = name
+            #terminal = name
             symbolic = True
         elif terminal in (True, False):
             # To support True and False terminals with Python 2.
