@@ -53,6 +53,12 @@ toolbox.
     import multiprocessing
 
     pool = multiprocessing.Pool()
+    # OR use the following to ensure releasing memory after each evaluate call
+    #  This helps in situation where an external library holds memory, ex: Tensorflow
+    #  when maxtaskperchild is set to 1, a new process is forked after each completed task
+    #  https://docs.python.org/3/library/multiprocessing.html#module-multiprocessing.pool
+    # pool = multiprocessing.Pool(maxtasksperchild=1)
+
     toolbox.register("map", pool.map)
 
     # Continue on with the evolutionary algorithm
