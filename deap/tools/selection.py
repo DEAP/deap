@@ -80,7 +80,7 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     :param fit_attr: The attribute of individuals to use as selection criterion
     :returns: A list of selected individuals.
 
-    This function uses the :func:`~random.random` function from the python base
+    This function uses the :func:`~random.choices` function from the python base
     :mod:`random` module.
 
     .. warning::
@@ -88,18 +88,14 @@ def selRoulette(individuals, k, fit_attr="fitness"):
        or when the fitness can be smaller or equal to 0.
     """
 
-    s_inds = sorted(individuals, key=attrgetter(fit_attr), reverse=True)
-    sum_fits = sum(getattr(ind, fit_attr).values[0] for ind in individuals)
-    chosen = []
-    for i in range(k):
-        u = random.random() * sum_fits
-        sum_ = 0
-        for ind in s_inds:
-            sum_ += getattr(ind, fit_attr).values[0]
-            if sum_ > u:
-                chosen.append(ind)
-                break
-
+    fits = [getattr(ind,fit_attr).values[0] for ind in individuals]
+    sum_fits = sum(fits)
+    if sum_fits == 0:
+        # If all individuals have zero fitness, evenly distribute probability of selection
+        fitness_proportions = [1/k for i in fits] 
+    else: fitness_proportions = [i/sum_fits for i in fits]
+    
+    chosen = random.choices(individuals, weights=fitness_proportions, k=k)
     return chosen
 
 
