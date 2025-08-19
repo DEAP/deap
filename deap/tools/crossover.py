@@ -27,7 +27,7 @@ def cxOnePoint(ind1, ind2):
     python base :mod:`random` module.
     """
     size = min(len(ind1), len(ind2))
-    cxpoint = random.randint(1, size - 1)
+    cxpoint = random.randint(1, size - 1) if size > 1 else size
     ind1[cxpoint:], ind2[cxpoint:] = ind2[cxpoint:], ind1[cxpoint:]
 
     return ind1, ind2
