@@ -83,7 +83,7 @@ def varAnd(population, toolbox, cxpb, mutpb):
 
 
 def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=__debug__):
+             halloffame=None, verbose=__debug__, logbook=None):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
 
@@ -98,6 +98,8 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
+    :param logbook: A :class:`~deap.tools.Logbook` to use, optional.
+                    If None is given, a new logbook is created.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
@@ -142,7 +144,9 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
     .. [Back2000] Back, Fogel and Michalewicz, "Evolutionary Computation 1 :
        Basic Algorithms and Operators", 2000.
     """
-    logbook = tools.Logbook()
+    if logbook is None:
+        logbook = tools.Logbook()
+
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     # Evaluate the individuals with an invalid fitness
@@ -246,7 +250,8 @@ def varOr(population, toolbox, lambda_, cxpb, mutpb):
 
 
 def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
-                   stats=None, halloffame=None, verbose=__debug__):
+                   stats=None, halloffame=None, verbose=__debug__,
+                   logbook=None):
     r"""This is the :math:`(\mu + \lambda)` evolutionary algorithm.
 
     :param population: A list of individuals.
@@ -262,6 +267,8 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
+    :param logbook: A :class:`~deap.tools.Logbook` to use, optional.
+                    If None is given, a new logbook is created.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution.
@@ -293,7 +300,9 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     registered in the toolbox. This algorithm uses the :func:`varOr`
     variation.
     """
-    logbook = tools.Logbook()
+    if logbook is None:
+        logbook = tools.Logbook()
+
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     # Evaluate the individuals with an invalid fitness
@@ -338,7 +347,8 @@ def eaMuPlusLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
 
 def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
-                    stats=None, halloffame=None, verbose=__debug__):
+                    stats=None, halloffame=None, verbose=__debug__,
+                    logbook=None):
     r"""This is the :math:`(\mu~,~\lambda)` evolutionary algorithm.
 
     :param population: A list of individuals.
@@ -354,6 +364,8 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
+    :param logbook: A :class:`~deap.tools.Logbook` to use, optional.
+                    If None is given, a new logbook is created.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
@@ -403,7 +415,9 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
     if halloffame is not None:
         halloffame.update(population)
 
-    logbook = tools.Logbook()
+    if logbook is None:
+        logbook = tools.Logbook()
+
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     record = stats.compile(population) if stats is not None else {}
@@ -438,7 +452,7 @@ def eaMuCommaLambda(population, toolbox, mu, lambda_, cxpb, mutpb, ngen,
 
 
 def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
-                     verbose=__debug__):
+                     verbose=__debug__, logbook=None):
     """This is algorithm implements the ask-tell model proposed in
     [Colette2010]_, where ask is called `generate` and tell is called `update`.
 
@@ -450,6 +464,8 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
     :param halloffame: A :class:`~deap.tools.HallOfFame` object that will
                        contain the best individuals, optional.
     :param verbose: Whether or not to log the statistics.
+    :param logbook: A :class:`~deap.tools.Logbook` to use, optional.
+                    If None is given, a new logbook is created.
     :returns: The final population
     :returns: A class:`~deap.tools.Logbook` with the statistics of the
               evolution
@@ -478,7 +494,9 @@ def eaGenerateUpdate(toolbox, ngen, halloffame=None, stats=None,
        Wiley, pp. 527-565;
 
     """
-    logbook = tools.Logbook()
+    if logbook is None:
+        logbook = tools.Logbook()
+
     logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
 
     for gen in range(ngen):
