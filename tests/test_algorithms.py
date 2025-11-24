@@ -100,7 +100,7 @@ def test_nsga2(setup_teardown_multi_obj):
         ind.fitness.values = fit
 
     pop = toolbox.select(pop, len(pop))
-    for gen in range(1, NGEN):
+    for _ in range(1, NGEN):
         offspring = tools.selTournamentDCD(pop, len(pop))
         offspring = [toolbox.clone(ind) for ind in offspring]
 
@@ -169,7 +169,7 @@ def test_mo_cma_es(setup_teardown_multi_obj_numpy):
     toolbox.register("generate", strategy.generate, creator.__dict__[INDCLSNAME])
     toolbox.register("update", strategy.update)
 
-    for gen in range(NGEN):
+    for _ in range(NGEN):
         # Generate a new population
         population = toolbox.generate()
 
@@ -222,7 +222,7 @@ def test_nsga3(setup_teardown_multi_obj):
 
     pop = toolbox.select(pop, len(pop))
     # Begin the generational process
-    for gen in range(1, NGEN):
+    for _ in range(1, NGEN):
         offspring = algorithms.varAnd(pop, toolbox, 1.0, 1.0)
 
         # Evaluate the individuals with an invalid fitness

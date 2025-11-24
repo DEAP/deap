@@ -5,7 +5,7 @@ from deap import creator
 
 
 def _evalOneMax(individual):
-    return sum(individual),
+    return (sum(individual),)
 
 
 def test_multiproc():

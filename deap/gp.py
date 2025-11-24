@@ -211,8 +211,7 @@ class Primitive(object):
         if type(self) is type(other):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
-        else:
-            return NotImplemented
+        return NotImplemented
 
 
 class Terminal(object):
@@ -238,8 +237,7 @@ class Terminal(object):
         if type(self) is type(other):
             return all(getattr(self, slot) == getattr(other, slot)
                        for slot in self.__slots__)
-        else:
-            return NotImplemented
+        return NotImplemented
 
 
 class MetaEphemeral(type):
@@ -296,7 +294,7 @@ class PrimitiveSetTyped(object):
         # being polluted by builtins function when evaluating
         # GP expression.
         self.context = {"__builtins__": None}
-        self.mapping = dict()
+        self.mapping = {}
         self.terms_count = 0
         self.prims_count = 0
 
@@ -639,7 +637,7 @@ def generate(pset, min_, max_, condition, type_=None):
                 raise IndexError("The gp.generate function tried to add "
                                  "a terminal of type '%s', but there is "
                                  "none available." % (type_,)).with_traceback(traceback)
-            if type(term) is MetaEphemeral:
+            if isinstance(term, MetaEphemeral):
                 term = term()
             expr.append(term)
         else:
@@ -772,7 +770,7 @@ def mutUniform(individual, expr, pset):
     slice_ = individual.searchSubtree(index)
     type_ = individual[index].ret
     individual[slice_] = expr(pset=pset, type_=type_)
-    return individual,
+    return (individual,)
 
 
 def mutNodeReplacement(individual, pset):
@@ -784,21 +782,21 @@ def mutNodeReplacement(individual, pset):
     :returns: A tuple of one tree.
     """
     if len(individual) < 2:
-        return individual,
+        return (individual,)
 
     index = random.randrange(1, len(individual))
     node = individual[index]
 
     if node.arity == 0:  # Terminal
         term = random.choice(pset.terminals[node.ret])
-        if type(term) is MetaEphemeral:
+        if isinstance(term, MetaEphemeral):
             term = term()
         individual[index] = term
     else:  # Primitive
         prims = [p for p in pset.primitives[node.ret] if p.args == node.args]
         individual[index] = random.choice(prims)
 
-    return individual,
+    return (individual,)
 
 
 def mutEphemeral(individual, mode):
@@ -826,7 +824,7 @@ def mutEphemeral(individual, mode):
         for i in ephemerals_idx:
             individual[i] = type(individual[i])()
 
-    return individual,
+    return (individual,)
 
 
 def mutInsert(individual, pset):
@@ -850,7 +848,7 @@ def mutInsert(individual, pset):
     primitives = [p for p in pset.primitives[node.ret] if node.ret in p.args]
 
     if len(primitives) == 0:
-        return individual,
+        return (individual,)
 
     new_node = choice(primitives)
     new_subtree = [None] * len(new_node.args)
@@ -866,7 +864,7 @@ def mutInsert(individual, pset):
     new_subtree[position:position + 1] = individual[slice_]
     new_subtree.insert(0, new_node)
     individual[slice_] = new_subtree
-    return individual,
+    return (individual,)
 
 
 def mutShrink(individual):
@@ -878,7 +876,7 @@ def mutShrink(individual):
     """
     # We don't want to "shrink" the root
     if len(individual) < 3 or individual.height <= 1:
-        return individual,
+        return (individual,)
 
     iprims = []
     for i, node in enumerate(individual[1:], 1):
@@ -897,7 +895,7 @@ def mutShrink(individual):
         slice_ = individual.searchSubtree(index)
         individual[slice_] = subtree
 
-    return individual,
+    return (individual,)
 
 
 ######################################
@@ -1057,8 +1055,7 @@ def harm(population, toolbox, cxpb, mutpb, ngen,
 
         if producesizes:
             return producedpop, producedpopsizes
-        else:
-            return producedpop
+        return producedpop
 
     def halflifefunc(x):
         return x * float(alpha) + beta
@@ -1210,8 +1207,8 @@ def graph(expr):
        out of order when using `NetworX <http://networkx.github.com/>`_.
     """
     nodes = list(range(len(expr)))
-    edges = list()
-    labels = dict()
+    edges = []
+    labels = {}
 
     stack = []
     for i, node in enumerate(expr):
@@ -1282,7 +1279,7 @@ def mutSemantic(individual, gen_func=genGrow, pset=None, ms=None, min=2, max=6):
     new_ind.extend(tr1)
     new_ind.extend(tr2)
 
-    return new_ind,
+    return (new_ind,)
 
 
 def cxSemantic(ind1, ind2, gen_func=genGrow, pset=None, min=2, max=6):
