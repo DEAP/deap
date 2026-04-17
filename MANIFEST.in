@@ -1,7 +1,6 @@
 include *.txt
 include *.md
-recursive-include deap *.cpp *.c *.hpp *.h
-recursive-include examples *.py *.csv *.json *.txt *.cpp *.hpp *.h
+recursive-include examples *.py *.csv *.json *.txt
 recursive-include doc *
 recursive-include tests *
 prune doc/_build
