@@ -7,9 +7,8 @@ def hypervolume(front, **kargs):
     contribution. The provided *front* should be a set of non-dominated
     individuals having each a :attr:`fitness` attribute.
 
-    The hypervolume is computed using the `moocore` package. See
-    `moocore.hypervolume <https://multi-objective.github.io/moocore/python/reference/generated/moocore.hypervolume.html>`_
-    for details.
+    The hypervolume is computed using the `moocore` package.
+    See :func:`moocore.hypervolume` for details.
     """
     # Must use wvalues * -1 since hypervolume use implicit minimization
     # And minimization in deap use max on -obj

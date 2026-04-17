@@ -302,9 +302,8 @@ def hypervolume(front, ref=None):
     """Return the hypervolume of a *front*. If the *ref* point is not
     given, the worst value for each objective +1 is used.
 
-    The hypervolume is computed using the `moocore` package. See
-    `moocore.hypervolume <https://multi-objective.github.io/moocore/python/reference/generated/moocore.hypervolume.html>`_
-    for details.
+    The hypervolume is computed using the `moocore` package.
+    See :func:`moocore.hypervolume` for details.
 
     :param front: The population (usually a list of undominated individuals)
                   on which to compute the hypervolume.
