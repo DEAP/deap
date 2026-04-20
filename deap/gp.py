@@ -755,6 +755,59 @@ def cxOnePointLeafBiased(ind1, ind2, termpb):
     return ind1, ind2
 
 
+def cxUniform(ind1, ind2, swap_prob):
+    """Finds common nodes in two trees and swap them with a given *swap_prob*
+      probability. If nodes have different arities, swap subtrees.
+
+    Offspring have the same roots as parents.
+
+    :param ind1: First tree participating in the crossover.
+    :param ind2: Second tree participating in the crossover.
+    :param swap_prob: The probability of swapping nodes.
+    :returns: A tuple of two trees.
+    """
+
+    def extractCommonSubtrees(start_idx1, start_idx2):
+        """ Extracts common subtrees between two individuals.
+
+        :param start1: Strarting index in the first individual.
+        :param start2: Starting index in the second individual.
+        :returs : A list of tuples with common subtrees.
+        """
+        common_slices = []
+        min_arity = min(ind1[start_idx1].arity, ind2[start_idx2].arity)
+        if min_arity == 0:
+            return []    
+        
+        sl1, sl2 = ind1.searchSubtree(start_idx1+1), ind2.searchSubtree(start_idx2+1)
+        common_slices.append((sl1, sl2))
+        for _ in range(min_arity - 1):
+            sl1, sl2 = ind1.searchSubtree(sl1.stop), ind2.searchSubtree(sl2.stop)
+            common_slices.append((sl1, sl2))
+
+        return common_slices
+        
+
+    if len(ind1) < 2 or len(ind2) < 2:
+        # No crossover on single node tree
+        return ind1, ind2
+    
+    stack = extractCommonSubtrees(0, 0)
+
+    while stack:
+        slice1, slice2=stack.pop()
+        
+        if random.random() < swap_prob and ind1[slice1.start].ret == ind2[slice2.start].ret:
+            if ind1[slice1.start].arity == ind2[slice2.start].arity:
+                ind1[slice1.start], ind2[slice2.start] = ind2[slice2.start], ind1[slice1.start]
+            else:
+                ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
+        
+        stack.extend(extractCommonSubtrees(slice1.start, slice2.start))
+
+    return ind1, ind2
+
+
 ######################################
 # GP Mutations                       #
 ######################################
