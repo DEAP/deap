@@ -28,6 +28,7 @@ import sys
 import types
 import warnings
 from inspect import isclass
+from typing import Dict, Callable
 
 from collections import defaultdict, deque
 from functools import partial, wraps
@@ -184,6 +185,64 @@ class PrimitiveTree(list):
             total += self[end].arity - 1
             end += 1
         return slice(begin, end)
+
+    def expression(self, sym_mapping: Dict[str, Callable] = None, **kwargs) -> str:
+        """
+        Return the simplified mathematical expression according to the defined mappings
+
+        Author: Rabbyt
+
+        Parameters:
+        - sym_mapping (python dict): A dictionary that maps strings to functions.
+
+        Returns:
+        - str: The simplified mathematical expression.
+
+        Example:
+        >>> tree = gp.PrimitiveTree.from_string("min(sqrt(pow(x0, 2)), min(x1, add(x0, x0)))", pset=pset)
+        >>> func_sym_mapping = {
+            'add': operator.add,
+            'pow': operator.pow,
+            'sqrt': sp.sqrt,
+            'min': sp.Min
+        }
+        >>> terminal_sym_mapping = {
+            'x0': sp.Symbol('x0', negative=True),
+            'x1': sp.Symbol('x0', positive=True)
+        }
+        >>> tree.expression(func_sym_mapping, **terminal_sym_mapping)
+        2*x0
+        """
+        try:
+            import sympy
+        except ImportError:
+            raise ImportError("Sympy needs to be installed "
+                              f"before calling {PrimitiveTree.__name__}.expression.")
+        if sym_mapping is None:
+            sym_mapping = {}
+        string = ""
+        stack = []
+        for node in self:
+            stack.append((node, []))
+            while len(stack[-1][1]) == stack[-1][0].arity:
+                prim, args = stack.pop()
+                if isinstance(prim, Primitive):
+                    sym_func = sym_mapping.get(prim.name)
+                    if sym_func is None:
+                        string = sympy.Function(prim.name)(*args)
+                    else:
+                        string = sym_func(*args)
+                else:
+                    if prim.conv_fct is str:
+                        string = kwargs.get(prim.value)
+                        if string is None:
+                            string = sympy.Symbol(prim.value)
+                    else:
+                        string = prim.value
+                if len(stack) == 0:
+                    break
+                stack[-1][1].append(string)
+        return str(string)
 
 
 class Primitive(object):
@@ -363,9 +422,9 @@ class PrimitiveSetTyped(object):
 
         assert name not in self.context or \
                self.context[name] is primitive, \
-               "Primitives are required to have a unique name. " \
-               "Consider using the argument 'name' to rename your " \
-               "second '%s' primitive." % (name,)
+            "Primitives are required to have a unique name. " \
+            "Consider using the argument 'name' to rename your " \
+            "second '%s' primitive." % (name,)
 
         self._add(prim)
         self.context[prim.name] = primitive
