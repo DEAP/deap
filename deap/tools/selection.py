@@ -103,7 +103,7 @@ def selRoulette(individuals, k, fit_attr="fitness"):
     return chosen
 
 
-def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_first, fit_attr="fitness"):
+def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_first, fitness_greedy=False, fit_attr="fitness"):
     """Tournament selection which use the size of the individuals in order
     to discriminate good solutions. This kind of tournament is obviously
     useless with fixed-length representation, but has been shown to
@@ -138,6 +138,9 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
     (size tournament feeding fitness tournaments with candidates). It has been \
     shown that this parameter does not have a significant effect in most cases\
     (see [Luke2002fighting]_).
+    :param fitness_greedy: Set this to True if the size tournament should always \
+    keep the fitter individual, and only apply size selection when the fitnesses \
+    are tied.
     :param fit_attr: The attribute of individuals to use as selection criterion
     :returns: A list of selected individuals.
 
@@ -151,14 +154,21 @@ def selDoubleTournament(individuals, k, fitness_size, parsimony_size, fitness_fi
         for i in range(k):
             # Select two individuals from the population
             # The first individual has to be the shortest
-            prob = parsimony_size / 2.
-            ind1, ind2 = select(individuals, k=2)
 
-            if len(ind1) > len(ind2):
+            ind1, ind2 = select(individuals, k=2)
+            f1, f2 = [getattr(ind, fit_attr).values[0] for ind in [ind1, ind2]]
+            prob = 1.
+
+            if f1 == f2 or not fitness_greedy:
+                prob = parsimony_size / 2.
+                if len(ind1) > len(ind2):
+                    ind1, ind2 = ind2, ind1
+                elif len(ind1) == len(ind2):
+                    # random selection in case of a tie
+                    prob = 0.5
+            elif f2 < f1:
                 ind1, ind2 = ind2, ind1
-            elif len(ind1) == len(ind2):
-                # random selection in case of a tie
-                prob = 0.5
+
 
             # Since size1 <= size2 then ind1 is selected
             # with a probability prob
