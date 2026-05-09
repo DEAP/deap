@@ -28,6 +28,7 @@ except ImportError:
 from copy import deepcopy
 from functools import partial
 from operator import mul, truediv
+import numpy as np
 
 
 class Toolbox(object):
@@ -226,7 +227,7 @@ class Fitness(object):
     @property
     def valid(self):
         """Assess if a fitness is valid or not."""
-        return len(self.wvalues) != 0
+        return len(self.wvalues) != 0 and all(not np.isnan(val) for val in self.wvalues)
 
     def __hash__(self):
         return hash(self.wvalues)
