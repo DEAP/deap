@@ -52,7 +52,7 @@ def cxExponential(x, y, cr):
     # Loop on the indices index -> end, then on 0 -> index
     for i in chain(range(index, size), range(0, index)):
         x[i] = y[i]
-        if random.random() < cr:
+        if random.random() >= cr:
             break
     return x
 
