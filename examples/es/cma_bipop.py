@@ -129,13 +129,13 @@ def main(verbose=True):
             # Update the strategy with the evaluated individuals
             toolbox.update(population)
 
-            # Count the number of times the k'th best solution is equal to the best solution
-            # At this point the population is sorted (method update)
-            if population[-1].fitness == population[-EQUALFUNVALS_K].fitness:
-                equalfunvalues.append(1)
+            # Record whether the k'th best solution is equal to the best solution
+            # At this point the population is sorted, best first (method update)
+            equal = population[0].fitness == population[EQUALFUNVALS_K - 1].fitness
+            equalfunvalues.append(1 if equal else 0)
 
             # Log the best and median value of this population
-            bestvalues.append(population[-1].fitness.values)
+            bestvalues.append(population[0].fitness.values)
             medianvalues.append(population[int(round(len(population)/2.))].fitness.values)
 
             # First run does not count into the budget
