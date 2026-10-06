@@ -303,6 +303,8 @@ class PrimitiveSetTyped(object):
         self.name = name
         self.ret = ret_type
         self.ins = in_types
+        self.terminals[ret_type] = []
+        self.primitives[ret_type] = []
         for i, type_ in enumerate(in_types):
             arg_str = "{prefix}{index}".format(prefix=prefix, index=i)
             self.arguments.append(arg_str)
