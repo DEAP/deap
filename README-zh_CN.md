@@ -73,9 +73,9 @@ EAP 的构建状态可以在 Travis-CI 上查看，网址为 https://travis-ci.o
 
 ## 依赖
 
-DEAP 的最基本功能依赖于 Python 2.6。为了能够将工具箱与多进程模块结合使用，需要 Python 2.7，因为它支持对部分函数进行序列化（pickle）。CMA-ES 需要使用到 Numpy，我们推荐使用 matplotlib 进行可视化，因为它能够与 DEAP 的 API 完全兼容。
+DEAP 使用 Python 3，CI 测试矩阵覆盖 Python 3.10 至 3.14。NumPy 和 moocore 是必需的依赖，pip 会自动安装它们。我们推荐使用 matplotlib 进行可视化，因为它能够与 DEAP 的 API 完全兼容。
 
-自从 0.8 版本以来，DEAP 可以开箱即用地与 Python 3 兼容。安装过程中会自动使用 2to3 将源代码转换为 Python 3，但这需要 `setuptools<=58`。我们建议使用 `pip install setuptools==57.5.0` 来解决此问题。
+源代码已经是 Python 3 代码：安装过程不运行 2to3，也不需要降级 setuptools。
 
 ## 示例
 

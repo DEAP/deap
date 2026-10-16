@@ -4,12 +4,16 @@ Installation
 Requirements
 ------------
 
-DEAP is compatible with Python 2.7 and 3.4 or higher. The computation distribution
-requires SCOOP_. CMA-ES requires Numpy_, and we recommend matplotlib_ for 
-visualization of  results as it is fully compatible with DEAP's API.
+DEAP uses Python 3. The CI test matrix covers Python 3.10 through 3.14.
+Numpy_ and moocore_ are required dependencies and are installed automatically by
+pip. The source is already Python 3 code: installation does not run 2to3 and
+does not require downgrading setuptools. For distributed evaluation, DEAP can
+use SCOOP_. We recommend matplotlib_ for visualization of results as it is
+fully compatible with DEAP's API.
 
 .. _SCOOP: http://www.pyscoop.org/
 .. _Numpy: http://www.numpy.org/
+.. _moocore: https://pypi.org/project/moocore/
 .. _matplotlib: http://www.matplotlib.org/
 
 
