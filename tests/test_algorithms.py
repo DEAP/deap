@@ -62,6 +62,59 @@ def setup_teardown_multi_obj_numpy():
     teardown_()
 
 
+@pytest.fixture
+def preserve_random_state():
+    state = random.getstate()
+    yield
+    random.setstate(state)
+
+
+def test_varOr_reproduction_independence(setup_teardown_single_obj,
+                                       preserve_random_state):
+    parent = creator.__dict__[INDCLSNAME]([1, 2, 3])
+    parent.fitness.values = (14,)
+    parent.history = [[1, 2, 3]]
+    toolbox = base.Toolbox()
+
+    offspring = algorithms.varOr([parent], toolbox, 3, cxpb=0, mutpb=0)
+
+    assert all(child == parent for child in offspring)
+    assert all(child.fitness.values == (14,) for child in offspring)
+    assert all(child is not parent for child in offspring)
+    assert len({id(child) for child in offspring}) == 3
+
+    offspring[0][0] = 10
+    offspring[0].history[0][0] = 10
+    del offspring[0].fitness.values
+
+    for individual in [parent] + offspring[1:]:
+        assert individual == [1, 2, 3]
+        assert individual.history == [[1, 2, 3]]
+        assert individual.fitness.values == (14,)
+
+
+def test_varOr_reproduction_custom_clone(setup_teardown_single_obj,
+                                       preserve_random_state):
+    parent = creator.__dict__[INDCLSNAME]([1, 2, 3])
+    parent.fitness.values = (14,)
+    toolbox = base.Toolbox()
+
+    def clone(individual):
+        child = type(individual)(individual)
+        child.fitness.values = individual.fitness.values
+        child.cloned = True
+        return child
+
+    toolbox.register("clone", clone)
+    child, = algorithms.varOr([parent], toolbox, 1, cxpb=0, mutpb=0)
+
+    assert child == parent
+    assert child.fitness.values == parent.fitness.values
+    assert child is not parent
+    assert child.cloned
+    assert not hasattr(parent, "cloned")
+
+
 def test_cma(setup_teardown_single_obj):
     NDIM = 5
 
