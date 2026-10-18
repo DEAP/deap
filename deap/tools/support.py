@@ -398,14 +398,12 @@ class Logbook(list):
 
     def __delitem__(self, key):
         if isinstance(key, slice):
-            for i, in range(*key.indices(len(self))):
-                self.pop(i)
-                for chapter in self.chapters.values():
-                    chapter.pop(i)
+            for i in sorted(range(*key.indices(len(self))), reverse=True):
+                del self[i]
         else:
             self.pop(key)
             for chapter in self.chapters.values():
-                chapter.pop(key)
+                del chapter[key]
 
     def pop(self, index=0):
         """Retrieve and delete element *index*. The header and stream will be
