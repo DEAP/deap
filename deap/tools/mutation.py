@@ -174,8 +174,9 @@ def mutUniformInt(individual, low, up, indpb):
 
 
 def mutInversion(individual):
-    """Select two points (indices) in the individual, reverse the order of the
-    attributes between these points [low, high] and return the mutated individual.
+    """Select two slice boundaries from 0 to the length of the individual,
+    reverse the attributes in the half-open interval [low, high), and return
+    the mutated individual.
     This implementation allows for the length of the inversion to be 0 and 1,
     which would cause no change. This mutation is useful in situations where the
     order/adjacency of elements is important.
@@ -183,15 +184,15 @@ def mutInversion(individual):
     :param individual: Individual to be mutated.
     :returns: A tuple of one individual.
 
-    This function uses the :func:`~random.random` function from the python base
+    This function uses the :func:`~random.randrange` function from the python base
     :mod:`random` module.
     """
     size = len(individual)
     if size == 0:
         return individual,
 
-    index_one = random.randrange(size)
-    index_two = random.randrange(size)
+    index_one = random.randrange(size + 1)
+    index_two = random.randrange(size + 1)
     start_index = min(index_one, index_two)
     end_index = max(index_one, index_two)
 
