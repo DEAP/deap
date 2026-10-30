@@ -1,3 +1,4 @@
+import random
 import unittest
 from unittest import mock
 
@@ -43,3 +44,26 @@ class MutationTest(unittest.TestCase):
         chromosome = ["a", "b", "c", "d", "e"]
         expected = ["a", "d", "c", "b", "e"]
         self.assertEqual((expected,), mutInversion(chromosome))
+
+    def test_mutInversion_can_swap_two_genes(self):
+        rng = random.Random(0)
+        outcomes = set()
+        with mock.patch("random.randrange", side_effect=rng.randrange):
+            for _ in range(32):
+                chromosome = ["a", "b"]
+                mutant, = mutInversion(chromosome)
+                self.assertIs(mutant, chromosome)
+                outcomes.add(tuple(mutant))
+        self.assertEqual({("a", "b"), ("b", "a")}, outcomes)
+
+    def test_mutInversion_real_random_can_reverse_full_chromosome(self):
+        rng = random.Random(0)
+        outcomes = set()
+        with mock.patch("random.randrange", side_effect=rng.randrange):
+            for _ in range(64):
+                chromosome = ["a", "b", "c", "d", "e"]
+                mutant, = mutInversion(chromosome)
+                self.assertIs(mutant, chromosome)
+                self.assertCountEqual(["a", "b", "c", "d", "e"], mutant)
+                outcomes.add(tuple(mutant))
+        self.assertIn(("e", "d", "c", "b", "a"), outcomes)
